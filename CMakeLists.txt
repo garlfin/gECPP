@@ -2,7 +2,12 @@ cmake_minimum_required(VERSION 3.25)
 project(VoxelField)
 
 set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_FLAGS -O0)
+
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3")
+
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0")
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0")
 
 include_directories(gECPP Vendor Vendor/FBX)
 
@@ -20,15 +25,18 @@ FILE(COPY "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ASSIMP/libassimp-5.dll" DESTINATIO
 # GLAD
 add_library(GLAD STATIC Vendor/GLAD/glad.c Vendor/GLAD/glad.h)
 
+# GETF
+add_library(GETF STATIC gEModel/gETF.h gEModel/gETF.cpp)
+
 # GEMODEL
 file(GLOB gEMODEL_SRC gEModel/Converter)
-add_executable(gEModel gEModel/main.cpp ${gEMODEL_SRC} gEModel/gETF.h)
-target_link_libraries(gEModel PRIVATE ASSIMP)
+add_executable(gEModel gEModel/main.cpp ${gEMODEL_SRC})
+target_link_libraries(gEModel PRIVATE ASSIMP GETF)
 
 # GECPP
 file(GLOB GECPP_SRC gECPP/*.cpp gECPP/*.h)
 add_library(gECPP STATIC ${GECPP_SRC})
-target_link_libraries(gECPP GLAD GLFW)
+target_link_libraries(gECPP GLAD GLFW GETF)
 
 # VOXELDEMO
 add_executable(VoxelDemo Demo/main.cpp Demo/DemoWindow.h Demo/DemoWindow.cpp)

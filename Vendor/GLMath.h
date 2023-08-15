@@ -67,3 +67,10 @@ typedef uint64_t ulong;
 typedef uint64_t u64;
 typedef int64_t slong;
 typedef int64_t i64;
+
+// World's dumbest optimization
+constexpr u8 GetSizeOfGLType(u32 t)
+{
+	if(t == GL_FLOAT) return 4;
+	return 1 << ((t - 0x1400) >> 1);
+}

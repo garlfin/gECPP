@@ -7,93 +7,62 @@
 #include <ASSIMP/scene.h>
 #include <ASSIMP/postprocess.h>
 
-#define MAX(x, y) ((x) < (y) ? (x) : (y))
-#define IMPORT_FLAGS aiProcessPreset_TargetRealtime_Fast
-#define FORMAT_VEC3 0
-#define FORMAT_TEXCOORD 1
-#define FORMAT_TRIANGLES_BASIC 2
+#define DEFINE_GL_TYPE(TYPE, VALUE) template<> constexpr u32 GLType<TYPE> = VALUE
+#define IMPORT_FLAGS (aiProcess_CalcTangentSpace | aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_LimitBoneWeights | aiProcess_ImproveCacheLocality)
 
-template<u8 T>
-void CreateField(u8 count, aiMesh** mesh, size_t offset, gETF::VertexField& field, const char* name)
+template<typename T, typename I>
+using TransformFunc = void(*)(const T&, I&);
+
+template<class T, class I>
+constexpr bool IsVec3 = std::is_same_v<aiVector3t<T>, I>;
+
+template<class T>
+constexpr u32 GLType = 0;
+
+DEFINE_GL_TYPE(float, GL_FLOAT);
+DEFINE_GL_TYPE(u32, GL_UNSIGNED_INT);
+
+void TransformFace(const aiFace& s, aiVector3t<u32>& v)
 {
-	field.Count = 0;
-	for(u8 i = 0; i < count; i++) field.Count += mesh[i]->mNumVertices;
-
-	field.Data = new aiVector3D[field.Count];
-	auto* vecPtr = (aiVector3D*) field.Data;
-
-	for(u8 i = 0; i < count; i++)
-	{
-		aiMesh& submesh = *mesh[i];
-
-		memcpy(vecPtr, *(u8**)((u8*) &submesh + offset), submesh.mNumVertices * sizeof(aiVector3D));
-
-		vecPtr += submesh.mNumVertices;
-	}
-
-	field.Type = GL_FLOAT;
-	field.Index = 0;
-	field.Name = name;
-	field.TypeCount = 3;
+	v.x = s.mIndices[0];
+	v.y = s.mIndices[1];
+	v.z = s.mIndices[2];
 }
 
-template<>
-void CreateField<FORMAT_TEXCOORD>(u8 count, aiMesh** mesh, size_t offset, gETF::VertexField& field, const char* name)
+void TransformUV(const aiVector3D& s, aiVector2D& v)
 {
-	field.Count = 0;
-	for(u8 i = 0; i < count; i++) field.Count += mesh[i]->mNumVertices;
-
-	field.Data = new aiVector2D[field.Count];
-	auto* vecPtr = (aiVector2D*) field.Data;
-
-	for(u8 i = 0; i < count; i++)
-	{
-		aiMesh& submesh = *mesh[i];
-		aiVector3D* texcoord = submesh.mTextureCoords[0];
-		for(u32 m = 0; m < submesh.mNumVertices; m++, vecPtr++) *vecPtr = aiVector2D(texcoord[i].x, texcoord[i].y);
-	}
-
-	field.Type = GL_FLOAT;
-	field.Index = 0;
-	field.Name = name;
-	field.TypeCount = 2;
+	v.x = s.x;
+	v.y = s.y;
 }
 
-template<>
-void CreateField<FORMAT_TRIANGLES_BASIC>(u8 count, aiMesh** mesh, size_t offset, gETF::VertexField& field, const char* name)
+template<typename IT, typename T, typename I = T, TransformFunc<T, I> F = nullptr>
+void CreateField(gETF::VertexField& field, T* t, u32 count, const char* name)
 {
-	field.Count = 0;
-	for(u8 i = 0; i < count; i++) field.Count += mesh[i]->mNumFaces;
-
-	field.Data = new aiVector3t<u32>[field.Count];
-	auto* vecPtr = (aiVector3t<u32>*) field.Data;
-
-	for(u8 i = 0; i < count; i++)
-	{
-		aiMesh& submesh = *mesh[i];
-		aiFace* faces = *(aiFace**)((u8*) &submesh + offset);
-
-		for(u32 m = 0; m < submesh.mNumFaces; m++, vecPtr++)
-			memcpy(vecPtr, faces[m].mIndices, sizeof(aiVector3t<u32>));
-	}
-
-	field.Type = GL_UNSIGNED_INT;
 	field.Index = 0;
-	field.Name = name;
-	field.TypeCount = 3;
+	field.Name = strcpy(new char[strlen(name) + 1], name);
+	field.Type = GLType<IT>;
+	field.Count = count;
+
+	field.TypeCount = IsVec3<IT, I> || std::is_same_v<aiFace, I> ? 3 : 2;
+
+	size_t fieldSize = sizeof(I) * count;
+	field.Data = new u8[fieldSize];
+
+	if constexpr(F) for(u32 i = 0; i < count; i++) F(t[i], ((I*) field.Data)[i]);
+	else memcpy(field.Data, t, fieldSize);
 }
 
 int main()
 {
 	Assimp::Importer importer;
 
-	const aiScene* scene = importer.ReadFile("cube.glb", IMPORT_FLAGS);
+	const aiScene* scene = importer.ReadFile("cube.dae", IMPORT_FLAGS);
 
 	auto* submeshCount = new u8[scene->mNumMeshes] {};
 	u8 realMeshCount = 0;
 	const aiMesh* previousMesh = nullptr;
 
-	for(u8 i = 0; i < (u8) MAX(scene->mNumMeshes, UINT8_MAX); i++)
+	for(u8 i = 0; i < (u8) MIN(scene->mNumMeshes, UINT8_MAX); i++)
 	{
 		const aiMesh* mesh = scene->mMeshes[i];
 
@@ -119,14 +88,14 @@ int main()
 		mesh.TriangleMode = TRIANGLE_MODE_SIMPLE;
 
 		mesh.FieldCount = 5; // POS UV NOR TAN TRI
-		mesh.Fields = new gETF::VertexField[4];
+		mesh.Fields = new gETF::VertexField[5];
 
-
-		CreateField<FORMAT_VEC3>(submeshCount[i], sourceMesh, offsetof(aiMesh, mVertices), mesh.Fields[0], "POS");
-		CreateField<FORMAT_TEXCOORD>(submeshCount[i], sourceMesh, offsetof(aiMesh, mTextureCoords), mesh.Fields[1], "UV");
-		CreateField<FORMAT_VEC3>(submeshCount[i], sourceMesh, offsetof(aiMesh, mNormals), mesh.Fields[2], "NOR");
-		CreateField<FORMAT_VEC3>(submeshCount[i], sourceMesh, offsetof(aiMesh, mTangents), mesh.Fields[3], "TAN");
-		CreateField<FORMAT_TRIANGLES_BASIC>(submeshCount[i], sourceMesh, offsetof(aiMesh, mFaces), mesh.Fields[4], "TRI");
+		// I may have overcomplicated things
+		CreateField<float, aiVector3D>(mesh.Fields[0], sourceMesh[0]->mVertices, sourceMesh[0]->mNumVertices, "POS");
+		CreateField<float, aiVector3D, aiVector2D, TransformUV>(mesh.Fields[1], sourceMesh[0]->mVertices, sourceMesh[0]->mNumVertices, "UV");
+		CreateField<float, aiVector3D>(mesh.Fields[2], sourceMesh[0]->mNormals, sourceMesh[0]->mNumVertices, "NOR");
+		CreateField<float, aiVector3D>(mesh.Fields[3], sourceMesh[0]->mTangents, sourceMesh[0]->mNumVertices, "TAN");
+		CreateField<u32, aiFace, aiVector3t<u32>, TransformFace>(mesh.Fields[4], sourceMesh[0]->mFaces, sourceMesh[0]->mNumFaces, "TRI");
 
 		mesh.MaterialCount = submeshCount[i];
 		mesh.Materials = new gETF::MaterialSlot[submeshCount[i]];
@@ -140,6 +109,13 @@ int main()
 			triOffset += mat.Count = sourceMesh[m]->mNumFaces;
 		}
 	}
+
+	gETF::SerializationBuffer buf{};
+	file.Deserialize(buf);
+
+	FILE* output = fopen("cube.gETF", "wb");
+	fwrite(buf.Data(), buf.Length(), 1, output);
+	fclose(output);
 
 	return 0;
 }
