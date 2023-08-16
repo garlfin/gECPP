@@ -684,7 +684,13 @@ struct aiMesh {
     * A mesh may contain 0 to AI_MAX_NUMBER_OF_TEXTURECOORDS per
     * vertex. nullptr if not present. The array is mNumVertices in size.
     */
-    C_STRUCT aiVector3D *mTextureCoords[AI_MAX_NUMBER_OF_TEXTURECOORDS];
+    union {
+		C_STRUCT aiVector3D *mTextureCoords[AI_MAX_NUMBER_OF_TEXTURECOORDS];
+		struct
+		{
+			C_STRUCT aiVector3D* FirstMap;
+		};
+	};
 
     /** Specifies the number of Components for a given UV channel.
     * Up to three channels are supported (UVW, for accessing volume
