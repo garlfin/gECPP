@@ -26,7 +26,7 @@ FILE(COPY "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ASSIMP/libassimp-5.dll" DESTINATIO
 add_library(GLAD STATIC Vendor/GLAD/glad.c Vendor/GLAD/glad.h)
 
 # GETF
-add_library(GETF STATIC gEModel/gETF.h gEModel/gETF.cpp)
+add_library(GETF STATIC gEModel/gETF.h gEModel/gETF.cpp gEModel/gETF/Binary.h gEModel/gETF/File.h gEModel/gETF/Prototype.h)
 
 # GEMODEL
 file(GLOB gEMODEL_SRC gEModel/Converter)
