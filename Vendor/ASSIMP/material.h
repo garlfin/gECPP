@@ -738,7 +738,7 @@ public:
      * @param pKey Key to search for. One of the AI_MATKEY_XXX constants.
     * @param type Specifies the type of the texture to be retrieved (
     *    e.g. diffuse, specular, height map ...)
-    * @param idx Index of the texture to be retrieved.
+    * @param idx BufferIndex of the texture to be retrieved.
      * @param pOut Reference to receive the output value
      */
     template <typename Type>
@@ -778,7 +778,7 @@ public:
      *  read the single material properties manually.
      *  @param type Specifies the type of the texture to be retrieved (
      *    e.g. diffuse, specular, height map ...)
-     *  @param index Index of the texture to be retrieved. The function fails
+     *  @param index BufferIndex of the texture to be retrieved. The function fails
      *    if there is no texture of that type with this index.
      *    #GetTextureCount() can be used to determine the number of textures
      *    per texture type.
@@ -1470,7 +1470,7 @@ extern "C" {
  * @param pKey Key to search for. One of the AI_MATKEY_XXX constants.
  * @param type Specifies the type of the texture to be retrieved (
  *    e.g. diffuse, specular, height map ...)
- * @param index Index of the texture to be retrieved.
+ * @param index BufferIndex of the texture to be retrieved.
  * @param pPropOut Pointer to receive a pointer to a valid aiMaterialProperty
  *        structure or NULL if the key has not been found. */
 // ---------------------------------------------------------------------------
@@ -1621,7 +1621,7 @@ ASSIMP_API unsigned int aiGetMaterialTextureCount(const C_STRUCT aiMaterial *pMa
  *  @param[in] mat Pointer to the input material. May not be NULL
  *  @param[in] type Specifies the texture stack to read from (e.g. diffuse,
  *     specular, height map ...).
- *  @param[in] index Index of the texture. The function fails if the
+ *  @param[in] index BufferIndex of the texture. The function fails if the
  *     requested index is not available for this texture type.
  *     #aiGetMaterialTextureCount() can be used to determine the number of
  *     textures in a particular texture stack.

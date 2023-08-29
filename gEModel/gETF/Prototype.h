@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include <GLMath.h>
+#include <GL/GLMath.h>
 
-#define SERIALIZABLE_PROTO  void Deserialize(SerializationBuffer& buf) const override;\
+#define SERIALIZABLE_PROTO  void Deserialize(gETF::SerializationBuffer& buf) const override;\
 							void Serialize(u8*& ptr) override
 
 namespace gETF

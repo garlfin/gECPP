@@ -290,8 +290,8 @@ class Matrix {
 
   /// @brief Access an element of the matrix.
   ///
-  /// @param row Index of the row to access.
-  /// @param column Index of the column to access.
+  /// @param row BufferIndex of the row to access.
+  /// @param column BufferIndex of the column to access.
   /// @return Const reference to the element.
   inline const T& operator()(const int row, const int column) const {
     return data_[column][row];
@@ -299,8 +299,8 @@ class Matrix {
 
   /// @brief Access an element of the Matrix.
   ///
-  /// @param row Index of the row to access.
-  /// @param column Index of the column to access.
+  /// @param row BufferIndex of the row to access.
+  /// @param column BufferIndex of the column to access.
   /// @return Reference to the data that can be modified by the caller.
   inline T& operator()(const int row, const int column) {
     return data_[column][row];
@@ -308,21 +308,21 @@ class Matrix {
 
   /// @brief Access an element of the Matrix.
   ///
-  /// @param i Index of the element to access in flattened memory.  Where
+  /// @param i BufferIndex of the element to access in flattened memory.  Where
   /// the column accessed is i / rows and the row is i % rows.
   /// @return Reference to the data that can be modified by the caller.
   inline const T& operator()(const int i) const { return operator[](i); }
 
   /// @brief Access an element of the Matrix.
   ///
-  /// @param i Index of the element to access in flattened memory.  Where
+  /// @param i BufferIndex of the element to access in flattened memory.  Where
   /// the column accessed is i / rows and the row is i % rows.
   /// @return Reference to the data that can be modified by the caller.
   inline T& operator()(const int i) { return operator[](i); }
 
   /// @brief Access an element of the Matrix.
   ///
-  /// @param i Index of the element to access in flattened memory.  Where
+  /// @param i BufferIndex of the element to access in flattened memory.  Where
   /// the column accessed is i / rows and the row is i % rows.
   /// @return Const reference to the data.
   inline const T& operator[](const int i) const {
@@ -331,7 +331,7 @@ class Matrix {
 
   /// @brief Access an element of the Matrix.
   ///
-  /// @param i Index of the element to access in flattened memory.  Where
+  /// @param i BufferIndex of the element to access in flattened memory.  Where
   /// the column accessed is i / rows and the row is i % rows.
   /// @return Reference to the data that can be modified by the caller.
   inline T& operator[](const int i) {
@@ -361,13 +361,13 @@ class Matrix {
   /// @cond MATHFU_INTERNAL
   /// @brief Access a column vector of the Matrix.
   ///
-  /// @param i Index of the column to access.
+  /// @param i BufferIndex of the column to access.
   /// @return Reference to the data that can be modified by the caller.
   inline Vector<T, rows>& GetColumn(const int i) { return data_[i]; }
 
   /// @brief Access a column vector of the Matrix.
   ///
-  /// @param i Index of the column to access.
+  /// @param i BufferIndex of the column to access.
   /// @return Const reference to the data.
   inline const Vector<T, rows>& GetColumn(const int i) const {
     return data_[i];

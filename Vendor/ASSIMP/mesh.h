@@ -214,7 +214,7 @@ struct aiFace {
 /** @brief A single influence of a bone on a vertex.
  */
 struct aiVertexWeight {
-    //! Index of the vertex which is influenced by the bone.
+    //! BufferIndex of the vertex which is influenced by the bone.
     unsigned int mVertexId;
 
     //! The strength of the influence in the range (0...1).
@@ -856,7 +856,7 @@ struct aiMesh {
     bool HasTangentsAndBitangents() const { return mTangents != nullptr && mBitangents != nullptr && mNumVertices > 0; }
 
     //! Check whether the mesh contains a vertex color set
-    //! \param pIndex Index of the vertex color set
+    //! \param pIndex BufferIndex of the vertex color set
     bool HasVertexColors(unsigned int pIndex) const {
         if (pIndex >= AI_MAX_NUMBER_OF_COLOR_SETS) {
             return false;
@@ -866,7 +866,7 @@ struct aiMesh {
     }
 
     //! Check whether the mesh contains a texture coordinate set
-    //! \param pIndex Index of the texture coordinates set
+    //! \param pIndex BufferIndex of the texture coordinates set
     bool HasTextureCoords(unsigned int pIndex) const {
         if (pIndex >= AI_MAX_NUMBER_OF_TEXTURECOORDS) {
             return false;
@@ -900,7 +900,7 @@ struct aiMesh {
     }
 
     //! Check whether the mesh contains a texture coordinate set name
-    //! \param pIndex Index of the texture coordinates set
+    //! \param pIndex BufferIndex of the texture coordinates set
     bool HasTextureCoordsName(unsigned int pIndex) const {
         if (mTextureCoordsNames == nullptr || pIndex >= AI_MAX_NUMBER_OF_TEXTURECOORDS) {
             return false;
@@ -909,7 +909,7 @@ struct aiMesh {
     }
 
     //! Set a texture coordinate set name
-    //! \param pIndex Index of the texture coordinates set
+    //! \param pIndex BufferIndex of the texture coordinates set
     //! \param texCoordsName name of the texture coordinate set
     void SetTextureCoordsName(unsigned int pIndex, const aiString &texCoordsName) {
         if (pIndex >= AI_MAX_NUMBER_OF_TEXTURECOORDS) {
@@ -936,7 +936,7 @@ struct aiMesh {
     }
 
     //! Get a texture coordinate set name
-    //! \param pIndex Index of the texture coordinates set
+    //! \param pIndex BufferIndex of the texture coordinates set
     const aiString *GetTextureCoordsName(unsigned int pIndex) const {
         if (mTextureCoordsNames == nullptr || pIndex >= AI_MAX_NUMBER_OF_TEXTURECOORDS) {
             return nullptr;

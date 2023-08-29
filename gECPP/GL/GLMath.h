@@ -4,9 +4,10 @@
 
 #pragma once
 
-#include <MathFU/vector.h>
-#include <MathFU/matrix.h>
-#include <GLAD/types.h>
+#include "MathFU/vector.h"
+#include "MathFU/matrix.h"
+#include "MathFU/quaternion.h"
+#include "GLAD/types.h"
 
 #include <cstdint>
 
@@ -46,6 +47,8 @@ namespace gl
 
 	typedef MathFU::Matrix<float, 4, 4> mat4;
 	typedef MathFU::Matrix<float, 3, 3> mat3;
+
+	typedef MathFU::Quaternion<float> quaternion;
 }
 
 typedef uint8_t ubyte;

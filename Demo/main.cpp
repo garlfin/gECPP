@@ -3,7 +3,7 @@
 #include "DemoWindow.h"
 
 using namespace VoxelDemo;
-using namespace gECPP;
+using namespace gE;
 
 int main()
 {

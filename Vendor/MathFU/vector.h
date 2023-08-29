@@ -287,27 +287,27 @@ class Vector {
 
   /// @brief Access an element of the vector.
   ///
-  /// @param i Index of the element to access.
+  /// @param i BufferIndex of the element to access.
   /// @return A reference to the accessed data that can be modified by the
   /// caller.
   inline T& operator()(const int i) { return data_[i]; }
 
   /// @brief Access an element of the vector.
   ///
-  /// @param i Index of the element to access.
+  /// @param i BufferIndex of the element to access.
   /// @return A reference to the accessed data.
   inline const T& operator()(const int i) const { return data_[i]; }
 
   /// @brief Access an element of the vector.
   ///
-  /// @param i Index of the element to access.
+  /// @param i BufferIndex of the element to access.
   /// @return A reference to the accessed data that can be modified by the
   /// caller.
   inline T& operator[](const int i) { return data_[i]; }
 
   /// @brief Access an element of the vector.
   ///
-  /// @param i Index of the element to access.
+  /// @param i BufferIndex of the element to access.
   /// @return A const reference to the accessed.
   inline const T& operator[](const int i) const { return data_[i]; }
 

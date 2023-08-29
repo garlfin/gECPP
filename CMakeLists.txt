@@ -9,7 +9,7 @@ set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0")
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0")
 
-include_directories(gECPP Vendor Vendor/FBX)
+include_directories(gECPP Vendor Vendor/FBX ${CMAKE_SOURCE_DIR})
 
 # GLFW
 add_library(GLFW STATIC IMPORTED)
@@ -26,18 +26,19 @@ FILE(COPY "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ASSIMP/libassimp-5.dll" DESTINATIO
 add_library(GLAD STATIC Vendor/GLAD/glad.c Vendor/GLAD/glad.h)
 
 # GETF
-add_library(GETF STATIC gEModel/gETF.h gEModel/gETF.cpp gEModel/gETF/Binary.h gEModel/gETF/File.h gEModel/gETF/Prototype.h)
+add_library(GETF STATIC gEModel/gETF.h gEModel/gETF/gETF.cpp gECPP/GL/Binary.h gEModel/gETF/File.h gEModel/gETF/Prototype.h)
 
 # GEMODEL
-file(GLOB gEMODEL_SRC gEModel/Converter)
+file(GLOB_RECURSE gEMODEL_SRC gEModel/Converter)
 add_executable(gEModel gEModel/main.cpp ${gEMODEL_SRC})
 target_link_libraries(gEModel PRIVATE ASSIMP GETF)
 
 # GECPP
-file(GLOB GECPP_SRC gECPP/*.cpp gECPP/*.h)
-add_library(gECPP STATIC ${GECPP_SRC})
+file(GLOB_RECURSE GECPP_SRC "gECPP/*.cpp" "gECPP/*.h")
+add_library(gECPP STATIC ${GECPP_SRC} )
 target_link_libraries(gECPP GLAD GLFW GETF)
 
 # VOXELDEMO
 add_executable(VoxelDemo Demo/main.cpp Demo/DemoWindow.h Demo/DemoWindow.cpp)
 target_link_libraries(VoxelDemo gECPP)
+add_custom_command(TARGET VoxelDemo POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/Resource/ ${CMAKE_BINARY_DIR}/Resource/)

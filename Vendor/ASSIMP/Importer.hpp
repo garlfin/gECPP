@@ -593,7 +593,7 @@ public:
     /** Get meta data for the importer corresponding to a specific index..
     *
     *  For the declaration of #aiImporterDesc, include <assimp/importerdesc.h>.
-    *  @param index Index to query, must be within [0,GetImporterCount())
+    *  @param index BufferIndex to query, must be within [0,GetImporterCount())
     *  @return Importer meta data structure, nullptr if the index does not
     *     exist or if the importer doesn't offer meta information (
     *     importers may do this at the cost of being hated by their peers).*/
@@ -602,7 +602,7 @@ public:
     // -------------------------------------------------------------------
     /** Find the importer corresponding to a specific index.
     *
-    *  @param index Index to query, must be within [0,GetImporterCount())
+    *  @param index BufferIndex to query, must be within [0,GetImporterCount())
     *  @return Importer instance. nullptr if the index does not
     *     exist. */
     BaseImporter *GetImporter(size_t index) const;

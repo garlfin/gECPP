@@ -1,4 +1,4 @@
-#include <GLMath.h>
+#include <GL/GLMath.h>
 #include "Prototype.h"
 
 #define GETF_VERSION 1

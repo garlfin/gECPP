@@ -1,6 +1,6 @@
 #pragma once
 
-#include <GLMath.h>
+#include <GL/GLMath.h>
 
 #define GLFW_INIT_FAILURE 1
 #define GLFW_WINDOW_FAILURE 2
@@ -8,18 +8,12 @@
 
 struct GLFWwindow;
 
-namespace gECPP
+namespace gE
 {
-	struct GLVersion
-	{
-		ubyte Major;
-		ubyte Minor;
-	};
-
 	class Window
 	{
 	 public:
-		Window(gl::u16vec2 size, const char* name = "gECPP");
+		Window(gl::u16vec2 size, const char* name = "gE");
 
 		inline GLFWwindow* GLFWWindow() const { return _window; }
 

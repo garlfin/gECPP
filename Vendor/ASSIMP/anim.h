@@ -154,7 +154,7 @@ struct aiMeshKey {
     /** The time of this key */
     double mTime;
 
-    /** Index into the aiMesh::mAnimMeshes array of the
+    /** BufferIndex into the aiMesh::mAnimMeshes array of the
      *  mesh corresponding to the #aiMeshAnim hosting this
      *  key frame. The referenced anim mesh is evaluated
      *  according to the rules defined in the docs for #aiAnimMesh.*/

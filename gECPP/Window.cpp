@@ -1,25 +1,26 @@
 #include "Window.h"
+#include "GL/GL.h"
 #include <GLAD/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
 
-using namespace gECPP;
+using namespace gE;
 
 Window::Window(gl::u16vec2 size, const char* name) :
 	_size(size)
 {
-	if(!glfwInit()) exit(GLFW_INIT_FAILURE);
+	if(!glfwInit()) GE_FAIL("Failed to initialize GLFW.");
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
 	_window = glfwCreateWindow(size.x, size.y, name, nullptr, nullptr);
-	if(!_window) exit(GLFW_WINDOW_FAILURE);
+	if(!_window) GE_FAIL("Failed to create Window.");
 
 	glfwMakeContextCurrent(_window);
 
-	if(!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) exit(GLAD_LOAD_FAILURE);
+	if(!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) GE_FAIL("Failed to initialize GLAD.");
 }
 
 Window::~Window()
@@ -32,12 +33,18 @@ void Window::Run()
 {
 	OnInit();
 
+	double time = glfwGetTime(), newTime, delta;
+
 	while(!glfwWindowShouldClose(_window))
 	{
 		glfwPollEvents();
 
-		OnUpdate(0);
-		OnRender(0);
+		newTime = glfwGetTime();
+		delta = newTime - time;
+		time = newTime;
+
+		OnUpdate((float) delta);
+		OnRender((float) delta);
 
 		glfwSwapBuffers(_window);
 	}
