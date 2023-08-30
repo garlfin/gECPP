@@ -7,7 +7,26 @@ namespace GL
 {
 	struct Texture;
 	struct ShaderStage;
-	typedef std::pair<const char*, const char*> PreprocessorPair;
+
+	struct PreprocessorPair
+	{
+		PreprocessorPair(const char* n, const char* v)
+		: NameLength(strlen(n)), ValueLength(strlen(v)), TotalLength(NameLength + ValueLength), // 2 terminators
+		Name(new char[TotalLength + 2]), Value(Name + NameLength + 1)
+		{
+			strcpy(Name, n);
+			strcpy(Value, v);
+		}
+
+		u16 NameLength;
+		u16 ValueLength;
+		u16 TotalLength;
+
+		char* const Name;
+		char* const Value;
+
+		~PreprocessorPair() { delete[] Name; }
+	};
 
 	enum ShaderStageType : GLenum
 	{
@@ -19,10 +38,10 @@ namespace GL
 	class Shader : public Asset
 	{
 	 protected:
-		Shader(gE::Window*, const char*, PreprocessorPair*, u8);
+		Shader(gE::Window*, const char*, const PreprocessorPair*, u8);
 	 public:
-		Shader(gE::Window*, const char* v, const char* f, PreprocessorPair* = nullptr, u8 = 0);
-		Shader(gE::Window*, const ShaderStage& v, const ShaderStage& f, PreprocessorPair* = nullptr, u8 = 0);
+		Shader(gE::Window*, const char* v, const char* f, const PreprocessorPair* = nullptr, u8 = 0);
+		Shader(gE::Window*, const ShaderStage& v, const ShaderStage& f);
 
 		inline void Bind() const override { glUseProgram(ID); }
 
@@ -40,14 +59,14 @@ namespace GL
 
 	class ComputeShader final : public Shader
 	{
-		ComputeShader(gE::Window* window, const char* src, PreprocessorPair* pair = nullptr, u8 count = 0) : Shader(window, src, pair, count) {};
+		ComputeShader(gE::Window* window, const char* src, const PreprocessorPair* pair = nullptr, u8 count = 0) : Shader(window, src, pair, count) {};
 		inline void Dispatch(u16 x, u16 y, u16 z) const { Bind(); glDispatchCompute(x, y, z); }
 	};
 
 	class ShaderStage final : public Asset
 	{
 	 public:
-		ShaderStage(gE::Window*, ShaderStageType, const char*, PreprocessorPair*, u8);
+		ShaderStage(gE::Window*, ShaderStageType, const char*, const PreprocessorPair*, u8);
 
 		inline void Bind() const override {}
 		inline void Attach(Shader* s) const { glAttachShader(s->Get(), ID); }

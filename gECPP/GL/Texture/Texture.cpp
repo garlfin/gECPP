@@ -41,14 +41,14 @@ Texture::Texture(gE::Window* window, GLuint target, TextureSize size, uint8_t mi
 	glTextureParameteri(ID, GL_TEXTURE_WRAP_T, GL_REPEAT);
 }
 
-Texture2D::Texture2D(gE::Window* window, TextureSize size, PVR::PVRPixelFormat f, u8* d, uint8_t mips, uint8_t sentMips, bool linear)
+Texture2D::Texture2D(gE::Window* window, TextureSize size, PVR::PVRPixelFormat f, u8* d, uint8_t mips, bool linear)
 	: Texture(window, GL_TEXTURE_2D, size, mips, linear)
 {
 	size = TextureSize::Max(size, TextureSize(1));
 	glTextureStorage2D(ID, mips, PVRToInternalFormat(f), size.x, size.y);
 	uint32_t dataSize;
 	if(!d) return;
-	for(ubyte i = 0; i < sentMips; i++, size = DIV_CEIL(size, TextureSize(2)), d += dataSize) // TODO: case for format, lazy
+	for(ubyte i = 0; i < mips; i++, size = DIV_CEIL(size, TextureSize(2)), d += dataSize) // TODO: case for format, lazy
 	{
 		if(FormatIsCompressed(f))
 		{
@@ -61,12 +61,13 @@ Texture2D::Texture2D(gE::Window* window, TextureSize size, PVR::PVRPixelFormat f
 			glTextureSubImage2D(ID, i, 0, 0, size.x, size.y, GL_RGB, GL_UNSIGNED_BYTE, d);
 		}
 	}
-	if(sentMips < mips) glGenerateTextureMipmap(ID);
+	if(!mips) glGenerateTextureMipmap(ID);
 }
 
 Texture* PVR::Read(gE::Window* window, const char* path, bool linear)
 {
-	u8* f = ReadFile(path);
+	u32 fileLen = 0;
+	u8* f = ReadFile(path, fileLen, false);
 	if (!f) return nullptr;
 
 	u8* ptr = f;
@@ -74,7 +75,7 @@ Texture* PVR::Read(gE::Window* window, const char* path, bool linear)
 	h.Serialize(ptr);
 
 	if(h.Depth + h.Surfaces + h.Faces > 3) std::cout << "Unexpected 3D Texture" << std::endl;
-	auto* tex = new Texture2D(window, h.Size, h.Format, ptr, 1, 1, linear);
+	auto* tex = new Texture2D(window, h.Size, h.Format, ptr, h.MipCount, linear);
 	delete[] f;
 
 	return tex;

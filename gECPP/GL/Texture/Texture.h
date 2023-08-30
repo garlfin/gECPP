@@ -61,8 +61,8 @@ namespace GL
 	 protected:
 		Texture(gE::Window* window, GLuint target, TextureSize, u8, bool linear = true);
 
-		TextureSize Size;
-		uint8_t Mips;
+		const TextureSize Size;
+		const uint8_t Mips;
 
 	 public:
 		ALWAYS_INLINE uint32_t Use(uint32_t slot) const { glBindTextureUnit(slot, ID); return slot; }
@@ -74,7 +74,7 @@ namespace GL
 	class Texture2D final : public Texture
 	{
 	 public:
-		Texture2D(gE::Window* window, TextureSize, PVR::PVRPixelFormat, u8* d, u8 mips = 0, u8 sentMips = 0, bool linear = true);
+		Texture2D(gE::Window* window, TextureSize, PVR::PVRPixelFormat, u8* d, u8 mips = 0, bool linear = true);
 
 		ALWAYS_INLINE void Bind() const override { glBindTexture(GL_TEXTURE_2D, ID); }
 	};

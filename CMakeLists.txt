@@ -1,13 +1,13 @@
-cmake_minimum_required(VERSION 3.25)
+cmake_minimum_required(VERSION 3.20)
 project(VoxelField)
 
 set(CMAKE_CXX_STANDARD 23)
 
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
-set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -static -s")
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3 -static -s")
 
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0")
-set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -static")
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -static")
 
 include_directories(gECPP Vendor Vendor/FBX ${CMAKE_SOURCE_DIR})
 
@@ -18,7 +18,7 @@ set_property(TARGET GLFW PROPERTY IMPORTED_IMPLIB "${CMAKE_CURRENT_SOURCE_DIR}/V
 FILE(COPY "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/GLFW/glfw3.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 # ASSIMP
-add_library(ASSIMP STATIC IMPORTED)
+add_library(ASSIMP STATIC IMPORTED gECPP/GL/Binary.cpp)
 set_property(TARGET ASSIMP PROPERTY IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ASSIMP/libassimp-5.dll")
 FILE(COPY "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ASSIMP/libassimp-5.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
@@ -26,7 +26,7 @@ FILE(COPY "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ASSIMP/libassimp-5.dll" DESTINATIO
 add_library(GLAD STATIC Vendor/GLAD/glad.c Vendor/GLAD/glad.h)
 
 # GETF
-add_library(GETF STATIC gEModel/gETF.h gEModel/gETF/gETF.cpp gECPP/GL/Binary.h gEModel/gETF/File.h gEModel/gETF/Prototype.h)
+add_library(GETF STATIC gEModel/gETF.h gEModel/gETF/gETF.cpp gECPP/GL/Binary.h gEModel/gETF/File.h gEModel/gETF/Prototype.h gECPP/GL/Binary.cpp)
 
 # GEMODEL
 file(GLOB_RECURSE gEMODEL_SRC gEModel/Converter)

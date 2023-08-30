@@ -124,12 +124,34 @@ namespace gETF
 
 	void SerializationBuffer::Realloc(u64 newSize)
 	{
-		u8* oldBuf = _buf;
+		u64 logSize = 1 << (BIT_SIZE(newSize) - __builtin_clzll(newSize));
 
-		_buf = new u8[newSize] {};
-		memcpy(_buf, oldBuf, MIN(newSize, _allocLen));
-		_allocLen = newSize;
-		delete[] oldBuf;
+		if(_allocLen != logSize)
+		{
+			u8* oldBuf = _buf;
+			_buf = new u8[logSize]{};
+			_allocLen = logSize;
+			memcpy(_buf, oldBuf, MIN(_size, _allocLen));
+
+			delete[] oldBuf;
+		}
+
+		_size = newSize;
+	}
+
+	void SerializationBuffer::PushString(const char* ptr)
+	{
+		u8 len = MIN(strlen(ptr), UINT8_MAX);
+		Push(len);
+		PushPtr(ptr, len);
+	}
+
+	void SerializationBuffer::StrCat(const char* str)
+	{
+		u32 strLen = strlen(str);
+		u64 last = MAX(_size, 1);
+
+		Realloc(last + strLen);
+		memcpy(_buf + last - 1, str, strLen);
 	}
 }
-

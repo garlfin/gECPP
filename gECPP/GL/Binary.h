@@ -6,14 +6,24 @@
 
 #include "GLMath.h"
 
+
 #ifndef NODISCARD
 #define NODISCARD [[nodiscard]]
+#endif
+#ifndef ALWAYS_INLINE
 #define ALWAYS_INLINE __attribute__((always_inline))
 #endif
 
+namespace gETF { struct Serializable; }
+
 #define BIT_FIELD(FIELD, INDEX) (((FIELD) >> (INDEX)) & 1)
+#ifndef MIN
 #define MIN(X, Y) ((X) < (Y) ? (X) : (Y))
+#endif
+#ifndef MAX
 #define MAX(X, Y) ((X) > (Y) ? (X) : (Y))
+#endif
+#define BIT_SIZE(X) (sizeof(decltype(X)) * 8)
 
 namespace gETF
 {
@@ -21,55 +31,41 @@ namespace gETF
 	{
 	 public:
 		explicit SerializationBuffer(u64 initialSize = 32)
-			: _buf(new u8[initialSize] {}), _len(0), _allocLen(initialSize)
+			: _buf(new u8[initialSize] {}), _size(0), _allocLen(initialSize)
 		{
-		}
-		~SerializationBuffer()
-		{
-			delete[] _buf;
 		}
 
 		template<class T>
 		void PushPtr(T* t, u32 count = 1)
 		{
-			if constexpr(std::is_base_of_v<Serializable, T>)
-			{
+			if constexpr (std::is_base_of_v<Serializable, T>)
 				for (u32 i = 0; i < count; i++) t[i].Deserialize(*this);
-			}
 			else
 			{
+				static_assert(std::is_trivially_copyable_v<T>, "T IS NOT COPYABLE!");
 				const size_t size = sizeof(T) * count;
-				if (_len + size > _allocLen) Realloc(_allocLen + MAX(MIN(_allocLen, 1024), size));
-				memcpy(_buf + _len, t, size);
-				_len += size;
+				u64 oldSize = _size;
+				Realloc(_size + size);
+				memcpy(_buf + oldSize, t, size);
 			}
 		}
 
 		template<class T>
-		ALWAYS_INLINE void Push(const T& t)
-		{
-			PushPtr<const T>(&t);
-		}
+		ALWAYS_INLINE void Push(const T& t) { PushPtr<const T>(&t); }
+		NODISCARD ALWAYS_INLINE u8* Data() const { return _buf; }
+		NODISCARD ALWAYS_INLINE u64 Length() const { return _size; }
 
-		NODISCARD ALWAYS_INLINE u8* Data() const
-		{
-			return _buf;
-		}
-		NODISCARD ALWAYS_INLINE u64 Length() const
-		{
-			return _len;
-		}
+		void PushString(const char* ptr);
+		void StrCat(const char* str);
 
-		void PushString(const char* ptr)
+		~SerializationBuffer()
 		{
-			u8 len = MIN(strlen(ptr), UINT8_MAX);
-			Push(len);
-			PushPtr(ptr, len);
+			delete[] _buf;
 		}
 
 	 private:
 		u8* _buf;
-		u64 _len, _allocLen;
+		u64 _size, _allocLen;
 
 		void Realloc(u64 newSize);
 	};
@@ -119,25 +115,12 @@ bool StrCmp(const char* a, const char* b)
 	return true;
 }
 
-inline char* ReadString(u8*& ptr)
+char* ReadString(u8*& ptr);
+
+u8* ReadFile(const char* name, u32& length, bool binary = false);
+
+inline u8* ReadFile(const char* name, bool binary)
 {
-	u8 len = Read<u8>(ptr);
-	char* str = new char[len + 1];
-	Read<char>(ptr, str, len);
-	str[len] = 0;
-	return str;
-}
-
-inline u8* ReadFile(const char* name)
-{
-	FILE* file = fopen(name, "rb");
-
-	fseek(file, 0, SEEK_END);
-	u64 fileLen = ftell(file);
-	u8* bin = new u8[fileLen];
-	fseek(file, 0, SEEK_SET);
-
-	fread(bin, fileLen, 1, file);
-
-	return bin;
+	u32 len;
+	return ReadFile(name, len, binary);
 }

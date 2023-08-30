@@ -8,13 +8,16 @@
 #include <iostream>
 #include <cstring>
 
-#define DEFINE_DIRECTIVE_LEN 10
+#define DEFINE_DIRECTIVE_LEN 9 // '#define '(8) + '\n'(1)
 char DEFINE_DIRECTIVE[] = "#define ";
 char VERSION_DIRECTIVE[] = "#version 460 core\n";
 
 namespace GL
 {
-	void GetShaderStatus(const Shader& shader);
+	template<typename T>
+	bool GetShaderStatus(const T& shader, const char* source = nullptr);
+
+	const char* CompileDirectives(const PreprocessorPair* pairs, u8 count);
 
 	void Shader::SetUniform(u8 loc, const Texture* tex, u8 slot) const
 	{
@@ -22,7 +25,7 @@ namespace GL
 		SetUniform(loc, i32(tex->Use(slot)));
 	}
 
-	Shader::Shader(gE::Window* window, const char* v, const char* f, PreprocessorPair* p, u8 c) : Asset(window)
+	Shader::Shader(gE::Window* window, const char* v, const char* f, const PreprocessorPair* p, u8 c) : Asset(window)
 	{
 		ID = glCreateProgram();
 
@@ -35,31 +38,24 @@ namespace GL
 		GetShaderStatus(*this);
 	}
 
-	ShaderStage::ShaderStage(gE::Window* window, ShaderStageType type, const char* file, PreprocessorPair* pairs, u8 pLen) : Asset(window)
+	ShaderStage::ShaderStage(gE::Window* window, ShaderStageType type, const char* file, const PreprocessorPair* directives, u8 dLen) : Asset(window)
 	{
 		ID = glCreateShader(type);
 
-		// TODO: COMPLETE INCLUDES AND DIRECTIVES
+		const char* source = (char*) ReadFile(file, true);
+		const char* directivesSrc = CompileDirectives(directives, dLen);
+		const char* sources[] {VERSION_DIRECTIVE, directivesSrc, source};
 
-		const char* f[] { VERSION_DIRECTIVE, (char*) ReadFile(file) };
-		glShaderSource(ID, 2, f, nullptr);
-
-		delete[] f[1]; /// deletes source
-
+		glShaderSource(ID, 3, sources, nullptr);
 		glCompileShader(ID);
 
-		i32 shaderStatus;
-		glGetShaderiv(ID, GL_COMPILE_STATUS, &shaderStatus);
+		GetShaderStatus(*this, source);
 
-		if(shaderStatus) return;
-
-		glGetShaderiv(ID, GL_INFO_LOG_LENGTH, &shaderStatus);
-		char* infoLog = new char[shaderStatus] {};
-		glGetShaderInfoLog(ID, shaderStatus - 1, nullptr, infoLog);
-		std::cout << "STAGE COMPILE FAILURE: \n" << infoLog << std::endl;
+		delete[] source;
+		delete[] directivesSrc;
 	}
 
-	Shader::Shader(gE::Window* window, const ShaderStage& v, const ShaderStage& f, PreprocessorPair*, u8) : Asset(window)
+	Shader::Shader(gE::Window* window, const ShaderStage& v, const ShaderStage& f) : Asset(window)
 	{
 		ID = glCreateProgram();
 
@@ -71,7 +67,7 @@ namespace GL
 		GetShaderStatus(*this);
 	}
 
-	Shader::Shader(gE::Window* window, const char* src , GL::PreprocessorPair* pairs, u8 count) : Asset(window)
+	Shader::Shader(gE::Window* window, const char* src , const GL::PreprocessorPair* pairs, u8 count) : Asset(window)
 	{
 		ID = glCreateProgram();
 
@@ -83,20 +79,63 @@ namespace GL
 		GetShaderStatus(*this);
 	}
 
-	void GetShaderStatus(const Shader& shader)
+	template<typename T>
+	bool GetShaderStatus(const T& shader, const char* source)
 	{
 		u32 id = shader.Get();
 
 		i32 shaderStatus;
-		glGetProgramiv(id, GL_LINK_STATUS, &shaderStatus);
+		if constexpr (std::is_same_v<T, ShaderStage>)
+			glGetShaderiv(id, GL_COMPILE_STATUS, &shaderStatus);
+		else
+			glGetProgramiv(id, GL_LINK_STATUS, &shaderStatus);
 
-		if(shaderStatus) return;
+		if (shaderStatus) return true;
 
-		glGetProgramiv(id, GL_INFO_LOG_LENGTH, &shaderStatus);
+		if constexpr (std::is_same_v<T, ShaderStage>)
+			glGetShaderiv(id, GL_INFO_LOG_LENGTH, &shaderStatus);
+		else
+			glGetProgramiv(id, GL_INFO_LOG_LENGTH, &shaderStatus);
+
 		char* infoLog = new char[shaderStatus] {};
 		glGetProgramInfoLog(id, shaderStatus - 1, nullptr, infoLog);
-		std::cout << "SHADER COMPILE FAILURE: \n" << infoLog << std::endl;
+		std::cout << "SHADER COMPILE FAILURE: " << infoLog << '\n';
+		std::cout << source << std::endl;
 
 		delete[] infoLog;
+		return false;
+	}
+
+	const char* CompileDirectives(const PreprocessorPair* pairs, u8 count)
+	{
+		u32 directiveSrcLen = 0;
+		for(u8 i = 0; i < count; i++)
+			directiveSrcLen += DEFINE_DIRECTIVE_LEN + pairs[i].TotalLength;
+
+		char* directivesSrc = new char[directiveSrcLen + 1];
+		directivesSrc[directiveSrcLen] = 0;
+
+		char* currentDirective = directivesSrc;
+		for(u8 i = 0; i < count; i++)
+		{
+			const PreprocessorPair& directive = pairs[i];
+
+			memcpy(currentDirective, DEFINE_DIRECTIVE, 8);
+			currentDirective += 8;
+
+			memcpy(currentDirective, directive.Name, directive.NameLength);
+			currentDirective += directive.NameLength;
+
+			*currentDirective = ' ';
+			currentDirective++;
+
+			memcpy(currentDirective, directive.Value, directive.ValueLength);
+			currentDirective += directive.ValueLength;
+
+			*currentDirective = '\n';
+			currentDirective++;
+		}
+
+		return directivesSrc;
 	}
 }
