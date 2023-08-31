@@ -1,7 +1,7 @@
 layout(location = 0) in vec3 Position;
-layout(location = 0) in vec2 UV;
-layout(location = 0) in vec3 Normal;
-layout(location = 0) in vec3 Tangent;
+layout(location = 1) in vec2 UV;
+layout(location = 2) in vec3 Normal;
+layout(location = 3) in vec3 Tangent;
 
 #define MAX_OBJECT 64
 
@@ -27,6 +27,8 @@ struct VertexOut
     vec2 UV;
     mat3 TBN;
 };
+
+#include "bob"
 
 out VertexOut Out;
 

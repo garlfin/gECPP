@@ -3,21 +3,19 @@
 //
 
 #include "Shader.h"
-#include "Shader.h"
 #include <GL/Texture/Texture.h>
 #include <iostream>
-#include <cstring>
 
-#define DEFINE_DIRECTIVE_LEN 9 // '#define '(8) + '\n'(1)
 char DEFINE_DIRECTIVE[] = "#define ";
-char VERSION_DIRECTIVE[] = "#version 460 core\n";
+char INCLUDE_DIRECTIVE[] = "#include ";
+char VERSION_DIRECTIVE[] = "#version 460 core\r\n";
 
 namespace GL
 {
 	template<typename T>
 	bool GetShaderStatus(const T& shader, const char* source = nullptr);
-
-	const char* CompileDirectives(const PreprocessorPair* pairs, u8 count);
+	void CompileDirectives(const PreprocessorPair* pairs, u8 count, gETF::SerializationBuffer&);
+	void CompileIncludes(const char* file, gETF::SerializationBuffer&);
 
 	void Shader::SetUniform(u8 loc, const Texture* tex, u8 slot) const
 	{
@@ -42,17 +40,18 @@ namespace GL
 	{
 		ID = glCreateShader(type);
 
-		const char* source = (char*) ReadFile(file, true);
-		const char* directivesSrc = CompileDirectives(directives, dLen);
-		const char* sources[] {VERSION_DIRECTIVE, directivesSrc, source};
+		gETF::SerializationBuffer sourceBuf{};
 
-		glShaderSource(ID, 3, sources, nullptr);
+		sourceBuf.StrCat(VERSION_DIRECTIVE);
+		CompileDirectives(directives, dLen, sourceBuf);
+		CompileIncludes(file, sourceBuf);
+
+		char* bufPtr = (char*) sourceBuf.Data();
+
+		glShaderSource(ID, 1, &bufPtr, nullptr);
 		glCompileShader(ID);
 
-		GetShaderStatus(*this, source);
-
-		delete[] source;
-		delete[] directivesSrc;
+		GetShaderStatus(*this, bufPtr);
 	}
 
 	Shader::Shader(gE::Window* window, const ShaderStage& v, const ShaderStage& f) : Asset(window)
@@ -79,6 +78,8 @@ namespace GL
 		GetShaderStatus(*this);
 	}
 
+#define GL_GET(FUNC_STAGE, FUNC_SHADER, ARGS...) if constexpr (std::is_same_v<T, ShaderStage>) FUNC_STAGE(ARGS); else FUNC_SHADER(ARGS);
+
 	template<typename T>
 	bool GetShaderStatus(const T& shader, const char* source)
 	{
@@ -92,50 +93,45 @@ namespace GL
 
 		if (shaderStatus) return true;
 
-		if constexpr (std::is_same_v<T, ShaderStage>)
-			glGetShaderiv(id, GL_INFO_LOG_LENGTH, &shaderStatus);
-		else
-			glGetProgramiv(id, GL_INFO_LOG_LENGTH, &shaderStatus);
+		GL_GET(glGetShaderiv, glGetProgramiv, id, GL_INFO_LOG_LENGTH, &shaderStatus);
 
 		char* infoLog = new char[shaderStatus] {};
-		glGetProgramInfoLog(id, shaderStatus - 1, nullptr, infoLog);
-		std::cout << "SHADER COMPILE FAILURE: " << infoLog << '\n';
-		std::cout << source << std::endl;
+
+		GL_GET(glGetShaderInfoLog, glGetProgramInfoLog, id, shaderStatus - 1, nullptr, infoLog);
+
+		std::cout << "SHADER COMPILE FAILURE:\n" << infoLog << '\n';
+		if(source) std::cout << "SOURCE:\n" << source << std::endl;
 
 		delete[] infoLog;
 		return false;
 	}
 
-	const char* CompileDirectives(const PreprocessorPair* pairs, u8 count)
+	void CompileDirectives(const PreprocessorPair* pairs, u8 count, gETF::SerializationBuffer& buf)
 	{
-		u32 directiveSrcLen = 0;
-		for(u8 i = 0; i < count; i++)
-			directiveSrcLen += DEFINE_DIRECTIVE_LEN + pairs[i].TotalLength;
-
-		char* directivesSrc = new char[directiveSrcLen + 1];
-		directivesSrc[directiveSrcLen] = 0;
-
-		char* currentDirective = directivesSrc;
 		for(u8 i = 0; i < count; i++)
 		{
 			const PreprocessorPair& directive = pairs[i];
 
-			memcpy(currentDirective, DEFINE_DIRECTIVE, 8);
-			currentDirective += 8;
-
-			memcpy(currentDirective, directive.Name, directive.NameLength);
-			currentDirective += directive.NameLength;
-
-			*currentDirective = ' ';
-			currentDirective++;
-
-			memcpy(currentDirective, directive.Value, directive.ValueLength);
-			currentDirective += directive.ValueLength;
-
-			*currentDirective = '\n';
-			currentDirective++;
+			buf.StrCat(DEFINE_DIRECTIVE);
+			buf.StrCat(directive.Name);
+			buf.StrCat(" ");
+			buf.StrCat(directive.Value);
+			buf.StrCat("\r\n");
 		}
+	}
 
-		return directivesSrc;
+	void CompileIncludes(const char* file, gETF::SerializationBuffer& dstBuffer)
+	{
+		char* source = (char*) ReadFile(file);
+		char* line = source;
+
+		do
+		{
+			if(!StrCmp(line, INCLUDE_DIRECTIVE)) dstBuffer.StrCat(line, '\n');
+
+
+		} while ((line = (char*) IncrementLine(line)));
+
+		delete[] source;
 	}
 }

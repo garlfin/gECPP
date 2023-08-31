@@ -31,51 +31,45 @@ namespace gETF
 	{
 	 public:
 		explicit SerializationBuffer(u64 initialSize = 32)
-			: _buf(new u8[initialSize] {}), _size(0), _allocLen(initialSize)
+			: _buf((u8*) malloc(initialSize)), _size(0), _alloc(initialSize)
 		{
 		}
 
 		template<class T>
-		void PushPtr(T* t, u32 count = 1)
-		{
-			if constexpr (std::is_base_of_v<Serializable, T>)
-				for (u32 i = 0; i < count; i++) t[i].Deserialize(*this);
-			else
-			{
-				static_assert(std::is_trivially_copyable_v<T>, "T IS NOT COPYABLE!");
-				const size_t size = sizeof(T) * count;
-				u64 oldSize = _size;
-				Realloc(_size + size);
-				memcpy(_buf + oldSize, t, size);
-			}
-		}
+		void PushPtr(T* t, u32 count = 1);
+
+		//template<class T>
+		//void InsertPtr(u64 i, T* t, u32 count = 1);
 
 		template<class T>
 		ALWAYS_INLINE void Push(const T& t) { PushPtr<const T>(&t); }
+
+		//template<typename T>
+		//ALWAYS_INLINE void Insert(u64 i, const T& t) {InsertPtr<const T>(i, &t); }
+
 		NODISCARD ALWAYS_INLINE u8* Data() const { return _buf; }
 		NODISCARD ALWAYS_INLINE u64 Length() const { return _size; }
 
 		void PushString(const char* ptr);
-		void StrCat(const char* str);
+		void StrCat(const char* str, char = 0);
+		void FromFile(const char* file, bool binary = false);
 
-		~SerializationBuffer()
-		{
-			delete[] _buf;
-		}
+		~SerializationBuffer() { free(_buf); }
 
 	 private:
 		u8* _buf;
-		u64 _size, _allocLen;
+		u64 _size, _alloc;
 
+		void SafeMemCpy(const u8* ptr, u64 len, u64 offset);
 		void Realloc(u64 newSize);
 	};
 
 	template<>
 	void SerializationBuffer::PushPtr<const SerializationBuffer>(const SerializationBuffer* t, u32 count);
-
-	template<>
-	inline void SerializationBuffer::PushPtr<const SerializationBuffer>(const SerializationBuffer* t, u32 count);
 }
+
+size_t strlenc(const char*, char = 0);
+const char* IncrementLine(const char* s);
 
 template<typename T>
 T Read(u8*& src)
@@ -115,12 +109,34 @@ bool StrCmp(const char* a, const char* b)
 	return true;
 }
 
-char* ReadString(u8*& ptr);
+template<u32 LENGTH>
+bool StrCmp(const char* a, const char(&b)[LENGTH])
+{
+	for(u32 i = 0; i < LENGTH - 1; i++) // exclude null terminator
+		if(a[i] != b[i]) return false;
+	return true;
+}
 
+char* ReadString(u8*& ptr);
 u8* ReadFile(const char* name, u32& length, bool binary = false);
 
-inline u8* ReadFile(const char* name, bool binary)
+inline u8* ReadFile(const char* name, bool binary = false)
 {
 	u32 len;
 	return ReadFile(name, len, binary);
+}
+
+template<class T>
+void gETF::SerializationBuffer::PushPtr(T* t, u32 count)
+{
+	if constexpr (std::is_base_of_v<Serializable, T>)
+		for (u32 i = 0; i < count; i++) t[i].Deserialize(*this);
+	else
+	{
+		static_assert(std::is_trivially_copyable_v<T>, "T IS NOT COPYABLE!");
+		const size_t size = sizeof(T) * count;
+		u64 oldSize = _size;
+		Realloc(_size + size);
+		memcpy(_buf + oldSize, t, size);
+	}
 }

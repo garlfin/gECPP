@@ -4,6 +4,8 @@
 
 #include <iostream>
 #include "../gETF.h"
+#include "GL/Binary.h"
+
 
 /*
  * void Deserialize(SerializationBuffer& ptr);
@@ -105,53 +107,5 @@ namespace gETF
 		MaterialIndex = Read<u8>(ptr);
 		Offset = Read<u32>(ptr);
 		Count = Read<u32>(ptr);
-	}
-
-	template<>
-	void SerializationBuffer::PushPtr<const SerializationBuffer>(const SerializationBuffer* t, u32 count)
-	{
-		for (u32 i = 0; i < count; i++) PushPtr(t[i].Data(), t[i].Length());
-	}
-
-	char* ReadString(u8*& ptr)
-	{
-		u8 len = Read<u8>(ptr);
-		char* str = new char[len + 1];
-		Read<char>(ptr, str, len);
-		str[len] = 0;
-		return str;
-	}
-
-	void SerializationBuffer::Realloc(u64 newSize)
-	{
-		u64 logSize = 1 << (BIT_SIZE(newSize) - __builtin_clzll(newSize));
-
-		if(_allocLen != logSize)
-		{
-			u8* oldBuf = _buf;
-			_buf = new u8[logSize]{};
-			_allocLen = logSize;
-			memcpy(_buf, oldBuf, MIN(_size, _allocLen));
-
-			delete[] oldBuf;
-		}
-
-		_size = newSize;
-	}
-
-	void SerializationBuffer::PushString(const char* ptr)
-	{
-		u8 len = MIN(strlen(ptr), UINT8_MAX);
-		Push(len);
-		PushPtr(ptr, len);
-	}
-
-	void SerializationBuffer::StrCat(const char* str)
-	{
-		u32 strLen = strlen(str);
-		u64 last = MAX(_size, 1);
-
-		Realloc(last + strLen);
-		memcpy(_buf + last - 1, str, strLen);
 	}
 }
