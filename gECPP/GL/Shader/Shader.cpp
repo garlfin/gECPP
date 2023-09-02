@@ -8,7 +8,7 @@
 
 char DEFINE_DIRECTIVE[] = "#define ";
 char INCLUDE_DIRECTIVE[] = "#include ";
-char VERSION_DIRECTIVE[] = "#version 460 core\r\n";
+char VERSION_DIRECTIVE[] = "#version 460 core\n";
 
 namespace GL
 {
@@ -116,18 +116,40 @@ namespace GL
 			buf.StrCat(directive.Name);
 			buf.StrCat(" ");
 			buf.StrCat(directive.Value);
-			buf.StrCat("\r\n");
+			buf.StrCat("\n");
 		}
 	}
 
 	void CompileIncludes(const char* file, gETF::SerializationBuffer& dstBuffer)
 	{
+		// Turns out most drivers support GL_ARB_SHADER_LANGUAGE_INCLUDE
+		// already wrote all this,
 		char* source = (char*) ReadFile(file);
+		if(!source) return;
 		char* line = source;
 
 		do
 		{
-			if(!StrCmp(line, INCLUDE_DIRECTIVE)) dstBuffer.StrCat(line, '\n');
+			if(!StrCmp(line, INCLUDE_DIRECTIVE))
+			{
+				dstBuffer.StrCat(line, '\n');
+				dstBuffer.StrCat("\n");
+				continue;
+			}
+
+			char delimiter = '"';
+			char* include;
+			if(!(include = (char*) IncrementLine(line, '"')))
+			{
+				delimiter = '>';
+				include = (char*) IncrementLine(line, '<');
+			}
+
+			size_t filenameLen = strlenc(include, delimiter) - 1;
+
+			include[filenameLen] = 0; // cut off to load file
+			CompileIncludes(include, dstBuffer);
+			include[filenameLen] = delimiter; // restore
 
 
 		} while ((line = (char*) IncrementLine(line)));

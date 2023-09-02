@@ -20,6 +20,7 @@ char* ReadString(u8*& ptr)
 u8* ReadFile(const char* name, u32& length, bool binary)
 {
 	FILE* file = fopen(name, "rb");
+	if(!file) return nullptr;
 
 	fseek(file, 0, SEEK_END);
 	length = ftell(file);
@@ -37,12 +38,12 @@ size_t strlenc(const char* str, char d)
 {
 	const char* s;
 	for(s = str; *s != d; s++) if(!*s) return s - str; // no clue why i need this, i was playing around...
-	return s - str + 1;
+	return s - str;
 }
 
-const char* IncrementLine(const char* str)
+const char* IncrementLine(const char* str, char d)
 {
-	for(; *str != '\n'; str++) if(!*str) return nullptr;
+	for(; *str != d; str++) if(!*str) return nullptr;
 	return ++str;
 }
 

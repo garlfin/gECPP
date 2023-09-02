@@ -69,7 +69,7 @@ namespace gETF
 }
 
 size_t strlenc(const char*, char = 0);
-const char* IncrementLine(const char* s);
+const char* IncrementLine(const char* s, char d = '\n');
 
 template<typename T>
 T Read(u8*& src)
