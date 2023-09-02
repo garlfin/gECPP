@@ -12,10 +12,12 @@ char VERSION_DIRECTIVE[] = "#version 460 core\n";
 
 namespace GL
 {
+	void CompileDirectives(const GL::PreprocessorPair* pairs, u8 count, gETF::SerializationBuffer&);
+	void CompileIncludes(const char* file, gETF::SerializationBuffer&);
+	const char* GetIncludePath(const char* origin, const char* include);
+
 	template<typename T>
 	bool GetShaderStatus(const T& shader, const char* source = nullptr);
-	void CompileDirectives(const PreprocessorPair* pairs, u8 count, gETF::SerializationBuffer&);
-	void CompileIncludes(const char* file, gETF::SerializationBuffer&);
 
 	void Shader::SetUniform(u8 loc, const Texture* tex, u8 slot) const
 	{
@@ -50,7 +52,7 @@ namespace GL
 
 		glShaderSource(ID, 1, &bufPtr, nullptr);
 		glCompileShader(ID);
-
+		std::cout << "SOURCE:\n" << bufPtr << std::endl;
 		GetShaderStatus(*this, bufPtr);
 	}
 
@@ -123,7 +125,6 @@ namespace GL
 	void CompileIncludes(const char* file, gETF::SerializationBuffer& dstBuffer)
 	{
 		// Turns out most drivers support GL_ARB_SHADER_LANGUAGE_INCLUDE
-		// already wrote all this,
 		char* source = (char*) ReadFile(file);
 		if(!source) return;
 		char* line = source;
@@ -132,28 +133,45 @@ namespace GL
 		{
 			if(!StrCmp(line, INCLUDE_DIRECTIVE))
 			{
-				dstBuffer.StrCat(line, '\n');
-				dstBuffer.StrCat("\n");
+				dstBuffer.StrCat(line, '\n', 1);
 				continue;
 			}
 
-			char delimiter = '"';
-			char* include;
-			if(!(include = (char*) IncrementLine(line, '"')))
-			{
-				delimiter = '>';
-				include = (char*) IncrementLine(line, '<');
-			}
+			const char* includePath = GetIncludePath(file, &line[9]);
 
-			size_t filenameLen = strlenc(include, delimiter) - 1;
-
-			include[filenameLen] = 0; // cut off to load file
-			CompileIncludes(include, dstBuffer);
-			include[filenameLen] = delimiter; // restore
-
-
+#ifdef INCLUDE_RECURSE
+			CompileIncludes(includePath, dstBuffer);
+#else
+			char* includeSrc = (char*) ReadFile(includePath);
+			dstBuffer.StrCat(includeSrc);
+			delete[] includeSrc;
+#endif
+			delete[] includePath;
 		} while ((line = (char*) IncrementLine(line)));
 
 		delete[] source;
 	}
+
+	const char* GetIncludePath(const char* origin, const char* include)
+	{
+		if(*include == '<') return strdupc(include + 1, '>');
+		else if(*include == '"')
+		{
+			size_t filelessLen = strlencLast(origin, '/') + 1;
+			size_t includeLen = strlenc(include + 1, '"');
+			size_t totalLen = filelessLen + includeLen;
+
+			char* path = new char[totalLen];
+			path[totalLen] = 0;
+
+			memcpy(path, origin, filelessLen);
+			memcpy(path + filelessLen, include + 1, includeLen);
+
+			return path;
+		}
+
+		std::cout << "Invalid delimiter: " << *include << '\n';
+		return nullptr;
+	}
 }
+

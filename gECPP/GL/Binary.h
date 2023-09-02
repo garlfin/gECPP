@@ -25,6 +25,12 @@ namespace gETF { struct Serializable; }
 #endif
 #define BIT_SIZE(X) (sizeof(decltype(X)) * 8)
 
+size_t strlenc(const char*, char);
+size_t strlencLast(const char*, char, char = 0);
+char* strdupc(const char*, char);
+
+const char* IncrementLine(const char* s, char d = '\n');
+
 namespace gETF
 {
 	class SerializationBuffer
@@ -51,7 +57,7 @@ namespace gETF
 		NODISCARD ALWAYS_INLINE u64 Length() const { return _size; }
 
 		void PushString(const char* ptr);
-		void StrCat(const char* str, char = 0);
+		void StrCat(const char* str, char = 0, u8 endOffset = 0);
 		void FromFile(const char* file, bool binary = false);
 
 		~SerializationBuffer() { free(_buf); }
@@ -60,16 +66,13 @@ namespace gETF
 		u8* _buf;
 		u64 _size, _alloc;
 
-		void SafeMemCpy(const u8* ptr, u64 len, u64 offset);
+		inline void SafeMemCpy(const u8* ptr, u64 len, u64 offset);
 		void Realloc(u64 newSize);
 	};
 
 	template<>
 	void SerializationBuffer::PushPtr<const SerializationBuffer>(const SerializationBuffer* t, u32 count);
 }
-
-size_t strlenc(const char*, char = 0);
-const char* IncrementLine(const char* s, char d = '\n');
 
 template<typename T>
 T Read(u8*& src)
@@ -139,4 +142,12 @@ void gETF::SerializationBuffer::PushPtr(T* t, u32 count)
 		Realloc(_size + size);
 		memcpy(_buf + oldSize, t, size);
 	}
+}
+
+void gETF::SerializationBuffer::SafeMemCpy(const u8* ptr, u64 len, u64 offset)
+{
+#ifdef DEBUG
+	if(offset + len >= _alloc) std::cout << "WARNING: TRIED TO WRITE OUT OF BOUNDS";
+#endif
+	memcpy(_buf + offset, ptr, std::min(offset + len, _alloc));
 }

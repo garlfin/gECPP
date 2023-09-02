@@ -28,7 +28,7 @@ struct VertexOut
     mat3 TBN;
 };
 
-#include "bob"
+#include "Include/demo.inc"
 
 out VertexOut Out;
 

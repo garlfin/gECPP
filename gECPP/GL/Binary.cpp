@@ -20,7 +20,11 @@ char* ReadString(u8*& ptr)
 u8* ReadFile(const char* name, u32& length, bool binary)
 {
 	FILE* file = fopen(name, "rb");
-	if(!file) return nullptr;
+	if(!file)
+	{
+		std::cout << "Could not find file: " << name << '\n';
+		return nullptr;
+	}
 
 	fseek(file, 0, SEEK_END);
 	length = ftell(file);
@@ -36,9 +40,26 @@ u8* ReadFile(const char* name, u32& length, bool binary)
 
 size_t strlenc(const char* str, char d)
 {
-	const char* s;
-	for(s = str; *s != d; s++) if(!*s) return s - str; // no clue why i need this, i was playing around...
+	u64 i = 0;
+	for(; str[i] && str[i] != d; i++);
+	return i;
+}
+
+size_t strlencLast(const char* str, char c, char d)
+{
+	const char* end = str + strlenc(str, d);
+	const char* s = end;
+	for(; s > str && *s != c; s--);
 	return s - str;
+}
+
+char* strdupc(const char* str, char d)
+{
+	size_t len = strlenc(str, d);
+	if(!len) return nullptr;
+	char* newStr = new char[len + 1];
+	newStr[len] = 0;
+	return newStr;
 }
 
 const char* IncrementLine(const char* str, char d)
@@ -68,10 +89,11 @@ void SerializationBuffer::PushString(const char* ptr)
 	PushPtr(ptr, len);
 }
 
-void SerializationBuffer::StrCat(const char* str, char d)
+void SerializationBuffer::StrCat(const char* str, char d, u8 offset)
 {
-	if(!str) return;
+	if(!str || !*str) return;
 	u32 strLen = strlenc(str, d);
+	if(str[strLen - 1]) strLen += offset;
 	u64 last = MAX(_size, 1);
 
 	Realloc(last + strLen);
@@ -94,11 +116,4 @@ void SerializationBuffer::FromFile(const char* file, bool binary)
 
 	fseek(fstream, 0, SEEK_SET);
 	fread(_buf + preSize, length, 1, fstream);
-}
-
-void SerializationBuffer::SafeMemCpy(const u8* ptr, u64 len, u64 offset)
-{
-	if(_buf + offset + len >= _buf + _alloc)
-		GE_FAIL("WROTE OUT OF BOUNDS");
-	memcpy(_buf + offset, ptr, len);
 }
