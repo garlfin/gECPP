@@ -3,7 +3,7 @@
 #include "GLMath.h"
 
 #define NODISCARD [[nodiscard]]
-#define ALWAYS_INLINE __attribute__((always_inline))
+#define ALWAYS_INLINE __attribute__((always_inline)) inline
 
 #define GE_FAIL(ERR) { std::cout << ERR << std::endl; exit(-1); }
 #define GE_ASSERT(COND, ERR) if(!(COND)) GE_FAIL(ERR);

@@ -1,5 +1,5 @@
 #pragma once
-#include <GL/gl.h>
+#include <GL/GL.h>
 #include <utility>
 #include "GLAD/glad.h"
 
@@ -41,7 +41,7 @@ namespace GL
 		Shader(gE::Window*, const char* v, const char* f, const PreprocessorPair* = nullptr, u8 = 0);
 		Shader(gE::Window*, const ShaderStage& v, const ShaderStage& f);
 
-		inline void Bind() const override { glUseProgram(ID); }
+		ALWAYS_INLINE void Bind() const override { glUseProgram(ID); }
 
 		ALWAYS_INLINE void GetUniform(const char* name) const { glGetUniformLocation(ID, name); }
 		ALWAYS_INLINE void SetUniform(u8 loc, u32 val) const { glProgramUniform1ui(ID, loc, val); }
@@ -52,13 +52,13 @@ namespace GL
 		ALWAYS_INLINE void SetUniform(u8 loc, const gl::vec4& val) const { glProgramUniform4fv(ID, loc, 1, (GLfloat*) &val); }
 		void SetUniform(u8 loc, const Texture*, u8 slot) const;
 
-		inline ~Shader() override { glDeleteProgram(ID); }
+		~Shader() override { glDeleteProgram(ID); }
 	};
 
 	class ComputeShader final : public Shader
 	{
 		ComputeShader(gE::Window* window, const char* src, const PreprocessorPair* pair = nullptr, u8 count = 0) : Shader(window, src, pair, count) {};
-		inline void Dispatch(u16 x, u16 y, u16 z) const { Bind(); glDispatchCompute(x, y, z); }
+		ALWAYS_INLINE void Dispatch(u16 x, u16 y, u16 z) const { Bind(); glDispatchCompute(x, y, z); }
 	};
 
 	class ShaderStage final : public Asset
@@ -67,7 +67,7 @@ namespace GL
 		ShaderStage(gE::Window*, ShaderStageType, const char*, const PreprocessorPair*, u8);
 
 		inline void Bind() const override {}
-		inline void Attach(Shader* s) const { glAttachShader(s->Get(), ID); }
+		ALWAYS_INLINE void Attach(Shader* s) const { glAttachShader(s->Get(), ID); }
 
 		~ShaderStage() final { glDeleteShader(ID); }
 	};

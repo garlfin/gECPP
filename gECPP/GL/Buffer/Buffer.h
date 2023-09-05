@@ -1,6 +1,6 @@
 #pragma once
 #include "GLAD/glad.h"
-#include "GL/GL.h"
+#include "GL/gl.h"
 #include <type_traits>
 #include <iostream>
 

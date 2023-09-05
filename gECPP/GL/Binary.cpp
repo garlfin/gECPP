@@ -35,6 +35,8 @@ u8* ReadFile(const char* name, u32& length, bool binary)
 	fseek(file, 0, SEEK_SET);
 	fread(bin, length, 1, file);
 
+	fclose(file);
+
 	return bin;
 }
 
@@ -47,10 +49,9 @@ size_t strlenc(const char* str, char d)
 
 size_t strlencLast(const char* str, char c, char d)
 {
-	const char* end = str + strlenc(str, d);
-	const char* s = end;
-	for(; s > str && *s != c; s--);
-	return s - str;
+	u64 i = 0, l = 0;
+	for(; str[i] && str[i] != d; i++) if(str[i] == c) l = i;
+	return l;
 }
 
 char* strdupc(const char* str, char d)
@@ -84,7 +85,7 @@ void SerializationBuffer::Realloc(u64 newSize)
 
 void SerializationBuffer::PushString(const char* ptr)
 {
-	u8 len = MIN(strlen(ptr), UINT8_MAX);
+	u8 len = ptr ? MIN(strlen(ptr), UINT8_MAX) : 0;
 	Push(len);
 	PushPtr(ptr, len);
 }

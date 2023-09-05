@@ -36,9 +36,9 @@ void TransformUV(const aiVector3D& s, aiVector2D& v)
 }
 
 template<unsigned int aiMesh::* COUNT_OFFSET, typename INDIVIDUAL_TYPE, typename T, T* aiMesh::* DATA_OFFSET, typename I = T, TransformFunc<T, I> F = nullptr>
-void CreateField(gETF::VertexField& field, aiMesh** source, u8 count, const char* name)
+void CreateField(u8 index, gETF::VertexField& field, aiMesh** source, u8 count, const char* name)
 {
-	field.Index = 0;
+	field.Index = index;
 	field.Name = strcpy(new char[strlen(name) + 1], name);
 	field.Type = GLType<INDIVIDUAL_TYPE>;
 
@@ -61,12 +61,18 @@ void CreateField(gETF::VertexField& field, aiMesh** source, u8 count, const char
 		data += meshCount;
 	}
 }
-
+#include "iostream"
+#include "chrono"
+using namespace std::chrono;
+#define TIME std::cout << duration_cast<microseconds>(high_resolution_clock::now() - t1).count() << " microseconds.\n"; t1 = high_resolution_clock::now();
 int main()
 {
-	Assimp::Importer importer;
+	time_point<high_resolution_clock> t1 = high_resolution_clock::now();
 
+	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile("cube.dae", IMPORT_FLAGS);
+
+	TIME;
 
 	auto* submeshCount = new u8[scene->mNumMeshes] {};
 	u8 realMeshCount = 0;
@@ -96,17 +102,17 @@ int main()
 		aiMesh** sourceMesh = &scene->mMeshes[mI];
 		u32 subCount = submeshCount[i];
 
-		mesh.TriangleMode = TRIANGLE_MODE_SIMPLE;
+		mesh.TriangleMode = gETF::TriangleMode::Simple;
+		CreateField<&aiMesh::mNumFaces, u32, aiFace, &aiMesh::mFaces, aiVector3t<u32>, TransformFace>(0, mesh.Triangles, sourceMesh, subCount, "TRI");
 
-		mesh.FieldCount = 5; // POS UV NOR TAN TRI
-		mesh.Fields = new gETF::VertexField[5];
+		mesh.FieldCount = 4; // POS UV NOR TAN
+		mesh.Fields = new gETF::VertexField[mesh.FieldCount];
 
 		// I may have overcomplicated things
-		CreateField<&aiMesh::mNumVertices, float, aiVector3D, &aiMesh::mVertices>(mesh.Fields[0], sourceMesh, subCount, "POS");
-		CreateField<&aiMesh::mNumVertices, float, aiVector3D, &aiMesh::FirstMap, aiVector2D, TransformUV>(mesh.Fields[1], sourceMesh, subCount, "UV");
-		CreateField<&aiMesh::mNumVertices, float, aiVector3D, &aiMesh::mNormals>(mesh.Fields[2], sourceMesh, subCount, "NOR");
-		CreateField<&aiMesh::mNumVertices, float, aiVector3D, &aiMesh::mTangents>(mesh.Fields[3], sourceMesh, subCount, "TAN");
-		CreateField<&aiMesh::mNumFaces, u32, aiFace, &aiMesh::mFaces, aiVector3t<u32>, TransformFace>(mesh.Fields[4], sourceMesh, subCount, "TRI");
+		CreateField<&aiMesh::mNumVertices, float, aiVector3D, &aiMesh::mVertices>(0, mesh.Fields[0], sourceMesh, subCount, "POS");
+		CreateField<&aiMesh::mNumVertices, float, aiVector3D, &aiMesh::FirstMap, aiVector2D, TransformUV>(1, mesh.Fields[1], sourceMesh, subCount, "UV");
+		CreateField<&aiMesh::mNumVertices, float, aiVector3D, &aiMesh::mNormals>(2, mesh.Fields[2], sourceMesh, subCount, "NOR");
+		CreateField<&aiMesh::mNumVertices, float, aiVector3D, &aiMesh::mTangents>(3, mesh.Fields[3], sourceMesh, subCount, "TAN");
 
 		mesh.MaterialCount = submeshCount[i];
 		mesh.Materials = new gETF::MaterialSlot[submeshCount[i]];
@@ -120,13 +126,15 @@ int main()
 			triOffset += mat.Count = sourceMesh[m]->mNumFaces;
 		}
 	}
-
+	TIME;
 	gETF::SerializationBuffer buf{};
 	file.Deserialize(buf);
+
 
 	FILE* output = fopen("cube.gETF", "wb");
 	fwrite(buf.Data(), buf.Length(), 1, output);
 	fclose(output);
+	TIME;
 
 	return 0;
 }

@@ -11,7 +11,7 @@
 #define NODISCARD [[nodiscard]]
 #endif
 #ifndef ALWAYS_INLINE
-#define ALWAYS_INLINE __attribute__((always_inline))
+#define ALWAYS_INLINE __attribute__((always_inline)) inline
 #endif
 
 namespace gETF { struct Serializable; }
@@ -132,6 +132,7 @@ inline u8* ReadFile(const char* name, bool binary = false)
 template<class T>
 void gETF::SerializationBuffer::PushPtr(T* t, u32 count)
 {
+	if(!count) return;
 	if constexpr (std::is_base_of_v<Serializable, T>)
 		for (u32 i = 0; i < count; i++) t[i].Deserialize(*this);
 	else

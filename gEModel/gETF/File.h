@@ -1,14 +1,9 @@
+#pragma once
+
 #include <GL/GLMath.h>
 #include "Prototype.h"
 
 #define GETF_VERSION 1
-#define MIN(x, y) ((x) < (y) ? (x) : (y))
-#define MAX(x, y) ((x) > (y) ? (x) : (y))
-#define TRIANGLE_MODE_SIMPLE 0
-#define TRIANGLE_MODE_COMPLEX 1
-
-#define NODISCARD [[nodiscard]]
-#define ALWAYS_INLINE __attribute__((always_inline))
 
 namespace gETF
 {
@@ -29,16 +24,16 @@ namespace gETF
 	{
 		SERIALIZABLE_PROTO;
 
-		const char* Name;
+		const char* Name = nullptr;
 
-		u8 Index;
+		u8 Index = 0;
 
-		u32 Type;
-		u8 TypeCount;
+		u32 Type = 0;
+		u8 TypeCount = 0;
 
-		u32 Count;
+		u32 Count = 0;
 
-		void* Data;
+		void* Data = nullptr;
 
 		~VertexField()
 		{
@@ -56,14 +51,22 @@ namespace gETF
 		u32 Count;
 	};
 
+	enum class TriangleMode : u8
+	{
+		None,
+		Simple,
+		Complex
+	};
+
 	struct Mesh : public Serializable
 	{
 		SERIALIZABLE_PROTO;
 
 		u8 MaterialCount;
 		u8 FieldCount;
-		u8 TriangleMode;
+		TriangleMode TriangleMode;
 
+		VertexField Triangles;
 		VertexField* Fields;
 		MaterialSlot* Materials;
 
@@ -86,4 +89,6 @@ namespace gETF
 			delete[] Meshes;
 		}
 	};
+
+	void Read(const char*, Header&);
 }

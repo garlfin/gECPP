@@ -5,6 +5,8 @@
 #include <iostream>
 #include "../gETF.h"
 #include "GL/Binary.h"
+#include "File.h"
+
 
 
 /*
@@ -30,7 +32,7 @@ namespace gETF
 	void Header::Serialize(u8*& ptr)
 	{
 		char magic[4];
-		Read<char, 4>(ptr, magic);
+		::Read<char, 4>(ptr, magic);
 
 		if(!StrCmp<4>(magic, "gETF"))
 		{
@@ -38,10 +40,10 @@ namespace gETF
 			return;
 		}
 
-		u8 version = Read<u8>(ptr);
-		MeshCount = Read<u8>(ptr);
+		u8 version = ::Read<u8>(ptr);
+		MeshCount = ::Read<u8>(ptr);
 		Meshes = new Mesh[MeshCount];
-		Read<Mesh>(ptr, Meshes, MeshCount);
+		::Read<Mesh>(ptr, Meshes, MeshCount);
 	}
 
 	void Mesh::Deserialize(gETF::SerializationBuffer& buf) const
@@ -50,6 +52,8 @@ namespace gETF
 		buf.Push(FieldCount);
 		buf.PushPtr(Fields, FieldCount);
 		buf.Push(TriangleMode);
+		if(TriangleMode == TriangleMode::Simple)
+			buf.Push(Triangles);
 		buf.Push(MaterialCount);
 		buf.PushPtr(Materials, MaterialCount);
 	}
@@ -57,19 +61,20 @@ namespace gETF
 	void Mesh::Serialize(u8*& ptr)
 	{
 		char magic[4];
-		Read<char, 4>(ptr, magic);
+		::Read<char, 4>(ptr, magic);
 
 		if(!StrCmp<4>(magic, "MESH")) std::cout << "Invalid File!\n";
 
-		FieldCount = Read<u8>(ptr);
+		FieldCount = ::Read<u8>(ptr);
 		Fields = new VertexField[FieldCount];
-		Read(ptr, Fields, FieldCount);
+		::Read(ptr, Fields, FieldCount);
 
-		TriangleMode = Read<u8>(ptr);
+		TriangleMode = ::Read<enum TriangleMode>(ptr);
+		if(TriangleMode == TriangleMode::Simple) Triangles.Serialize(ptr);
 
-		MaterialCount = Read<u8>(ptr);
+		MaterialCount = ::Read<u8>(ptr);
 		Materials = new MaterialSlot[MaterialCount];
-		Read(ptr, Materials, MaterialCount);
+		::Read(ptr, Materials, MaterialCount);
 	}
 
 	void VertexField::Deserialize(gETF::SerializationBuffer& buf) const
@@ -85,14 +90,14 @@ namespace gETF
 	void VertexField::Serialize(u8*& ptr)
 	{
 		Name = ReadString(ptr);
-		Index = Read<u8>(ptr);
-		Type = Read<u32>(ptr);
-		TypeCount = Read<u8>(ptr);
-		Count = Read<u32>(ptr);
+		Index = ::Read<u8>(ptr);
+		Type = ::Read<u32>(ptr);
+		TypeCount = ::Read<u8>(ptr);
+		Count = ::Read<u32>(ptr);
 
 		size_t bufLen = Count * TypeCount * GetSizeOfGLType(Type);
 		Data = new u8[bufLen];
-		Read<u8>(ptr, (u8*) Data, bufLen);
+		::Read<u8>(ptr, (u8*) Data, bufLen);
 	}
 
 	void MaterialSlot::Deserialize(gETF::SerializationBuffer& buf) const
@@ -104,8 +109,16 @@ namespace gETF
 
 	void MaterialSlot::Serialize(u8*& ptr)
 	{
-		MaterialIndex = Read<u8>(ptr);
-		Offset = Read<u32>(ptr);
-		Count = Read<u32>(ptr);
+		MaterialIndex = ::Read<u8>(ptr);
+		Offset = ::Read<u32>(ptr);
+		Count = ::Read<u32>(ptr);
+	}
+
+	void Read(const char* file, Header& header)
+	{
+		u8* src = ReadFile(file, true);
+		u8* srcCpy = src;
+		header.Serialize(srcCpy);
+		delete[] src;
 	}
 }

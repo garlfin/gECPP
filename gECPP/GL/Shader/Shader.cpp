@@ -52,7 +52,6 @@ namespace GL
 
 		glShaderSource(ID, 1, &bufPtr, nullptr);
 		glCompileShader(ID);
-		std::cout << "SOURCE:\n" << bufPtr << std::endl;
 		GetShaderStatus(*this, bufPtr);
 	}
 
