@@ -6,7 +6,9 @@
 
 namespace gE
 {
-	Entity::Entity(Window* w, Entity* o, const char* n) : _window(w), _parent(o), _name(n ? strdup(n) : nullptr), _transform(this)
+	Entity::Entity(Window* w, Entity* o, const char* n) :
+		_window(w), _parent(o), _name(n ? strdup(n) : nullptr),
+		_transform(this)
 	{
 
 	}

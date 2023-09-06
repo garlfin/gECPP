@@ -27,7 +27,7 @@ namespace GL
 			const VAOField& field = settings->Fields[i];
 			glEnableVertexArrayAttrib(ID, field.Index);
 			glVertexArrayAttribBinding(ID, field.Index, field.Buffer);
-			glVertexArrayAttribFormat(ID, field.Index, GetSizeOfGLType(field.Type) * field.TypeCount, field.Type, GL_FALSE, field.Offset);
+			glVertexArrayAttribFormat(ID, field.Index, field.TypeCount, field.Type, GL_FALSE, field.Offset);
 		}
 	}
 

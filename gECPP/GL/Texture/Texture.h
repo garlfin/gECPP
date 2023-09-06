@@ -58,17 +58,17 @@ namespace GL
 {
 	class Texture : public Asset
 	{
+	 public:
+		NODISCARD ALWAYS_INLINE uint32_t Use(uint32_t slot) const { glBindTextureUnit(slot, ID); return slot; }
+		NODISCARD ALWAYS_INLINE TextureSize GetSize(u8 mip = 0) const { return TextureSize(Size.x >> mip, Size.y >> mip); }
+
+		~Texture() override { glDeleteTextures(1, &ID); }
+
 	 protected:
 		Texture(gE::Window* window, GLuint target, TextureSize, u8, bool linear = true);
 
 		const TextureSize Size;
 		const uint8_t Mips;
-
-	 public:
-		ALWAYS_INLINE uint32_t Use(uint32_t slot) const { glBindTextureUnit(slot, ID); return slot; }
-		NODISCARD ALWAYS_INLINE TextureSize GetSize() const { return Size; }
-
-		~Texture() override { glDeleteTextures(1, &ID); }
 	};
 
 	class Texture2D final : public Texture

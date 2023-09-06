@@ -12,6 +12,7 @@ namespace GL
 		ALWAYS_INLINE void Bind() const final;
 		virtual void Draw(u8 index, u16 instanceCount = 1) const;
 
+		NODISCARD ALWAYS_INLINE const VAOSettings* GetSettings() const { return _settings; }
 		ALWAYS_INLINE void ReplaceData(u8 buf, u32 count, void* data);
 		// void Realloc(u32 vertexCount, void* data = nullptr); // TODO
 

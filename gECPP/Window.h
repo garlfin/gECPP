@@ -25,6 +25,7 @@ namespace gE
 		virtual void OnInit() = 0;
 		virtual void OnUpdate(float) = 0;
 		virtual void OnRender(float) = 0;
+		virtual void OnDestroy() = 0;
 
 		gl::u16vec2 _size;
 		const char* _name;
