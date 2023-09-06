@@ -16,15 +16,18 @@ namespace gE
 
 		NODISCARD ALWAYS_INLINE Window* GetWindow() const { return _window; }
 		NODISCARD ALWAYS_INLINE Transform& GetTransform() { return _transform; }
+		NODISCARD ALWAYS_INLINE const Transform& GetTransform() const { return _transform; }
 		NODISCARD ALWAYS_INLINE const char* GetName() const { return _name; }
 		NODISCARD ALWAYS_INLINE Entity* GetParent() { return _parent; }
 
-		inline virtual void OnInit() {};
-		inline virtual void OnUpdate(float delta) { _transform.OnUpdate(delta); }
-		inline virtual void OnRender(float delta) {}
-		inline virtual void OnDestroy() {};
+		virtual void OnInit() {};
+		virtual void OnUpdate(float delta) {  }
+		virtual void OnRender(float delta) { _transform.OnRender(delta); }
+		virtual void OnDestroy() {};
 
 		~Entity() { delete[] _name; }
+	 protected:
+		NODISCARD ALWAYS_INLINE gl::mat4& GetModel() { return _transform._model; }
 
 	 private:
 		Window* const _window;

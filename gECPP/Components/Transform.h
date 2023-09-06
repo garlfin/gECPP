@@ -31,9 +31,14 @@ namespace gE
 		explicit Transform(Entity* o) : Component(o) {}
 		void SetRotation(const gl::vec3& r);
 		void Set(const TransformData& d);
+		void Set(const Transform& d);
+
+		gl::mat4 GetParentTransform();
 
 		void OnUpdate(float) override {};
-		void OnRender(float) override {};
+		void OnRender(float) override;
+
+		NODISCARD ALWAYS_INLINE const gl::mat4& Model() const { return _model; }
 
 		union
 		{
@@ -42,5 +47,10 @@ namespace gE
 		};
 		gl::vec3 Scale = gl::vec3(1.f);
 		gl::quaternion Rotation = gl::quaternion::identity;
+
+		friend class Entity;
+
+	 private:
+		gl::mat4 _model;
 	};
 }

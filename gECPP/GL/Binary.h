@@ -25,9 +25,12 @@ namespace gETF { struct Serializable; }
 #endif
 #define BIT_SIZE(X) (sizeof(decltype(X)) * 8)
 
+#define GET(TYPE, ACCESSOR, FIELD) NODISCARD ALWAYS_INLINE TYPE Get##ACCESSOR() const { return FIELD; }
+#define SET(TYPE, ACCESSOR, FIELD) ALWAYS_INLINE void Set##ACCESSOR(TYPE ACCESSOR) { FIELD = ACCESSOR; }
+
 #define GET_SET(TYPE, ACCESSOR, FIELD) \
-	NODISCARD ALWAYS_INLINE TYPE Get##ACCESSOR() const { return FIELD; } \
-	ALWAYS_INLINE void Set##ACCESSOR(TYPE ACCESSOR) { FIELD = ACCESSOR; }
+	GET(TYPE, ACCESSOR, FIELD)	\
+	SET(TYPE, ACCESSOR, FIELD)
 
 size_t strlenc(const char*, char);
 size_t strlencLast(const char*, char, char = 0);

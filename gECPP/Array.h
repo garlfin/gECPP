@@ -29,6 +29,7 @@ class Array
 	u64 _size;
 	T* _t;
 };
+
 template<typename T>
 Array<T>& Array<T>::operator=(const Array&& o) noexcept
 {

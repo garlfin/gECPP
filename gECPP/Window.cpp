@@ -60,7 +60,5 @@ gE::DefaultPipelineBuffers::DefaultPipelineBuffers(Window* window)
 
 void gE::DefaultPipelineBuffers::UpdateCamera(const gE::Camera& cam) const
 {
-	GL::Camera cam2;
-	cam.GetGLCamera(cam2);
-	UpdateCamera(cam2);
+	UpdateCamera(cam.GetGLCamera());
 }
