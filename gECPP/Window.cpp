@@ -51,3 +51,16 @@ void Window::Run()
 	}
 }
 
+gE::DefaultPipelineBuffers::DefaultPipelineBuffers(Window* window)
+	: Scene(window), Camera(window)
+{
+	Scene.Bind(GL::BufferTarget::Uniform, 0);
+	Camera.Bind(GL::BufferTarget::Uniform, 1);
+}
+
+void gE::DefaultPipelineBuffers::UpdateCamera(const gE::Camera& cam) const
+{
+	GL::Camera cam2;
+	cam.GetGLCamera(cam2);
+	UpdateCamera(cam2);
+}

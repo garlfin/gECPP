@@ -47,6 +47,7 @@ namespace GL
 		sourceBuf.StrCat(VERSION_DIRECTIVE);
 		CompileDirectives(directives, dLen, sourceBuf);
 		CompileIncludes(file, sourceBuf);
+		sourceBuf.Push('\0');
 
 		char* bufPtr = (char*) sourceBuf.Data();
 
@@ -115,9 +116,16 @@ namespace GL
 
 			buf.StrCat(DEFINE_DIRECTIVE);
 			buf.StrCat(directive.Name);
-			buf.StrCat(" ");
+
+			if(!directive.Value)
+			{
+				buf.Push('\n');
+				continue;
+			}
+
+			buf.Push(' ');
 			buf.StrCat(directive.Value);
-			buf.StrCat("\n");
+			buf.Push('\n');
 		}
 	}
 
@@ -171,6 +179,15 @@ namespace GL
 
 		std::cout << "Invalid delimiter: " << *include << '\n';
 		return nullptr;
+	}
+
+	PreprocessorPair::PreprocessorPair(const char* n, const char* v)
+	{
+		u32 totalLength;
+		u32 nameLength;
+		u32 valueLength;
+
+
 	}
 }
 

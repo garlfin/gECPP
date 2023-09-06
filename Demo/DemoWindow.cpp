@@ -31,6 +31,8 @@ void DemoWindow::OnInit()
 {
 	glClearColor(0.2, 0.2, 1, 1);
 
+	PipelineBuffers = new gE::DefaultPipelineBuffers(this);
+
 	_testShader = new GL::Shader(this, "Resource/Shader/uber.vert", "Resource/Shader/uber.frag");
 	_testShader->Bind();
 

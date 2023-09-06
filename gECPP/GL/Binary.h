@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "GLMath.h"
+#include "Math.h"
 
 
 #ifndef NODISCARD
@@ -24,6 +24,10 @@ namespace gETF { struct Serializable; }
 #define MAX(X, Y) ((X) > (Y) ? (X) : (Y))
 #endif
 #define BIT_SIZE(X) (sizeof(decltype(X)) * 8)
+
+#define GET_SET(TYPE, ACCESSOR, FIELD) \
+	NODISCARD ALWAYS_INLINE TYPE Get##ACCESSOR() const { return FIELD; } \
+	ALWAYS_INLINE void Set##ACCESSOR(TYPE ACCESSOR) { FIELD = ACCESSOR; }
 
 size_t strlenc(const char*, char);
 size_t strlencLast(const char*, char, char = 0);

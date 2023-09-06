@@ -3,38 +3,31 @@ layout(location = 1) in vec2 UV;
 layout(location = 2) in vec3 Normal;
 layout(location = 3) in vec3 Tangent;
 
-#define MAX_OBJECT 64
-
-struct Camera
-{
-    vec2 ClipPlanes;
-    float FOV;
-
-    mat4 View;
-    mat4 Projection;
-};
-
-struct Object
-{
-    uint InstanceCount;
-    mat4 Model[MAX_OBJECT];
-    mat3 Normal[MAX_OBJECT];
-};
+#include "Include/Camera.glsl"
+#include "Include/Scene.glsl"
 
 struct VertexOut
 {
-    vec3 FragPos;
-    vec2 UV;
-    mat3 TBN;
+vec3 FragPos;
+vec2 UV;
+mat3 TBN;
 };
-
-#include "Include/demo.inc"
 
 out VertexOut Out;
 
 void main()
 {
-    Out.FragPos = Position;
+    mat4 ViewProjection = Camera.Projection * Camera.View[ViewIndex];
+
+    gl_Position = ViewProjection * Scene.Model[ModelIndex] * vec4(Position, 1);
+    Out.FragPos = gl_Position.xyz;
+
     Out.UV = UV;
-    Out.TBN = mat3(Tangent, normalize(cross(Tangent, Normal)), Normal);
+
+    vec3 v_Normal, v_Tangent, v_Bitangent;
+    v_Normal = normalize(Scene.Normal[ModelIndex] * Normal);
+    v_Tangent = normalize(Scene.Normal[ModelIndex] * Tangent);
+    v_Bitangent = normalize(cross(v_Tangent, v_Normal));
+
+    Out.TBN = mat3(v_Tangent, v_Bitangent, v_Normal);
 }

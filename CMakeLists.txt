@@ -41,4 +41,4 @@ target_link_libraries(gECPP GLAD GLFW GETF)
 # VOXELDEMO
 add_executable(VoxelDemo Demo/main.cpp Demo/DemoWindow.h Demo/DemoWindow.cpp)
 target_link_libraries(VoxelDemo gECPP)
-add_custom_command(TARGET VoxelDemo POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/Resource/ ${CMAKE_BINARY_DIR}/Resource/)
+add_custom_command(TARGET VoxelDemo PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/Resource/ ${CMAKE_BINARY_DIR}/Resource/)

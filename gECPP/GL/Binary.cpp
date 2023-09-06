@@ -3,7 +3,6 @@
 //
 
 #include "Binary.h"
-#include "GL.h"
 #include "iostream"
 
 using namespace gETF;
@@ -92,14 +91,13 @@ void SerializationBuffer::PushString(const char* ptr)
 
 void SerializationBuffer::StrCat(const char* str, char d, u8 offset)
 {
-	if(!str || !*str) return;
-	u32 strLen = strlenc(str, d);
-	if(str[strLen - 1]) strLen += offset;
-	u64 last = MAX(_size, 1);
+	if(!str) return;
 
-	Realloc(last + strLen);
-	memcpy((char*) _buf + last - 1, str, strLen);
-	_buf[_size - 1] = 0;
+	u32 strLen = strlenc(str, d) + offset;
+	u64 size = Length();
+
+	Realloc(size + strLen);
+	memcpy(_buf + size, str, strLen);
 }
 
 void SerializationBuffer::FromFile(const char* file, bool binary)

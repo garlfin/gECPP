@@ -61,18 +61,26 @@ void CreateField(u8 index, gETF::VertexField& field, aiMesh** source, u8 count, 
 		data += meshCount;
 	}
 }
+
+#ifdef DEBUG
 #include "iostream"
 #include "chrono"
 using namespace std::chrono;
-#define TIME std::cout << duration_cast<microseconds>(high_resolution_clock::now() - t1).count() << " microseconds.\n"; t1 = high_resolution_clock::now();
+#define TIME() std::cout << duration_cast<microseconds>(high_resolution_clock::now() - t1).count() << " microseconds.\n"; t1 = high_resolution_clock::now();
+#define TIME_INIT() time_point<high_resolution_clock> t1 = high_resolution_clock::now();
+#else
+#define TIME()
+#define TIME_INIT()
+#endif
+
 int main()
 {
-	time_point<high_resolution_clock> t1 = high_resolution_clock::now();
+	TIME_INIT();
 
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile("cube.dae", IMPORT_FLAGS);
 
-	TIME;
+	TIME();
 
 	auto* submeshCount = new u8[scene->mNumMeshes] {};
 	u8 realMeshCount = 0;
@@ -126,7 +134,7 @@ int main()
 			triOffset += mat.Count = sourceMesh[m]->mNumFaces;
 		}
 	}
-	TIME;
+	TIME();
 	gETF::SerializationBuffer buf{};
 	file.Deserialize(buf);
 
@@ -134,7 +142,7 @@ int main()
 	FILE* output = fopen("cube.gETF", "wb");
 	fwrite(buf.Data(), buf.Length(), 1, output);
 	fclose(output);
-	TIME;
+	TIME();
 
 	return 0;
 }

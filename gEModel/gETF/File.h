@@ -1,6 +1,6 @@
 #pragma once
 
-#include <GL/GLMath.h>
+#include <GL/Math.h>
 #include "Prototype.h"
 
 #define GETF_VERSION 1

@@ -10,18 +10,10 @@ namespace GL
 
 	struct PreprocessorPair
 	{
-		PreprocessorPair(const char* n, const char* v)
-		: NameLength(strlen(n)), ValueLength(strlen(v)), TotalLength(NameLength + ValueLength),
-		Name(strcpy(new char[TotalLength + 2], n)), Value(strcpy(Name + NameLength + 1, v))
-		{
-		}
+		explicit PreprocessorPair(const char* n, const char* v = nullptr);
 
-		const u16 NameLength;
-		const u16 ValueLength;
-		const u16 TotalLength;
-
-		char* const Name;
-		char* const Value;
+		char* Name;
+		char* Value;
 
 		~PreprocessorPair() { delete[] Name; }
 	};

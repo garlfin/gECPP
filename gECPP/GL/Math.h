@@ -27,7 +27,7 @@
 	typedef MathFU::Vector<TYPE, 3> p##NAME##vec3; \
 	typedef MathFU::Vector<TYPE, 4> p##NAME##vec4;
 
-namespace gl
+namespace GL
 {
 	VEC_ALIAS(float, );
 
@@ -77,3 +77,7 @@ constexpr u8 GetSizeOfGLType(u32 t)
 	if(t == GL_FLOAT) return 4;
 	return 1 << ((t - 0x1400) >> 1);
 }
+
+namespace gl = GL;
+
+

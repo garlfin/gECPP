@@ -15,7 +15,7 @@ namespace GL
 		Buffer = GL_ARRAY_BUFFER
 	};
 
-	template<typename T, bool DYNAMIC = false>
+	template<typename T = u8, bool DYNAMIC = false>
 	class Buffer : public Asset
 	{
 	 public:
@@ -30,19 +30,19 @@ namespace GL
 		};
 
 		template<typename I>
-		ALWAYS_INLINE void ReplaceData(I const* data, uint32_t count = 1, uint32_t offset = 0)
+		ALWAYS_INLINE void ReplaceData(I const* data, uint32_t count = 1, uint32_t offset = 0) const
 		{
 			static constexpr unsigned SIZE_T = sizeof(std::conditional_t<std::is_same_v<I, void>, uint8_t, I>);
 			if (!data || !count) return;
 			glNamedBufferSubData(ID, offset, SIZE_T * count, data);
 		}
 
-		ALWAYS_INLINE void Bind(BufferTarget target, uint32_t slot)
+		ALWAYS_INLINE void Bind(BufferTarget target, uint32_t slot) const
 		{
 			glBindBufferBase((GLenum)target, slot, ID);
 		}
 
-		ALWAYS_INLINE void Bind(BufferTarget target)
+		ALWAYS_INLINE void Bind(BufferTarget target) const
 		{
 			glBindBuffer((GLenum)target, ID);
 		}
@@ -53,7 +53,7 @@ namespace GL
 		}
 
 		template<typename I>
-		void Realloc(uint32_t count, I* data = nullptr)
+		void Realloc(uint32_t count, I* data = nullptr) const
 		{
 			static constexpr unsigned SIZE_T = sizeof(std::conditional_t<std::is_same_v<I, void>, uint8_t, I>);
 			if constexpr(DYNAMIC) glNamedBufferData(ID, SIZE_T * count, data, GL_DYNAMIC_DRAW);

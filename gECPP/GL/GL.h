@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GLMath.h"
+#include "Math.h"
 
 #define NODISCARD [[nodiscard]]
 #define ALWAYS_INLINE __attribute__((always_inline)) inline
