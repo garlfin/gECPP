@@ -25,9 +25,14 @@ namespace gE
 			 std::iter_swap(f, vec::end() - 1);
 			 vec::erase(vec::end() - 1);
 		}
+
+		virtual void OnUpdate(float delta) { for(Component* component : *this) component->OnUpdate(delta); }
+		virtual void OnRender(float delta) { for(Component* component : *this) component->OnRender(delta); }
+
 	 private:
 		typedef std::vector<Component*> vec;
 		inline bool Contains(Component* v) { return std::find(vec::begin(), vec::end(), v) != vec::end(); }
 		Window* const _window;
 	};
 }
+

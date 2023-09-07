@@ -1,5 +1,4 @@
 #include "Window.h"
-#include "GL/GL.h"
 #include <GLAD/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
@@ -7,7 +6,7 @@
 using namespace gE;
 
 Window::Window(gl::u16vec2 size, const char* name) :
-	_size(size)
+	_size(size), Cameras(this), Assets(this)
 {
 	if(!glfwInit()) GE_FAIL("Failed to initialize GLFW.");
 

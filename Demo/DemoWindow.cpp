@@ -13,23 +13,22 @@
 
 using namespace VoxelDemo;
 
-void DefaultRenderPass(gE::Camera* cam)
+void DefaultRenderPass(gE::Window* window, gE::Camera* cam)
 {
 
 }
 
+
 class FlyCam : public gE::Entity
 {
  public:
-	FlyCam(gE::Window* window) : gE::Entity(window), Camera(this, gE::CameraSettings{{1280, 720}, {0.1f, 100.f}, DefaultRenderPass }, 60) {}
+	explicit FlyCam(gE::Window* window) : gE::Entity(window),
+		Camera(this, gE::CameraSettings{&window->CameraManager(), {1280, 720}, {0.1f, 100.f}, DefaultRenderPass}, 60)
+	{
+
+	}
 
 	gE::PerspectiveCamera Camera;
-
-	void OnRender(float delta) override
-	{
-		Entity::OnRender(delta);
-		Camera.OnRender(delta);
-	}
 };
 
 void DemoWindow::OnUpdate(float)
@@ -41,7 +40,7 @@ void DemoWindow::OnRender(float delta)
 {
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	_testMesh->OnRender(delta);
+	_testMesh->Draw(0);
 }
 
 void DemoWindow::OnInit()
@@ -57,13 +56,15 @@ void DemoWindow::OnInit()
 	gETF::Read("cube.gETF", file);
 
 	FlyCam cam(this);
-	cam.OnRender(0);
+	cam.Camera.OnRender(0);
 	PipelineBuffers->UpdateCamera(cam.Camera);
 
 	GL::Scene test{1, gl::mat4::Identity()};
 	PipelineBuffers->Scene.ReplaceData(&test);
 
-	_testMesh = new gE::MeshRenderer(this, GL::VAO::Create(this, new GL::Mesh(file.Meshes[0])));
+	_testMesh = Assets.Register(GL::VAO::Create(this, GL::Mesh(file.Meshes[0])));
+
+
 }
 
 void DemoWindow::OnDestroy()

@@ -20,6 +20,17 @@ namespace GL
 
 	struct BufferSettings
 	{
+		BufferSettings& operator=(const BufferSettings& o)
+		{
+			if(&o == this) return *this;
+
+			Data = nullptr;
+			Stride = o.Stride;
+			Count = o.Count;
+			Index = o.Index;
+			return *this;
+		}
+
 		u32 Count = 0;
 		u8 Stride = 0;
 		u8 Index = 0;

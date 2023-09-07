@@ -18,14 +18,12 @@ namespace VoxelDemo
 	 public:
 		DemoWindow(gl::u16vec2 size, const char* name = "VoxelDemo") : gE::Window(size, name) {};
 	 private:
-		virtual void OnInit();
-		virtual void OnUpdate(float);
-		virtual void OnRender(float);
-		virtual void OnDestroy();
+		void OnInit() override;
+		void OnUpdate(float) override;
+		void OnRender(float) override;
+		void OnDestroy() override;
 
-		gE::MeshRenderer* _testMesh;
+		GL::VAO* _testMesh;
 		GL::Shader* _testShader;
-
-
 	};
 }

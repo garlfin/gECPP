@@ -9,15 +9,15 @@
 
 namespace gE
 {
-	class MeshRenderer : public Entity
+	class MeshRenderer : public Component
 	{
 	 public:
-		MeshRenderer(gE::Window*, const GL::VAO* mesh, Entity* parent = nullptr, const char* = nullptr);
+		MeshRenderer(gE::Entity*, const GL::VAO* mesh);
 
 		void OnUpdate(float delta) override;
 		void OnRender(float delta) override;
 
-		NODISCARD ALWAYS_INLINE const GL::Mesh* GetMeshSettings() { return _mesh->GetSettings(); }
+		NODISCARD ALWAYS_INLINE const GL::Mesh& GetMeshSettings() { return _mesh->GetSettings(); }
 	 private:
 		const GL::VAO* _mesh;
 	};

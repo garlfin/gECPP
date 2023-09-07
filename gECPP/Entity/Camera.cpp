@@ -10,6 +10,7 @@ gE::Camera::Camera(gE::Entity* parent, const CameraSettings& settings) :
 	_postProcessPass(), _size(settings.Size)
 {
 	if(settings.PostProcess) _postProcessPass = *settings.PostProcess;
+	settings.Manager->Register(this);
 }
 
 void gE::Camera::OnRender(float delta)
@@ -17,7 +18,7 @@ void gE::Camera::OnRender(float delta)
 	_view = GetOwner()->GetTransform().Model().Inverse();
 	UpdateProjection();
 
-	_renderPass(this);
+	_renderPass(GetWindow(), this);
 
 	if(!_postProcessPass.Size()) return;
 }

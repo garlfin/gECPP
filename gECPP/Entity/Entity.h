@@ -21,8 +21,6 @@ namespace gE
 		NODISCARD ALWAYS_INLINE Entity* GetParent() { return _parent; }
 
 		virtual void OnInit() {};
-		virtual void OnUpdate(float delta) {  }
-		virtual void OnRender(float delta) { _transform.OnRender(delta); }
 		virtual void OnDestroy() {};
 
 		virtual ~Entity() { delete[] _name; }

@@ -13,21 +13,21 @@ vec2 UV;
 mat3 TBN;
 };
 
-out VertexOut Out;
+out VertexOut Vertex;
 
 void main()
 {
     mat4 ViewProjection = Camera.Projection * Camera.View[ViewIndex];
 
     gl_Position = ViewProjection * Scene.Model[ModelIndex] * vec4(Position, 1);
-    Out.FragPos = gl_Position.xyz;
+    Vertex.FragPos = gl_Position.xyz;
 
-    Out.UV = UV;
+    Vertex.UV = UV;
 
     vec3 v_Normal, v_Tangent, v_Bitangent;
     v_Normal = normalize(Scene.Normal[ModelIndex] * Normal);
     v_Tangent = normalize(Scene.Normal[ModelIndex] * Tangent);
     v_Bitangent = normalize(cross(v_Tangent, v_Normal));
 
-    Out.TBN = mat3(v_Tangent, v_Bitangent, v_Normal);
+    Vertex.TBN = mat3(v_Tangent, v_Bitangent, v_Normal);
 }
