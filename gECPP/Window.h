@@ -17,7 +17,10 @@ namespace gE
 		void Run();
 
 		NODISCARD ALWAYS_INLINE GLFWwindow* GLFWWindow() const { return _window; }
-		NODISCARD ALWAYS_INLINE ComponentManager& CameraManager() { return Cameras; }
+		GET(ComponentManager<Camera>&, Cameras, Cameras);
+		GET(AssetManager&, Assets, Assets);
+		GET(DefaultPipelineBuffers*, PipelineBuffers, PipelineBuffers);
+		GET(ComponentManager<Transform>&, Transforms, Transforms);
 
 		~Window();
 
@@ -29,7 +32,8 @@ namespace gE
 
 		DefaultPipelineBuffers* PipelineBuffers;
 		AssetManager Assets;
-		ComponentManager Cameras;
+		ComponentManager<Camera> Cameras;
+		ComponentManager<Transform> Transforms;
 
 	 private:
 		gl::u16vec2 _size;

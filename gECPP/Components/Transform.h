@@ -28,7 +28,7 @@ namespace gE
 			Set(d);
 		}
 
-		explicit Transform(Entity* o) : Component(o) {}
+		explicit Transform(Entity* o);
 		void SetRotation(const gl::vec3& r);
 		void Set(const TransformData& d);
 		void Set(const Transform& d);

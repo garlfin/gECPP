@@ -12,7 +12,7 @@ char VERSION_DIRECTIVE[] = "#version 460 core\n";
 
 namespace GL
 {
-	void CompileDirectives(const GL::PreprocessorPair* pairs, u8 count, gETF::SerializationBuffer&);
+	void CompileDirectives(const Array<PreprocessorPair>*, gETF::SerializationBuffer&);
 	void CompileIncludes(const char* file, gETF::SerializationBuffer&);
 	const char* GetIncludePath(const char* origin, const char* include);
 
@@ -25,11 +25,11 @@ namespace GL
 		SetUniform(loc, i32(tex->Use(slot)));
 	}
 
-	Shader::Shader(gE::Window* window, const char* v, const char* f, const PreprocessorPair* p, u8 c) : Asset(window)
+	Shader::Shader(gE::Window* window, const char* v, const char* f, const Array<PreprocessorPair>* p) : Asset(window)
 	{
 		ID = glCreateProgram();
 
-		ShaderStage frag(window, Fragment, f, p, c), vert(window, Vertex, v, p, c);
+		ShaderStage frag(window, Fragment, f, p), vert(window, Vertex, v, p);
 		frag.Attach(this);
 		vert.Attach(this);
 
@@ -38,14 +38,15 @@ namespace GL
 		GetShaderStatus(*this);
 	}
 
-	ShaderStage::ShaderStage(gE::Window* window, ShaderStageType type, const char* file, const PreprocessorPair* directives, u8 dLen) : Asset(window)
+	ShaderStage::ShaderStage(gE::Window* window, ShaderStageType type, const char* file, const Array<PreprocessorPair>* directives) : Asset(window)
 	{
 		ID = glCreateShader(type);
 
 		gETF::SerializationBuffer sourceBuf{};
 
 		sourceBuf.StrCat(VERSION_DIRECTIVE);
-		CompileDirectives(directives, dLen, sourceBuf);
+		sourceBuf.StrCat(ShaderStageDefine(type));
+		CompileDirectives(directives, sourceBuf);
 		CompileIncludes(file, sourceBuf);
 		sourceBuf.Push('\0');
 
@@ -68,11 +69,11 @@ namespace GL
 		GetShaderStatus(*this);
 	}
 
-	Shader::Shader(gE::Window* window, const char* src , const GL::PreprocessorPair* pairs, u8 count) : Asset(window)
+	Shader::Shader(gE::Window* window, const char* src, const Array<PreprocessorPair>* p) : Asset(window)
 	{
 		ID = glCreateProgram();
 
-		ShaderStage c(window, Compute, src, pairs, count);
+		ShaderStage c(window, Compute, src, p);
 		c.Attach(this);
 
 		glLinkProgram(ID);
@@ -108,11 +109,13 @@ namespace GL
 		return false;
 	}
 
-	void CompileDirectives(const PreprocessorPair* pairs, u8 count, gETF::SerializationBuffer& buf)
+	void CompileDirectives(const Array<PreprocessorPair>* pairs, gETF::SerializationBuffer& buf)
 	{
-		for(u8 i = 0; i < count; i++)
+		if(!pairs) return;
+
+		for(u64 i = 0; i < pairs->Size(); i++)
 		{
-			const PreprocessorPair& directive = pairs[i];
+			const PreprocessorPair& directive = (*pairs)[i];
 
 			buf.StrCat(DEFINE_DIRECTIVE);
 			buf.StrCat(directive.Name);
@@ -183,11 +186,28 @@ namespace GL
 
 	PreprocessorPair::PreprocessorPair(const char* n, const char* v)
 	{
-		u32 totalLength;
-		u32 nameLength;
-		u32 valueLength;
+		u32 nameLength = strlen(n);
+		u32 valueLength = strlen(v);
+		u32 totalLength = nameLength + valueLength + 2; // 2 null terminators
+		Name = new char[totalLength];
+		Value = Name + nameLength;
+		memcpy(Name, n, nameLength + 1);
+		memcpy(Value, v, valueLength + 1);
+	}
 
-
+	const char* ShaderStageDefine(ShaderStageType type)
+	{
+		switch(type)
+		{
+		case Fragment:
+			return "#define FRAGMENT_SHADER\n";
+		case Vertex:
+			return "#define VERTEX_SHADER\n";
+		case Compute:
+			return "#define COMPUTE_SHADER";
+		default:
+			return "";
+		}
 	}
 }
 

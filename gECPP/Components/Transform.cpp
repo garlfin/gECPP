@@ -4,6 +4,7 @@
 
 #include "Transform.h"
 #include <Entity/Entity.h>
+#include <Window.h>
 
 void gE::Transform::SetRotation(const gl::vec3& r)
 {
@@ -34,4 +35,10 @@ void gE::Transform::OnRender(float)
 {
 	_model = GetParentTransform();
 	_model *= gl::mat4::FromScaleVector(Scale) * Rotation.ToMatrix4() * gl::mat4::FromTranslationVector(Location);
+}
+
+gE::Transform::Transform(gE::Entity* o)
+	: Component(o)
+{
+	GetWindow()->GetTransforms().Register(this);
 }

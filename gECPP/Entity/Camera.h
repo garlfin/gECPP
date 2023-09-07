@@ -22,7 +22,6 @@ namespace gE
 
 	struct CameraSettings
 	{
-		ComponentManager* Manager;
 		GL::TextureSize Size = {0, 0};
 		ClipPlanes ClipPlanes = {0.1, 100};
 		RenderPass RenderPass = nullptr;
@@ -41,9 +40,9 @@ namespace gE
 		void OnRender(float delta) override;
 
 		GET_SET(RenderPass, RenderPass, _renderPass);
-		GET(const Array<PostProcessPass>&, PostProcessPasses, _postProcessPass);
+		GET_CONST(Array<PostProcessPass>&, PostProcessPasses, _postProcessPass);
 
-		virtual GL::Camera GetGLCamera() const = 0;
+		NODISCARD virtual GL::Camera GetGLCamera() const = 0;
 
 	 protected:
 		virtual void UpdateProjection() = 0;
@@ -67,7 +66,7 @@ namespace gE
 
 		GET_SET(float, FOV, _fov);
 
-		GL::Camera GetGLCamera() const override;
+		[[nodiscard]] GL::Camera GetGLCamera() const override;
 
 	 protected:
 		void UpdateProjection() override;

@@ -15,7 +15,7 @@ using namespace VoxelDemo;
 
 void DefaultRenderPass(gE::Window* window, gE::Camera* cam)
 {
-
+	((GL::VAO*) window->GetAssets()[1])->Draw(0);
 }
 
 
@@ -23,7 +23,7 @@ class FlyCam : public gE::Entity
 {
  public:
 	explicit FlyCam(gE::Window* window) : gE::Entity(window),
-		Camera(this, gE::CameraSettings{&window->CameraManager(), {1280, 720}, {0.1f, 100.f}, DefaultRenderPass}, 60)
+		Camera(this, gE::CameraSettings{{1280, 720}, {0.1f, 100.f}, DefaultRenderPass}, 60)
 	{
 
 	}
@@ -40,7 +40,8 @@ void DemoWindow::OnRender(float delta)
 {
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	_testMesh->Draw(0);
+	Transforms.OnRender(delta);
+	Cameras.OnRender(delta);
 }
 
 void DemoWindow::OnInit()
@@ -49,22 +50,17 @@ void DemoWindow::OnInit()
 
 	PipelineBuffers = new gE::DefaultPipelineBuffers(this);
 
-	_testShader = new GL::Shader(this, "Resource/Shader/uber.vert", "Resource/Shader/uber.frag");
-	_testShader->Bind();
+	Assets.Create<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/uber.frag")->Bind();
 
 	gETF::Header file;
 	gETF::Read("cube.gETF", file);
+	Assets.Register(GL::VAO::Create(this, GL::Mesh(file.Meshes[0])));
 
-	FlyCam cam(this);
-	cam.Camera.OnRender(0);
-	PipelineBuffers->UpdateCamera(cam.Camera);
+	auto* cam = new FlyCam(this);
 
 	GL::Scene test{1, gl::mat4::Identity()};
+	test.Normal[0] = gl::mat3::Identity();
 	PipelineBuffers->Scene.ReplaceData(&test);
-
-	_testMesh = Assets.Register(GL::VAO::Create(this, GL::Mesh(file.Meshes[0])));
-
-
 }
 
 void DemoWindow::OnDestroy()

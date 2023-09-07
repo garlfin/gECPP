@@ -21,8 +21,8 @@ class Array
 
 	NODISCARD ALWAYS_INLINE u64 Size() const { return _size; }
 	NODISCARD ALWAYS_INLINE T* Data() const { return _t; }
-	NODISCARD ALWAYS_INLINE T* operator[](u64 i) { return _t[i]; }
-	NODISCARD ALWAYS_INLINE const T* operator[](u64 i) const { return _t[i]; }
+	NODISCARD ALWAYS_INLINE T& operator[](u64 i) { return _t[i]; }
+	NODISCARD ALWAYS_INLINE const T& operator[](u64 i) const { return _t[i]; }
 
 	~Array() { delete[] _t; }
 
