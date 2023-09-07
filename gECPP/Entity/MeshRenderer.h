@@ -17,7 +17,7 @@ namespace gE
 		void OnUpdate(float delta) override;
 		void OnRender(float delta) override;
 
-		NODISCARD ALWAYS_INLINE const GL::VAOSettings* GetMeshSettings() { return _mesh->GetSettings(); }
+		NODISCARD ALWAYS_INLINE const GL::Mesh* GetMeshSettings() { return _mesh->GetSettings(); }
 	 private:
 		const GL::VAO* _mesh;
 	};

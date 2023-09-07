@@ -3,11 +3,11 @@
 //
 
 #include "VAO.h"
-#include "VAOSettings.h"
+#include "Mesh.h"
 
 namespace GL
 {
-	VAO::VAO(gE::Window* window, const VAOSettings* settings) :
+	VAO::VAO(gE::Window* window, const Mesh* settings) :
 		Asset(window), _settings(settings),
 		_bufferBuffer(new u8[sizeof(Buffer<u8>) * settings->BufferCount])
 	{
@@ -61,14 +61,14 @@ namespace GL
 		operator delete[](_bufferBuffer);
 	}
 
-	VAO* VAO::Create(gE::Window* window, const VAOSettings* settings)
+	VAO* VAO::Create(gE::Window* window, const Mesh* settings)
 	{
 		if(settings->TriangleMode == gETF::TriangleMode::Simple)
 			return new IndexedVAO(window, settings);
 		else return new VAO(window, settings);
 	}
 
-	VAOSettings::VAOSettings(const VAOSettings& o) :
+	Mesh::Mesh(const Mesh& o) :
 		BufferCount(o.BufferCount),
 		Buffers((BufferSettings*) memcpy(new BufferSettings[BufferCount], o.Buffers, BufferCount * sizeof(BufferSettings))),
 		MeshCount(o.MeshCount),
@@ -78,7 +78,7 @@ namespace GL
 	{
 	}
 
-	VAOSettings::VAOSettings(const gETF::Mesh& mesh)
+	Mesh::Mesh(const gETF::Mesh& mesh)
 	{
 		MeshCount = mesh.MaterialCount;
 		Meshes = new SubMesh[MeshCount];
@@ -133,7 +133,7 @@ namespace GL
 		}
 	}
 
-	IndexedVAO::IndexedVAO(gE::Window* window, const VAOSettings* settings)
+	IndexedVAO::IndexedVAO(gE::Window* window, const Mesh* settings)
 		: VAO(window, settings)
 	{
 		glVertexArrayElementBuffer(ID, _buffers[settings->Triangles.Buffer].Get());

@@ -22,5 +22,5 @@ layout(CAMERA_UNIFORM_LAYOUT, binding = CAMERA_UNIFORM_LOCATION) uniform CameraU
     CameraData Camera;
 };
 
-const vec3 CameraPos = vec3(Camera.View[0][3]);
+vec3 CameraPos = vec3(Camera.View[0][3]);
 

@@ -8,17 +8,34 @@
 
 #include "DemoWindow.h"
 #include "gEModel/gETF/File.h"
-#include "GL/Buffer/VAOSettings.h"
+#include "GL/Buffer/Mesh.h"
 #include "Entity/MeshRenderer.h"
 
 using namespace VoxelDemo;
+
+void DefaultRenderPass(gE::Camera* cam)
+{
+
+}
+
+class FlyCam : public gE::Entity
+{
+ public:
+	FlyCam(gE::Window* window) : gE::Entity(window), Camera(this, gE::CameraSettings{{1280, 720}, {0.1f, 100.f}, DefaultRenderPass }, 60) {}
+
+	gE::PerspectiveCamera Camera;
+
+	void OnRender(float delta) override
+	{
+		Entity::OnRender(delta);
+		Camera.OnRender(delta);
+	}
+};
 
 void DemoWindow::OnUpdate(float)
 {
 
 }
-
-char TITLE_BUF[16];
 
 void DemoWindow::OnRender(float delta)
 {
@@ -39,7 +56,14 @@ void DemoWindow::OnInit()
 	gETF::Header file;
 	gETF::Read("cube.gETF", file);
 
-	_testMesh = new gE::MeshRenderer(this, GL::VAO::Create(this, new GL::VAOSettings(file.Meshes[0])));
+	FlyCam cam(this);
+	cam.OnRender(0);
+	PipelineBuffers->UpdateCamera(cam.Camera);
+
+	GL::Scene test{1, gl::mat4::Identity()};
+	PipelineBuffers->Scene.ReplaceData(&test);
+
+	_testMesh = new gE::MeshRenderer(this, GL::VAO::Create(this, new GL::Mesh(file.Meshes[0])));
 }
 
 void DemoWindow::OnDestroy()

@@ -14,6 +14,7 @@ class Array
 	explicit Array(u64 count, T* initialData = nullptr, u64 initialSize = 0);
 	Array(const Array& o);
 	Array(Array&& o) noexcept;
+	Array();
 
 	Array& operator =(const Array& o);
 	Array& operator =(const Array&& o) noexcept;
@@ -29,6 +30,12 @@ class Array
 	u64 _size;
 	T* _t;
 };
+
+template<typename T>
+Array<T>::Array() : _size(0), _t(nullptr)
+{
+
+}
 
 template<typename T>
 Array<T>& Array<T>::operator=(const Array&& o) noexcept

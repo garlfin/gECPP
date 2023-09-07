@@ -20,6 +20,6 @@ layout(SCENE_UNIFORM_LAYOUT, binding = SCENE_UNIFORM_LOCATION) uniform SceneUnif
     SceneData Scene;
 };
 
-const uint ViewIndex = gl_InstanceID / Scene.InstanceCount;
-const uint ModelIndex = gl_InstanceID % Scene.InstanceCount;
+uint ViewIndex = gl_InstanceID / Scene.InstanceCount;
+uint ModelIndex = gl_InstanceID % Scene.InstanceCount;
 

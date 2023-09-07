@@ -2,7 +2,7 @@
 
 #include "GL/gl.h"
 #include "Buffer.h"
-#include "VAOSettings.h"
+#include "Mesh.h"
 
 namespace GL
 {
@@ -12,16 +12,16 @@ namespace GL
 		ALWAYS_INLINE void Bind() const final;
 		virtual void Draw(u8 index, u16 instanceCount = 1) const;
 
-		NODISCARD ALWAYS_INLINE const VAOSettings* GetSettings() const { return _settings; }
+		NODISCARD ALWAYS_INLINE const Mesh* GetSettings() const { return _settings; }
 		ALWAYS_INLINE void ReplaceData(u8 buf, u32 count, void* data);
 		// void Realloc(u32 vertexCount, void* data = nullptr); // TODO
 
-		static VAO* Create(gE::Window*, const VAOSettings*);
+		static VAO* Create(gE::Window*, const Mesh*);
 
 		~VAO() override;
 
 	 protected:
-		VAO(gE::Window* window, const VAOSettings* settings);
+		VAO(gE::Window* window, const Mesh* settings);
 
 		union
 		{
@@ -30,7 +30,7 @@ namespace GL
 			// TODO come up with a better name than this 😭😭
 		};
 
-		const VAOSettings* _settings;
+		const Mesh* _settings;
 	};
 
 	class IndexedVAO final : public VAO
@@ -40,7 +40,7 @@ namespace GL
 		inline void Draw(u8 index, u16 instanceCount = 1) const override;
 
 	 protected:
-		IndexedVAO(gE::Window* window, const VAOSettings* settings);
+		IndexedVAO(gE::Window* window, const Mesh* settings);
 	};
 
 	void VAO::ReplaceData(u8 buf, u32 count, void* data)

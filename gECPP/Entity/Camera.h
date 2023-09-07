@@ -19,18 +19,27 @@ namespace gE
 	typedef void(*PostProcessPass)(Camera*, GL::Texture* in, GL::Texture* out);
 	typedef gl::vec2 ClipPlanes;
 
-	class Camera : public Entity
+	struct CameraSettings
+	{
+		GL::TextureSize Size = {0, 0};
+		ClipPlanes ClipPlanes = {0.1, 100};
+		RenderPass RenderPass = nullptr;
+		Array<PostProcessPass>* PostProcess = nullptr;
+	};
+
+	class Camera : public Component
 	{
 	 public:
-		Camera(Window* w, const GL::TextureSize&, const ClipPlanes&, RenderPass, const Array<PostProcessPass>*);
+		Camera(Entity* w, const CameraSettings&);
 
-		NODISCARD ALWAYS_INLINE GL::TextureSize GetSize() const { return _texture->GetSize(); }
+		NODISCARD ALWAYS_INLINE GL::TextureSize GetSize() const { return _size; }
 		NODISCARD ALWAYS_INLINE float GetAspect() const { gl::TextureSize size = GetSize(); return (float) size.x / (float) size.y; }
 
+		void OnUpdate(float delta) override {}
 		void OnRender(float delta) override;
 
 		GET_SET(RenderPass, RenderPass, _renderPass);
-		GET(const Array<PostProcessPass>*, PostProcessPasses, _postProcessPass);
+		GET(const Array<PostProcessPass>&, PostProcessPasses, _postProcessPass);
 
 		virtual GL::Camera GetGLCamera() const = 0;
 
@@ -38,21 +47,21 @@ namespace gE
 		virtual void UpdateProjection() = 0;
 
 		ClipPlanes _clipPlanes;
+		GL::TextureSize _size;
 
 		GL::Texture* _texture{};
 
 		RenderPass _renderPass;
-		Array<PostProcessPass>* _postProcessPass;
+		Array<PostProcessPass> _postProcessPass;
 
 		gl::mat4 _projection;
-
-		virtual ~Camera() { delete _postProcessPass; }
+		gl::mat4 _view;
 	};
 
-	class PerspectiveCamera : Camera
+	class PerspectiveCamera : public Camera
 	{
 	 public:
-		PerspectiveCamera(Window* w, float fov, const GL::TextureSize&, const gE::ClipPlanes&, RenderPass, const Array<PostProcessPass>*);
+		PerspectiveCamera(Entity* w, const CameraSettings&, float fov);
 
 		GET_SET(float, FOV, _fov);
 

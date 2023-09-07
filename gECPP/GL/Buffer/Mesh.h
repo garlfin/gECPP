@@ -43,11 +43,11 @@ namespace GL
 		u8 Offset = 0;
 	};
 
-	struct VAOSettings
+	struct Mesh
 	{
-		VAOSettings(const VAOSettings& o);
-		explicit VAOSettings(const gETF::Mesh& mesh);
-		VAOSettings() = default;
+		Mesh(const Mesh& o);
+		explicit Mesh(const gETF::Mesh& mesh);
+		Mesh() = default;
 
 		u8 BufferCount = 0;
 		u8 MeshCount = 0;
@@ -59,7 +59,7 @@ namespace GL
 		VAOField* Fields = nullptr;
 		VAOField Triangles {};
 
-		~VAOSettings() { delete[] Buffers; delete[] Meshes; delete[] Fields; }
+		~Mesh() { delete[] Buffers; delete[] Meshes; delete[] Fields; }
 	};
 
 

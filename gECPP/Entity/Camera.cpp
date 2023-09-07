@@ -5,39 +5,36 @@
 #include "Camera.h"
 #include <Components/Transform.h>
 
-gE::Camera::Camera(gE::Window* w, const GL::TextureSize& size, const gE::ClipPlanes&, gE::RenderPass rp, const Array<PostProcessPass>* pp) :
-	Entity(w), _renderPass(rp)
+gE::Camera::Camera(gE::Entity* parent, const CameraSettings& settings) :
+	Component(parent), _renderPass(settings.RenderPass), _clipPlanes(settings.ClipPlanes),
+	_postProcessPass(), _size(settings.Size)
 {
-	_postProcessPass = pp ? new Array<PostProcessPass>(*pp) : nullptr;
+	if(settings.PostProcess) _postProcessPass = *settings.PostProcess;
 }
+
 void gE::Camera::OnRender(float delta)
 {
-	Entity::OnRender(delta);
-	GetModel() = GetModel().Inverse();
-
+	_view = GetOwner()->GetTransform().Model().Inverse();
 	UpdateProjection();
 
 	_renderPass(this);
 
-	if(!_postProcessPass) return;
-
-
+	if(!_postProcessPass.Size()) return;
 }
 
-gE::PerspectiveCamera::PerspectiveCamera(gE::Window* w, float fov, const GL::TextureSize& s, const gE::ClipPlanes& cp, gE::RenderPass rp, const Array<PostProcessPass>* pp)
-	: Camera(w, s, cp, rp, pp), _fov(fov)
+gE::PerspectiveCamera::PerspectiveCamera(gE::Entity* parent, const CameraSettings& settings, float fov)
+	: Camera(parent, settings), _fov(fov)
 {
 
 }
 
 GL::Camera gE::PerspectiveCamera::GetGLCamera() const
 {
-
 	GL::Camera cam;
 	cam.ClipPlanes = _clipPlanes;
 	cam.FOV = _fov;
 	cam.Projection = _projection;
-	cam.View[0] = GetTransform().Model();
+	cam.View[0] = GetOwner()->GetTransform().Model();
 
 	return cam;
 }

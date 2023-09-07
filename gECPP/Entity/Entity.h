@@ -25,7 +25,7 @@ namespace gE
 		virtual void OnRender(float delta) { _transform.OnRender(delta); }
 		virtual void OnDestroy() {};
 
-		~Entity() { delete[] _name; }
+		virtual ~Entity() { delete[] _name; }
 	 protected:
 		NODISCARD ALWAYS_INLINE gl::mat4& GetModel() { return _transform._model; }
 
