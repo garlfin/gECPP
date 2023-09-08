@@ -14,7 +14,7 @@ namespace gE
 	class AssetManager : private std::vector<GL::Asset*>
 	{
 	 public:
-		explicit AssetManager(Window* w) : _window(w) {}
+		AssetManager() = default;
 
 		template<class T, typename... ARGS>
 		inline T* Create(ARGS&&... args)
@@ -45,6 +45,5 @@ namespace gE
 		}
 	 private:
 		inline bool Contains(GL::Asset* v) { return std::find(begin(), end(), v) != end(); }
-		Window* const _window;
 	};
 }

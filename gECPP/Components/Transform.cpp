@@ -42,3 +42,8 @@ gE::Transform::Transform(gE::Entity* o)
 {
 	GetWindow()->GetTransforms().Register(this);
 }
+
+gE::Transform::~Transform()
+{
+	GetWindow()->GetTransforms().Remove(this);
+}

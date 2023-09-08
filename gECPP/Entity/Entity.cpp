@@ -3,6 +3,8 @@
 //
 
 #include "Entity.h"
+#include "Components/Component.h"
+#include <Window.h>
 
 namespace gE
 {
@@ -16,5 +18,16 @@ namespace gE
 	Window* Component::GetWindow() const
 	{
 		return _entity->GetWindow();
+	}
+
+	Behavior::Behavior(Entity* o)
+		: Component(o)
+	{
+		GetWindow()->GetBehaviors().Register(this);
+	}
+
+	Behavior::~Behavior()
+	{
+		GetWindow()->GetBehaviors().Remove(this);
 	}
 }

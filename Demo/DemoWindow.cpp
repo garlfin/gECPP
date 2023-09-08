@@ -63,6 +63,7 @@ void DemoWindow::OnInit()
 
 	GL::Scene test{1, gl::mat4::Identity()};
 	test.Normal[0] = gl::mat3::Identity();
+
 	PipelineBuffers->Scene.ReplaceData(&test);
 }
 

@@ -48,7 +48,7 @@ namespace gE
 		gl::vec3 Scale = gl::vec3(1.f);
 		gl::quaternion Rotation = gl::quaternion::identity;
 
-		friend class Entity;
+		~Transform() override;
 
 	 private:
 		gl::mat4 _model;

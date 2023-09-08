@@ -28,6 +28,11 @@ void gE::Camera::OnRender(float delta)
 	if(!_postProcessPass.Size()) return;
 }
 
+gE::Camera::~Camera()
+{
+	GetWindow()->GetCameras().Remove(this);
+}
+
 gE::PerspectiveCamera::PerspectiveCamera(gE::Entity* parent, const CameraSettings& settings, float fov)
 	: Camera(parent, settings), _fov(fov)
 {
@@ -41,6 +46,7 @@ GL::Camera gE::PerspectiveCamera::GetGLCamera() const
 	cam.FOV = _fov;
 	cam.Projection = _projection;
 	cam.View[0] = _view;
+	cam.Position = GetOwner()->GetTransform().Model().TranslationVector3D();
 
 	return cam;
 }

@@ -1,5 +1,6 @@
 struct CameraData
 {
+    vec3 Position;
     vec2 ClipPlanes;
     float FOV;
     float _pad;
@@ -21,6 +22,4 @@ layout(CAMERA_UNIFORM_LAYOUT, binding = CAMERA_UNIFORM_LOCATION) uniform CameraU
 {
     CameraData Camera;
 };
-
-vec3 CameraPos = vec3(Camera.View[0][3]);
 

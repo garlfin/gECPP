@@ -20,9 +20,16 @@ namespace gE
 		virtual void OnRender(float) = 0;
 		virtual void OnDestroy() {};
 
-		virtual ~Component() = default;;
+		virtual ~Component() = default;
 
 	 private:
 		Entity* const _entity;
+	};
+
+	// For future development.
+	class Behavior : public Component
+	{
+		explicit Behavior(Entity* o);
+		~Behavior() override;
 	};
 }

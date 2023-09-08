@@ -13,6 +13,7 @@ namespace GL
 {
 	struct Camera
 	{
+		gl::vec3 Position;
 		gl::vec2 ClipPlanes;
 		float FOV;
 

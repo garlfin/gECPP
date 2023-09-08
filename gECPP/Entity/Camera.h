@@ -44,6 +44,8 @@ namespace gE
 
 		NODISCARD virtual GL::Camera GetGLCamera() const = 0;
 
+		~Camera() override;
+
 	 protected:
 		virtual void UpdateProjection() = 0;
 

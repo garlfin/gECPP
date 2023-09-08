@@ -15,7 +15,7 @@ namespace gE
  	class ComponentManager : private std::vector<T*>
 	{
 	 public:
-		explicit ComponentManager(Window* w) : _window(w) {}
+		ComponentManager() = default;
 
 		inline virtual void Register(T* t) { if(!Contains(t)) vec::push_back(t); }
 		inline virtual void Remove(T* t)
@@ -37,7 +37,6 @@ namespace gE
 	 private:
 		typedef std::vector<T*> vec;
 		inline bool Contains(T* v) { return std::find(vec::begin(), vec::end(), v) != vec::end(); }
-		Window* const _window;
 	};
 }
 

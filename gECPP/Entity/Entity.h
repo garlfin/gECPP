@@ -24,8 +24,6 @@ namespace gE
 		virtual void OnDestroy() {};
 
 		virtual ~Entity() { delete[] _name; }
-	 protected:
-		NODISCARD ALWAYS_INLINE gl::mat4& GetModel() { return _transform._model; }
 
 	 private:
 		Window* const _window;
