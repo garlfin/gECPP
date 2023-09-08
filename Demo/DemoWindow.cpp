@@ -38,7 +38,7 @@ void DemoWindow::OnUpdate(float)
 
 void DemoWindow::OnRender(float delta)
 {
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	Transforms.OnRender(delta);
 	Cameras.OnRender(delta);
@@ -47,6 +47,9 @@ void DemoWindow::OnRender(float delta)
 void DemoWindow::OnInit()
 {
 	glClearColor(0.2, 0.2, 1, 1);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+	glDisable(GL_CULL_FACE);
 
 	PipelineBuffers = new gE::DefaultPipelineBuffers(this);
 
@@ -56,7 +59,7 @@ void DemoWindow::OnInit()
 	gETF::Read("cube.gETF", file);
 	Assets.Register(GL::VAO::Create(this, GL::Mesh(file.Meshes[0])));
 
-	auto* cam = new FlyCam(this);
+	new FlyCam(this);
 
 	GL::Scene test{1, gl::mat4::Identity()};
 	test.Normal[0] = gl::mat3::Identity();

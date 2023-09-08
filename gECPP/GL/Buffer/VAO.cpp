@@ -74,7 +74,8 @@ namespace GL
 		MeshCount(o.MeshCount),
 		Meshes((SubMesh*) memcpy(new SubMesh[MeshCount], o.Meshes, MeshCount * sizeof(SubMesh))),
 		FieldCount(o.FieldCount),
-		Fields((VAOField*) memcpy(new VAOField[FieldCount], o.Fields, FieldCount * sizeof(VAOField)))
+		Fields((VAOField*) memcpy(new VAOField[FieldCount], o.Fields, FieldCount * sizeof(VAOField))),
+		Triangles(o.Triangles)
 	{
 		for(u8 i = 0; i < BufferCount; i++) Buffers[i] = o.Buffers[i];
 	}
