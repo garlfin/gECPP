@@ -42,9 +42,9 @@ namespace GL
 		ALWAYS_INLINE void SetUniform(u8 loc, u32 val) const { glProgramUniform1ui(ID, loc, val); }
 		ALWAYS_INLINE void SetUniform(u8 loc, i32 val) const { glProgramUniform1i(ID, loc, val); }
 		ALWAYS_INLINE void SetUniform(u8 loc, float val) const { glProgramUniform1f(ID, loc, val); }
-		ALWAYS_INLINE void SetUniform(u8 loc, const gl::vec2& val) const { glProgramUniform2f(ID, loc, val.x, val.y); }
-		ALWAYS_INLINE void SetUniform(u8 loc, const gl::vec3& val) const { glProgramUniform3fv(ID, loc, 1, (GLfloat*) &val); }
-		ALWAYS_INLINE void SetUniform(u8 loc, const gl::vec4& val) const { glProgramUniform4fv(ID, loc, 1, (GLfloat*) &val); }
+		ALWAYS_INLINE void SetUniform(u8 loc, const glm::vec2& val) const { glProgramUniform2f(ID, loc, val.x, val.y); }
+		ALWAYS_INLINE void SetUniform(u8 loc, const glm::vec3& val) const { glProgramUniform3fv(ID, loc, 1, (GLfloat*) &val); }
+		ALWAYS_INLINE void SetUniform(u8 loc, const glm::vec4& val) const { glProgramUniform4fv(ID, loc, 1, (GLfloat*) &val); }
 		void SetUniform(u8 loc, const Texture*, u8 slot) const;
 
 		~Shader() override { glDeleteProgram(ID); }

@@ -27,7 +27,7 @@ struct CompressionScheme
 	uint8_t Pixel;
 	uint8_t Byte;
 
-	NODISCARD size_t GetByteSize(const gl::u16vec2& size) const { return DIV_CEIL(size.x * size.y, Pixel) * Byte; }
+	NODISCARD size_t GetByteSize(const glm::u16vec2& size) const { return DIV_CEIL(size.x * size.y, Pixel) * Byte; }
 };
 
 inline bool FormatIsCompressed(PVR::PVRPixelFormat f) { return f != PVR::PVRPixelFormat::R8G8B8; }
@@ -44,7 +44,7 @@ Texture::Texture(gE::Window* window, GLuint target, TextureSize size, uint8_t mi
 Texture2D::Texture2D(gE::Window* window, TextureSize size, PVR::PVRPixelFormat f, u8* d, uint8_t mips, bool linear)
 	: Texture(window, GL_TEXTURE_2D, size, mips, linear)
 {
-	size = TextureSize::Max(size, TextureSize(1));
+	size = glm::max(size, TextureSize(1));
 	glTextureStorage2D(ID, mips, PVRToInternalFormat(f), size.x, size.y);
 	uint32_t dataSize;
 	if(!d) return;

@@ -16,7 +16,7 @@ gE::Camera::Camera(gE::Entity* parent, const CameraSettings& settings) :
 
 void gE::Camera::OnRender(float delta)
 {
-	_view = GetOwner()->GetTransform().Model().Inverse();
+	_view = glm::inverse(GetOwner()->GetTransform().Model());
 	UpdateProjection();
 
 	Window* window = GetWindow();
@@ -46,14 +46,14 @@ GL::Camera gE::PerspectiveCamera::GetGLCamera() const
 	cam.FOV = _fov;
 	cam.Projection = _projection;
 	cam.View[0] = _view;
-	cam.Position = GetOwner()->GetTransform().Model().TranslationVector3D();
+	cam.Position = glm::vec3(GetOwner()->GetTransform().Model()[3]);
 
 	return cam;
 }
 
 void gE::PerspectiveCamera::UpdateProjection()
 {
-	_projection = gl::mat4::Perspective(_fov, GetAspect(), _clipPlanes.x, _clipPlanes.y);
+	_projection = glm::perspectiveFov(_fov, (float) _size.x, (float) _size.y, _clipPlanes.x, _clipPlanes.y);
 }
 
 

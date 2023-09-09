@@ -13,11 +13,11 @@ namespace gE
 	{
 		union
 		{
-			gl::vec3 Location = gl::vec3(0.f);
-			gl::vec3 Position;
+			glm::vec3 Location = glm::vec3(0.f);
+			glm::vec3 Position;
 		};
-		gl::vec3 Scale = gl::vec3(1.f);
-		gl::quaternion Rotation = gl::quaternion::identity;
+		glm::vec3 Scale = glm::vec3(1.f);
+		glm::quaternion Rotation = glm::quaternion();
 	};
 
 	class Transform : Component
@@ -29,28 +29,33 @@ namespace gE
 		}
 
 		explicit Transform(Entity* o);
-		void SetRotation(const gl::vec3& r);
+		ALWAYS_INLINE void SetRotation(const glm::vec3& r) { Rotation = glm::quaternion(r); }
 		void Set(const TransformData& d);
 		void Set(const Transform& d);
 
-		gl::mat4 GetParentTransform();
+		glm::mat4 GetParentTransform();
 
 		void OnUpdate(float) override {};
 		void OnRender(float) override;
 
-		NODISCARD ALWAYS_INLINE const gl::mat4& Model() const { return _model; }
+		NODISCARD ALWAYS_INLINE const glm::mat4& Model() const { return _model; }
+
+		NODISCARD ALWAYS_INLINE glm::vec3 Forward() const { return Rotation * glm::vec3(0, 0, -1); }
+		NODISCARD ALWAYS_INLINE glm::vec3 Up() const { return Rotation * glm::vec3(0, 1, 0); }
+		NODISCARD ALWAYS_INLINE glm::vec3 Right() const { return Rotation * glm::vec3(1, 0, 0); }
+		NODISCARD ALWAYS_INLINE glm::mat3 LocalRotationMatrix() const { return glm::toMat3(Rotation); }
 
 		union
 		{
-			gl::vec3 Location = gl::vec3(0.f);
-			gl::vec3 Position;
+			glm::vec3 Location = glm::vec3(0.f);
+			glm::vec3 Position;
 		};
-		gl::vec3 Scale = gl::vec3(1.f);
-		gl::quaternion Rotation = gl::quaternion::identity;
+		glm::vec3 Scale = glm::vec3(1.f);
+		glm::quaternion Rotation = glm::quaternion();
 
 		~Transform() override;
 
 	 private:
-		gl::mat4 _model;
+		glm::mat4 _model;
 	};
 }

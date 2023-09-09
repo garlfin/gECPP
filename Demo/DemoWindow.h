@@ -16,7 +16,7 @@ namespace VoxelDemo
 	class DemoWindow final : public gE::Window
 	{
 	 public:
-		DemoWindow(gl::u16vec2 size, const char* name = "VoxelDemo") : gE::Window(size, name) {};
+		DemoWindow(glm::u16vec2 size, const char* name = "VoxelDemo") : gE::Window(size, name) {};
 	 private:
 		void OnInit() override;
 		void OnUpdate(float) override;

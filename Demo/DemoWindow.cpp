@@ -18,22 +18,63 @@ void DefaultRenderPass(gE::Window* window, gE::Camera* cam)
 	((GL::VAO*) window->GetAssets()[1])->Draw(0);
 }
 
+class Movement : public gE::Behavior
+{
+ public:
+	explicit Movement(gE::Entity* o) :
+		gE::Behavior(o),
+		_transform(o->GetTransform()), _window(o->GetWindow()->GLFWWindow())
+	{
+
+	}
+
+	void OnUpdate(float d) override
+	{
+		glm::dvec2 mousePos, mouseDelta;
+		glfwGetCursorPos(_window, &mousePos.x, &mousePos.y);
+		mouseDelta = _prevCursorPos - mousePos;
+		_prevCursorPos = mousePos;
+
+		_rot.y += mouseDelta.x * 0.1f;
+		_rot.x += mouseDelta.y * 0.1f;
+		_rot.x = std::clamp(_rot.x, -89.9f, 89.9f);
+
+		_transform.SetRotation(_rot * RAD);
+
+		glm::vec3 dir(0.f);
+		if(glfwGetKey(_window, GLFW_KEY_W)) dir.z -= 1;
+		if(glfwGetKey(_window, GLFW_KEY_S)) dir.z += 1;
+		if(glfwGetKey(_window, GLFW_KEY_D)) dir.x += 1;
+		if(glfwGetKey(_window, GLFW_KEY_A)) dir.x -= 1;
+
+		dir = glm::normalize(dir);
+		if(!glm::isinf(dir.x) && !glm::isnan(dir.x)) _transform.Position += _transform.LocalRotationMatrix() * dir * d;
+	}
+
+ private:
+	gE::Transform& _transform;
+	GLFWwindow* const _window;
+	glm::dvec2 _prevCursorPos {0.f, 0.f};
+	glm::vec3 _rot;
+};
 
 class FlyCam : public gE::Entity
 {
  public:
 	explicit FlyCam(gE::Window* window) : gE::Entity(window),
-		Camera(this, gE::CameraSettings{{1280, 720}, {0.1f, 100.f}, DefaultRenderPass}, 60)
+		Camera(this, gE::CameraSettings{{1280, 720}, {0.1f, 100.f}, DefaultRenderPass}, 60 * RAD),
+	  	_movement(this)
 	{
 
 	}
 
 	gE::PerspectiveCamera Camera;
+	Movement _movement;
 };
 
-void DemoWindow::OnUpdate(float)
+void DemoWindow::OnUpdate(float delta)
 {
-
+	Behaviors.OnUpdate(delta);
 }
 
 void DemoWindow::OnRender(float delta)
@@ -46,6 +87,7 @@ void DemoWindow::OnRender(float delta)
 
 void DemoWindow::OnInit()
 {
+	glfwSetInputMode(GLFWWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glClearColor(0.2, 0.2, 1, 1);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
@@ -61,8 +103,8 @@ void DemoWindow::OnInit()
 
 	new FlyCam(this);
 
-	GL::Scene test{1, gl::mat4::Identity()};
-	test.Normal[0] = gl::mat3::Identity();
+	GL::Scene test{1, glm::mat4(1.f)};
+	test.Normal[0] = glm::mat3(1.f);
 
 	PipelineBuffers->Scene.ReplaceData(&test);
 }

@@ -5,7 +5,7 @@
 #include <GL/Binary.h>
 #include <GLAD/glad.h>
 
-namespace GL { class Texture; typedef gl::u32vec2 TextureSize; }
+namespace GL { class Texture; typedef glm::u32vec2 TextureSize; }
 
 namespace PVR
 {

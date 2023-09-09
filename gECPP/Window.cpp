@@ -5,7 +5,7 @@
 
 using namespace gE;
 
-Window::Window(gl::u16vec2 size, const char* name) :
+Window::Window(glm::u16vec2 size, const char* name) :
 	_size(size)
 {
 	if(!glfwInit()) GE_FAIL("Failed to initialize GLFW.");

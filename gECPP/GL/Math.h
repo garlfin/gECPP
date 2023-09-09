@@ -4,9 +4,12 @@
 
 #pragma once
 
-#include "MathFU/vector.h"
-#include "MathFU/matrix.h"
-#include "MathFU/quaternion.h"
+#include "GLM/vec2.hpp"
+#include "GLM/vec3.hpp"
+#include "GLM/vec4.hpp"
+#include "GLM/gtx/quaternion.hpp"
+#include "GLM/mat3x3.hpp"
+#include "GLM/mat4x4.hpp"
 #include "GLAD/types.h"
 
 #include <cstdint>
@@ -18,38 +21,8 @@
 #define GL_INT 0x1404
 #define GL_UNSIGNED_INT 0x1405
 #define GL_FLOAT 0x1406
-
-#define VEC_ALIAS(TYPE, NAME) \
-	typedef MathFU::Vector<TYPE, 2> NAME##vec2; \
-	typedef MathFU::Vector<TYPE, 3> NAME##vec3; \
-	typedef MathFU::Vector<TYPE, 4> NAME##vec4; \
-	typedef MathFU::Vector<TYPE, 2> p##NAME##vec2; \
-	typedef MathFU::Vector<TYPE, 3> p##NAME##vec3; \
-	typedef MathFU::Vector<TYPE, 4> p##NAME##vec4;
-
-namespace GL
-{
-	VEC_ALIAS(float, );
-
-	VEC_ALIAS(uint8_t, u8);
-	VEC_ALIAS(int8_t, i8);
-
-	VEC_ALIAS(uint16_t, u16);
-	VEC_ALIAS(int16_t, i16);
-
-	VEC_ALIAS(uint32_t, u32);
-	VEC_ALIAS(int32_t, i32);
-	VEC_ALIAS(uint32_t, u);
-	VEC_ALIAS(int32_t, i);
-
-	VEC_ALIAS(uint64_t, u64);
-	VEC_ALIAS(int64_t, i64);
-
-	typedef MathFU::Matrix<float, 4, 4> mat4;
-	typedef MathFU::Matrix<float, 3, 3> mat3;
-
-	typedef MathFU::Quaternion<float> quaternion;
-}
+#define RAD 0.01745329251f
+#define DEG 57.2957795131f
 
 typedef uint8_t ubyte;
 typedef uint8_t u8;
@@ -78,6 +51,11 @@ constexpr u8 GetSizeOfGLType(u32 t)
 	return 1 << ((t - 0x1400) >> 1);
 }
 
-namespace gl = GL;
+namespace glm
+{
+	typedef quat quaternion;
+	typedef u32vec2 TextureSize;
+}
+
 
 

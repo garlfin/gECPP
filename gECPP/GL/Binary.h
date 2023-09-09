@@ -5,6 +5,7 @@
 #pragma once
 
 #include "Math.h"
+#include <cstring>
 
 
 #ifndef NODISCARD

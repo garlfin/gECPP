@@ -19,8 +19,8 @@ void main()
 {
     mat4 ViewProjection = Camera.Projection * Camera.View[ViewIndex];
 
-    gl_Position = ViewProjection * Scene.Model[ModelIndex] * vec4(Position, 1);
-    Vertex.FragPos = gl_Position.xyz;
+    Vertex.FragPos = (Scene.Model[ModelIndex] * vec4(Position, 1)).xyz;
+    gl_Position = ViewProjection * Scene.Model[ModelIndex] * vec4(Vertex.FragPos, 1);
 
     Vertex.UV = UV;
 

@@ -6,11 +6,6 @@
 #include <Entity/Entity.h>
 #include <Window.h>
 
-void gE::Transform::SetRotation(const gl::vec3& r)
-{
-	Rotation = gl::quaternion::FromEulerAngles(r);
-}
-
 void gE::Transform::Set(const gE::TransformData& d)
 {
 	Location = d.Location;
@@ -18,10 +13,10 @@ void gE::Transform::Set(const gE::TransformData& d)
 	Rotation = d.Rotation;
 }
 
-gl::mat4 gE::Transform::GetParentTransform()
+glm::mat4 gE::Transform::GetParentTransform()
 {
 	gE::Entity* parent = GetOwner()->GetParent();
-	return parent ? parent->GetTransform()._model : gl::mat4::Identity();
+	return parent ? parent->GetTransform()._model : glm::mat4(1.f);
 }
 
 void gE::Transform::Set(const gE::Transform& d)
@@ -34,7 +29,10 @@ void gE::Transform::Set(const gE::Transform& d)
 void gE::Transform::OnRender(float)
 {
 	_model = GetParentTransform();
-	_model *= gl::mat4::FromScaleVector(Scale) * Rotation.ToMatrix4() * gl::mat4::FromTranslationVector(Location);
+
+	_model = glm::translate(_model, Location);
+	_model *= glm::toMat4(Rotation);
+	_model = glm::scale(_model, Scale);
 }
 
 gE::Transform::Transform(gE::Entity* o)

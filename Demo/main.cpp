@@ -7,6 +7,6 @@ using namespace gE;
 
 int main()
 {
-	DemoWindow window(gl::u16vec2(1280, 720));
+	DemoWindow window(glm::u16vec2(1280, 720));
 	window.Run();
 }

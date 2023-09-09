@@ -18,7 +18,7 @@ namespace gE
 
 	typedef void(*RenderPass)(Window*, Camera*);
 	typedef void(*PostProcessPass)(Window*, Camera*, GL::Texture* in, GL::Texture* out);
-	typedef gl::vec2 ClipPlanes;
+	typedef glm::vec2 ClipPlanes;
 
 	struct CameraSettings
 	{
@@ -34,7 +34,7 @@ namespace gE
 		Camera(Entity* w, const CameraSettings&);
 
 		NODISCARD ALWAYS_INLINE GL::TextureSize GetSize() const { return _size; }
-		NODISCARD ALWAYS_INLINE float GetAspect() const { gl::TextureSize size = GetSize(); return (float) size.x / (float) size.y; }
+		NODISCARD ALWAYS_INLINE float GetAspect() const { glm::TextureSize size = GetSize(); return (float) size.x / (float) size.y; }
 
 		void OnUpdate(float delta) override {}
 		void OnRender(float delta) override;
@@ -57,8 +57,8 @@ namespace gE
 		RenderPass _renderPass;
 		Array<PostProcessPass> _postProcessPass;
 
-		gl::mat4 _projection;
-		gl::mat4 _view;
+		glm::mat4 _projection;
+		glm::mat4 _view;
 	};
 
 	class PerspectiveCamera : public Camera

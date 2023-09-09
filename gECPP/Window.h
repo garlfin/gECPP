@@ -12,7 +12,7 @@ namespace gE
 	class Window
 	{
 	 public:
-		explicit Window(gl::u16vec2 size, const char* name = "gE");
+		explicit Window(glm::u16vec2 size, const char* name = "gE");
 
 		void Run();
 
@@ -38,7 +38,7 @@ namespace gE
 		ComponentManager<Behavior> Behaviors {};
 
 	 private:
-		gl::u16vec2 _size;
+		glm::u16vec2 _size;
 		const char* _name;
 		GLFWwindow* _window;
 	};

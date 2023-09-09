@@ -145,7 +145,7 @@ extern "C" {
  */
 #if defined(GLFW_INCLUDE_ES1)
 
- #include <GLES/gl.h>
+ #include <GLES/glm.h>
  #if defined(GLFW_INCLUDE_GLEXT)
   #include <GLES/glext.h>
  #endif
@@ -234,11 +234,11 @@ extern "C" {
   #if !defined(GLFW_INCLUDE_GLEXT)
    #define GL_GLEXT_LEGACY
   #endif
-  #include <OpenGL/gl.h>
+  #include <OpenGL/glm.h>
 
  #else /*__APPLE__*/
 
-  #include <GL/gl.h>
+  #include <GL/glm.h>
   #if defined(GLFW_INCLUDE_GLEXT)
    #include <GL/glext.h>
   #endif
@@ -5894,7 +5894,7 @@ GLFWAPI VkResult glfwCreateWindowSurface(VkInstance instance, GLFWwindow* window
 #endif
 
 /* Some OpenGL related headers need GLAPIENTRY, but it is unconditionally
- * defined by some gl.h variants (OpenBSD) so define it after if needed.
+ * defined by some glm.h variants (OpenBSD) so define it after if needed.
  */
 #ifndef GLAPIENTRY
  #define GLAPIENTRY APIENTRY

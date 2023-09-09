@@ -9,24 +9,27 @@
 
 #define MAX_OBJECT 64
 
+#define ALIGN alignas(16)
+
 namespace GL
 {
 	struct Camera
 	{
-		gl::vec3 Position;
-		gl::vec2 ClipPlanes;
+		glm::vec3 Position;
+		ALIGN glm::vec2 ClipPlanes;
 		float FOV;
 
-		mat4 Projection;
-		mat4 PreviousViewProjection;
-		mat4 View[6];
+
+		ALIGN glm::mat4 Projection;
+		glm::mat4 PreviousViewProjection;
+		glm::mat4 View[6];
 	};
 
 	struct Scene
 	{
 		uint InstanceCount;
-		mat4 Model[MAX_OBJECT];
-		mat3 Normal[MAX_OBJECT];
+		ALIGN glm::mat4 Model[MAX_OBJECT];
+		glm::mat4 Normal[MAX_OBJECT]; // for alignment purposes.
 	};
 }
 

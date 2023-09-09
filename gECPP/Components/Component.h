@@ -29,7 +29,14 @@ namespace gE
 	// For future development.
 	class Behavior : public Component
 	{
+	 public:
 		explicit Behavior(Entity* o);
+
+		void OnStart() override {}
+		void OnUpdate(float d) override {}
+		void OnRender(float d) override {}
+		void OnDestroy() override {}
+
 		~Behavior() override;
 	};
 }
