@@ -21,8 +21,9 @@
 #define GL_INT 0x1404
 #define GL_UNSIGNED_INT 0x1405
 #define GL_FLOAT 0x1406
-#define RAD 0.01745329251f
-#define DEG 57.2957795131f
+
+#define TO_RAD 0.01745329251f
+#define TO_DEG 57.2957795131f
 
 typedef uint8_t ubyte;
 typedef uint8_t u8;
@@ -57,5 +58,35 @@ namespace glm
 	typedef u32vec2 TextureSize;
 }
 
+enum class FOVType : u8
+{
+	Horizontal, Vertical
+};
+
+enum class AngleType : u8
+{
+	Degree, Radian
+};
+
+template<FOVType TO, AngleType UNIT = AngleType::Radian>
+float fov_cast(float in, const glm::TextureSize& size)
+{
+	float aspesct;
+	if constexpr (TO == FOVType::Horizontal) aspesct = (float) size.x / size.y;
+	else aspesct = (float) size.y / size.x;
+
+	if constexpr (UNIT == AngleType::Degree) in *= TO_RAD;
+	float val = 2 * atanf(tanf(in / 2) * aspesct);
+
+	if constexpr (UNIT == AngleType::Degree) return val * TO_DEG;
+	else return val;
+}
+
+template<AngleType TO, typename T>
+inline T degree_cast(const T& t)
+{
+	if constexpr(TO == AngleType::Radian) return t * TO_RAD;
+	else return t * TO_DEG;
+}
 
 

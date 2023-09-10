@@ -39,7 +39,7 @@ class Movement : public gE::Behavior
 		_rot.x += mouseDelta.y * 0.1f;
 		_rot.x = std::clamp(_rot.x, -89.9f, 89.9f);
 
-		_transform.SetRotation(_rot * RAD);
+		_transform.SetRotation(degree_cast<AngleType::Radian>(_rot));
 
 		glm::vec3 dir(0.f);
 		if(glfwGetKey(_window, GLFW_KEY_W)) dir.z -= 1;
@@ -62,7 +62,7 @@ class FlyCam : public gE::Entity
 {
  public:
 	explicit FlyCam(gE::Window* window) : gE::Entity(window),
-		Camera(this, gE::CameraSettings{{1280, 720}, {0.1f, 100.f}, DefaultRenderPass}, 60 * RAD),
+		Camera(this, gE::CameraSettings{{1280, 720}, {0.1f, 100.f}, DefaultRenderPass}, degree_cast<AngleType::Radian>(80.f)),
 	  	_movement(this)
 	{
 
