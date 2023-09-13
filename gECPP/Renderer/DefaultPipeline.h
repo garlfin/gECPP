@@ -4,23 +4,23 @@
 
 #pragma once
 
-#include <GL/Buffer/Buffer.h>
+#include "GL/Buffer/Buffer.h"
 #include "Entity/Camera.h"
 
 #define MAX_OBJECT 64
 
-#define ALIGN alignas(16)
+#define GL_ALIGN alignas(16)
 
 namespace GL
 {
 	struct Camera
 	{
 		glm::vec3 Position;
-		ALIGN glm::vec2 ClipPlanes;
+		GL_ALIGN glm::vec2 ClipPlanes;
 		float FOV;
 
 
-		ALIGN glm::mat4 Projection;
+		GL_ALIGN glm::mat4 Projection;
 		glm::mat4 PreviousViewProjection;
 		glm::mat4 View[6];
 	};
@@ -28,8 +28,8 @@ namespace GL
 	struct Scene
 	{
 		uint InstanceCount;
-		ALIGN glm::mat4 Model[MAX_OBJECT];
-		glm::mat4 Normal[MAX_OBJECT]; // for alignment purposes.
+		GL_ALIGN glm::mat4 Model[MAX_OBJECT];
+		glm::mat4x3 Normal[MAX_OBJECT]; // for alignment purposes.
 	};
 }
 

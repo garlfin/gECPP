@@ -2,8 +2,16 @@
 
 #include "Math.h"
 
-#define NODISCARD [[nodiscard]]
-#define ALWAYS_INLINE __attribute__((always_inline)) inline
+#ifndef NODISCARD
+	#define NODISCARD [[nodiscard]]
+#endif
+#ifndef ALWAYS_INLINE
+	#ifdef DEBUG
+		#define ALWAYS_INLINE inline
+	#else
+		#define ALWAYS_INLINE __attribute__((always_inline)) inline
+	#endif // #if DEBUG
+#endif // #ifndef ALWAYS_INLINE
 
 #define GE_FAIL(ERR) { std::cout << ERR << std::endl; exit(-1); }
 #define GE_ASSERT(COND, ERR) if(!(COND)) GE_FAIL(ERR);

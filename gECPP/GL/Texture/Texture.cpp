@@ -6,8 +6,6 @@
 
 using namespace GL;
 
-#define DIV_CEIL(x, y) (((x) + (y) - decltype(x)(1)) / (y))
-
 constexpr GLenum PVRToInternalFormat(PVR::PVRPixelFormat f)
 {
 	// TODO: Implement table instead of switch.
@@ -22,17 +20,22 @@ constexpr GLenum PVRToInternalFormat(PVR::PVRPixelFormat f)
 	}
 }
 
-struct CompressionScheme
-{
-	uint8_t Pixel;
-	uint8_t Byte;
-
-	NODISCARD size_t GetByteSize(const glm::u16vec2& size) const { return DIV_CEIL(size.x * size.y, Pixel) * Byte; }
-};
-
 inline bool FormatIsCompressed(PVR::PVRPixelFormat f) { return f != PVR::PVRPixelFormat::R8G8B8; }
 
-Texture::Texture(gE::Window* window, GLuint target, TextureSize size, uint8_t mips, bool linear) : Asset(window), Size(size), Mips(mips)
+template<>
+Texture<TextureSize>::Texture(gE::Window* window, GLuint target, GLenum format, const TextureSize& size, u8 mips, bool linear = true) :
+	Asset(window), Size(size), Mips(mips), Format(format), Target(target)
+{
+	glCreateTextures(target, 1, &ID);
+	glTextureParameteri(ID, GL_TEXTURE_MIN_FILTER, linear ? (mips > 1 ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR) : GL_NEAREST);
+	glTextureParameteri(ID, GL_TEXTURE_MAG_FILTER, linear ? GL_LINEAR : GL_NEAREST);
+	glTextureParameteri(ID, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTextureParameteri(ID, GL_TEXTURE_WRAP_T, GL_REPEAT);
+}
+
+template<>
+Texture<TextureSize3D>::Texture(gE::Window* window, GLuint target, GLenum format, const TextureSize3D& size, u8 mips, bool linear = true) :
+	Asset(window), Size(size), Mips(mips), Format(format), Target(target)
 {
 	glCreateTextures(target, 1, &ID);
 	glTextureParameteri(ID, GL_TEXTURE_MIN_FILTER, linear ? (mips > 1 ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR) : GL_NEAREST);
@@ -42,18 +45,17 @@ Texture::Texture(gE::Window* window, GLuint target, TextureSize size, uint8_t mi
 }
 
 Texture2D::Texture2D(gE::Window* window, TextureSize size, PVR::PVRPixelFormat f, u8* d, uint8_t mips, bool linear)
-	: Texture(window, GL_TEXTURE_2D, size, mips, linear)
+	: Texture<TextureSize>(window, GL_TEXTURE_2D, PVRToInternalFormat(f), size, mips, linear)
 {
-	size = glm::max(size, TextureSize(1));
-	glTextureStorage2D(ID, mips, PVRToInternalFormat(f), size.x, size.y);
+	glTextureStorage2D(ID, mips, Format, size.x, size.y);
 	uint32_t dataSize;
 	if(!d) return;
-	for(ubyte i = 0; i < mips; i++, size = DIV_CEIL(size, TextureSize(2)), d += dataSize) // TODO: case for format, lazy
+	for(ubyte i = 0; i < mips; i++, size >>= 1, d += dataSize)
 	{
-		if(FormatIsCompressed(f))
+		size = glm::max(size, TextureSize(1));
+		if(FormatIsCompressed(f)) // todo: this....
 		{
-			dataSize = DIV_CEIL(size.x * size.y, 16) * 16; // 16 bytes for 16 pixels
-			glCompressedTextureSubImage2D(ID, i, 0, 0, size.x, size.y, PVRToInternalFormat(f), dataSize, d);
+			glCompressedTextureSubImage2D(ID, i, 0, 0, size.x, size.y, Format, dataSize, d);
 		}
 		else
 		{
@@ -64,7 +66,7 @@ Texture2D::Texture2D(gE::Window* window, TextureSize size, PVR::PVRPixelFormat f
 	if(!mips) glGenerateTextureMipmap(ID);
 }
 
-Texture* PVR::Read(gE::Window* window, const char* path, bool linear)
+Texture<TextureSize>* PVR::Read(gE::Window* window, const char* path, bool linear)
 {
 	u32 fileLen = 0;
 	u8* f = ReadFile(path, fileLen, false);
@@ -96,4 +98,10 @@ void PVR::PVRHeader::Serialize(u8*& ptr)
 	Faces = ::Read<uint32_t>(ptr);
 	MipCount = ::Read<uint32_t>(ptr);
 	ptr += ::Read<uint32_t>(ptr); // I couldn't give two hoots about the metadata
+}
+
+Texture3D::Texture3D(gE::Window*, const TextureSize3D&, GLenum fmt, u8*, u8* mip, bool linear) :
+	Texture<TextureSize3D>(window, GL_TEXTURE_3D, fmt, size, mip, linear)
+{
+
 }

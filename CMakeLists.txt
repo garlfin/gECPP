@@ -9,6 +9,8 @@ set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3 -static -s")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -static")
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -static")
 
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
+
 include_directories(gECPP Vendor Vendor/FBX ${CMAKE_SOURCE_DIR})
 
 # GLFW
@@ -35,7 +37,7 @@ target_link_libraries(gEModel PRIVATE ASSIMP GETF)
 
 # GECPP
 file(GLOB_RECURSE GECPP_SRC "gECPP/*.cpp" "gECPP/*.h")
-add_library(gECPP STATIC ${GECPP_SRC} gECPP/Entity/MeshRenderer.cpp gECPP/Entity/MeshRenderer.h gECPP/ComponentManager.h gECPP/AssetManager.h)
+add_library(gECPP STATIC ${GECPP_SRC} gECPP/Entity/MeshRenderer.cpp gECPP/Entity/MeshRenderer.h gECPP/Asset/ComponentManager.h gECPP/Asset/AssetManager.h)
 target_link_libraries(gECPP GLAD GLFW GETF)
 
 # VOXELDEMO

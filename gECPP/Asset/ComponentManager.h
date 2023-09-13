@@ -5,7 +5,7 @@
 #pragma once
 
 #include <vector>
-#include <Components/Component.h>
+#include "Components/Component.h"
 
 namespace gE
 {

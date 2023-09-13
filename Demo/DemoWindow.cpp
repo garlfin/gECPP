@@ -48,7 +48,7 @@ class Movement : public gE::Behavior
 		if(glfwGetKey(_window, GLFW_KEY_A)) dir.x -= 1;
 
 		dir = glm::normalize(dir);
-		if(!glm::isinf(dir.x) && !glm::isnan(dir.x)) _transform.Position += _transform.LocalRotationMatrix() * dir * d;
+		if(!glm::isnan(dir.x)) _transform.Position += _transform.LocalRotationMatrix() * dir * d;
 	}
 
  private:

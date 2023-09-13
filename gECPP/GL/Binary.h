@@ -9,11 +9,19 @@
 
 
 #ifndef NODISCARD
-#define NODISCARD [[nodiscard]]
+	#define NODISCARD [[nodiscard]]
 #endif
 #ifndef ALWAYS_INLINE
-#define ALWAYS_INLINE __attribute__((always_inline)) inline
-#endif
+	#ifdef DEBUG
+		#define ALWAYS_INLINE inline
+	#else
+		#define ALWAYS_INLINE __attribute__((always_inline)) inline
+	#endif // #if DEBUG
+#endif // #ifndef ALWAYS_INLINE
+
+#ifdef DEBUG
+	#include <iostream>
+#endif // #ifdef DEBUG
 
 namespace gETF { struct Serializable; }
 

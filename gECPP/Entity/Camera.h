@@ -5,9 +5,9 @@
 #pragma once
 
 #include "Entity.h"
-#include "DefaultPipeline.h"
-#include "Array.h"
-#include "ComponentManager.h"
+#include "Renderer/DefaultPipeline.h"
+#include "Asset/Array.h"
+#include "Asset/ComponentManager.h"
 #include <GL/Texture/Texture.h>
 
 namespace GL { struct Camera; }

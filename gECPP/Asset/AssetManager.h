@@ -5,7 +5,7 @@
 #pragma once
 
 #include <vector>
-#include <GL/gl.h>
+#include "GL/GL.h"
 
 namespace gE
 {
@@ -24,6 +24,7 @@ namespace gE
 			push_back(t);
 			return t;
 		}
+
 		template<class T>
 		inline T* Register(T* t) { if(!Contains(t)) push_back(t); return t; }
 		inline virtual void Remove(GL::Asset* t)

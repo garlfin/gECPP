@@ -2,7 +2,7 @@
 #include <GL/GL.h>
 #include <utility>
 #include "GLAD/glad.h"
-#include "Array.h"
+#include "Asset/Array.h"
 
 namespace GL
 {

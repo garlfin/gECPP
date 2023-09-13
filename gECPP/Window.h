@@ -1,9 +1,9 @@
 #pragma once
 
 #include <GL/Math.h>
-#include "DefaultPipeline.h"
-#include <ComponentManager.h>
-#include <AssetManager.h>
+#include "Renderer/DefaultPipeline.h"
+#include "Asset/ComponentManager.h"
+#include "Asset/AssetManager.h"
 
 struct GLFWwindow;
 

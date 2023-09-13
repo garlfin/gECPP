@@ -4,7 +4,7 @@
 
 #pragma once
 #include <iostream>
-#include <GL/GL.h>
+#include "GL/gl.h"
 
 template<class T, u64 PAGE_T_SIZE = 64>
 struct MemoryPool
