@@ -1,9 +1,9 @@
 #pragma once
 
-#include <GL/Math.h>
+#include "GL/Math.h"
 #include "Renderer/DefaultPipeline.h"
-#include "Asset/ComponentManager.h"
-#include "Asset/AssetManager.h"
+#include "Engine/ComponentManager.h"
+#include "Engine/AssetManager.h"
 
 struct GLFWwindow;
 
@@ -22,6 +22,7 @@ namespace gE
 		GET(DefaultPipelineBuffers*, PipelineBuffers, PipelineBuffers);
 		GET(ComponentManager<Transform>&, Transforms, Transforms);
 		GET(ComponentManager<Behavior>&, Behaviors, Behaviors);
+		GET_CONST(glm::TextureSize2D, Size, _size);
 
 		~Window();
 
@@ -38,7 +39,7 @@ namespace gE
 		ComponentManager<Behavior> Behaviors {};
 
 	 private:
-		glm::u16vec2 _size;
+		glm::TextureSize2D _size;
 		const char* _name;
 		GLFWwindow* _window;
 	};

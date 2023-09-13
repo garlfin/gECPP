@@ -19,10 +19,9 @@ namespace GL
 	template<typename T>
 	bool GetShaderStatus(const T& shader, const char* source = nullptr);
 
-	void Shader::SetUniform(u8 loc, const Texture* tex, u8 slot) const
+	void Shader::SetUniform(u8 loc, const TextureHandle& tex, u8 slot) const
 	{
-		if(!tex) return;
-		SetUniform(loc, i32(tex->Use(slot)));
+		SetUniform(loc, i32(tex.Use(slot)));
 	}
 
 	Shader::Shader(gE::Window* window, const char* v, const char* f, const Array<PreprocessorPair>* p) : Asset(window)

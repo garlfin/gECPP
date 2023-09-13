@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "Window.h"
-#include "Asset/MemoryPool.h"
+#include "Engine/Window.h"
+#include "Engine/MemoryPool.h"
 #include "GL/Buffer/VAO.h"
 #include "GL/Shader/Shader.h"
 #include "Entity/MeshRenderer.h"

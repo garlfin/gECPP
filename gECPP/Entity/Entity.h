@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "Forward.h"
+#include "Prototype.h"
 #include "Components/Transform.h"
 
 namespace gE

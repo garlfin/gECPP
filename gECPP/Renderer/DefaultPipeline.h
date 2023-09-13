@@ -29,7 +29,7 @@ namespace GL
 	{
 		uint InstanceCount;
 		GL_ALIGN glm::mat4 Model[MAX_OBJECT];
-		glm::mat4x3 Normal[MAX_OBJECT]; // for alignment purposes.
+		glm::mat3x4 Normal[MAX_OBJECT]; // for alignment purposes.
 	};
 }
 
@@ -44,7 +44,6 @@ namespace gE
 		const GL::Buffer<GL::Scene> Scene;
 		const GL::Buffer<GL::Camera> Camera;
 
-		void UpdateCamera(const class Camera& cam) const;
 		ALWAYS_INLINE void UpdateCamera(const GL::Camera& cam) const { Camera.ReplaceData(&cam); };
 	};
 }

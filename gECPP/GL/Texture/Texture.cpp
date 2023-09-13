@@ -6,67 +6,62 @@
 
 using namespace GL;
 
-constexpr GLenum PVRToInternalFormat(PVR::PVRPixelFormat f)
+template<TextureDimension DIMENSION>
+Texture<DIMENSION>::Texture(gE::Window* window, GLenum tgt, const TextureSettings<DIMENSION>& settings) :
+	Asset(window), Size(settings.Size), Mips(settings.MipCount), Format(settings.Format), Target(tgt)
 {
-	// TODO: Implement table instead of switch.
-	switch(f)
-	{
-	case PVR::PVRPixelFormat::DXT1: return GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
-	case PVR::PVRPixelFormat::DXT3: return GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
-	case PVR::PVRPixelFormat::DXT5: return GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
-	case PVR::PVRPixelFormat::BC5: return GL_COMPRESSED_RG_RGTC2;
-	case PVR::PVRPixelFormat::Depth: return GL_DEPTH_COMPONENT16;
-	default: return GL_RGB8;
-	}
-}
-
-inline bool FormatIsCompressed(PVR::PVRPixelFormat f) { return f != PVR::PVRPixelFormat::R8G8B8; }
-
-template<>
-Texture<TextureSize>::Texture(gE::Window* window, GLuint target, GLenum format, const TextureSize& size, u8 mips, bool linear = true) :
-	Asset(window), Size(size), Mips(mips), Format(format), Target(target)
-{
-	glCreateTextures(target, 1, &ID);
-	glTextureParameteri(ID, GL_TEXTURE_MIN_FILTER, linear ? (mips > 1 ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR) : GL_NEAREST);
-	glTextureParameteri(ID, GL_TEXTURE_MAG_FILTER, linear ? GL_LINEAR : GL_NEAREST);
+	glCreateTextures(tgt, 1, &ID);
+	glTextureParameteri(ID, GL_TEXTURE_MIN_FILTER, (GLint) settings.Filter + (Mips > 1 ? 0x102 : 0));
+	glTextureParameteri(ID, GL_TEXTURE_MAG_FILTER, (GLint) settings.Filter);
 	glTextureParameteri(ID, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTextureParameteri(ID, GL_TEXTURE_WRAP_T, GL_REPEAT);
 }
 
-template<>
-Texture<TextureSize3D>::Texture(gE::Window* window, GLuint target, GLenum format, const TextureSize3D& size, u8 mips, bool linear = true) :
-	Asset(window), Size(size), Mips(mips), Format(format), Target(target)
+Texture2D::Texture2D(gE::Window* window, const TextureSettings<TextureDimension::D2D>& settings, const TextureData& data) :
+	Texture<TextureDimension::D2D>(window, GL_TEXTURE_2D, settings)
 {
-	glCreateTextures(target, 1, &ID);
-	glTextureParameteri(ID, GL_TEXTURE_MIN_FILTER, linear ? (mips > 1 ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR) : GL_NEAREST);
-	glTextureParameteri(ID, GL_TEXTURE_MAG_FILTER, linear ? GL_LINEAR : GL_NEAREST);
-	glTextureParameteri(ID, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTextureParameteri(ID, GL_TEXTURE_WRAP_T, GL_REPEAT);
-}
+	glTextureStorage2D(ID, Mips, Format, Size.x, Size.y);
 
-Texture2D::Texture2D(gE::Window* window, TextureSize size, PVR::PVRPixelFormat f, u8* d, uint8_t mips, bool linear)
-	: Texture<TextureSize>(window, GL_TEXTURE_2D, PVRToInternalFormat(f), size, mips, linear)
-{
-	glTextureStorage2D(ID, mips, Format, size.x, size.y);
-	uint32_t dataSize;
-	if(!d) return;
-	for(ubyte i = 0; i < mips; i++, size >>= 1, d += dataSize)
+	if(!data.Data) return;
+
+	TextureSize<TextureDimension::D2D> size = Size;
+	u8* dataPtr = (u8*) data.Data;
+	bool isCompressed = settings.Scheme.BlockSize != 1;
+
+	for(ubyte i = 0; i < Mips; i++, size >>= decltype(size)(1)) // lazy guy
 	{
-		size = glm::max(size, TextureSize(1));
-		if(FormatIsCompressed(f)) // todo: this....
-		{
-			glCompressedTextureSubImage2D(ID, i, 0, 0, size.x, size.y, Format, dataSize, d);
-		}
-		else
-		{
-			dataSize = size.x * size.y * 3; // 3bpp
-			glTextureSubImage2D(ID, i, 0, 0, size.x, size.y, GL_RGB, GL_UNSIGNED_BYTE, d);
-		}
+		size = glm::max(size, decltype(size)(1)); // double lazy guy
+		u64 dataSize = settings.Scheme.Size<TextureDimension::D2D>(size);
+
+		if(isCompressed) glCompressedTextureSubImage2D(ID, i, 0, 0, size.x, size.y, Format, dataSize, dataPtr);
+		else glTextureSubImage2D(ID, i, 0, 0, size.x, size.y, GL_RGB, GL_UNSIGNED_BYTE, dataPtr);
+
+		dataPtr += dataSize;
 	}
-	if(!mips) glGenerateTextureMipmap(ID);
 }
 
-Texture<TextureSize>* PVR::Read(gE::Window* window, const char* path, bool linear)
+Texture3D::Texture3D(gE::Window* window, const TextureSettings<TextureDimension::D3D>& settings, const TextureData& data) :
+	Texture<TextureDimension::D3D>(window, GL_TEXTURE_3D, settings)
+{
+	glTextureStorage3D(ID, Mips, Format, Size.x, Size.y, Size.z);
+
+	if(!data.Data) return;
+
+	TextureSize<TextureDimension::D3D> size = Size;
+	u8* dataPtr = (u8*) data.Data;
+
+	for(ubyte i = 0; i < Mips; i++, size >>= decltype(size)(1)) // lazy guy
+	{
+		size = glm::max(size, decltype(size)(1)); // double lazy guy
+		u64 dataSize = settings.Scheme.Size<TextureDimension::D2D>(size);
+
+		glTextureSubImage3D(ID, i, 0, 0, 0, size.x, size.y, size.z, GL_RGB, GL_UNSIGNED_BYTE, dataPtr); // TODO: ADD CASES!!!
+
+		dataPtr += dataSize;
+	}
+}
+
+Texture<GL::TextureDimension::D2D>* PVR::Read(gE::Window* window, const char* path, WrapMode wM, FilterMode fM)
 {
 	u32 fileLen = 0;
 	u8* f = ReadFile(path, fileLen, false);
@@ -77,31 +72,60 @@ Texture<TextureSize>* PVR::Read(gE::Window* window, const char* path, bool linea
 	h.Serialize(ptr);
 
 	if(h.Depth + h.Surfaces + h.Faces > 3) std::cout << "Unexpected 3D Texture" << std::endl;
-	auto* tex = new Texture2D(window, h.Size, h.Format, ptr, h.MipCount, linear);
-	delete[] f;
 
+	TextureSettings<GL::TextureDimension::D2D> settings
+	{
+		h.Size,
+		PVRToInternalFormat(h.Format),
+		CompressionScheme(16, 16),
+		wM,
+		fM,
+		(u8) h.MipCount
+	};
+
+	auto* tex = new Texture2D(window, settings, { ptr, (u8) h.MipCount });
+
+	delete[] f;
 	return tex;
 }
 
 void PVR::PVRHeader::Serialize(u8*& ptr)
 {
-	Version = ::Read<uint32_t>(ptr);
+	Version = ::Read<u32>(ptr);
 	Flags = ::Read<PVRFlags>(ptr);
 	Format = ::Read<PVRPixelFormat>(ptr);
 	ColorSpace = ::Read<PVRColorSpace>(ptr);
 	::Read<uint32_t>(ptr); // This was like bpc or something; unimportant w/ compression
-	Size = ::Read<TextureSize>(ptr);
-	Size = {Size.y, Size.x};
+	Size = ::Read<glm::u32vec2>(ptr);
+	Size = { Size.y, Size.x };
 	// they store it height, width 🤦‍♂️
-	Depth = ::Read<uint32_t>(ptr);
-	Surfaces = ::Read<uint32_t>(ptr);
-	Faces = ::Read<uint32_t>(ptr);
-	MipCount = ::Read<uint32_t>(ptr);
-	ptr += ::Read<uint32_t>(ptr); // I couldn't give two hoots about the metadata
+	Depth = ::Read<u32>(ptr);
+	Surfaces = ::Read<u32>(ptr);
+	Faces = ::Read<u32>(ptr);
+	MipCount = ::Read<u32>(ptr);
+	ptr += ::Read<u32>(ptr); // I couldn't give two hoots about the metadata
 }
 
-Texture3D::Texture3D(gE::Window*, const TextureSize3D&, GLenum fmt, u8*, u8* mip, bool linear) :
-	Texture<TextureSize3D>(window, GL_TEXTURE_3D, fmt, size, mip, linear)
+TextureHandle::TextureHandle(const Texture<TextureDimension::D2D>& tex) :
+	_id(tex.Get()), _format(tex.GetFormat()), _target(tex.GetTarget())
 {
+}
 
+TextureHandle::TextureHandle(const Texture<TextureDimension::D3D>& tex) :
+	_id(tex.Get()), _format(tex.GetFormat()), _target(tex.GetTarget())
+{
+}
+
+bool FormatIsCompressed(GLenum f)
+{
+	switch(f)
+	{
+	case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
+	case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
+	case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
+	case GL_COMPRESSED_RG_RGTC2:
+		return true;
+	default:
+		return false;
+	}
 }

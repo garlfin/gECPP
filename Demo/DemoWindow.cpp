@@ -62,7 +62,7 @@ class FlyCam : public gE::Entity
 {
  public:
 	explicit FlyCam(gE::Window* window) : gE::Entity(window),
-		Camera(this, gE::CameraSettings{{1280, 720}, {0.1f, 100.f}, DefaultRenderPass}, degree_cast<AngleType::Radian>(80.f)),
+		Camera(this, gE::CameraSettings{window->GetSize(), {0.1f, 100.f}, DefaultRenderPass}, degree_cast<AngleType::Radian>(80.f)),
 	  	_movement(this)
 	{
 

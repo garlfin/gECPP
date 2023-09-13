@@ -4,124 +4,67 @@
 #include <gEModel/gETF/Prototype.h>
 #include <GL/Binary.h>
 #include <GLAD/glad.h>
-
-#define DIV_CEIL(x, y) (((x) + (y) - decltype(x)(1)) / (y))
-
-namespace GL { typedef glm::u32vec2 TextureSize; typedef glm::u32vec3 TextureSize3D; }
-
-namespace PVR
-{
-	enum class PVRFlags : uint32_t
-	{
-		None = 0,
-		PreMultiplied = 2
-	};
-
-	enum class PVRPixelFormat : uint64_t
-	{
-		DXT1 = 7,
-		DXT3 = 9,
-		DXT5 = 11,
-		R8G8B8 = 2260630272894834, // rgb.888.
-		Depth, BC5 = 13
-	};
-
-	enum class PVRColorSpace : uint32_t
-	{
-		Linear = 0,
-		SRGB = 1,
-	};
-
-	struct PVRHeader : gETF::Serializable
-	{
-		SERIALIZABLE_PROTO;
-
-		uint32_t Version;
-		PVRFlags Flags;
-		PVRPixelFormat Format;
-		PVRColorSpace ColorSpace;
-		GL::TextureSize Size;
-		uint32_t Depth;
-		uint32_t Surfaces;
-		uint32_t Faces;
-		uint32_t MipCount;
-	};
-
-	enum class FilterMode : GLenum
-	{
-		Nearest = GL_NEAREST,
-		Linear = GL_LINEAR
-	};
-}
+#include "TextureSettings.h"
 
 namespace GL
 {
-	struct CompressionScheme
-	{
-		u8 BlockSize;
-		u8 ByteSize;
-
-		template<typename DIMENSION>
-		NODISCARD ALWAYS_INLINE u64 Size(const DIMENSION& size)
-		{
-			DIMENSION blocks = DIV_CEIL(size, BlockSize);
-			if constexpr(std::is_same_v<DIMENSION, TextureSize>) return blocks.x * blocks.y * ByteSize;
-			else return blocks.x * blocks.y * blocks.z * ByteSize;
-		}
-	};
-
-	template<typename DIMENSION>
-	struct TextureSettings
-	{
-		DIMENSION Size = DIMENSION(1);
-		u8 Mips = 0;
-		GLenum Format = GL_UNSIGNED_BYTE;
-		GLenum WrapMode = GL_REPEAT;
-		GLenum Filter = GL_LINEAR;
-	};
-
-	template<typename DIMENSION>
+	template<TextureDimension DIMENSION>
 	class Texture : public Asset
 	{
 	 public:
-		NODISCARD ALWAYS_INLINE uint32_t Use(uint32_t slot) const { glBindTextureUnit(slot, ID); return slot; }
-		NODISCARD ALWAYS_INLINE TextureSize GetSize(u8 mip = 0) const { return Size >> DIMENSION(mip); }
-		ALWAYS_INLINE u32 Bind(u32 unit, GLenum access, u8 mip = 0) { glBindImageTexture(unit, ID, mip, GL_FALSE, 0, access, Format); return unit; }
+		NODISCARD ALWAYS_INLINE TextureSize<DIMENSION> GetSize(u8 mip = 0) const { return Size >> TextureSize<DIMENSION>(mip); }
+		ALWAYS_INLINE uint32_t Use(uint32_t slot) const { glBindTextureUnit(slot, ID); return slot; }
+		ALWAYS_INLINE u32 Bind(u32 unit, GLenum access, u8 mip = 0) const { glBindImageTexture(unit, ID, mip, GL_FALSE, 0, access, Format); return unit; }
+		inline void Bind() const override { glBindTexture(Target, ID); }
 
-		inline void Bind() const override  { glBindTexture(Target, ID); }
+		GET_CONST(GLenum, Format, Format);
+		GET_CONST(GLenum, Target, Target);
+		GET_CONST(GLenum, MipCount, Mips);
+
 		~Texture() override { glDeleteTextures(1, &ID); }
 
 	 protected:
-		Texture(gE::Window* window, GLuint target, GLenum Format, const DIMENSION& size, u8, bool linear = true);
+		Texture(gE::Window* window, GLenum tgt, const TextureSettings<DIMENSION>& settings);
 
-		const DIMENSION Size;
+		const TextureSize<DIMENSION> Size;
 		const uint8_t Mips;
 		const GLenum Format;
 		const GLenum Target;
 	};
 
-	template class Texture<TextureSize>;
-	template class Texture<TextureSize3D>;
+	template class Texture<TextureDimension::D2D>;
+	template class Texture<TextureDimension::D3D>;
 
-	class Texture2D final : public Texture<TextureSize>
+	class Texture2D final : public Texture<TextureDimension::D2D>
 	{
 	 public:
-		Texture2D(gE::Window* window, TextureSize, PVR::PVRPixelFormat, u8* d = nullptr, u8 mips = 0, bool linear = true);
+		Texture2D(gE::Window* window, const TextureSettings<TextureDimension::D2D>& settings, const TextureData& = {});
 	};
 
-	class Texture3D final : public Texture<TextureSize3D>
+	class Texture3D final : public Texture<TextureDimension::D3D>
 	{
 	 public:
-		Texture3D(gE::Window*, const TextureSize3D&, GLenum fmt, u8* = nullptr, u8* mip = 0, bool linear = true);
+		Texture3D(gE::Window* window, const TextureSettings<TextureDimension::D3D>& settings, const TextureData& = {});
+	};
 
-		NODISCARD ALWAYS_INLINE TextureSize3D GetSize3D(u8 mip = 0) { return _size >> TextureSize3D(mip); }
+	class TextureHandle
+	{
+	 public:
+		TextureHandle(const Texture<TextureDimension::D2D>&); // NOLINT
+		TextureHandle(const Texture<TextureDimension::D3D>&); // NOLINT
+
+		ALWAYS_INLINE uint32_t Use(uint32_t slot) const { glBindTextureUnit(slot, _id); return slot; }
+		ALWAYS_INLINE u32 Bind(u32 unit, GLenum access, u8 mip = 0) const { glBindImageTexture(unit, _id, mip, GL_FALSE, 0, access, _format); return unit; }
+		ALWAYS_INLINE void Bind() const { glBindTexture(_target, _id); }
 
 	 private:
-		TextureSize3D _size;
+		const GLuint _id;
+		const GLuint _format;
+		const GLuint _target;
 	};
 }
 
 namespace PVR
 {
-	GL::Texture<GL::TextureSize>* Read(gE::Window* window, const char* path, bool linear = true);
+	GL::Texture<GL::TextureDimension::D2D>* Read(gE::Window* window, const char* path, GL::WrapMode wM, GL::FilterMode fM);
 }

@@ -4,7 +4,7 @@
 
 #include "Camera.h"
 #include <Components/Transform.h>
-#include <Window.h>
+#include "Engine/Window.h"
 
 gE::Camera::Camera(gE::Entity* parent, const CameraSettings& settings) :
 	Component(parent), _renderPass(settings.RenderPass), _clipPlanes(settings.ClipPlanes),

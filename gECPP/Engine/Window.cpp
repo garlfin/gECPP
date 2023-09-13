@@ -1,6 +1,6 @@
 #include "Window.h"
-#include <GLAD/glad.h>
-#include <GLFW/glfw3.h>
+#include "GLAD/glad.h"
+#include "GLFW/glfw3.h"
 #include <iostream>
 
 using namespace gE;
@@ -55,9 +55,4 @@ gE::DefaultPipelineBuffers::DefaultPipelineBuffers(Window* window)
 {
 	Scene.Bind(GL::BufferTarget::Uniform, 0);
 	Camera.Bind(GL::BufferTarget::Uniform, 1);
-}
-
-void gE::DefaultPipelineBuffers::UpdateCamera(const gE::Camera& cam) const
-{
-	UpdateCamera(cam.GetGLCamera());
 }

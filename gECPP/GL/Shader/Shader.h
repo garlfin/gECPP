@@ -2,11 +2,11 @@
 #include <GL/GL.h>
 #include <utility>
 #include "GLAD/glad.h"
-#include "Asset/Array.h"
+#include "Engine/Array.h"
 
 namespace GL
 {
-	struct Texture;
+	struct TextureHandle;
 	struct ShaderStage;
 
 	struct PreprocessorPair
@@ -45,7 +45,7 @@ namespace GL
 		ALWAYS_INLINE void SetUniform(u8 loc, const glm::vec2& val) const { glProgramUniform2f(ID, loc, val.x, val.y); }
 		ALWAYS_INLINE void SetUniform(u8 loc, const glm::vec3& val) const { glProgramUniform3fv(ID, loc, 1, (GLfloat*) &val); }
 		ALWAYS_INLINE void SetUniform(u8 loc, const glm::vec4& val) const { glProgramUniform4fv(ID, loc, 1, (GLfloat*) &val); }
-		void SetUniform(u8 loc, const Texture*, u8 slot) const;
+		void SetUniform(u8 loc, const TextureHandle&, u8 slot) const;
 
 		~Shader() override { glDeleteProgram(ID); }
 	};

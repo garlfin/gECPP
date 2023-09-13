@@ -6,8 +6,8 @@
 
 #include "Entity.h"
 #include "Renderer/DefaultPipeline.h"
-#include "Asset/Array.h"
-#include "Asset/ComponentManager.h"
+#include "Engine/Array.h"
+#include "Engine/ComponentManager.h"
 #include <GL/Texture/Texture.h>
 
 namespace GL { struct Camera; }
@@ -17,12 +17,12 @@ namespace gE
 	class Camera;
 
 	typedef void(*RenderPass)(Window*, Camera*);
-	typedef void(*PostProcessPass)(Window*, Camera*, GL::Texture* in, GL::Texture* out);
+	typedef void(*PostProcessPass)(Window*, Camera*, GL::Texture<GL::TextureDimension::D2D>* in, GL::Texture<GL::TextureDimension::D2D>* out);
 	typedef glm::vec2 ClipPlanes;
 
 	struct CameraSettings
 	{
-		GL::TextureSize Size = {0, 0};
+		glm::TextureSize2D Size = {0, 0};
 		ClipPlanes ClipPlanes = {0.1, 100};
 		RenderPass RenderPass = nullptr;
 		Array<PostProcessPass>* PostProcess = nullptr;
@@ -33,8 +33,8 @@ namespace gE
 	 public:
 		Camera(Entity* w, const CameraSettings&);
 
-		NODISCARD ALWAYS_INLINE GL::TextureSize GetSize() const { return _size; }
-		NODISCARD ALWAYS_INLINE float GetAspect() const { glm::TextureSize size = GetSize(); return (float) size.x / (float) size.y; }
+		NODISCARD ALWAYS_INLINE glm::TextureSize2D GetSize() const { return _size; }
+		NODISCARD ALWAYS_INLINE float GetAspect() const { glm::TextureSize2D size = GetSize(); return (float) size.x / (float) size.y; }
 
 		void OnUpdate(float delta) override {}
 		void OnRender(float delta) override;
@@ -50,9 +50,9 @@ namespace gE
 		virtual void UpdateProjection() = 0;
 
 		ClipPlanes _clipPlanes;
-		GL::TextureSize _size;
+		glm::TextureSize2D _size;
 
-		GL::Texture* _texture{};
+		GL::Texture<GL::TextureDimension::D2D>* _texture;
 
 		RenderPass _renderPass;
 		Array<PostProcessPass> _postProcessPass;
