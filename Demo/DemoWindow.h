@@ -8,8 +8,8 @@
 #include "Engine/MemoryPool.h"
 #include "GL/Buffer/VAO.h"
 #include "GL/Shader/Shader.h"
-#include "Entity/MeshRenderer.h"
-#include <gECPP/Entity/Entity.h>
+#include "Engine/Entity/MeshRenderer.h"
+#include <Engine/Entity/Entity.h>
 
 namespace VoxelDemo
 {

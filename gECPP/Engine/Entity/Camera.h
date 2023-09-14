@@ -5,10 +5,10 @@
 #pragma once
 
 #include "Entity.h"
-#include "Renderer/DefaultPipeline.h"
+#include "Engine/Renderer/DefaultPipeline.h"
 #include "Engine/Array.h"
 #include "Engine/ComponentManager.h"
-#include <GL/Texture/Texture.h>
+#include "GL/Texture/Texture.h"
 
 namespace GL { struct Camera; }
 

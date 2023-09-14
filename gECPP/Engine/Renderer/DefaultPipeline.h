@@ -5,7 +5,7 @@
 #pragma once
 
 #include "GL/Buffer/Buffer.h"
-#include "Entity/Camera.h"
+#include "Engine/Entity/Camera.h"
 
 #define MAX_OBJECT 64
 

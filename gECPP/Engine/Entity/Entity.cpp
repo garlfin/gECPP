@@ -3,7 +3,7 @@
 //
 
 #include "Entity.h"
-#include "Components/Component.h"
+#include "Engine/Component/Component.h"
 #include "Engine/Window.h"
 
 namespace gE

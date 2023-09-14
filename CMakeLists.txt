@@ -37,10 +37,11 @@ target_link_libraries(gEModel PRIVATE ASSIMP GETF)
 
 # GECPP
 file(GLOB_RECURSE GECPP_SRC "gECPP/*.cpp" "gECPP/*.h")
-add_library(gECPP STATIC ${GECPP_SRC} gECPP/Entity/MeshRenderer.cpp gECPP/Entity/MeshRenderer.h gECPP/Engine/ComponentManager.h gECPP/Engine/AssetManager.h)
+add_library(gECPP STATIC ${GECPP_SRC} )
 target_link_libraries(gECPP GLAD GLFW GETF)
 
 # VOXELDEMO
-add_executable(VoxelDemo Demo/main.cpp Demo/DemoWindow.h Demo/DemoWindow.cpp)
+file(GLOB_RECURSE VOXELDEMO_SRC "Demo/*.cpp" "Demo/*.h")
+add_executable(VoxelDemo ${VOXELDEMO_SRC})
 target_link_libraries(VoxelDemo gECPP)
 add_custom_command(TARGET VoxelDemo PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/Resource/ ${CMAKE_BINARY_DIR}/Resource/)

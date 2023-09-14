@@ -3,7 +3,7 @@
 //
 
 #pragma once
-#include <GL/Shader/Shader.h>
+#include "GL/Shader/Shader.h"
 
 namespace gE
 {

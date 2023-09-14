@@ -3,7 +3,7 @@
 //
 
 #include "Camera.h"
-#include <Components/Transform.h>
+#include "Engine/Component/Transform.h"
 #include "Engine/Window.h"
 
 gE::Camera::Camera(gE::Entity* parent, const CameraSettings& settings) :
@@ -36,7 +36,6 @@ gE::Camera::~Camera()
 gE::PerspectiveCamera::PerspectiveCamera(gE::Entity* parent, const CameraSettings& settings, float fov)
 	: Camera(parent, settings), _fov(fov)
 {
-
 }
 
 GL::Camera gE::PerspectiveCamera::GetGLCamera() const

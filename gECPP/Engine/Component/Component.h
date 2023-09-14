@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <Prototype.h>
+#include "Prototype.h"
 
 namespace gE
 {

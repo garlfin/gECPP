@@ -5,7 +5,7 @@
 #pragma once
 
 #include "Prototype.h"
-#include "Components/Transform.h"
+#include "Engine/Component/Transform.h"
 
 namespace gE
 {

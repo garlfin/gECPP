@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <GL/Math.h>
+#include "GL/Math.h"
 #include "Component.h"
 
 namespace gE

@@ -9,11 +9,14 @@
 char DEFINE_DIRECTIVE[] = "#define ";
 char INCLUDE_DIRECTIVE[] = "#include ";
 char VERSION_DIRECTIVE[] = "#version 460 core\n";
+char EXTENSION_DIRECTIVE[] = "#extension ";
+char EXTENSION_DIRECTIVE_END[] = " : require";
+char EXTENSION_REQUIRE_DIRECTIVE[] = "#require\n";
 
 namespace GL
 {
 	void CompileDirectives(const Array<PreprocessorPair>*, gETF::SerializationBuffer&);
-	void CompileIncludes(const char* file, gETF::SerializationBuffer&);
+	void CompileIncludes(const char* file, gETF::SerializationBuffer&, gETF::SerializationBuffer&);
 	const char* GetIncludePath(const char* origin, const char* include);
 
 	template<typename T>
@@ -41,15 +44,17 @@ namespace GL
 	{
 		ID = glCreateShader(type);
 
+		gETF::SerializationBuffer directivesBuf{};
 		gETF::SerializationBuffer sourceBuf{};
 
-		sourceBuf.StrCat(VERSION_DIRECTIVE);
-		sourceBuf.StrCat(ShaderStageDefine(type));
-		CompileDirectives(directives, sourceBuf);
-		CompileIncludes(file, sourceBuf);
-		sourceBuf.Push('\0');
+		directivesBuf.StrCat(VERSION_DIRECTIVE);
+		directivesBuf.StrCat(ShaderStageDefine(type));
+		CompileDirectives(directives, directivesBuf);
+		CompileIncludes(file, sourceBuf, directivesBuf);
+		directivesBuf.Push(sourceBuf);
+		directivesBuf.Push('\0');
 
-		char* bufPtr = (char*) sourceBuf.Data();
+		char* bufPtr = (char*) directivesBuf.Data();
 
 		glShaderSource(ID, 1, &bufPtr, nullptr);
 		glCompileShader(ID);
@@ -131,7 +136,7 @@ namespace GL
 		}
 	}
 
-	void CompileIncludes(const char* file, gETF::SerializationBuffer& dstBuffer)
+	void CompileIncludes(const char* file, gETF::SerializationBuffer& dstBuffer, gETF::SerializationBuffer& directivesBuffer)
 	{
 		// Turns out most drivers support GL_ARB_SHADER_LANGUAGE_INCLUDE
 		char* source = (char*) ReadFile(file);
@@ -140,22 +145,22 @@ namespace GL
 
 		do
 		{
-			if(!StrCmp(line, INCLUDE_DIRECTIVE))
+			if(StrCmp(line, INCLUDE_DIRECTIVE))
 			{
-				dstBuffer.StrCat(line, '\n', 1);
+				const char* includePath = GetIncludePath(file, &line[9]);
+				CompileIncludes(includePath, dstBuffer, directivesBuffer);
+				delete[] includePath;
+				continue;
+			}
+			else if (StrCmp(line, EXTENSION_REQUIRE_DIRECTIVE))
+			{
+				directivesBuffer.StrCat(EXTENSION_DIRECTIVE);
+				directivesBuffer.StrCat(line + 8, '\n');
+				directivesBuffer.StrCat(EXTENSION_DIRECTIVE_END);
 				continue;
 			}
 
-			const char* includePath = GetIncludePath(file, &line[9]);
-
-#ifdef INCLUDE_RECURSE
-			CompileIncludes(includePath, dstBuffer);
-#else
-			char* includeSrc = (char*) ReadFile(includePath);
-			dstBuffer.StrCat(includeSrc);
-			delete[] includeSrc;
-#endif
-			delete[] includePath;
+			dstBuffer.StrCat(line, '\n', 1);
 		} while ((line = (char*) IncrementLine(line)));
 
 		delete[] source;
