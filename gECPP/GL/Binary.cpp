@@ -89,11 +89,12 @@ void SerializationBuffer::PushString(const char* ptr)
 	PushPtr(ptr, len);
 }
 
-void SerializationBuffer::StrCat(const char* str, char d, u8 offset)
+void SerializationBuffer::StrCat(const char* str, char d, i8 offset)
 {
 	if(!str) return;
 
-	u32 strLen = strlenc(str, d) + offset;
+	u32 strLen = strlenc(str, d);
+	if(str[strLen]) strLen += offset;
 	u64 size = Length();
 
 	Realloc(size + strLen);

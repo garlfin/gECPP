@@ -77,7 +77,7 @@ namespace gETF
 		NODISCARD ALWAYS_INLINE u64 Length() const { return _size; }
 
 		void PushString(const char* ptr);
-		void StrCat(const char* str, char = 0, u8 endOffset = 0);
+		void StrCat(const char* str, char = 0, i8 endOffset = 0);
 		void FromFile(const char* file, bool binary = false);
 
 		~SerializationBuffer() { free(_buf); }

@@ -6,12 +6,14 @@
     layout(binding = VOXEL_TEXTURE_LOCATION, rgba16f) restrict writeonly image3D VoxelOut;
 #endif
 
-#require GL_ARB_bindless_texture
+#extension GL_ARB_bindless_texture : require
 
 struct VoxelGridData
 {
     vec3 Minimum;
+    float VoxelScale; // Packs in there nicely, wasted space before.
     vec3 Maximum;
+    float MipCount;
     sampler3D Texture;
 };
 

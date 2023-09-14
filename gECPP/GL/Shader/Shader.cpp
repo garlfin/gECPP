@@ -6,12 +6,10 @@
 #include <GL/Texture/Texture.h>
 #include <iostream>
 
-char DEFINE_DIRECTIVE[] = "#define ";
-char INCLUDE_DIRECTIVE[] = "#include ";
-char VERSION_DIRECTIVE[] = "#version 460 core\n";
-char EXTENSION_DIRECTIVE[] = "#extension ";
-char EXTENSION_DIRECTIVE_END[] = " : require";
-char EXTENSION_REQUIRE_DIRECTIVE[] = "#require\n";
+#define DEFINE_DIRECTIVE "#define "
+#define INCLUDE_DIRECTIVE "#include "
+#define VERSION_DIRECTIVE "#version 460 core\n"
+#define EXTENSION_DIRECTIVE "#extension "
 
 namespace GL
 {
@@ -150,17 +148,9 @@ namespace GL
 				const char* includePath = GetIncludePath(file, &line[9]);
 				CompileIncludes(includePath, dstBuffer, directivesBuffer);
 				delete[] includePath;
-				continue;
 			}
-			else if (StrCmp(line, EXTENSION_REQUIRE_DIRECTIVE))
-			{
-				directivesBuffer.StrCat(EXTENSION_DIRECTIVE);
-				directivesBuffer.StrCat(line + 8, '\n');
-				directivesBuffer.StrCat(EXTENSION_DIRECTIVE_END);
-				continue;
-			}
-
-			dstBuffer.StrCat(line, '\n', 1);
+			else if (StrCmp(line, EXTENSION_DIRECTIVE)) directivesBuffer.StrCat(line, '\n', 1);
+			else dstBuffer.StrCat(line, '\n', 1);
 		} while ((line = (char*) IncrementLine(line)));
 
 		delete[] source;
