@@ -106,6 +106,8 @@ void PVR::PVRHeader::Serialize(u8*& ptr)
 	ptr += ::Read<u32>(ptr); // I couldn't give two hoots about the metadata
 }
 
+void PVR::PVRHeader::Deserialize(gETF::SerializationBuffer&) const {}
+
 TextureHandle::TextureHandle(const Texture<TextureDimension::D2D>& tex) :
 	_id(tex.Get()), _format(tex.GetFormat()), _target(tex.GetTarget())
 {

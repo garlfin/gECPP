@@ -19,7 +19,7 @@ void main()
     FragColor *= FragColor;
 
 #ifdef WRITE_VOXEL
-    Voxel voxel(FragColor.rgb, 0, 0, 1);
+    Voxel voxel = Voxel(FragColor.rgb, 0, 0, true);
     WriteVoxel(Vertex.FragPos, voxel);
 #endif
 }

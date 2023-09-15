@@ -18,7 +18,7 @@ namespace GL
 	const char* GetIncludePath(const char* origin, const char* include);
 
 	template<typename T>
-	bool GetShaderStatus(const T& shader, const char* source = nullptr);
+	bool GetShaderStatus(const T& shader, char* source = nullptr);
 
 	void Shader::SetUniform(u8 loc, const TextureHandle& tex, u8 slot) const
 	{
@@ -34,8 +34,9 @@ namespace GL
 		vert.Attach(this);
 
 		glLinkProgram(ID);
-
+#ifdef DEBUG
 		GetShaderStatus(*this);
+#endif
 	}
 
 	ShaderStage::ShaderStage(gE::Window* window, ShaderStageType type, const char* file, const Array<PreprocessorPair>* directives) : Asset(window)
@@ -47,6 +48,7 @@ namespace GL
 
 		directivesBuf.StrCat(VERSION_DIRECTIVE);
 		directivesBuf.StrCat(ShaderStageDefine(type));
+
 		CompileDirectives(directives, directivesBuf);
 		CompileIncludes(file, sourceBuf, directivesBuf);
 		directivesBuf.Push(sourceBuf);
@@ -56,7 +58,9 @@ namespace GL
 
 		glShaderSource(ID, 1, &bufPtr, nullptr);
 		glCompileShader(ID);
-		GetShaderStatus(*this, bufPtr);
+#ifdef DEBUG
+		GetSaderStatus(*this, bufPtr);
+#endif
 	}
 
 	Shader::Shader(gE::Window* window, const ShaderStage& v, const ShaderStage& f) : Asset(window)
@@ -68,7 +72,9 @@ namespace GL
 
 		glLinkProgram(ID);
 
+#ifdef DEBUG
 		GetShaderStatus(*this);
+#endif
 	}
 
 	Shader::Shader(gE::Window* window, const char* src, const Array<PreprocessorPair>* p) : Asset(window)
@@ -79,14 +85,15 @@ namespace GL
 		c.Attach(this);
 
 		glLinkProgram(ID);
-
+#ifdef DEBUG
 		GetShaderStatus(*this);
+#endif
 	}
 
 #define GL_GET(FUNC_STAGE, FUNC_SHADER, ARGS...) if constexpr (std::is_same_v<T, ShaderStage>) FUNC_STAGE(ARGS); else FUNC_SHADER(ARGS);
 
 	template<typename T>
-	bool GetShaderStatus(const T& shader, const char* source)
+	bool GetShaderStatus(const T& shader, char* source)
 	{
 		u32 id = shader.Get();
 
@@ -105,7 +112,22 @@ namespace GL
 		GL_GET(glGetShaderInfoLog, glGetProgramInfoLog, id, shaderStatus - 1, nullptr, infoLog);
 
 		std::cout << "SHADER COMPILE FAILURE:\n" << infoLog << '\n';
-		if(source) std::cout << "SOURCE:\n" << source << std::endl;
+		if(source)
+		{
+			std::cout << "0(1): ";
+			u32 i = 2;
+			for(;*source; source++)
+			{
+				if (*source == '\n')
+				{
+					std::cout << "\n0(" << i << "): ";
+					i++;
+				}
+				else std::cout << *source;
+
+				if(!source[1]) std::cout << '\n';
+			}
+		}
 
 		delete[] infoLog;
 		return false;
@@ -122,14 +144,12 @@ namespace GL
 			buf.StrCat(DEFINE_DIRECTIVE);
 			buf.StrCat(directive.Name);
 
-			if(!directive.Value)
+			if(directive.Value)
 			{
-				buf.Push('\n');
-				continue;
+				buf.Push(' ');
+				buf.StrCat(directive.Value);
 			}
 
-			buf.Push(' ');
-			buf.StrCat(directive.Value);
 			buf.Push('\n');
 		}
 	}
@@ -181,12 +201,12 @@ namespace GL
 	PreprocessorPair::PreprocessorPair(const char* n, const char* v)
 	{
 		u32 nameLength = strlen(n);
-		u32 valueLength = strlen(v);
+		u32 valueLength = v ? strlen(v) : 0;
 		u32 totalLength = nameLength + valueLength + 2; // 2 null terminators
 		Name = new char[totalLength];
 		Value = Name + nameLength;
 		memcpy(Name, n, nameLength + 1);
-		memcpy(Value, v, valueLength + 1);
+		if(valueLength) memcpy(Value, v, valueLength + 1);
 	}
 
 	const char* ShaderStageDefine(ShaderStageType type)

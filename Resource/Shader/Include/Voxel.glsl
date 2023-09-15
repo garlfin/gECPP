@@ -3,7 +3,7 @@
 #endif
 
 #ifdef WRITE_VOXEL
-    layout(binding = VOXEL_TEXTURE_LOCATION, rgba16f) restrict writeonly image3D VoxelOut;
+    uniform layout(binding = VOXEL_TEXTURE_LOCATION, rgba16f) restrict writeonly image3D VoxelOut;
 #endif
 
 #extension GL_ARB_bindless_texture : require
@@ -78,7 +78,7 @@ ivec3 WorldToLocalVoxel(vec3 worldPos, uint mip)
 
 ivec3 WorldToLocalVoxel(vec3 worldPos)
 {
-    WorldToLocalVoxelTexcoord(worldPos, 0u);
+    return WorldToLocalVoxel(worldPos, 0u);
 }
 
 #ifdef WRITE_VOXEL

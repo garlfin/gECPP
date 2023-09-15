@@ -48,6 +48,7 @@ namespace PVR
 		uint32_t Surfaces;
 		uint32_t Faces;
 		uint32_t MipCount;
+
 	};
 
 	constexpr GLenum PVRToInternalFormat(PVR::PVRPixelFormat f)

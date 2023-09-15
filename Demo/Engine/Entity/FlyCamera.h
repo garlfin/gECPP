@@ -11,7 +11,7 @@
 
 void DefaultRenderPass(gE::Window* window, gE::Camera* cam)
 {
-	((GL::VAO*) window->GetAssets()[1])->Draw(0);
+	window->_testHandle->Draw(0);
 }
 
 namespace VoxelDemo

@@ -41,10 +41,10 @@ void DemoWindow::OnInit()
 
 	gETF::Header file;
 	gETF::Read("cube.gETF", file);
-	Assets.Register(GL::VAO::Create(this, GL::Mesh(file.Meshes[0])));
+	_testHandle = Assets.Register(GL::VAO::Create(this, GL::Mesh(file.Meshes[0])));
 
 	GL::TextureSettings<GL::TextureDimension::D3D> voxelTexSettings{{64, 64, 64}, GL_RGBA16F};
-	GL::Texture3D* voxelTex = Assets.Create<GL::Texture3D>(this, voxelTexSettings);
+	gE::AssetHandle<GL::Texture3D> voxelTex = Assets.Create<GL::Texture3D>(this, voxelTexSettings);
 
 	voxelTex->Bind(0, GL_WRITE_ONLY);
 
