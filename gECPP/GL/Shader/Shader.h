@@ -12,9 +12,10 @@ namespace GL
 	struct PreprocessorPair
 	{
 		explicit PreprocessorPair(const char* n, const char* v = nullptr);
+		PreprocessorPair() = default;
 
-		char* Name;
-		char* Value;
+		char* Name = nullptr;
+		char* Value = nullptr;
 
 		~PreprocessorPair() { delete[] Name; }
 	};

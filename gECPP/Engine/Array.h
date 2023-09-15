@@ -70,5 +70,5 @@ Array<T>::Array(const Array& o) : _size(o.Size()), _t(new T[_size])
 template<typename T>
 Array<T>::Array(u64 count, T* initialData, u64 initialSize) : _size(count), _t(new T[_size])
 {
-	memcpy(_t, initialData, initialData * sizeof(T));
+	if(initialSize) memcpy(_t, initialData, initialSize * sizeof(T));
 }

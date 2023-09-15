@@ -89,6 +89,7 @@ namespace GL
 
 	struct CompressionScheme
 	{
+		CompressionScheme(u8 bls, u8 bs) : BlockSize(bls), ByteSize(bs) {}
 		u8 BlockSize;
 		u8 ByteSize;
 
@@ -99,7 +100,10 @@ namespace GL
 			if constexpr(DIMENSION == TextureDimension::D2D) return blocks.x * blocks.y * ByteSize;
 			else return blocks.x * blocks.y * blocks.z * ByteSize;
 		}
+
+		static const CompressionScheme& None() { static const CompressionScheme none{1, 1}; return none; }
 	};
+
 
 	template<TextureDimension DIMENSION>
 	struct TextureSettings

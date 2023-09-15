@@ -35,11 +35,18 @@ void DemoWindow::OnInit()
 
 	PipelineBuffers = new gE::DefaultPipelineBuffers(this);
 
-	Assets.Create<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/uber.frag")->Bind();
+	Array<GL::PreprocessorPair> arrP(1);
+	arrP[0] = GL::PreprocessorPair("WRITE_VOXEL");
+	Assets.Create<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/uber.frag", &arrP)->Bind();
 
 	gETF::Header file;
 	gETF::Read("cube.gETF", file);
 	Assets.Register(GL::VAO::Create(this, GL::Mesh(file.Meshes[0])));
+
+	GL::TextureSettings<GL::TextureDimension::D3D> voxelTexSettings{{64, 64, 64}, GL_RGBA16F};
+	GL::Texture3D* voxelTex = Assets.Create<GL::Texture3D>(this, voxelTexSettings);
+
+	voxelTex->Bind(0, GL_WRITE_ONLY);
 
 	new FlyCam(this);
 
