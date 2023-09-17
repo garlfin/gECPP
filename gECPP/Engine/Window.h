@@ -19,7 +19,6 @@ namespace gE
 
 		NODISCARD ALWAYS_INLINE GLFWwindow* GLFWWindow() const { return _window; }
 		GET(ComponentManager<Camera>&, Cameras, Cameras);
-		GET(AssetManager&, Assets, Assets);
 		GET(DefaultPipelineBuffers*, PipelineBuffers, PipelineBuffers);
 		GET(ComponentManager<Transform>&, Transforms, Transforms);
 		GET(ComponentManager<Behavior>&, Behaviors, Behaviors);
@@ -34,7 +33,6 @@ namespace gE
 		virtual void OnDestroy() = 0;
 
 		DefaultPipelineBuffers* PipelineBuffers;
-		AssetManager Assets {};
 		ComponentManager<Camera> Cameras {};
 		ComponentManager<Transform> Transforms {};
 		ComponentManager<Behavior> Behaviors {};

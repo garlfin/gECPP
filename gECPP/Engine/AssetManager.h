@@ -12,38 +12,17 @@ namespace gE
 	class Window;
 
 	template<class T>
-	struct AssetHandle;
-
-	struct AssetContainer
-	{
-		explicit AssetContainer(GL::Asset* t) : _t(t) {}
-
-		AssetContainer(const AssetContainer&&) = delete;
-		AssetContainer(const AssetContainer&) = delete;
-
-		GET_CONST(u32, RefCount, _refCount);
-		GET_BOTH(GL::Asset*, , _t);
-		ALWAYS_INLINE void Inc() { ++_refCount; }
-		ALWAYS_INLINE void Dec() { --_refCount; }
-
-		~AssetContainer() { delete _t; }
-
-	 private:
-		GL::Asset* _t = nullptr;
-		u32 _refCount = 0;
-	};
-
-	template<typename T, typename... ARGS>
-	AssetContainer* CreateContainer(ARGS&&... args) { return new AssetContainer(new T(args...)); }
-
-	template<class T>
 	struct AssetHandle
 	{
-		inline AssetHandle(AssetContainer& container) : _container(&container) { _container->Inc(); }
-		inline AssetHandle(const AssetHandle& h) : _container(h._container) { _container->Inc(); }
+		static_assert(std::is_base_of_v<GL::Asset, T>, "T SHOULD BE AN ASSET!");
+		inline AssetHandle(T* t) : _t(t), _counter(new u32(1)) {}
+		inline AssetHandle(const AssetHandle& h) : _t(h._t), _counter(h._counter) { ++(*_counter); }
 		inline AssetHandle() = default;
 
-		ALWAYS_INLINE T* operator->() const { return (T*) _container->Get(); }
+		ALWAYS_INLINE T* operator->() const { return _t; }
+
+		template<typename... ARGS>
+		inline static AssetHandle Create(ARGS&&... args) { return AssetHandle(new T(args...)); }
 
 		AssetHandle& operator=(const AssetHandle& o)
 		{
@@ -57,49 +36,27 @@ namespace gE
 
 		~AssetHandle()
 		{
-			if(!_container) return;
-			_container->Dec();
-			if(!_container->GetRefCount())
-				delete _container;
+			if(!_t || --(*_counter)) return;
+
+			std::cout << "FREE!" << std::endl;
+			delete _t;
+			delete _counter;
 		}
 
 	 private:
-		AssetContainer* _container = nullptr;
+		T* _t = nullptr;
+		u32* _counter = nullptr;
 	};
 
- 	class AssetManager : private std::vector<AssetContainer*>
+	template<class T, typename... ARGS>
+	AssetHandle<T> CreateHandle(ARGS&&... args)
 	{
-	 public:
-		AssetManager() = default;
+		return AssetHandle<T>::Create(std::forward<ARGS>(args)...);
+	}
 
-		template<class T, typename... ARGS>
-		inline AssetHandle<T> Create(ARGS&&... args)
-		{
-			static_assert(std::is_base_of_v<GL::Asset, T>, "T should be an asset!");
-			AssetContainer* container = CreateContainer<T>(args...);
-			push_back(container);
-			return AssetHandle<T>(*container);
-		}
-
-		template<class T>
-		inline AssetHandle<T> Register(T* t)
-		{
-			push_back(new AssetContainer(t));
-			return AssetHandle<T>(*back());
-		}
-
-		NODISCARD ALWAYS_INLINE size_t Size() const { return size(); }
-
-	 private:
-		// inline bool Contains(AssetContainer* v) { return std::find(begin(), end(), v) != end(); }
-		virtual void Remove(AssetContainer* t)
-		{
-			auto f = std::find(begin(), end(), t);
-			//if(f == end()) return;
-
-			std::iter_swap(f, end() - 1);
-			erase(end() - 1);
-		}
-
-	};
+	template<class T>
+	AssetHandle<T> CreateHandleFromPointer(T* t)
+	{
+		return AssetHandle<T>(t);
+	}
 }
