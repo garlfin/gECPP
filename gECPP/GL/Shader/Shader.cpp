@@ -59,7 +59,7 @@ namespace GL
 		glShaderSource(ID, 1, &bufPtr, nullptr);
 		glCompileShader(ID);
 #ifdef DEBUG
-		GetSaderStatus(*this, bufPtr);
+		GetShaderStatus(*this, bufPtr);
 #endif
 	}
 
@@ -185,7 +185,7 @@ namespace GL
 			size_t includeLen = strlenc(include + 1, '"');
 			size_t totalLen = filelessLen + includeLen;
 
-			char* path = new char[totalLen];
+			char* path = new char[totalLen + 1];
 			path[totalLen] = 0;
 
 			memcpy(path, origin, filelessLen);
@@ -207,6 +207,14 @@ namespace GL
 		Value = Name + nameLength;
 		memcpy(Name, n, nameLength + 1);
 		if(valueLength) memcpy(Value, v, valueLength + 1);
+	}
+
+	PreprocessorPair::PreprocessorPair(const PreprocessorPair& o):
+		Name(), Value(Name + (o.Value - o.Name))
+	{
+		u32 len = strlen(o.Name) + strlen(o.Value) + 2; // 2 terminators
+		Name = new char[len];
+		memcpy(Name, o.Name, len);
 	}
 
 	const char* ShaderStageDefine(ShaderStageType type)

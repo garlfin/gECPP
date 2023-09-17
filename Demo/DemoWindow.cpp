@@ -36,7 +36,6 @@ void DemoWindow::OnInit()
 	PipelineBuffers = new gE::DefaultPipelineBuffers(this);
 
 	Array<GL::PreprocessorPair> arrP(1);
-	arrP[0] = GL::PreprocessorPair("WRITE_VOXEL");
 	Assets.Create<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/uber.frag", &arrP)->Bind();
 
 	gETF::Header file;

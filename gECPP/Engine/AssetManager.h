@@ -55,7 +55,13 @@ namespace gE
 			return *this;
 		}
 
-		~AssetHandle() { if(_container) _container->Dec(); }
+		~AssetHandle()
+		{
+			if(!_container) return;
+			_container->Dec();
+			if(!_container->GetRefCount())
+				delete _container;
+		}
 
 	 private:
 		AssetContainer* _container = nullptr;
@@ -82,23 +88,8 @@ namespace gE
 			return AssetHandle<T>(*back());
 		}
 
-		void Collect()
-		{
-			for(AssetContainer* t : *this)
-				if (!t->GetRefCount())
-				{
-					Remove(t);
-					delete t;
-				}
-		}
-
-
 		NODISCARD ALWAYS_INLINE size_t Size() const { return size(); }
 
-		~AssetManager()
-		{
-			for(auto* t : *this) delete t;
-		}
 	 private:
 		// inline bool Contains(AssetContainer* v) { return std::find(begin(), end(), v) != end(); }
 		virtual void Remove(AssetContainer* t)
