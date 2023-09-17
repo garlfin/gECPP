@@ -217,6 +217,26 @@ namespace GL
 		memcpy(Name, o.Name, len);
 	}
 
+	PreprocessorPair& PreprocessorPair::operator=(const PreprocessorPair& o)
+	{
+		if(&o == this) return *this;
+
+		this->~PreprocessorPair();
+		new(this) PreprocessorPair(o);
+
+		return *this;
+	}
+
+	PreprocessorPair& PreprocessorPair::operator=(PreprocessorPair&& o) noexcept
+	{
+		if(&o == this) return *this;
+
+		this->~PreprocessorPair();
+		new(this) PreprocessorPair(o);
+
+		return *this;
+	}
+
 	const char* ShaderStageDefine(ShaderStageType type)
 	{
 		switch(type)

@@ -35,8 +35,7 @@ void DemoWindow::OnInit()
 
 	PipelineBuffers = new gE::DefaultPipelineBuffers(this);
 
-	Array<GL::PreprocessorPair> arrP(1);
-	Assets.Create<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/uber.frag", &arrP)->Bind();
+	Assets.Create<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/uber.frag")->Bind();
 
 	gETF::Header file;
 	gETF::Read("cube.gETF", file);

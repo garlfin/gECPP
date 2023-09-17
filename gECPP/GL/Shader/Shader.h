@@ -14,8 +14,10 @@ namespace GL
 		explicit PreprocessorPair(const char* n, const char* v = nullptr);
 		PreprocessorPair(PreprocessorPair&& o) : Name(o.Name), Value(o.Value) { o.Name = nullptr; }
 		PreprocessorPair(const PreprocessorPair& o);
-
 		PreprocessorPair() = default;
+
+		PreprocessorPair& operator=(const PreprocessorPair& o);
+		PreprocessorPair& operator=(PreprocessorPair&& o) noexcept;
 
 		char* Name = nullptr;
 		char* Value = nullptr;
