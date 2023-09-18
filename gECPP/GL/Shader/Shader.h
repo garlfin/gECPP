@@ -12,7 +12,7 @@ namespace GL
 	struct PreprocessorPair
 	{
 		explicit PreprocessorPair(const char* n, const char* v = nullptr);
-		PreprocessorPair(PreprocessorPair&& o) : Name(o.Name), Value(o.Value) { o.Name = nullptr; }
+		PreprocessorPair(PreprocessorPair&& o) noexcept : Name(o.Name), Value(o.Value) { o.Name = nullptr; }
 		PreprocessorPair(const PreprocessorPair& o);
 		PreprocessorPair() = default;
 
@@ -21,6 +21,8 @@ namespace GL
 
 		char* Name = nullptr;
 		char* Value = nullptr;
+
+		void WriteDirective(gETF::SerializationBuffer&) const;
 
 		~PreprocessorPair() { delete[] Name; }
 	};

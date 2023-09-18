@@ -6,15 +6,7 @@
 
 #include <vector>
 #include "GL/gl.h"
-
-#define CONSTRUCTOR(TYPE, REFTYPE, MODIFIER) \
-	TYPE& operator=(Handle REFTYPE o) MODIFIER \
-	{ \
-		if(&o == this) return *this; \
-		this->~TYPE(); \
-		new(this) TYPE(o); \
-		return *this; \
-	}
+#include "GL/Binary.h"
 
 namespace gE
 {
@@ -24,9 +16,11 @@ namespace gE
 	struct Handle
 	{
 		inline Handle(T* t) : _t(t), _counter(new u32(1)) {}
-		inline Handle(const Handle& h) : _t(h._t), _counter(h._counter) { ++(*_counter); }
-		inline Handle(Handle&& h) noexcept : _t(h._t), _counter(h._counter) { h._counter = nullptr; h._t = nullptr; }
+		Handle(Handle&& o) noexcept : _t(o._t), _counter(o._counter) { o._t = o._counter = nullptr; }
+		Handle(const Handle& o) : _t(o._t), _counter(o._counter) { if(_counter) (*_counter)++;}
 		inline Handle() = default;
+
+		COPY_CONSTRUCTOR_BOTH(Handle);
 
 		ALWAYS_INLINE T* Get() const { return _t; }
 		ALWAYS_INLINE T* operator->() const { return _t; }
@@ -34,9 +28,6 @@ namespace gE
 
 		template<typename... ARGS>
 		inline static Handle Create(ARGS&&... args) { return Handle(new T(args...)); }
-
-		CONSTRUCTOR(Handle, const &,);
-		CONSTRUCTOR(Handle, &&, noexcept);
 
 		~Handle()
 		{
@@ -47,8 +38,8 @@ namespace gE
 		}
 
 	 private:
-		T* _t;
-		u32* _counter;
+		T* _t = nullptr;
+		u32* _counter = nullptr;
 	};
 
 	template<class T, typename... ARGS>

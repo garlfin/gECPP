@@ -24,6 +24,7 @@ namespace gE
 		GET(ComponentManager<Behavior>&, Behaviors, Behaviors);
 		GET_CONST(glm::TextureSize2D, Size, _size);
 		Handle<GL::VAO> _testHandle;
+
 		~Window();
 
 	 protected:

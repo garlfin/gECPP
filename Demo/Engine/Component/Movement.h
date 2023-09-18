@@ -47,7 +47,7 @@ namespace VoxelDemo
 	 private:
 		gE::Transform& _transform;
 		GLFWwindow* const _window;
-		glm::dvec2 _prevCursorPos {0.f, 0.f};
-		glm::vec3 _rot;
+		glm::dvec2 _prevCursorPos {};
+		glm::vec3 _rot {};
 	};
 }

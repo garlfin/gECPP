@@ -35,15 +35,26 @@ namespace gETF { struct Serializable; }
 #define BIT_SIZE(X) (sizeof(decltype(X)) * 8)
 
 #define GET(TYPE, ACCESSOR, FIELD) NODISCARD ALWAYS_INLINE TYPE Get##ACCESSOR() { return FIELD; }
-
 #define GET_CONST(TYPE, ACCESSOR, FIELD) NODISCARD ALWAYS_INLINE const TYPE Get##ACCESSOR() const { return FIELD; }
-#define GET_BOTH(TYPE, ACCESSOR, FIELD) GET(TYPE, ACCESSOR, FIELD) \
-										GET_CONST(TYPE, ACCESSOR, FIELD)
 #define SET(TYPE, ACCESSOR, FIELD) ALWAYS_INLINE void Set##ACCESSOR(TYPE ACCESSOR) { FIELD = ACCESSOR; }
 
 #define GET_SET(TYPE, ACCESSOR, FIELD) \
 	GET(TYPE, ACCESSOR, FIELD)	\
 	SET(TYPE, ACCESSOR, FIELD)
+
+#define COPY_CONSTRUCTOR(TYPE, REFTYPE, MODIFIER) \
+	TYPE& operator=(TYPE REFTYPE o) MODIFIER \
+	{ \
+		if(&o == this) return *this; \
+		this->~TYPE(); \
+		new(this) TYPE(o); \
+		return *this; \
+	}
+
+#define COPY_CONSTRUCTOR_BOTH(TYPE) \
+    COPY_CONSTRUCTOR(TYPE, const &,); \
+	COPY_CONSTRUCTOR(TYPE, &&, noexcept);
+
 
 size_t strlenc(const char*, char);
 size_t strlencLast(const char*, char, char = 0);

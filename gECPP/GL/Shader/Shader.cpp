@@ -6,7 +6,6 @@
 #include <GL/Texture/Texture.h>
 #include <iostream>
 
-#define DEFINE_DIRECTIVE "#define "
 #define INCLUDE_DIRECTIVE "#include "
 #define VERSION_DIRECTIVE "#version 460 core\n"
 #define EXTENSION_DIRECTIVE "#extension "
@@ -136,22 +135,7 @@ namespace GL
 	void CompileDirectives(const Array<PreprocessorPair>* pairs, gETF::SerializationBuffer& buf)
 	{
 		if(!pairs) return;
-
-		for(u64 i = 0; i < pairs->Size(); i++)
-		{
-			const PreprocessorPair& directive = (*pairs)[i];
-
-			buf.StrCat(DEFINE_DIRECTIVE);
-			buf.StrCat(directive.Name);
-
-			if(directive.Value)
-			{
-				buf.Push(' ');
-				buf.StrCat(directive.Value);
-			}
-
-			buf.Push('\n');
-		}
+		for(u64 i = 0; i < pairs->Size(); i++) (*pairs)[i].WriteDirective(buf);
 	}
 
 	void CompileIncludes(const char* file, gETF::SerializationBuffer& dstBuffer, gETF::SerializationBuffer& directivesBuffer)
@@ -212,7 +196,10 @@ namespace GL
 	PreprocessorPair::PreprocessorPair(const PreprocessorPair& o):
 		Name(), Value(Name + (o.Value - o.Name))
 	{
-		u32 len = strlen(o.Name) + strlen(o.Value) + 2; // 2 terminators
+		u32 len = strlen(o.Name) + 1;
+		if(o.Value) len += strlen(o.Value) + 1;
+		else Value = nullptr;
+
 		Name = new char[len];
 		memcpy(Name, o.Name, len);
 	}
@@ -235,6 +222,23 @@ namespace GL
 		new(this) PreprocessorPair(o);
 
 		return *this;
+	}
+
+	void PreprocessorPair::WriteDirective(gETF::SerializationBuffer& buf) const
+	{
+		if(!Name) return;
+
+		buf.StrCat("#include ");
+		buf.StrCat(Name);
+
+		if(Value)
+		{
+			buf.Push(' ');
+			buf.StrCat(Value);
+		}
+
+		buf.Push('\n');
+
 	}
 
 	const char* ShaderStageDefine(ShaderStageType type)
