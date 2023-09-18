@@ -7,56 +7,59 @@
 #include <vector>
 #include "GL/gl.h"
 
+#define CONSTRUCTOR(TYPE, REFTYPE, MODIFIER) \
+	TYPE& operator=(Handle REFTYPE o) MODIFIER \
+	{ \
+		if(&o == this) return *this; \
+		this->~TYPE(); \
+		new(this) TYPE(o); \
+		return *this; \
+	}
+
 namespace gE
 {
 	class Window;
 
 	template<class T>
-	struct AssetHandle
+	struct Handle
 	{
-		static_assert(std::is_base_of_v<GL::Asset, T>, "T SHOULD BE AN ASSET!");
-		inline AssetHandle(T* t) : _t(t), _counter(new u32(1)) {}
-		inline AssetHandle(const AssetHandle& h) : _t(h._t), _counter(h._counter) { ++(*_counter); }
-		inline AssetHandle() = default;
+		inline Handle(T* t) : _t(t), _counter(new u32(1)) {}
+		inline Handle(const Handle& h) : _t(h._t), _counter(h._counter) { ++(*_counter); }
+		inline Handle(Handle&& h) noexcept : _t(h._t), _counter(h._counter) { h._counter = nullptr; h._t = nullptr; }
+		inline Handle() = default;
 
+		ALWAYS_INLINE T* Get() const { return _t; }
 		ALWAYS_INLINE T* operator->() const { return _t; }
+		ALWAYS_INLINE T& operator*() const { return *_t; }
 
 		template<typename... ARGS>
-		inline static AssetHandle Create(ARGS&&... args) { return AssetHandle(new T(args...)); }
+		inline static Handle Create(ARGS&&... args) { return Handle(new T(args...)); }
 
-		AssetHandle& operator=(const AssetHandle& o)
-		{
-			if(&o == this) return *this;
+		CONSTRUCTOR(Handle, const &,);
+		CONSTRUCTOR(Handle, &&, noexcept);
 
-			this->~AssetHandle();
-			new(this) AssetHandle(o);
-
-			return *this;
-		}
-
-		~AssetHandle()
+		~Handle()
 		{
 			if(!_t || --(*_counter)) return;
 
-			std::cout << "FREE!" << std::endl;
 			delete _t;
 			delete _counter;
 		}
 
 	 private:
-		T* _t = nullptr;
-		u32* _counter = nullptr;
+		T* _t;
+		u32* _counter;
 	};
 
 	template<class T, typename... ARGS>
-	AssetHandle<T> CreateHandle(ARGS&&... args)
+	Handle<T> CreateHandle(ARGS&&... args)
 	{
-		return AssetHandle<T>::Create(std::forward<ARGS>(args)...);
+		return Handle<T>::Create(std::forward<ARGS>(args)...);
 	}
 
 	template<class T>
-	AssetHandle<T> CreateHandleFromPointer(T* t)
+	Handle<T> CreateHandleFromPointer(T* t)
 	{
-		return AssetHandle<T>(t);
+		return Handle<T>(t);
 	}
 }

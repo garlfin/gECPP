@@ -23,7 +23,7 @@ namespace gE
 		GET(ComponentManager<Transform>&, Transforms, Transforms);
 		GET(ComponentManager<Behavior>&, Behaviors, Behaviors);
 		GET_CONST(glm::TextureSize2D, Size, _size);
-		AssetHandle<GL::VAO> _testHandle;
+		Handle<GL::VAO> _testHandle;
 		~Window();
 
 	 protected:
@@ -36,7 +36,6 @@ namespace gE
 		ComponentManager<Camera> Cameras {};
 		ComponentManager<Transform> Transforms {};
 		ComponentManager<Behavior> Behaviors {};
-
 
 	 private:
 		glm::TextureSize2D _size;

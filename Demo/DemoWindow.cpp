@@ -44,7 +44,6 @@ void DemoWindow::OnInit()
 	_testHandle = gE::CreateHandleFromPointer<GL::VAO>(GL::VAO::Create(this, GL::Mesh(file.Meshes[0])));
 
 
-
 	new FlyCam(this);
 
 	GL::Scene test{1, glm::mat4(1.f)};
