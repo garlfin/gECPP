@@ -16,6 +16,9 @@ Texture::Texture(gE::Window* window, GLenum tgt, const TextureSettings<DIMENSION
 	glTextureParameteri(ID, GL_TEXTURE_WRAP_T, GL_REPEAT);
 }
 
+template Texture::Texture(gE::Window* window, GLenum tgt, const TextureSettings<TextureDimension::D2D>& settings);
+template Texture::Texture(gE::Window* window, GLenum tgt, const TextureSettings<TextureDimension::D3D>& settings);
+
 Texture2D::Texture2D(gE::Window* window, const TextureSettings<TextureDimension::D2D>& settings, const TextureData& data) :
 	Texture(window, GL_TEXTURE_2D, settings), Size(settings.Size)
 {
@@ -60,7 +63,7 @@ Texture3D::Texture3D(gE::Window* window, const TextureSettings<TextureDimension:
 	}
 }
 
-Texture2D* PVR::Read(gE::Window* window, const char* path, WrapMode wM, FilterMode fM)
+Texture2D* PVR::Read(gE::Window* window, const char* path, WrapMode wrapMode, FilterMode filterMode)
 {
 	u32 fileLen = 0;
 	u8* f = ReadFile(path, fileLen, false);
@@ -77,8 +80,8 @@ Texture2D* PVR::Read(gE::Window* window, const char* path, WrapMode wM, FilterMo
 		h.Size,
 		PVRToInternalFormat(h.Format),
 		CompressionScheme(16, 16),
-		wM,
-		fM,
+		wrapMode,
+		filterMode,
 		(u8) h.MipCount
 	};
 
@@ -106,17 +109,3 @@ void PVR::PVRHeader::Serialize(u8*& ptr)
 }
 
 void PVR::PVRHeader::Deserialize(gETF::SerializationBuffer&) const {}
-
-bool FormatIsCompressed(GLenum f)
-{
-	switch(f)
-	{
-	case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
-	case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
-	case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
-	case GL_COMPRESSED_RG_RGTC2:
-		return true;
-	default:
-		return false;
-	}
-}

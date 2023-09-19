@@ -20,10 +20,10 @@ namespace gE
 		glm::quaternion Rotation = glm::quaternion();
 	};
 
-	class Transform : Component
+	class Transform : public Component, public TransformData // Why rewrite it if I have it write above??
 	{
 	 public:
-		Transform(Entity* o, TransformData& d) : Component(o)
+		Transform(Entity* o, const TransformData& d) : Component(o)
 		{
 			Set(d);
 		}
@@ -44,14 +44,6 @@ namespace gE
 		NODISCARD ALWAYS_INLINE glm::vec3 Up() const { return Rotation * glm::vec3(0, 1, 0); }
 		NODISCARD ALWAYS_INLINE glm::vec3 Right() const { return Rotation * glm::vec3(1, 0, 0); }
 		NODISCARD ALWAYS_INLINE glm::mat3 LocalRotationMatrix() const { return glm::toMat3(Rotation); }
-
-		union
-		{
-			glm::vec3 Location = glm::vec3(0.f);
-			glm::vec3 Position;
-		};
-		glm::vec3 Scale = glm::vec3(1.f);
-		glm::quaternion Rotation = glm::quaternion();
 
 		~Transform() override;
 

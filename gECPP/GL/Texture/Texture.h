@@ -32,11 +32,6 @@ namespace GL
 		const GLenum Target;
 	};
 
-	template<>
-	Texture::Texture(gE::Window* window, GLenum tgt, const TextureSettings<TextureDimension::D2D>& settings);
-	template<>
-	Texture::Texture(gE::Window* window, GLenum tgt, const TextureSettings<TextureDimension::D3D>& settings);
-
 	class Texture2D final : public Texture
 	{
 	 public:
@@ -60,5 +55,5 @@ namespace GL
 
 namespace PVR
 {
-	GL::Texture2D* Read(gE::Window* window, const char* path, GL::WrapMode wM, GL::FilterMode fM);
+	GL::Texture2D* Read(gE::Window* window, const char* path, GL::WrapMode wrapMode, GL::FilterMode filterMode);
 }

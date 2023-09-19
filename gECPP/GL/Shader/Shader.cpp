@@ -224,7 +224,6 @@ namespace GL
 		}
 
 		buf.Push('\n');
-
 	}
 
 	const char* ShaderStageDefine(ShaderStageType type)
