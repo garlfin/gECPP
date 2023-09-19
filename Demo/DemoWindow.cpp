@@ -38,14 +38,15 @@ void DemoWindow::OnInit()
 	Array<GL::PreprocessorPair> pairs(1);
 	pairs[0] = GL::PreprocessorPair("TEST");
 
-	gE::CreateHandle<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/uber.frag", &pairs)->Bind();
+	RasterShader = gE::CreateHandle<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/uber.frag");
+	VoxelShader = gE::CreateHandle<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/uber.frag", &pairs);
 
 	GL::TextureSettings<GL::TextureDimension::D3D> voxelTexSettings{{64, 64, 64}, GL_RGBA16F};
-	gE::CreateHandle<GL::Texture3D>(this, voxelTexSettings)->Bind(0, GL_WRITE_ONLY);
+	ExportTexture = gE::CreateHandle<GL::Texture3D>(this, voxelTexSettings);
 
 	gETF::Header file;
 	gETF::Read("cube.gETF", file);
-	_testHandle = gE::CreateHandleFromPointer<GL::VAO>(GL::VAO::Create(this, GL::Mesh(file.Meshes[0])));
+	Mesh = gE::CreateHandleFromPointer<GL::VAO>(GL::VAO::Create(this, GL::Mesh(file.Meshes[0])));
 
 	new FlyCam(this);
 

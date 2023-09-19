@@ -5,6 +5,7 @@
 #include "Engine/ComponentManager.h"
 #include "Engine/AssetManager.h"
 #include "GL/Buffer/VAO.h"
+#include "GL/Shader/Shader.h"
 
 struct GLFWwindow;
 
@@ -22,8 +23,7 @@ namespace gE
 		GET(DefaultPipelineBuffers*, PipelineBuffers, PipelineBuffers);
 		GET(ComponentManager<Transform>&, Transforms, Transforms);
 		GET(ComponentManager<Behavior>&, Behaviors, Behaviors);
-		GET_CONST(glm::TextureSize2D, Size, _size);
-		Handle<GL::VAO> _testHandle;
+		GET_CONST(GL::TextureSize2D&, Size, _size);
 
 		~Window();
 
@@ -39,7 +39,7 @@ namespace gE
 		ComponentManager<Behavior> Behaviors {};
 
 	 private:
-		glm::TextureSize2D _size;
+		GL::TextureSize2D _size;
 		const char* _name;
 		GLFWwindow* _window;
 	};

@@ -19,7 +19,7 @@ namespace GL
 	template<typename T>
 	bool GetShaderStatus(const T& shader, char* source = nullptr);
 
-	void Shader::SetUniform(u8 loc, const TextureHandle& tex, u8 slot) const
+	void Shader::SetUniform(u8 loc, const Texture& tex, u8 slot) const
 	{
 		SetUniform(loc, i32(tex.Use(slot)));
 	}
@@ -184,13 +184,19 @@ namespace GL
 
 	PreprocessorPair::PreprocessorPair(const char* n, const char* v)
 	{
-		u32 nameLength = strlen(n);
-		u32 valueLength = v ? strlen(v) : 0;
-		u32 totalLength = nameLength + valueLength + 2; // 2 null terminators
+		u32 totalLength = strlen(n) + 1;
+		u32 nameLength = totalLength, valueLength = 0;
+
+		if(v) totalLength += valueLength = strlen(v) + 1;
+
 		Name = new char[totalLength];
-		Value = Name + nameLength;
-		memcpy(Name, n, nameLength + 1);
-		if(valueLength) memcpy(Value, v, valueLength + 1);
+		Value = nullptr;
+		memcpy(Name, n, nameLength);
+
+		if(!v) return;
+
+		Value = Name + nameLength + 1;
+		memcpy(Value, v, valueLength);
 	}
 
 	PreprocessorPair::PreprocessorPair(const PreprocessorPair& o):
@@ -204,31 +210,11 @@ namespace GL
 		memcpy(Name, o.Name, len);
 	}
 
-	PreprocessorPair& PreprocessorPair::operator=(const PreprocessorPair& o)
-	{
-		if(&o == this) return *this;
-
-		this->~PreprocessorPair();
-		new(this) PreprocessorPair(o);
-
-		return *this;
-	}
-
-	PreprocessorPair& PreprocessorPair::operator=(PreprocessorPair&& o) noexcept
-	{
-		if(&o == this) return *this;
-
-		this->~PreprocessorPair();
-		new(this) PreprocessorPair(o);
-
-		return *this;
-	}
-
 	void PreprocessorPair::WriteDirective(gETF::SerializationBuffer& buf) const
 	{
 		if(!Name) return;
 
-		buf.StrCat("#include ");
+		buf.StrCat("#define ");
 		buf.StrCat(Name);
 
 		if(Value)

@@ -9,9 +9,11 @@
 #include "Engine/Window.h"
 #include "Demo/Engine/Component/Movement.h"
 
-void DefaultRenderPass(gE::Window* window, gE::Camera* cam)
+void DefaultRenderPass(VoxelDemo::DemoWindow* window, gE::PerspectiveCamera* cam)
 {
-	window->_testHandle->Draw(0);
+	window->VoxelShader->Bind();
+	window->ExportTexture->Bind();
+	window->Mesh->Draw(0);
 }
 
 namespace VoxelDemo
@@ -21,7 +23,7 @@ namespace VoxelDemo
 	 public:
 		explicit FlyCam(gE::Window* window) :
 			gE::Entity(window),
-			Camera(this, gE::CameraSettings{window->GetSize(), {0.1f, 100.f}, DefaultRenderPass},
+			Camera(this, gE::CameraSettings{window->GetSize(), {0.1f, 100.f}, (gE::RenderPass) DefaultRenderPass},
 			degree_cast<AngleType::Radian>(80.f)), _movement(this)
 		{
 		}

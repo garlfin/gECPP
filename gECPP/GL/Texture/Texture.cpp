@@ -2,13 +2,12 @@
 #include <iostream>
 #include <GLAD/glad.h>
 #include <GL/Binary.h>
-#include <sys/stat.h>
 
 using namespace GL;
 
 template<TextureDimension DIMENSION>
-Texture<DIMENSION>::Texture(gE::Window* window, GLenum tgt, const TextureSettings<DIMENSION>& settings) :
-	Asset(window), Size(settings.Size), Mips(settings.MipCount), Format(settings.Format), Target(tgt)
+Texture::Texture(gE::Window* window, GLenum tgt, const TextureSettings<DIMENSION>& settings) :
+	Asset(window), Mips(settings.MipCount), Format(settings.Format), Target(tgt)
 {
 	glCreateTextures(tgt, 1, &ID);
 	glTextureParameteri(ID, GL_TEXTURE_MIN_FILTER, (GLint) settings.Filter + (Mips > 1 ? 0x102 : 0));
@@ -18,13 +17,13 @@ Texture<DIMENSION>::Texture(gE::Window* window, GLenum tgt, const TextureSetting
 }
 
 Texture2D::Texture2D(gE::Window* window, const TextureSettings<TextureDimension::D2D>& settings, const TextureData& data) :
-	Texture<TextureDimension::D2D>(window, GL_TEXTURE_2D, settings)
+	Texture(window, GL_TEXTURE_2D, settings), Size(settings.Size)
 {
 	glTextureStorage2D(ID, Mips, Format, Size.x, Size.y);
 
 	if(!data.Data) return;
 
-	TextureSize<TextureDimension::D2D> size = Size;
+	glm::u32vec2 size = Size;
 	u8* dataPtr = (u8*) data.Data;
 	bool isCompressed = settings.Scheme.BlockSize != 1;
 
@@ -41,13 +40,13 @@ Texture2D::Texture2D(gE::Window* window, const TextureSettings<TextureDimension:
 }
 
 Texture3D::Texture3D(gE::Window* window, const TextureSettings<TextureDimension::D3D>& settings, const TextureData& data) :
-	Texture<TextureDimension::D3D>(window, GL_TEXTURE_3D, settings)
+	Texture(window, GL_TEXTURE_3D, settings), Size(settings.Size)
 {
 	glTextureStorage3D(ID, Mips, Format, Size.x, Size.y, Size.z);
 
 	if(!data.Data) return;
 
-	TextureSize<TextureDimension::D3D> size = Size;
+	glm::u32vec3 size = Size;
 	u8* dataPtr = (u8*) data.Data;
 
 	for(ubyte i = 0; i < Mips; i++, size >>= decltype(size)(1)) // lazy guy
@@ -61,7 +60,7 @@ Texture3D::Texture3D(gE::Window* window, const TextureSettings<TextureDimension:
 	}
 }
 
-Texture<GL::TextureDimension::D2D>* PVR::Read(gE::Window* window, const char* path, WrapMode wM, FilterMode fM)
+Texture2D* PVR::Read(gE::Window* window, const char* path, WrapMode wM, FilterMode fM)
 {
 	u32 fileLen = 0;
 	u8* f = ReadFile(path, fileLen, false);
@@ -107,16 +106,6 @@ void PVR::PVRHeader::Serialize(u8*& ptr)
 }
 
 void PVR::PVRHeader::Deserialize(gETF::SerializationBuffer&) const {}
-
-TextureHandle::TextureHandle(const Texture<TextureDimension::D2D>& tex) :
-	_id(tex.Get()), _format(tex.GetFormat()), _target(tex.GetTarget())
-{
-}
-
-TextureHandle::TextureHandle(const Texture<TextureDimension::D3D>& tex) :
-	_id(tex.Get()), _format(tex.GetFormat()), _target(tex.GetTarget())
-{
-}
 
 bool FormatIsCompressed(GLenum f)
 {

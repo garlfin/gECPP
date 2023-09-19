@@ -6,8 +6,8 @@
 
 namespace GL
 {
-	struct TextureHandle;
 	struct ShaderStage;
+	struct Texture;
 
 	struct PreprocessorPair
 	{
@@ -16,8 +16,7 @@ namespace GL
 		PreprocessorPair(const PreprocessorPair& o);
 		PreprocessorPair() = default;
 
-		PreprocessorPair& operator=(const PreprocessorPair& o);
-		PreprocessorPair& operator=(PreprocessorPair&& o) noexcept;
+		COPY_CONSTRUCTOR_BOTH(PreprocessorPair);
 
 		char* Name = nullptr;
 		char* Value = nullptr;
@@ -53,7 +52,7 @@ namespace GL
 		ALWAYS_INLINE void SetUniform(u8 loc, const glm::vec2& val) const { glProgramUniform2f(ID, loc, val.x, val.y); }
 		ALWAYS_INLINE void SetUniform(u8 loc, const glm::vec3& val) const { glProgramUniform3fv(ID, loc, 1, (GLfloat*) &val); }
 		ALWAYS_INLINE void SetUniform(u8 loc, const glm::vec4& val) const { glProgramUniform4fv(ID, loc, 1, (GLfloat*) &val); }
-		void SetUniform(u8 loc, const TextureHandle&, u8 slot) const;
+		void SetUniform(u8 loc, const Texture&, u8 slot) const;
 
 		~Shader() override { glDeleteProgram(ID); }
 	};

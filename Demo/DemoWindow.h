@@ -17,13 +17,16 @@ namespace VoxelDemo
 	{
 	 public:
 		DemoWindow(glm::u16vec2 size, const char* name = "VoxelDemo") : gE::Window(size, name) {};
+
+		gE::Handle<GL::VAO> Mesh;
+		gE::Handle<GL::Texture3D> ExportTexture;
+		gE::Handle<GL::Shader> RasterShader, VoxelShader;
+
+
 	 private:
 		void OnInit() override;
 		void OnUpdate(float) override;
 		void OnRender(float) override;
 		void OnDestroy() override;
-
-		GL::VAO* _testMesh;
-		GL::Shader* _testShader;
 	};
 }

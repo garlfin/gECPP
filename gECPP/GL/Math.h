@@ -55,6 +55,10 @@ constexpr u8 GetSizeOfGLType(u32 t)
 namespace glm
 {
 	typedef quat quaternion;
+}
+
+namespace GL
+{
 	typedef glm::u32vec2 TextureSize2D;
 	typedef glm::u32vec3 TextureSize3D;
 }
@@ -70,14 +74,14 @@ enum class AngleType : u8
 };
 
 template<FOVType TO, AngleType UNIT = AngleType::Radian>
-float fov_cast(float in, const glm::TextureSize2D& size)
+float fov_cast(float in, const GL::TextureSize2D& size)
 {
-	float aspesct;
-	if constexpr (TO == FOVType::Horizontal) aspesct = (float) size.x / size.y;
-	else aspesct = (float) size.y / size.x;
+	float aspect;
+	if constexpr (TO == FOVType::Horizontal) aspect = (float) size.x / size.y;
+	else aspect = (float) size.y / size.x;
 
 	if constexpr (UNIT == AngleType::Degree) in *= TO_RAD;
-	float val = 2 * atanf(tanf(in / 2) * aspesct);
+	float val = 2 * atanf(tanf(in / 2) * aspect);
 
 	if constexpr (UNIT == AngleType::Degree) return val * TO_DEG;
 	else return val;
@@ -89,4 +93,6 @@ inline constexpr T degree_cast(const T& t)
 	if constexpr(TO == AngleType::Radian) return t * TO_RAD;
 	else return t * TO_DEG;
 }
+
+
 
