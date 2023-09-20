@@ -7,7 +7,6 @@
 #include "Math.h"
 #include <cstring>
 
-
 #ifndef NODISCARD
 	#define NODISCARD [[nodiscard]]
 #endif
@@ -23,6 +22,8 @@
 	#include <iostream>
 #endif // #ifdef DEBUG
 
+#define assertm(exp, msg) assert(((void) msg, exp))
+
 namespace gETF { struct Serializable; }
 
 #define BIT_FIELD(FIELD, INDEX) (((FIELD) >> (INDEX)) & 1)
@@ -34,8 +35,10 @@ namespace gETF { struct Serializable; }
 #endif
 #define BIT_SIZE(X) (sizeof(decltype(X)) * 8)
 
-#define GET(TYPE, ACCESSOR, FIELD) NODISCARD ALWAYS_INLINE TYPE Get##ACCESSOR() { return FIELD; }
 #define GET_CONST(TYPE, ACCESSOR, FIELD) NODISCARD ALWAYS_INLINE const TYPE Get##ACCESSOR() const { return FIELD; }
+#define GET(TYPE, ACCESSOR, FIELD) NODISCARD ALWAYS_INLINE TYPE Get##ACCESSOR() { return FIELD; } \
+								   GET_CONST(TYPE, ACCESSOR, FIELD);
+
 #define SET(TYPE, ACCESSOR, FIELD) ALWAYS_INLINE void Set##ACCESSOR(TYPE ACCESSOR) { FIELD = ACCESSOR; }
 
 #define GET_SET(TYPE, ACCESSOR, FIELD) \

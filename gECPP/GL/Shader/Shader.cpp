@@ -235,7 +235,7 @@ namespace GL
 		case Vertex:
 			return "#define VERTEX_SHADER\n";
 		case Compute:
-			return "#define COMPUTE_SHADER";
+			return "#define COMPUTE_SHADER\n";
 		default:
 			return "";
 		}

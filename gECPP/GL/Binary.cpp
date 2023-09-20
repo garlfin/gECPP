@@ -10,6 +10,7 @@ using namespace gETF;
 char* ReadString(u8*& ptr)
 {
 	u8 len = Read<u8>(ptr);
+	if(!len) return nullptr;
 	char* str = new char[len + 1];
 	Read<char>(ptr, str, len);
 	str[len] = 0;
@@ -91,7 +92,7 @@ void SerializationBuffer::PushString(const char* ptr)
 
 void SerializationBuffer::StrCat(const char* str, char d, i8 offset)
 {
-	if(!str) return;
+	assertm(str, "'str' should have a value.");
 
 	u32 strLen = strlenc(str, d);
 	if(str[strLen]) strLen += offset;
