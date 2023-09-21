@@ -50,7 +50,7 @@ void Window::Run()
 	}
 }
 
-gE::DefaultPipelineBuffers::DefaultPipelineBuffers(Window* window)
+gE::DefaultPipeline::Buffers::Buffers(Window* window)
 	: Scene(window), Camera(window)
 {
 	Scene.Bind(GL::BufferTarget::Uniform, 0);

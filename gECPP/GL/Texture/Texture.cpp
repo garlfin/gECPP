@@ -7,8 +7,7 @@
 
 using namespace GL;
 
-template<TextureDimension DIMENSION>
-Texture::Texture(gE::Window* window, GLenum tgt, const TextureSettings<DIMENSION>& settings) :
+Texture::Texture(gE::Window* window, GLenum tgt, const SizelessTextureSettings& settings) :
 	Asset(window), Mips(settings.MipCount), Format(settings.Format), Target(tgt)
 {
 	glCreateTextures(tgt, 1, &ID);
@@ -17,9 +16,6 @@ Texture::Texture(gE::Window* window, GLenum tgt, const TextureSettings<DIMENSION
 	glTextureParameteri(ID, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTextureParameteri(ID, GL_TEXTURE_WRAP_T, GL_REPEAT);
 }
-
-template Texture::Texture(gE::Window* window, GLenum tgt, const TextureSettings<TextureDimension::D2D>& settings);
-template Texture::Texture(gE::Window* window, GLenum tgt, const TextureSettings<TextureDimension::D3D>& settings);
 
 Texture2D::Texture2D(gE::Window* window, const TextureSettings<TextureDimension::D2D>& settings, const TextureData& data) :
 	Texture(window, GL_TEXTURE_2D, settings), Size(settings.Size)
@@ -30,18 +26,20 @@ Texture2D::Texture2D(gE::Window* window, const TextureSettings<TextureDimension:
 
 	glm::u32vec2 size = Size;
 	u8* dataPtr = (u8*) data.Data;
-	bool isCompressed = settings.Scheme.BlockSize != 1;
+	bool isCompressed = data.Scheme.BlockSize != 1;
 
-	for(ubyte i = 0; i < Mips; i++, size >>= decltype(size)(1)) // lazy guy
-	{
-		size = glm::max(size, decltype(size)(1)); // double lazy guy
-		u64 dataSize = settings.Scheme.Size<TextureDimension::D2D>(size);
+	if(data.SentAllMips)
+		for(ubyte i = 0; i < Mips; i++, size >>= decltype(size)(1)) // lazy guy
+		{
+			size = glm::max(size, decltype(size)(1)); // double lazy guy
+			u64 dataSize = data.Scheme.Size<TextureDimension::D2D>(size);
 
-		if(isCompressed) glCompressedTextureSubImage2D(ID, i, 0, 0, size.x, size.y, Format, dataSize, dataPtr);
-		else glTextureSubImage2D(ID, i, 0, 0, size.x, size.y, GL_RGB, GL_UNSIGNED_BYTE, dataPtr);
+			if(isCompressed) glCompressedTextureSubImage2D(ID, i, 0, 0, size.x, size.y, Format, dataSize, dataPtr);
+			else glTextureSubImage2D(ID, i, 0, 0, size.x, size.y, data.PixelFormat, data.PixelType, dataPtr);
 
-		dataPtr += dataSize;
-	}
+			dataPtr += dataSize;
+		}
+	else glGenerateTextureMipmap(ID);
 }
 
 Texture3D::Texture3D(gE::Window* window, const TextureSettings<TextureDimension::D3D>& settings, const TextureData& data) :
@@ -57,9 +55,9 @@ Texture3D::Texture3D(gE::Window* window, const TextureSettings<TextureDimension:
 	for(ubyte i = 0; i < Mips; i++, size >>= decltype(size)(1)) // lazy guy
 	{
 		size = glm::max(size, decltype(size)(1)); // double lazy guy
-		u64 dataSize = settings.Scheme.Size<TextureDimension::D2D>(size);
+		u64 dataSize = data.Scheme.Size<TextureDimension::D3D>(size);
 
-		glTextureSubImage3D(ID, i, 0, 0, 0, size.x, size.y, size.z, GL_RGB, GL_UNSIGNED_BYTE, dataPtr); // TODO: ADD CASES!!!
+		glTextureSubImage3D(ID, i, 0, 0, 0, size.x, size.y, size.z, data.PixelFormat, data.PixelType, dataPtr);
 
 		dataPtr += dataSize;
 	}
@@ -79,15 +77,23 @@ Texture2D* PVR::Read(gE::Window* window, const char* path, WrapMode wrapMode, Fi
 
 	TextureSettings<GL::TextureDimension::D2D> settings
 	{
-		h.Size,
 		PVRToInternalFormat(h.Format),
-		CompressionScheme(16, 16),
 		wrapMode,
 		filterMode,
-		(u8) h.MipCount
+		(u8) h.MipCount,
+		h.Size,
 	};
 
-	auto* tex = new Texture2D(window, settings, { ptr, (u8) h.MipCount });
+	TextureData data
+	{
+		GL_NONE,
+		GL_NONE,
+		CompressionScheme(16, 16),
+		ptr,
+		true
+	};
+
+	auto* tex = new Texture2D(window, settings, data);
 
 	delete[] f;
 	return tex;

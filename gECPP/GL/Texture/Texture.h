@@ -27,8 +27,7 @@ namespace GL
 		~Texture() override { glDeleteTextures(1, &ID); }
 
 	 protected:
-		template<TextureDimension DIMENSION>
-		Texture(gE::Window* window, GLenum tgt, const TextureSettings<DIMENSION>& settings);
+		Texture(gE::Window* window, GLenum tgt, const SizelessTextureSettings& settings);
 
 		const uint8_t Mips;
 		const GLenum Format;

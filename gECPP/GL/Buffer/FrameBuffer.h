@@ -3,8 +3,7 @@
 #include <GL/GL.h>
 #include <GL/Texture/Texture.h>
 #include <Engine/AssetManager.h>
-
-#define FRAMEBUFFER_MAX_COLOR_ATTACHMENTS 2
+#include <Engine/Renderer/DefaultPipeline.h>
 
 namespace GL
 {

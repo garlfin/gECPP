@@ -106,21 +106,28 @@ namespace GL
 	};
 
 
-	template<TextureDimension DIMENSION>
-	struct TextureSettings
+	struct SizelessTextureSettings
 	{
-		TextureSize<DIMENSION> Size = TextureSize<DIMENSION>(1);
-		GLenum Format = GL_UNSIGNED_BYTE;
-		CompressionScheme Scheme = {1, 1};
+		GLenum Format = GL_RGBA8UI;
 		WrapMode WrapMode = WrapMode::Repeat;
 		FilterMode Filter = FilterMode::Linear;
-		u8 MipCount = 0;
+		u8 MipCount = 1;
+	};
+
+	template<TextureDimension DIMENSION>
+	struct TextureSettings : public SizelessTextureSettings
+	{
+		TextureSize<DIMENSION> Size = TextureSize<DIMENSION>(1);
 	};
 
 	struct TextureData
 	{
+		GLenum PixelFormat = GL_RGB;
+		GLenum PixelType = GL_UNSIGNED_BYTE;
+		CompressionScheme Scheme = { 1, 1 };
+
 		void* Data = nullptr;
-		u8 SentMips = 0;
+		bool SentAllMips = false;
 	};
 
 	bool FormatIsCompressed(GLenum f);

@@ -21,7 +21,7 @@ void gE::Camera::OnRender(float delta)
 	Window* window = GetWindow();
 	window->GetPipelineBuffers()->UpdateCamera(GetGLCamera());
 
-	_renderPass(window, this);
+	_renderTarget.RenderPass(window, this);
 
 	if(!_postProcessPass.Size()) return;
 }
@@ -31,8 +31,7 @@ gE::Camera::~Camera()
 	GetWindow()->GetCameras().Remove(this);
 }
 
-template<class T>
-GL::Camera gE::PerspectiveCamera<T>::GetGLCamera() const
+GL::Camera gE::PerspectiveCamera::GetGLCamera() const
 {
 	GL::Camera cam;
 	cam.ClipPlanes = _clipPlanes;
@@ -44,8 +43,7 @@ GL::Camera gE::PerspectiveCamera<T>::GetGLCamera() const
 	return cam;
 }
 
-template<class T>
-void gE::PerspectiveCamera<T>::UpdateProjection()
+void gE::PerspectiveCamera::UpdateProjection()
 {
 	_projection = glm::perspectiveFov(_fov, (float) _size.x, (float) _size.y, _clipPlanes.x, _clipPlanes.y);
 }
