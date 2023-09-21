@@ -7,6 +7,7 @@
 #include <GL/Math.h>
 #include "GL/Texture/Texture.h"
 #include "GL/Buffer/Buffer.h"
+#include "Engine/Component/Camera.h"
 
 namespace VoxelDemo
 {
@@ -17,6 +18,11 @@ namespace VoxelDemo
 		glm::vec3 Maximum {};
 		float MipCount = 0;
 		u64 Texture = 0;
+	};
+
+ 	class VoxelCamera : public gE::Camera
+	{
+
 	};
 
 	struct VoxelPipeline

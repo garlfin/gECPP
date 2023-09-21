@@ -2,6 +2,8 @@
 #include <iostream>
 #include <GLAD/glad.h>
 #include <GL/Binary.h>
+#include <GL/Buffer/FrameBuffer.h>
+#include "RenderBuffer.h"
 
 using namespace GL;
 
@@ -99,7 +101,7 @@ void PVR::PVRHeader::Serialize(u8*& ptr)
 	ColorSpace = ::Read<PVRColorSpace>(ptr);
 	::Read<uint32_t>(ptr); // This was like bpc or something; unimportant w/ compression
 	Size = ::Read<glm::u32vec2>(ptr);
-	Size = { Size.y, Size.x };
+	Size = { Size.y, Size.x }; // NOLINT
 	// they store it height, width 🤦‍♂️
 	Depth = ::Read<u32>(ptr);
 	Surfaces = ::Read<u32>(ptr);
@@ -109,3 +111,13 @@ void PVR::PVRHeader::Serialize(u8*& ptr)
 }
 
 void PVR::PVRHeader::Deserialize(gETF::SerializationBuffer&) const {}
+
+void Texture::Attach(GL::FrameBuffer* buffer, GLenum attachment, u8 mip) const
+{
+	glNamedFramebufferTexture(buffer->Get(), attachment, ID, mip);
+}
+
+void RenderBuffer::Attach(GL::FrameBuffer* buffer, GLenum attachment, u8 mip) const
+{
+	glNamedFramebufferRenderbuffer(ID, attachment, GL_RENDERBUFFER, ID);
+}

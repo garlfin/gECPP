@@ -5,7 +5,8 @@
 #pragma once
 
 #include "GL/Buffer/Buffer.h"
-#include "Engine/Entity/Camera.h"
+#include "Engine/Component/Camera.h"
+#include "GL/Buffer/FrameBuffer.h"
 
 #define MAX_OBJECT 64
 
@@ -37,6 +38,7 @@ namespace gE
 {
 	class Window;
 
+	// Using pipelines allows for robustness in code, at the cost of annoying templates.
 	struct DefaultPipelineBuffers
 	{
 		explicit DefaultPipelineBuffers(Window* window);
@@ -45,6 +47,21 @@ namespace gE
 		const GL::Buffer<GL::Camera> Camera;
 
 		ALWAYS_INLINE void UpdateCamera(const GL::Camera& cam) const { Camera.ReplaceData(&cam); };
+	};
+
+	struct DefaultRenderTarget
+	{
+		struct Settings
+		{
+
+		};
+
+		DefaultRenderTarget(const GL::TextureSize2D& size, const Settings& s);
+
+		GL::Texture2D Depth; // Textures should be init first
+		GL::Texture2D Albedo;
+		GL::FrameBuffer FrameBuffer;
+
 	};
 }
 

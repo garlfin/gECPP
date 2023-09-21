@@ -5,12 +5,13 @@
 #include <GL/Binary.h>
 #include <GLAD/glad.h>
 #include "TextureSettings.h"
+#include "Attachment.h"
 
 namespace GL
 {
 	typedef u64 TextureHandle;
 
-	class Texture : public Asset
+	class Texture : public Asset, public Attachment
 	{
 	 public:
 		ALWAYS_INLINE uint32_t Use(uint32_t slot) const { glBindTextureUnit(slot, ID); return slot; }
@@ -20,6 +21,8 @@ namespace GL
 		GET_CONST(GLenum, Format, Format);
 		GET_CONST(GLenum, Target, Target);
 		GET_CONST(GLenum, MipCount, Mips);
+
+		void Attach(GL::FrameBuffer* buffer, GLenum attachment, u8 mip) const override;
 
 		~Texture() override { glDeleteTextures(1, &ID); }
 

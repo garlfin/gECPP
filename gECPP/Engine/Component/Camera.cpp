@@ -7,8 +7,7 @@
 #include "Engine/Window.h"
 
 gE::Camera::Camera(gE::Entity* parent, const CameraSettings& settings) :
-	Component(parent), _renderPass(settings.RenderPass), _clipPlanes(settings.ClipPlanes),
-	_postProcessPass(), _size(settings.Size)
+	Component(parent), _clipPlanes(settings.ClipPlanes), _size(settings.Size)
 {
 	if(settings.PostProcess) _postProcessPass = *settings.PostProcess;
 	GetWindow()->GetCameras().Register(this);
@@ -33,12 +32,8 @@ gE::Camera::~Camera()
 	GetWindow()->GetCameras().Remove(this);
 }
 
-gE::PerspectiveCamera::PerspectiveCamera(gE::Entity* parent, const CameraSettings& settings, float fov)
-	: Camera(parent, settings), _fov(fov)
-{
-}
-
-GL::Camera gE::PerspectiveCamera::GetGLCamera() const
+template<class T>
+GL::Camera gE::PerspectiveCamera<T>::GetGLCamera() const
 {
 	GL::Camera cam;
 	cam.ClipPlanes = _clipPlanes;
@@ -50,9 +45,11 @@ GL::Camera gE::PerspectiveCamera::GetGLCamera() const
 	return cam;
 }
 
-void gE::PerspectiveCamera::UpdateProjection()
+template<class T>
+void gE::PerspectiveCamera<T>::UpdateProjection()
 {
 	_projection = glm::perspectiveFov(_fov, (float) _size.x, (float) _size.y, _clipPlanes.x, _clipPlanes.y);
 }
+
 
 

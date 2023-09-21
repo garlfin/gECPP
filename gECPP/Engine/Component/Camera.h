@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "Entity.h"
+#include "Engine/Entity/Entity.h"
 #include "Engine/Renderer/DefaultPipeline.h"
 #include "Engine/Array.h"
 #include "Engine/ComponentManager.h"
@@ -31,7 +31,7 @@ namespace gE
 	class Camera : public Component
 	{
 	 public:
-		Camera(Entity* w, const CameraSettings&);
+		Camera(Entity* e, const CameraSettings&);
 
 		NODISCARD ALWAYS_INLINE GL::TextureSize2D GetSize() const { return _size; }
 		NODISCARD ALWAYS_INLINE float GetAspect() const { return (float) _size.x / (float) _size.y; }
@@ -52,8 +52,6 @@ namespace gE
 		ClipPlanes _clipPlanes;
 		GL::TextureSize2D _size;
 
-		GL::Texture2D* _texture;
-
 		RenderPass _renderPass;
 		Array<PostProcessPass> _postProcessPass;
 
@@ -61,17 +59,18 @@ namespace gE
 		glm::mat4 _view;
 	};
 
-	class PerspectiveCamera : public Camera
+	template<class T>
+	class PerspectiveCamera : public Camera, public T
 	{
 	 public:
-		PerspectiveCamera(Entity* w, const CameraSettings&, float fov);
+		PerspectiveCamera(Entity* e, const CameraSettings& s, const T::Settings& c, float fov) : Camera(e, s), T(s.Size, c), _fov(fov) {}
 
 		GET_SET(float, FOV, _fov);
 
 		[[nodiscard]] GL::Camera GetGLCamera() const override;
 
 	 protected:
-		void UpdateProjection() override;
+		inline void UpdateProjection() override;
 
 	 private:
 		float _fov;
