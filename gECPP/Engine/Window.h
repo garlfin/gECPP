@@ -29,6 +29,10 @@ namespace gE
 		GET(ComponentManager<Behavior>&, Behaviors, Behaviors);
 		GET_CONST(GL::TextureSize2D&, Size, _size);
 
+		gE::Handle<GL::VAO> Mesh;
+		gE::Handle<GL::Texture3D> ExportTexture;
+		gE::Handle<GL::Shader> RasterShader, VoxelShader;
+
 		~Window();
 
 	 protected:

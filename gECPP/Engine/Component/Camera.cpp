@@ -6,8 +6,11 @@
 #include "Engine/Component/Transform.h"
 #include "Engine/Window.h"
 
-gE::Camera::Camera(gE::Entity* parent, const CameraSettings& settings) :
-	Component(parent), _clipPlanes(settings.ClipPlanes), _size(settings.Size)
+gE::Camera::Camera(gE::Entity* parent, const CameraSettings& settings) : Component(parent),
+	_clipPlanes(settings.ClipPlanes), _size(settings.Size),
+	_renderTarget(settings.RenderTarget),
+	_frameBuffer(parent->GetWindow()),
+	_depthTexture(parent->GetWindow(), { settings.RenderTarget->Depth, _size })
 {
 	if(settings.PostProcess) _postProcessPass = *settings.PostProcess;
 	GetWindow()->GetCameras().Register(this);
@@ -19,9 +22,11 @@ void gE::Camera::OnRender(float delta)
 	UpdateProjection();
 
 	Window* window = GetWindow();
-	window->GetPipelineBuffers()->UpdateCamera(GetGLCamera());
 
-	_renderTarget.RenderPass(window, this);
+	GL::Camera cam = GetGLCamera();
+	window->GetPipelineBuffers()->Camera.ReplaceData(&cam);
+
+	_renderTarget->RenderPass(window, this);
 
 	if(!_postProcessPass.Size()) return;
 }
@@ -46,6 +51,13 @@ GL::Camera gE::PerspectiveCamera::GetGLCamera() const
 void gE::PerspectiveCamera::UpdateProjection()
 {
 	_projection = glm::perspectiveFov(_fov, (float) _size.x, (float) _size.y, _clipPlanes.x, _clipPlanes.y);
+}
+
+gE::PerspectiveCamera::PerspectiveCamera(gE::Entity* e, const gE::PerspectiveCameraSettings& s)
+	: Camera(e, s), _fov(s.FOV)
+{
+	for(u8 i = 0; _renderTarget->Attachments[i].Format; i++)
+		_attachments[i] = new GL::Texture2D(GetOwner()->GetWindow(), { _renderTarget->Attachments[i], _size });
 }
 
 

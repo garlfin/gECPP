@@ -28,15 +28,22 @@ namespace GL
 
 	struct Asset
 	{
+	 public:
+		Asset(Asset&&) = delete;
+		Asset(Asset&) = delete;
+
+		Asset& operator=(const Asset&) = delete;
+		Asset& operator=(Asset&&) = delete;
+
+		NODISCARD ALWAYS_INLINE uint32_t Get() const { return ID; }
+		virtual void Bind() const = 0;
+		NODISCARD ALWAYS_INLINE gE::Window* GetWindow() const { return Window; }
+
+		virtual ~Asset() = default;
+
 	 protected:
 		Asset(gE::Window* window) : Window(window) { };
 		gE::Window *const Window;
 		uint32_t ID;
-
-	 public:
-		NODISCARD ALWAYS_INLINE uint32_t Get() const { return ID; }
-		virtual void Bind() const = 0;
-		NODISCARD ALWAYS_INLINE gE::Window* GetWindow() const { return Window; }
-		virtual ~Asset() = default;
 	};
 }

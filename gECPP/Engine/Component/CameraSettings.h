@@ -16,7 +16,7 @@ namespace gE
 	{
 		GL::TextureSize2D Size = {1280, 720};
 		ClipPlanes ClipPlanes = {0.1, 1000};
-		const RenderTarget& RenderPass = DefaultPipeline::RenderTarget2D;
+		const RenderTarget* RenderTarget = &DefaultPipeline::RenderTarget2D;
 		const Array<PostProcessPass>* PostProcess = nullptr;
 	};
 

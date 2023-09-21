@@ -1,6 +1,8 @@
 #include "Window.h"
 #include "GLAD/glad.h"
 #include "GLFW/glfw3.h"
+#include "Engine/Renderer/DefaultPipeline.h"
+
 #include <iostream>
 
 using namespace gE;
@@ -56,3 +58,14 @@ gE::DefaultPipeline::Buffers::Buffers(Window* window)
 	Scene.Bind(GL::BufferTarget::Uniform, 0);
 	Camera.Bind(GL::BufferTarget::Uniform, 1);
 }
+
+void DefaultPipeline::RenderPass2D(Window* window, Camera* camera)
+{
+
+	window->RasterShader->Bind();
+	//window->ExportTexture->Bind();
+	window->Mesh->Draw(0);
+}
+
+void DefaultPipeline::RenderPass3D(Window*, Camera*) {}
+void DefaultPipeline::RenderPassDirectionalShadow(Window*, Camera*) {}

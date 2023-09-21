@@ -25,7 +25,7 @@ namespace gE
 
 		NODISCARD virtual GL::Camera GetGLCamera() const = 0;
 
-		GET_CONST(RenderTarget&, RenderTarget, _renderTarget);
+		GET_CONST(RenderTarget*, RenderTarget, _renderTarget);
 		GET_CONST(Array<PostProcessPass>&, PostProcessPasses, _postProcessPass);
 		GET_CONST(GL::TextureSize2D&, Size, _size);
 		GET_CONST(float, Aspect, (float) _size.x / _size.y);
@@ -40,7 +40,7 @@ namespace gE
 		const ClipPlanes _clipPlanes;
 		const GL::TextureSize2D _size;
 
-		const gE::RenderTarget& _renderTarget;
+		const gE::RenderTarget* const _renderTarget;
 		Array<PostProcessPass> _postProcessPass;
 
 		GL::FrameBuffer _frameBuffer;
@@ -54,11 +54,7 @@ namespace gE
 	class PerspectiveCamera : public Camera
 	{
 	 public:
-		PerspectiveCamera(Entity* e, const PerspectiveCameraSettings& s) :
-			Camera(e, s), _fov(s.FOV)
-		{
-
-		}
+		PerspectiveCamera(Entity* e, const PerspectiveCameraSettings& s);
 
 		GET_SET(float, FOV, _fov);
 

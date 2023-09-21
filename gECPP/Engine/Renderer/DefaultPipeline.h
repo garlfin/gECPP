@@ -52,8 +52,8 @@ namespace gE
 namespace gE::DefaultPipeline
 {
 	void RenderPass2D(Window*, Camera*);
-	void RenderPass3D(Window*, Camera*);
-	void RenderPassDirectionalShadow(Window*, Camera*);
+	void RenderPass3D(Window*, Camera*);;
+	void RenderPassDirectionalShadow(Window*, Camera*);;
 
 	static const gE::RenderTarget RenderTarget2D
 	{
@@ -82,5 +82,7 @@ namespace gE::DefaultPipeline
 		GL::Buffer<GL::Camera> Camera;
 		GL::Buffer<GL::Scene> Scene;
 	};
+
+
 }
 
