@@ -20,7 +20,6 @@ namespace GL
 		GL_ALIGN glm::vec2 ClipPlanes;
 		float FOV;
 
-
 		GL_ALIGN glm::mat4 Projection;
 		glm::mat4 PreviousViewProjection;
 		glm::mat4 View[6];
@@ -34,34 +33,9 @@ namespace GL
 	};
 }
 
-namespace gE
+namespace gE { class Window; }
+
+namespace gE::Pipeline::Default
 {
-	class Window;
-
-	// Using pipelines allows for robustness in code, at the cost of annoying templates.
-	struct DefaultPipelineBuffers
-	{
-		explicit DefaultPipelineBuffers(Window* window);
-
-		const GL::Buffer<GL::Scene> Scene;
-		const GL::Buffer<GL::Camera> Camera;
-
-		ALWAYS_INLINE void UpdateCamera(const GL::Camera& cam) const { Camera.ReplaceData(&cam); };
-	};
-
-	struct DefaultRenderTarget
-	{
-		struct Settings
-		{
-
-		};
-
-		DefaultRenderTarget(const GL::TextureSize2D& size, const Settings& s);
-
-		GL::Texture2D Depth; // Textures should be init first
-		GL::Texture2D Albedo;
-		GL::FrameBuffer FrameBuffer;
-
-	};
 }
 

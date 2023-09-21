@@ -5,7 +5,6 @@
 #pragma once
 
 #include "Engine/Entity/Entity.h"
-#include "Engine/Renderer/DefaultPipeline.h"
 #include "Engine/Array.h"
 #include "Engine/ComponentManager.h"
 #include "GL/Texture/Texture.h"
@@ -18,6 +17,7 @@ namespace gE
 
 	typedef void(*RenderPass)(Window*, Camera*);
 	typedef void(*PostProcessPass)(Window*, Camera*, GL::Texture2D* in, GL::Texture2D* out);
+
 	typedef glm::vec2 ClipPlanes;
 
 	struct CameraSettings
@@ -26,6 +26,11 @@ namespace gE
 		ClipPlanes ClipPlanes = {0.1, 100};
 		RenderPass RenderPass = nullptr;
 		Array<PostProcessPass>* PostProcess = nullptr;
+	};
+
+	struct PerspectiveCameraSettings : public CameraSettings
+	{
+		float FOV = degree_cast<AngleType::Radian>(80.f);
 	};
 
 	class Camera : public Component
@@ -59,18 +64,19 @@ namespace gE
 		glm::mat4 _view;
 	};
 
-	template<class T>
+	template<typename T>
 	class PerspectiveCamera : public Camera, public T
 	{
 	 public:
-		PerspectiveCamera(Entity* e, const CameraSettings& s, const T::Settings& c, float fov) : Camera(e, s), T(s.Size, c), _fov(fov) {}
+		PerspectiveCamera(Entity* e, const PerspectiveCameraSettings& s, const T::Settings& c, float fov) :
+			Camera(e, s), T(s, c), _fov(fov) {}
 
 		GET_SET(float, FOV, _fov);
 
 		[[nodiscard]] GL::Camera GetGLCamera() const override;
 
 	 protected:
-		inline void UpdateProjection() override;
+		void UpdateProjection() override;
 
 	 private:
 		float _fov;

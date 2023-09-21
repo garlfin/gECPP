@@ -21,7 +21,6 @@ void gE::Camera::OnRender(float delta)
 	Window* window = GetWindow();
 	window->GetPipelineBuffers()->UpdateCamera(GetGLCamera());
 
-	glViewport(0, 0, _size.x, _size.y);
 	_renderPass(window, this);
 
 	if(!_postProcessPass.Size()) return;
