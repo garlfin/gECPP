@@ -29,6 +29,8 @@ namespace gE
 		GET(ComponentManager<Behavior>&, Behaviors, Behaviors);
 		GET_CONST(GL::TextureSize2D&, Size, _size);
 
+		void Blit(const GL::Texture& texture);
+
 		gE::Handle<GL::VAO> Mesh;
 		gE::Handle<GL::Texture3D> ExportTexture;
 		gE::Handle<GL::Shader> RasterShader, VoxelShader;
@@ -36,7 +38,7 @@ namespace gE
 		~Window();
 
 	 protected:
-		virtual void OnInit() = 0;
+		virtual void OnInit();
 		virtual void OnUpdate(float) = 0;
 		virtual void OnRender(float) = 0;
 		virtual void OnDestroy() = 0;
@@ -50,6 +52,8 @@ namespace gE
 		GL::TextureSize2D _size;
 		const char* _name;
 		GLFWwindow* _window;
+
+		Handle<GL::Shader> _blitShader;
 	};
 }
 

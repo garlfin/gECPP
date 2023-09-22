@@ -14,6 +14,9 @@ Window::Window(glm::u16vec2 size, const char* name) :
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+#ifdef DEBUG
+	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
+#endif
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
@@ -31,8 +34,21 @@ Window::~Window()
 	glfwTerminate();
 }
 
+#ifdef DEBUG
+void DebugMessage(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
+{
+	std::cout << message << std::endl;
+}
+#endif
+
 void Window::Run()
 {
+#ifdef DEBUG
+	glEnable(GL_DEBUG_OUTPUT);
+	glDebugMessageCallback(DebugMessage, nullptr);
+#endif
+
+	Window::OnInit();
 	OnInit();
 
 	double time = glfwGetTime(), newTime, delta;
@@ -52,6 +68,25 @@ void Window::Run()
 	}
 }
 
+void Window::OnInit()
+{
+	_blitShader = CreateHandle<GL::Shader>(this, "Resource/Shader/blit.vert", "Resource/Shader/blit.frag");
+}
+
+void Window::Blit(const GL::Texture& texture)
+{
+	_blitShader->Bind();
+
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_CULL_FACE);
+
+	texture.Use(0);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+}
+
 gE::DefaultPipeline::Buffers::Buffers(Window* window)
 	: Scene(window), Camera(window)
 {
@@ -61,9 +96,9 @@ gE::DefaultPipeline::Buffers::Buffers(Window* window)
 
 void DefaultPipeline::RenderPass2D(Window* window, Camera* camera)
 {
+	glClear(GL_DEPTH_BUFFER_BIT);
 
 	window->RasterShader->Bind();
-	//window->ExportTexture->Bind();
 	window->Mesh->Draw(0);
 }
 

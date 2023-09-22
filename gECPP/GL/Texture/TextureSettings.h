@@ -108,7 +108,7 @@ namespace GL
 
 	struct SizelessTextureSettings
 	{
-		GLenum Format = GL_RGBA8UI;
+		GLenum Format = GL_NONE;
 		WrapMode WrapMode = WrapMode::Repeat;
 		FilterMode Filter = FilterMode::Linear;
 		u8 MipCount = 1;

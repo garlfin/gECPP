@@ -23,12 +23,14 @@ namespace gE
 		void OnUpdate(float delta) override {}
 		void OnRender(float delta) override;
 
-		NODISCARD virtual GL::Camera GetGLCamera() const = 0;
+		virtual void GetGLCamera(GL::Camera&) const = 0;
 
 		GET_CONST(RenderTarget*, RenderTarget, _renderTarget);
 		GET_CONST(Array<PostProcessPass>&, PostProcessPasses, _postProcessPass);
 		GET_CONST(GL::TextureSize2D&, Size, _size);
-		GET_CONST(float, Aspect, (float) _size.x / _size.y);
+		GET_CONST_VALUE(float, Aspect, (float) _size.x / _size.y);
+		GET_CONST(GL::FrameBuffer&, FrameBuffer, _frameBuffer);
+		GET(GL::Texture&, DepthAttachment, _depthTexture);
 
 		NODISCARD ALWAYS_INLINE GL::Texture* GetAttachment(u8 i) const { return _attachments[i]; }
 
@@ -58,7 +60,7 @@ namespace gE
 
 		GET_SET(float, FOV, _fov);
 
-		[[nodiscard]] GL::Camera GetGLCamera() const override;
+		void GetGLCamera(GL::Camera&) const override;
 
 	 protected:
 		void UpdateProjection() override;

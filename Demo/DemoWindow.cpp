@@ -20,10 +20,11 @@ void DemoWindow::OnUpdate(float delta)
 
 void DemoWindow::OnRender(float delta)
 {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 	Transforms.OnRender(delta);
 	Cameras.OnRender(delta);
+
+	GL::FrameBuffer::Reset();
+	Blit(*Cameras[0]->GetAttachment(0));
 }
 
 void DemoWindow::OnInit()

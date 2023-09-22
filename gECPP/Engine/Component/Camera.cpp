@@ -12,8 +12,10 @@ gE::Camera::Camera(gE::Entity* parent, const CameraSettings& settings) : Compone
 	_frameBuffer(parent->GetWindow()),
 	_depthTexture(parent->GetWindow(), { settings.RenderTarget->Depth, _size })
 {
-	if(settings.PostProcess) _postProcessPass = *settings.PostProcess;
 	GetWindow()->GetCameras().Register(this);
+
+	if(settings.PostProcess) _postProcessPass = *settings.PostProcess;
+	_frameBuffer.SetDepthAttachment(&_depthTexture);
 }
 
 void gE::Camera::OnRender(float delta)
@@ -23,9 +25,12 @@ void gE::Camera::OnRender(float delta)
 
 	Window* window = GetWindow();
 
-	GL::Camera cam = GetGLCamera();
+	GL::Camera cam;
+	GetGLCamera(cam);
 	window->GetPipelineBuffers()->Camera.ReplaceData(&cam);
 
+	_frameBuffer.Bind();
+	glViewport(0, 0, _size.x, _size.y);
 	_renderTarget->RenderPass(window, this);
 
 	if(!_postProcessPass.Size()) return;
@@ -36,16 +41,13 @@ gE::Camera::~Camera()
 	GetWindow()->GetCameras().Remove(this);
 }
 
-GL::Camera gE::PerspectiveCamera::GetGLCamera() const
+void gE::PerspectiveCamera::GetGLCamera(GL::Camera& cam) const
 {
-	GL::Camera cam;
 	cam.ClipPlanes = _clipPlanes;
 	cam.FOV = _fov;
 	cam.Projection = _projection;
 	cam.View[0] = _view;
 	cam.Position = glm::vec3(GetOwner()->GetTransform().Model()[3]);
-
-	return cam;
 }
 
 void gE::PerspectiveCamera::UpdateProjection()
@@ -57,7 +59,10 @@ gE::PerspectiveCamera::PerspectiveCamera(gE::Entity* e, const gE::PerspectiveCam
 	: Camera(e, s), _fov(s.FOV)
 {
 	for(u8 i = 0; _renderTarget->Attachments[i].Format; i++)
+	{
 		_attachments[i] = new GL::Texture2D(GetOwner()->GetWindow(), { _renderTarget->Attachments[i], _size });
+		_frameBuffer.SetAttachment(i, _attachments[i]);
+	}
 }
 
 

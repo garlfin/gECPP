@@ -29,6 +29,8 @@ namespace GL
 
 		inline ~FrameBuffer() override { glDeleteFramebuffers(1, &ID); }
 
+		ALWAYS_INLINE static void Reset() { glBindFramebuffer(GL_FRAMEBUFFER, 0); }
+
 	 private:
 		GLenum _attachmentsEnum[FRAMEBUFFER_MAX_COLOR_ATTACHMENTS] {};
 	};
