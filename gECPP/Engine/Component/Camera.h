@@ -18,42 +18,53 @@ namespace gE
 	class Camera : public Component
 	{
 	 public:
-		Camera(Entity* e, const CameraSettings&);
+		Camera(Entity* e, const SizelessCameraSettings&);
 
 		void OnUpdate(float delta) override {}
 		void OnRender(float delta) override;
 
 		virtual void GetGLCamera(GL::Camera&) const = 0;
 
-		GET_CONST(RenderTarget*, RenderTarget, _renderTarget);
-		GET_CONST(Array<PostProcessPass>&, PostProcessPasses, _postProcessPass);
-		GET_CONST(GL::TextureSize2D&, Size, _size);
-		GET_CONST_VALUE(float, Aspect, (float) _size.x / _size.y);
-		GET_CONST(GL::FrameBuffer&, FrameBuffer, _frameBuffer);
-		GET(GL::Texture&, DepthAttachment, _depthTexture);
+		GET_CONST(RenderTarget*, RenderTarget, RenderTarget);
+		GET_CONST(Array<PostProcessPass>&, PostProcessPasses, PostProcessPasses);
+		GET_CONST(GL::FrameBuffer&, FrameBuffer, FrameBuffer);
+		GET_CONST(ClipPlanes, ClipPlanes, ClipPlanes);
+		GET(GL::Texture*, DepthAttachment, DepthTexture);
 
-		NODISCARD ALWAYS_INLINE GL::Texture* GetAttachment(u8 i) const { return _attachments[i]; }
+		NODISCARD ALWAYS_INLINE GL::Texture* GetAttachment(u8 i) const { return Attachments[i]; }
 
 		~Camera() override;
 
 	 protected:
 		virtual void UpdateProjection() = 0;
 
-		const ClipPlanes _clipPlanes;
-		const GL::TextureSize2D _size;
+		GL::FrameBuffer FrameBuffer;
+		glm::mat4 Projection;
+		glm::mat4 View;
 
-		const gE::RenderTarget* const _renderTarget;
-		Array<PostProcessPass> _postProcessPass;
+		const ClipPlanes ClipPlanes;
 
-		GL::FrameBuffer _frameBuffer;
-		GL::Texture2D _depthTexture;
-		GL::Texture2D* _attachments[FRAMEBUFFER_MAX_COLOR_ATTACHMENTS] {};
+		const gE::RenderTarget* const RenderTarget;
+		Array<PostProcessPass> PostProcessPasses;
 
-		glm::mat4 _projection;
-		glm::mat4 _view;
+		GL::Texture2D* DepthTexture;
+		GL::Texture2D* Attachments[FRAMEBUFFER_MAX_COLOR_ATTACHMENTS] {};
+
 	};
 
-	class PerspectiveCamera : public Camera
+	class Camera2D : public Camera
+	{
+	 public:
+		Camera2D(Entity*, const CameraSettings2D&);
+
+		GET_CONST_VALUE(GL::TextureSize2D, Size, _size);
+		GET_CONST_VALUE(float, Aspect, (float) _size.x / _size.y);
+
+	 private:
+		const GL::TextureSize2D _size;
+	};
+
+	class PerspectiveCamera : public Camera2D
 	{
 	 public:
 		PerspectiveCamera(Entity* e, const PerspectiveCameraSettings& s);
@@ -67,5 +78,19 @@ namespace gE
 
 	 private:
 		float _fov;
+	};
+
+	class OrthographicCamera : public Camera2D
+	{
+	 public:
+		OrthographicCamera(Entity* e, const OrthographicCameraSettings& s);
+
+		GET_CONST(glm::vec4&, Scale, _orthographicScale);
+
+	 protected:
+		void UpdateProjection() override;
+
+	 private:
+		glm::vec4 _orthographicScale;
 	};
 }

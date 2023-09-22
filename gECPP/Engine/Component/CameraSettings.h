@@ -12,16 +12,29 @@ namespace gE
 {
 	typedef glm::vec2 ClipPlanes;
 
-	struct CameraSettings
+	struct SizelessCameraSettings
 	{
-		GL::TextureSize2D Size = {1280, 720};
 		ClipPlanes ClipPlanes = {0.1, 1000};
 		const RenderTarget* RenderTarget = &DefaultPipeline::RenderTarget2D;
 		const Array<PostProcessPass>* PostProcess = nullptr;
 	};
 
-	struct PerspectiveCameraSettings : public CameraSettings
+	template<GL::TextureDimension DIMENSION>
+	struct CameraSettings : public SizelessCameraSettings
+	{
+		GL::TextureSize<DIMENSION> Size = { 0 };
+	};
+
+	typedef CameraSettings<GL::TextureDimension::D2D> CameraSettings2D;
+	typedef CameraSettings<GL::TextureDimension::D3D> CameraSettings3D;
+
+	struct PerspectiveCameraSettings : public CameraSettings2D
 	{
 		float FOV = degree_cast<AngleType::Radian>(80.f);
+	};
+
+	struct OrthographicCameraSettings : public CameraSettings2D
+	{
+		glm::vec4 Scale;
 	};
 }

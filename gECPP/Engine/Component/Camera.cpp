@@ -6,21 +6,18 @@
 #include "Engine/Component/Transform.h"
 #include "Engine/Window.h"
 
-gE::Camera::Camera(gE::Entity* parent, const CameraSettings& settings) : Component(parent),
-	_clipPlanes(settings.ClipPlanes), _size(settings.Size),
-	_renderTarget(settings.RenderTarget),
-	_frameBuffer(parent->GetWindow()),
-	_depthTexture(parent->GetWindow(), { settings.RenderTarget->Depth, _size })
+gE::Camera::Camera(gE::Entity* parent, const SizelessCameraSettings& settings) : Component(parent),
+																				 ClipPlanes(settings.ClipPlanes),
+																				 RenderTarget(settings.RenderTarget),
+																				 FrameBuffer(parent->GetWindow())
 {
 	GetWindow()->GetCameras().Register(this);
-
-	if(settings.PostProcess) _postProcessPass = *settings.PostProcess;
-	_frameBuffer.SetDepthAttachment(&_depthTexture);
+	if(settings.PostProcess) PostProcessPasses = *settings.PostProcess;
 }
 
 void gE::Camera::OnRender(float delta)
 {
-	_view = glm::inverse(GetOwner()->GetTransform().Model());
+	View = glm::inverse(GetOwner()->GetTransform().Model());
 	UpdateProjection();
 
 	Window* window = GetWindow();
@@ -29,11 +26,10 @@ void gE::Camera::OnRender(float delta)
 	GetGLCamera(cam);
 	window->GetPipelineBuffers()->Camera.ReplaceData(&cam);
 
-	_frameBuffer.Bind();
-	glViewport(0, 0, _size.x, _size.y);
-	_renderTarget->RenderPass(window, this);
+	FrameBuffer.Bind();
+	RenderTarget->RenderPass(window, this);
 
-	if(!_postProcessPass.Size()) return;
+	if(!PostProcessPasses.Size()) return;
 }
 
 gE::Camera::~Camera()
@@ -43,27 +39,42 @@ gE::Camera::~Camera()
 
 void gE::PerspectiveCamera::GetGLCamera(GL::Camera& cam) const
 {
-	cam.ClipPlanes = _clipPlanes;
+	cam.ClipPlanes = GetClipPlanes();
 	cam.FOV = _fov;
-	cam.Projection = _projection;
-	cam.View[0] = _view;
+	cam.Projection = Projection;
+	cam.View[0] = View;
 	cam.Position = glm::vec3(GetOwner()->GetTransform().Model()[3]);
 }
 
 void gE::PerspectiveCamera::UpdateProjection()
 {
-	_projection = glm::perspectiveFov(_fov, (float) _size.x, (float) _size.y, _clipPlanes.x, _clipPlanes.y);
+	Projection = glm::perspectiveFov(_fov, (float) GetSize().x, (float) GetSize().y, GetClipPlanes().x, GetClipPlanes().y);
 }
 
 gE::PerspectiveCamera::PerspectiveCamera(gE::Entity* e, const gE::PerspectiveCameraSettings& s)
-	: Camera(e, s), _fov(s.FOV)
+	: Camera2D(e, s), _fov(s.FOV)
 {
-	for(u8 i = 0; _renderTarget->Attachments[i].Format; i++)
-	{
-		_attachments[i] = new GL::Texture2D(GetOwner()->GetWindow(), { _renderTarget->Attachments[i], _size });
-		_frameBuffer.SetAttachment(i, _attachments[i]);
-	}
 }
 
+void gE::OrthographicCamera::UpdateProjection()
+{
+	Projection = glm::ortho(_orthographicScale.x, _orthographicScale.y, _orthographicScale.z, _orthographicScale.w, GetClipPlanes().x, GetClipPlanes().y);
+}
 
+gE::OrthographicCamera::OrthographicCamera(gE::Entity* e, const gE::OrthographicCameraSettings& s) :
+	Camera2D(e, s), _orthographicScale(s.Scale)
+{}
+
+gE::Camera2D::Camera2D(gE::Entity *parent, const gE::CameraSettings2D& settings) :
+	Camera(parent, settings), _size(settings.Size)
+{
+	DepthTexture = new GL::Texture2D(parent->GetWindow(), { settings.RenderTarget->Depth, _size });
+	FrameBuffer.SetDepthAttachment(DepthTexture);
+
+	for(u8 i = 0; GetRenderTarget()->Attachments[i].Format; i++)
+	{
+		Attachments[i] = new GL::Texture2D(GetOwner()->GetWindow(), { GetRenderTarget()->Attachments[i], _size });
+		FrameBuffer.SetAttachment(i, Attachments[i]);
+	}
+}
 
