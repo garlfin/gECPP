@@ -51,10 +51,11 @@ void DemoWindow::OnInit()
 
 	new FlyCam(this);
 
-	GL::Scene test{1, glm::mat4(1.f)};
-	test.Normal[0] = glm::mat3(1.f);
+	PipelineBuffers->Scene.InstanceCount = 1;
+	PipelineBuffers->Scene.Model[0] = glm::mat4(1);
+	PipelineBuffers->Scene.Normal[0] = glm::mat3(1);
 
-	PipelineBuffers->Scene.ReplaceData(&test);
+	PipelineBuffers->UpdateScene(offsetof(GL::Scene, Normal[1]));
 }
 
 void DemoWindow::OnDestroy()

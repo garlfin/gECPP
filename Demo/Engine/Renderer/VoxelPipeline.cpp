@@ -3,3 +3,8 @@
 //
 
 #include "VoxelPipeline.h"
+
+void VoxelDemo::VoxelPipeline::VoxelRenderPass(DemoWindow*, VoxelCamera*)
+{
+
+}

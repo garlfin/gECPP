@@ -14,15 +14,15 @@ namespace gE
 
 	struct SizelessCameraSettings
 	{
+		RenderPass RenderPass;
 		ClipPlanes ClipPlanes = {0.1, 1000};
-		const RenderTarget* RenderTarget = &DefaultPipeline::RenderTarget2D;
-		const Array<PostProcessPass>* PostProcess = nullptr;
+		const AttachmentSettings& RenderAttachments = DefaultPipeline::AttachmentDefault;
 	};
 
 	template<GL::TextureDimension DIMENSION>
 	struct CameraSettings : public SizelessCameraSettings
 	{
-		GL::TextureSize<DIMENSION> Size = { 0 };
+		GL::TextureSize<DIMENSION> Size { 0 };
 	};
 
 	typedef CameraSettings<GL::TextureDimension::D2D> CameraSettings2D;

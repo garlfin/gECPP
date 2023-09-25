@@ -25,13 +25,14 @@ namespace gE
 
 		virtual void GetGLCamera(GL::Camera&) const = 0;
 
-		GET_CONST(RenderTarget*, RenderTarget, RenderTarget);
-		GET_CONST(Array<PostProcessPass>&, PostProcessPasses, PostProcessPasses);
+		GET_CONST(RenderPass, RenderPass, Settings.RenderPass);
 		GET_CONST(GL::FrameBuffer&, FrameBuffer, FrameBuffer);
-		GET_CONST(ClipPlanes, ClipPlanes, ClipPlanes);
+		GET_CONST(ClipPlanes, ClipPlanes, Settings.ClipPlanes);
 		GET(GL::Texture*, DepthAttachment, DepthTexture);
+		GET_CONST(SizelessCameraSettings&, Settings, Settings);
 
 		NODISCARD ALWAYS_INLINE GL::Texture* GetAttachment(u8 i) const { return Attachments[i]; }
+		NODISCARD ALWAYS_INLINE GL::Texture* GetCopy(u8 i) const { return AttachmentCopies[i]; }
 
 		~Camera() override;
 
@@ -42,14 +43,12 @@ namespace gE
 		glm::mat4 Projection;
 		glm::mat4 View;
 
-		const ClipPlanes ClipPlanes;
+		const SizelessCameraSettings Settings;
 
-		const gE::RenderTarget* const RenderTarget;
-		Array<PostProcessPass> PostProcessPasses;
-
-		GL::Texture2D* DepthTexture;
+		GL::Texture2D* DepthTexture = nullptr;
+		GL::Texture2D* DepthCopy = nullptr;
 		GL::Texture2D* Attachments[FRAMEBUFFER_MAX_COLOR_ATTACHMENTS] {};
-
+		GL::Texture2D* AttachmentCopies[FRAMEBUFFER_MAX_COLOR_ATTACHMENTS] {};
 	};
 
 	class Camera2D : public Camera

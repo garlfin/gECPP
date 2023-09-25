@@ -17,7 +17,7 @@ namespace VoxelDemo
 		explicit FlyCam(gE::Window* window) : gE::Entity(window),
 			Camera(this,
 				{
-					gE::CameraSettings2D({{0.1f, 100.f}, &gE::DefaultPipeline::RenderTarget2D}, window->GetSize()),
+					gE::CameraSettings2D({ gE::DefaultPipeline::RenderPass2D }, window->GetSize()),
 					degree_cast<AngleType::Radian>(80.f)
 				}),
 			_movement(this)

@@ -4,6 +4,7 @@
 #include "Engine/Renderer/DefaultPipeline.h"
 
 #include <iostream>
+#include <Engine/Component/Camera.h>
 
 using namespace gE;
 
@@ -88,15 +89,15 @@ void Window::Blit(const GL::Texture& texture)
 }
 
 gE::DefaultPipeline::Buffers::Buffers(Window* window)
-	: Scene(window), Camera(window)
+	: _sceneBuffer(window), _cameraBuffer(window)
 {
-	Scene.Bind(GL::BufferTarget::Uniform, 0);
-	Camera.Bind(GL::BufferTarget::Uniform, 1);
+	_sceneBuffer.Bind(GL::BufferTarget::Uniform, 0);
+	_cameraBuffer.Bind(GL::BufferTarget::Uniform, 1);
 }
 
 void DefaultPipeline::RenderPass2D(Window* window, Camera* camera)
 {
-	glClear(GL_DEPTH_BUFFER_BIT);
+	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 	window->RasterShader->Bind();
 	window->Mesh->Draw(0);
@@ -104,3 +105,23 @@ void DefaultPipeline::RenderPass2D(Window* window, Camera* camera)
 
 void DefaultPipeline::RenderPass3D(Window*, Camera*) {}
 void DefaultPipeline::RenderPassDirectionalShadow(Window*, Camera*) {}
+
+#ifdef DEBUG
+// this will only really be used w/ assert; not too concerned w/ perf
+bool PostProcessPass::CheckRequirements(const Camera& cam) const
+{
+	const AttachmentSettings& settings = cam.GetSettings().RenderAttachments;
+
+	if(Requirements.Depth != settings.Depth) return false;
+	if(Requirements.DepthCopy && !settings.DepthCopy) return false;
+
+	#pragma GCC unroll FRAMEBUFFER_MAX_COLOR_ATTACHMENTS
+	for(u8 i = 0; i < FRAMEBUFFER_MAX_COLOR_ATTACHMENTS; i++)
+	{
+		if(!Requirements.Attachments[i]) continue;
+		if(Requirements.Attachments[i] != settings.Attachments[i]) return false;
+		if(Requirements.ColorCopy[i] && !settings.ColorCopy[i]) return false;
+	}
+	return true;
+}
+#endif

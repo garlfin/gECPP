@@ -112,7 +112,10 @@ namespace GL
 		WrapMode WrapMode = WrapMode::Repeat;
 		FilterMode Filter = FilterMode::Linear;
 		u8 MipCount = 1;
+
+		constexpr operator bool() const { return (bool) Format; }
 	};
+
 
 	template<TextureDimension DIMENSION>
 	struct TextureSettings : public SizelessTextureSettings

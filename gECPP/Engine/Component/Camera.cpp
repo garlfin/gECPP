@@ -7,12 +7,11 @@
 #include "Engine/Window.h"
 
 gE::Camera::Camera(gE::Entity* parent, const SizelessCameraSettings& settings) : Component(parent),
-																				 ClipPlanes(settings.ClipPlanes),
-																				 RenderTarget(settings.RenderTarget),
+																				 Settings(settings),
 																				 FrameBuffer(parent->GetWindow())
 {
+	assertm(settings.RenderPass, "RENDERPASS SHOULD NOT BE NULL!");
 	GetWindow()->GetCameras().Register(this);
-	if(settings.PostProcess) PostProcessPasses = *settings.PostProcess;
 }
 
 void gE::Camera::OnRender(float delta)
@@ -21,15 +20,13 @@ void gE::Camera::OnRender(float delta)
 	UpdateProjection();
 
 	Window* window = GetWindow();
+	DefaultPipeline::Buffers* buffers = window->GetPipelineBuffers();
 
-	GL::Camera cam;
-	GetGLCamera(cam);
-	window->GetPipelineBuffers()->Camera.ReplaceData(&cam);
+	GetGLCamera(buffers->Camera);
+	buffers->UpdateCamera();
 
 	FrameBuffer.Bind();
-	RenderTarget->RenderPass(window, this);
-
-	if(!PostProcessPasses.Size()) return;
+	Settings.RenderPass(window, this);
 }
 
 gE::Camera::~Camera()
@@ -65,15 +62,18 @@ gE::OrthographicCamera::OrthographicCamera(gE::Entity* e, const gE::Orthographic
 	Camera2D(e, s), _orthographicScale(s.Scale)
 {}
 
+template<class T>
+void CreateAttachments();
+
 gE::Camera2D::Camera2D(gE::Entity *parent, const gE::CameraSettings2D& settings) :
 	Camera(parent, settings), _size(settings.Size)
 {
-	DepthTexture = new GL::Texture2D(parent->GetWindow(), { settings.RenderTarget->Depth, _size });
+	DepthTexture = new GL::Texture2D(parent->GetWindow(), { settings.RenderAttachments.Depth, _size });
 	FrameBuffer.SetDepthAttachment(DepthTexture);
 
-	for(u8 i = 0; GetRenderTarget()->Attachments[i].Format; i++)
+	for(u8 i = 0; settings.RenderAttachments.Attachments[i].Format; i++)
 	{
-		Attachments[i] = new GL::Texture2D(GetOwner()->GetWindow(), { GetRenderTarget()->Attachments[i], _size });
+		Attachments[i] = new GL::Texture2D(GetOwner()->GetWindow(), { settings.RenderAttachments.Attachments[i], _size });
 		FrameBuffer.SetAttachment(i, Attachments[i]);
 	}
 }

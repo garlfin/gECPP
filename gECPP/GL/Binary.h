@@ -34,6 +34,11 @@ namespace gETF { struct Serializable; }
 #define MAX(X, Y) ((X) > (Y) ? (X) : (Y))
 #endif
 #define BIT_SIZE(X) (sizeof(decltype(X)) * 8)
+#ifdef GLOBAL
+#error GLOBAL ALREADY DEFINED
+#else
+#define GLOBAL inline
+#endif
 
 #define GET_CONST_VALUE(TYPE, ACCESSOR, FIELD) NODISCARD ALWAYS_INLINE TYPE Get##ACCESSOR() const { return FIELD; }
 #define GET_CONST(TYPE, ACCESSOR, FIELD) NODISCARD ALWAYS_INLINE const TYPE Get##ACCESSOR() const { return FIELD; }

@@ -11,6 +11,20 @@
 
 namespace VoxelDemo
 {
+	class DemoWindow;
+	class VoxelCamera;
+}
+
+namespace VoxelDemo::VoxelPipeline
+{
+	void VoxelRenderPass(DemoWindow*, VoxelCamera*);
+
+	static const gE::AttachmentSettings Target3D
+	{
+		{ GL_NONE }, // Depth Format
+		{ { GL_RGB16F }, { GL_RGB5_A1 } }, // Attachments: COLOR, DATA(Roughness, Metallic, _, SOLID)
+	};
+
 	struct VoxelGrid
 	{
 		glm::vec3 Minimum {};
@@ -20,16 +34,11 @@ namespace VoxelDemo
 		u64 Texture = 0;
 	};
 
- 	class VoxelCamera : public gE::Camera
+	struct Buffers
 	{
+		explicit Buffers(DemoWindow* window);
 
-	};
-
-	struct VoxelPipeline
-	{
-		VoxelPipeline();
-
-		VoxelGrid VoxelGrid;
+		VoxelGrid VoxelGrid{};
 		GL::Texture3D VoxelTexture;
 		GL::Buffer<struct VoxelGrid> GridBuffer;
 	};

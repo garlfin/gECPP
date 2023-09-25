@@ -5,6 +5,7 @@
 #pragma once
 
 #include <vector>
+#include <algorithm>
 #include "Component/Component.h"
 
 namespace gE
