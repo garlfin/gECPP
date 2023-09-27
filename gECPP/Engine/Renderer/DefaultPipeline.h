@@ -104,14 +104,13 @@ namespace gE::DefaultPipeline
 	{
 		explicit Buffers(Window*);
 
-		inline void UpdateCamera(u64 size = sizeof(GL::Camera), u64 offset = 0) const
+		ALWAYS_INLINE void UpdateCamera(u64 size = sizeof(GL::Camera), u64 offset = 0) const
 		{
 			_cameraBuffer.ReplaceData((u8*) &Camera + offset, size, offset);
 		}
 
-		inline void UpdateScene(u64 size = sizeof(GL::Scene), u64 offset = 0) const
+		ALWAYS_INLINE void UpdateScene(u64 size = sizeof(GL::Scene), u64 offset = 0) const
 		{
-			assertm(((u8*) &Scene + offset + size) < (u8*)(&Scene + 1), "YUH");
 			_sceneBuffer.ReplaceData((u8*) &Scene + offset, size, offset);
 		}
 
