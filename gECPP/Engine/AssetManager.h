@@ -5,7 +5,7 @@
 #pragma once
 
 #include <vector>
-#include "GL/gl.h"
+#include "GL/GL.h"
 #include "GL/Binary.h"
 
 namespace gE
@@ -15,7 +15,7 @@ namespace gE
 	template<class T>
 	struct Handle
 	{
-		inline Handle(T* t) : _t(t), _counter(new u32(1)) {}
+		inline explicit Handle(T* t) : _t(t), _counter(new u32(1)) {}
 		Handle(Handle&& o) noexcept : _t(o._t), _counter(o._counter) { o._t = o._counter = nullptr; }
 		Handle(const Handle& o) : _t(o._t), _counter(o._counter) { if(_counter) (*_counter)++;}
 		inline Handle() = default;
@@ -25,6 +25,7 @@ namespace gE
 		ALWAYS_INLINE T* Get() const { return _t; }
 		ALWAYS_INLINE T* operator->() const { return _t; }
 		ALWAYS_INLINE T& operator*() const { return *_t; }
+		ALWAYS_INLINE operator bool() { return (bool) _t; } // NOLINT
 
 		template<typename... ARGS>
 		inline static Handle Create(ARGS&&... args) { return Handle(new T(args...)); }

@@ -23,16 +23,20 @@ namespace gE
 		void OnUpdate(float delta) override {}
 		void OnRender(float delta) override;
 
-		virtual void GetGLCamera(GL::Camera&) const = 0;
+		void GetGLCamera(GL::Camera&) const;
 
 		GET_CONST(RenderPass, RenderPass, Settings.RenderPass);
 		GET_CONST(GL::FrameBuffer&, FrameBuffer, FrameBuffer);
 		GET_CONST(ClipPlanes, ClipPlanes, Settings.ClipPlanes);
 		GET(GL::Texture*, DepthAttachment, DepthTexture);
+		GET(GL::Texture*, DepthAttachmentCopy, DepthCopy);
 		GET_CONST(SizelessCameraSettings&, Settings, Settings);
 
 		NODISCARD ALWAYS_INLINE GL::Texture* GetAttachment(u8 i) const { return Attachments[i]; }
-		NODISCARD ALWAYS_INLINE GL::Texture* GetCopy(u8 i) const { return AttachmentCopies[i]; }
+		NODISCARD ALWAYS_INLINE GL::Texture* GetAttachmentCopy(u8 i) const { return AttachmentCopies[i]; }
+
+		template<class TEX_T, class CAM_T>
+		static void CreateAttachments(CAM_T& cam, const gE::AttachmentSettings& settings);
 
 		~Camera() override;
 
@@ -69,8 +73,6 @@ namespace gE
 		PerspectiveCamera(Entity* e, const PerspectiveCameraSettings& s);
 
 		GET_SET(float, FOV, _fov);
-
-		void GetGLCamera(GL::Camera&) const override;
 
 	 protected:
 		void UpdateProjection() override;

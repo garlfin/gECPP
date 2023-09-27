@@ -15,19 +15,14 @@ namespace gE
 
 	}
 
-	Window* Component::GetWindow() const
-	{
-		return _entity->GetWindow();
-	}
-
 	Behavior::Behavior(Entity* o)
 		: Component(o)
 	{
-		GetWindow()->GetBehaviors().Register(this);
+		Owner()->GetWindow()->GetBehaviors().Register(this);
 	}
 
-	Behavior::~Behavior()
+	Behavior::~Behavior() noexcept
 	{
-		GetWindow()->GetBehaviors().Remove(this);
+		Owner()->GetWindow()->GetBehaviors().Remove(this);
 	}
 }

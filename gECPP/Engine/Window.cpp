@@ -47,6 +47,7 @@ void Window::Run()
 #ifdef DEBUG
 	glEnable(GL_DEBUG_OUTPUT);
 	glDebugMessageCallback(DebugMessage, nullptr);
+	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 #endif
 
 	Window::OnInit();
@@ -115,7 +116,7 @@ bool PostProcessPass::CheckRequirements(const Camera& cam) const
 	if(Requirements.Depth != settings.Depth) return false;
 	if(Requirements.DepthCopy && !settings.DepthCopy) return false;
 
-	#pragma GCC unroll FRAMEBUFFER_MAX_COLOR_ATTACHMENTS
+	#pragma unroll FRAMEBUFFER_MAX_COLOR_ATTACHMENTS
 	for(u8 i = 0; i < FRAMEBUFFER_MAX_COLOR_ATTACHMENTS; i++)
 	{
 		if(!Requirements.Attachments[i]) continue;

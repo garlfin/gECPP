@@ -15,7 +15,7 @@ void gE::Transform::Set(const gE::TransformData& d)
 
 glm::mat4 gE::Transform::GetParentTransform()
 {
-	gE::Entity* parent = GetOwner()->GetParent();
+	gE::Entity* parent = Owner()->GetParent();
 	return parent ? parent->GetTransform()._model : glm::mat4(1.f);
 }
 
@@ -38,10 +38,10 @@ void gE::Transform::OnRender(float)
 gE::Transform::Transform(gE::Entity* o)
 	: Component(o)
 {
-	GetWindow()->GetTransforms().Register(this);
+	GET_WINDOW()->GetTransforms().Register(this);
 }
 
 gE::Transform::~Transform()
 {
-	GetWindow()->GetTransforms().Remove(this);
+	GET_WINDOW()->GetTransforms().Remove(this);
 }

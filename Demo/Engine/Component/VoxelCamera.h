@@ -6,7 +6,6 @@
 
 namespace VoxelDemo
 {
-
 	class VoxelCamera
 	{
 

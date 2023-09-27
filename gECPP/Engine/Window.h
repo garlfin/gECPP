@@ -26,7 +26,7 @@ namespace gE
 		GET(ComponentManager<Camera>&, Cameras, Cameras);
 		GET(DefaultPipeline::Buffers*, PipelineBuffers, PipelineBuffers);
 		GET(ComponentManager<Transform>&, Transforms, Transforms);
-		GET(ComponentManager<Behavior>&, Behaviors, Behaviors);
+		GET(ComponentManager<Component> &, Behaviors, Behaviors);
 		GET_CONST(GL::TextureSize2D&, Size, _size);
 
 		void Blit(const GL::Texture& texture);
@@ -46,7 +46,7 @@ namespace gE
 		DefaultPipeline::Buffers* PipelineBuffers;
 		ComponentManager<Camera> Cameras {};
 		ComponentManager<Transform> Transforms {};
-		ComponentManager<Behavior> Behaviors {};
+		ComponentManager<Component> Behaviors {};
 
 	 private:
 		GL::TextureSize2D _size;

@@ -5,17 +5,16 @@
 #pragma once
 
 #include "Prototype.h"
-
+#define GET_WINDOW() Owner()->GetWindow()
+// ouf
 namespace gE
 {
 	class Component
 	{
 	 public:
 		explicit Component(Entity* o) : _entity(o) {};
-		NODISCARD ALWAYS_INLINE Entity* GetOwner() const { return _entity; }
-		NODISCARD Window* GetWindow() const;
+		NODISCARD ALWAYS_INLINE Entity* Owner() const { return _entity; }
 
-		virtual void OnStart() {};
 		virtual void OnUpdate(float) = 0;
 		virtual void OnRender(float) = 0;
 		virtual void OnDestroy() {};
@@ -26,17 +25,39 @@ namespace gE
 		Entity* const _entity;
 	};
 
-	// For future development.
 	class Behavior : public Component
 	{
 	 public:
 		explicit Behavior(Entity* o);
 
-		void OnStart() override {}
 		void OnUpdate(float d) override {}
 		void OnRender(float d) override {}
 		void OnDestroy() override {}
 
 		~Behavior() override;
 	};
+
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "HidingNonVirtualFunction"
+
+	template<class T>
+	class TypedComponent : public Component
+	{
+	 public:
+		inline explicit TypedComponent(gE::Entity* o) : Component(o) {};
+
+		NODISCARD ALWAYS_INLINE T* Owner() const { (T*) Component::Owner(); }
+	};
+
+	template<class T>
+	class TypedBehavior : public Behavior
+	{
+	 public:
+		inline explicit TypedBehavior(gE::Entity* o) : Behavior(o) {};
+
+		NODISCARD ALWAYS_INLINE T* Owner() const { (T*) Behavior::Owner(); }
+	};
+
+#pragma clang diagnostic pop
+
 }

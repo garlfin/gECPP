@@ -11,15 +11,15 @@ gE::Camera::Camera(gE::Entity* parent, const SizelessCameraSettings& settings) :
 																				 FrameBuffer(parent->GetWindow())
 {
 	assertm(settings.RenderPass, "RENDERPASS SHOULD NOT BE NULL!");
-	GetWindow()->GetCameras().Register(this);
+	Owner()->GetWindow()->GetCameras().Register(this);
 }
 
 void gE::Camera::OnRender(float delta)
 {
-	View = glm::inverse(GetOwner()->GetTransform().Model());
+	View = glm::inverse(Owner()->GetTransform().Model());
 	UpdateProjection();
 
-	Window* window = GetWindow();
+	Window* window = Owner()->GetWindow();
 	DefaultPipeline::Buffers* buffers = window->GetPipelineBuffers();
 
 	GetGLCamera(buffers->Camera);
@@ -31,16 +31,15 @@ void gE::Camera::OnRender(float delta)
 
 gE::Camera::~Camera()
 {
-	GetWindow()->GetCameras().Remove(this);
+	Owner()->GetWindow()->GetCameras().Remove(this);
 }
 
-void gE::PerspectiveCamera::GetGLCamera(GL::Camera& cam) const
+void gE::Camera::GetGLCamera(GL::Camera& cam) const
 {
 	cam.ClipPlanes = GetClipPlanes();
-	cam.FOV = _fov;
-	cam.Projection = Projection;
 	cam.View[0] = View;
-	cam.Position = glm::vec3(GetOwner()->GetTransform().Model()[3]);
+	cam.Projection = Projection;
+	cam.Position = glm::vec3(Owner()->GetTransform().Model()[3]);
 }
 
 void gE::PerspectiveCamera::UpdateProjection()
@@ -62,19 +61,26 @@ gE::OrthographicCamera::OrthographicCamera(gE::Entity* e, const gE::Orthographic
 	Camera2D(e, s), _orthographicScale(s.Scale)
 {}
 
-template<class T>
-void CreateAttachments();
+template<class TEX_T, class CAM_T>
+void gE::Camera::CreateAttachments(CAM_T& cam, const gE::AttachmentSettings& settings)
+{
+	if(settings.Depth)
+	{
+		cam.DepthTexture = new TEX_T(cam.GET_WINDOW(), {settings.Depth, cam.GetSize()});
+		cam.FrameBuffer.SetDepthAttachment(cam.DepthTexture);
+	}
+
+	for(u8 i = 0; i < FRAMEBUFFER_MAX_COLOR_ATTACHMENTS; i++)
+	{
+		if(!settings.Attachments[i]) return;
+		cam.Attachments[i] = new TEX_T(cam.GET_WINDOW(), { settings.Attachments[i], cam.GetSize() });
+		cam.FrameBuffer.SetAttachment(i, cam.Attachments[i]);
+	}
+}
 
 gE::Camera2D::Camera2D(gE::Entity *parent, const gE::CameraSettings2D& settings) :
 	Camera(parent, settings), _size(settings.Size)
 {
-	DepthTexture = new GL::Texture2D(parent->GetWindow(), { settings.RenderAttachments.Depth, _size });
-	FrameBuffer.SetDepthAttachment(DepthTexture);
-
-	for(u8 i = 0; settings.RenderAttachments.Attachments[i].Format; i++)
-	{
-		Attachments[i] = new GL::Texture2D(GetOwner()->GetWindow(), { settings.RenderAttachments.Attachments[i], _size });
-		FrameBuffer.SetAttachment(i, Attachments[i]);
-	}
+	CreateAttachments<GL::Texture2D>(*this, settings.RenderAttachments);
 }
 
