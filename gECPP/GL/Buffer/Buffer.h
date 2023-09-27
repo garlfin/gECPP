@@ -37,12 +37,6 @@ namespace GL
 			glNamedBufferSubData(ID, offset, SIZE_T * count, &data);
 		}
 
-		template<typename I>
-		ALWAYS_INLINE void ReplaceData(const I& data, u32 count = sizeof(I))
-		{
-			ReplaceData((u8*) &data, count);
-		}
-
 		ALWAYS_INLINE void Bind(BufferTarget target, uint32_t slot) const
 		{
 			glBindBufferBase((GLenum)target, slot, ID);

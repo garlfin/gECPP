@@ -111,6 +111,7 @@ namespace gE::DefaultPipeline
 
 		inline void UpdateScene(u64 size = sizeof(GL::Scene), u64 offset = 0) const
 		{
+			assertm(((u8*) &Scene + offset + size) < (u8*)(&Scene + 1), "YUH");
 			_sceneBuffer.ReplaceData((u8*) &Scene + offset, size, offset);
 		}
 

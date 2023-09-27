@@ -13,6 +13,8 @@
 
 struct GLFWwindow;
 
+#define LOG(MSG) std::cout << MSG << std::endl
+
 namespace gE
 {
 	class Window

@@ -39,6 +39,7 @@ void DemoWindow::OnInit()
 	Array<GL::PreprocessorPair> pairs(1);
 	pairs[0] = GL::PreprocessorPair("TEST");
 
+
 	RasterShader = gE::CreateHandle<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/uber.frag");
 	VoxelShader = gE::CreateHandle<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/uber.frag", &pairs);
 
@@ -51,10 +52,11 @@ void DemoWindow::OnInit()
 
 	new FlyCam(this);
 
+
 	PipelineBuffers->Scene.InstanceCount = 1;
 	PipelineBuffers->Scene.Model[0] = glm::mat4(1);
 	PipelineBuffers->Scene.Normal[0] = glm::mat3(1);
-
+	LOG("A");
 	PipelineBuffers->UpdateScene(offsetof(GL::Scene, Normal[1]));
 }
 
