@@ -1,6 +1,6 @@
 #pragma once
 #include "GLAD/glad.h"
-#include "GL/GL.h"
+#include "GL/gl.h"
 #include <type_traits>
 #include <iostream>
 
@@ -30,11 +30,11 @@ namespace GL
 		};
 
 		template<typename I>
-		ALWAYS_INLINE void ReplaceData(I const* data, uint32_t count = 1, uint32_t offset = 0) const
+		ALWAYS_INLINE void ReplaceData(const I* data, uint32_t count = 1, uint32_t offset = 0) const
 		{
 			static constexpr unsigned SIZE_T = sizeof(std::conditional_t<std::is_same_v<I, void>, uint8_t, I>);
 			if (!data || !count) return;
-			glNamedBufferSubData(ID, offset, SIZE_T * count, &data);
+			glNamedBufferSubData(ID, offset, SIZE_T * count, data);
 		}
 
 		ALWAYS_INLINE void Bind(BufferTarget target, uint32_t slot) const
