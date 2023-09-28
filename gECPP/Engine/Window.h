@@ -46,7 +46,7 @@ namespace gE
 		virtual void OnDestroy() = 0;
 
 		DefaultPipeline::Buffers* PipelineBuffers;
-		ComponentManager<Camera> Cameras {};
+		CameraManager Cameras {};
 		ComponentManager<Transform> Transforms {};
 		ComponentManager<Component> Behaviors {};
 

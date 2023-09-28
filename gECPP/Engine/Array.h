@@ -17,7 +17,7 @@ class Array
 	Array(const Array& o) : _size(o.Size()), _t(new T[_size]) { memcpy(_t, o.Data(), o.Size() * sizeof(T)); };
 	Array(Array&& o) noexcept : _size(o.Size()), _t(o._t) { o._t = nullptr; };
 
-	COPY_CONSTRUCTOR_BOTH(Array<T>);
+	OPERATOR_EQUALS_BOTH(Array<T>);
 
 	NODISCARD ALWAYS_INLINE u64 Size() const { return _size; }
 	NODISCARD ALWAYS_INLINE T* Data() const { return _t; }

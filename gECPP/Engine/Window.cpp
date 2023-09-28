@@ -108,7 +108,7 @@ void DefaultPipeline::RenderPass3D(Window*, Camera*) {}
 void DefaultPipeline::RenderPassDirectionalShadow(Window*, Camera*) {}
 
 #ifdef DEBUG
-// this will only really be used w/ assert; not too concerned w/ perf
+// this will only really be used in; not too concerned w/ perf
 bool PostProcessPass::CheckRequirements(const Camera& cam) const
 {
 	const AttachmentSettings& settings = cam.GetSettings().RenderAttachments;

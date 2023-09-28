@@ -51,7 +51,11 @@ namespace gETF { struct Serializable; }
 	GET(TYPE, ACCESSOR, FIELD)	\
 	SET(TYPE, ACCESSOR, FIELD)
 
-#define COPY_CONSTRUCTOR(TYPE, REFTYPE, MODIFIER) \
+#define GET_SET_VALUE(TYPE, ACCESSOR, FIELD) \
+	GET_CONST_VALUE(TYPE, ACCESSOR, FIELD) \
+	SET(TYPE, ACCESSOR, FIELD)
+
+#define OPERATOR_EQUALS(TYPE, REFTYPE, MODIFIER) \
 	TYPE& operator=(TYPE REFTYPE o) MODIFIER \
 	{ \
 		if(&o == this) return *this; \
@@ -60,9 +64,9 @@ namespace gETF { struct Serializable; }
 		return *this; \
 	}
 
-#define COPY_CONSTRUCTOR_BOTH(TYPE) \
-    COPY_CONSTRUCTOR(TYPE, const &,); \
-	COPY_CONSTRUCTOR(TYPE, &&, noexcept);
+#define OPERATOR_EQUALS_BOTH(TYPE) \
+    OPERATOR_EQUALS(TYPE, const &,); \
+	OPERATOR_EQUALS(TYPE, &&, noexcept);
 
 
 size_t strlenc(const char*, char);

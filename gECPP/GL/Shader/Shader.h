@@ -16,7 +16,7 @@ namespace GL
 		PreprocessorPair(const PreprocessorPair& o);
 		PreprocessorPair() = default;
 
-		COPY_CONSTRUCTOR_BOTH(PreprocessorPair);
+		OPERATOR_EQUALS_BOTH(PreprocessorPair);
 
 		char* Name = nullptr;
 		char* Value = nullptr;

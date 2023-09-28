@@ -25,9 +25,9 @@ namespace gE
 
 		void GetGLCamera(GL::Camera&) const;
 
-		GET_CONST(RenderPass, RenderPass, Settings.RenderPass);
+		GET_CONST_VALUE(RenderPass, RenderPass, Settings.RenderPass);
 		GET_CONST(GL::FrameBuffer&, FrameBuffer, FrameBuffer);
-		GET_CONST(ClipPlanes, ClipPlanes, Settings.ClipPlanes);
+		GET_CONST_VALUE(ClipPlanes, ClipPlanes, Settings.ClipPlanes);
 		GET(GL::Texture*, DepthAttachment, DepthTexture);
 		GET(GL::Texture*, DepthAttachmentCopy, DepthCopy);
 		GET_CONST(SizelessCameraSettings&, Settings, Settings);
@@ -49,10 +49,10 @@ namespace gE
 
 		const SizelessCameraSettings Settings;
 
-		GL::Texture2D* DepthTexture = nullptr;
-		GL::Texture2D* DepthCopy = nullptr;
-		GL::Texture2D* Attachments[FRAMEBUFFER_MAX_COLOR_ATTACHMENTS] {};
-		GL::Texture2D* AttachmentCopies[FRAMEBUFFER_MAX_COLOR_ATTACHMENTS] {};
+		gE::Reference<GL::Texture2D> DepthTexture;
+		gE::Reference<GL::Texture2D> DepthCopy;
+		gE::Reference<GL::Texture2D> Attachments[FRAMEBUFFER_MAX_COLOR_ATTACHMENTS] {};
+		gE::Reference<GL::Texture2D> AttachmentCopies[FRAMEBUFFER_MAX_COLOR_ATTACHMENTS] {};
 	};
 
 	class Camera2D : public Camera
@@ -72,7 +72,7 @@ namespace gE
 	 public:
 		PerspectiveCamera(Entity* e, const PerspectiveCameraSettings& s);
 
-		GET_SET(float, FOV, _fov);
+		GET_SET_VALUE(float, FOV, _fov);
 
 	 protected:
 		void UpdateProjection() override;
@@ -94,4 +94,16 @@ namespace gE
 	 private:
 		glm::vec4 _orthographicScale;
 	};
+
+	class CameraManager : public ComponentManager<Camera>
+	{
+	 public:
+		using ComponentManager<Camera>::ComponentManager;
+
+		GET_SET(Camera*, CurrentCamera, _currentCamera);
+
+	 private:
+		Camera* _currentCamera = nullptr;
+	};
+
 }

@@ -24,7 +24,7 @@ void DemoWindow::OnRender(float delta)
 	Cameras.OnRender(delta);
 
 	GL::FrameBuffer::Reset();
-	Blit(*Cameras[0]->GetAttachment(0));
+	Blit(*Cameras.GetCurrentCamera()->GetAttachment(0));
 }
 
 void DemoWindow::OnInit()
@@ -39,7 +39,6 @@ void DemoWindow::OnInit()
 	Array<GL::PreprocessorPair> pairs(1);
 	pairs[0] = GL::PreprocessorPair("TEST");
 
-
 	RasterShader = gE::CreateHandle<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/uber.frag");
 	VoxelShader = gE::CreateHandle<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/uber.frag", &pairs);
 
@@ -50,8 +49,8 @@ void DemoWindow::OnInit()
 	gETF::Read("cube.gETF", file);
 	Mesh = gE::CreateHandleFromPointer<GL::VAO>(GL::VAO::Create(this, GL::Mesh(file.Meshes[0])));
 
-	new FlyCam(this);
-
+	FlyCam* camera = new FlyCam(this);
+	Cameras.SetCurrentCamera(&camera->Camera);
 
 	PipelineBuffers->Scene.InstanceCount = 1;
 	PipelineBuffers->Scene.Model[0] = glm::mat4(1);
