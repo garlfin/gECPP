@@ -232,7 +232,7 @@ struct aiLight {
      */
     float mAngleOuterCone;
 
-    /** Size of area light source. */
+    /** _size of area light source. */
     C_STRUCT aiVector2D mSize;
 
 #ifdef __cplusplus

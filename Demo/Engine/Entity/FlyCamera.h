@@ -25,5 +25,6 @@ namespace VoxelDemo
 
 		gE::PerspectiveCamera Camera;
 		Movement _movement;
+
 	};
 }

@@ -21,7 +21,7 @@ namespace gE
 		Owner()->GetWindow()->GetBehaviors().Register(this);
 	}
 
-	Behavior::~Behavior() noexcept
+	Behavior::~Behavior()
 	{
 		Owner()->GetWindow()->GetBehaviors().Remove(this);
 	}

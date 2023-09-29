@@ -81,12 +81,14 @@ namespace GL
 
 	enum class TextureDimension : u8
 	{
+		D1D,
 		D2D,
 		D3D
 	};
 
-	template<TextureDimension DIMENSION = TextureDimension::D2D>
-	using TextureSize = std::conditional_t<DIMENSION == TextureDimension::D2D, glm::u32vec2, glm::u32vec3>;
+	template<TextureDimension DIMENSION>
+	using TextureSize = std::conditional_t<DIMENSION == TextureDimension::D1D, u32,
+						std::conditional_t<DIMENSION == TextureDimension::D2D, glm::u32vec2, glm::u32vec3>>;
 
 	struct CompressionScheme
 	{
@@ -98,9 +100,12 @@ namespace GL
 		NODISCARD ALWAYS_INLINE u64 Size(const TextureSize<DIMENSION>& size) const
 		{
 			TextureSize<DIMENSION> blocks = DIV_CEIL_T(size, BlockSize, TextureSize<DIMENSION>);
-			if constexpr(DIMENSION == TextureDimension::D2D) return blocks.x * blocks.y * ByteSize;
+			if constexpr(DIMENSION == TextureDimension::D1D) return blocks * ByteSize;
+			else if constexpr(DIMENSION == TextureDimension::D2D) return blocks.x * blocks.y * ByteSize;
 			else return blocks.x * blocks.y * blocks.z * ByteSize;
 		}
+
+		NODISCARD ALWAYS_INLINE constexpr operator bool() const { return BlockSize != 1; } // NOLINT
 
 		static const CompressionScheme& None() { static const CompressionScheme none{1, 1}; return none; }
 	};
@@ -113,7 +118,7 @@ namespace GL
 		FilterMode Filter = FilterMode::Linear;
 		u8 MipCount = 1;
 
-		constexpr operator bool() const { return (bool) Format; }
+		constexpr operator bool() const { return (bool) Format; } // NOLINT
 	};
 
 

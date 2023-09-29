@@ -55,7 +55,6 @@ void DemoWindow::OnInit()
 	PipelineBuffers->Scene.InstanceCount = 1;
 	PipelineBuffers->Scene.Model[0] = glm::mat4(1);
 	PipelineBuffers->Scene.Normal[0] = glm::mat3(1);
-	LOG("A");
 	PipelineBuffers->UpdateScene(offsetof(GL::Scene, Normal[1]));
 }
 

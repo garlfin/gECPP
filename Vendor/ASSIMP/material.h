@@ -636,7 +636,7 @@ struct aiMaterialProperty {
      */
     unsigned int mIndex;
 
-    /** Size of the buffer mData is pointing to, in bytes.
+    /** _size of the buffer mData is pointing to, in bytes.
      *  This value may not be 0.
      */
     unsigned int mDataLength;
@@ -817,7 +817,7 @@ public:
      *  structure
      *
      *  @param pInput Pointer to input data
-     *  @param pSizeInBytes Size of input data
+     *  @param pSizeInBytes _size of input data
      *  @param pKey Key/Usage of the property (AI_MATKEY_XXX)
      *  @param type Set by the AI_MATKEY_XXX macro
      *  @param index Set by the AI_MATKEY_XXX macro

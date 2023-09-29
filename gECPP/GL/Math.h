@@ -61,6 +61,7 @@ namespace GL
 {
 	typedef glm::u32vec2 TextureSize2D;
 	typedef glm::u32vec3 TextureSize3D;
+	typedef u32 TextureSize1D;
 }
 
 enum class FOVType : u8

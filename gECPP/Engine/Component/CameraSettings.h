@@ -25,6 +25,7 @@ namespace gE
 		GL::TextureSize<DIMENSION> Size { 0 };
 	};
 
+	typedef CameraSettings<GL::TextureDimension::D1D> CameraSettings1D;
 	typedef CameraSettings<GL::TextureDimension::D2D> CameraSettings2D;
 	typedef CameraSettings<GL::TextureDimension::D3D> CameraSettings3D;
 

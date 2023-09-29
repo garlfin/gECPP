@@ -13,6 +13,9 @@
 
 namespace GL { struct Camera; }
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "HidingNonVirtualFunction"
+
 namespace gE
 {
 	class Camera : public Component
@@ -28,10 +31,10 @@ namespace gE
 		GET_CONST_VALUE(RenderPass, RenderPass, Settings.RenderPass);
 		GET_CONST(GL::FrameBuffer&, FrameBuffer, FrameBuffer);
 		GET_CONST_VALUE(ClipPlanes, ClipPlanes, Settings.ClipPlanes);
-		GET(GL::Texture*, DepthAttachment, DepthTexture);
-		GET(GL::Texture*, DepthAttachmentCopy, DepthCopy);
 		GET_CONST(SizelessCameraSettings&, Settings, Settings);
 
+		GET(GL::Texture*, DepthAttachment, DepthTexture);
+		GET(GL::Texture*, DepthAttachmentCopy, DepthCopy);
 		NODISCARD ALWAYS_INLINE GL::Texture* GetAttachment(u8 i) const { return Attachments[i]; }
 		NODISCARD ALWAYS_INLINE GL::Texture* GetAttachmentCopy(u8 i) const { return AttachmentCopies[i]; }
 
@@ -59,6 +62,11 @@ namespace gE
 	{
 	 public:
 		Camera2D(Entity*, const CameraSettings2D&);
+
+		GET(GL::Texture2D*, DepthAttachment, (GL::Texture2D*) DepthTexture.Get());
+		GET(GL::Texture2D*, DepthAttachmentCopy, (GL::Texture2D*) DepthTexture.Get());
+		NODISCARD ALWAYS_INLINE GL::Texture2D* GetAttachment(u8 i) const { return (GL::Texture2D*) Attachments[i].Get(); }
+		NODISCARD ALWAYS_INLINE GL::Texture2D* GetAttachmentCopy(u8 i) const { return (GL::Texture2D*) AttachmentCopies[i].Get(); }
 
 		GET_CONST_VALUE(GL::TextureSize2D, Size, _size);
 		GET_CONST_VALUE(float, Aspect, (float) _size.x / _size.y);
@@ -95,6 +103,39 @@ namespace gE
 		glm::vec4 _orthographicScale;
 	};
 
+	class Camera3D : public Camera
+	{
+	 public:
+		Camera3D(Entity*, const CameraSettings3D&);
+
+		GET(GL::Texture3D*, DepthAttachment, (GL::Texture3D*) DepthTexture.Get());
+		GET(GL::Texture3D*, DepthAttachmentCopy, (GL::Texture3D*) DepthTexture.Get());
+		NODISCARD ALWAYS_INLINE GL::Texture3D* GetAttachment(u8 i) const { return (GL::Texture3D*) Attachments[i].Get(); }
+		NODISCARD ALWAYS_INLINE GL::Texture3D* GetAttachmentCopy(u8 i) const { return (GL::Texture3D*) AttachmentCopies[i].Get(); }
+
+		GET_CONST_VALUE(GL::TextureSize3D, Size, _size);
+
+	 private:
+		const GL::TextureSize3D _size;
+	};
+
+	class CubemapCamera : public Camera
+	{
+	 public:
+		CubemapCamera(Entity*, const CameraSettings1D&);
+
+		GET(GL::TextureCubemap*, DepthAttachment, (GL::TextureCubemap*) DepthTexture.Get());
+		GET(GL::TextureCubemap*, DepthAttachmentCopy, (GL::TextureCubemap*) DepthTexture.Get());
+		NODISCARD ALWAYS_INLINE GL::TextureCubemap* GetAttachment(u8 i) const { return (GL::TextureCubemap*) Attachments[i].Get(); }
+		NODISCARD ALWAYS_INLINE GL::TextureCubemap* GetAttachmentCopy(u8 i) const { return (GL::TextureCubemap*) AttachmentCopies[i].Get(); }
+
+		GET_CONST_VALUE(GL::TextureSize1D, Size, _size);
+
+	 public:
+		const GL::TextureSize1D _size;
+
+	};
+
 	class CameraManager : public ComponentManager<Camera>
 	{
 	 public:
@@ -105,5 +146,6 @@ namespace gE
 	 private:
 		Camera* _currentCamera = nullptr;
 	};
-
 }
+
+#pragma clang diagnostic pop
