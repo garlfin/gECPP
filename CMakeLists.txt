@@ -20,7 +20,7 @@ set_property(TARGET GLFW PROPERTY IMPORTED_IMPLIB "${CMAKE_CURRENT_SOURCE_DIR}/V
 FILE(COPY "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/GLFW/glfw3.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 # ASSIMP
-add_library(ASSIMP STATIC IMPORTED gECPP/GL/Binary.cpp Demo/Engine/Renderer/VoxelPipeline.h)
+add_library(ASSIMP STATIC IMPORTED gECPP/GL/Binary.cpp gECPP/Engine/Renderer/VoxelPipeline.h)
 set_property(TARGET ASSIMP PROPERTY IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ASSIMP/libassimp-5.dll")
 FILE(COPY "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ASSIMP/libassimp-5.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
@@ -37,7 +37,9 @@ target_link_libraries(gEModel PRIVATE ASSIMP GETF)
 
 # GECPP
 file(GLOB_RECURSE GECPP_SRC "gECPP/*.cpp" "gECPP/*.h")
-add_library(gECPP STATIC ${GECPP_SRC})
+add_library(gECPP STATIC ${GECPP_SRC}
+        gECPP/Engine/WindowState.h
+        gECPP/Engine/Renderer/Material.cpp)
 target_link_libraries(gECPP GLAD GLFW GETF)
 
 # VOXELDEMO

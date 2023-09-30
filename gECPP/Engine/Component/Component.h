@@ -6,7 +6,7 @@
 
 #include "Prototype.h"
 #define GET_WINDOW() Owner()->GetWindow()
-// ouf
+
 namespace gE
 {
 	class Component

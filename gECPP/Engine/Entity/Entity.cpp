@@ -8,8 +8,8 @@
 
 namespace gE
 {
-	Entity::Entity(Window* w, Entity* o, const char* n) :
-		_window(w), _parent(o), _name(n ? strdup(n) : nullptr),
+	Entity::Entity(Window* w, Entity* o) :
+		_window(w), _parent(o),
 		_transform(this)
 	{
 

@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "Entity.h"
+#include "Engine/Entity/Entity.h"
 #include "GL/Buffer/VAO.h"
 
 namespace gE

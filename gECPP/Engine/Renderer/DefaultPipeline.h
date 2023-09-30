@@ -34,17 +34,26 @@ namespace GL
 	};
 }
 
+
 namespace gE
 {
 	class Camera;
+	class Camera2D;
+	class Camera3D;
 
 	using RenderPass = void(*)(Window*, Camera*);
-	using PostProcessFunc = void(*)(Window*, Camera*, GL::Texture2D* out);
+	using PostProcessFunc = void(*)(Window*, Camera*, GL::Texture* out);
+
+	template<class T>
+	using RenderPassT = void(*)(Window*, T*);
+
+	template<class T>
+	using PostProcessFuncT = void(*)(Window*, T*, GL::Texture* out);
 
 	struct AttachmentSettings
 	{
-		GL::SizelessTextureSettings Depth;
-		GL::SizelessTextureSettings Attachments[FRAMEBUFFER_MAX_COLOR_ATTACHMENTS];
+		GL::SizelessTextureSettings Depth {};
+		GL::SizelessTextureSettings Attachments[FRAMEBUFFER_MAX_COLOR_ATTACHMENTS] {};
 		bool DepthCopy = false;
 		bool ColorCopy[FRAMEBUFFER_MAX_COLOR_ATTACHMENTS] {};
 
@@ -52,7 +61,6 @@ namespace gE
 		{
 			if(!Depth && o.Depth) Depth = o.Depth;
 
-#pragma gcc unroll FRAMEBUFFER_MAX_COLOR_ATTACHMENTS
 			for(u8 i = 0; i < FRAMEBUFFER_MAX_COLOR_ATTACHMENTS; i++)
 				if(!Attachments[i] && o.Attachments[i]) Attachments[i] = o.Attachments[i];
 
@@ -75,30 +83,34 @@ namespace gE
 
 namespace gE::DefaultPipeline
 {
-	void RenderPass2D(Window*, Camera*);
-	void RenderPass3D(Window*, Camera*);
-	void RenderPassDirectionalShadow(Window*, Camera*);
+	void RenderPass2D(Window*, Camera2D*);
+	void RenderPass3D(Window*, Camera3D*);
+	void RenderPassDirectionalShadow(Window*, Camera2D*);
 
-	GLOBAL constexpr const gE::AttachmentSettings AttachmentColor
+	GLOBAL gE::AttachmentSettings AttachmentColor
 	{
 		{ GL_NONE }, // Depth Format
 		{ { GL_RGBA16F } } // Attachments
 	};
 
-	GLOBAL constexpr const gE::AttachmentSettings AttachmentDepth
+	GLOBAL gE::AttachmentSettings AttachmentDepth
 	{
 		{ GL_DEPTH_COMPONENT32F }
 	};
 
-	GLOBAL constexpr const gE::AttachmentSettings AttachmentTAA
+	GLOBAL gE::AttachmentSettings AttachmentShadow
 	{
-		{},
-		{ {}, { GL_RGB16F } }
+		{ GL_DEPTH_COMPONENT16 }
 	};
 
-	GLOBAL constexpr const gE::AttachmentSettings AttachmentDefault = AttachmentColor | AttachmentDepth;
-	GLOBAL constexpr const gE::AttachmentSettings AttachmentDefaultTAA = AttachmentDefault | AttachmentTAA;
-	GLOBAL constexpr const gE::AttachmentSettings& AttachmentShadow = AttachmentDepth;
+	GLOBAL gE::AttachmentSettings AttachmentTAA
+	{
+		{},
+		{ {}, { GL_RGB16F } } // Velocity
+	};
+
+	GLOBAL gE::AttachmentSettings AttachmentDefault = AttachmentColor | AttachmentDepth;
+	GLOBAL gE::AttachmentSettings AttachmentDefaultTAA = AttachmentDefault | AttachmentTAA;
 
 	struct Buffers
 	{

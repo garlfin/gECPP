@@ -23,32 +23,15 @@ namespace gE
 		Blend
 	};
 
-	struct Material
-	{
+	 struct Material : public GL::Asset
+	 {
 	 public:
 		Material(Window* window, GL::Shader* shader, DepthFunction depthFunc = DepthFunction::Less);
 
-		virtual void Use()
-		{
-			if((bool) _depthFunc)
-			{
-				glEnable(GL_DEPTH_TEST);
-				glDepthFunc((GLenum) _depthFunc);
-			}
-			else glDisable(GL_DEPTH_TEST);
-
-			_shader->Bind();
-		}
+		void Bind() const override;
 
 	 private:
 		GL::Shader* const _shader;
-		Window* const _window;
 		const DepthFunction _depthFunc;
 	};
-}
-
-gE::Material::Material(Window* window, GL::Shader* shader, DepthFunction depthFunc) :
-	_window(window), _shader(shader), _depthFunc(depthFunc)
-{
-
 }

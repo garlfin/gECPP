@@ -39,12 +39,12 @@ namespace GL
 
 		ALWAYS_INLINE void Bind(BufferTarget target, uint32_t slot) const
 		{
-			glBindBufferBase((GLenum)target, slot, ID);
+			glBindBufferBase((GLenum) target, slot, ID);
 		}
 
 		ALWAYS_INLINE void Bind(BufferTarget target) const
 		{
-			glBindBuffer((GLenum)target, ID);
+			glBindBuffer((GLenum) target, ID);
 		}
 
 		ALWAYS_INLINE void Bind() const override

@@ -7,22 +7,20 @@
 #include "Math.h"
 #include <cstring>
 
-#ifndef NODISCARD
-	#define NODISCARD [[nodiscard]]
-#endif
-#ifndef ALWAYS_INLINE
-	#ifdef DEBUG
-		#define ALWAYS_INLINE inline
-	#else
-		#define ALWAYS_INLINE __attribute__((always_inline)) inline
-	#endif // #if DEBUG
-#endif // #ifndef ALWAYS_INLINE
+#define NODISCARD [[nodiscard]]
+#ifdef DEBUG
+	#define ALWAYS_INLINE inline
+#else
+	#define ALWAYS_INLINE __attribute__((always_inline)) inline
+#endif // #if DEBUG
 
 #ifdef DEBUG
 	#include <iostream>
 #endif // #ifdef DEBUG
 
 #define assertm(exp, msg) assert(((void) msg, exp))
+#define GE_FAIL(ERR) assertm(false, ERR);
+#define GE_ASSERT(COND, ERR) assertm(COND, ERR);
 
 namespace gETF { struct Serializable; }
 
@@ -37,7 +35,7 @@ namespace gETF { struct Serializable; }
 #ifdef GLOBAL
 #error GLOBAL ALREADY DEFINED
 #else
-#define GLOBAL inline
+#define GLOBAL inline constexpr const
 #endif
 
 #define GET_CONST_VALUE(TYPE, ACCESSOR, FIELD) NODISCARD ALWAYS_INLINE TYPE Get##ACCESSOR() const { return FIELD; }
@@ -191,8 +189,6 @@ void gETF::SerializationBuffer::PushPtr(T* t, u32 count)
 
 void gETF::SerializationBuffer::SafeMemCpy(const u8* ptr, u64 len, u64 offset)
 {
-#ifdef DEBUG
-	if(offset + len >= _alloc) std::cout << "WARNING: TRIED TO WRITE OUT OF BOUNDS";
-#endif
+	assertm(offset + len < _alloc, "WROTE OUT OF BOUNDS!");
 	memcpy(_buf + offset, ptr, std::min(offset + len, _alloc));
 }

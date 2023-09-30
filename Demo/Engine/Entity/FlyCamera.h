@@ -17,14 +17,12 @@ namespace VoxelDemo
 		explicit FlyCam(gE::Window* window) : gE::Entity(window),
 			Camera(this,
 				{
-					gE::CameraSettings2D({ gE::DefaultPipeline::RenderPass2D }, window->GetSize()),
-					degree_cast<AngleType::Radian>(80.f)
+					gE::CameraSettings2D({ (gE::RenderPass) gE::DefaultPipeline::RenderPass2D }, window->GetSize())
 				}),
 			_movement(this)
 		{}
 
 		gE::PerspectiveCamera Camera;
 		Movement _movement;
-
 	};
 }

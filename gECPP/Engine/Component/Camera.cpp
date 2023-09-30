@@ -1,22 +1,24 @@
 //
 // Created by scion on 9/5/2023.
 //
-
+#define GLM_FORCE_SWIZZLE
+#include <GLM/glm.hpp>
 #include "Camera.h"
 #include "Engine/Component/Transform.h"
 #include "Engine/Window.h"
 
-gE::Camera::Camera(gE::Entity* parent, const SizelessCameraSettings& settings) : Component(parent),
-																				 Settings(settings),
-																				 FrameBuffer(parent->GetWindow())
+
+gE::Camera::Camera(gE::Entity* parent, const SizelessCameraSettings& settings) :
+	Component(parent), Settings(settings), FrameBuffer(parent->GetWindow())
 {
-	assertm(settings.RenderPass, "RENDERPASS SHOULD NOT BE NULL!");
+	GE_ASSERT(settings.RenderPass, "RENDERPASS SHOULD NOT BE NULL!");
 }
 
 void gE::Camera::OnRender(float delta)
 {
 	View = glm::inverse(Owner()->GetTransform().Model());
-	UpdateProjection();
+	if(_invalidated) UpdateProjection();
+	_invalidated = false;
 
 	Window* window = Owner()->GetWindow();
 	DefaultPipeline::Buffers* buffers = window->GetPipelineBuffers();
@@ -38,7 +40,7 @@ void gE::Camera::GetGLCamera(GL::Camera& cam) const
 	cam.ClipPlanes = GetClipPlanes();
 	cam.View[0] = View;
 	cam.Projection = Projection;
-	cam.Position = glm::vec3(Owner()->GetTransform().Model()[3]);
+	cam.Position = Owner()->GetTransform().GlobalTransform();
 }
 
 void gE::PerspectiveCamera::UpdateProjection()
@@ -47,8 +49,9 @@ void gE::PerspectiveCamera::UpdateProjection()
 }
 
 gE::PerspectiveCamera::PerspectiveCamera(gE::Entity* e, const gE::PerspectiveCameraSettings& s)
-	: Camera2D(e, s), _fov(s.FOV)
+	: Camera2D(e, s)
 {
+	SetFOV(s.FOV);
 	Owner()->GetWindow()->GetCameras().Register(this);
 }
 
@@ -68,15 +71,15 @@ void gE::Camera::CreateAttachments(CAM_T& cam, const gE::AttachmentSettings& set
 {
 	if(settings.Depth)
 	{
-		cam.DepthTexture = std::move(gE::CreateReference<GL::Texture>(new TEX_T(cam.GET_WINDOW(), {settings.Depth, cam.GetSize()})));
-		cam.FrameBuffer.SetDepthAttachment(cam.DepthTexture);
+		cam.DepthTexture = Reference<GL::Texture>(new TEX_T(cam.GET_WINDOW(), {settings.Depth, cam.GetSize()}));
+		if constexpr (!std::is_same_v<TEX_T, GL::Texture3D>) cam.FrameBuffer.SetDepthAttachment(cam.DepthTexture);
 	}
 
 	for(u8 i = 0; i < FRAMEBUFFER_MAX_COLOR_ATTACHMENTS; i++)
 	{
 		if(!settings.Attachments[i]) continue;
 		cam.Attachments[i] = new TEX_T(cam.GET_WINDOW(), { settings.Attachments[i], cam.GetSize() });
-		cam.FrameBuffer.SetAttachment(i, cam.Attachments[i]);
+		if constexpr (!std::is_same_v<TEX_T, GL::Texture3D>) cam.FrameBuffer.SetAttachment(i, cam.Attachments[i]);
 	}
 }
 
@@ -89,11 +92,22 @@ gE::Camera2D::Camera2D(gE::Entity* parent, const gE::CameraSettings2D& settings)
 gE::Camera3D::Camera3D(gE::Entity* parent, const gE::CameraSettings3D& settings) :
 	Camera(parent, settings), _size(settings.Size)
 {
-	CreateAttachments<GL::Texture2D>(*this, settings.RenderAttachments);
+	CreateAttachments<GL::Texture3D>(*this, settings.RenderAttachments);
+}
+
+void gE::Camera3D::UpdateProjection()
+{
+	glm::vec2 halfSize = (glm::vec2) GetSize().xz() / 2.f;
+	Projection = glm::ortho(-halfSize.x, -halfSize.y, halfSize.x, halfSize.y, GetClipPlanes().x, GetClipPlanes().y);
 }
 
 gE::CubemapCamera::CubemapCamera(gE::Entity* parent, const gE::CameraSettings1D& settings) :
 	Camera(parent, settings), _size(settings.Size)
 {
 	CreateAttachments<GL::TextureCubemap>(*this, settings.RenderAttachments);
+}
+
+void gE::CubemapCamera::UpdateProjection()
+{
+	Projection = glm::perspectiveFov(degree_cast<AngleType::Radian>(90.f), (float) GetSize(), (float) GetSize(), GetClipPlanes().x, GetClipPlanes().y);
 }

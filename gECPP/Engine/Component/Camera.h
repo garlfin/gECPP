@@ -24,7 +24,7 @@ namespace gE
 		Camera(Entity* e, const SizelessCameraSettings&);
 
 		void OnUpdate(float delta) override {}
-		void OnRender(float delta) override;
+		void OnRender(float delta) final;
 
 		void GetGLCamera(GL::Camera&) const;
 
@@ -52,10 +52,13 @@ namespace gE
 
 		const SizelessCameraSettings Settings;
 
-		gE::Reference<GL::Texture2D> DepthTexture;
-		gE::Reference<GL::Texture2D> DepthCopy;
-		gE::Reference<GL::Texture2D> Attachments[FRAMEBUFFER_MAX_COLOR_ATTACHMENTS] {};
-		gE::Reference<GL::Texture2D> AttachmentCopies[FRAMEBUFFER_MAX_COLOR_ATTACHMENTS] {};
+		gE::Reference<GL::Texture> DepthTexture;
+		gE::Reference<GL::Texture> DepthCopy;
+		gE::Reference<GL::Texture> Attachments[FRAMEBUFFER_MAX_COLOR_ATTACHMENTS] {};
+		gE::Reference<GL::Texture> AttachmentCopies[FRAMEBUFFER_MAX_COLOR_ATTACHMENTS] {};
+
+	 private:
+		bool _invalidated = true;
 	};
 
 	class Camera2D : public Camera
@@ -80,7 +83,22 @@ namespace gE
 	 public:
 		PerspectiveCamera(Entity* e, const PerspectiveCameraSettings& s);
 
-		GET_SET_VALUE(float, FOV, _fov);
+		template<AngleType T = AngleType::Degree>
+		NODISCARD ALWAYS_INLINE float GetFOV() const
+		{
+			if constexpr(T == AngleType::Radian)
+				return _fov;
+			return degree_cast<AngleType::Degree>(_fov);
+		}
+
+		template<AngleType T = AngleType::Degree>
+		ALWAYS_INLINE void SetFOV(float fov)
+		{
+			if constexpr(T == AngleType::Radian)
+				_fov = fov;
+			else
+				_fov = degree_cast<AngleType::Radian>(fov);
+		}
 
 	 protected:
 		void UpdateProjection() override;
@@ -115,6 +133,9 @@ namespace gE
 
 		GET_CONST_VALUE(GL::TextureSize3D, Size, _size);
 
+	 protected:
+		void UpdateProjection() override;
+
 	 private:
 		const GL::TextureSize3D _size;
 	};
@@ -131,9 +152,11 @@ namespace gE
 
 		GET_CONST_VALUE(GL::TextureSize1D, Size, _size);
 
+	 protected:
+		void UpdateProjection() override;
+
 	 public:
 		const GL::TextureSize1D _size;
-
 	};
 
 	class CameraManager : public ComponentManager<Camera>

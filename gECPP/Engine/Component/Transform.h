@@ -45,6 +45,8 @@ namespace gE
 		NODISCARD ALWAYS_INLINE glm::vec3 Right() const { return Rotation * glm::vec3(1, 0, 0); }
 		NODISCARD ALWAYS_INLINE glm::mat3 LocalRotationMatrix() const { return glm::toMat3(Rotation); }
 
+		NODISCARD ALWAYS_INLINE glm::vec3 GlobalTransform() const { return (glm::vec3) _model[3]; }
+
 		~Transform() override;
 
 	 private:

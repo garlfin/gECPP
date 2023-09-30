@@ -10,6 +10,7 @@
 
 #include "Engine/Component/Transform.h"
 #include "Engine/Component/Camera.h"
+#include "WindowState.h"
 
 struct GLFWwindow;
 
@@ -28,8 +29,9 @@ namespace gE
 		GET(ComponentManager<Camera>&, Cameras, Cameras);
 		GET(DefaultPipeline::Buffers*, PipelineBuffers, PipelineBuffers);
 		GET(ComponentManager<Transform>&, Transforms, Transforms);
-		GET(ComponentManager<Component> &, Behaviors, Behaviors);
-		GET_CONST(GL::TextureSize2D&, Size, _size);
+		GET(ComponentManager<Component>&, Behaviors, Behaviors);
+		GET_CONST_VALUE(GL::TextureSize2D, Size, _size);
+		GET_SET_VALUE(RenderState, RenderState, _renderState);
 
 		void Blit(const GL::Texture& texture);
 
@@ -54,6 +56,7 @@ namespace gE
 		GL::TextureSize2D _size;
 		const char* _name;
 		GLFWwindow* _window;
+		RenderState _renderState;
 
 		Handle<GL::Shader> _blitShader;
 	};

@@ -92,7 +92,7 @@ void SerializationBuffer::PushString(const char* ptr)
 
 void SerializationBuffer::StrCat(const char* str, char d, i8 offset)
 {
-	assertm(str, "'str' should have a value.");
+	GE_ASSERT(str, "'str' should have a value.");
 
 	u32 strLen = strlenc(str, d);
 	if(str[strLen]) strLen += offset;

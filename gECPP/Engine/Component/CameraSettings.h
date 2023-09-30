@@ -31,7 +31,8 @@ namespace gE
 
 	struct PerspectiveCameraSettings : public CameraSettings2D
 	{
-		float FOV = degree_cast<AngleType::Radian>(80.f);
+		float FOV = 80.f;
+		AngleType Type = AngleType::Radian;
 	};
 
 	struct OrthographicCameraSettings : public CameraSettings2D
