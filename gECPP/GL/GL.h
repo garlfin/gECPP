@@ -26,7 +26,7 @@ namespace GL
 		virtual void Bind() const = 0;
 		NODISCARD ALWAYS_INLINE gE::Window* GetWindow() const { return _window; }
 
-		virtual ~Asset() = default;
+		virtual ~Asset() = 0;
 
 	 protected:
 		Asset(gE::Window* window) : _window(window) { };
@@ -35,4 +35,6 @@ namespace GL
 	 private:
 		gE::Window *const _window;
 	};
+
+	inline Asset::~Asset() = default;
 }

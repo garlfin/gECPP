@@ -26,7 +26,7 @@ namespace gE
 		void OnUpdate(float delta) override {}
 		void OnRender(float delta) final;
 
-		void GetGLCamera(GL::Camera&) const;
+		virtual void GetGLCamera(GL::Camera&) const;
 
 		GET_CONST_VALUE(RenderPass, RenderPass, Settings.RenderPass);
 		GET_CONST(GL::FrameBuffer&, FrameBuffer, FrameBuffer);
@@ -48,7 +48,6 @@ namespace gE
 
 		GL::FrameBuffer FrameBuffer;
 		glm::mat4 Projection;
-		glm::mat4 View;
 
 		const SizelessCameraSettings Settings;
 
@@ -131,6 +130,8 @@ namespace gE
 		NODISCARD ALWAYS_INLINE GL::Texture3D* GetAttachment(u8 i) const { return (GL::Texture3D*) Attachments[i].Get(); }
 		NODISCARD ALWAYS_INLINE GL::Texture3D* GetAttachmentCopy(u8 i) const { return (GL::Texture3D*) AttachmentCopies[i].Get(); }
 
+		void GetGLCamera(GL::Camera&) const override;
+
 		GET_CONST_VALUE(GL::TextureSize3D, Size, _size);
 
 	 protected:
@@ -150,6 +151,8 @@ namespace gE
 		NODISCARD ALWAYS_INLINE GL::TextureCubemap* GetAttachment(u8 i) const { return (GL::TextureCubemap*) Attachments[i].Get(); }
 		NODISCARD ALWAYS_INLINE GL::TextureCubemap* GetAttachmentCopy(u8 i) const { return (GL::TextureCubemap*) AttachmentCopies[i].Get(); }
 
+		void GetGLCamera(GL::Camera& camera) const override;
+
 		GET_CONST_VALUE(GL::TextureSize1D, Size, _size);
 
 	 protected:
@@ -164,7 +167,7 @@ namespace gE
 	 public:
 		using ComponentManager<Camera>::ComponentManager;
 
-		GET_SET(Camera*, CurrentCamera, _currentCamera);
+		GET_SET_VALUE(Camera*, CurrentCamera, _currentCamera);
 
 	 private:
 		Camera* _currentCamera = nullptr;

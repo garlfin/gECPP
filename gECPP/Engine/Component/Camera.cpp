@@ -16,7 +16,6 @@ gE::Camera::Camera(gE::Entity* parent, const SizelessCameraSettings& settings) :
 
 void gE::Camera::OnRender(float delta)
 {
-	View = glm::inverse(Owner()->GetTransform().Model());
 	if(_invalidated) UpdateProjection();
 	_invalidated = false;
 
@@ -38,9 +37,9 @@ gE::Camera::~Camera()
 void gE::Camera::GetGLCamera(GL::Camera& cam) const
 {
 	cam.ClipPlanes = GetClipPlanes();
-	cam.View[0] = View;
+	cam.View[0] = glm::inverse(Owner()->GetTransform().Model());
 	cam.Projection = Projection;
-	cam.Position = Owner()->GetTransform().GlobalTransform();
+	cam.Position = Owner()->GetTransform().GlobalTranslation();
 }
 
 void gE::PerspectiveCamera::UpdateProjection()
@@ -101,6 +100,16 @@ void gE::Camera3D::UpdateProjection()
 	Projection = glm::ortho(-halfSize.x, -halfSize.y, halfSize.x, halfSize.y, GetClipPlanes().x, GetClipPlanes().y);
 }
 
+void gE::Camera3D::GetGLCamera(GL::Camera& cam) const
+{
+	cam.ClipPlanes = GetClipPlanes();
+	cam.Projection = Projection;
+	cam.Position = Owner()->GetTransform().GlobalTranslation();
+
+	glm::vec3 pos = Owner()->GetTransform().GlobalTranslation();
+	cam.View[0] = glm::lookAt(pos, pos + glm::vec3(0, -1, 0), pos + glm::vec3(1, 0, 0));
+}
+
 gE::CubemapCamera::CubemapCamera(gE::Entity* parent, const gE::CameraSettings1D& settings) :
 	Camera(parent, settings), _size(settings.Size)
 {
@@ -110,4 +119,34 @@ gE::CubemapCamera::CubemapCamera(gE::Entity* parent, const gE::CameraSettings1D&
 void gE::CubemapCamera::UpdateProjection()
 {
 	Projection = glm::perspectiveFov(degree_cast<AngleType::Radian>(90.f), (float) GetSize(), (float) GetSize(), GetClipPlanes().x, GetClipPlanes().y);
+}
+
+glm::vec3 ForwardDirs[]
+{
+	glm::vec3(1, 0, 0),
+	glm::vec3(-1, 0, 0),
+	glm::vec3(0, 1, 0),
+	glm::vec3(0, -1, 0),
+	glm::vec3(0, 0, 1),
+	glm::vec3(0, 0, -1)
+};
+
+glm::vec3 UpDirs[]
+{
+	glm::vec3(0, 1, 0),
+	glm::vec3(0, 1, 0),
+	glm::vec3(0, 0, 1),
+	glm::vec3(0, 0, -1),
+	glm::vec3(0, 1, 0),
+	glm::vec3(0, 1, 0)
+};
+
+void gE::CubemapCamera::GetGLCamera(GL::Camera& cam) const
+{
+	cam.ClipPlanes = GetClipPlanes();
+	cam.Projection = Projection;
+	cam.Position = Owner()->GetTransform().GlobalTranslation();
+
+	glm::vec3 pos = Owner()->GetTransform().GlobalTranslation();
+	for(u8 i = 0; i < 6; i++) cam.View[i] = glm::lookAt(pos, pos + ForwardDirs[i], pos + UpDirs[i]);
 }

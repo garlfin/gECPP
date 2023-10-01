@@ -28,7 +28,9 @@ namespace gE
 	 public:
 		Material(Window* window, GL::Shader* shader, DepthFunction depthFunc = DepthFunction::Less);
 
-		void Bind() const override;
+		void Bind() const final;
+
+		~Material() override = default;
 
 	 private:
 		GL::Shader* const _shader;
