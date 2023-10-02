@@ -31,19 +31,12 @@ void DemoWindow::OnInit()
 {
 	glfwSetInputMode(GLFWWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glClearColor(0.2, 0.2, 1, 1);
-	glEnable(GL_DEPTH_TEST);
-	glDisable(GL_CULL_FACE);
-
-	PipelineBuffers = new gE::DefaultPipeline::Buffers(this);
 
 	Array<GL::PreprocessorPair> pairs(1);
 	pairs[0] = GL::PreprocessorPair("TEST");
 
 	RasterShader = gE::CreateHandle<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/uber.frag");
 	VoxelShader = gE::CreateHandle<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/uber.frag", &pairs);
-
-	// GL::TextureSettings<GL::TextureDimension::D3D> voxelTexSettings{{64, 64, 64}, GL_RGBA16F};
-	// ExportTexture = gE::CreateHandle<GL::Texture3D>(this, voxelTexSettings);
 
 	gETF::Header file;
 	gETF::Read("cube.gETF", file);

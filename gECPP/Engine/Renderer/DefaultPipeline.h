@@ -20,6 +20,7 @@ namespace GL
 		glm::vec3 Position;
 		GL_ALIGN glm::vec2 ClipPlanes;
 		float FOV;
+		u32 State;
 
 		GL_ALIGN glm::mat4 Projection;
 		glm::mat4 PreviousViewProjection;

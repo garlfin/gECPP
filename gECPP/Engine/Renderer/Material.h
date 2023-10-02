@@ -4,6 +4,7 @@
 
 #pragma once
 #include "GL/Shader/Shader.h"
+#include "Engine/AssetManager.h"
 
 namespace gE
 {
@@ -26,14 +27,14 @@ namespace gE
 	 struct Material : public GL::Asset
 	 {
 	 public:
-		Material(Window* window, GL::Shader* shader, DepthFunction depthFunc = DepthFunction::Less);
+		Material(Window* window, Handle<GL::Shader> shader, DepthFunction depthFunc = DepthFunction::Less);
 
 		void Bind() const final;
 
 		~Material() override = default;
 
 	 private:
-		GL::Shader* const _shader;
+		Handle<GL::Shader> const _shader;
 		const DepthFunction _depthFunc;
 	};
 }

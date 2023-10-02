@@ -9,7 +9,7 @@
 using namespace gE;
 
 Window::Window(glm::u16vec2 size, const char* name) :
-	_size(size)
+	_size(size), _name(strdup(name))
 {
 	if(!glfwInit()) GE_FAIL("Failed to initialize GLFW.");
 
@@ -31,6 +31,7 @@ Window::Window(glm::u16vec2 size, const char* name) :
 
 Window::~Window()
 {
+	delete[] _name;
 	glfwDestroyWindow(_window);
 	glfwTerminate();
 }
@@ -72,7 +73,10 @@ void Window::Run()
 
 void Window::OnInit()
 {
-	_blitShader = CreateHandle<GL::Shader>(this, "Resource/Shader/blit.vert", "Resource/Shader/blit.frag");
+	PipelineBuffers = new gE::DefaultPipeline::Buffers(this);
+
+	_blitShader = CreateReference<GL::Shader>(this, "Resource/Shader/blit.vert", "Resource/Shader/blit.frag");
+
 }
 
 void Window::Blit(const GL::Texture& texture)

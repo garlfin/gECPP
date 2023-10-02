@@ -11,6 +11,9 @@
 #include "Engine/Component/Transform.h"
 #include "Engine/Component/Camera.h"
 #include "WindowState.h"
+#include "Engine/Renderer/VoxelPipeline.h"
+#include "Engine/Entity/VoxelCapture.h"
+#include "Engine/Component/MeshRenderer.h"
 
 struct GLFWwindow;
 
@@ -29,15 +32,13 @@ namespace gE
 		GET(ComponentManager<Camera>&, Cameras, Cameras);
 		GET(DefaultPipeline::Buffers*, PipelineBuffers, PipelineBuffers);
 		GET(ComponentManager<Transform>&, Transforms, Transforms);
-		GET(ComponentManager<Component>&, Behaviors, Behaviors);
+		GET(ComponentManager<Behavior>&, Behaviors, Behaviors);
+		GET(ComponentManager<MeshRenderer>&, MeshRenderers, MeshRenderers);
 		GET_CONST_VALUE(GL::TextureSize2D, Size, _size);
 		GET_SET_VALUE(RenderState, RenderState, _renderState);
+		GET_CONST_VALUE(VoxelPipeline::Buffers*, VoxelBuffers, VoxelBuffers);
 
 		void Blit(const GL::Texture& texture);
-
-		gE::Handle<GL::VAO> Mesh;
-		gE::Handle<GL::Texture3D> ExportTexture;
-		gE::Handle<GL::Shader> RasterShader, VoxelShader;
 
 		~Window();
 
@@ -47,10 +48,15 @@ namespace gE
 		virtual void OnRender(float) = 0;
 		virtual void OnDestroy() = 0;
 
-		DefaultPipeline::Buffers* PipelineBuffers;
+		Reference<DefaultPipeline::Buffers> PipelineBuffers;
+		Reference<VoxelPipeline::Buffers> VoxelBuffers;
+
 		CameraManager Cameras {};
-		ComponentManager<Transform> Transforms {};
-		ComponentManager<Component> Behaviors {};
+		ComponentManager<Transform> Transforms;
+		ComponentManager<Behavior> Behaviors;
+		ComponentManager<MeshRenderer> MeshRenderers;
+
+		Reference<VoxelCapture> VoxelCap;
 
 	 private:
 		GL::TextureSize2D _size;
@@ -58,7 +64,7 @@ namespace gE
 		GLFWwindow* _window;
 		RenderState _renderState;
 
-		Handle<GL::Shader> _blitShader;
+		Reference<GL::Shader> _blitShader;
 	};
 }
 

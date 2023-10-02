@@ -127,6 +127,20 @@ void Texture::Attach(GL::FrameBuffer* buffer, GLenum attachment, u8 mip) const
 	glNamedFramebufferTexture(buffer->Get(), attachment, ID, mip);
 }
 
+Texture::~Texture()
+{
+	glDeleteTextures(1, &ID);
+	if(_handle) glMakeTextureHandleNonResidentARB(_handle);
+}
+
+TextureHandle Texture::Handle()
+{
+	if(_handle) return _handle;
+
+	_handle = glGetTextureHandleARB(ID);
+	glMakeTextureHandleResidentARB(_handle);
+}
+
 void RenderBuffer::Attach(GL::FrameBuffer* buffer, GLenum attachment, u8 mip) const
 {
 	glNamedFramebufferRenderbuffer(ID, attachment, GL_RENDERBUFFER, ID);

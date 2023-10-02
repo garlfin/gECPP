@@ -22,9 +22,11 @@ namespace GL
 		GET_CONST_VALUE(GLenum, Target, Target);
 		GET_CONST_VALUE(GLenum, MipCount, Mips);
 
+		TextureHandle Handle();
+
 		void Attach(GL::FrameBuffer* buffer, GLenum attachment, u8 mip) const override;
 
-		~Texture() override { glDeleteTextures(1, &ID); }
+		~Texture() override;
 
 	 protected:
 		Texture(gE::Window* window, GLenum tgt, const SizelessTextureSettings& settings);
@@ -32,6 +34,9 @@ namespace GL
 		const uint8_t Mips;
 		const GLenum Format;
 		const GLenum Target;
+
+	 private:
+		TextureHandle _handle = 0;
 	};
 
 	class Texture2D final : public Texture
