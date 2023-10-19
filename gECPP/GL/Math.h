@@ -46,10 +46,11 @@ typedef int64_t slong;
 typedef int64_t i64;
 
 // World's dumbest optimization
-constexpr u8 GetSizeOfGLType(u32 t)
+constexpr u8 GLSizeOf(u32 t)
 {
 	if(t == GL_FLOAT) return 4;
-	return 1 << ((t - 0x1400) >> 1);
+	return 1 << ((t - 0x1400) >> 1); // i made this and i forgot how it worked
+	// this is why you comment this kind of stupid stuff
 }
 
 namespace glm

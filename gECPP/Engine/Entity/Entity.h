@@ -26,6 +26,8 @@ namespace gE
 		virtual void OnRender(float delta) {};
 		virtual void OnDestroy() {};
 
+		virtual ~Entity();
+
 	 private:
 		Window* const _window;
 		Transform _transform;

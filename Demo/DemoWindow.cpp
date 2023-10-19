@@ -8,7 +8,6 @@
 
 #include "DemoWindow.h"
 #include "gEModel/gETF/File.h"
-#include "GL/Buffer/Mesh.h"
 #include "Demo/Engine/Entity/FlyCamera.h"
 #include "Demo/Engine/Entity/StaticMeshEntity.h"
 
@@ -35,13 +34,12 @@ void DemoWindow::OnInit()
 
 	auto rasterShader = gE::CreateHandle<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/uber.frag");
 
-	gETF::Header file;
+	gETF::File file;
 	gETF::Read("cube.gETF", file);
 
+	VoxelDemo::StaticMeshEntity* renderer = new VoxelDemo::StaticMeshEntity(this, file.Meshes[0]);
 	FlyCam* camera = new FlyCam(this);
 	Cameras.SetCurrentCamera(&camera->Camera);
-
-	auto* mesh = new VoxelDemo::StaticMeshEntity(this, &file.Meshes[0]);
 
 	PipelineBuffers->Scene.InstanceCount = 1;
 	PipelineBuffers->Scene.Model[0] = glm::mat4(1);

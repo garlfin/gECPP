@@ -36,7 +36,7 @@ void TransformUV(const aiVector3D& s, aiVector2D& v)
 }
 
 template<unsigned int aiMesh::* COUNT_OFFSET, typename INDIVIDUAL_TYPE, typename T, T* aiMesh::* DATA_OFFSET, typename I = T, TransformFunc<T, I> F = nullptr>
-void CreateField(u8 index, gETF::VertexField& field, aiMesh** source, u8 count, const char* name)
+void CreateField(u8 index, gETF::VertexBuffer& field, aiMesh** source, u8 count, const char* name)
 {
 	field.Index = index;
 	field.Name = strcpy(new char[strlen(name) + 1], name);
@@ -99,7 +99,7 @@ int main()
 		previousMesh = mesh;
 	}
 
-	gETF::Header file {};
+	gETF::File file {};
 
 	file.MeshCount = realMeshCount;
 	file.Meshes = new gETF::Mesh[realMeshCount];
@@ -114,7 +114,7 @@ int main()
 		CreateField<&aiMesh::mNumFaces, u32, aiFace, &aiMesh::mFaces, aiVector3t<u32>, TransformFace>(0, mesh.Triangles, sourceMesh, subCount, "TRI");
 
 		mesh.FieldCount = 4; // POS UV NOR TAN
-		mesh.Fields = new gETF::VertexField[mesh.FieldCount];
+		mesh.Fields = new gETF::VertexBuffer[mesh.FieldCount];
 
 		// I may have overcomplicated things
 		CreateField<&aiMesh::mNumVertices, float, aiVector3D, &aiMesh::mVertices>(0, mesh.Fields[0], sourceMesh, subCount, "POS");

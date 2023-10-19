@@ -13,10 +13,10 @@ namespace gE
 	class Window;
 
 	template<class T>
- 	class ComponentManager : private std::vector<T*>
+ 	class Manager : private std::vector<T*>
 	{
 	 public:
-		ComponentManager() = default;
+		Manager() = default;
 
 		inline virtual void Register(T* t) { if(!Contains(t)) vec::push_back(t); }
 		inline virtual void Remove(T* t)
@@ -30,16 +30,16 @@ namespace gE
 
 		virtual void OnUpdate(float delta)
 		{
-			for(T* component : *this)
-				if(component->GetFlags().Deletion)
-					component->OnDestroy();
+			for(T* t : *this)
+				if(t->GetFlags().Deletion)
+					t->OnDestroy();
 				else
-					component->OnUpdate(delta);
+					t->OnUpdate(delta);
 		}
 		virtual void OnRender(float delta)
 		{
-			for(T* component : *this)
-				component->OnRender(delta);
+			for(T* t : *this)
+				t->OnRender(delta);
 		}
 
 		using std::vector<T*>::operator[];
@@ -50,5 +50,8 @@ namespace gE
 		typedef std::vector<T*> vec;
 		inline bool Contains(T* v) { return std::find(vec::begin(), vec::end(), v) != vec::end(); }
 	};
+
+	template<class T>
+	using ComponentManager = Manager<T>;
 }
 

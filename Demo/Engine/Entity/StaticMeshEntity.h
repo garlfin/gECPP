@@ -13,7 +13,7 @@ namespace VoxelDemo
  	class StaticMeshEntity : public gE::Entity
 	{
 	 public:
-		StaticMeshEntity(gE::Window* window, gETF::MeshHandle& mesh) :
+		StaticMeshEntity(gE::Window* window, const gETF::MeshHandle& mesh) :
 			gE::Entity(window), _renderer(this, mesh) {};
 
 	 private:

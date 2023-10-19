@@ -10,9 +10,9 @@ namespace GL { struct VAO; }
 
 namespace gETF
 {
-	struct Header;
+	struct File;
 	struct Mesh;
-	struct VertexField;
+	struct VertexBuffer;
 	struct MaterialSlot;
 	struct Serializable;
 	struct SerializationBuffer;
@@ -21,40 +21,48 @@ namespace gETF
 	// struct Scene;
 	// struct Node;
 
-	Header Import(const char*);
+	File Import(const char*);
+
+	struct VertexBuffer : public Serializable
+	{
+		SERIALIZABLE_PROTO;
+
+		u8 Index = 0;
+		u8 Stride = 0;
+
+		u32 Count;
+
+		void* Data = nullptr;
+
+		inline void Free() { free(Data); Data = nullptr; }
+		NODISCARD ALWAYS_INLINE bool IsFree() const { return Data; }
+
+		~VertexBuffer() { free(Data); }
+	};
 
 	struct VertexField : public Serializable
 	{
 		SERIALIZABLE_PROTO;
 
-		const char* Name = nullptr;
+		const char* Name;
+
+		GLenum ElementType = 0;
 
 		u8 Index = 0;
+		u8 BufferIndex = 0;
+		u8 ElementCount;
+		u8 Stride = 0;
 
-		u32 Type = 0;
-		u8 TypeCount = 0;
-
-		u32 Count = 0;
-
-		void* Data = nullptr;
-
-		inline void Free() { free(Data); Data = nullptr; }
-		NODISCARD ALWAYS_INLINE bool IsFree() { return Data; }
-
-		~VertexField()
-		{
-			free(Data);
-			delete[] Name;
-		}
+		~VertexField() { delete[] Name; }
 	};
 
 	struct MaterialSlot : public Serializable
 	{
 		SERIALIZABLE_PROTO;
 
-		u8 MaterialIndex;
-		u32 Offset;
-		u32 Count;
+		u8 MaterialIndex = 0;
+		u32 Offset = 0;
+		u32 Count = 0;
 	};
 
 	enum class TriangleMode : u8
@@ -68,56 +76,35 @@ namespace gETF
 	{
 		SERIALIZABLE_PROTO;
 
-		u8 MaterialCount;
-		u8 FieldCount;
-		TriangleMode TriangleMode;
+		u8 MaterialCount = 0;
+		u8 BufferCount = 0;
+		u8 FieldCount = 0;
+		TriangleMode TriangleMode = TriangleMode::None;
 
 		VertexField Triangles;
-		VertexField* Fields;
-		MaterialSlot* Materials;
+		VertexBuffer* Buffers = nullptr;
+		VertexField* Fields = nullptr;
+		MaterialSlot* Materials = nullptr;
 
-		void Free() { Triangles.Free(); for(u8 i = 0; i < FieldCount; i++) Fields[i].Free(); }
+		GL::VAO* VAO;
 
-		~Mesh()
-		{
-			delete[] Fields;
-			delete[] Materials;
-		}
+		void Free() { for(u8 i = 0; i < FieldCount; i++) Buffers[i].Free(); }
+
+		~Mesh();
 	};
 
-	struct Header : public Serializable
+	struct File : public Serializable
 	{
 		SERIALIZABLE_PROTO;
 
 		u8 MeshCount = 0;
-		Mesh* Meshes = nullptr;
+		gE::Handle<Mesh>* Meshes = nullptr;
 
-		~Header()
-		{
-			delete[] Meshes;
-		}
+		~File() { delete[] Meshes; }
 	};
 
-	class MeshHandle
-	{
-	 public:
-		MeshHandle(const gE::Handle<Header>&, u8);
-		MeshHandle(const gE::Handle<Header>&, Mesh*);
+	File& Read(const char*, File&);
+	NODISCARD File* Read(const char*);
 
-		MeshHandle(const MeshHandle&);
-		MeshHandle(MeshHandle&&) noexcept;
-
-		OPERATOR_EQUALS_BOTH(MeshHandle);
-
-		GET_CONST_VALUE(Header*, File, _handle.Get());
-		GET_CONST_VALUE(Mesh*,, _mesh);
-
-		ALWAYS_INLINE Mesh* operator->() const { return Get(); }
-
-	 private:
-		gE::Handle<Header> _handle;
-	 	Mesh* _mesh;
-	};
-
-	void Read(const char*, Header&);
+	typedef gE::Handle<Mesh> MeshHandle;
 }

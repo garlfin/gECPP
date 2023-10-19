@@ -18,4 +18,12 @@ namespace gETF
 		virtual void Deserialize(SerializationBuffer& buf) const = 0;
 		virtual void Serialize(u8*& ptr) = 0;
 	};
+
+	template<class T>
+	T* ReadNew(u8*& ptr)
+	{
+		T* t = new T();
+		t->Serialize(ptr);
+		return t;
+	}
 }

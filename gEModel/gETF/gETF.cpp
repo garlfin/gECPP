@@ -2,12 +2,10 @@
 // Created by scion on 8/13/2023.
 //
 
-#include <iostream>
-#include "../gETF.h"
-#include "GL/Binary.h"
 #include "File.h"
-#include "GL/Buffer/VAO.h"
-
+#include <iostream>
+#include <GL/Binary.h>
+#include <GL/Buffer/VAO.h>
 
 /*
  * void Deserialize(SerializationBuffer& ptr);
@@ -21,15 +19,15 @@
 
 namespace gETF
 {
-	void Header::Deserialize(SerializationBuffer& buf) const
+	void File::Deserialize(SerializationBuffer& buf) const
 	{
 		buf.PushPtr("gETF", 4);
 		buf.Push<u8>(GETF_VERSION);
 		buf.Push(MeshCount);
-		buf.PushPtr(Meshes, MeshCount);
+		for(u8 i = 0; i < MeshCount; i++) buf.Push(*Meshes[i].Get());
 	}
 
-	void Header::Serialize(u8*& ptr)
+	void File::Serialize(u8*& ptr)
 	{
 		char magic[4];
 		::Read<char, 4>(ptr, magic);
@@ -42,17 +40,23 @@ namespace gETF
 
 		u8 version = ::Read<u8>(ptr);
 		MeshCount = ::Read<u8>(ptr);
-		Meshes = new Mesh[MeshCount];
-		::Read<Mesh>(ptr, Meshes, MeshCount);
+		Meshes = new MeshHandle[MeshCount];
+		for(u8 i = 0; i < MeshCount; i++) Meshes[i] = MeshHandle(ReadNew<Mesh>(ptr));
 	}
 
 	void Mesh::Deserialize(gETF::SerializationBuffer& buf) const
 	{
 		buf.PushPtr("MESH", 4);
+
+		buf.Push(BufferCount);
+		buf.PushPtr(Buffers, BufferCount);
+
 		buf.Push(FieldCount);
 		buf.PushPtr(Fields, FieldCount);
+
 		buf.Push(TriangleMode);
-		if(TriangleMode == TriangleMode::Simple) buf.Push(Triangles);
+		if(TriangleMode != TriangleMode::None) buf.Push(Triangles);
+
 		buf.Push(MaterialCount);
 		buf.PushPtr(Materials, MaterialCount);
 	}
@@ -64,39 +68,49 @@ namespace gETF
 
 		if(!StrCmp<4>(magic, "MESH")) std::cout << "Invalid File!\n";
 
+		BufferCount = ::Read<u8>(ptr);
+		Buffers = new VertexBuffer[BufferCount];
+		::Read(ptr, Buffers, BufferCount);
+
 		FieldCount = ::Read<u8>(ptr);
 		Fields = new VertexField[FieldCount];
 		::Read(ptr, Fields, FieldCount);
 
 		TriangleMode = ::Read<enum TriangleMode>(ptr);
-		if(TriangleMode == TriangleMode::Simple) Triangles.Serialize(ptr);
+		if(TriangleMode != TriangleMode::Simple) Triangles.Serialize(ptr);
 
 		MaterialCount = ::Read<u8>(ptr);
 		Materials = new MaterialSlot[MaterialCount];
 		::Read(ptr, Materials, MaterialCount);
 	}
 
-	void VertexField::Deserialize(gETF::SerializationBuffer& buf) const
+	Mesh::~Mesh()
 	{
-		buf.PushString(Name);
-		buf.Push(Index);
-		buf.Push(Type);
-		buf.Push(TypeCount);
-		buf.Push(Count);
-		buf.PushPtr((u8*) Data, Count * TypeCount * GetSizeOfGLType(Type));
+		delete[] Fields;
+		delete[] Materials;
+		delete VAO;
 	}
 
-	void VertexField::Serialize(u8*& ptr)
+	void VertexBuffer::Deserialize(gETF::SerializationBuffer& buf) const
 	{
-		Name = ReadString(ptr);
+		buf.Push(Index);
+
+		buf.Push(Stride);
+		buf.Push(Count);
+
+		buf.PushPtr((u8*) Data, Stride * Count);
+	}
+
+	void VertexBuffer::Serialize(u8*& ptr)
+	{
 		Index = ::Read<u8>(ptr);
-		Type = ::Read<u32>(ptr);
-		TypeCount = ::Read<u8>(ptr);
+		Stride = ::Read<u8>(ptr);
+
 		Count = ::Read<u32>(ptr);
 
-		size_t bufLen = Count * TypeCount * GetSizeOfGLType(Type);
-		Data = malloc(bufLen);
-		::Read<u8>(ptr, (u8*) Data, bufLen);
+		size_t byteSize = Stride * Count;
+		Data = malloc(byteSize);
+		::Read(ptr, (u8*) Data, byteSize);
 	}
 
 	void MaterialSlot::Deserialize(gETF::SerializationBuffer& buf) const
@@ -113,24 +127,40 @@ namespace gETF
 		Count = ::Read<u32>(ptr);
 	}
 
-	void Read(const char* file, Header& header)
+	File& Read(const char* file, File& header)
 	{
 		u8* src = ReadFile(file, true);
 		u8* srcCpy = src;
 		header.Serialize(srcCpy);
 		delete[] src;
+		return header;
 	}
 
-	MeshHandle::MeshHandle(const gE::Handle<Header>& f, u8 i) : _handle(f), _mesh(&f->Meshes[i])
+	File* Read(const char* file)
 	{
-		GE_ASSERT(i < f->MeshCount, "MESH OUT OF RANGE");
+		auto* h = new File;
+		return &Read(file, *h);
 	}
 
-	MeshHandle::MeshHandle(const gE::Handle<Header>& f, Mesh* m) : _handle(f), _mesh(m)
+	void VertexField::Serialize(u8*& ptr)
 	{
-		GE_ASSERT(m > f->Meshes && m < &f->Meshes[f->MeshCount], "MESH OUT OF RANGE")
+		Name = ::ReadString(ptr);
+
+		Index = ::Read<u8>(ptr);
+		BufferIndex = ::Read<u8>(ptr);
+		ElementCount = ::Read<u8>(ptr);
+		Stride = ::Read<u8> (ptr);
+		ElementType = ::Read<GLenum>(ptr);
 	}
 
-	MeshHandle::MeshHandle(const MeshHandle& o) : _handle(o._handle), _mesh(o._mesh) { }
-	MeshHandle::MeshHandle(MeshHandle&& o) noexcept : _handle(o._handle), _mesh(o._mesh) { }
+	void VertexField::Deserialize(gETF::SerializationBuffer& buf) const
+	{
+		buf.PushString(Name);
+
+		buf.Push(Index);
+		buf.Push(BufferIndex);
+		buf.Push(ElementCount);
+		buf.Push(Stride);
+		buf.Push(ElementType);
+	}
 }

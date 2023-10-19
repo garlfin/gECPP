@@ -139,6 +139,8 @@ TextureHandle Texture::Handle()
 
 	_handle = glGetTextureHandleARB(ID);
 	glMakeTextureHandleResidentARB(_handle);
+
+	return _handle;
 }
 
 void RenderBuffer::Attach(GL::FrameBuffer* buffer, GLenum attachment, u8 mip) const

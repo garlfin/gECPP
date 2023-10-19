@@ -12,7 +12,12 @@ namespace gE
 		_window(w), _parent(o),
 		_transform(this)
 	{
+		w->GetEntities().Register(this);
+	}
 
+	Entity::~Entity()
+	{
+		_window->GetEntities().Remove(this);
 	}
 
 	Behavior::Behavior(Entity* o)

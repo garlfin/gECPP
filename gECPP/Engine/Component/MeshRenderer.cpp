@@ -29,5 +29,5 @@ void gE::MeshRenderer::OnRender(float delta)
 	buffers->UpdateScene(offsetof(GL::Scene, Normal[1]));
 
 	uint8_t meshCount = _mesh->MaterialCount;
-	for (uint8_t i = 0; i < meshCount; i++) _mesh->Draw(i);
+	for (uint8_t i = 0; i < meshCount; i++) _mesh->VAO->Draw(i);
 }

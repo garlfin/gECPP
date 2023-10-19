@@ -34,6 +34,7 @@ namespace gE
 		GET(ComponentManager<Transform>&, Transforms, Transforms);
 		GET(ComponentManager<Behavior>&, Behaviors, Behaviors);
 		GET(ComponentManager<MeshRenderer>&, Renderers, Renderers);
+		GET(Manager<Entity>&, Entities, Entities);
 		GET_CONST_VALUE(GL::TextureSize2D, Size, _size);
 		GET_SET_VALUE(RenderState, RenderState, _renderState);
 		GET_CONST_VALUE(VoxelPipeline::Buffers*, VoxelBuffers, VoxelBuffers);
@@ -55,6 +56,7 @@ namespace gE
 		ComponentManager<Transform> Transforms;
 		ComponentManager<Behavior> Behaviors;
 		ComponentManager<MeshRenderer> Renderers;
+		ComponentManager<Entity> Entities;
 
 		Reference<VoxelCapture> VoxelCap;
 

@@ -1,8 +1,10 @@
 #pragma once
+
 #include "GLAD/glad.h"
 #include "GL/gl.h"
 #include <type_traits>
 #include <iostream>
+#include <gEModel/gETF.h>
 
 namespace GL
 {
@@ -23,7 +25,7 @@ namespace GL
 		Buffer(gE::Window* window, uint32_t count = 1, T* data = nullptr)
 			: Asset(window)
 		{
-			static constexpr unsigned SIZE_T = sizeof(std::conditional_t<std::is_same_v<T, void>, uint8_t, T>);
+			static constexpr size_t SIZE_T = sizeof(std::conditional_t<std::is_same_v<T, void>, uint8_t, T>);
 			glCreateBuffers(1, &ID);
 			if constexpr(DYNAMIC) glNamedBufferData(ID, SIZE_T * count, data, GL_DYNAMIC_DRAW);
 			else glNamedBufferStorage(ID, SIZE_T * count, data, GL_DYNAMIC_STORAGE_BIT);
@@ -32,7 +34,7 @@ namespace GL
 		template<typename I>
 		ALWAYS_INLINE void ReplaceData(const I* data, uint32_t count = 1, uint32_t offset = 0) const
 		{
-			static constexpr unsigned SIZE_T = sizeof(std::conditional_t<std::is_same_v<I, void>, uint8_t, I>);
+			static constexpr size_t SIZE_T = sizeof(std::conditional_t<std::is_same_v<I, void>, uint8_t, I>);
 			if (!data || !count) return;
 			glNamedBufferSubData(ID, offset, SIZE_T * count, data);
 		}
@@ -55,7 +57,7 @@ namespace GL
 		template<typename I>
 		void Realloc(uint32_t count, I* data = nullptr) const
 		{
-			static constexpr unsigned SIZE_T = sizeof(std::conditional_t<std::is_same_v<I, void>, uint8_t, I>);
+			static constexpr size_t SIZE_T = sizeof(std::conditional_t<std::is_same_v<I, void>, uint8_t, I>);
 			if constexpr(DYNAMIC) glNamedBufferData(ID, SIZE_T * count, data, GL_DYNAMIC_DRAW);
 			else
 			{
@@ -71,4 +73,9 @@ namespace GL
 			glDeleteBuffers(1, &ID);
 		}
 	};
+
+	template<class T>
+	using DynamicBuffer = Buffer<T, true>;
+
+	Buffer<void>* CreateBuffer(gETF::Mesh*);
 }
