@@ -22,14 +22,14 @@ namespace gE
 		glDepthMask(1);
 		glColorMask(0, 0, 0, 0);
 		glClear(GL_DEPTH_BUFFER_BIT);
-		window->GetMeshRenderers().OnRender(0.f);
+		window->GetRenderers().OnRender(0.f);
 
 		// COLOR
 		window->SetRenderState(RenderState::Color);
 
 		glDepthMask(0);
 		glColorMask(1, 1, 1, 1);
-		window->GetMeshRenderers().OnRender(0.f);
+		window->GetRenderers().OnRender(0.f);
 	}
 
 	void DefaultPipeline::RenderPass3D(Window*, Camera3D*) {}

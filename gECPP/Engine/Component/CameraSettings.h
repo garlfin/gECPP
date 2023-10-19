@@ -22,6 +22,10 @@ namespace gE
 	template<GL::TextureDimension DIMENSION>
 	struct CameraSettings : public SizelessCameraSettings
 	{
+		CameraSettings(const SizelessCameraSettings& settings, const GL::TextureSize<DIMENSION>& size) :
+			SizelessCameraSettings(settings), Size(size)
+		{};
+
 		GL::TextureSize<DIMENSION> Size { 0 };
 	};
 

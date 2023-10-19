@@ -68,7 +68,7 @@ namespace GL
 		else return new VAO(window, settings);
 	}
 
-	Mesh::Mesh(const Mesh& o) :
+	/*Mesh::Mesh(const Mesh& o) :
 		BufferCount(o.BufferCount),
 		Buffers(new BufferSettings[BufferCount]),
 		MeshCount(o.MeshCount),
@@ -78,7 +78,7 @@ namespace GL
 		Triangles(o.Triangles)
 	{
 		for(u8 i = 0; i < BufferCount; i++) Buffers[i] = o.Buffers[i];
-	}
+	}*/
 
 	Mesh::Mesh(const gETF::Mesh& mesh)
 	{

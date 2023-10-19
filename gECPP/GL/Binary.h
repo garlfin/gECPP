@@ -66,6 +66,10 @@ namespace gETF { struct Serializable; }
     OPERATOR_EQUALS(TYPE, const &,); \
 	OPERATOR_EQUALS(TYPE, &&, noexcept);
 
+#ifndef SUPER
+#define SUPER(CLASS) private: using Super = CLASS;
+#endif
+
 
 size_t strlenc(const char*, char);
 size_t strlencLast(const char*, char, char = 0);

@@ -56,7 +56,7 @@ namespace GL
 
 	struct Mesh
 	{
-		Mesh(const Mesh& o);
+		// Mesh(const Mesh& o);
 		explicit Mesh(const gETF::Mesh& mesh);
 		Mesh() = default;
 

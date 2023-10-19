@@ -15,14 +15,14 @@ namespace VoxelDemo
 	{
 	 public:
 		explicit FlyCam(gE::Window* window) : gE::Entity(window),
-			Camera(this,
+											  Camera(this,
 				{
 					gE::CameraSettings2D({ (gE::RenderPass) gE::DefaultPipeline::RenderPass2D }, window->GetSize())
 				}),
-			_movement(this)
+											  Movement(this)
 		{}
 
 		gE::PerspectiveCamera Camera;
-		Movement _movement;
+		Movement Movement;
 	};
 }

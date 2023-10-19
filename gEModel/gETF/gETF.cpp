@@ -6,7 +6,7 @@
 #include "../gETF.h"
 #include "GL/Binary.h"
 #include "File.h"
-
+#include "GL/Buffer/VAO.h"
 
 
 /*
@@ -52,8 +52,7 @@ namespace gETF
 		buf.Push(FieldCount);
 		buf.PushPtr(Fields, FieldCount);
 		buf.Push(TriangleMode);
-		if(TriangleMode == TriangleMode::Simple)
-			buf.Push(Triangles);
+		if(TriangleMode == TriangleMode::Simple) buf.Push(Triangles);
 		buf.Push(MaterialCount);
 		buf.PushPtr(Materials, MaterialCount);
 	}
@@ -96,7 +95,7 @@ namespace gETF
 		Count = ::Read<u32>(ptr);
 
 		size_t bufLen = Count * TypeCount * GetSizeOfGLType(Type);
-		Data = new u8[bufLen];
+		Data = malloc(bufLen);
 		::Read<u8>(ptr, (u8*) Data, bufLen);
 	}
 
@@ -121,4 +120,17 @@ namespace gETF
 		header.Serialize(srcCpy);
 		delete[] src;
 	}
+
+	MeshHandle::MeshHandle(const gE::Handle<Header>& f, u8 i) : _handle(f), _mesh(&f->Meshes[i])
+	{
+		GE_ASSERT(i < f->MeshCount, "MESH OUT OF RANGE");
+	}
+
+	MeshHandle::MeshHandle(const gE::Handle<Header>& f, Mesh* m) : _handle(f), _mesh(m)
+	{
+		GE_ASSERT(m > f->Meshes && m < &f->Meshes[f->MeshCount], "MESH OUT OF RANGE")
+	}
+
+	MeshHandle::MeshHandle(const MeshHandle& o) : _handle(o._handle), _mesh(o._mesh) { }
+	MeshHandle::MeshHandle(MeshHandle&& o) noexcept : _handle(o._handle), _mesh(o._mesh) { }
 }

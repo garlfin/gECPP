@@ -47,7 +47,7 @@ void CreateField(u8 index, gETF::VertexField& field, aiMesh** source, u8 count, 
 	field.Count = 0;
 	for(u8 i = 0; i < count; i++) field.Count += source[i]->*COUNT_OFFSET;
 
-	I* data = new I[field.Count];
+	I* data = (I*) malloc(sizeof(I) * field.Count);
 	field.Data = data;
 
 	for(u8 i = 0; i < count; i++)
@@ -55,7 +55,7 @@ void CreateField(u8 index, gETF::VertexField& field, aiMesh** source, u8 count, 
 		u32 meshCount = source[i]->*COUNT_OFFSET;
 		T* arr = source[i]->*DATA_OFFSET;
 
-		if constexpr(F) for(u32 m = 0; m < meshCount; m++) F(arr[m], data[m]);
+		if constexpr((bool) F) for(u32 m = 0; m < meshCount; m++) F(arr[m], data[m]);
 		else memcpy(data, arr, sizeof(I) * meshCount);
 
 		data += meshCount;

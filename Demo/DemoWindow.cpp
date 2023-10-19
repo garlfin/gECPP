@@ -10,6 +10,7 @@
 #include "gEModel/gETF/File.h"
 #include "GL/Buffer/Mesh.h"
 #include "Demo/Engine/Entity/FlyCamera.h"
+#include "Demo/Engine/Entity/StaticMeshEntity.h"
 
 using namespace VoxelDemo;
 
@@ -32,18 +33,15 @@ void DemoWindow::OnInit()
 	glfwSetInputMode(GLFWWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glClearColor(0.2, 0.2, 1, 1);
 
-	Array<GL::PreprocessorPair> pairs(1);
-	pairs[0] = GL::PreprocessorPair("TEST");
-
-	RasterShader = gE::CreateHandle<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/uber.frag");
-	VoxelShader = gE::CreateHandle<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/uber.frag", &pairs);
+	auto rasterShader = gE::CreateHandle<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/uber.frag");
 
 	gETF::Header file;
 	gETF::Read("cube.gETF", file);
-	Mesh = gE::CreateHandleFromPointer<GL::VAO>(GL::VAO::Create(this, GL::Mesh(file.Meshes[0])));
 
 	FlyCam* camera = new FlyCam(this);
 	Cameras.SetCurrentCamera(&camera->Camera);
+
+	auto* mesh = new VoxelDemo::StaticMeshEntity(this, &file.Meshes[0]);
 
 	PipelineBuffers->Scene.InstanceCount = 1;
 	PipelineBuffers->Scene.Model[0] = glm::mat4(1);

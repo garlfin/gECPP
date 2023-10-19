@@ -15,6 +15,7 @@ namespace gE
 		explicit Component(Entity* o) : _entity(o) {};
 		NODISCARD ALWAYS_INLINE Entity* Owner() const { return _entity; }
 
+		Flags GetFlags() const;
 		virtual void OnUpdate(float) = 0;
 		virtual void OnRender(float) = 0;
 		virtual void OnDestroy() {};

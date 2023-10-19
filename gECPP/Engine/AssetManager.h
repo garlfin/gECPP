@@ -89,5 +89,4 @@ namespace gE
 
 	template<typename T>
 	Reference<T> CreateReferenceFromPointer(T* t) { return Reference<T>(t); }
-
 }

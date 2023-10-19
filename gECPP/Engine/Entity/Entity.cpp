@@ -18,11 +18,16 @@ namespace gE
 	Behavior::Behavior(Entity* o)
 		: Component(o)
 	{
-		Owner()->GetWindow()->GetBehaviors().Register(this);
+		GET_WINDOW()->GetBehaviors().Register(this);
 	}
 
 	Behavior::~Behavior()
 	{
-		Owner()->GetWindow()->GetBehaviors().Remove(this);
+		GET_WINDOW()->GetBehaviors().Remove(this);
+	}
+
+	Flags Component::GetFlags() const
+	{
+		return Owner()->GetFlags();
 	}
 }

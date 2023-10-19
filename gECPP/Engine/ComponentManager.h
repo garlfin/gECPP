@@ -28,8 +28,19 @@ namespace gE
 			 vec::erase(vec::end() - 1);
 		}
 
-		virtual void OnUpdate(float delta) { for(T* component : *this) component->OnUpdate(delta); }
-		virtual void OnRender(float delta) { for(T* component : *this) component->OnRender(delta); }
+		virtual void OnUpdate(float delta)
+		{
+			for(T* component : *this)
+				if(component->GetFlags().Deletion)
+					component->OnDestroy();
+				else
+					component->OnUpdate(delta);
+		}
+		virtual void OnRender(float delta)
+		{
+			for(T* component : *this)
+				component->OnRender(delta);
+		}
 
 		using std::vector<T*>::operator[];
 

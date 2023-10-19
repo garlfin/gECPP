@@ -12,13 +12,14 @@ namespace gE
 	class MeshRenderer : public Component
 	{
 	 public:
-		MeshRenderer(gE::Entity*, const GL::VAO* mesh);
+		MeshRenderer(gE::Entity*, const gETF::MeshHandle& mesh);
 
 		void OnUpdate(float delta) override;
 		void OnRender(float delta) override;
 
-		NODISCARD ALWAYS_INLINE const GL::Mesh& GetMeshSettings() { return _mesh->GetSettings(); }
+		GET_CONST_VALUE(gETF::Mesh*, Mesh, _mesh.Get());
+
 	 private:
-		const GL::VAO* _mesh;
+		const gETF::MeshHandle _mesh;
 	};
 }

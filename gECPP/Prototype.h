@@ -16,4 +16,11 @@ namespace gE
 
 	template<class T> class TypedComponent;
 	template<class T> class TypedBehavior;
+
+	struct Flags
+	{
+		bool Enabled: 1 = true;
+		bool Deletion: 1 = false;
+		u8 Layer: 6 = 0;
+	};
 }

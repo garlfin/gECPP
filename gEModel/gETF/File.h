@@ -2,8 +2,11 @@
 
 #include <GL/Math.h>
 #include "Prototype.h"
+#include <Engine/AssetManager.h>
 
 #define GETF_VERSION 1
+
+namespace GL { struct VAO; }
 
 namespace gETF
 {
@@ -35,9 +38,12 @@ namespace gETF
 
 		void* Data = nullptr;
 
+		inline void Free() { free(Data); Data = nullptr; }
+		NODISCARD ALWAYS_INLINE bool IsFree() { return Data; }
+
 		~VertexField()
 		{
-			delete[] (u8*)Data;
+			free(Data);
 			delete[] Name;
 		}
 	};
@@ -70,6 +76,8 @@ namespace gETF
 		VertexField* Fields;
 		MaterialSlot* Materials;
 
+		void Free() { Triangles.Free(); for(u8 i = 0; i < FieldCount; i++) Fields[i].Free(); }
+
 		~Mesh()
 		{
 			delete[] Fields;
@@ -81,13 +89,34 @@ namespace gETF
 	{
 		SERIALIZABLE_PROTO;
 
-		u8 MeshCount;
-		Mesh* Meshes;
+		u8 MeshCount = 0;
+		Mesh* Meshes = nullptr;
 
 		~Header()
 		{
 			delete[] Meshes;
 		}
+	};
+
+	class MeshHandle
+	{
+	 public:
+		MeshHandle(const gE::Handle<Header>&, u8);
+		MeshHandle(const gE::Handle<Header>&, Mesh*);
+
+		MeshHandle(const MeshHandle&);
+		MeshHandle(MeshHandle&&) noexcept;
+
+		OPERATOR_EQUALS_BOTH(MeshHandle);
+
+		GET_CONST_VALUE(Header*, File, _handle.Get());
+		GET_CONST_VALUE(Mesh*,, _mesh);
+
+		ALWAYS_INLINE Mesh* operator->() const { return Get(); }
+
+	 private:
+		gE::Handle<Header> _handle;
+	 	Mesh* _mesh;
 	};
 
 	void Read(const char*, Header&);

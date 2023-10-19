@@ -33,7 +33,7 @@ namespace gE
 		GET(DefaultPipeline::Buffers*, PipelineBuffers, PipelineBuffers);
 		GET(ComponentManager<Transform>&, Transforms, Transforms);
 		GET(ComponentManager<Behavior>&, Behaviors, Behaviors);
-		GET(ComponentManager<MeshRenderer>&, MeshRenderers, MeshRenderers);
+		GET(ComponentManager<MeshRenderer>&, Renderers, Renderers);
 		GET_CONST_VALUE(GL::TextureSize2D, Size, _size);
 		GET_SET_VALUE(RenderState, RenderState, _renderState);
 		GET_CONST_VALUE(VoxelPipeline::Buffers*, VoxelBuffers, VoxelBuffers);
@@ -54,7 +54,7 @@ namespace gE
 		CameraManager Cameras {};
 		ComponentManager<Transform> Transforms;
 		ComponentManager<Behavior> Behaviors;
-		ComponentManager<MeshRenderer> MeshRenderers;
+		ComponentManager<MeshRenderer> Renderers;
 
 		Reference<VoxelCapture> VoxelCap;
 
