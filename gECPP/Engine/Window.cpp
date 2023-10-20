@@ -76,7 +76,6 @@ void Window::OnInit()
 	PipelineBuffers = (Reference<DefaultPipeline::Buffers>) new DefaultPipeline::Buffers(this);
 
 	_blitShader = CreateReference<GL::Shader>(this, "Resource/Shader/blit.vert", "Resource/Shader/blit.frag");
-
 }
 
 void Window::Blit(const GL::Texture& texture)

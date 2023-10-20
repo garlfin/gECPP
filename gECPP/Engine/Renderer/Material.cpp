@@ -15,11 +15,10 @@ namespace gE
 
 	void gE::Material::Bind() const
 	{
-		if(GetWindow())
 		if((bool) _depthFunc)
 		{
 			glEnable(GL_DEPTH_TEST);
-			glDepthFunc((GLenum) _depthFunc);
+			glDepthFunc(GetWindow()->GetRenderState() ==  RenderState::PreZ ? (GLenum) _depthFunc : GL_EQUAL);
 		}
 		else glDisable(GL_DEPTH_TEST);
 

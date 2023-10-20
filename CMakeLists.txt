@@ -33,7 +33,8 @@ add_library(GETF STATIC gEModel/gETF.h gEModel/gETF/gETF.cpp gECPP/GL/Binary.h g
 # GEMODEL
 file(GLOB_RECURSE gEMODEL_SRC gEModel/Converter)
 add_executable(gEModel gEModel/main.cpp ${gEMODEL_SRC})
-target_link_libraries(gEModel PRIVATE ASSIMP GETF)
+target_link_libraries(gEModel PRIVATE ASSIMP GETF GLAD)
+# gotta link glad or it yaps about linking
 
 # GECPP
 file(GLOB_RECURSE GECPP_SRC "gECPP/*.cpp" "gECPP/*.h")

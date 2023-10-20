@@ -7,8 +7,6 @@
 
 #define GETF_VERSION 1
 
-namespace GL { struct VAO; }
-
 namespace gETF
 {
 	struct File;
