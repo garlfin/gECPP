@@ -77,7 +77,7 @@ void gE::Camera::CreateAttachments(CAM_T& cam, const gE::AttachmentSettings& set
 	for(u8 i = 0; i < FRAMEBUFFER_MAX_COLOR_ATTACHMENTS; i++)
 	{
 		if(!settings.Attachments[i]) continue;
-		cam.Attachments[i] = new TEX_T(cam.GET_WINDOW(), { settings.Attachments[i], cam.GetSize() });
+		cam.Attachments[i] = (Reference<GL::Texture>) new TEX_T(cam.GET_WINDOW(), { settings.Attachments[i], cam.GetSize() });
 		if constexpr (!std::is_same_v<TEX_T, GL::Texture3D>) cam.FrameBuffer.SetAttachment(i, cam.Attachments[i]);
 	}
 }

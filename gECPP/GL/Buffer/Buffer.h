@@ -4,7 +4,6 @@
 #include "GL/gl.h"
 #include <type_traits>
 #include <iostream>
-#include <gEModel/gETF.h>
 
 namespace GL
 {
@@ -76,6 +75,4 @@ namespace GL
 
 	template<class T>
 	using DynamicBuffer = Buffer<T, true>;
-
-	Buffer<void>* CreateBuffer(gETF::Mesh*);
 }

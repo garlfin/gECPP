@@ -3,6 +3,7 @@
 //
 
 #include "VAO.h"
+#include <gEModel/gETF/File.h>
 
 namespace GL
 {
@@ -60,13 +61,6 @@ namespace GL
 		glDeleteVertexArrays(1, &ID);
 		for(u8 i = 0; i < _settings->FieldCount; i++) _buffers[i].~Buffer<void>();
 		free(_bufferBuffer);
-	}
-
-	VAO* CreateVAO(gE::Window* window, const gETF::Mesh* settings)
-	{
-		if(settings->TriangleMode == gETF::TriangleMode::Simple)
-			return new IndexedVAO(window, settings);
-		else return new VAO(window, settings);
 	}
 
 	IndexedVAO::IndexedVAO(gE::Window* window, const gETF::Mesh* settings)

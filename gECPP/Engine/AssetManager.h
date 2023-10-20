@@ -56,7 +56,7 @@ namespace gE
 	{
 	 public:
 		Reference() = default;
-		Reference(T* t) : _t(t) {}; // NOLINT
+		explicit Reference(T* t) : _t(t) {};
 
 		Reference(Reference&& o) noexcept : _t(o._t) { o._t = nullptr; }
 		Reference& operator=(Reference&& o) noexcept

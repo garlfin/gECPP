@@ -3,6 +3,7 @@
 #include <GL/Math.h>
 #include "Prototype.h"
 #include <Engine/AssetManager.h>
+#include <GL/Buffer/VAO.h>
 
 #define GETF_VERSION 1
 
@@ -83,9 +84,10 @@ namespace gETF
 		VertexField* Fields = nullptr;
 		MaterialSlot* Materials = nullptr;
 
-		GL::VAO* VAO = nullptr;
+		gE::Reference<GL::VAO> VAO { nullptr };
 
 		void Free() const { for(u8 i = 0; i < BufferCount; i++) Buffers[i].Free(); }
+		void CreateVAO(gE::Window*);
 
 		~Mesh();
 	};

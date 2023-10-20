@@ -3,6 +3,8 @@
 #include "GL/GL.h"
 #include "Buffer.h"
 
+namespace gETF { struct Mesh; }
+
 namespace GL
 {
 	class VAO : public Asset
@@ -36,6 +38,4 @@ namespace GL
 
 		friend class VAO;
 	};
-
-	VAO* CreateVAO(gE::Window*, const gETF::Mesh*);
 }

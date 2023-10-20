@@ -46,7 +46,7 @@ namespace gETF
 
 	void Mesh::Deserialize(gETF::SerializationBuffer& buf) const
 	{
-		buf.PushPtr("MESH", 4);
+		buf.PushPtr<4>("MESH");
 
 		buf.Push(BufferCount);
 		buf.PushPtr(Buffers, BufferCount);
@@ -89,6 +89,15 @@ namespace gETF
 		delete[] Fields;
 		delete[] Materials;
 		delete VAO;
+	}
+
+	void Mesh::CreateVAO(gE::Window* w)
+	{
+		if(VAO) return;
+
+		if(TriangleMode == TriangleMode::Simple)
+			VAO = (gE::Reference<GL::VAO>) new GL::IndexedVAO(w, this);
+		else VAO = (gE::Reference<GL::VAO>) new GL::VAO(w, this);
 	}
 
 	void VertexBuffer::Deserialize(gETF::SerializationBuffer& buf) const

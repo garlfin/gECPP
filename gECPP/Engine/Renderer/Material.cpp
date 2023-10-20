@@ -3,10 +3,11 @@
 //
 
 #include "Material.h"
+#include <Engine/Window.h>
 
 namespace gE
 {
-	gE::Material::Material(Window* window, Handle<GL::Shader> shader, DepthFunction depthFunc) :
+	gE::Material::Material(Window* window, const Handle<GL::Shader>& shader, DepthFunction depthFunc) :
 		GL::Asset(window), _shader(shader), _depthFunc(depthFunc)
 	{
 
@@ -14,6 +15,7 @@ namespace gE
 
 	void gE::Material::Bind() const
 	{
+		if(GetWindow())
 		if((bool) _depthFunc)
 		{
 			glEnable(GL_DEPTH_TEST);

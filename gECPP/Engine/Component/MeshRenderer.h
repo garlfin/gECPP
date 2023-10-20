@@ -4,15 +4,17 @@
 
 #pragma once
 
-#include "Engine/Entity/Entity.h"
-#include "GL/Buffer/VAO.h"
+#include <Engine/Entity/Entity.h>
+#include <GL/Buffer/VAO.h>
+#include <Engine/Renderer/Material.h>
+#include <gEModel/gETF.h>
 
 namespace gE
 {
 	class MeshRenderer : public Component
 	{
 	 public:
-		MeshRenderer(gE::Entity*, const gETF::MeshHandle& mesh);
+		MeshRenderer(Entity* owner, const gETF::MeshHandle& mesh, const Handle<Material>& mat);
 
 		void OnUpdate(float delta) override;
 		void OnRender(float delta) override;
@@ -21,5 +23,6 @@ namespace gE
 
 	 private:
 		const gETF::MeshHandle _mesh;
+		const Handle<Material> _mat;
 	};
 }

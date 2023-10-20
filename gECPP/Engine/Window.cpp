@@ -73,7 +73,7 @@ void Window::Run()
 
 void Window::OnInit()
 {
-	PipelineBuffers = new gE::DefaultPipeline::Buffers(this);
+	PipelineBuffers = (Reference<DefaultPipeline::Buffers>) new DefaultPipeline::Buffers(this);
 
 	_blitShader = CreateReference<GL::Shader>(this, "Resource/Shader/blit.vert", "Resource/Shader/blit.frag");
 

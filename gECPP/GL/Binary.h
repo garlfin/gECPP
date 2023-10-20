@@ -88,13 +88,16 @@ namespace gETF
 		}
 
 		template<class T>
-		void PushPtr(T* t, u32 count = 1);
+		void PushPtr(T* t, u32 count);
+
+		template<size_t C, class T>
+		void PushPtr(T* t);
 
 		//template<class T>
 		//void InsertPtr(u64 i, T* t, u32 count = 1);
 
 		template<class T>
-		ALWAYS_INLINE void Push(const T& t) { PushPtr<const T>(&t); }
+		ALWAYS_INLINE void Push(const T& t) { PushPtr<const T>(&t, 1); }
 
 		//template<typename T>
 		//ALWAYS_INLINE void Insert(u64 i, const T& t) {InsertPtr<const T>(i, &t); }
@@ -195,4 +198,19 @@ void gETF::SerializationBuffer::SafeMemCpy(const u8* ptr, u64 len, u64 offset)
 {
 	assertm(offset + len < _alloc, "WROTE OUT OF BOUNDS!");
 	memcpy(_buf + offset, ptr, std::min(offset + len, _alloc));
+}
+
+template<size_t C, class T>
+void gETF::SerializationBuffer::PushPtr(T* t)
+{
+	if constexpr (std::is_base_of_v<Serializable, T>)
+		for (u32 i = 0; i < C; i++) t[i].Deserialize(*this);
+	else
+	{
+		static_assert(std::is_trivially_copyable_v<T>, "T IS NOT COPYABLE!");
+		static constexpr size_t size = sizeof(T) * C;
+		u64 oldSize = _size;
+		Realloc(_size + size);
+		memcpy(_buf + oldSize, t, size);
+	}
 }

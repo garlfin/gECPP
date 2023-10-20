@@ -33,13 +33,13 @@ void DemoWindow::OnInit()
 	glClearColor(0.2, 0.2, 1, 1);
 
 	auto rasterShader = gE::CreateHandle<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/uber.frag");
-	rasterShader->Bind();
+	auto rasterMaterial = gE::CreateHandle<gE::Material>(this, rasterShader);
 
 	gETF::File file;
 	gETF::Read("cube.gETF", file);
 
-	VoxelDemo::StaticMeshEntity* renderer = new VoxelDemo::StaticMeshEntity(this, file.Meshes[0]);
-	FlyCam* camera = new FlyCam(this);
+	auto* renderer = new VoxelDemo::StaticMeshEntity(this, file.Meshes[0], rasterMaterial);
+	auto* camera = new FlyCam(this);
 	Cameras.SetCurrentCamera(&camera->Camera);
 
 	PipelineBuffers->Scene.InstanceCount = 1;
