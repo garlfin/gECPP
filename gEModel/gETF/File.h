@@ -21,16 +21,13 @@ namespace gETF
 	// struct Scene;
 	// struct Node;
 
-	File Import(const char*);
-
 	struct VertexBuffer : public Serializable
 	{
 		SERIALIZABLE_PROTO;
 
 		u8 Index = 0;
 		u8 Stride = 0;
-
-		u32 Count;
+		u32 Count = 0;
 
 		void* Data = nullptr;
 
@@ -50,8 +47,8 @@ namespace gETF
 
 		u8 Index = 0;
 		u8 BufferIndex = 0;
-		u8 ElementCount;
-		u8 Stride = 0;
+		u8 ElementCount = 0;
+		u8 Offset = 0;
 
 		~VertexField() { delete[] Name; }
 	};
@@ -86,9 +83,9 @@ namespace gETF
 		VertexField* Fields = nullptr;
 		MaterialSlot* Materials = nullptr;
 
-		GL::VAO* VAO;
+		GL::VAO* VAO = nullptr;
 
-		void Free() { for(u8 i = 0; i < FieldCount; i++) Buffers[i].Free(); }
+		void Free() const { for(u8 i = 0; i < BufferCount; i++) Buffers[i].Free(); }
 
 		~Mesh();
 	};

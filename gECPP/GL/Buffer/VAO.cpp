@@ -7,7 +7,7 @@
 namespace GL
 {
 	VAO::VAO(gE::Window* window, const gETF::Mesh* settings) : Asset(window),
-		_settings(settings), _bufferBuffer(malloc(sizeof(Buffer<void>) * settings->FieldCount))
+		_settings(settings), _bufferBuffer(malloc(sizeof(Buffer<void>) * settings->BufferCount))
 	{
 		glCreateVertexArrays(1, &ID);
 
@@ -28,7 +28,7 @@ namespace GL
 
 			glEnableVertexArrayAttrib(ID, field.Index);
 			glVertexArrayAttribBinding(ID, field.Index, field.BufferIndex);
-			glVertexArrayAttribFormat(ID, field.Index, field.ElementCount, field.ElementType, false, field.Stride);
+			glVertexArrayAttribFormat(ID, field.Index, field.ElementCount, field.ElementType, false, field.Offset);
 		}
 	}
 

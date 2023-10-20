@@ -36,19 +36,22 @@ void TransformUV(const aiVector3D& s, aiVector2D& v)
 }
 
 template<unsigned int aiMesh::* COUNT_OFFSET, typename INDIVIDUAL_TYPE, typename T, T* aiMesh::* DATA_OFFSET, typename I = T, TransformFunc<T, I> F = nullptr>
-void CreateField(u8 index, gETF::VertexBuffer& field, aiMesh** source, u8 count, const char* name)
+void CreateField(u8 index, gETF::VertexBuffer& buffer, gETF::VertexField& field, aiMesh** source, u8 count, const char* name)
 {
 	field.Index = index;
 	field.Name = strcpy(new char[strlen(name) + 1], name);
-	field.Type = GLType<INDIVIDUAL_TYPE>;
+	field.ElementType = GLType<INDIVIDUAL_TYPE>;
+	field.ElementCount = IsVec3<INDIVIDUAL_TYPE, I> || std::is_same_v<aiFace, I> ? 3 : 2;
+	field.Offset = 0;
+	field.BufferIndex = index;
 
-	field.TypeCount = IsVec3<INDIVIDUAL_TYPE, I> || std::is_same_v<aiFace, I> ? 3 : 2;
+	buffer.Index = index;
+	buffer.Stride = GLSizeOf(field.ElementType) * field.ElementCount;
+	buffer.Count = 0;
+	for(u8 i = 0; i < count; i++) buffer.Count += source[i]->*COUNT_OFFSET;
 
-	field.Count = 0;
-	for(u8 i = 0; i < count; i++) field.Count += source[i]->*COUNT_OFFSET;
-
-	I* data = (I*) malloc(sizeof(I) * field.Count);
-	field.Data = data;
+	I* data = (I*) malloc(sizeof(I) * buffer.Count);
+	buffer.Data = data;
 
 	for(u8 i = 0; i < count; i++)
 	{
@@ -102,25 +105,27 @@ int main()
 	gETF::File file {};
 
 	file.MeshCount = realMeshCount;
-	file.Meshes = new gETF::Mesh[realMeshCount];
+	file.Meshes = new gETF::MeshHandle[realMeshCount];
 
 	for(u8 mI = 0, i = 0; i < realMeshCount; mI += submeshCount[i], i++)
 	{
-		gETF::Mesh& mesh = file.Meshes[i];
+		gETF::Mesh& mesh = *(file.Meshes[i] = gETF::MeshHandle(new gETF::Mesh()));
 		aiMesh** sourceMesh = &scene->mMeshes[mI];
 		u32 subCount = submeshCount[i];
 
-		mesh.TriangleMode = gETF::TriangleMode::Simple;
-		CreateField<&aiMesh::mNumFaces, u32, aiFace, &aiMesh::mFaces, aiVector3t<u32>, TransformFace>(0, mesh.Triangles, sourceMesh, subCount, "TRI");
-
+		mesh.BufferCount = 5; // POS UV NOR TAN TRI
 		mesh.FieldCount = 4; // POS UV NOR TAN
-		mesh.Fields = new gETF::VertexBuffer[mesh.FieldCount];
+		mesh.Buffers = new gETF::VertexBuffer[mesh.BufferCount];
+		mesh.Fields = new gETF::VertexField[mesh.FieldCount];
+
+		mesh.TriangleMode = gETF::TriangleMode::Simple;
+		CreateField<&aiMesh::mNumFaces, u32, aiFace, &aiMesh::mFaces, aiVector3t<u32>, TransformFace>(4, mesh.Buffers[4], mesh.Triangles, sourceMesh, subCount, "TRI");
 
 		// I may have overcomplicated things
-		CreateField<&aiMesh::mNumVertices, float, aiVector3D, &aiMesh::mVertices>(0, mesh.Fields[0], sourceMesh, subCount, "POS");
-		CreateField<&aiMesh::mNumVertices, float, aiVector3D, &aiMesh::FirstMap, aiVector2D, TransformUV>(1, mesh.Fields[1], sourceMesh, subCount, "UV");
-		CreateField<&aiMesh::mNumVertices, float, aiVector3D, &aiMesh::mNormals>(2, mesh.Fields[2], sourceMesh, subCount, "NOR");
-		CreateField<&aiMesh::mNumVertices, float, aiVector3D, &aiMesh::mTangents>(3, mesh.Fields[3], sourceMesh, subCount, "TAN");
+		CreateField<&aiMesh::mNumVertices, float, aiVector3D, &aiMesh::mVertices>(0, mesh.Buffers[0], mesh.Fields[0], sourceMesh, subCount, "POS");
+		CreateField<&aiMesh::mNumVertices, float, aiVector3D, &aiMesh::FirstMap, aiVector2D, TransformUV>(1, mesh.Buffers[1], mesh.Fields[1], sourceMesh, subCount, "UV");
+		CreateField<&aiMesh::mNumVertices, float, aiVector3D, &aiMesh::mNormals>(2, mesh.Buffers[2], mesh.Fields[2], sourceMesh, subCount, "NOR");
+		CreateField<&aiMesh::mNumVertices, float, aiVector3D, &aiMesh::mTangents>(3, mesh.Buffers[3], mesh.Fields[3], sourceMesh, subCount, "TAN");
 
 		mesh.MaterialCount = submeshCount[i];
 		mesh.Materials = new gETF::MaterialSlot[submeshCount[i]];

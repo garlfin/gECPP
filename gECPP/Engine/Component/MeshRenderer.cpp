@@ -10,6 +10,10 @@ gE::MeshRenderer::MeshRenderer(gE::Entity* owner, const gETF::MeshHandle& mesh)
 	: Component(owner), _mesh(mesh)
 {
 	GET_WINDOW()->GetRenderers().Register(this);
+	if(mesh->VAO) return;
+
+	mesh->VAO = new GL::VAO(GET_WINDOW(), mesh);
+	mesh->Free();
 }
 
 void gE::MeshRenderer::OnUpdate(float delta)

@@ -77,7 +77,7 @@ namespace gETF
 		::Read(ptr, Fields, FieldCount);
 
 		TriangleMode = ::Read<enum TriangleMode>(ptr);
-		if(TriangleMode != TriangleMode::Simple) Triangles.Serialize(ptr);
+		if(TriangleMode != TriangleMode::None) Triangles.Serialize(ptr);
 
 		MaterialCount = ::Read<u8>(ptr);
 		Materials = new MaterialSlot[MaterialCount];
@@ -149,7 +149,7 @@ namespace gETF
 		Index = ::Read<u8>(ptr);
 		BufferIndex = ::Read<u8>(ptr);
 		ElementCount = ::Read<u8>(ptr);
-		Stride = ::Read<u8> (ptr);
+		Offset = ::Read<u8>(ptr);
 		ElementType = ::Read<GLenum>(ptr);
 	}
 
@@ -160,7 +160,7 @@ namespace gETF
 		buf.Push(Index);
 		buf.Push(BufferIndex);
 		buf.Push(ElementCount);
-		buf.Push(Stride);
+		buf.Push(Offset);
 		buf.Push(ElementType);
 	}
 }

@@ -33,6 +33,7 @@ void DemoWindow::OnInit()
 	glClearColor(0.2, 0.2, 1, 1);
 
 	auto rasterShader = gE::CreateHandle<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/uber.frag");
+	rasterShader->Bind();
 
 	gETF::File file;
 	gETF::Read("cube.gETF", file);
