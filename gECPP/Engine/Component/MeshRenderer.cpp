@@ -5,8 +5,8 @@
 #include "MeshRenderer.h"
 #include <Engine/Window.h>
 
-gE::MeshRenderer::MeshRenderer(gE::Entity* owner, const gETF::MeshHandle& mesh, const Handle<Material>& mat)
-	: Component(owner), _mesh(mesh), _mat(mat)
+gE::MeshRenderer::MeshRenderer(gE::Entity* owner, const gETF::MeshHandle& mesh, const gE::MaterialHolder* mat)
+	: Component(owner), _mesh(mesh), _materialHolder(mat)
 {
 	GET_WINDOW()->GetRenderers().Register(this);
 	if(mesh->VAO) return;
@@ -31,8 +31,11 @@ void gE::MeshRenderer::OnRender(float delta)
 
 	buffers->UpdateScene(offsetof(GL::Scene, Normal[1]));
 
-	_mat->Bind();
 
 	uint8_t meshCount = _mesh->MaterialCount;
-	for (uint8_t i = 0; i < meshCount; i++) _mesh->VAO->Draw(i);
+	for (uint8_t i = 0; i < meshCount; i++)
+	{
+		_materialHolder->GetMaterial(i)->Bind();
+		_mesh->VAO->Draw(i);
+	}
 }

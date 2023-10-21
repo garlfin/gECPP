@@ -7,8 +7,8 @@
 
 namespace gE
 {
-	gE::Material::Material(Window* window, const Handle<GL::Shader>& shader, DepthFunction depthFunc) :
-		GL::Asset(window), _shader(shader), _depthFunc(depthFunc)
+	gE::Material::Material(Window* window, const Handle<GL::Shader>& shader, DepthFunction depthFunc, CullMode cullMode) :
+		GL::Asset(window), _shader(shader), _depthFunc(depthFunc), _cullMode(cullMode)
 	{
 
 	}
@@ -21,6 +21,12 @@ namespace gE
 			glDepthFunc(GetWindow()->GetRenderState() ==  RenderState::PreZ ? (GLenum) _depthFunc : GL_EQUAL);
 		}
 		else glDisable(GL_DEPTH_TEST);
+
+		if((bool) _cullMode)
+		{
+			glEnable(GL_CULL_FACE);
+			glCullFace((GLenum) _cullMode);
+		} else glDisable(GL_CULL_FACE);
 
 		_shader->Bind();
 	}

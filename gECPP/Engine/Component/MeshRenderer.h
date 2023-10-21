@@ -8,13 +8,14 @@
 #include <GL/Buffer/VAO.h>
 #include <Engine/Renderer/Material.h>
 #include <gEModel/gETF.h>
+#include "MaterialHolder.h"
 
 namespace gE
 {
 	class MeshRenderer : public Component
 	{
 	 public:
-		MeshRenderer(Entity* owner, const gETF::MeshHandle& mesh, const Handle<Material>& mat);
+		MeshRenderer(Entity* owner, const gETF::MeshHandle& mesh, const MaterialHolder* mat);
 
 		void OnUpdate(float delta) override;
 		void OnRender(float delta) override;
@@ -23,6 +24,6 @@ namespace gE
 
 	 private:
 		const gETF::MeshHandle _mesh;
-		const Handle<Material> _mat;
+		const MaterialHolder* _materialHolder;
 	};
 }

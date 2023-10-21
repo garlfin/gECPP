@@ -17,6 +17,13 @@ namespace gE
 		GreaterEqual = GL_GEQUAL
 	};
 
+	enum class CullMode : GLenum
+	{
+		Disable,
+		Back = GL_BACK,
+		Front = GL_FRONT,
+	};
+
 	enum class BlendMode : GLenum
 	{
 		Disable,
@@ -27,7 +34,7 @@ namespace gE
 	 struct Material : public GL::Asset
 	 {
 	 public:
-		Material(Window* window, const Handle<GL::Shader>& shader, DepthFunction depthFunc = DepthFunction::Less);
+		Material(Window* window, const Handle<GL::Shader>& shader, DepthFunction depthFunc = DepthFunction::Less, CullMode cullMode = CullMode::Back);
 
 		void Bind() const final;
 
@@ -36,5 +43,6 @@ namespace gE
 	 private:
 		Handle<GL::Shader> const _shader;
 		const DepthFunction _depthFunc;
-	};
+		const CullMode _cullMode;
+	 };
 }
