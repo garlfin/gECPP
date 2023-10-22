@@ -21,6 +21,7 @@ namespace GL
 		GL_ALIGN glm::vec2 ClipPlanes;
 		float FOV;
 		u32 State;
+		glm::vec4 FutureData; // TODO Find use for space.
 
 		GL_ALIGN glm::mat4 Projection;
 		glm::mat4 PreviousViewProjection;

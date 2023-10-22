@@ -6,14 +6,17 @@
 #include <GL/Texture/Texture.h>
 #include <iostream>
 
+
 #define INCLUDE_DIRECTIVE "#include "
 #define VERSION_DIRECTIVE "#version 460 core\n"
 #define EXTENSION_DIRECTIVE "#extension "
 
+#define GL_GET(FUNC_STAGE, FUNC_SHADER, ARGS...) if constexpr (std::is_same_v<T, ShaderStage>) FUNC_STAGE(ARGS); else FUNC_SHADER(ARGS);
+
 namespace GL
 {
 	void CompileDirectives(const Array<PreprocessorPair>*, gETF::SerializationBuffer&);
-	void CompileIncludes(const char* file, gETF::SerializationBuffer&, gETF::SerializationBuffer&);
+	void CompileIncludes(const char* file, gETF::SerializationBuffer&, gETF::SerializationBuffer&, gETF::SerializationBuffer& idBuffer);
 	const char* GetIncludePath(const char* origin, const char* include);
 
 	template<typename T>
@@ -33,9 +36,8 @@ namespace GL
 		vert.Attach(this);
 
 		glLinkProgram(ID);
-#ifdef DEBUG
+
 		GetShaderStatus(*this);
-#endif
 	}
 
 	ShaderStage::ShaderStage(gE::Window* window, ShaderStageType type, const char* file, const Array<PreprocessorPair>* directives) : Asset(window)
@@ -44,12 +46,13 @@ namespace GL
 
 		gETF::SerializationBuffer directivesBuf{};
 		gETF::SerializationBuffer sourceBuf{};
+		gETF::SerializationBuffer incIDBuf{};
 
-		directivesBuf.StrCat(VERSION_DIRECTIVE);
-		directivesBuf.StrCat(ShaderStageDefine(type));
+		directivesBuf.StrCat(VERSION_DIRECTIVE, false);
+		directivesBuf.StrCat(ShaderStageDefine(type), false);
 
 		CompileDirectives(directives, directivesBuf);
-		CompileIncludes(file, sourceBuf, directivesBuf);
+		CompileIncludes(file, sourceBuf, directivesBuf, incIDBuf);
 		directivesBuf.Push(sourceBuf);
 		directivesBuf.Push('\0');
 
@@ -57,9 +60,8 @@ namespace GL
 
 		glShaderSource(ID, 1, &bufPtr, nullptr);
 		glCompileShader(ID);
-#ifdef DEBUG
+
 		GetShaderStatus(*this, bufPtr);
-#endif
 	}
 
 	Shader::Shader(gE::Window* window, const ShaderStage& v, const ShaderStage& f) : Asset(window)
@@ -89,8 +91,6 @@ namespace GL
 #endif
 	}
 
-#define GL_GET(FUNC_STAGE, FUNC_SHADER, ARGS...) if constexpr (std::is_same_v<T, ShaderStage>) FUNC_STAGE(ARGS); else FUNC_SHADER(ARGS);
-
 	template<typename T>
 	bool GetShaderStatus(const T& shader, char* source)
 	{
@@ -111,22 +111,20 @@ namespace GL
 		GL_GET(glGetShaderInfoLog, glGetProgramInfoLog, id, shaderStatus - 1, nullptr, infoLog);
 
 		std::cout << "SHADER COMPILE FAILURE:\n" << infoLog << '\n';
+
+		#ifdef DEBUG
 		if(source)
 		{
-			std::cout << "0(1): ";
-			u32 i = 2;
-			for(;*source; source++)
-			{
-				if (*source == '\n')
+			for (u32 i = 0; *source; source++)
+				if(*source == '\n' || !i)
 				{
-					std::cout << "\n0(" << i << "): ";
+					if(i) std::cout << "\n0(" << i << "): ";
+					else std::cout << "0(0): ";
 					i++;
 				}
 				else std::cout << *source;
-
-				if(!source[1]) std::cout << '\n';
-			}
 		}
+		#endif
 
 		delete[] infoLog;
 		return false;
@@ -138,23 +136,30 @@ namespace GL
 		for(u64 i = 0; i < pairs->Size(); i++) (*pairs)[i].WriteDirective(buf);
 	}
 
-	void CompileIncludes(const char* file, gETF::SerializationBuffer& dstBuffer, gETF::SerializationBuffer& directivesBuffer)
+	void CompileIncludes(const char* file, gETF::SerializationBuffer& dstBuffer, gETF::SerializationBuffer& directivesBuffer, gETF::SerializationBuffer& idBuffer)
 	{
 		// Turns out most drivers support GL_ARB_SHADER_LANGUAGE_INCLUDE
 		char* source = (char*) ReadFile(file);
 		if(!source) return;
 		char* line = source;
 
+		if(idBuffer.Find(file))
+		{
+			std::cout << "Include already included, skipping " << file << '\n';
+			return;
+		}
+		idBuffer.StrCat(file);
+
 		do
 		{
 			if(StrCmp(line, INCLUDE_DIRECTIVE))
 			{
 				const char* includePath = GetIncludePath(file, &line[9]);
-				CompileIncludes(includePath, dstBuffer, directivesBuffer);
+				CompileIncludes(includePath, dstBuffer, directivesBuffer, idBuffer);
 				delete[] includePath;
 			}
-			else if (StrCmp(line, EXTENSION_DIRECTIVE)) directivesBuffer.StrCat(line, '\n', 1);
-			else dstBuffer.StrCat(line, '\n', 1);
+			else if (StrCmp(line, EXTENSION_DIRECTIVE)) directivesBuffer.StrCat(line, true, '\n');
+			else dstBuffer.StrCat(line, true, '\n');
 		} while ((line = (char*) IncrementLine(line)));
 
 		delete[] source;
@@ -165,15 +170,20 @@ namespace GL
 		if(*include == '<') return strdupc(include + 1, '>');
 		else if(*include == '"')
 		{
+			// Allocation
 			size_t filelessLen = strlencLast(origin, '/') + 1;
 			size_t includeLen = strlenc(include + 1, '"');
 			size_t totalLen = filelessLen + includeLen;
 
-			char* path = new char[totalLen + 1];
-			path[totalLen] = 0;
+			char* path = new char[totalLen + 1] {};
 
+			// Original Copy
 			memcpy(path, origin, filelessLen);
 			memcpy(path + filelessLen, include + 1, includeLen);
+
+			// Canonicalization
+			// TODO
+			// Fr lazy atm
 
 			return path;
 		}
@@ -185,7 +195,7 @@ namespace GL
 	PreprocessorPair::PreprocessorPair(const char* n, const char* v)
 	{
 		u32 totalLength = strlen(n) + 1;
-		u32 nameLength = totalLength, valueLength = 0;
+		u32 nameLength = totalLength, valueLength;
 
 		if(v) totalLength += valueLength = strlen(v) + 1;
 

@@ -2,7 +2,7 @@
 
 #include "GL/Math.h"
 
-#include "Engine/ComponentManager.h"
+#include "Engine/Manager.h"
 #include "Engine/AssetManager.h"
 
 #include "GL/Buffer/VAO.h"

@@ -7,7 +7,7 @@
 
 using namespace gETF;
 
-char* ReadString(u8*& ptr)
+char* ReadLengthString(u8*& ptr)
 {
 	u8 len = Read<u8>(ptr);
 	if(!len) return nullptr;
@@ -49,18 +49,24 @@ size_t strlenc(const char* str, char d)
 
 size_t strlencLast(const char* str, char c, char d)
 {
-	u64 i = 0, l = 0;
-	for(; str[i] && str[i] != d; i++) if(str[i] == c) l = i;
-	return l;
+	size_t len = strlenc(str, d);
+	size_t i = 0;
+
+	while(i < len)
+	{
+		i++; // i starts off as the end character
+		if(*(str + len - i) == c) return len - i;
+	}
+
+	return -1;
 }
 
 char* strdupc(const char* str, char d)
 {
 	size_t len = strlenc(str, d);
 	if(!len) return nullptr;
-	char* newStr = new char[len + 1];
-	newStr[len] = 0;
-	return newStr;
+	char* newStr = new char[len + 1] {};
+	return (char*) memcpy(newStr, str, len);
 }
 
 const char* IncrementLine(const char* str, char d)
@@ -77,29 +83,29 @@ void SerializationBuffer::PushPtr<const SerializationBuffer>(const Serialization
 
 void SerializationBuffer::Realloc(u64 newSize)
 {
-	u64 logSize = 1 << (BIT_SIZE(newSize) - __builtin_clzll(newSize));
+	u64 logSize = 1 << (BIT_SIZE(newSize) - __builtin_clzll(newSize)); // count leading zeros
 	if(_alloc != logSize) _buf = (u8*) realloc(_buf, logSize);
 	_alloc = logSize;
 	_size = newSize;
 }
 
-void SerializationBuffer::PushString(const char* ptr)
+void SerializationBuffer::PushLengthString(const char* ptr)
 {
 	u8 len = ptr ? MIN(strlen(ptr), UINT8_MAX) : 0;
 	Push(len);
 	PushPtr(ptr, len);
 }
 
-void SerializationBuffer::StrCat(const char* str, char d, i8 offset)
+void SerializationBuffer::StrCat(const char* str, bool incTerminator, char d)
 {
 	GE_ASSERT(str, "'str' should have a value.");
 
 	u32 strLen = strlenc(str, d);
-	if(str[strLen]) strLen += offset;
-	u64 size = Length();
+	if(str[strLen] == d) strLen += incTerminator;
+	u64 preSize = Length();
 
-	Realloc(size + strLen);
-	memcpy(_buf + size, str, strLen);
+	Realloc(_size + strLen);
+	memcpy(_buf + preSize, str, strLen);
 }
 
 void SerializationBuffer::FromFile(const char* file, bool binary)
@@ -118,3 +124,20 @@ void SerializationBuffer::FromFile(const char* file, bool binary)
 	fseek(fstream, 0, SEEK_SET);
 	fread(_buf + preSize, length, 1, fstream);
 }
+
+char* SerializationBuffer::Find(const char* str, char delimiter)
+{
+	char* s = (char*) _buf;
+	char* end = (char*) _buf + _size;
+	size_t len = strlenc(str, delimiter);
+
+	while (s < end)
+	{
+		if(!memcmp(s, str, std::min(end - s, (long long) len)))
+			return s;
+		s++;
+	}
+
+	return nullptr;
+}
+

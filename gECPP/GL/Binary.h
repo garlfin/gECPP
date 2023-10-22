@@ -89,25 +89,20 @@ namespace gETF
 
 		template<class T>
 		void PushPtr(T* t, u32 count);
-
 		template<size_t C, class T>
 		void PushPtr(T* t);
-
-		//template<class T>
-		//void InsertPtr(u64 i, T* t, u32 count = 1);
-
 		template<class T>
 		ALWAYS_INLINE void Push(const T& t) { PushPtr<const T>(&t, 1); }
 
-		//template<typename T>
-		//ALWAYS_INLINE void Insert(u64 i, const T& t) {InsertPtr<const T>(i, &t); }
 
 		NODISCARD ALWAYS_INLINE u8* Data() const { return _buf; }
 		NODISCARD ALWAYS_INLINE u64 Length() const { return _size; }
 
-		void PushString(const char* ptr);
-		void StrCat(const char* str, char = 0, i8 endOffset = 0);
+		ALWAYS_INLINE u8* PushEnd(u64 length);
+		void PushLengthString(const char* ptr);
+		void StrCat(const char* str, bool = true, char = 0);
 		void FromFile(const char* file, bool binary = false);
+		char* Find(const char* str, char = 0);
 
 		~SerializationBuffer() { free(_buf); }
 
@@ -169,7 +164,7 @@ bool StrCmp(const char* a, const char(&b)[LENGTH])
 	return true;
 }
 
-char* ReadString(u8*& ptr);
+char* ReadLengthString(u8*& ptr);
 u8* ReadFile(const char* name, u32& length, bool binary = false);
 
 inline u8* ReadFile(const char* name, bool binary = false)
@@ -213,4 +208,11 @@ void gETF::SerializationBuffer::PushPtr(T* t)
 		Realloc(_size + size);
 		memcpy(_buf + oldSize, t, size);
 	}
+}
+
+u8* gETF::SerializationBuffer::PushEnd(u64 length)
+{
+	u64 preSize = _size;
+	Realloc(_size + length);
+	return _buf + preSize;
 }

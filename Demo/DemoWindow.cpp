@@ -43,11 +43,6 @@ void DemoWindow::OnInit()
 
 	auto* camera = new FlyCam(this);
 	Cameras.SetCurrentCamera(&camera->GetCamera());
-
-	PipelineBuffers->Scene.InstanceCount = 1;
-	PipelineBuffers->Scene.Model[0] = glm::mat4(1);
-	PipelineBuffers->Scene.Normal[0] = glm::mat3(1);
-	PipelineBuffers->UpdateScene(offsetof(GL::Scene, Normal[1]));
 }
 
 void DemoWindow::OnDestroy()

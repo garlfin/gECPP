@@ -6,7 +6,7 @@
 
 #include "Engine/Entity/Entity.h"
 #include "Engine/Array.h"
-#include "Engine/ComponentManager.h"
+#include "Engine/Manager.h"
 #include "GL/Texture/Texture.h"
 #include "GL/Buffer/FrameBuffer.h"
 #include "CameraSettings.h"

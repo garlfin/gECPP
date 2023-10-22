@@ -153,7 +153,7 @@ namespace gETF
 
 	void VertexField::Serialize(u8*& ptr)
 	{
-		Name = ::ReadString(ptr);
+		Name = ::ReadLengthString(ptr);
 
 		Index = ::Read<u8>(ptr);
 		BufferIndex = ::Read<u8>(ptr);
@@ -164,7 +164,7 @@ namespace gETF
 
 	void VertexField::Deserialize(gETF::SerializationBuffer& buf) const
 	{
-		buf.PushString(Name);
+		buf.PushLengthString(Name);
 
 		buf.Push(Index);
 		buf.Push(BufferIndex);
