@@ -218,7 +218,7 @@ namespace detail
 			}
 
 			//
-			// Handle exponent overflow
+			// GetHandle exponent overflow
 			//
 
 			if (e > 30)

@@ -15,9 +15,9 @@ struct CameraData
     mat4 View[6];
 };
 
-#ifndef GL_ARB_bindless_texture
-layout(location = 0) uniform sampler2D Depth;
-layout(location = 1) uniform sampler2D Color;
+#if defined(FRAGMENT) && !defined(GL_ARB_bindless_texture)
+uniform sampler2D CameraDepth;
+uniform sampler2D CameraColor;
 #endif
 
 #ifndef CAMERA_UNIFORM_LOCATION

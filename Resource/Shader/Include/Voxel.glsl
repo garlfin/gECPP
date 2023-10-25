@@ -21,9 +21,9 @@ struct VoxelGridData
     BINDLESS_TEXTURE(sampler3D, Data);
 };
 
-#ifndef GL_ARB_bindless_texture
-layout(location = 2) uniform sampler3D VoxelColor;
-layout(location = 3) uniform sampler3D VoxelData;
+#if defined(FRAGMENT) && !defined(GL_ARB_bindless_texture)
+uniform sampler3D VoxelColor;
+uniform sampler3D VoxelData;
 #endif
 
 #ifndef VOXEL_UNIFORM_LOCATION

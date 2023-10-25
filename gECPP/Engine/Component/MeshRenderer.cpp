@@ -29,8 +29,7 @@ void gE::MeshRenderer::OnRender(float delta)
 	buffers->Scene.Model[0] = Owner()->GetTransform().Model();
 	buffers->Scene.Normal[0] = glm::mat3(1);
 
-	buffers->UpdateScene(offsetof(GL::Scene, Normal[1]));
-
+	buffers->UpdateScene(offsetof(GL::Scene, Normal[1]), offsetof(GL::Scene, InstanceCount));
 
 	uint8_t meshCount = _mesh->MaterialCount;
 	for (uint8_t i = 0; i < meshCount; i++)

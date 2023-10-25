@@ -74,7 +74,7 @@ void gE::Camera::CreateAttachments(CAM_T& cam, const gE::AttachmentSettings& set
 		if constexpr (!std::is_same_v<TEX_T, GL::Texture3D>) cam.FrameBuffer.SetDepthAttachment(cam.DepthTexture);
 	}
 
-	for(u8 i = 0; i < FRAMEBUFFER_MAX_COLOR_ATTACHMENTS; i++)
+	for(u8 i = 0; i < GE_MAX_ATTACHMENTS; i++)
 	{
 		if(!settings.Attachments[i]) continue;
 		cam.Attachments[i] = (Reference<GL::Texture>) new TEX_T(cam.GET_WINDOW(), { settings.Attachments[i], cam.GetSize() });
@@ -110,13 +110,13 @@ void gE::Camera3D::GetGLCamera(GL::Camera& cam) const
 	cam.View[0] = glm::lookAt(pos, pos + glm::vec3(0, -1, 0), pos + glm::vec3(1, 0, 0));
 }
 
-gE::CubemapCamera::CubemapCamera(gE::Entity* parent, const gE::CameraSettings1D& settings) :
+gE::CameraCubemap::CameraCubemap(gE::Entity* parent, const gE::CameraSettings1D& settings) :
 	Camera(parent, settings), _size(settings.Size)
 {
 	CreateAttachments<GL::TextureCubemap>(*this, settings.RenderAttachments);
 }
 
-void gE::CubemapCamera::UpdateProjection()
+void gE::CameraCubemap::UpdateProjection()
 {
 	Projection = glm::perspectiveFov(degree_cast<AngleType::Radian>(90.f), (float) GetSize(), (float) GetSize(), GetClipPlanes().x, GetClipPlanes().y);
 }
@@ -141,7 +141,7 @@ glm::vec3 UpDirs[]
 	glm::vec3(0, 1, 0)
 };
 
-void gE::CubemapCamera::GetGLCamera(GL::Camera& cam) const
+void gE::CameraCubemap::GetGLCamera(GL::Camera& cam) const
 {
 	cam.ClipPlanes = GetClipPlanes();
 	cam.Projection = Projection;

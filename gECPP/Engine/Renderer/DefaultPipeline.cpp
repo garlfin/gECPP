@@ -46,7 +46,7 @@ namespace gE
 		if(Requirements.Depth != settings.Depth) return false;
 		if(Requirements.DepthCopy && !settings.DepthCopy) return false;
 
-		for(u8 i = 0; i < FRAMEBUFFER_MAX_COLOR_ATTACHMENTS; i++)
+		for(u8 i = 0; i < GE_MAX_ATTACHMENTS; i++)
 		{
 			if(!Requirements.Attachments[i]) continue;
 			if(Requirements.Attachments[i] != settings.Attachments[i]) return false;

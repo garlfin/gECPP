@@ -14,7 +14,7 @@ namespace gE
 	 public:
 		VoxelCapture(Window* w, u16 resolution, float size, Entity* p = nullptr);
 
-		void Update();
+		void OnUpdate(float) override;
 
 		GET_CONST_VALUE(GL::Texture3D*, Color, _camera.GetAttachment(0));
 		GET_CONST_VALUE(GL::Texture3D*, Data, _camera.GetAttachment(1));

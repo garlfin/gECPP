@@ -15,7 +15,7 @@ gE::VoxelCapture::VoxelCapture(gE::Window* w, u16 resolution, float size, gE::En
 {
 }
 
-void gE::VoxelCapture::Update()
+void gE::VoxelCapture::OnUpdate(float)
 {
 	VoxelPipeline::Buffers* buffers = GetWindow()->GetVoxelBuffers();
 	Transform& transform = GetTransform();
@@ -23,7 +23,7 @@ void gE::VoxelCapture::Update()
 	buffers->Scene.VoxelScale = _size / _resolution;
 	buffers->Scene.Minimum = transform.Position - transform.Scale / 2.f;
 	buffers->Scene.Maximum = transform.Position + transform.Scale / 2.f;
-	buffers->Scene.Texture = GetColor()->Handle();
+	buffers->Scene.Texture = GetColor()->GetHandle();
 
 	buffers->UpdateScene();
 }

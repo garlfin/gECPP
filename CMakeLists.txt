@@ -40,7 +40,7 @@ target_link_libraries(gEModel PRIVATE ASSIMP GETF GLAD)
 file(GLOB_RECURSE GECPP_SRC "gECPP/*.cpp" "gECPP/*.h")
 add_library(gECPP STATIC ${GECPP_SRC}
         gECPP/Engine/WindowState.h
-        gECPP/Engine/Renderer/Material.cpp)
+        gECPP/Engine/Renderer/Material.cpp gECPP/Engine/Entity/CubemapCapture.cpp gECPP/Engine/Entity/CubemapCapture.h gECPP/Engine/Entity/DirectionalLight.cpp gECPP/Engine/Entity/DirectionalLight.h)
 target_link_libraries(gECPP GLAD GLFW GETF)
 
 # VOXELDEMO

@@ -133,7 +133,7 @@ Texture::~Texture()
 	if(_handle) glMakeTextureHandleNonResidentARB(_handle);
 }
 
-TextureHandle Texture::Handle()
+TextureHandle Texture::GetHandle()
 {
 	if(_handle) return _handle;
 

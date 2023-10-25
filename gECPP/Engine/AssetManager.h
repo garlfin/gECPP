@@ -46,7 +46,7 @@ namespace gE
 	template<class T, typename... ARGS>
 	Handle<T> CreateHandle(ARGS&&... args) { return Handle<T>::Create(std::forward<ARGS>(args)...); }
 
-	/// Gives ownership of the pointer to the Handle.
+	/// Gives ownership of the pointer to the GetHandle.
 	template<class T>
 	Handle<T> CreateHandleFromPointer(T* t) { return Handle<T>(t); }
 
