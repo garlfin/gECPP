@@ -1,0 +1,20 @@
+//
+// Created by scion on 10/23/2023.
+//
+
+#pragma once
+#include "Entity.h"
+#include <Engine/Component/Camera.h>
+
+namespace gE
+{
+	class CubemapCapture final : public Entity
+	{
+	 public:
+		CubemapCapture(Window*, u16 size);
+		GET_CONST(GL::TextureCubemap*, Texture, _camera.GetAttachment(0));
+
+	 private:
+		CameraCubemap _camera;
+	};
+}
