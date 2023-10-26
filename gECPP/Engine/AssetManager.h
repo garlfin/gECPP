@@ -42,7 +42,7 @@ namespace gE
 	};
 
 	template<class T, typename... ARGS>
-	Reference<T> CreateReference(ARGS&&... args) { return SmartPointer<T>(new T(args...)); }
+	Reference<T> CreateReference(ARGS&&... args) { return Reference<T>(new T(args...)); }
 
 	/// Gives ownership of the pointer to the Reference.
 	template<class T>
