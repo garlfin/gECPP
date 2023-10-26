@@ -96,8 +96,8 @@ namespace gETF
 		if(VAO) return;
 
 		if(TriangleMode == TriangleMode::Simple)
-			VAO = (gE::Reference<GL::VAO>) new GL::IndexedVAO(w, this);
-		else VAO = (gE::Reference<GL::VAO>) new GL::VAO(w, this);
+			VAO = (gE::SmartPointer<GL::VAO>) new GL::IndexedVAO(w, this);
+		else VAO = (gE::SmartPointer<GL::VAO>) new GL::VAO(w, this);
 	}
 
 	void VertexBuffer::Deserialize(gETF::SerializationBuffer& buf) const

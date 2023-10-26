@@ -73,10 +73,10 @@ void Window::Run()
 
 void Window::OnInit()
 {
-	PipelineBuffers = CreateReference<DefaultPipeline::Buffers>(this);
-	VoxelBuffers = CreateReference<VoxelPipeline::Buffers>(this);
+	PipelineBuffers = CreateSmartPointer<DefaultPipeline::Buffers>(this);
+	VoxelBuffers = CreateSmartPointer<VoxelPipeline::Buffers>(this);
 
-	_blitShader = CreateReference<GL::Shader>(this, "Resource/Shader/blit.vert", "Resource/Shader/blit.frag");
+	_blitShader = CreateSmartPointer<GL::Shader>(this, "Resource/Shader/blit.vert", "Resource/Shader/blit.frag");
 }
 
 void Window::Blit(const GL::Texture& texture)

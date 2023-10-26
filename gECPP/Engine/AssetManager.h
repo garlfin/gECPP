@@ -11,26 +11,24 @@
 namespace gE
 {
 	template<class T>
-	class Handle
+	class Reference
 	{
 	 public:
-		inline explicit Handle(T* t) : _t(t), _counter(new u32(1)) {};
-		Handle(Handle&& o) noexcept : _t(o._t), _counter(o._counter) { o._t = o._counter = nullptr; }
-		Handle(const Handle& o) : _t(o._t), _counter(o._counter) { if(_counter) (*_counter)++;}
-		inline Handle() = default;
+		inline explicit Reference(T* t) : _t(t), _counter(new u32(1)) {};
+		Reference(Reference&& o) noexcept : _t(o._t), _counter(o._counter) { o._t = o._counter = nullptr; }
+		Reference(const Reference& o) : _t(o._t), _counter(o._counter) { if(_counter) (*_counter)++;}
+		inline Reference() = default;
 
-		OPERATOR_EQUALS_BOTH(Handle);
+		OPERATOR_EQUALS_BOTH(Reference);
 
 		ALWAYS_INLINE T* Get() const { return _t; }
 		ALWAYS_INLINE T* operator->() const { return _t; }
 		ALWAYS_INLINE T& operator*() const { return *_t; }
 		ALWAYS_INLINE operator bool() const { return (bool) _t; } // NOLINT
 		ALWAYS_INLINE operator T*() const { return _t; } // NOLINT
+		ALWAYS_INLINE operator T&() const { return *_t; } // NOLINT
 
-		template<typename... ARGS>
-		inline static Handle Create(ARGS&&... args) { return Handle(new T(args...)); }
-
-		~Handle()
+		~Reference()
 		{
 			if(!_t || --(*_counter)) return;
 
@@ -44,22 +42,21 @@ namespace gE
 	};
 
 	template<class T, typename... ARGS>
-	Handle<T> CreateHandle(ARGS&&... args) { return Handle<T>::Create(std::forward<ARGS>(args)...); }
+	Reference<T> CreateReference(ARGS&&... args) { return SmartPointer<T>(new T(args...)); }
 
-	/// Gives ownership of the pointer to the GetHandle.
+	/// Gives ownership of the pointer to the Reference.
 	template<class T>
-	Handle<T> CreateHandleFromPointer(T* t) { return Handle<T>(t); }
+	Reference<T> CreateReferenceFromPointer(T* t) { return Reference<T> (t); }
 
-	/// Literally a unique pointer...
 	template<class T>
-	class Reference
+	class SmartPointer
 	{
 	 public:
-		Reference() = default;
-		explicit Reference(T* t) : _t(t) {};
+		SmartPointer() = default;
+		explicit SmartPointer(T* t) : _t(t) {};
 
-		Reference(Reference&& o) noexcept : _t(o._t) { o._t = nullptr; }
-		Reference& operator=(Reference&& o) noexcept
+		SmartPointer(SmartPointer&& o) noexcept : _t(o._t) { o._t = nullptr; }
+		SmartPointer& operator=(SmartPointer&& o) noexcept
 		{
 			if(this == &o) return *this;
 
@@ -69,24 +66,26 @@ namespace gE
 			return *this;
 		}
 
-		Reference(const Reference&) = delete;
-		Reference& operator=(const Reference&) = delete;
+		SmartPointer(const SmartPointer&) = delete;
+		SmartPointer& operator=(const SmartPointer&) = delete;
 
 		ALWAYS_INLINE T* Get() const { return _t; }
 		ALWAYS_INLINE T* operator->() const { return _t; }
 		ALWAYS_INLINE T& operator*() const { return *_t; }
 		ALWAYS_INLINE operator bool() const { return (bool) _t; } // NOLINT
 		ALWAYS_INLINE operator T*() const { return _t; } // NOLINT
+		ALWAYS_INLINE operator T&() const { return *_t; } // NOLINT
 
-		~Reference() { delete _t; }
+		~SmartPointer() { delete _t; }
 
 	 private:
 			T* _t = nullptr;
 	};
 
 	template<typename T, typename... ARGS>
-	Reference<T> CreateReference(ARGS&&... args) { return Reference<T>(new T(args...)); }
+	SmartPointer<T> CreateSmartPointer(ARGS&&... args) { return SmartPointer<T>(new T(args...)); }
 
+	/// Gives ownership of the pointer to the SmartPointer.
 	template<typename T>
-	Reference<T> CreateReferenceFromPointer(T* t) { return Reference<T>(t); }
+	SmartPointer<T> CreateSmartPointerFromPointer(T* t) { return SmartPointer<T>(t); }
 }

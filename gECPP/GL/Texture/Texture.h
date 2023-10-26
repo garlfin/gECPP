@@ -1,6 +1,6 @@
 #pragma once
 
-#include <GL/gl.h>
+#include <GL/GL.h>
 #include <gEModel/gETF/Prototype.h>
 #include <GL/Binary.h>
 #include <GLAD/glad.h>
@@ -59,10 +59,10 @@ namespace GL
 		const GL::TextureSize3D _size;
 	};
 
-	class TextureCubemap final : public Texture
+	class TextureCube final : public Texture
 	{
 	 public:
-		TextureCubemap(gE::Window* window, const TextureSettings<TextureDimension::D1D>& settings, const TextureData& = {});
+		TextureCube(gE::Window* window, const TextureSettings<TextureDimension::D1D>& settings, const TextureData& = {});
 		NODISCARD ALWAYS_INLINE GL::TextureSize1D GetSize(u8 mip = 0) const { return _size >> mip; }
 
 	 private:

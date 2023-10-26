@@ -60,10 +60,10 @@ namespace gE
 
 		const SizelessCameraSettings Settings;
 
-		gE::Reference<GL::Texture> DepthTexture;
-		gE::Reference<GL::Texture> DepthCopy;
-		gE::Reference<GL::Texture> Attachments[GE_MAX_ATTACHMENTS] {};
-		gE::Reference<GL::Texture> AttachmentCopies[GE_MAX_ATTACHMENTS] {};
+		gE::SmartPointer<GL::Texture> DepthTexture;
+		gE::SmartPointer<GL::Texture> DepthCopy;
+		gE::SmartPointer<GL::Texture> Attachments[GE_MAX_ATTACHMENTS] {};
+		gE::SmartPointer<GL::Texture> AttachmentCopies[GE_MAX_ATTACHMENTS] {};
 
 	 private:
 		bool _invalidated = true;
@@ -149,7 +149,7 @@ namespace gE
 	 public:
 		CameraCubemap(Entity*, const CameraSettings1D&);
 
-		CAMERA_GET(GL::TextureCubemap);
+		CAMERA_GET(GL::TextureCube);
 
 		void GetGLCamera(GL::Camera& camera) const override;
 

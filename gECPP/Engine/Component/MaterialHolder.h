@@ -18,14 +18,14 @@ namespace gE
 
 		};
 
-		MaterialHolder(gE::Entity* o, const Array<Handle<Material>>& materials)
+		MaterialHolder(gE::Entity* o, const Array<Reference<Material>>& materials)
 			: Component(o)
 		{
 			materials.CopyToCArray(_materials);
 		}
 
 		NODISCARD ALWAYS_INLINE Material* GetMaterial(u8 i) const { GE_ASSERT(i < GE_MAX_MATERIAL, "MATERIAL OUT OF RANGE"); return _materials[i]; }
-		ALWAYS_INLINE void SetMaterial(u8 i, const Handle<Material>& mat) { GE_ASSERT(i < GE_MAX_MATERIAL, "MATERIAL OUT OF RANGE"); _materials[i] = mat; }
+		ALWAYS_INLINE void SetMaterial(u8 i, const Reference<Material>& mat) { GE_ASSERT(i < GE_MAX_MATERIAL, "MATERIAL OUT OF RANGE"); _materials[i] = mat; }
 
 		void OnUpdate(float d) override { };
 		void OnRender(float d) override { };
@@ -34,7 +34,7 @@ namespace gE
 
 	 protected:
 	 private:
-		Handle<Material> _materials[GE_MAX_MATERIAL] {};
+		Reference<Material> _materials[GE_MAX_MATERIAL] {};
 	};
 }
 

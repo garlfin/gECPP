@@ -17,7 +17,7 @@ namespace gE
 	void DefaultPipeline::RenderPass2D(Window* window, Camera2D* camera)
 	{
 		// PRE-Z
-		window->SetRenderState(RenderState::PreZ);
+		window->SetRenderStage(RenderStage::PreZ);
 
 		glDepthMask(1);
 		glColorMask(1, 1, 1, 1);
@@ -27,7 +27,7 @@ namespace gE
 		window->GetRenderers().OnRender(0.f);
 
 		// COLOR
-		window->SetRenderState(RenderState::Color);
+		window->SetRenderStage(RenderStage::Color);
 
 		glDepthMask(0);
 		glColorMask(1, 1, 1, 1);
@@ -38,7 +38,7 @@ namespace gE
 	void DefaultPipeline::RenderPassDirectionalShadow(Window*, Camera2D*) {}
 
 	#ifdef DEBUG
-	// this will only really be used in; not too concerned w/ perf
+	// this will only really be used in debug; not too concerned w/ perf
 	bool PostProcessPass::CheckRequirements(const Camera& cam) const
 	{
 		const AttachmentSettings& settings = cam.GetSettings().RenderAttachments;

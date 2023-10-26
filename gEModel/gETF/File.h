@@ -82,7 +82,7 @@ namespace gETF
 		VertexField* Fields = nullptr;
 		MaterialSlot* Materials = nullptr;
 
-		gE::Reference<GL::VAO> VAO { nullptr };
+		gE::SmartPointer<GL::VAO> VAO { nullptr };
 
 		void Free() const { for(u8 i = 0; i < BufferCount; i++) Buffers[i].Free(); }
 		void CreateVAO(gE::Window*);
@@ -95,7 +95,7 @@ namespace gETF
 		SERIALIZABLE_PROTO;
 
 		u8 MeshCount = 0;
-		gE::Handle<Mesh>* Meshes = nullptr;
+		gE::Reference<Mesh>* Meshes = nullptr;
 
 		~File() { delete[] Meshes; }
 	};
@@ -103,5 +103,5 @@ namespace gETF
 	File& Read(const char*, File&);
 	NODISCARD File* Read(const char*);
 
-	typedef gE::Handle<Mesh> MeshHandle;
+	typedef gE::Reference<Mesh> MeshHandle;
 }

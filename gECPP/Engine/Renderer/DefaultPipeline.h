@@ -12,7 +12,6 @@
 #define GE_MAX_LIGHT 4
 #define GE_MAX_CUBEMAP 4
 #define GE_MAX_ATTACHMENTS 2
-
 #define GL_ALIGN alignas(16)
 
 namespace GL

@@ -6,7 +6,7 @@
 
 namespace gE
 {
-	enum class RenderState
+	enum class RenderStage
 	{
 		Cubemap,
 		Voxel,

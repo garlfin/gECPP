@@ -18,8 +18,9 @@ void main()
     FragColor = (dot(Vertex.TBN[2], normalize(vec3(1, 1, 1))) * 0.5 + 0.5).rrrr;
     FragColor *= FragColor;
 
-#ifdef WRITE_VOXEL
+    if(Camera.Stage != STAGE_VOXEL) return;
+
     Voxel voxel = Voxel(FragColor.rgb, 0, 0, true);
     WriteVoxel(Vertex.FragPos, voxel);
-#endif
+
 }

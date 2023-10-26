@@ -70,14 +70,14 @@ void gE::Camera::CreateAttachments(CAM_T& cam, const gE::AttachmentSettings& set
 {
 	if(settings.Depth)
 	{
-		cam.DepthTexture = Reference<GL::Texture>(new TEX_T(cam.GET_WINDOW(), {settings.Depth, cam.GetSize()}));
+		cam.DepthTexture = SmartPointer<GL::Texture>(new TEX_T(cam.GET_WINDOW(), { settings.Depth, cam.GetSize()}));
 		if constexpr (!std::is_same_v<TEX_T, GL::Texture3D>) cam.FrameBuffer.SetDepthAttachment(cam.DepthTexture);
 	}
 
 	for(u8 i = 0; i < GE_MAX_ATTACHMENTS; i++)
 	{
 		if(!settings.Attachments[i]) continue;
-		cam.Attachments[i] = (Reference<GL::Texture>) new TEX_T(cam.GET_WINDOW(), { settings.Attachments[i], cam.GetSize() });
+		cam.Attachments[i] = (SmartPointer<GL::Texture>) new TEX_T(cam.GET_WINDOW(), { settings.Attachments[i], cam.GetSize() });
 		if constexpr (!std::is_same_v<TEX_T, GL::Texture3D>) cam.FrameBuffer.SetAttachment(i, cam.Attachments[i]);
 	}
 }
@@ -113,7 +113,7 @@ void gE::Camera3D::GetGLCamera(GL::Camera& cam) const
 gE::CameraCubemap::CameraCubemap(gE::Entity* parent, const gE::CameraSettings1D& settings) :
 	Camera(parent, settings), _size(settings.Size)
 {
-	CreateAttachments<GL::TextureCubemap>(*this, settings.RenderAttachments);
+	CreateAttachments<GL::TextureCube>(*this, settings.RenderAttachments);
 }
 
 void gE::CameraCubemap::UpdateProjection()
