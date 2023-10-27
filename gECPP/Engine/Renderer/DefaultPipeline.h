@@ -31,6 +31,7 @@ namespace GL
 
 	enum class LightType : uint
 	{
+		None,
 		Directional,
 		Point,
 		Spot,

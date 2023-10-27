@@ -42,8 +42,8 @@ layout(VOXEL_UNIFORM_LAYOUT, binding = VOXEL_UNIFORM_LOCATION) uniform VoxelGrid
 struct Voxel
 {
     vec3 Color;
-    float Metallic;
-    float Roughness;
-    float Emission;
+    vec3 MRE; // Meal Ready to Eat! (Metallic, Roughness, Emission)
     bool Solid;
 };
+
+

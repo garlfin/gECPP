@@ -14,12 +14,29 @@ namespace gE
 	class Reference
 	{
 	 public:
-		inline explicit Reference(T* t) : _t(t), _counter(new u32(1)) {};
-		Reference(Reference&& o) noexcept : _t(o._t), _counter(o._counter) { o._t = o._counter = nullptr; }
-		Reference(const Reference& o) : _t(o._t), _counter(o._counter) { if(_counter) (*_counter)++;}
+		inline Reference(T* t) : _t(t) { if(t) _counter = new u32(1); }
+
+		template<class I>
+		explicit Reference(Reference<I>&& o) noexcept : _t(o._t), _counter(o._counter)
+		{
+			static_assert(std::is_convertible_v<I, T> || std::is_base_of_v<T, I>);
+			o._t = nullptr;
+			o._counter = nullptr;
+		}
+		template<class I>
+		explicit Reference(const Reference<I>& o) : _t(o._t), _counter(o._counter)
+		{
+			static_assert(std::is_convertible_v<I, T> || std::is_base_of_v<T, I>);
+			if(_counter) (*_counter)++;
+		}
+
 		inline Reference() = default;
 
-		OPERATOR_EQUALS_BOTH(Reference);
+		template<class I>
+		OPERATOR_EQUALS_T(Reference, Reference<I>);
+
+		template<class I>
+		OPERATOR_EQUALS_XVAL_T(Reference, Reference<I>);
 
 		ALWAYS_INLINE T* Get() const { return _t; }
 		ALWAYS_INLINE T* operator->() const { return _t; }
@@ -39,6 +56,9 @@ namespace gE
 	 private:
 		T* _t = nullptr;
 		u32* _counter = nullptr;
+
+		template<class I>
+		friend class Reference;
 	};
 
 	template<class T, typename... ARGS>
@@ -55,18 +75,17 @@ namespace gE
 		SmartPointer() = default;
 		explicit SmartPointer(T* t) : _t(t) {};
 
-		SmartPointer(SmartPointer&& o) noexcept : _t(o._t) { o._t = nullptr; }
-		SmartPointer& operator=(SmartPointer&& o) noexcept
+		SmartPointer(const SmartPointer&) = delete;
+		template<class I>
+		explicit SmartPointer(SmartPointer&& o) noexcept : _t(o._t)
 		{
-			if(this == &o) return *this;
-
-			_t = o._t;
+			static_assert(std::is_convertible_v<I, T> || std::is_base_of_v<T, I>);
 			o._t = nullptr;
-
-			return *this;
+			o._counter = nullptr;
 		}
 
-		SmartPointer(const SmartPointer&) = delete;
+		template<class I>
+		OPERATOR_EQUALS_XVAL_T(SmartPointer, SmartPointer<I>);
 		SmartPointer& operator=(const SmartPointer&) = delete;
 
 		ALWAYS_INLINE T* Get() const { return _t; }
@@ -79,7 +98,10 @@ namespace gE
 		~SmartPointer() { delete _t; }
 
 	 private:
-			T* _t = nullptr;
+		T* _t = nullptr;
+
+		template<class I>
+		friend class SmartPointer;
 	};
 
 	template<typename T, typename... ARGS>

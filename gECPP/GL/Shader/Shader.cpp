@@ -113,11 +113,12 @@ namespace GL
 				if(*source == '\n' || !i)
 				{
 					if(i) std::cout << "\n0(" << i << "): ";
-					else std::cout << "0(0): ";
+					else std::cout << "0(0): " << *source;
 					i++;
 				}
 				else std::cout << *source;
 		}
+		std::cout << '\n';
 		#endif
 
 		delete[] infoLog;

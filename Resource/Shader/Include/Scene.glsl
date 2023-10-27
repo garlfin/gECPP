@@ -4,10 +4,11 @@
 
 #define TEXTURE_HANDLE vec2
 
-#define LIGHT_DIRECTIONAL 0
-#define LIGHT_POINT 1
-#define LIGHT_SPOT 2
-#define LIGHT_AREA 3
+#define LIGHT_NONE 0
+#define LIGHT_DIRECTIONAL 1
+#define LIGHT_POINT 2
+#define LIGHT_SPOT 3
+#define LIGHT_AREA 4
 
 struct Light
 {

@@ -54,23 +54,30 @@ namespace gETF { struct Serializable; }
 	GET_CONST_VALUE(TYPE, ACCESSOR, FIELD) \
 	SET(TYPE, ACCESSOR, FIELD)
 
-#define OPERATOR_EQUALS(TYPE, REFTYPE, MODIFIER) \
-	TYPE& operator=(TYPE REFTYPE o) MODIFIER \
+#define OPERATOR_EQUALS_T(TYPE, INTYPE) \
+	TYPE& operator=(const INTYPE& o) \
 	{ \
-		if(&o == this) return *this; \
+		if((TYPE*) &o == this) return *this; \
 		this->~TYPE(); \
 		new(this) TYPE(o); \
 		return *this; \
 	}
 
+#define OPERATOR_EQUALS_XVAL_T(TYPE, INTYPE) \
+	TYPE& operator=(INTYPE&& o) noexcept \
+	{ \
+		if((TYPE*) &o == this) return *this; \
+		this->~TYPE(); \
+		new(this) TYPE(std::move(o)); \
+		return *this; \
+	}
+
+#define OPERATOR_EQUALS(TYPE) OPERATOR_EQUALS_T(TYPE, TYPE)
+#define OPERATOR_EQUALS_XVAL(TYPE) OPERATOR_EQUALS_XVAL_T(TYPE, TYPE)
+
 #define OPERATOR_EQUALS_BOTH(TYPE) \
-    OPERATOR_EQUALS(TYPE, const &,); \
-	OPERATOR_EQUALS(TYPE, &&, noexcept);
-
-#ifndef SUPER
-#define SUPER(CLASS) private: using Super = CLASS;
-#endif
-
+    OPERATOR_EQUALS(TYPE); \
+	OPERATOR_EQUALS_XVAL(TYPE);
 
 size_t strlenc(const char*, char);
 size_t strlencLast(const char*, char, char = 0);

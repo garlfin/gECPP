@@ -10,6 +10,7 @@
 #include "gEModel/gETF/File.h"
 #include "Demo/Engine/Entity/FlyCamera.h"
 #include "Demo/Engine/Entity/StaticMeshEntity.h"
+#include "Engine/Renderer/PBRMaterial.h"
 
 using namespace VoxelDemo;
 
@@ -32,9 +33,11 @@ void DemoWindow::OnInit()
 	glfwSetInputMode(GLFWWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glClearColor(0.2, 0.2, 1, 1);
 
+	gE::PBRMaterialSettings materialSettings { PVR::Read(this, "../../x.pvr") };
+
 	auto rasterShader = gE::CreateReference<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/uber.frag");
 	Array<gE::Reference<gE::Material>> materials { 1 };
-	materials[0] = gE::CreateReference<gE::Material>(this, rasterShader);
+	materials[0] = gE::CreateReference<gE::PBRMaterial>(this, rasterShader, materialSettings);
 
 	gETF::File file;
 	gETF::Read("cube.gETF", file);

@@ -33,7 +33,7 @@ namespace gE
 		_shader->Bind();
 	}
 
-	PBRMaterial::PBRMaterial(Window* w, const Reference<GL::Shader>& s, PBRMaterialSettings& settings) :
+	PBRMaterial::PBRMaterial(Window* w, const Reference<GL::Shader>& s, const PBRMaterialSettings& settings) :
 		Material(w, s),
 		_albedo(*this, "Albedo", settings.Albedo),
 		_amr(*this, 0u, settings.AMR),
