@@ -35,6 +35,6 @@ namespace GL
 	 public:
 		using DynamicUniform::DynamicUniform;
 
-		ALWAYS_INLINE void Set(const T& t) const { DynamicUniform::Set(t); } // NOLINT
+		ALWAYS_INLINE void Set(const T& t) const { DynamicUniform::Set(t); }
 	};
 }

@@ -14,29 +14,22 @@ namespace gE
 	class Reference
 	{
 	 public:
-		inline Reference(T* t) : _t(t) { if(t) _counter = new u32(1); }
+		explicit inline Reference(T* t) : _t(t) { if(t) _counter = new u32(1); }
 
-		template<class I>
-		explicit Reference(Reference<I>&& o) noexcept : _t(o._t), _counter(o._counter)
+		Reference(Reference&& o) noexcept : _t(o._t), _counter(o._counter)
 		{
-			static_assert(std::is_convertible_v<I, T> || std::is_base_of_v<T, I>);
 			o._t = nullptr;
 			o._counter = nullptr;
 		}
-		template<class I>
-		explicit Reference(const Reference<I>& o) : _t(o._t), _counter(o._counter)
+
+		Reference(const Reference& o) : _t(o._t), _counter(o._counter)
 		{
-			static_assert(std::is_convertible_v<I, T> || std::is_base_of_v<T, I>);
 			if(_counter) (*_counter)++;
 		}
 
 		inline Reference() = default;
 
-		template<class I>
-		OPERATOR_EQUALS_T(Reference, Reference<I>);
-
-		template<class I>
-		OPERATOR_EQUALS_XVAL_T(Reference, Reference<I>);
+		OPERATOR_EQUALS_BOTH(Reference);
 
 		ALWAYS_INLINE T* Get() const { return _t; }
 		ALWAYS_INLINE T* operator->() const { return _t; }
@@ -44,6 +37,13 @@ namespace gE
 		ALWAYS_INLINE operator bool() const { return (bool) _t; } // NOLINT
 		ALWAYS_INLINE operator T*() const { return _t; } // NOLINT
 		ALWAYS_INLINE operator T&() const { return *_t; } // NOLINT
+
+		template<class I>
+		ALWAYS_INLINE operator Reference<I>()
+		{
+			static_assert(std::is_base_of_v<I, T>);
+			return Reference<I>(_t, _counter);
+		}
 
 		~Reference()
 		{
@@ -54,6 +54,8 @@ namespace gE
 		}
 
 	 private:
+		Reference(T* t, u32* c) : _t(t), _counter(c) { if(_counter) (*_counter)++; }
+
 		T* _t = nullptr;
 		u32* _counter = nullptr;
 
@@ -62,11 +64,11 @@ namespace gE
 	};
 
 	template<class T, typename... ARGS>
-	Reference<T> CreateReference(ARGS&&... args) { return Reference<T>(new T(args...)); }
+	ALWAYS_INLINE Reference<T> CreateReference(ARGS&&... args) { return Reference<T>(new T(args...)); }
 
 	/// Gives ownership of the pointer to the Reference.
 	template<class T>
-	Reference<T> CreateReferenceFromPointer(T* t) { return Reference<T> (t); }
+	ALWAYS_INLINE Reference<T> CreateReferenceFromPointer(T* t) { return Reference<T> (t); }
 
 	template<class T>
 	class SmartPointer
@@ -74,18 +76,10 @@ namespace gE
 	 public:
 		SmartPointer() = default;
 		explicit SmartPointer(T* t) : _t(t) {};
-
 		SmartPointer(const SmartPointer&) = delete;
-		template<class I>
-		explicit SmartPointer(SmartPointer&& o) noexcept : _t(o._t)
-		{
-			static_assert(std::is_convertible_v<I, T> || std::is_base_of_v<T, I>);
-			o._t = nullptr;
-			o._counter = nullptr;
-		}
+		SmartPointer(SmartPointer&& o) noexcept : _t(o._t) { o._t = nullptr; }
 
-		template<class I>
-		OPERATOR_EQUALS_XVAL_T(SmartPointer, SmartPointer<I>);
+		OPERATOR_EQUALS_XVAL(SmartPointer);
 		SmartPointer& operator=(const SmartPointer&) = delete;
 
 		ALWAYS_INLINE T* Get() const { return _t; }
@@ -105,9 +99,9 @@ namespace gE
 	};
 
 	template<typename T, typename... ARGS>
-	SmartPointer<T> CreateSmartPointer(ARGS&&... args) { return SmartPointer<T>(new T(args...)); }
+	ALWAYS_INLINE SmartPointer<T> CreateSmartPointer(ARGS&&... args) { return SmartPointer<T>(new T(args...)); }
 
 	/// Gives ownership of the pointer to the SmartPointer.
 	template<typename T>
-	SmartPointer<T> CreateSmartPointerFromPointer(T* t) { return SmartPointer<T>(t); }
+	ALWAYS_INLINE SmartPointer<T> CreateSmartPointerFromPointer(T* t) { return SmartPointer<T>(t); }
 }

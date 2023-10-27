@@ -40,8 +40,8 @@ namespace gETF
 
 		u8 version = ::Read<u8>(ptr);
 		MeshCount = ::Read<u8>(ptr);
-		Meshes = new MeshHandle[MeshCount];
-		for(u8 i = 0; i < MeshCount; i++) Meshes[i] = MeshHandle(ReadNew<Mesh>(ptr));
+		Meshes = new MeshReference[MeshCount];
+		for(u8 i = 0; i < MeshCount; i++) Meshes[i] = gE::CreateReferenceFromPointer(ReadNew<Mesh>(ptr));
 	}
 
 	void Mesh::Deserialize(gETF::SerializationBuffer& buf) const

@@ -105,11 +105,11 @@ int main()
 	gETF::File file {};
 
 	file.MeshCount = realMeshCount;
-	file.Meshes = new gETF::MeshHandle[realMeshCount];
+	file.Meshes = new gETF::MeshReference[realMeshCount];
 
 	for(u8 mI = 0, i = 0; i < realMeshCount; mI += submeshCount[i], i++)
 	{
-		gETF::Mesh& mesh = *(file.Meshes[i] = gETF::MeshHandle(new gETF::Mesh()));
+		gETF::Mesh& mesh = *(file.Meshes[i] = gETF::MeshReference(new gETF::Mesh()));
 		aiMesh** sourceMesh = &scene->mMeshes[mI];
 		u32 subCount = submeshCount[i];
 

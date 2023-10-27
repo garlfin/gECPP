@@ -5,14 +5,14 @@
 #include "MeshRenderer.h"
 #include <Engine/Window.h>
 
-gE::MeshRenderer::MeshRenderer(gE::Entity* owner, const gETF::MeshHandle& mesh, const gE::MaterialHolder* mat)
+gE::MeshRenderer::MeshRenderer(gE::Entity* owner, const gETF::MeshReference& mesh, const gE::MaterialHolder* mat)
 	: Component(owner), _mesh(mesh), _materialHolder(mat)
 {
 	GET_WINDOW()->GetRenderers().Register(this);
-	if(mesh->VAO) return;
+	if(_mesh->VAO) return;
 
-	mesh->CreateVAO(GET_WINDOW());
-	mesh->Free();
+	_mesh->CreateVAO(GET_WINDOW());
+	_mesh->Free();
 }
 
 void gE::MeshRenderer::OnUpdate(float delta)

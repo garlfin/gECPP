@@ -15,7 +15,7 @@ namespace gE
 	class MeshRenderer : public Component
 	{
 	 public:
-		MeshRenderer(Entity* owner, const gETF::MeshHandle& mesh, const MaterialHolder* mat);
+		MeshRenderer(Entity* owner, const gETF::MeshReference& mesh, const MaterialHolder* mat);
 
 		void OnUpdate(float delta) override;
 		void OnRender(float delta) override;
@@ -23,7 +23,7 @@ namespace gE
 		GET_CONST_VALUE(gETF::Mesh*, Mesh, _mesh.Get());
 
 	 private:
-		const gETF::MeshHandle _mesh;
+		const gETF::MeshReference _mesh;
 		const MaterialHolder* _materialHolder;
 	};
 }

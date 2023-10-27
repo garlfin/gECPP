@@ -18,8 +18,9 @@ void main()
 {
     vec3 viewDir = normalize(Vertex.FragPos - Camera.Position);
     float lambert = dot(Vertex.TBN[2], normalize(vec3(1, 1, 1))) * 0.5 + 0.5;
-    FragColor = texture(Albedo, UV);
-    FragColor *= FragColor;
+    FragColor = texture(Albedo, Vertex.UV);
+    FragColor *= lambert;
+    FragColor.rgb = pow(FragColor.rgb, vec3(1.0 / 2.2));
 
     if(Camera.Stage != STAGE_VOXEL) return;
 

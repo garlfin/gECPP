@@ -45,5 +45,6 @@ namespace gE
 	void gE::PBRMaterial::Bind() const
 	{
 		_albedo.Set();
+		Material::Bind();
 	}
 }

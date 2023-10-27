@@ -103,5 +103,5 @@ namespace gETF
 	File& Read(const char*, File&);
 	NODISCARD File* Read(const char*);
 
-	typedef gE::Reference<Mesh> MeshHandle;
+	typedef gE::Reference<Mesh> MeshReference;
 }
