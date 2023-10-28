@@ -35,7 +35,7 @@ namespace gE
 
 	struct Material : public GL::Asset
 	{
-		public:
+	public:
 		Material(Window* window, const Reference<GL::Shader>& shader, DepthFunction depthFunc = DepthFunction::Less, CullMode cullMode = CullMode::Back);
 
 		void Bind() const override;
@@ -44,7 +44,7 @@ namespace gE
 
 		~Material() override = default;
 
-		private:
+	private:
 		const Reference<GL::Shader> _shader;
 		const DepthFunction _depthFunc;
 		const CullMode _cullMode;

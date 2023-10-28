@@ -33,7 +33,8 @@ void DemoWindow::OnInit()
 	glfwSetInputMode(GLFWWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glClearColor(0.2, 0.2, 1, 1);
 
-	gE::PBRMaterialSettings materialSettings { gE::CreateReferenceFromPointer(PVR::Read(this, "../../x.pvr")) };
+	gE::Reference<GL::Texture2D> tex = gE::CreateReferenceFromPointer(PVR::Read(this, "../x.pvr"));
+	gE::PBRMaterialSettings materialSettings { tex };
 
 	auto rasterShader = gE::CreateReference<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/uber.frag");
 	Array<gE::Reference<gE::Material>> materials { 1 };

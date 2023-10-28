@@ -16,7 +16,7 @@ namespace PVR
 		PVRHeader h;
 		h.Serialize(ptr);
 
-		if (h.Depth + h.Surfaces + h.Faces > 3) std::cout << "Unexpected 3D Texture" << std::endl;
+		if (h.Depth + h.Surfaces + h.Faces > 3) std::cout << "Unexpected 3D Texture\n";
 
 		GL::TextureSettings<GL::TextureDimension::D2D> settings
 		{
@@ -31,7 +31,7 @@ namespace PVR
 		{
 			GL_NONE,
 			GL_NONE,
-			GL::CompressionScheme(16, 16),
+			GL::CompressionScheme(4, 16),
 			ptr,
 			true
 		};

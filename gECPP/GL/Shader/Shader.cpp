@@ -127,7 +127,7 @@ namespace GL
 
 	void Shader::SetUniform(u8 loc, const Texture& tex, u8 slot) const
 	{
-		SetUniform(loc, i32(tex.Use(slot)));
+		SetUniform(loc, tex.Use(slot));
 	}
 
 	DynamicUniform::DynamicUniform(Shader* s, u32 l) : _shader(s), _location(l) { }
