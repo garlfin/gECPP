@@ -88,7 +88,6 @@ namespace gETF
 	{
 		delete[] Fields;
 		delete[] Materials;
-		delete VAO;
 	}
 
 	void Mesh::CreateVAO(gE::Window* w)

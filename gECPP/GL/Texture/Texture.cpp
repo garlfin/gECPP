@@ -129,6 +129,8 @@ namespace GL
 		// 	if(_textures[i] == t)
 		// 		return i;
 
+		t->Use(_index);
+
 		_textures[_index] = t;
 		_index++;
 

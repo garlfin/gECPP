@@ -34,8 +34,8 @@ namespace gE
 		ALWAYS_INLINE T* Get() const { return _t; }
 		ALWAYS_INLINE T* operator->() const { return _t; }
 		ALWAYS_INLINE T& operator*() const { return *_t; }
-		ALWAYS_INLINE operator bool() const { return (bool) _t; } // NOLINT
-		ALWAYS_INLINE operator T*() const { return _t; } // NOLINT
+		explicit ALWAYS_INLINE operator bool() const { return (bool) _t; }
+		explicit ALWAYS_INLINE operator T*() const { return _t; }
 		ALWAYS_INLINE operator T&() const { return *_t; } // NOLINT
 
 		template<class I>
@@ -85,8 +85,8 @@ namespace gE
 		ALWAYS_INLINE T* Get() const { return _t; }
 		ALWAYS_INLINE T* operator->() const { return _t; }
 		ALWAYS_INLINE T& operator*() const { return *_t; }
-		ALWAYS_INLINE operator bool() const { return (bool) _t; } // NOLINT
-		ALWAYS_INLINE operator T*() const { return _t; } // NOLINT
+		explicit ALWAYS_INLINE operator bool() const { return (bool) _t; }
+		explicit ALWAYS_INLINE operator T*() const { return _t; } // NOLINT
 		ALWAYS_INLINE operator T&() const { return *_t; } // NOLINT
 
 		~SmartPointer() { delete _t; }

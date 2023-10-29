@@ -24,8 +24,9 @@ namespace gE
 			materials.CopyToCArray(_materials);
 		}
 
-		NODISCARD ALWAYS_INLINE Material* GetMaterial(u8 i) const { GE_ASSERT(i < GE_MAX_MATERIAL, "MATERIAL OUT OF RANGE"); return _materials[i]; }
+		NODISCARD ALWAYS_INLINE Material& GetMaterial(u8 i) const { GE_ASSERT(i < GE_MAX_MATERIAL, "MATERIAL OUT OF RANGE"); return _materials[i]; }
 		ALWAYS_INLINE void SetMaterial(u8 i, const Reference<Material>& mat) { GE_ASSERT(i < GE_MAX_MATERIAL, "MATERIAL OUT OF RANGE"); _materials[i] = mat; }
+		ALWAYS_INLINE void SetMaterial(u8 i, Reference<Material>&& mat) { GE_ASSERT(i < GE_MAX_MATERIAL, "MATERIAL OUT OF RANGE"); _materials[i] = mat; }
 
 		void OnUpdate(float d) override { };
 		void OnRender(float d) override { };

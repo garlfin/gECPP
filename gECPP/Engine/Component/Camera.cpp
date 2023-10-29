@@ -20,10 +20,10 @@ void gE::Camera::OnRender(float delta)
 	_invalidated = false;
 
 	Window* window = Owner()->GetWindow();
-	DefaultPipeline::Buffers* buffers = window->GetPipelineBuffers();
+	DefaultPipeline::Buffers& buffers = window->GetPipelineBuffers();
 
-	GetGLCamera(buffers->Camera);
-	buffers->UpdateCamera();
+	GetGLCamera(buffers.Camera);
+	buffers.UpdateCamera();
 
 	FrameBuffer.Bind();
 	Settings.RenderPass(window, this);
@@ -71,14 +71,14 @@ void gE::Camera::CreateAttachments(CAM_T& cam, const gE::AttachmentSettings& set
 	if(settings.Depth)
 	{
 		cam.DepthTexture = SmartPointer<GL::Texture>(new TEX_T(cam.GET_WINDOW(), { settings.Depth, cam.GetSize()}));
-		if constexpr (!std::is_same_v<TEX_T, GL::Texture3D>) cam.FrameBuffer.SetDepthAttachment(cam.DepthTexture);
+		if constexpr (!std::is_same_v<TEX_T, GL::Texture3D>) cam.FrameBuffer.SetDepthAttachment((GL::Texture*) cam.DepthTexture);
 	}
 
 	for(u8 i = 0; i < GE_MAX_ATTACHMENTS; i++)
 	{
 		if(!settings.Attachments[i]) continue;
 		cam.Attachments[i] = (SmartPointer<GL::Texture>) new TEX_T(cam.GET_WINDOW(), { settings.Attachments[i], cam.GetSize() });
-		if constexpr (!std::is_same_v<TEX_T, GL::Texture3D>) cam.FrameBuffer.SetAttachment(i, cam.Attachments[i]);
+		if constexpr (!std::is_same_v<TEX_T, GL::Texture3D>) cam.FrameBuffer.SetAttachment(i, (GL::Texture*) cam.Attachments[i]);
 	}
 }
 

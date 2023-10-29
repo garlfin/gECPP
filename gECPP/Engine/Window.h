@@ -31,9 +31,9 @@ namespace gE
 		void Blit(const GL::Texture& texture);
 
 		// Entities & Data
-		GET(VoxelCapture*, VoxelCapture, VoxelCap);
-		GET(DirectionalLight*, Sun, Sun);
-		GET(GL::TextureCube*, Cubemap, Cubemap);
+		GET(VoxelCapture&, VoxelCapture, VoxelCap);
+		GET(DirectionalLight&, Sun, Sun);
+		GET(GL::TextureCube&, Cubemap, Cubemap);
 		SET_XVAL(SmartPointer<GL::TextureCube>, Cubemap, Cubemap);
 
 		// Managers
@@ -48,8 +48,8 @@ namespace gE
 		GET_CONST_VALUE(GL::TextureSize2D, Size, _size);
 		GET_SET_VALUE(RenderStage, RenderStage, _renderStage);
 
-		GET_CONST_VALUE(VoxelPipeline::Buffers*, VoxelBuffers, VoxelBuffers);
-		GET_CONST_VALUE(DefaultPipeline::Buffers*, PipelineBuffers, PipelineBuffers);
+		GET_CONST_VALUE(VoxelPipeline::Buffers&, VoxelBuffers, VoxelBuffers);
+		GET_CONST_VALUE(DefaultPipeline::Buffers&, PipelineBuffers, PipelineBuffers);
 		NODISCARD ALWAYS_INLINE GLFWwindow* GLFWWindow() const { return _window; }
 
 		~Window();

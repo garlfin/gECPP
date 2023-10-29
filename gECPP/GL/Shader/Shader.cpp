@@ -130,6 +130,11 @@ namespace GL
 		SetUniform(loc, tex.Use(slot));
 	}
 
+	void Shader::SetUniform(u8 loc, const Texture& tex) const
+	{
+		SetUniform(loc, GetWindow()->GetSlotManager().Increment(&tex));
+	}
+
 	DynamicUniform::DynamicUniform(Shader* s, u32 l) : _shader(s), _location(l) { }
 	DynamicUniform::DynamicUniform(Shader* s, const char* n) : _shader(s), _location(GetUniformLocation(n)) { }
 
