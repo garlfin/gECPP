@@ -58,6 +58,13 @@ namespace gE
 		ValueUniform(const Material* mat, const char* n, T&& t) : GL::Uniform<T>(&mat->GetShader(), n), _t(t) {};
 		ValueUniform(const Material* mat, u32 l, const T& t) : GL::Uniform<T>(&mat->GetShader(), l), _t(t) {};
 		ValueUniform(const Material* mat, u32 l, T&& t) : GL::Uniform<T>(&mat->GetShader(), l), _t(t) {};
+		ValueUniform(const ValueUniform&) = default;
+		ValueUniform(ValueUniform&&) = default;
+
+		ALWAYS_INLINE ValueUniform& operator=(const T& t) { _t = t; return *this; }
+		ALWAYS_INLINE ValueUniform& operator=(T&& t) noexcept { _t = t; return *this; }
+		ALWAYS_INLINE ValueUniform& operator=(ValueUniform&&) noexcept = default;
+		ALWAYS_INLINE ValueUniform& operator=(const ValueUniform&) = default;
 
 		ALWAYS_INLINE T* operator->() const { return _t; }
 		ALWAYS_INLINE T& operator*() const { return *_t; }

@@ -78,8 +78,8 @@ namespace GL
 
 	Texture::~Texture()
 	{
-		glDeleteTextures(1, &ID);
 		if (_handle) glMakeTextureHandleNonResidentARB(_handle);
+		glDeleteTextures(1, &ID);
 	}
 
 	TextureHandle Texture::GetHandle()

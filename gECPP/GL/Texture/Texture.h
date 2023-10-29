@@ -22,7 +22,7 @@ namespace GL
 		void Attach(GL::FrameBuffer* buffer, GLenum attachment, u8 mip) const override;
 
 		TextureHandle GetHandle();
-		NODISCARD ALWAYS_INLINE operator TextureHandle() { return _handle; } // NOLINT
+		explicit ALWAYS_INLINE operator TextureHandle() const { return _handle; }
 
 		GET_CONST_VALUE(GLenum, Format, Format);
 		GET_CONST_VALUE(GLenum, Target, Target);
