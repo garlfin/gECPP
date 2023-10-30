@@ -6,6 +6,7 @@
 
 #include "Math.h"
 #include <cstring>
+#include <algorithm>
 
 #define NODISCARD [[nodiscard]]
 #ifdef DEBUG
@@ -16,6 +17,8 @@
 
 #ifdef DEBUG
 	#include <iostream>
+#include <vector>
+
 #endif // #ifdef DEBUG
 
 #define assertm(exp, msg) assert(((void) msg, exp))
@@ -223,4 +226,13 @@ u8* gETF::SerializationBuffer::PushEnd(u64 length)
 	u64 preSize = _size;
 	Realloc(_size + length);
 	return _buf + preSize;
+}
+
+template<class T>
+void RemoveFirstFromVec(std::vector<T>& vec, const T& t)
+{
+	auto f = std::find(vec.begin(), vec.end(), t);
+	if(f == vec.end()) return;
+	std::iter_swap(f, vec.end() - 1);
+	vec.pop_back();
 }

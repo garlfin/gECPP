@@ -45,3 +45,4 @@ gE::Transform::~Transform()
 {
 	GET_WINDOW()->GetTransforms().Remove(this);
 }
+

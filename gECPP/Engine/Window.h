@@ -13,8 +13,8 @@
 #include "Engine/Renderer/VoxelPipeline.h"
 #include "Engine/Entity/VoxelCapture.h"
 #include "Engine/Component/MeshRenderer.h"
-
 #include "Engine/Entity/DirectionalLight.h"
+#include "Engine/Component/TransformManager.h"
 
 struct GLFWwindow;
 
@@ -38,10 +38,9 @@ namespace gE
 
 		// Managers
 		GET(ComponentManager<Camera>&, Cameras, Cameras);
-		GET(ComponentManager<Transform>&, Transforms, Transforms);
+		GET(TransformManager&, Transforms, Transforms);
 		GET(ComponentManager<Behavior>&, Behaviors, Behaviors);
 		GET(ComponentManager<MeshRenderer>&, Renderers, Renderers);
-		GET(Manager<Entity>&, Entities, Entities);
 		GET(GL::TextureSlotManager&, SlotManager, SlotManager);
 
 		// Engine States
@@ -64,7 +63,7 @@ namespace gE
 		SmartPointer<VoxelPipeline::Buffers> VoxelBuffers;
 
 		CameraManager Cameras {};
-		ComponentManager<Transform> Transforms;
+		TransformManager Transforms;
 		ComponentManager<Behavior> Behaviors;
 		ComponentManager<MeshRenderer> Renderers;
 		ComponentManager<Entity> Entities;
@@ -79,7 +78,6 @@ namespace gE
 		const char* _name;
 		GLFWwindow* _window;
 		RenderStage _renderStage;
-
 		SmartPointer<GL::Shader> _blitShader;
 	};
 }

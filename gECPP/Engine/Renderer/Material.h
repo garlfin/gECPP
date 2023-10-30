@@ -85,5 +85,4 @@ namespace gE
 
 	template<class T>
 	using SmartPointerUniform = ValueUniform<gE::SmartPointer<T>>;
-
 }

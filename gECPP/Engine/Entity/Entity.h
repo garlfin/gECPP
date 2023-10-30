@@ -7,6 +7,7 @@
 #include "GL/Binary.h"
 #include "Prototype.h"
 #include "Engine/Component/Transform.h"
+#include <vector>
 
 namespace gE
 {
@@ -15,11 +16,13 @@ namespace gE
 	 public:
 		explicit Entity(Window*, Entity* parent = nullptr);
 
-		ALWAYS_INLINE void Destroy() { _flags.Deletion = true; }
+		void Destroy(bool flagChildren = true);
+
 		GET_CONST_VALUE(Window*, Window, _window);
 		GET(Transform&, Transform, _transform);
 		GET_CONST_VALUE(Entity*, Parent, _parent);
 		GET_CONST_VALUE(Flags, Flags, _flags);
+		GET_CONST(std::vector<Entity*>&, Children, _children);
 
 		virtual void OnInit() {};
 		virtual void OnUpdate(float delta) {};
@@ -29,9 +32,11 @@ namespace gE
 		virtual ~Entity();
 
 	 private:
-		Window* const _window;
-		Transform _transform;
-		Entity* const _parent;
-		Flags _flags;
+		Window* const _window = nullptr;
+		Entity* _parent = nullptr;
+		Flags _flags = (Flags) 0;
+		std::vector<Entity*> _children;
+
+		Transform _transform = Transform(this);
 	};
 }

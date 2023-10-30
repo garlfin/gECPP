@@ -13,20 +13,13 @@ namespace gE
 	class Window;
 
 	template<class T>
- 	class Manager : private std::vector<T*>
+ 	class Manager : protected std::vector<T*>
 	{
 	 public:
 		Manager() = default;
 
-		inline virtual void Register(T* t) { if(!Contains(t)) vec::push_back(t); }
-		inline virtual void Remove(T* t)
-		{
-			 auto f = std::find(vec::begin(), vec::end(), t);
-			 if(f == vec::end()) return;
-
-			 std::iter_swap(f, vec::end() - 1);
-			 vec::erase(vec::end() - 1);
-		}
+		inline virtual void Register(T* t) { if(!Contains(t)) VEC_T::push_back(t); }
+		inline virtual void Remove(T* t) { RemoveFirstFromVec(*this, t); }
 
 		virtual void OnUpdate(float delta)
 		{
@@ -44,11 +37,11 @@ namespace gE
 
 		using std::vector<T*>::operator[];
 
-		NODISCARD ALWAYS_INLINE size_t Size() const { return vec::size(); }
+		NODISCARD ALWAYS_INLINE size_t Size() const { return VEC_T::size(); }
 
-	 private:
-		typedef std::vector<T*> vec;
-		inline bool Contains(T* v) { return std::find(vec::begin(), vec::end(), v) != vec::end(); }
+	 protected:
+		typedef std::vector<T*> VEC_T;
+		inline bool Contains(T* v) { return std::find(VEC_T::begin(), VEC_T::end(), v) != VEC_T::end(); }
 	};
 
 	template<class T>

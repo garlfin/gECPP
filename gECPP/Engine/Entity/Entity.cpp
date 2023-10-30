@@ -8,17 +8,39 @@
 
 namespace gE
 {
-	Entity::Entity(Window* w, Entity* o) :
-		_window(w), _parent(o),
-		_transform(this)
+	Entity::Entity(Window* w, Entity* parent) : _window(w), _parent(parent)
 	{
-		w->GetEntities().Register(this);
+		if(parent) parent->_children.push_back(this);
 	}
 
-	Entity::~Entity()
+	void Entity::Destroy(bool flagChildren)
 	{
-		_window->GetEntities().Remove(this);
+		_flags.Deletion = true;
+
+		RemoveFirstFromVec(_parent->_children, this);
+
+		std::vector<Entity*> stack{ this };
+
+		if (flagChildren)
+			for (Entity* child: _children)
+			{
+				child->_parent = GetParent();
+				GetParent()->_children.push_back(child);
+			}
+		else
+			while (!stack.empty())
+			{
+				Entity* back = stack.back();
+				back->_flags.Deletion = true;
+				stack.pop_back();
+
+				for (Entity* child: back->GetChildren())
+					stack.push_back(child);
+			}
+
 	}
+
+	Entity::~Entity() = default;
 
 	Behavior::Behavior(Entity* o)
 		: Component(o)

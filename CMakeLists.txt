@@ -20,7 +20,8 @@ set_property(TARGET GLFW PROPERTY IMPORTED_IMPLIB "${CMAKE_CURRENT_SOURCE_DIR}/V
 FILE(COPY "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/GLFW/glfw3.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 # ASSIMP
-add_library(ASSIMP STATIC IMPORTED gECPP/GL/Binary.cpp)
+add_library(ASSIMP STATIC IMPORTED gECPP/GL/Binary.cpp
+        gECPP/Engine/Component/TransformManager.h)
 set_property(TARGET ASSIMP PROPERTY IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ASSIMP/libassimp-5.dll")
 FILE(COPY "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ASSIMP/libassimp-5.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
@@ -38,7 +39,8 @@ target_link_libraries(gEModel PRIVATE ASSIMP GETF GLAD)
 
 # GECPP
 file(GLOB_RECURSE GECPP_SRC "gECPP/*.cpp" "gECPP/*.h")
-add_library(gECPP STATIC ${GECPP_SRC})
+add_library(gECPP STATIC ${GECPP_SRC}
+        gECPP/Engine/Component/TransformManager.h)
 target_link_libraries(gECPP GLAD GLFW GETF)
 
 # VOXELDEMO
