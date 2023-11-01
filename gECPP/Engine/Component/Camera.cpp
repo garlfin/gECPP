@@ -9,24 +9,26 @@
 
 
 gE::Camera::Camera(gE::Entity* parent, const SizelessCameraSettings& settings) :
-	Component(parent), Settings(settings), FrameBuffer(parent->GetWindow())
+	Component(parent), SizelessCameraSettings(settings), FrameBuffer(parent->GetWindow())
 {
 	GE_ASSERT(settings.RenderPass, "RENDERPASS SHOULD NOT BE NULL!");
 }
 
 void gE::Camera::OnRender(float delta)
 {
-	if(_invalidated) UpdateProjection();
-	_invalidated = false;
+	if(_isProjectionInvalid) UpdateProjection();
+	_isProjectionInvalid = false;
 
 	Window* window = Owner()->GetWindow();
 	DefaultPipeline::Buffers& buffers = window->GetPipelineBuffers();
+
+	if(!Timing.Tick(delta)) return;
 
 	GetGLCamera(buffers.Camera);
 	buffers.UpdateCamera();
 
 	FrameBuffer.Bind();
-	Settings.RenderPass(window, this);
+	RenderPass(window, this);
 }
 
 gE::Camera::~Camera()

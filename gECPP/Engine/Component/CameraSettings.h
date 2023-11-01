@@ -7,6 +7,7 @@
 #include <GL/Math.h>
 #include <Engine/Renderer/DefaultPipeline.h>
 #include "Engine/Array.h"
+#include "CameraTiming.h"
 
 namespace gE
 {
@@ -16,6 +17,7 @@ namespace gE
 	{
 		RenderPass RenderPass;
 		ClipPlanes ClipPlanes = {0.1, 1000};
+		CameraTiming Timing;
 		const AttachmentSettings& RenderAttachments = DefaultPipeline::AttachmentDefault;
 	};
 

@@ -37,7 +37,7 @@ void DemoWindow::OnInit()
 	gE::PBRMaterialSettings materialSettings { tex };
 
 	auto rasterShader = gE::CreateReference<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/uber.frag");
-	Array<gE::Reference<gE::Material>> materials { 1 };
+	Array<gE::Reference<gE::Material>> materials(1);
 	materials[0] = gE::CreateReference<gE::PBRMaterial>(this, rasterShader, materialSettings);
 
 	gETF::File file;

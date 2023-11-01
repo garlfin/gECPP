@@ -6,8 +6,7 @@
 
 namespace gE
 {
-	class DirectionalLight
+	class DirectionalLight : public Entity
 	{
-
 	};
 }

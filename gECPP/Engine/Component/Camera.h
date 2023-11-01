@@ -4,12 +4,14 @@
 
 #pragma once
 
+#include <GL/Texture/Texture.h>
+#include <GL/Buffer/FrameBuffer.h>
+
 #include "Engine/Entity/Entity.h"
 #include "Engine/Array.h"
 #include "Engine/Manager.h"
-#include "GL/Texture/Texture.h"
-#include "GL/Buffer/FrameBuffer.h"
 #include "CameraSettings.h"
+#include "CameraTiming.h"
 
 namespace GL { struct Camera; }
 
@@ -30,7 +32,7 @@ namespace GL { struct Camera; }
 
 namespace gE
 {
-	class Camera : public Component
+	class Camera : public Component, protected SizelessCameraSettings
 	{
 	 public:
 		Camera(Entity* e, const SizelessCameraSettings&);
@@ -40,10 +42,11 @@ namespace gE
 
 		virtual void GetGLCamera(GL::Camera&) const;
 
-		GET_CONST_VALUE(RenderPass, RenderPass, Settings.RenderPass);
+		GET_CONST_VALUE(gE::RenderPass, RenderPass, RenderPass);
 		GET_CONST(GL::FrameBuffer&, FrameBuffer, FrameBuffer);
-		GET_CONST_VALUE(ClipPlanes, ClipPlanes, Settings.ClipPlanes);
-		GET_CONST(SizelessCameraSettings&, Settings, Settings);
+		GET_CONST_VALUE(gE::ClipPlanes, ClipPlanes, ClipPlanes);
+		GET_CONST(SizelessCameraSettings&, Settings, *this);
+		GET_CONST_VALUE(CameraTiming, Timing, Timing);
 
 		CAMERA_GET(GL::Texture);
 
@@ -58,15 +61,13 @@ namespace gE
 		GL::FrameBuffer FrameBuffer;
 		glm::mat4 Projection;
 
-		const SizelessCameraSettings Settings;
-
 		gE::SmartPointer<GL::Texture> DepthTexture;
 		gE::SmartPointer<GL::Texture> DepthCopy;
 		gE::SmartPointer<GL::Texture> Attachments[GE_MAX_ATTACHMENTS] {};
 		gE::SmartPointer<GL::Texture> AttachmentCopies[GE_MAX_ATTACHMENTS] {};
 
 	 private:
-		bool _invalidated = true;
+		bool _isProjectionInvalid = true;
 	};
 
 	class Camera2D : public Camera
@@ -150,10 +151,9 @@ namespace gE
 		CameraCubemap(Entity*, const CameraSettings1D&);
 
 		CAMERA_GET(GL::TextureCube);
+		GET_CONST_VALUE(GL::TextureSize1D, Size, _size);
 
 		void GetGLCamera(GL::Camera& camera) const override;
-
-		GET_CONST_VALUE(GL::TextureSize1D, Size, _size);
 
 	 protected:
 		void UpdateProjection() override;

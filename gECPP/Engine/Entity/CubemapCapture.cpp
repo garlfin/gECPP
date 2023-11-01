@@ -10,6 +10,7 @@ namespace gE
 	{
 		(RenderPass) gE::DefaultPipeline::RenderPassCubemap,
 		ClipPlanes(0.1, 100),
+		CameraTiming(),
 		gE::DefaultPipeline::AttachmentDefault
 	};
 

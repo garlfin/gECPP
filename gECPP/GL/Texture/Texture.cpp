@@ -128,7 +128,7 @@ namespace GL
 		// for(u8 i = 0; i < GL_MAX_TEXTURE_SLOT; i++)
 		// 	if(_textures[i] == t)
 		// 		return i;
-
+		if(!t) return 0;
 		t->Use(_index);
 
 		_textures[_index] = t;
