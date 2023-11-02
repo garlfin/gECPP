@@ -8,6 +8,10 @@
 
 using namespace gE;
 
+#ifdef DEBUG
+char WindowTitleBuf[10];
+#endif
+
 Window::Window(glm::u16vec2 size, const char* name) :
 	_size(size), _name(strdup(name))
 {
@@ -20,11 +24,22 @@ Window::Window(glm::u16vec2 size, const char* name) :
 #endif
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+	glfwWindowHint(GLFW_MAXIMIZED, false);
 
 	_window = glfwCreateWindow(size.x, size.y, name, nullptr, nullptr);
 	if(!_window) GE_FAIL("Failed to create Window.");
 
 	glfwMakeContextCurrent(_window);
+
+	PVR::Header iconHeader;
+
+	u8* iconData = PVR::Read("Resource/gE.PVR", iconHeader);
+	GLFWimage image(iconHeader.Size.x, iconHeader.Size.y, iconData);
+	glfwSetWindowIcon(_window, 1, &image);
+
+	delete[] iconData;
+
+	_monitor = Monitor(glfwGetVideoMode(glfwGetPrimaryMonitor()));
 
 	if(!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) GE_FAIL("Failed to initialize GLAD.");
 }
@@ -52,9 +67,12 @@ void Window::Run()
 #endif
 
 	Window::OnInit();
+	glfwSwapInterval(0);
+
 	OnInit();
 
-	double time = glfwGetTime(), newTime, delta;
+	double time = glfwGetTime(), newTime;
+	double delta, frameDelta = 0;
 
 	while(!glfwWindowShouldClose(_window))
 	{
@@ -62,11 +80,20 @@ void Window::Run()
 
 		newTime = glfwGetTime();
 		delta = newTime - time;
+		frameDelta += delta;
 		time = newTime;
 
 		OnUpdate((float) delta);
-		OnRender((float) delta);
 
+		if(frameDelta < 1.0 / _monitor.RefreshRate) continue;
+
+	#ifdef DEBUG
+		sprintf_s(WindowTitleBuf, "FPS: %u", (unsigned) std::ceil(1.0 / frameDelta));
+		glfwSetWindowTitle(_window, WindowTitleBuf);
+	#endif
+
+		frameDelta = 0;
+		OnRender((float) frameDelta);
 		glfwSwapBuffers(_window);
 	}
 }
@@ -93,3 +120,8 @@ void Window::Blit(const GL::Texture& texture)
 	glEnable(GL_CULL_FACE);
 }
 
+Monitor::Monitor(const GLFWvidmode* mode) :
+	Name(nullptr),
+	Size(mode->width, mode->height),
+	RefreshRate(mode->refreshRate)
+{}

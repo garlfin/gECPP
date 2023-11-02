@@ -19,8 +19,10 @@ namespace gE
 
 	struct Flags
 	{
-		bool Enabled: 1 = true;
-		bool Deletion: 1 = false;
-		u8 Layer: 6 = 0;
+		bool Enabled : 1 = true;
+		bool Deletion : 1 = false;
+		bool Static : 1 = false;
+		//bool FutureUse : 1 = false;
+		u8 Layer : 4 = 0;
 	};
 }

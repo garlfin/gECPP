@@ -6,25 +6,36 @@
 
 namespace PVR
 {
+	u8* Read(const char* path, PVR::Header& header)
+	{
+		u32 fileLen;
+		u8* file = ReadFile(path, fileLen, false);
+		u8* textureData = file;
+
+		if (!file) return nullptr;
+
+		header.Serialize(textureData);
+		size_t copySize = fileLen - (textureData - file);
+		u8* textureDataCopy = (u8*) memcpy(new u8[copySize], textureData, copySize);
+
+		delete[] file;
+		return textureDataCopy;
+	}
+
 	GL::Texture2D* Read(gE::Window* window, const char* path, GL::WrapMode wrapMode, GL::FilterMode filterMode)
 	{
-		u32 fileLen = 0;
-		u8* f = ReadFile(path, fileLen, false);
-		if (!f) return nullptr;
+		Header header;
+		u8* imageData = Read(path, header);
 
-		u8* ptr = f;
-		PVRHeader h;
-		h.Serialize(ptr);
-
-		if (h.Depth + h.Surfaces + h.Faces > 3) std::cout << "Unexpected 3D Texture\n";
+		if (header.Depth + header.Surfaces + header.Faces > 3) std::cout << "Unexpected 3D Texture\n";
 
 		GL::TextureSettings<GL::TextureDimension::D2D> settings
 		{
-			PVRToInternalFormat(h.Format),
+			PVRToInternalFormat(header.Format),
 			wrapMode,
 			filterMode,
-			(u8) h.MipCount,
-			h.Size,
+			(u8) header.MipCount,
+			header.Size,
 		};
 
 		GL::TextureData data
@@ -32,22 +43,22 @@ namespace PVR
 			GL_NONE,
 			GL_NONE,
 			GL::CompressionScheme(4, 16),
-			ptr,
+			imageData,
 			true
 		};
 
 		auto* tex = new GL::Texture2D(window, settings, data);
 
-		delete[] f;
+		delete[] imageData;
 		return tex;
 	}
 
-	void PVRHeader::Serialize(u8*& ptr)
+	void Header::Serialize(u8*& ptr)
 	{
 		Version = ::Read<u32>(ptr);
-		Flags = ::Read<PVRFlags>(ptr);
-		Format = ::Read<PVRPixelFormat>(ptr);
-		ColorSpace = ::Read<PVRColorSpace>(ptr);
+		Flags = ::Read<PVR::Flags>(ptr);
+		Format = ::Read<PVR::PixelFormat>(ptr);
+		ColorSpace = ::Read<PVR::ColorSpace>(ptr);
 		::Read<uint32_t>(ptr); // This was like bpc or something; unimportant w/ compression
 		Size = ::Read<glm::u32vec2>(ptr);
 		Size = { Size.y, Size.x }; // NOLINT
@@ -59,6 +70,6 @@ namespace PVR
 		ptr += ::Read<u32>(ptr); // I couldn't give two hoots about the metadata
 	}
 
-	void PVRHeader::Deserialize(gETF::SerializationBuffer&) const
+	void Header::Deserialize(gETF::SerializationBuffer&) const
 	{}
 }

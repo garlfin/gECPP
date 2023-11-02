@@ -7,6 +7,8 @@
 #include "Engine/Component/Transform.h"
 #include "Engine/Window.h"
 
+#define NOT(EXPR) (!(EXPR))
+
 
 gE::Camera::Camera(gE::Entity* parent, const SizelessCameraSettings& settings) :
 	Component(parent), SizelessCameraSettings(settings), FrameBuffer(parent->GetWindow())
@@ -22,7 +24,9 @@ void gE::Camera::OnRender(float delta)
 	Window* window = Owner()->GetWindow();
 	DefaultPipeline::Buffers& buffers = window->GetPipelineBuffers();
 
-	if(!Timing.Tick(delta)) return;
+	bool isFirst = Timing.GetIsFirst();
+	bool shouldTick = Timing.Tick(delta);
+	if NOT(isFirst || !Owner()->GetFlags().Static && shouldTick) return;
 
 	GetGLCamera(buffers.Camera);
 	buffers.UpdateCamera();

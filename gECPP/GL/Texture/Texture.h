@@ -72,5 +72,6 @@ namespace GL
 
 namespace PVR
 {
-	GL::Texture2D* Read(gE::Window* window, const char* path, GL::WrapMode = GL::WrapMode::Repeat, GL::FilterMode = GL::FilterMode::Linear);
+	NODISCARD GL::Texture2D* Read(gE::Window* window, const char* path, GL::WrapMode = GL::WrapMode::Repeat, GL::FilterMode = GL::FilterMode::Linear);
+	NODISCARD u8* Read(const char* path, PVR::Header& header);
 }

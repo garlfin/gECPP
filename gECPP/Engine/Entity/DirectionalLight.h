@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "Entity.h"
+
 namespace gE
 {
 	class DirectionalLight : public Entity

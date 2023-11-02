@@ -17,11 +17,24 @@
 #include "Engine/Component/TransformManager.h"
 
 struct GLFWwindow;
+struct GLFWvidmode;
 
 #define LOG(MSG) std::cout << MSG << std::endl
 
 namespace gE
 {
+	struct Monitor
+	{
+		explicit Monitor(const GLFWvidmode*);
+		Monitor() = default;
+
+		const char* Name = nullptr;
+		GL::TextureSize2D Size = GL::TextureSize2D(0);
+		u16 RefreshRate = 0;
+
+		~Monitor() { delete[] Name; }
+	};
+
 	class Window
 	{
 	 public:
@@ -46,6 +59,7 @@ namespace gE
 		// Engine States
 		GET_CONST_VALUE(GL::TextureSize2D, Size, _size);
 		GET_SET_VALUE(RenderStage, RenderStage, _renderStage);
+		GET_CONST(Monitor&, Monitor, _monitor);
 
 		GET_CONST_VALUE(VoxelPipeline::Buffers&, VoxelBuffers, VoxelBuffers);
 		GET_CONST_VALUE(DefaultPipeline::Buffers&, PipelineBuffers, PipelineBuffers);
@@ -79,6 +93,7 @@ namespace gE
 		GLFWwindow* _window;
 		RenderStage _renderStage;
 		SmartPointer<GL::Shader> _blitShader;
+		Monitor _monitor;
 	};
 }
 

@@ -29,7 +29,9 @@ namespace GL
 
 		if (idBuffer.Find(file))
 		{
-			std::cout << "Include already included, skipping " << file << '\n';
+		#ifdef DEBUG
+			std::cout << file << " already included, skipping.\n";
+		#endif
 			return;
 		}
 		idBuffer.StrCat(file);

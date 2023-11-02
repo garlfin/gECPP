@@ -14,52 +14,53 @@
 
 namespace PVR
 {
-	enum class PVRFlags : u32
+	enum class Flags : u32
 	{
 		None = 0,
 		PreMultiplied = 2
 	};
 
-	enum class PVRPixelFormat : u64
+	enum class PixelFormat : u64
 	{
 		DXT1 = 7,
 		DXT3 = 9,
 		DXT5 = 11,
-		R8G8B8 = 2260630272894834, // rgb.888.
-		Depth, BC5 = 13
+		BC5 = 13,
+		Depth,
+		RBB8 = 2260630272894834,
+		RGBA8 = 7267626108080808,
 	};
 
-	enum class PVRColorSpace : u32
+	enum class ColorSpace : u32
 	{
 		Linear = 0,
 		SRGB = 1,
 	};
 
-	struct PVRHeader : gETF::Serializable
+	struct Header : gETF::Serializable
 	{
 		SERIALIZABLE_PROTO;
 
 		uint32_t Version;
-		PVRFlags Flags;
-		PVRPixelFormat Format;
-		PVRColorSpace ColorSpace;
+		Flags Flags;
+		PixelFormat Format;
+		ColorSpace ColorSpace;
 		glm::u32vec2 Size;
 		uint32_t Depth;
 		uint32_t Surfaces;
 		uint32_t Faces;
 		uint32_t MipCount;
-
 	};
 
-	constexpr GLenum PVRToInternalFormat(PVR::PVRPixelFormat f)
+	constexpr GLenum PVRToInternalFormat(PVR::PixelFormat f)
 	{
 		switch(f)
 		{
-		case PVR::PVRPixelFormat::DXT1: return GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
-		case PVR::PVRPixelFormat::DXT3: return GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
-		case PVR::PVRPixelFormat::DXT5: return GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
-		case PVR::PVRPixelFormat::BC5: return GL_COMPRESSED_RG_RGTC2;
-		case PVR::PVRPixelFormat::Depth: return GL_DEPTH_COMPONENT16;
+		case PVR::PixelFormat::DXT1: return GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+		case PVR::PixelFormat::DXT3: return GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+		case PVR::PixelFormat::DXT5: return GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+		case PVR::PixelFormat::BC5: return GL_COMPRESSED_RG_RGTC2;
+		case PVR::PixelFormat::Depth: return GL_DEPTH_COMPONENT16;
 		default: return GL_RGB8;
 		}
 	}
