@@ -1,7 +1,7 @@
 #include "Texture.h"
 #include <iostream>
 #include <GLAD/glad.h>
-#include <GL/Binary.h>
+#include "GL/Binary/Binary.h"
 #include <GL/Buffer/FrameBuffer.h>
 #include "RenderBuffer.h"
 #include "TextureSlotManager.h"

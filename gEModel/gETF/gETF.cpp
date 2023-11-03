@@ -4,7 +4,7 @@
 
 #include "File.h"
 #include <iostream>
-#include <GL/Binary.h>
+#include "GL/Binary/Binary.h"
 #include <GL/Buffer/VAO.h>
 
 /*
@@ -32,7 +32,7 @@ namespace gETF
 		char magic[4];
 		::Read<char, 4>(ptr, magic);
 
-		if(!StrCmp<4>(magic, "gETF"))
+		if(!strcmpb<4>(magic, "gETF"))
 		{
 			std::cout << "Invalid File!" << std::endl;
 			return;
@@ -66,7 +66,7 @@ namespace gETF
 		char magic[4];
 		::Read<char, 4>(ptr, magic);
 
-		if(!StrCmp<4>(magic, "MESH")) std::cout << "Invalid File!\n";
+		if(!strcmpb<4>(magic, "MESH")) std::cout << "Invalid File!\n";
 
 		BufferCount = ::Read<u8>(ptr);
 		Buffers = new VertexBuffer[BufferCount];
@@ -152,7 +152,7 @@ namespace gETF
 
 	void VertexField::Serialize(u8*& ptr)
 	{
-		Name = ::ReadLengthString(ptr);
+		Name = ::ReadPrefixedString(ptr);
 
 		Index = ::Read<u8>(ptr);
 		BufferIndex = ::Read<u8>(ptr);

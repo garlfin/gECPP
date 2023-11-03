@@ -6,7 +6,7 @@
 
 #include <vector>
 #include "GL/GL.h"
-#include "GL/Binary.h"
+#include "GL/Binary/Binary.h"
 
 namespace gE
 {

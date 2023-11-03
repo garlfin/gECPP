@@ -5,7 +5,7 @@
 #pragma once
 
 #include "gETF/File.h"
-#include "GL/Binary.h"
+#include "GL/Binary/Binary.h"
 
 
 

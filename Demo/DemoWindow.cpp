@@ -33,7 +33,7 @@ void DemoWindow::OnInit()
 	glfwSetInputMode(GLFWWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glClearColor(0.2, 0.2, 1, 1);
 
-	gE::Reference<GL::Texture2D> tex = gE::CreateReferenceFromPointer(PVR::Read(this, "../x.pvr"));
+	gE::Reference<GL::Texture2D> tex = gE::CreateReferenceFromPointer((GL::Texture2D*) PVR::Read(this, "../x.pvr"));
 	gE::PBRMaterialSettings materialSettings { tex };
 
 	auto rasterShader = gE::CreateReference<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/uber.frag");
@@ -43,7 +43,8 @@ void DemoWindow::OnInit()
 	gETF::File file;
 	gETF::Read("cube.gETF", file);
 
-	new VoxelDemo::StaticMeshEntity(this, file.Meshes[0], materials);
+	auto* mesh = new VoxelDemo::StaticMeshEntity(this, file.Meshes[0]);
+	
 	auto* camera = new FlyCam(this);
 	Cameras.SetCurrentCamera(&camera->GetCamera());
 }

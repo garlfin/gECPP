@@ -22,7 +22,7 @@ namespace GL
 		union
 		{
 			Buffer<void>* _buffers;
-			void* _bufferBuffer; // INCEPTION!
+			void* _bufferBuffer; // Allocation for _buffers, so I don't have to construct them on the spot.
 			// TODO come up with a better name than this 😭😭
 		};
 

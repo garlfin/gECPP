@@ -38,13 +38,13 @@ namespace GL
 
 		do
 		{
-			if (StrCmp(line, INCLUDE_DIRECTIVE))
+			if (strcmpb(line, INCLUDE_DIRECTIVE))
 			{
 				const char* includePath = GetIncludePath(file, &line[9]);
 				CompileIncludes(includePath, dstBuffer, directivesBuffer, idBuffer);
 				delete[] includePath;
 			}
-			else if (StrCmp(line, EXTENSION_DIRECTIVE)) directivesBuffer.StrCat(line, true, '\n');
+			else if (strcmpb(line, EXTENSION_DIRECTIVE)) directivesBuffer.StrCat(line, true, '\n');
 			else dstBuffer.StrCat(line, true, '\n');
 		} while ((line = (char*) IncrementLine(line)));
 

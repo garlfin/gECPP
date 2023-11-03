@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "GL/Binary.h"
+#include "GL/Binary/Binary.h"
 #include "Prototype.h"
 #include "Engine/Component/Transform.h"
 #include <vector>

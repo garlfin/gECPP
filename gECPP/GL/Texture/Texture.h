@@ -2,7 +2,7 @@
 
 #include <GL/GL.h>
 #include <gEModel/gETF/Prototype.h>
-#include <GL/Binary.h>
+#include "GL/Binary/Binary.h"
 #include <GLAD/glad.h>
 #include "TextureSettings.h"
 #include "Attachment.h"
@@ -72,6 +72,6 @@ namespace GL
 
 namespace PVR
 {
-	NODISCARD GL::Texture2D* Read(gE::Window* window, const char* path, GL::WrapMode = GL::WrapMode::Repeat, GL::FilterMode = GL::FilterMode::Linear);
+	NODISCARD GL::Texture* Read(gE::Window* window, const char* path, GL::WrapMode = GL::WrapMode::Repeat, GL::FilterMode = GL::FilterMode::Linear);
 	NODISCARD u8* Read(const char* path, PVR::Header& header);
 }

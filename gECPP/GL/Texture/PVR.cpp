@@ -22,12 +22,13 @@ namespace PVR
 		return textureDataCopy;
 	}
 
-	GL::Texture2D* Read(gE::Window* window, const char* path, GL::WrapMode wrapMode, GL::FilterMode filterMode)
+	GL::Texture* Read(gE::Window* window, const char* path, GL::WrapMode wrapMode, GL::FilterMode filterMode)
 	{
 		Header header;
 		u8* imageData = Read(path, header);
+		if(!imageData) return nullptr;
 
-		if (header.Depth + header.Surfaces + header.Faces > 3) std::cout << "Unexpected 3D Texture\n";
+		GE_ASSERT(header.Depth + header.Surfaces + header.Faces == 3, "Unexpected Texture Format");
 
 		GL::TextureSettings<GL::TextureDimension::D2D> settings
 		{
@@ -48,8 +49,8 @@ namespace PVR
 		};
 
 		auto* tex = new GL::Texture2D(window, settings, data);
-
 		delete[] imageData;
+
 		return tex;
 	}
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Math.h"
-#include "GL/Binary.h"
+#include "GL/Binary/Binary.h"
 
 namespace gE { class Window; }
 

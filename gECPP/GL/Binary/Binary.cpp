@@ -7,7 +7,7 @@
 
 using namespace gETF;
 
-char* ReadLengthString(u8*& ptr)
+char* ReadPrefixedString(u8*& ptr)
 {
 	u8 len = Read<u8>(ptr);
 	if(!len) return nullptr;
@@ -22,7 +22,9 @@ u8* ReadFile(const char* name, u32& length, bool binary)
 	FILE* file = fopen(name, "rb");
 	if(!file)
 	{
+#ifdef DEBUG
 		std::cout << "Could not find file: " << name << '\n';
+#endif
 		return nullptr;
 	}
 

@@ -7,7 +7,7 @@
 #include <GL/Math.h>
 #include <gEModel/gETF/Prototype.h>
 #include "GLAD/glad.h"
-#include "GL/Binary.h"
+#include "GL/Binary/Binary.h"
 
 #define DIV_CEIL(X, Y) (((X) + (Y) - decltype(X)(1)) / (Y))
 #define DIV_CEIL_T(X, Y, T) (((T)(X) + (T)(Y) - (T)(1)) / (T)(Y))

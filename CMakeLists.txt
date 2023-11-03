@@ -20,7 +20,7 @@ set_property(TARGET GLFW PROPERTY IMPORTED_IMPLIB "${CMAKE_CURRENT_SOURCE_DIR}/V
 FILE(COPY "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/GLFW/glfw3.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 # ASSIMP
-add_library(ASSIMP STATIC IMPORTED gECPP/GL/Binary.cpp
+add_library(ASSIMP STATIC IMPORTED gECPP/GL/Binary/Binary.cpp
         gECPP/Engine/Component/TransformManager.h)
 set_property(TARGET ASSIMP PROPERTY IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ASSIMP/libassimp-5.dll")
 FILE(COPY "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ASSIMP/libassimp-5.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
@@ -29,7 +29,7 @@ FILE(COPY "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ASSIMP/libassimp-5.dll" DESTINATIO
 add_library(GLAD STATIC Vendor/GLAD/glad.c Vendor/GLAD/glad.h)
 
 # GETF
-add_library(GETF STATIC gEModel/gETF.h gEModel/gETF/gETF.cpp gECPP/GL/Binary.h gEModel/gETF/File.h gEModel/gETF/Prototype.h gECPP/GL/Binary.cpp gECPP/GL/Buffer/VAO.cpp)
+add_library(GETF STATIC gEModel/gETF.h gEModel/gETF/gETF.cpp gECPP/GL/Binary/Binary.h gEModel/gETF/File.h gEModel/gETF/Prototype.h gECPP/GL/Binary/Binary.cpp gECPP/GL/Buffer/VAO.cpp)
 
 # GEMODEL
 file(GLOB_RECURSE gEMODEL_SRC gEModel/Converter)
@@ -40,7 +40,7 @@ target_link_libraries(gEModel PRIVATE ASSIMP GETF GLAD)
 # GECPP
 file(GLOB_RECURSE GECPP_SRC "gECPP/*.cpp" "gECPP/*.h")
 add_library(gECPP STATIC ${GECPP_SRC}
-        gECPP/Engine/Component/TransformManager.h gECPP/Engine/Component/CameraTiming.h)
+        gECPP/Engine/Component/TransformManager.h gECPP/Engine/Component/CameraTiming.h gECPP/GL/Binary/Nullable.h gECPP/GL/Binary/SerializationBuffer.h gECPP/GL/Binary/Macro.h)
 target_link_libraries(gECPP GLAD GLFW GETF)
 
 # VOXELDEMO

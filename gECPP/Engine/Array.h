@@ -5,7 +5,7 @@
 #pragma once
 
 #include "GL/Math.h"
-#include "GL/Binary.h"
+#include "GL/Binary/Binary.h"
 
 template<typename T>
 class Array
