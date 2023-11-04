@@ -60,6 +60,7 @@ namespace GL
 		Light Lights[GE_MAX_LIGHT];
 		GL_ALIGN Cubemap Cubemaps[GE_MAX_CUBEMAP];
 		uint InstanceCount;
+		float Time;
 		GL_ALIGN glm::mat4 Model[GE_MAX_INSTANCE];
 		glm::mat3x4 Normal[GE_MAX_INSTANCE]; // for alignment purposes.
 	};
@@ -68,11 +69,8 @@ namespace GL
 namespace gE
 {
 	class Camera;
-
 	class Camera2D;
-
 	class Camera3D;
-
 	class CameraCubemap;
 
 	using RenderPass = void (*)(Window*, Camera*);
@@ -93,7 +91,6 @@ namespace gE
 
 		constexpr AttachmentSettings& operator|=(const AttachmentSettings& o)
 		{
-
 			if(!Depth && o.Depth) Depth = o.Depth;
 
 			for(u8 i = 0; i < GE_MAX_ATTACHMENTS; i++)
@@ -104,7 +101,6 @@ namespace gE
 
 		inline constexpr AttachmentSettings operator|(const AttachmentSettings& o) const
 		{
-
 			AttachmentSettings settings = *this;
 			return settings |= o;
 		};
@@ -129,32 +125,32 @@ namespace gE::DefaultPipeline
 	void RenderPassCubemap(Window*, CameraCubemap*);
 
 	GLOBAL gE::AttachmentSettings AttachmentColor
-		{
-			{ GL_NONE }, // Depth Format
-			{{ GL_RGBA16F }} // Attachments
-		};
+	{
+		{ GL_NONE }, // Depth Format
+		{{ GL_RGBA16F }} // Attachments
+	};
 
 	GLOBAL gE::AttachmentSettings AttachmentDepth
-		{
-			{ GL_DEPTH_COMPONENT32F }
-		};
+	{
+		{ GL_DEPTH_COMPONENT32F }
+	};
 
 	GLOBAL gE::AttachmentSettings AttachmentShadow
-		{
-			{ GL_DEPTH_COMPONENT16 }
-		};
+	{
+		{ GL_DEPTH_COMPONENT16 }
+	};
 
 	GLOBAL gE::AttachmentSettings AttachmentTAA
-		{
-			{},
-			{{}, { GL_RGB16F }} // Velocity
-		};
+	{
+		{},
+		{{}, { GL_RGB16F }} // Velocity
+	};
 
 	GLOBAL gE::AttachmentSettings AttachmentCubemap
-		{
-			{ GL_DEPTH_COMPONENT16 },
-			{{ GL_RGB16F }}
-		};
+	{
+		{ GL_DEPTH_COMPONENT16 },
+		{{ GL_RGB16F }}
+	};
 
 	GLOBAL gE::AttachmentSettings AttachmentDefault = AttachmentColor | AttachmentDepth;
 
@@ -166,13 +162,11 @@ namespace gE::DefaultPipeline
 
 		ALWAYS_INLINE void UpdateCamera(u64 size = sizeof(GL::Camera), u64 offset = 0) const
 		{
-
 			_cameraBuffer.ReplaceData((u8*) &Camera + offset, size, offset);
 		}
 
 		ALWAYS_INLINE void UpdateScene(u64 size = sizeof(GL::Scene), u64 offset = 0) const
 		{
-
 			_sceneBuffer.ReplaceData((u8*) &Scene + offset, size, offset);
 		}
 

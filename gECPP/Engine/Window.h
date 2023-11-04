@@ -42,25 +42,26 @@ namespace gE
 		void Blit(const GL::Texture& texture);
 
 		// Entities & Data
-		GET(VoxelCapture &, VoxelCapture, VoxelCap);
-		GET(DirectionalLight &, Sun, Sun);
-		GET(GL::TextureCube &, Cubemap, Cubemap);
-		GET(gE::Material &, DefaultMaterial, DefaultMaterial);
+		GET_REGULAR(VoxelCapture&, VoxelCapture, VoxelCap);
+		GET_REGULAR(DirectionalLight&, Sun, Sun);
+		GET_REGULAR(GL::TextureCube&, Cubemap, Cubemap);
+		GET_REGULAR(gE::Material&, DefaultMaterial, DefaultMaterial);
 		SET_XVAL(SmartPointer<GL::TextureCube>, Cubemap, Cubemap);
 
 		// Managers
-		GET(ComponentManager<Camera> &, Cameras, Cameras);
-		GET(TransformManager &, Transforms, Transforms);
-		GET(ComponentManager<Behavior> &, Behaviors, Behaviors);
-		GET(ComponentManager<MeshRenderer> &, Renderers, Renderers);
+		GET(ComponentManager<Camera>&, Cameras, Cameras);
+		GET(TransformManager&, Transforms, Transforms);
+		GET(ComponentManager<Behavior>&, Behaviors, Behaviors);
+		GET(ComponentManager<MeshRenderer>&, Renderers, Renderers);
 		GET(GL::TextureSlotManager &, SlotManager, SlotManager);
 
 		// Engine States
 		GET_CONST_VALUE(GL::TextureSize2D, Size, _size);
 		GET_SET_VALUE(RenderStage, RenderStage, _renderStage);
-		GET_CONST(Monitor &, Monitor, _monitor);
-		GET_CONST_VALUE(VoxelPipeline::Buffers &, VoxelBuffers, VoxelBuffers);
-		GET_CONST_VALUE(DefaultPipeline::Buffers &, PipelineBuffers, PipelineBuffers);
+		GET_CONST(Monitor&, Monitor, _monitor);
+		GET_CONST_VALUE(VoxelPipeline::Buffers&, VoxelBuffers, VoxelBuffers);
+		GET_CONST_VALUE(DefaultPipeline::Buffers&, PipelineBuffers, PipelineBuffers);
+		GET_CONST_VALUE(double, Time, _time);
 
 		NODISCARD ALWAYS_INLINE GLFWwindow* GLFWWindow() const { return _window; }
 
@@ -86,14 +87,15 @@ namespace gE
 		SmartPointer<DirectionalLight> Sun;
 		SmartPointer<GL::TextureCube> Cubemap;
 		SmartPointer<gE::Material> DefaultMaterial;
+		SmartPointer<GL::Shader> BlitShader;
 
 	 private:
 		GL::TextureSize2D _size;
 		const char* _name;
 		GLFWwindow* _window;
 		RenderStage _renderStage;
-		SmartPointer<GL::Shader> _blitShader;
 		Monitor _monitor;
+		double _time;
 	};
 }
 

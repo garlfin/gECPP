@@ -15,8 +15,8 @@ namespace gE
 	{
 	 public:
 		explicit inline Reference(T* t) : _t(t) { if(t) _counter = new u32(1); }
-
 		inline Reference() = default;
+
 		Reference(Reference&& o) noexcept : _t(o._t), _counter(o._counter)
 		{
 
@@ -32,10 +32,12 @@ namespace gE
 		ALWAYS_INLINE T* operator->() const { return _t; }
 		ALWAYS_INLINE T& operator*() const { return *_t; }
 		ALWAYS_INLINE operator T&() const { return *_t; } // NOLINT
+
 		ALWAYS_INLINE const T& operator||(const T& t) const { return _t ? *_t : t; };
-		ALWAYS_INLINE T& operator||(T& t) { return _t ? *_t : t; }
+		ALWAYS_INLINE T& operator||(T& t) const { return _t ? *_t : t; }
 		ALWAYS_INLINE const T* operator||(const T* t) const { return _t ?: t; };
 		ALWAYS_INLINE T* operator||(T* t) const { return _t ?: t; }
+
 		explicit ALWAYS_INLINE operator bool() const { return _t; }
 		explicit ALWAYS_INLINE operator T*() const { return _t; } // NOLINT
 
@@ -95,10 +97,12 @@ namespace gE
 		ALWAYS_INLINE T* operator->() const { return _t; }
 		ALWAYS_INLINE T& operator*() const { return *_t; }
 		ALWAYS_INLINE operator T&() const { return *_t; } // NOLINT
+
 		ALWAYS_INLINE const T& operator||(const T& t) const { return _t ? *_t : t; };
-		ALWAYS_INLINE T& operator||(T& t) { return _t ? *_t : t; }
+		ALWAYS_INLINE T& operator||(T& t) const { return _t ? *_t : t; }
 		ALWAYS_INLINE const T* operator||(const T* t) const { return _t ?: t; };
 		ALWAYS_INLINE T* operator||(T* t) const { return _t ?: t; }
+
 		explicit ALWAYS_INLINE operator bool() const { return _t; }
 		explicit ALWAYS_INLINE operator T*() const { return _t; } // NOLINT
 

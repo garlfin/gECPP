@@ -21,13 +21,7 @@ namespace gE
 			if(materials.Size()) materials.CopyToCArray(_materials);
 		}
 
-		NODISCARD Material& GetMaterialSafe(u8 i) const;
-
-		NODISCARD ALWAYS_INLINE Material& GetMaterial(u8 i) const
-		{
-			GE_ASSERT(i < GE_MAX_MATERIAL, "MATERIAL OUT OF RANGE");
-			return _materials[i];
-		}
+		NODISCARD Material& GetMaterial(u8 i) const;
 
 		ALWAYS_INLINE void SetMaterial(u8 i, const Reference<Material>& mat)
 		{

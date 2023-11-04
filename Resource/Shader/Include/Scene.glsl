@@ -1,8 +1,8 @@
+#include "Bindless.glsl"
+
 #define MAX_OBJECT 64
 #define MAX_LIGHT 4
 #define MAX_CUBEMAP 4
-
-#define TEXTURE_HANDLE vec2
 
 #define LIGHT_NONE 0
 #define LIGHT_DIRECTIONAL 1
@@ -32,6 +32,7 @@ struct SceneData
     Light Lights[MAX_LIGHT];
     Cubemap Cubemaps[MAX_CUBEMAP];
     uint InstanceCount;
+    float Time;
     mat4 Model[MAX_OBJECT];
     mat3 Normal[MAX_OBJECT];
 };
@@ -49,11 +50,12 @@ layout(SCENE_UNIFORM_LAYOUT, binding = SCENE_UNIFORM_LOCATION) uniform SceneUnif
     SceneData Scene;
 };
 
-#if defined(FRAGMENT) && !defined(GL_ARB_bindless_texture)
+#if defined(FRAGMENT_SHADER) && !defined(GL_ARB_bindless_texture)
 uniform sampler2D Lights[MAX_LIGHTS];
 uniform samplerCube Cubemaps[MAX_CUBEMAPS];
 #endif
 
+#ifdef VERTEX_SHADER
 uint ViewIndex = gl_InstanceID / Scene.InstanceCount;
 uint ModelIndex = gl_InstanceID % Scene.InstanceCount;
-
+#endif

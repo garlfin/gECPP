@@ -21,7 +21,7 @@ struct VoxelGridData
     BINDLESS_TEXTURE(sampler3D, Data);
 };
 
-#if defined(FRAGMENT) && !defined(GL_ARB_bindless_texture)
+#if defined(FRAGMENT_SHADER) && !defined(GL_ARB_bindless_texture)
 uniform sampler3D VoxelColor;
 uniform sampler3D VoxelData;
 #endif

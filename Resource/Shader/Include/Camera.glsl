@@ -21,7 +21,7 @@ struct CameraData
     mat4 View[6];
 };
 
-#if defined(FRAGMENT) && !defined(GL_ARB_bindless_texture)
+#if defined(FRAGMENT_SHADER) && !defined(GL_ARB_bindless_texture)
 uniform sampler2D CameraDepth;
 uniform sampler2D CameraColor;
 #endif

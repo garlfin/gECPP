@@ -10,7 +10,7 @@ using namespace gE;
 
 #ifdef DEBUG
 
-char WindowTitleBuf[10];
+char WindowTitleBuf[30];
 
 #endif
 
@@ -75,7 +75,8 @@ void Window::Run()
 
 	OnInit();
 
-	double time = glfwGetTime(), newTime;
+	_time = glfwGetTime();
+	double newTime;
 	double delta, frameDelta = 0;
 
 	while(!glfwWindowShouldClose(_window))
@@ -83,18 +84,18 @@ void Window::Run()
 		glfwPollEvents();
 
 		newTime = glfwGetTime();
-		delta = newTime - time;
+		delta = newTime - _time;
 		frameDelta += delta;
-		time = newTime;
+		_time = newTime;
 
 		OnUpdate((float) delta);
 
 		if(frameDelta < 1.0 / _monitor.RefreshRate) continue;
 
-		#ifdef DEBUG
-		sprintf_s(WindowTitleBuf, "FPS: %u", (unsigned) std::ceil(1.0 / frameDelta));
+	#ifdef DEBUG
+		sprintf_s(WindowTitleBuf, "FPS: %u, TICK: %f", (unsigned) std::ceil(1.0 / frameDelta), delta);
 		glfwSetWindowTitle(_window, WindowTitleBuf);
-		#endif
+	#endif
 
 		frameDelta = 0;
 		OnRender((float) frameDelta);
@@ -107,12 +108,15 @@ void Window::OnInit()
 	PipelineBuffers = CreateSmartPointer<DefaultPipeline::Buffers>(this);
 	VoxelBuffers = CreateSmartPointer<VoxelPipeline::Buffers>(this);
 
-	_blitShader = CreateSmartPointer<GL::Shader>(this, "Resource/Shader/blit.vert", "Resource/Shader/blit.frag");
+	BlitShader = CreateSmartPointer<GL::Shader>(this, "Resource/Shader/blit.vert", "Resource/Shader/blit.frag");
+
+	auto defaultShader = CreateReference<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/missing.frag");
+	DefaultMaterial = CreateSmartPointer<gE::Material>(this, defaultShader);
 }
 
 void Window::Blit(const GL::Texture& texture)
 {
-	_blitShader->Bind();
+	BlitShader->Bind();
 
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);

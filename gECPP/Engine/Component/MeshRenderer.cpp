@@ -22,6 +22,7 @@ void gE::MeshRenderer::OnRender(float delta)
 	DefaultPipeline::Buffers& buffers = Window->GetPipelineBuffers();
 
 	buffers.Scene.InstanceCount = 1;
+	buffers.Scene.Time = Window->GetTime();
 	buffers.Scene.Model[0] = GetOwner()->GetTransform().Model();
 	buffers.Scene.Normal[0] = glm::mat3(1);
 	buffers.UpdateScene(offsetof(GL::Scene, Normal[1]), offsetof(GL::Scene, InstanceCount));
@@ -34,8 +35,8 @@ void gE::MeshRenderer::OnRender(float delta)
 	}
 }
 
-gE::Material& gE::MaterialHolder::GetMaterialSafe(u8 i) const
+gE::Material& gE::MaterialHolder::GetMaterial(u8 i) const
 {
 	GE_ASSERT(i < GE_MAX_MATERIAL, "MATERIAL OUT OF RANGE");
-	return _materials[i] or Window->GetDefaultMaterial();
+	return _materials[i] || Window->GetDefaultMaterial();
 }
