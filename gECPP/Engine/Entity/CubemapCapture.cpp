@@ -7,12 +7,12 @@
 namespace gE
 {
 	SizelessCameraSettings CubemapSettings
-	{
-		(RenderPass) gE::DefaultPipeline::RenderPassCubemap,
-		ClipPlanes(0.1, 100),
-		CameraTiming(),
-		gE::DefaultPipeline::AttachmentDefault
-	};
+		{
+			(RenderPass) gE::DefaultPipeline::RenderPassCubemap,
+			ClipPlanes(0.1, 100),
+			CameraTiming(),
+			gE::DefaultPipeline::AttachmentDefault
+		};
 
 	CubemapCapture::CubemapCapture(gE::Window* w, u16 size) :
 		Entity(w), _camera(this, { CubemapSettings, size })

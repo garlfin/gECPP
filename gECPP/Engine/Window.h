@@ -42,25 +42,26 @@ namespace gE
 		void Blit(const GL::Texture& texture);
 
 		// Entities & Data
-		GET(VoxelCapture&, VoxelCapture, VoxelCap);
-		GET(DirectionalLight&, Sun, Sun);
-		GET(GL::TextureCube&, Cubemap, Cubemap);
+		GET(VoxelCapture &, VoxelCapture, VoxelCap);
+		GET(DirectionalLight &, Sun, Sun);
+		GET(GL::TextureCube &, Cubemap, Cubemap);
+		GET(gE::Material &, DefaultMaterial, DefaultMaterial);
 		SET_XVAL(SmartPointer<GL::TextureCube>, Cubemap, Cubemap);
 
 		// Managers
-		GET(ComponentManager<Camera>&, Cameras, Cameras);
-		GET(TransformManager&, Transforms, Transforms);
-		GET(ComponentManager<Behavior>&, Behaviors, Behaviors);
-		GET(ComponentManager<MeshRenderer>&, Renderers, Renderers);
-		GET(GL::TextureSlotManager&, SlotManager, SlotManager);
+		GET(ComponentManager<Camera> &, Cameras, Cameras);
+		GET(TransformManager &, Transforms, Transforms);
+		GET(ComponentManager<Behavior> &, Behaviors, Behaviors);
+		GET(ComponentManager<MeshRenderer> &, Renderers, Renderers);
+		GET(GL::TextureSlotManager &, SlotManager, SlotManager);
 
 		// Engine States
 		GET_CONST_VALUE(GL::TextureSize2D, Size, _size);
 		GET_SET_VALUE(RenderStage, RenderStage, _renderStage);
-		GET_CONST(Monitor&, Monitor, _monitor);
+		GET_CONST(Monitor &, Monitor, _monitor);
+		GET_CONST_VALUE(VoxelPipeline::Buffers &, VoxelBuffers, VoxelBuffers);
+		GET_CONST_VALUE(DefaultPipeline::Buffers &, PipelineBuffers, PipelineBuffers);
 
-		GET_CONST_VALUE(VoxelPipeline::Buffers&, VoxelBuffers, VoxelBuffers);
-		GET_CONST_VALUE(DefaultPipeline::Buffers&, PipelineBuffers, PipelineBuffers);
 		NODISCARD ALWAYS_INLINE GLFWwindow* GLFWWindow() const { return _window; }
 
 		~Window();
@@ -74,7 +75,7 @@ namespace gE
 		SmartPointer<DefaultPipeline::Buffers> PipelineBuffers;
 		SmartPointer<VoxelPipeline::Buffers> VoxelBuffers;
 
-		CameraManager Cameras {};
+		CameraManager Cameras{};
 		TransformManager Transforms;
 		ComponentManager<Behavior> Behaviors;
 		ComponentManager<MeshRenderer> Renderers;
@@ -84,6 +85,7 @@ namespace gE
 		SmartPointer<VoxelCapture> VoxelCap;
 		SmartPointer<DirectionalLight> Sun;
 		SmartPointer<GL::TextureCube> Cubemap;
+		SmartPointer<gE::Material> DefaultMaterial;
 
 	 private:
 		GL::TextureSize2D _size;

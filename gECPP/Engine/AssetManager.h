@@ -15,24 +15,27 @@ namespace gE
 	{
 	 public:
 		explicit inline Reference(T* t) : _t(t) { if(t) _counter = new u32(1); }
-		Reference(Reference&& o) noexcept : _t(o._t), _counter(o._counter) { o._t = nullptr; o._counter = nullptr; }
-		Reference(const Reference& o) : _t(o._t), _counter(o._counter) { if(_counter) (*_counter)++; }
+
 		inline Reference() = default;
+		Reference(Reference&& o) noexcept : _t(o._t), _counter(o._counter)
+		{
+
+			o._t = nullptr;
+			o._counter = nullptr;
+		}
+
+		Reference(const Reference& o) : _t(o._t), _counter(o._counter) { if(_counter) (*_counter)++; }
 
 		OPERATOR_EQUALS_BOTH(Reference);
 
 		ALWAYS_INLINE T* Get() const { return _t; }
-
 		ALWAYS_INLINE T* operator->() const { return _t; }
 		ALWAYS_INLINE T& operator*() const { return *_t; }
 		ALWAYS_INLINE operator T&() const { return *_t; } // NOLINT
-
 		ALWAYS_INLINE const T& operator||(const T& t) const { return _t ? *_t : t; };
 		ALWAYS_INLINE T& operator||(T& t) { return _t ? *_t : t; }
 		ALWAYS_INLINE const T* operator||(const T* t) const { return _t ?: t; };
 		ALWAYS_INLINE T* operator||(T* t) const { return _t ?: t; }
-
-
 		explicit ALWAYS_INLINE operator bool() const { return _t; }
 		explicit ALWAYS_INLINE operator T*() const { return _t; } // NOLINT
 
@@ -58,39 +61,44 @@ namespace gE
 		u32* _counter = nullptr;
 
 		template<class I>
-		friend class Reference;
+		friend
+		class Reference;
 	};
 
 	template<class T, typename... ARGS>
-	ALWAYS_INLINE Reference<T> CreateReference(ARGS&&... args) { return Reference<T>(new T(args...)); }
+	ALWAYS_INLINE Reference<T> CreateReference(ARGS&& ... args)
+	{
+		return Reference<T>(new T(args...));
+	}
 
 	/// Gives ownership of the pointer to the Reference.
 	template<class T>
-	ALWAYS_INLINE Reference<T> CreateReferenceFromPointer(T* t) { return Reference<T> (t); }
+	ALWAYS_INLINE Reference<T> CreateReferenceFromPointer(T* t)
+	{
+		return Reference<T>(t);
+	}
 
 	template<class T>
 	class SmartPointer
 	{
 	 public:
-		explicit SmartPointer(T* t) : _t(t) {};
+		explicit SmartPointer(T* t) : _t(t) { };
+		SmartPointer() = default;
+
 		SmartPointer(const SmartPointer&) = delete;
 		SmartPointer(SmartPointer&& o) noexcept : _t(o._t) { o._t = nullptr; }
-		SmartPointer() = default;
 
 		OPERATOR_EQUALS_XVAL(SmartPointer);
 		SmartPointer& operator=(const SmartPointer&) = delete;
 
 		ALWAYS_INLINE T* Get() const { return _t; }
-
 		ALWAYS_INLINE T* operator->() const { return _t; }
 		ALWAYS_INLINE T& operator*() const { return *_t; }
 		ALWAYS_INLINE operator T&() const { return *_t; } // NOLINT
-
 		ALWAYS_INLINE const T& operator||(const T& t) const { return _t ? *_t : t; };
 		ALWAYS_INLINE T& operator||(T& t) { return _t ? *_t : t; }
 		ALWAYS_INLINE const T* operator||(const T* t) const { return _t ?: t; };
 		ALWAYS_INLINE T* operator||(T* t) const { return _t ?: t; }
-
 		explicit ALWAYS_INLINE operator bool() const { return _t; }
 		explicit ALWAYS_INLINE operator T*() const { return _t; } // NOLINT
 
@@ -100,13 +108,20 @@ namespace gE
 		T* _t = nullptr;
 
 		template<class I>
-		friend class SmartPointer;
+		friend
+		class SmartPointer;
 	};
 
 	template<typename T, typename... ARGS>
-	ALWAYS_INLINE SmartPointer<T> CreateSmartPointer(ARGS&&... args) { return SmartPointer<T>(new T(args...)); }
+	ALWAYS_INLINE SmartPointer<T> CreateSmartPointer(ARGS&& ... args)
+	{
+		return SmartPointer<T>(new T(args...));
+	}
 
 	/// Gives ownership of the pointer to the SmartPointer.
 	template<typename T>
-	ALWAYS_INLINE SmartPointer<T> CreateSmartPointerFromPointer(T* t) { return SmartPointer<T>(t); }
+	ALWAYS_INLINE SmartPointer<T> CreateSmartPointerFromPointer(T* t)
+	{
+		return SmartPointer<T>(t);
+	}
 }

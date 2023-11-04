@@ -65,7 +65,7 @@ char* strdupc(const char* str, char d)
 {
 	size_t len = strlenc(str, d);
 	if(!len) return nullptr;
-	char* newStr = new char[len + 1] {};
+	char* newStr = new char[len + 1]{};
 	return (char*) memcpy(newStr, str, len);
 }
 
@@ -78,7 +78,7 @@ const char* IncrementLine(const char* str, char d)
 template<>
 void SerializationBuffer::PushPtr<const SerializationBuffer>(const SerializationBuffer* t, u32 count)
 {
-	for (u32 i = 0; i < count; i++) PushPtr(t[i].Data(), t[i].Length());
+	for(u32 i = 0; i < count; i++) PushPtr(t[i].Data(), t[i].Length());
 }
 
 void SerializationBuffer::Realloc(u64 newSize)
@@ -131,7 +131,7 @@ char* SerializationBuffer::Find(const char* str, char delimiter)
 	char* end = (char*) _buf + _size;
 	size_t len = strlenc(str, delimiter);
 
-	while (s < end)
+	while(s < end)
 	{
 		if(!memcmp(s, str, std::min(end - s, (long long) len)))
 			return s;

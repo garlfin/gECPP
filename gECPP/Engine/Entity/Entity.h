@@ -18,16 +18,17 @@ namespace gE
 
 		void Destroy(bool flagChildren = true);
 
+		GET(Transform &, Transform, _transform);
+		GET_CONST(std::vector<Entity*> &, Children, _children);
 		GET_CONST_VALUE(Window*, Window, _window);
-		GET(Transform&, Transform, _transform);
 		GET_CONST_VALUE(Entity*, Parent, _parent);
 		GET_CONST_VALUE(Flags, Flags, _flags);
-		GET_CONST(std::vector<Entity*>&, Children, _children);
 
-		virtual void OnInit() {};
-		virtual void OnUpdate(float delta) {};
-		virtual void OnRender(float delta) {};
-		virtual void OnDestroy() {};
+
+		virtual void OnInit() { };
+		virtual void OnUpdate(float delta) { };
+		virtual void OnRender(float delta) { };
+		virtual void OnDestroy() { };
 
 		virtual ~Entity();
 
@@ -38,5 +39,7 @@ namespace gE
 		std::vector<Entity*> _children;
 
 		Transform _transform = Transform(this);
+
+		friend class Component;
 	};
 }

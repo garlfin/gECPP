@@ -9,7 +9,9 @@
 using namespace gE;
 
 #ifdef DEBUG
+
 char WindowTitleBuf[10];
+
 #endif
 
 Window::Window(glm::u16vec2 size, const char* name) :
@@ -52,10 +54,12 @@ Window::~Window()
 }
 
 #ifdef DEBUG
+
 void DebugMessage(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
 {
 	std::cout << message << std::endl;
 }
+
 #endif
 
 void Window::Run()
@@ -87,10 +91,10 @@ void Window::Run()
 
 		if(frameDelta < 1.0 / _monitor.RefreshRate) continue;
 
-	#ifdef DEBUG
+		#ifdef DEBUG
 		sprintf_s(WindowTitleBuf, "FPS: %u", (unsigned) std::ceil(1.0 / frameDelta));
 		glfwSetWindowTitle(_window, WindowTitleBuf);
-	#endif
+		#endif
 
 		frameDelta = 0;
 		OnRender((float) frameDelta);
@@ -124,4 +128,4 @@ Monitor::Monitor(const GLFWvidmode* mode) :
 	Name(nullptr),
 	Size(mode->width, mode->height),
 	RefreshRate(mode->refreshRate)
-{}
+{ }

@@ -3,7 +3,10 @@
 #include "GL/GL.h"
 #include "Buffer.h"
 
-namespace gETF { struct Mesh; }
+namespace gETF
+{
+	struct Mesh;
+}
 
 namespace GL
 {
@@ -13,7 +16,10 @@ namespace GL
 		VAO(gE::Window* window, const gETF::Mesh* settings);
 
 		GET_CONST_VALUE(const gETF::Mesh*, Settings, _settings);
-		ALWAYS_INLINE void Bind() const final { glBindVertexArray(ID); }
+
+		ALWAYS_INLINE void Bind() const final
+		{ glBindVertexArray(ID); }
+
 		virtual void Draw(u8 index, u16 instanceCount = 1) const;
 
 		~VAO() override;

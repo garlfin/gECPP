@@ -10,10 +10,10 @@ template<class T, u64 PAGE_T_SIZE = 64>
 struct MemoryPool
 {
  public:
-	MemoryPool() : _page((T*) new u8[PAGE_T_SIZE * (sizeof(T) + 1)] {}), _pageFlags((u8*) &_page[PAGE_T_SIZE]) {}
+	MemoryPool() : _page((T*) new u8[PAGE_T_SIZE * (sizeof(T) + 1)]{}), _pageFlags((u8*) &_page[PAGE_T_SIZE]) { }
 
 	template<typename... ARGS>
-	T* New(ARGS&&... args)
+	T* New(ARGS&& ... args)
 	{
 		for(u64 i = 0; i < PAGE_T_SIZE; i++)
 			if(!_pageFlags[i])

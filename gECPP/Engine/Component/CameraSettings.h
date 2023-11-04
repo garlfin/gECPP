@@ -16,7 +16,7 @@ namespace gE
 	struct SizelessCameraSettings
 	{
 		RenderPass RenderPass;
-		ClipPlanes ClipPlanes = {0.1, 1000};
+		ClipPlanes ClipPlanes = { 0.1, 1000 };
 		CameraTiming Timing;
 		const AttachmentSettings& RenderAttachments = DefaultPipeline::AttachmentDefault;
 	};
@@ -26,9 +26,9 @@ namespace gE
 	{
 		CameraSettings(const SizelessCameraSettings& settings, const GL::TextureSize<DIMENSION>& size) :
 			SizelessCameraSettings(settings), Size(size)
-		{};
+		{ };
 
-		GL::TextureSize<DIMENSION> Size { 0 };
+		GL::TextureSize<DIMENSION> Size{ 0 };
 	};
 
 	typedef CameraSettings<GL::TextureDimension::D1D> CameraSettings1D;

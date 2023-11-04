@@ -13,22 +13,25 @@
 #include "CameraSettings.h"
 #include "CameraTiming.h"
 
-namespace GL { struct Camera; }
+namespace GL
+{
+	struct Camera;
+}
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "HidingNonVirtualFunction"
 
 #define CAMERA_GET(TYPE) \
-	GET(TYPE*, DepthAttachment, (TYPE*) DepthTexture.Get()); \
-	GET(TYPE*, DepthAttachmentCopy, (TYPE*) DepthTexture.Get()); \
-	NODISCARD ALWAYS_INLINE TYPE* GetAttachment(u8 i) const { return (TYPE*) Attachments[i].Get(); } \
-	NODISCARD ALWAYS_INLINE TYPE* GetAttachmentCopy(u8 i) const { return (TYPE*) AttachmentCopies[i].Get(); } \
-	template<u8 I, bool COPY> \
-	NODISCARD ALWAYS_INLINE TYPE* GetAttachment() const      \
-	{                       \
-    	if constexpr(COPY) return (TYPE*) *AttachmentCopies[I].Get(); \
-		else return (TYPE*) *Attachments[I].Get(); \
-	}
+    GET(TYPE*, DepthAttachment, (TYPE*) DepthTexture.Get()); \
+    GET(TYPE*, DepthAttachmentCopy, (TYPE*) DepthTexture.Get()); \
+    NODISCARD ALWAYS_INLINE TYPE* GetAttachment(u8 i) const { return (TYPE*) Attachments[i].Get(); } \
+    NODISCARD ALWAYS_INLINE TYPE* GetAttachmentCopy(u8 i) const { return (TYPE*) AttachmentCopies[i].Get(); } \
+    template<u8 I, bool COPY> \
+    NODISCARD ALWAYS_INLINE TYPE* GetAttachment() const      \
+    {                       \
+        if constexpr(COPY) return (TYPE*) *AttachmentCopies[I].Get(); \
+        else return (TYPE*) *Attachments[I].Get(); \
+    }
 
 namespace gE
 {
@@ -37,16 +40,17 @@ namespace gE
 	 public:
 		Camera(Entity* e, const SizelessCameraSettings&);
 
-		void OnUpdate(float delta) override {}
+		void OnUpdate(float delta) override { }
+
 		void OnRender(float delta) final;
 
 		virtual void GetGLCamera(GL::Camera&) const;
 
-		GET_CONST_VALUE(gE::RenderPass, RenderPass, RenderPass);
-		GET_CONST(GL::FrameBuffer&, FrameBuffer, FrameBuffer);
-		GET_CONST_VALUE(gE::ClipPlanes, ClipPlanes, ClipPlanes);
-		GET_CONST(SizelessCameraSettings&, Settings, *this);
 		GET_CONST_VALUE(CameraTiming, Timing, Timing);
+		GET_CONST_VALUE(gE::RenderPass, RenderPass, RenderPass);
+		GET_CONST_VALUE(gE::ClipPlanes, ClipPlanes, ClipPlanes);
+		GET_CONST(GL::FrameBuffer &, FrameBuffer, FrameBuffer);
+		GET_CONST(SizelessCameraSettings &, Settings, *this);
 
 		CAMERA_GET(GL::Texture);
 
@@ -63,8 +67,8 @@ namespace gE
 
 		gE::SmartPointer<GL::Texture> DepthTexture;
 		gE::SmartPointer<GL::Texture> DepthCopy;
-		gE::SmartPointer<GL::Texture> Attachments[GE_MAX_ATTACHMENTS] {};
-		gE::SmartPointer<GL::Texture> AttachmentCopies[GE_MAX_ATTACHMENTS] {};
+		gE::SmartPointer<GL::Texture> Attachments[GE_MAX_ATTACHMENTS]{};
+		gE::SmartPointer<GL::Texture> AttachmentCopies[GE_MAX_ATTACHMENTS]{};
 
 	 private:
 		bool _isProjectionInvalid = true;
@@ -78,6 +82,7 @@ namespace gE
 		CAMERA_GET(GL::Texture2D);
 
 		GET_CONST_VALUE(GL::TextureSize2D, Size, _size);
+
 		GET_CONST_VALUE(float, Aspect, (float) _size.x / _size.y);
 
 	 private:
@@ -92,6 +97,7 @@ namespace gE
 		template<AngleType T = AngleType::Degree>
 		NODISCARD ALWAYS_INLINE float GetFOV() const
 		{
+
 			if constexpr(T == AngleType::Radian)
 				return _fov;
 			return degree_cast<AngleType::Degree>(_fov);
@@ -100,6 +106,7 @@ namespace gE
 		template<AngleType T = AngleType::Degree>
 		ALWAYS_INLINE void SetFOV(float fov)
 		{
+
 			if constexpr(T == AngleType::Radian)
 				_fov = fov;
 			else
@@ -118,7 +125,7 @@ namespace gE
 	 public:
 		OrthographicCamera(Entity* e, const OrthographicCameraSettings& s);
 
-		GET_CONST(glm::vec4&, Scale, _orthographicScale);
+		GET_CONST(glm::vec4 &, Scale, _orthographicScale);
 
 	 protected:
 		void UpdateProjection() override;
@@ -151,6 +158,7 @@ namespace gE
 		CameraCubemap(Entity*, const CameraSettings1D&);
 
 		CAMERA_GET(GL::TextureCube);
+
 		GET_CONST_VALUE(GL::TextureSize1D, Size, _size);
 
 		void GetGLCamera(GL::Camera& camera) const override;

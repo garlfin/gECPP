@@ -11,6 +11,7 @@ namespace GL
 	Texture::Texture(gE::Window* window, GLenum tgt, const SizelessTextureSettings& settings) :
 		Asset(window), Mips(settings.MipCount), Format(settings.Format), Target(tgt)
 	{
+
 		glCreateTextures(tgt, 1, &ID);
 		glTextureParameteri(ID, GL_TEXTURE_MIN_FILTER, (GLint) settings.Filter + (Mips > 1 ? 0x102 : 0));
 		glTextureParameteri(ID, GL_TEXTURE_MAG_FILTER, (GLint) settings.Filter);
@@ -22,20 +23,21 @@ namespace GL
 		:
 		Texture(window, GL_TEXTURE_2D, settings), _size(settings.Size)
 	{
+
 		glTextureStorage2D(ID, Mips, Format, _size.x, _size.y);
 
-		if (!data.Data) return;
+		if(!data.Data) return;
 
 		glm::u32vec2 size = _size;
 		u8* dataPtr = (u8*) data.Data;
 
-		if (data.SentAllMips)
-			for (ubyte i = 0; i < Mips; i++, size >>= decltype(size)(1)) // lazy guy
+		if(data.SentAllMips)
+			for(ubyte i = 0; i < Mips; i++, size >>= decltype(size)(1)) // lazy guy
 			{
 				size = glm::max(size, decltype(size)(1)); // double lazy guy
 				u64 dataSize = data.Scheme.Size<TextureDimension::D2D>(size);
 
-				if (data.Scheme)
+				if(data.Scheme)
 					glCompressedTextureSubImage2D(ID, i, 0, 0, size.x, size.y, Format, dataSize, dataPtr);
 				else
 					glTextureSubImage2D(ID, i, 0, 0, size.x, size.y, data.PixelFormat, data.PixelType, dataPtr);
@@ -50,19 +52,20 @@ namespace GL
 		:
 		Texture(window, GL_TEXTURE_3D, settings), _size(settings.Size)
 	{
+
 		glTextureStorage3D(ID, Mips, Format, _size.x, _size.y, _size.z);
 
-		if (!data.Data) return;
+		if(!data.Data) return;
 
 		glm::u32vec3 size = _size;
 		u8* dataPtr = (u8*) data.Data;
 
-		for (ubyte i = 0; i < Mips; i++, size >>= decltype(size)(1)) // lazy guy
+		for(ubyte i = 0; i < Mips; i++, size >>= decltype(size)(1)) // lazy guy
 		{
 			size = glm::max(size, decltype(size)(1)); // double lazy guy
 			u64 dataSize = data.Scheme.Size<TextureDimension::D3D>(size);
 
-			if (data.Scheme)
+			if(data.Scheme)
 				glCompressedTextureSubImage3D(ID, i, 0, 0, 0, size.x, size.y, size.z, Format, dataSize, dataPtr);
 			else
 				glTextureSubImage3D(ID, i, 0, 0, 0, size.x, size.y, size.z, data.PixelFormat, data.PixelType, dataPtr);
@@ -73,18 +76,21 @@ namespace GL
 
 	void Texture::Attach(GL::FrameBuffer* buffer, GLenum attachment, u8 mip) const
 	{
+
 		glNamedFramebufferTexture(buffer->Get(), attachment, ID, mip);
 	}
 
 	Texture::~Texture()
 	{
-		if (_handle) glMakeTextureHandleNonResidentARB(_handle);
+
+		if(_handle) glMakeTextureHandleNonResidentARB(_handle);
 		glDeleteTextures(1, &ID);
 	}
 
 	TextureHandle Texture::GetHandle()
 	{
-		if (_handle) return _handle;
+
+		if(_handle) return _handle;
 
 		_handle = glGetTextureHandleARB(ID);
 		glMakeTextureHandleResidentARB(_handle);
@@ -94,6 +100,7 @@ namespace GL
 
 	void RenderBuffer::Attach(GL::FrameBuffer* buffer, GLenum attachment, u8 mip) const
 	{
+
 		glNamedFramebufferRenderbuffer(ID, attachment, GL_RENDERBUFFER, ID);
 	}
 
@@ -101,19 +108,20 @@ namespace GL
 		:
 		Texture(window, GL_TEXTURE_CUBE_MAP, settings), _size(settings.Size)
 	{
+
 		glTextureStorage2D(ID, Mips, settings.Format, _size, _size);
 
-		if (!data.Data) return;
+		if(!data.Data) return;
 
 		u32 size = _size;
 		u8* dataPtr = (u8*) data.Data;
 
-		for (ubyte i = 0; i < Mips; i++, size >>= 1)
+		for(ubyte i = 0; i < Mips; i++, size >>= 1)
 		{
 			size = glm::max(size, 1u);
 			u64 dataSize = data.Scheme.Size<TextureDimension::D2D>(TextureSize2D(size));
 
-			if (data.Scheme)
+			if(data.Scheme)
 				glCompressedTextureSubImage3D(ID, i, 0, 0, 0, _size, _size, 6, Format, dataSize, dataPtr);
 			else
 				glTextureSubImage3D(ID, i, 0, 0, 0, _size, _size, 6, data.PixelFormat, data.PixelType, dataPtr);

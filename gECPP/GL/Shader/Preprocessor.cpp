@@ -16,18 +16,19 @@ namespace GL
 
 	void CompileDirectives(const Array<PreprocessorPair>* pairs, gETF::SerializationBuffer& buf)
 	{
-		if (!pairs) return;
-		for (u64 i = 0; i < pairs->Size(); i++) (*pairs)[i].WriteDirective(buf);
+
+		if(!pairs) return;
+		for(u64 i = 0; i < pairs->Size(); i++) (*pairs)[i].WriteDirective(buf);
 	}
 
 	void CompileIncludes(const char* file, gETF::SerializationBuffer& dstBuffer, gETF::SerializationBuffer& directivesBuffer, gETF::SerializationBuffer& idBuffer)
 	{
 		// Turns out most drivers support GL_ARB_SHADER_LANGUAGE_INCLUDE
 		char* source = (char*) ReadFile(file);
-		if (!source) return;
+		if(!source) return;
 		char* line = source;
 
-		if (idBuffer.Find(file))
+		if(idBuffer.Find(file))
 		{
 			LOG(file << " already included, skipping.\n");
 			return;
@@ -36,23 +37,24 @@ namespace GL
 
 		do
 		{
-			if (strcmpb(line, INCLUDE_DIRECTIVE))
+			if(strcmpb(line, INCLUDE_DIRECTIVE))
 			{
 				const char* includePath = GetIncludePath(file, &line[9]);
 				CompileIncludes(includePath, dstBuffer, directivesBuffer, idBuffer);
 				delete[] includePath;
 			}
-			else if (strcmpb(line, EXTENSION_DIRECTIVE)) directivesBuffer.StrCat(line, true, '\n');
+			else if(strcmpb(line, EXTENSION_DIRECTIVE)) directivesBuffer.StrCat(line, true, '\n');
 			else dstBuffer.StrCat(line, true, '\n');
-		} while ((line = (char*) IncrementLine(line)));
+		} while((line = (char*) IncrementLine(line)));
 
 		delete[] source;
 	}
 
 	const char* GetIncludePath(const char* origin, const char* include)
 	{
-		if (*include == '<') return strdupc(include + 1, '>');
-		else if (*include == '"')
+
+		if(*include == '<') return strdupc(include + 1, '>');
+		else if(*include == '"')
 		{
 			// Allocation
 			size_t filelessLen = strlencLast(origin, '/') + 1;
@@ -78,16 +80,17 @@ namespace GL
 
 	PreprocessorPair::PreprocessorPair(const char* n, const char* v)
 	{
+
 		u32 totalLength = strlen(n) + 1;
 		u32 nameLength = totalLength, valueLength;
 
-		if (v) totalLength += valueLength = strlen(v) + 1;
+		if(v) totalLength += valueLength = strlen(v) + 1;
 
 		Name = new char[totalLength];
 		Value = nullptr;
 		memcpy(Name, n, nameLength);
 
-		if (!v) return;
+		if(!v) return;
 
 		Value = Name + nameLength + 1;
 		memcpy(Value, v, valueLength);
@@ -97,8 +100,9 @@ namespace GL
 		:
 		Name(), Value(Name + (o.Value - o.Name))
 	{
+
 		u32 len = strlen(o.Name) + 1;
-		if (o.Value) len += strlen(o.Value) + 1;
+		if(o.Value) len += strlen(o.Value) + 1;
 		else Value = nullptr;
 
 		Name = new char[len];
@@ -107,12 +111,13 @@ namespace GL
 
 	void PreprocessorPair::WriteDirective(gETF::SerializationBuffer& buf) const
 	{
-		if (!Name) return;
+
+		if(!Name) return;
 
 		buf.StrCat("#define ");
 		buf.StrCat(Name);
 
-		if (Value)
+		if(Value)
 		{
 			buf.Push(' ');
 			buf.StrCat(Value);
@@ -123,16 +128,13 @@ namespace GL
 
 	const char* ShaderStageDefine(ShaderStageType type)
 	{
+
 		switch(type)
 		{
-		case Fragment:
-			return "#define FRAGMENT_SHADER\n";
-		case Vertex:
-			return "#define VERTEX_SHADER\n";
-		case Compute:
-			return "#define COMPUTE_SHADER\n";
-		default:
-			return "";
+		case Fragment: return "#define FRAGMENT_SHADER\n";
+		case Vertex: return "#define VERTEX_SHADER\n";
+		case Compute: return "#define COMPUTE_SHADER\n";
+		default: return "";
 		}
 	}
 }

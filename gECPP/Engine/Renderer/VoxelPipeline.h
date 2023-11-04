@@ -13,9 +13,9 @@ namespace GL
 {
 	struct VoxelScene
 	{
-		glm::vec3 Minimum {};
+		glm::vec3 Minimum{};
 		float VoxelScale = 0;
-		glm::vec3 Maximum {};
+		glm::vec3 Maximum{};
 		GL_ALIGN u64 Texture = 0;
 	};
 }
@@ -30,10 +30,10 @@ namespace gE::VoxelPipeline
 	void RenderPass3D(Window*, VoxelCamera*);
 
 	GLOBAL gE::AttachmentSettings Target3D
-	{
-		{ GL_NONE }, // Depth Format
-		{ { GL_RGB16F }, { GL_RGB5_A1 } }, // Attachments: COLOR, DATA (Metallic, Roughness, Emission, Solid)
-	};
+		{
+			{ GL_NONE }, // Depth Format
+			{{ GL_RGB16F }, { GL_RGB5_A1 }}, // Attachments: COLOR, DATA (Metallic, Roughness, Emission, Solid)
+		};
 
 	struct Buffers
 	{
@@ -41,6 +41,7 @@ namespace gE::VoxelPipeline
 
 		ALWAYS_INLINE void UpdateScene(u64 size = sizeof(GL::Camera), u64 offset = 0) const
 		{
+
 			_voxelBuffer.ReplaceData((u8*) &Scene + offset, size, offset);
 		}
 

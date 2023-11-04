@@ -65,32 +65,35 @@ namespace GL
 	};
 }
 
-
 namespace gE
 {
 	class Camera;
+
 	class Camera2D;
+
 	class Camera3D;
+
 	class CameraCubemap;
 
-	using RenderPass = void(*)(Window*, Camera*);
-	using PostProcessFunc = void(*)(Window*, Camera*, GL::Texture* out);
+	using RenderPass = void (*)(Window*, Camera*);
+	using PostProcessFunc = void (*)(Window*, Camera*, GL::Texture* out);
 
 	template<class T>
-	using RenderPassT = void(*)(Window*, T*);
+	using RenderPassT = void (*)(Window*, T*);
 
 	template<class T>
-	using PostProcessFuncT = void(*)(Window*, T*, GL::Texture* out);
+	using PostProcessFuncT = void (*)(Window*, T*, GL::Texture* out);
 
 	struct AttachmentSettings
 	{
-		GL::SizelessTextureSettings Depth {};
-		GL::SizelessTextureSettings Attachments[GE_MAX_ATTACHMENTS] {};
+		GL::SizelessTextureSettings Depth{};
+		GL::SizelessTextureSettings Attachments[GE_MAX_ATTACHMENTS]{};
 		bool DepthCopy = false;
-		bool ColorCopy[GE_MAX_ATTACHMENTS] {};
+		bool ColorCopy[GE_MAX_ATTACHMENTS]{};
 
 		constexpr AttachmentSettings& operator|=(const AttachmentSettings& o)
 		{
+
 			if(!Depth && o.Depth) Depth = o.Depth;
 
 			for(u8 i = 0; i < GE_MAX_ATTACHMENTS; i++)
@@ -99,7 +102,12 @@ namespace gE
 			return *this;
 		}
 
-		inline constexpr AttachmentSettings operator|(const AttachmentSettings& o) const { AttachmentSettings settings = *this; return settings |= o; };
+		inline constexpr AttachmentSettings operator|(const AttachmentSettings& o) const
+		{
+
+			AttachmentSettings settings = *this;
+			return settings |= o;
+		};
 	};
 
 	struct PostProcessPass
@@ -121,34 +129,35 @@ namespace gE::DefaultPipeline
 	void RenderPassCubemap(Window*, CameraCubemap*);
 
 	GLOBAL gE::AttachmentSettings AttachmentColor
-	{
-		{ GL_NONE }, // Depth Format
-		{ { GL_RGBA16F } } // Attachments
-	};
+		{
+			{ GL_NONE }, // Depth Format
+			{{ GL_RGBA16F }} // Attachments
+		};
 
 	GLOBAL gE::AttachmentSettings AttachmentDepth
-	{
-		{ GL_DEPTH_COMPONENT32F }
-	};
+		{
+			{ GL_DEPTH_COMPONENT32F }
+		};
 
 	GLOBAL gE::AttachmentSettings AttachmentShadow
-	{
-		{ GL_DEPTH_COMPONENT16 }
-	};
+		{
+			{ GL_DEPTH_COMPONENT16 }
+		};
 
 	GLOBAL gE::AttachmentSettings AttachmentTAA
-	{
-		{},
-		{ {}, { GL_RGB16F } } // Velocity
-	};
+		{
+			{},
+			{{}, { GL_RGB16F }} // Velocity
+		};
 
 	GLOBAL gE::AttachmentSettings AttachmentCubemap
-	{
-		{ GL_DEPTH_COMPONENT16 },
-		{ { GL_RGB16F } }
-	};
+		{
+			{ GL_DEPTH_COMPONENT16 },
+			{{ GL_RGB16F }}
+		};
 
 	GLOBAL gE::AttachmentSettings AttachmentDefault = AttachmentColor | AttachmentDepth;
+
 	GLOBAL gE::AttachmentSettings AttachmentDefaultTAA = AttachmentDefault | AttachmentTAA;
 
 	struct Buffers
@@ -157,11 +166,13 @@ namespace gE::DefaultPipeline
 
 		ALWAYS_INLINE void UpdateCamera(u64 size = sizeof(GL::Camera), u64 offset = 0) const
 		{
+
 			_cameraBuffer.ReplaceData((u8*) &Camera + offset, size, offset);
 		}
 
 		ALWAYS_INLINE void UpdateScene(u64 size = sizeof(GL::Scene), u64 offset = 0) const
 		{
+
 			_sceneBuffer.ReplaceData((u8*) &Scene + offset, size, offset);
 		}
 

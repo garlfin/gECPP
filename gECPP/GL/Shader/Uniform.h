@@ -14,13 +14,15 @@ namespace GL
 		DynamicUniform(Shader*, u32);
 		DynamicUniform(Shader*, const char*);
 
-		GET_CONST_VALUE(u32,, _location);
+		GET_CONST_VALUE(u32, , _location);
 
 		template<class T>
-		ALWAYS_INLINE void Set(const T& t) const { _shader->SetUniform(_location, t); }
+		ALWAYS_INLINE void Set(const T& t) const
+		{ _shader->SetUniform(_location, t); }
 
 	 private:
-		ALWAYS_INLINE u32 GetUniformLocation(const char* name) const { return glGetUniformLocation(_shader->Get(), name); }
+		ALWAYS_INLINE u32 GetUniformLocation(const char* name) const
+		{ return glGetUniformLocation(_shader->Get(), name); }
 
 		Shader* _shader;
 		u32 _location;
@@ -35,6 +37,7 @@ namespace GL
 	 public:
 		using DynamicUniform::DynamicUniform;
 
-		ALWAYS_INLINE void Set(const T& t) const { DynamicUniform::Set(t); }
+		ALWAYS_INLINE void Set(const T& t) const
+		{ DynamicUniform::Set(t); }
 	};
 }

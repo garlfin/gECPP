@@ -4,7 +4,6 @@
 
 #include "VoxelPipeline.h"
 
-
 gE::VoxelPipeline::Buffers::Buffers(gE::Window* window) :
 	_voxelBuffer(window)
 {

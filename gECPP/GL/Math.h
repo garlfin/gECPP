@@ -26,28 +26,41 @@
 #define TO_DEG 57.2957795131f
 
 typedef uint8_t ubyte;
+
 typedef uint8_t u8;
+
 typedef int8_t sbyte;
+
 typedef int8_t i8;
 
 typedef uint16_t ushort;
+
 typedef uint16_t u16;
+
 typedef int16_t sshort;
+
 typedef int16_t i16;
 
 typedef uint32_t uint;
+
 typedef uint32_t u32;
+
 typedef int32_t sint;
+
 typedef int32_t i32;
 
 typedef uint64_t ulong;
+
 typedef uint64_t u64;
+
 typedef int64_t slong;
+
 typedef int64_t i64;
 
 // World's dumbest optimization
 constexpr u8 GLSizeOf(u32 t)
 {
+
 	if(t == GL_FLOAT) return 4;
 	return 1 << ((t - 0x1400) >> 1); // i made this and i forgot how it worked
 	// this is why you comment this kind of stupid stuff
@@ -61,37 +74,43 @@ namespace glm
 namespace GL
 {
 	typedef glm::u32vec2 TextureSize2D;
+
 	typedef glm::u32vec3 TextureSize3D;
+
 	typedef u32 TextureSize1D;
 }
 
 enum class FOVType : u8
 {
-	Horizontal, Vertical
+	Horizontal,
+	Vertical
 };
 
 enum class AngleType : u8
 {
-	Degree, Radian
+	Degree,
+	Radian
 };
 
 template<FOVType TO, AngleType UNIT = AngleType::Radian>
 float fov_cast(float in, const GL::TextureSize2D& size)
 {
+
 	float aspect;
-	if constexpr (TO == FOVType::Horizontal) aspect = (float) size.x / size.y;
+	if constexpr(TO == FOVType::Horizontal) aspect = (float) size.x / size.y;
 	else aspect = (float) size.y / size.x;
 
-	if constexpr (UNIT == AngleType::Degree) in *= TO_RAD;
+	if constexpr(UNIT == AngleType::Degree) in *= TO_RAD;
 	float val = 2 * atanf(tanf(in / 2) * aspect);
 
-	if constexpr (UNIT == AngleType::Degree) return val * TO_DEG;
+	if constexpr(UNIT == AngleType::Degree) return val * TO_DEG;
 	else return val;
 }
 
 template<AngleType TO, typename T>
 inline constexpr T degree_cast(const T& t)
 {
+
 	if constexpr(TO == AngleType::Radian) return t * TO_RAD;
 	else return t * TO_DEG;
 }

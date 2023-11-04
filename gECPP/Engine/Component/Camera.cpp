@@ -9,7 +9,6 @@
 
 #define NOT(EXPR) (!(EXPR))
 
-
 gE::Camera::Camera(gE::Entity* parent, const SizelessCameraSettings& settings) :
 	Component(parent), SizelessCameraSettings(settings), FrameBuffer(parent->GetWindow())
 {
@@ -21,31 +20,30 @@ void gE::Camera::OnRender(float delta)
 	if(_isProjectionInvalid) UpdateProjection();
 	_isProjectionInvalid = false;
 
-	Window* window = Owner()->GetWindow();
-	DefaultPipeline::Buffers& buffers = window->GetPipelineBuffers();
+	DefaultPipeline::Buffers& buffers = Window->GetPipelineBuffers();
 
 	bool isFirst = Timing.GetIsFirst();
 	bool shouldTick = Timing.Tick(delta);
-	if NOT(isFirst || !Owner()->GetFlags().Static && shouldTick) return;
+	if NOT(isFirst || !GetOwner()->GetFlags().Static && shouldTick) return;
 
 	GetGLCamera(buffers.Camera);
 	buffers.UpdateCamera();
 
 	FrameBuffer.Bind();
-	RenderPass(window, this);
+	RenderPass(Window, this);
 }
 
 gE::Camera::~Camera()
 {
-	Owner()->GetWindow()->GetCameras().Remove(this);
+	GetOwner()->GetWindow()->GetCameras().Remove(this);
 }
 
 void gE::Camera::GetGLCamera(GL::Camera& cam) const
 {
 	cam.ClipPlanes = GetClipPlanes();
-	cam.View[0] = glm::inverse(Owner()->GetTransform().Model());
+	cam.View[0] = glm::inverse(GetOwner()->GetTransform().Model());
 	cam.Projection = Projection;
-	cam.Position = Owner()->GetTransform().GlobalTranslation();
+	cam.Position = GetOwner()->GetTransform().GlobalTranslation();
 }
 
 void gE::PerspectiveCamera::UpdateProjection()
@@ -57,7 +55,7 @@ gE::PerspectiveCamera::PerspectiveCamera(gE::Entity* e, const gE::PerspectiveCam
 	: Camera2D(e, s)
 {
 	SetFOV(s.FOV);
-	Owner()->GetWindow()->GetCameras().Register(this);
+	GetOwner()->GetWindow()->GetCameras().Register(this);
 }
 
 void gE::OrthographicCamera::UpdateProjection()
@@ -68,7 +66,7 @@ void gE::OrthographicCamera::UpdateProjection()
 gE::OrthographicCamera::OrthographicCamera(gE::Entity* e, const gE::OrthographicCameraSettings& s) :
 	Camera2D(e, s), _orthographicScale(s.Scale)
 {
-	Owner()->GetWindow()->GetCameras().Register(this);
+	GetOwner()->GetWindow()->GetCameras().Register(this);
 }
 
 template<class TEX_T, class CAM_T>
@@ -76,15 +74,16 @@ void gE::Camera::CreateAttachments(CAM_T& cam, const gE::AttachmentSettings& set
 {
 	if(settings.Depth)
 	{
-		cam.DepthTexture = SmartPointer<GL::Texture>(new TEX_T(cam.GET_WINDOW(), { settings.Depth, cam.GetSize()}));
-		if constexpr (!std::is_same_v<TEX_T, GL::Texture3D>) cam.FrameBuffer.SetDepthAttachment((GL::Texture*) cam.DepthTexture);
+		cam.DepthTexture = SmartPointer<GL::Texture>(new TEX_T(cam.Window, { settings.Depth, cam.GetSize() }));
+		if constexpr(!std::is_same_v<TEX_T, GL::Texture3D>) cam.FrameBuffer.SetDepthAttachment((GL::Texture*) cam.DepthTexture);
 	}
 
 	for(u8 i = 0; i < GE_MAX_ATTACHMENTS; i++)
 	{
 		if(!settings.Attachments[i]) continue;
-		cam.Attachments[i] = (SmartPointer<GL::Texture>) new TEX_T(cam.GET_WINDOW(), { settings.Attachments[i], cam.GetSize() });
-		if constexpr (!std::is_same_v<TEX_T, GL::Texture3D>) cam.FrameBuffer.SetAttachment(i, (GL::Texture*) cam.Attachments[i]);
+		cam.Attachments[i] = (SmartPointer<GL::Texture>) new TEX_T(cam.Window, { settings.Attachments[i],
+																				 cam.GetSize() });
+		if constexpr(!std::is_same_v<TEX_T, GL::Texture3D>) cam.FrameBuffer.SetAttachment(i, (GL::Texture*) cam.Attachments[i]);
 	}
 }
 
@@ -110,9 +109,9 @@ void gE::Camera3D::GetGLCamera(GL::Camera& cam) const
 {
 	cam.ClipPlanes = GetClipPlanes();
 	cam.Projection = Projection;
-	cam.Position = Owner()->GetTransform().GlobalTranslation();
+	cam.Position = GetOwner()->GetTransform().GlobalTranslation();
 
-	glm::vec3 pos = Owner()->GetTransform().GlobalTranslation();
+	glm::vec3 pos = GetOwner()->GetTransform().GlobalTranslation();
 	cam.View[0] = glm::lookAt(pos, pos + glm::vec3(0, -1, 0), pos + glm::vec3(1, 0, 0));
 }
 
@@ -128,31 +127,31 @@ void gE::CameraCubemap::UpdateProjection()
 }
 
 glm::vec3 ForwardDirs[]
-{
-	glm::vec3(1, 0, 0),
-	glm::vec3(-1, 0, 0),
-	glm::vec3(0, 1, 0),
-	glm::vec3(0, -1, 0),
-	glm::vec3(0, 0, 1),
-	glm::vec3(0, 0, -1)
-};
+	{
+		glm::vec3(1, 0, 0),
+		glm::vec3(-1, 0, 0),
+		glm::vec3(0, 1, 0),
+		glm::vec3(0, -1, 0),
+		glm::vec3(0, 0, 1),
+		glm::vec3(0, 0, -1)
+	};
 
 glm::vec3 UpDirs[]
-{
-	glm::vec3(0, 1, 0),
-	glm::vec3(0, 1, 0),
-	glm::vec3(0, 0, 1),
-	glm::vec3(0, 0, -1),
-	glm::vec3(0, 1, 0),
-	glm::vec3(0, 1, 0)
-};
+	{
+		glm::vec3(0, 1, 0),
+		glm::vec3(0, 1, 0),
+		glm::vec3(0, 0, 1),
+		glm::vec3(0, 0, -1),
+		glm::vec3(0, 1, 0),
+		glm::vec3(0, 1, 0)
+	};
 
 void gE::CameraCubemap::GetGLCamera(GL::Camera& cam) const
 {
 	cam.ClipPlanes = GetClipPlanes();
 	cam.Projection = Projection;
-	cam.Position = Owner()->GetTransform().GlobalTranslation();
+	cam.Position = GetOwner()->GetTransform().GlobalTranslation();
 
-	glm::vec3 pos = Owner()->GetTransform().GlobalTranslation();
+	glm::vec3 pos = GetOwner()->GetTransform().GlobalTranslation();
 	for(u8 i = 0; i < 6; i++) cam.View[i] = glm::lookAt(pos, pos + ForwardDirs[i], pos + UpDirs[i]);
 }

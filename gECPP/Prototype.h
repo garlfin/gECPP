@@ -10,12 +10,14 @@ namespace gE
 {
 	class Window;
 	class Entity;
-
 	class Component;
 	class Behavior;
 
-	template<class T> class TypedComponent;
-	template<class T> class TypedBehavior;
+	template<class T>
+	class TypedComponent;
+
+	template<class T>
+	class TypedBehavior;
 
 	struct Flags
 	{

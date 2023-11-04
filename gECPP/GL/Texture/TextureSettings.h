@@ -54,6 +54,7 @@ namespace PVR
 
 	constexpr GLenum PVRToInternalFormat(PVR::PixelFormat f)
 	{
+
 		switch(f)
 		{
 		case PVR::PixelFormat::DXT1: return GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
@@ -89,28 +90,36 @@ namespace GL
 
 	template<TextureDimension DIMENSION>
 	using TextureSize = std::conditional_t<DIMENSION == TextureDimension::D1D, u32,
-						std::conditional_t<DIMENSION == TextureDimension::D2D, glm::u32vec2, glm::u32vec3>>;
+		std::conditional_t<DIMENSION == TextureDimension::D2D, glm::u32vec2, glm::u32vec3>>;
 
 	struct CompressionScheme
 	{
-		CompressionScheme(u8 bls, u8 bs) : BlockSize(bls), ByteSize(bs) {}
+		CompressionScheme(u8 bls, u8 bs) : BlockSize(bls), ByteSize(bs)
+		{ }
+
 		u8 BlockSize;
 		u8 ByteSize;
 
 		template<TextureDimension DIMENSION>
 		NODISCARD ALWAYS_INLINE u64 Size(const TextureSize<DIMENSION>& size) const
 		{
+
 			TextureSize<DIMENSION> blocks = DIV_CEIL_T(size, BlockSize, TextureSize<DIMENSION>);
 			if constexpr(DIMENSION == TextureDimension::D1D) return blocks * ByteSize;
 			else if constexpr(DIMENSION == TextureDimension::D2D) return blocks.x * blocks.y * ByteSize;
 			else return blocks.x * blocks.y * blocks.z * ByteSize;
 		}
 
-		NODISCARD ALWAYS_INLINE constexpr operator bool() const { return BlockSize != 1; } // NOLINT
+		NODISCARD ALWAYS_INLINE constexpr operator bool() const
+		{ return BlockSize != 1; } // NOLINT
 
-		static const CompressionScheme& None() { static const CompressionScheme none{1, 1}; return none; }
+		static const CompressionScheme& None()
+		{
+
+			static const CompressionScheme none{ 1, 1 };
+			return none;
+		}
 	};
-
 
 	struct SizelessTextureSettings
 	{
@@ -119,9 +128,9 @@ namespace GL
 		FilterMode Filter = FilterMode::Linear;
 		u8 MipCount = 1;
 
-		constexpr operator bool() const { return (bool) Format; } // NOLINT
+		constexpr operator bool() const
+		{ return (bool) Format; } // NOLINT
 	};
-
 
 	template<TextureDimension DIMENSION>
 	struct TextureSettings : public SizelessTextureSettings

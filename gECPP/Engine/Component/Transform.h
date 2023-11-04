@@ -23,15 +23,19 @@ namespace gE
 	class Transform : public Component, public TransformData
 	{
 	 public:
-		Transform(Entity* o, const TransformData& d) : Component(o) { Set(d); }
+		Transform(Entity* o, const TransformData& d) : Component(o)
+		{ Set(d); }
+
 		explicit Transform(Entity* o);
 
 		glm::mat4 GetParentTransform();
+
 		ALWAYS_INLINE void SetRotation(const glm::vec3& r) { Rotation = glm::quaternion(r); }
+
 		void Set(const TransformData& d);
 		void Set(const Transform& d);
 
-		void OnUpdate(float) override {};
+		void OnUpdate(float) override { };
 		void OnRender(float) override;
 
 		NODISCARD ALWAYS_INLINE const glm::mat4& Model() const { return _model; }

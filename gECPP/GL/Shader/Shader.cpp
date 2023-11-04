@@ -23,6 +23,7 @@ namespace GL
 
 	Shader::Shader(gE::Window* window, const char* v, const char* f, const Array<PreprocessorPair>* p) : Asset(window)
 	{
+
 		ID = glCreateProgram();
 
 		ShaderStage frag(window, Fragment, f, p), vert(window, Vertex, v, p);
@@ -34,8 +35,10 @@ namespace GL
 		GetShaderStatus(*this);
 	}
 
-	ShaderStage::ShaderStage(gE::Window* window, ShaderStageType type, const char* file, const Array<PreprocessorPair>* directives) : Asset(window)
+	ShaderStage::ShaderStage(gE::Window* window, ShaderStageType type, const char* file, const Array<PreprocessorPair>* directives)
+		: Asset(window)
 	{
+
 		ID = glCreateShader(type);
 
 		gETF::SerializationBuffer directivesBuf{};
@@ -60,6 +63,7 @@ namespace GL
 
 	Shader::Shader(gE::Window* window, const ShaderStage& v, const ShaderStage& f) : Asset(window)
 	{
+
 		ID = glCreateProgram();
 
 		v.Attach(this);
@@ -74,6 +78,7 @@ namespace GL
 
 	Shader::Shader(gE::Window* window, const char* src, const Array<PreprocessorPair>* p) : Asset(window)
 	{
+
 		ID = glCreateProgram();
 
 		ShaderStage c(window, Compute, src, p);
@@ -88,19 +93,20 @@ namespace GL
 	template<typename T>
 	bool GetShaderStatus(const T& shader, char* source)
 	{
+
 		u32 id = shader.Get();
 
 		i32 shaderStatus;
-		if constexpr (std::is_same_v<T, ShaderStage>)
+		if constexpr(std::is_same_v<T, ShaderStage>)
 			glGetShaderiv(id, GL_COMPILE_STATUS, &shaderStatus);
 		else
 			glGetProgramiv(id, GL_LINK_STATUS, &shaderStatus);
 
-		if (shaderStatus) return true;
+		if(shaderStatus) return true;
 
 		GL_GET(glGetShaderiv, glGetProgramiv, id, GL_INFO_LOG_LENGTH, &shaderStatus);
 
-		char* infoLog = new char[shaderStatus] {};
+		char* infoLog = new char[shaderStatus]{};
 
 		GL_GET(glGetShaderInfoLog, glGetProgramInfoLog, id, shaderStatus - 1, nullptr, infoLog);
 
@@ -109,7 +115,7 @@ namespace GL
 		#ifdef DEBUG
 		if(source)
 		{
-			for (u32 i = 0; *source; source++)
+			for(u32 i = 0; *source; source++)
 				if(*source == '\n' || !i)
 				{
 					if(i) std::cout << "\n0(" << i << "): ";
@@ -127,20 +133,26 @@ namespace GL
 
 	void Shader::SetUniform(u8 loc, const Texture& tex, u8 slot) const
 	{
+
 		SetUniform(loc, tex.Use(slot));
 	}
 
 	void Shader::SetUniform(u8 loc, const Texture& tex) const
 	{
+
 		SetUniform(loc, GetWindow()->GetSlotManager().Increment(&tex));
 	}
 
-	DynamicUniform::DynamicUniform(Shader* s, u32 l) : _shader(s), _location(l) { }
-	DynamicUniform::DynamicUniform(Shader* s, const char* n) : _shader(s), _location(GetUniformLocation(n)) { }
+	DynamicUniform::DynamicUniform(Shader* s, u32 l) : _shader(s), _location(l)
+	{ }
+
+	DynamicUniform::DynamicUniform(Shader* s, const char* n) : _shader(s), _location(GetUniformLocation(n))
+	{ }
 
 	template<>
 	void DynamicUniform::Set(const Texture& t) const
 	{
+
 		_shader->SetUniform(_location, t, _shader->GetWindow()->GetSlotManager().Increment(&t));
 	}
 }

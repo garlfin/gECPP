@@ -5,6 +5,7 @@
 
 void GL::FrameBuffer::SetNoAttatchments(const GL::TextureSize2D& size)
 {
+
 	glNamedFramebufferParameteri(ID, GL_FRAMEBUFFER_DEFAULT_WIDTH, size.x);
 	glNamedFramebufferParameteri(ID, GL_FRAMEBUFFER_DEFAULT_HEIGHT, size.y);
 	glNamedFramebufferParameteri(ID, GL_FRAMEBUFFER_DEFAULT_LAYERS, 1);
@@ -16,6 +17,7 @@ void GL::FrameBuffer::SetNoAttatchments(const GL::TextureSize2D& size)
 
 void GL::FrameBuffer::SetAttachment(u8 i, GL::Attachment* h)
 {
+
 	assert(i < GE_MAX_ATTACHMENTS);
 
 	h->Attach(this, GL_COLOR_ATTACHMENT0 + i, 0);

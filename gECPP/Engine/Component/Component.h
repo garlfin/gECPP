@@ -5,25 +5,32 @@
 #pragma once
 
 #include "Prototype.h"
-#define GET_WINDOW() Owner()->GetWindow()
 
 namespace gE
 {
 	class Component
 	{
 	 public:
-		explicit Component(Entity* o) : _entity(o) {};
-		NODISCARD ALWAYS_INLINE Entity* Owner() const { return _entity; }
+		explicit Component(Entity* o);;
 
-		Flags GetFlags() const;
+		GET_CONST_VALUE(Entity*, Owner, _owner);
+
+		GET_CONST_VALUE(Window*, Window, Window);
+
+		GET_CONST_VALUE(Flags, Flags, Flags);
+
 		virtual void OnUpdate(float) = 0;
 		virtual void OnRender(float) = 0;
-		virtual void OnDestroy() {};
+		virtual void OnDestroy() { };
 
 		virtual ~Component() = default;
 
+	 protected:
+		Window* const Window;
+		Flags& Flags;
+
 	 private:
-		Entity* const _entity;
+		Entity* const _owner;
 	};
 
 	class Behavior : public Component
@@ -31,9 +38,9 @@ namespace gE
 	 public:
 		explicit Behavior(Entity* o);
 
-		void OnUpdate(float d) override {}
-		void OnRender(float d) override {}
-		void OnDestroy() override {}
+		void OnUpdate(float d) override { }
+		void OnRender(float d) override { }
+		void OnDestroy() override { }
 
 		~Behavior() override;
 	};
@@ -45,20 +52,19 @@ namespace gE
 	class TypedComponent : public Component
 	{
 	 public:
-		inline explicit TypedComponent(gE::Entity* o) : Component(o) {};
+		inline explicit TypedComponent(gE::Entity* o) : Component(o) { };
 
-		NODISCARD ALWAYS_INLINE T* Owner() const { (T*) Component::Owner(); }
+		GET_CONST_VALUE(T*, Owner, (T*) Component::GetOwner());
 	};
 
 	template<class T>
 	class TypedBehavior : public Behavior
 	{
 	 public:
-		inline explicit TypedBehavior(gE::Entity* o) : Behavior(o) {};
+		inline explicit TypedBehavior(gE::Entity* o) : Behavior(o) { };
 
-		NODISCARD ALWAYS_INLINE T* Owner() const { (T*) Behavior::Owner(); }
+		GET_CONST_VALUE(T*, Owner, (T*) Component::GetOwner());
 	};
 
 #pragma clang diagnostic pop
-
 }

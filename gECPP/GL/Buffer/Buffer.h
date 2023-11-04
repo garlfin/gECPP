@@ -21,41 +21,49 @@ namespace GL
 	{
 	 public:
 		static_assert(!std::is_pointer_v<T>, "Buffer data shouldn't be a pointer!");
+
 		Buffer(gE::Window* window, uint32_t count = 1, T* data = nullptr)
 			: Asset(window)
 		{
+
 			static constexpr size_t SIZE_T = sizeof(std::conditional_t<std::is_same_v<T, void>, uint8_t, T>);
 			glCreateBuffers(1, &ID);
 			if constexpr(DYNAMIC) glNamedBufferData(ID, SIZE_T * count, data, GL_DYNAMIC_DRAW);
-			else glNamedBufferStorage(ID, SIZE_T * count, data, GL_DYNAMIC_STORAGE_BIT);
+			else
+				glNamedBufferStorage(ID, SIZE_T * count, data, GL_DYNAMIC_STORAGE_BIT);
 		};
 
 		template<typename I>
 		ALWAYS_INLINE void ReplaceData(const I* data, uint32_t count = 1, uint32_t offset = 0) const
 		{
+
 			static constexpr size_t SIZE_T = sizeof(std::conditional_t<std::is_same_v<I, void>, uint8_t, I>);
-			if (!data || !count) return;
+			if(!data || !count) return;
 			glNamedBufferSubData(ID, offset, SIZE_T * count, data);
 		}
 
 		ALWAYS_INLINE void Bind(BufferTarget target, uint32_t slot) const
 		{
+
 			glBindBufferBase((GLenum) target, slot, ID);
 		}
 
 		ALWAYS_INLINE void Bind(BufferTarget target) const
 		{
+
 			glBindBuffer((GLenum) target, ID);
 		}
 
 		ALWAYS_INLINE void Bind() const override
 		{
+
 			glBindBuffer(GL_ARRAY_BUFFER, ID);
 		}
 
 		template<typename I>
 		void Realloc(uint32_t count, I* data = nullptr) const
 		{
+
 			static constexpr size_t SIZE_T = sizeof(std::conditional_t<std::is_same_v<I, void>, uint8_t, I>);
 			if constexpr(DYNAMIC) glNamedBufferData(ID, SIZE_T * count, data, GL_DYNAMIC_DRAW);
 			else
@@ -69,6 +77,7 @@ namespace GL
 
 		inline ~Buffer() override
 		{
+
 			glDeleteBuffers(1, &ID);
 		}
 	};

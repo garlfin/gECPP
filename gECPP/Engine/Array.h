@@ -14,14 +14,13 @@ class Array
 	explicit Array(u64 count, T* initialData = nullptr, u64 initialSize = 0);
 	Array() = default;
 
-	Array(const Array& o) : _size(o.Size()), _t(new T[_size] {}) { memcpy(_t, o.Data(), o.Size() * sizeof(T)); };
+	Array(const Array& o) : _size(o.Size()), _t(new T[_size]{}) { memcpy(_t, o.Data(), o.Size() * sizeof(T)); };
 	Array(Array&& o) noexcept : _size(o.Size()), _t(o._t) { o._t = nullptr; };
 
 	OPERATOR_EQUALS_BOTH(Array<T>);
 
 	template<size_t COUNT, typename I>
-	size_t CopyToCArray(I(&arr)[COUNT]) const;
-
+	size_t CopyToCArray(I(& arr)[COUNT]) const;
 	size_t CopyToCArray(T* arr, size_t arrSize) const;
 
 	NODISCARD ALWAYS_INLINE u64 Size() const { return _size; }
@@ -54,6 +53,7 @@ template<typename T>
 template<size_t COUNT, typename I>
 size_t Array<T>::CopyToCArray(I (& arr)[COUNT]) const
 {
+
 	size_t copyCount = std::min(COUNT, _size);
 
 	if constexpr(std::is_trivially_constructible_v<T>)
@@ -68,5 +68,6 @@ size_t Array<T>::CopyToCArray(I (& arr)[COUNT]) const
 template<typename T>
 Array<T>::Array(u64 count, T* initialData, u64 initialSize) : _size(count), _t(new T[_size])
 {
+
 	if(initialSize) memcpy(_t, initialData, initialSize * sizeof(T));
 }

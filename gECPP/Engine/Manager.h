@@ -13,7 +13,7 @@ namespace gE
 	class Window;
 
 	template<class T>
- 	class Manager : protected std::vector<T*>
+	class Manager : protected std::vector<T*>
 	{
 	 public:
 		Manager() = default;
@@ -23,21 +23,22 @@ namespace gE
 
 		virtual void OnUpdate(float delta)
 		{
-			for(T* t : *this)
+			for(T* t: *this)
 				if(t->GetFlags().Deletion)
 					t->OnDestroy();
 				else
 					t->OnUpdate(delta);
 		}
+
 		virtual void OnRender(float delta)
 		{
-			for(T* t : *this)
+			for(T* t: *this)
 				t->OnRender(delta);
 		}
 
-		using std::vector<T*>::operator[];
-
 		NODISCARD ALWAYS_INLINE size_t Size() const { return VEC_T::size(); }
+
+		using std::vector<T*>::operator[];
 
 	 protected:
 		typedef std::vector<T*> VEC_T;
