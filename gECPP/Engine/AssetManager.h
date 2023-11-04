@@ -15,28 +15,26 @@ namespace gE
 	{
 	 public:
 		explicit inline Reference(T* t) : _t(t) { if(t) _counter = new u32(1); }
-
-		Reference(Reference&& o) noexcept : _t(o._t), _counter(o._counter)
-		{
-			o._t = nullptr;
-			o._counter = nullptr;
-		}
-
-		Reference(const Reference& o) : _t(o._t), _counter(o._counter)
-		{
-			if(_counter) (*_counter)++;
-		}
-
+		Reference(Reference&& o) noexcept : _t(o._t), _counter(o._counter) { o._t = nullptr; o._counter = nullptr; }
+		Reference(const Reference& o) : _t(o._t), _counter(o._counter) { if(_counter) (*_counter)++; }
 		inline Reference() = default;
 
 		OPERATOR_EQUALS_BOTH(Reference);
 
 		ALWAYS_INLINE T* Get() const { return _t; }
+
 		ALWAYS_INLINE T* operator->() const { return _t; }
 		ALWAYS_INLINE T& operator*() const { return *_t; }
-		explicit ALWAYS_INLINE operator bool() const { return (bool) _t; }
-		explicit ALWAYS_INLINE operator T*() const { return _t; }
 		ALWAYS_INLINE operator T&() const { return *_t; } // NOLINT
+
+		ALWAYS_INLINE const T& operator||(const T& t) const { return _t ? *_t : t; };
+		ALWAYS_INLINE T& operator||(T& t) { return _t ? *_t : t; }
+		ALWAYS_INLINE const T* operator||(const T* t) const { return _t ?: t; };
+		ALWAYS_INLINE T* operator||(T* t) const { return _t ?: t; }
+
+
+		explicit ALWAYS_INLINE operator bool() const { return _t; }
+		explicit ALWAYS_INLINE operator T*() const { return _t; } // NOLINT
 
 		template<class I>
 		ALWAYS_INLINE operator Reference<I>()
@@ -74,20 +72,27 @@ namespace gE
 	class SmartPointer
 	{
 	 public:
-		SmartPointer() = default;
 		explicit SmartPointer(T* t) : _t(t) {};
 		SmartPointer(const SmartPointer&) = delete;
 		SmartPointer(SmartPointer&& o) noexcept : _t(o._t) { o._t = nullptr; }
+		SmartPointer() = default;
 
 		OPERATOR_EQUALS_XVAL(SmartPointer);
 		SmartPointer& operator=(const SmartPointer&) = delete;
 
 		ALWAYS_INLINE T* Get() const { return _t; }
+
 		ALWAYS_INLINE T* operator->() const { return _t; }
 		ALWAYS_INLINE T& operator*() const { return *_t; }
-		explicit ALWAYS_INLINE operator bool() const { return (bool) _t; }
-		explicit ALWAYS_INLINE operator T*() const { return _t; } // NOLINT
 		ALWAYS_INLINE operator T&() const { return *_t; } // NOLINT
+
+		ALWAYS_INLINE const T& operator||(const T& t) const { return _t ? *_t : t; };
+		ALWAYS_INLINE T& operator||(T& t) { return _t ? *_t : t; }
+		ALWAYS_INLINE const T* operator||(const T* t) const { return _t ?: t; };
+		ALWAYS_INLINE T* operator||(T* t) const { return _t ?: t; }
+
+		explicit ALWAYS_INLINE operator bool() const { return _t; }
+		explicit ALWAYS_INLINE operator T*() const { return _t; } // NOLINT
 
 		~SmartPointer() { delete _t; }
 
