@@ -37,13 +37,13 @@ void DemoWindow::OnInit()
 	gE::PBRMaterialSettings materialSettings { tex };
 
 	auto rasterShader = gE::CreateReference<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/uber.frag");
-	Array<gE::Reference<gE::Material>> materials(1);
-	materials[0] = gE::CreateReference<gE::PBRMaterial>(this, rasterShader, materialSettings);
+	auto rasterMaterial = gE::CreateReference<gE::PBRMaterial>(this, rasterShader, materialSettings);
 
 	gETF::File file;
 	gETF::Read("cube.gETF", file);
 
 	auto* mesh = new VoxelDemo::StaticMeshEntity(this, file.Meshes[0]);
+	mesh->GetMaterials().SetMaterial(0, std::move(rasterMaterial));
 	
 	auto* camera = new FlyCam(this);
 	Cameras.SetCurrentCamera(&camera->GetCamera());

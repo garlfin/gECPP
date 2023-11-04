@@ -20,6 +20,9 @@ namespace VoxelDemo
 			_materialHolder(this, mat)
 		{ };
 
+		GET(gE::MeshRenderer&, Renderer, _renderer);
+		GET(gE::MaterialHolder&, Materials, _materialHolder);
+
 	 private:
 		gE::MeshRenderer _renderer;
 		gE::MaterialHolder _materialHolder;
