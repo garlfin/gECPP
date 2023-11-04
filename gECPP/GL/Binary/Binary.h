@@ -79,10 +79,7 @@ void Read(u8*& src, T* ts)
 	src += COUNT * sizeof(T);
 }
 
-char* ReadPrefixedString(u8*& ptr);
-u8* ReadFile(const char* name, u32& length, bool binary = false);
-
-inline u8* ReadFile(const char* name, bool binary = false)
+inline u8* ReadFile(const char* name, bool binary)
 {
 	u32 len;
 	return ReadFile(name, len, binary);

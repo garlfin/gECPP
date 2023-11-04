@@ -16,6 +16,12 @@
 #include <vector>
 #endif // #ifdef DEBUG
 
+#ifdef DEBUG
+#define LOG(MSG) std::cout << MSG
+#else
+#define LOG(MSG) // NOTHING!
+#endif
+
 #define assertm(exp, msg) assert(((void) msg, exp))
 #define GE_FAIL(ERR) assertm(false, ERR);
 #define GE_ASSERT(COND, ERR) assertm(COND, ERR);
@@ -76,3 +82,5 @@ namespace gETF { struct Serializable; }
 #define OPERATOR_EQUALS_BOTH(TYPE) \
     OPERATOR_EQUALS(TYPE); \
 	OPERATOR_EQUALS_XVAL(TYPE);
+
+// Yapping about newline >: (

@@ -19,8 +19,6 @@
 struct GLFWwindow;
 struct GLFWvidmode;
 
-#define LOG(MSG) std::cout << MSG << std::endl
-
 namespace gE
 {
 	struct Monitor

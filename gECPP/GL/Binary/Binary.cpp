@@ -22,9 +22,7 @@ u8* ReadFile(const char* name, u32& length, bool binary)
 	FILE* file = fopen(name, "rb");
 	if(!file)
 	{
-#ifdef DEBUG
-		std::cout << "Could not find file: " << name << '\n';
-#endif
+		LOG("Could not find file: " << name << '\n');
 		return nullptr;
 	}
 

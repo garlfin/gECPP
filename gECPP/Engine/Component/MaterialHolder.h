@@ -2,6 +2,7 @@
 
 #include <gECPP/Engine/Component/Component.h>
 #include "Engine/Renderer/Material.h"
+#include "GL/Binary/Nullable.h"
 
 #ifndef GE_MAX_MATERIAL
 #define GE_MAX_MATERIAL 4
@@ -18,10 +19,10 @@ namespace gE
 
 		};
 
-		MaterialHolder(gE::Entity* o, Nullable<const Array<Reference<Material>>> materials)
+		explicit MaterialHolder(gE::Entity* o, const Array<Reference<Material>>& materials = {})
 			: Component(o)
 		{
-			if(materials) materials->CopyToCArray(_materials);
+			if(materials.Size()) materials.CopyToCArray(_materials);
 		}
 
 		NODISCARD ALWAYS_INLINE Material& GetMaterial(u8 i) const { GE_ASSERT(i < GE_MAX_MATERIAL, "MATERIAL OUT OF RANGE"); return _materials[i]; }
