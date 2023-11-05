@@ -130,6 +130,14 @@ namespace gE::DefaultPipeline
 		{{ GL_RGBA16F }} // Attachments
 	};
 
+	GLOBAL gE::AttachmentSettings AttachmentScreenSpace
+	{
+		{},
+		{},
+		true,
+		{ true }
+	};
+
 	GLOBAL gE::AttachmentSettings AttachmentDepth
 	{
 		{ GL_DEPTH_COMPONENT32F }
@@ -152,9 +160,8 @@ namespace gE::DefaultPipeline
 		{{ GL_RGB16F }}
 	};
 
-	GLOBAL gE::AttachmentSettings AttachmentDefault = AttachmentColor | AttachmentDepth;
-
-	GLOBAL gE::AttachmentSettings AttachmentDefaultTAA = AttachmentDefault | AttachmentTAA;
+	GLOBAL gE::AttachmentSettings AttachmentsDefault = AttachmentColor | AttachmentDepth;
+	GLOBAL gE::AttachmentSettings AttachmentsTAA = AttachmentsDefault | AttachmentScreenSpace | AttachmentTAA;
 
 	struct Buffers
 	{

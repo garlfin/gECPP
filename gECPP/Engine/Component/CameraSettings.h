@@ -17,8 +17,8 @@ namespace gE
 	{
 		RenderPass RenderPass;
 		ClipPlanes ClipPlanes = { 0.1, 1000 };
-		CameraTiming Timing;
-		const AttachmentSettings& RenderAttachments = DefaultPipeline::AttachmentDefault;
+		CameraTiming Timing = DefaultCameraTiming;
+		const AttachmentSettings& RenderAttachments = DefaultPipeline::AttachmentsDefault;
 	};
 
 	template<GL::TextureDimension DIMENSION>

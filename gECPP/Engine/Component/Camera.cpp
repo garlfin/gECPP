@@ -31,6 +31,10 @@ void gE::Camera::OnRender(float delta)
 
 	FrameBuffer.Bind();
 	RenderPass(Window, this);
+
+	if(DepthCopy) DepthCopy->CopyFrom(DepthTexture);
+	for(u8 i = 0; i < GE_MAX_ATTACHMENTS; i++)
+		if(AttachmentCopies[i]) AttachmentCopies[i]->CopyFrom(Attachments[i]);
 }
 
 gE::Camera::~Camera()

@@ -48,6 +48,11 @@ namespace GL
 			glGenerateTextureMipmap(ID);
 	}
 
+	void Texture2D::CopyFrom(const Texture& o)
+	{
+		glcopyte()
+	}
+
 	Texture3D::Texture3D(gE::Window* window, const TextureSettings<TextureDimension::D3D>& settings, const TextureData& data)
 		:
 		Texture(window, GL_TEXTURE_3D, settings), _size(settings.Size)
@@ -72,6 +77,11 @@ namespace GL
 
 			dataPtr += dataSize;
 		}
+	}
+
+	void Texture3D::CopyFrom(const Texture&)
+	{
+
 	}
 
 	void Texture::Attach(GL::FrameBuffer* buffer, GLenum attachment, u8 mip) const

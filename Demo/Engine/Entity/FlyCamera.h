@@ -11,15 +11,20 @@
 
 namespace VoxelDemo
 {
-	class FlyCam : public gE::Entity
+	gE::SizelessCameraSettings FlyCameraSettings
+	{
+		(gE::RenderPass) gE::DefaultPipeline::RenderPass2D,
+		gE::ClipPlanes(0.1, 100),
+		gE::DefaultCameraTiming,
+		gE::DefaultPipeline::AttachmentsTAA
+	};
+
+	class FlyCamera : public gE::Entity
 	{
 	 public:
-		explicit FlyCam(gE::Window* window) :
+		explicit FlyCamera(gE::Window* window) :
 			gE::Entity(window),
-			_camera(this,
-				{
-					gE::CameraSettings2D({ (gE::RenderPass) gE::DefaultPipeline::RenderPass2D }, window->GetSize())
-				}),
+			_camera(this, { gE::CameraSettings2D(FlyCameraSettings, window->GetSize()) }),
 			_movement(this)
 		{}
 

@@ -36,4 +36,6 @@ namespace gE
 		bool _isFirst = true; // padded anyways, no need for bitfield
 		u64 _frame = 0;
 	};
+
+	GLOBAL CameraTiming DefaultCameraTiming(0, 1);
 }
