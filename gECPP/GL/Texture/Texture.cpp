@@ -11,7 +11,6 @@ namespace GL
 	Texture::Texture(gE::Window* window, GLenum tgt, const SizelessTextureSettings& settings) :
 		Asset(window), Mips(settings.MipCount), Format(settings.Format), Target(tgt)
 	{
-
 		glCreateTextures(tgt, 1, &ID);
 		glTextureParameteri(ID, GL_TEXTURE_MIN_FILTER, (GLint) settings.Filter + (Mips > 1 ? 0x102 : 0));
 		glTextureParameteri(ID, GL_TEXTURE_MAG_FILTER, (GLint) settings.Filter);
@@ -20,10 +19,8 @@ namespace GL
 	}
 
 	Texture2D::Texture2D(gE::Window* window, const TextureSettings<TextureDimension::D2D>& settings, const TextureData& data)
-		:
-		Texture(window, GL_TEXTURE_2D, settings), _size(settings.Size)
+		: Texture(window, GL_TEXTURE_2D, settings), _size(settings.Size)
 	{
-
 		glTextureStorage2D(ID, Mips, Format, _size.x, _size.y);
 
 		if(!data.Data) return;
@@ -50,14 +47,13 @@ namespace GL
 
 	void Texture2D::CopyFrom(const Texture& o)
 	{
-		glcopyte()
+		glCopyImageSubData(o.Get(), GL_TEXTURE_2D, 0, 0, 0, 0, ID, GL_TEXTURE_2D, 0, 0, 0, 0, GetSize().x, GetSize().y, 1);
 	}
 
 	Texture3D::Texture3D(gE::Window* window, const TextureSettings<TextureDimension::D3D>& settings, const TextureData& data)
 		:
 		Texture(window, GL_TEXTURE_3D, settings), _size(settings.Size)
 	{
-
 		glTextureStorage3D(ID, Mips, Format, _size.x, _size.y, _size.z);
 
 		if(!data.Data) return;
@@ -79,27 +75,19 @@ namespace GL
 		}
 	}
 
-	void Texture3D::CopyFrom(const Texture&)
-	{
-
-	}
-
 	void Texture::Attach(GL::FrameBuffer* buffer, GLenum attachment, u8 mip) const
 	{
-
 		glNamedFramebufferTexture(buffer->Get(), attachment, ID, mip);
 	}
 
 	Texture::~Texture()
 	{
-
 		if(_handle) glMakeTextureHandleNonResidentARB(_handle);
 		glDeleteTextures(1, &ID);
 	}
 
 	TextureHandle Texture::GetHandle()
 	{
-
 		if(_handle) return _handle;
 
 		_handle = glGetTextureHandleARB(ID);
@@ -110,15 +98,12 @@ namespace GL
 
 	void RenderBuffer::Attach(GL::FrameBuffer* buffer, GLenum attachment, u8 mip) const
 	{
-
 		glNamedFramebufferRenderbuffer(ID, attachment, GL_RENDERBUFFER, ID);
 	}
 
 	TextureCube::TextureCube(gE::Window* window, const TextureSettings<TextureDimension::D1D>& settings, const TextureData& data)
-		:
-		Texture(window, GL_TEXTURE_CUBE_MAP, settings), _size(settings.Size)
+		: Texture(window, GL_TEXTURE_CUBE_MAP, settings), _size(settings.Size)
 	{
-
 		glTextureStorage2D(ID, Mips, settings.Format, _size, _size);
 
 		if(!data.Data) return;

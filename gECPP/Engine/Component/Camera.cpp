@@ -79,15 +79,17 @@ void gE::Camera::CreateAttachments(CAM_T& cam, const gE::AttachmentSettings& set
 	if(settings.Depth)
 	{
 		cam.DepthTexture = SmartPointer<GL::Texture>(new TEX_T(cam.Window, { settings.Depth, cam.GetSize() }));
+		if(settings.CopyDepth) cam.DepthCopy = SmartPointer<GL::Texture>(new TEX_T(cam.Window, {settings.Depth, cam.GetSize() }));
 		if constexpr(!std::is_same_v<TEX_T, GL::Texture3D>) cam.FrameBuffer.SetDepthAttachment((GL::Texture*) cam.DepthTexture);
 	}
 
 	for(u8 i = 0; i < GE_MAX_ATTACHMENTS; i++)
 	{
 		if(!settings.Attachments[i]) continue;
-		cam.Attachments[i] = (SmartPointer<GL::Texture>) new TEX_T(cam.Window, { settings.Attachments[i],
-																				 cam.GetSize() });
+		cam.Attachments[i] = (SmartPointer<GL::Texture>) new TEX_T(cam.Window, { settings.Attachments[i], cam.GetSize() });
 		if constexpr(!std::is_same_v<TEX_T, GL::Texture3D>) cam.FrameBuffer.SetAttachment(i, (GL::Texture*) cam.Attachments[i]);
+		if(!settings.CopyAttachment[i]) continue;
+		cam.AttachmentCopies[i] = (SmartPointer<GL::Texture>) new TEX_T(cam.Window, {settings.Attachments[i], cam.GetSize() });
 	}
 }
 

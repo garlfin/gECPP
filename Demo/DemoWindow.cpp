@@ -43,7 +43,7 @@ void DemoWindow::OnInit()
 	gETF::Read("cube.gETF", file);
 
 	auto* mesh = new VoxelDemo::StaticMeshEntity(this, file.Meshes[0]);
-	// mesh->GetMaterials().SetMaterial(0, std::move(rasterMaterial));
+	mesh->GetMaterials().SetMaterial(0, std::move(rasterMaterial));
 	
 	auto* camera = new FlyCamera(this);
 	Cameras.SetCurrentCamera(&camera->GetCamera());

@@ -50,13 +50,13 @@ namespace gE
 		const AttachmentSettings& settings = cam.GetSettings().RenderAttachments;
 
 		if(Requirements.Depth != settings.Depth) return false;
-		if(Requirements.DepthCopy && !settings.DepthCopy) return false;
+		if(Requirements.CopyDepth && !settings.CopyDepth) return false;
 
 		for(u8 i = 0; i < GE_MAX_ATTACHMENTS; i++)
 		{
 			if(!Requirements.Attachments[i]) continue;
 			if(Requirements.Attachments[i] != settings.Attachments[i]) return false;
-			if(Requirements.ColorCopy[i] && !settings.ColorCopy[i]) return false;
+			if(Requirements.CopyAttachment[i] && !settings.CopyAttachment[i]) return false;
 		}
 		return true;
 	}
