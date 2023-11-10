@@ -16,8 +16,8 @@ namespace gE
 
 		void OnUpdate(float) override;
 
-		GET_CONST_VALUE(GL::Texture3D*, Color, _camera.GetAttachment(0));
-		GET_CONST_VALUE(GL::Texture3D*, Data, _camera.GetAttachment(1));
+		GET_REGULAR(GL::Texture3D*, Color, _camera.GetAttachment(0));
+		GET_REGULAR(GL::Texture3D*, Data, _camera.GetAttachment(1));
 
 	 private:
 		Camera3D _camera;

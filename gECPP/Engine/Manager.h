@@ -55,5 +55,38 @@ namespace gE
 
 	template<class T>
 	using ComponentManager = Manager<T>;
-}
 
+	// TODO: Consider moving into Component
+	template<class T>
+	class Registry
+	{
+	 public:
+		Registry(T* t, Manager<T>* m) : _t(t), _manager(m) { m->Register(t); }
+		~Registry() { _manager->Remove(_t); }
+	 private:
+		T* _t;
+		Manager<T>* _manager;
+	};
+
+	template<class T, class I>
+	class RegistryPair : public Registry<I>
+	{
+	 public:
+		template<typename... ARGS>
+		explicit RegistryPair(Manager<I>* m, ARGS&&... args) : Object(std::forward<ARGS>(args)...), Registry<I>(&Object, m) {};
+
+		ALWAYS_INLINE T* Get() const { return Object; }
+
+		ALWAYS_INLINE const T& operator*() const { return Object; }
+		ALWAYS_INLINE T& operator*() { return Object; }
+		ALWAYS_INLINE const T* operator->() const { return &Object; }
+		ALWAYS_INLINE T* operator->() { return &Object; }
+
+		ALWAYS_INLINE operator const T&() const { return Object; } // NOLINT
+		ALWAYS_INLINE operator T&() { return Object; } // NOLINT
+		ALWAYS_INLINE operator const T*() const { return &Object; } // NOLINT
+		ALWAYS_INLINE operator T*() { return &Object; } // NOLINT
+
+		T Object;
+	};
+}

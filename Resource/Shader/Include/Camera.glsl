@@ -9,12 +9,12 @@
 struct CameraData
 {
     vec3 Position;
-    vec2 ClipPlanes;
-    float FOV;
     uint Stage;
+    vec2 ClipPlanes;
+    vec2 Parameters;
 
-    BINDLESS_TEXTURE(sampler2D, Depth);
     BINDLESS_TEXTURE(sampler2D, Color);
+    BINDLESS_TEXTURE(sampler2D, Depth);
 
     mat4 Projection;
     mat4 PreviousViewProjection;

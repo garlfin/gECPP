@@ -16,7 +16,7 @@ namespace VoxelDemo
 	 public:
 		explicit Movement(gE::Entity* o) :
 			gE::Behavior(o),
-			_transform(o->GetTransform()), _window(o->GetWindow()->GLFWWindow())
+			_transform(o->GetTransform()), _window(o->GetWindow().GLFWWindow())
 		{
 
 		}

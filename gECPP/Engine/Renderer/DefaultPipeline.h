@@ -19,15 +19,19 @@ namespace GL
 	struct Camera
 	{
 		glm::vec3 Position;
+		u32 Stage;
 		GL_ALIGN glm::vec2 ClipPlanes;
-		float FOV;
-		u32 State;
-		glm::vec4 FutureData; // TODO Find use for space.
+		glm::vec2 Parameters;
+
+		TextureHandle ColorTexture;
+		TextureHandle DepthTexture;
 
 		GL_ALIGN glm::mat4 Projection;
 		glm::mat4 PreviousViewProjection;
 		glm::mat4 View[6];
 	};
+
+
 
 	enum class LightType : uint
 	{

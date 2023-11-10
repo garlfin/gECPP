@@ -30,7 +30,7 @@ namespace GL
 
 		if(idBuffer.Find(file))
 		{
-			LOG(file << " already included, skipping.\n");
+			LOG(file << " already included, skipping.");
 			return;
 		}
 		idBuffer.StrCat(file);

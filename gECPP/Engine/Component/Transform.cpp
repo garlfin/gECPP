@@ -38,11 +38,11 @@ void gE::Transform::OnRender(float)
 gE::Transform::Transform(gE::Entity* o)
 	: Component(o)
 {
-	Window->GetTransforms().Register(this);
+	GetWindow().GetTransforms().Register(this);
 }
 
 gE::Transform::~Transform()
 {
-	Window->GetTransforms().Remove(this);
+	GetWindow().GetTransforms().Remove(this);
 }
 

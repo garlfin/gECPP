@@ -20,7 +20,7 @@ namespace gE
 
 		GET(Transform &, Transform, _transform);
 		GET_CONST(std::vector<Entity*> &, Children, _children);
-		GET_CONST_VALUE(Window*, Window, _window);
+		GET_CONST_VALUE(Window&, Window, *_window);
 		GET_CONST_VALUE(Entity*, Parent, _parent);
 		GET_CONST_VALUE(Flags, Flags, _flags);
 		GET_CONST_VALUE(u64, UpdateTick, _updateTick);

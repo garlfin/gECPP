@@ -20,7 +20,7 @@ gE::VoxelCapture::VoxelCapture(gE::Window* w, u16 resolution, float size, gE::En
 
 void gE::VoxelCapture::OnUpdate(float)
 {
-	VoxelPipeline::Buffers& buffers = GetWindow()->GetVoxelBuffers();
+	VoxelPipeline::Buffers& buffers = GetWindow().GetVoxelBuffers();
 	Transform& transform = GetTransform();
 
 	buffers.Scene.VoxelScale = _size / _resolution;

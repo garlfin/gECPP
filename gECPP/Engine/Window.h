@@ -49,7 +49,7 @@ namespace gE
 		SET_XVAL(SmartPointer<GL::TextureCube>, Cubemap, Cubemap);
 
 		// Managers
-		GET(ComponentManager<Camera>&, Cameras, Cameras);
+		GET(CameraManager&, Cameras, Cameras);
 		GET(TransformManager&, Transforms, Transforms);
 		GET(ComponentManager<Behavior>&, Behaviors, Behaviors);
 		GET(ComponentManager<MeshRenderer>&, Renderers, Renderers);

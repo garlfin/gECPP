@@ -23,7 +23,6 @@ namespace GL
 
 	Shader::Shader(gE::Window* window, const char* v, const char* f, const Array<PreprocessorPair>* p) : Asset(window)
 	{
-
 		ID = glCreateProgram();
 
 		ShaderStage frag(window, Fragment, f, p), vert(window, Vertex, v, p);
@@ -38,7 +37,6 @@ namespace GL
 	ShaderStage::ShaderStage(gE::Window* window, ShaderStageType type, const char* file, const Array<PreprocessorPair>* directives)
 		: Asset(window)
 	{
-
 		ID = glCreateShader(type);
 
 		gETF::SerializationBuffer directivesBuf{};
@@ -63,7 +61,6 @@ namespace GL
 
 	Shader::Shader(gE::Window* window, const ShaderStage& v, const ShaderStage& f) : Asset(window)
 	{
-
 		ID = glCreateProgram();
 
 		v.Attach(this);
@@ -78,7 +75,6 @@ namespace GL
 
 	Shader::Shader(gE::Window* window, const char* src, const Array<PreprocessorPair>* p) : Asset(window)
 	{
-
 		ID = glCreateProgram();
 
 		ShaderStage c(window, Compute, src, p);
@@ -93,7 +89,6 @@ namespace GL
 	template<typename T>
 	bool GetShaderStatus(const T& shader, char* source)
 	{
-
 		u32 id = shader.Get();
 
 		i32 shaderStatus;
@@ -133,27 +128,21 @@ namespace GL
 
 	void Shader::SetUniform(u8 loc, const Texture& tex, u8 slot) const
 	{
-
 		SetUniform(loc, tex.Use(slot));
 	}
 
 	void Shader::SetUniform(u8 loc, const Texture& tex) const
 	{
-
-		SetUniform(loc, GetWindow()->GetSlotManager().Increment(&tex));
+		SetUniform(loc, GetWindow().GetSlotManager().Increment(&tex));
 	}
 
-	DynamicUniform::DynamicUniform(Shader* s, u32 l) : _shader(s), _location(l)
-	{ }
-
-	DynamicUniform::DynamicUniform(Shader* s, const char* n) : _shader(s), _location(GetUniformLocation(n))
-	{ }
+	DynamicUniform::DynamicUniform(Shader* s, u32 l) : _shader(s), _location(l) { }
+	DynamicUniform::DynamicUniform(Shader* s, const char* n) : _shader(s), _location(GetUniformLocation(n)) { }
 
 	template<>
 	void DynamicUniform::Set(const Texture& t) const
 	{
-
-		_shader->SetUniform(_location, t, _shader->GetWindow()->GetSlotManager().Increment(&t));
+		_shader->SetUniform(_location, t, _shader->GetWindow().GetSlotManager().Increment(&t));
 	}
 }
 

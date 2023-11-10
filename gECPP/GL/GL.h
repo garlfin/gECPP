@@ -25,23 +25,19 @@ namespace GL
 		Asset& operator=(const Asset&) = delete;
 		Asset& operator=(Asset&&) = delete;
 
-		NODISCARD ALWAYS_INLINE uint32_t Get() const
-		{ return ID; }
-
 		virtual void Bind() const = 0;
 
-		NODISCARD ALWAYS_INLINE gE::Window* GetWindow() const
-		{ return _window; }
+		GET_CONST_VALUE(u32, , ID);
+		GET_CONST_VALUE(gE::Window&, Window, *_window);
 
 		virtual ~Asset() = 0;
 
 	 protected:
-		Asset(gE::Window* window) : _window(window)
-		{ };
+		Asset(gE::Window* window) : _window(window) { };
 		uint32_t ID;
 
 	 private:
-		gE::Window* const _window;
+		gE::Window* _window;
 	};
 
 	inline Asset::~Asset() = default;

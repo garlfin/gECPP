@@ -45,15 +45,15 @@ namespace gE
 	Behavior::Behavior(Entity* o)
 		: Component(o)
 	{
-		Window->GetBehaviors().Register(this);
+		GetWindow().GetBehaviors().Register(this);
 	}
 
 	Behavior::~Behavior()
 	{
-		Window->GetBehaviors().Remove(this);
+		GetWindow().GetBehaviors().Remove(this);
 	}
 
-	Component::Component(Entity* o) : _owner(o), Window(o->_window), Flags(o->_flags)
+	Component::Component(Entity* o) : _owner(o), _window(o->_window), Flags(o->_flags)
 	{
 
 	}

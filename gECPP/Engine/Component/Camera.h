@@ -27,10 +27,10 @@ namespace GL
     NODISCARD ALWAYS_INLINE TYPE* GetAttachment(u8 i) const { return (TYPE*) Attachments[i].Get(); } \
     NODISCARD ALWAYS_INLINE TYPE* GetAttachmentCopy(u8 i) const { return (TYPE*) AttachmentCopies[i].Get(); } \
     template<u8 I, bool COPY> \
-    NODISCARD ALWAYS_INLINE TYPE* GetAttachment() const      \
-    {                       \
-        if constexpr(COPY) return (TYPE*) *AttachmentCopies[I].Get(); \
-        else return (TYPE*) *Attachments[I].Get(); \
+    NODISCARD ALWAYS_INLINE TYPE* GetAttachment() const \
+    { \
+        if constexpr(COPY) return (TYPE*) AttachmentCopies[I].Get(); \
+        else return (TYPE*) Attachments[I].Get(); \
     }
 
 namespace gE
@@ -41,16 +41,15 @@ namespace gE
 		Camera(Entity* e, const SizelessCameraSettings&);
 
 		void OnUpdate(float delta) override { }
-
 		void OnRender(float delta) final;
 
-		virtual void GetGLCamera(GL::Camera&) const;
+		virtual void GetGLCamera(GL::Camera&);
 
 		GET_CONST_VALUE(CameraTiming, Timing, Timing);
 		GET_CONST_VALUE(gE::RenderPass, RenderPass, RenderPass);
 		GET_CONST_VALUE(gE::ClipPlanes, ClipPlanes, ClipPlanes);
-		GET_CONST(GL::FrameBuffer &, FrameBuffer, FrameBuffer);
-		GET_CONST(SizelessCameraSettings &, Settings, *this);
+		GET_CONST(GL::FrameBuffer&, FrameBuffer, FrameBuffer);
+		GET_CONST(SizelessCameraSettings&, Settings, *this);
 
 		CAMERA_GET(GL::Texture);
 
@@ -80,10 +79,10 @@ namespace gE
 		Camera2D(Entity*, const CameraSettings2D&);
 
 		CAMERA_GET(GL::Texture2D);
-
 		GET_CONST_VALUE(GL::TextureSize2D, Size, _size);
-
 		GET_CONST_VALUE(float, Aspect, (float) _size.x / _size.y);
+
+		void GetGLCamera(GL::Camera& camera) override;
 
 	 private:
 		const GL::TextureSize2D _size;
@@ -141,7 +140,7 @@ namespace gE
 
 		CAMERA_GET(GL::Texture3D);
 
-		void GetGLCamera(GL::Camera&) const override;
+		void GetGLCamera(GL::Camera&) override;
 
 		GET_CONST_VALUE(GL::TextureSize3D, Size, _size);
 
@@ -161,7 +160,7 @@ namespace gE
 
 		GET_CONST_VALUE(GL::TextureSize1D, Size, _size);
 
-		void GetGLCamera(GL::Camera& camera) const override;
+		void GetGLCamera(GL::Camera& camera) override;
 
 	 protected:
 		void UpdateProjection() override;
@@ -176,9 +175,11 @@ namespace gE
 		using ComponentManager<Camera>::ComponentManager;
 
 		GET_SET_VALUE(Camera*, CurrentCamera, _currentCamera);
+		GET_SET_VALUE(Camera*, CallingCamera, _callingCamera);
 
 	 private:
 		Camera* _currentCamera = nullptr;
+		Camera* _callingCamera = nullptr;
 	};
 }
 

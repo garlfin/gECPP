@@ -6,7 +6,8 @@
 
 #include <GL/Shader/Shader.h>
 #include <GL/Shader/Uniform.h>
-#include "Engine/AssetManager.h"
+#include <GL/Texture/Texture.h>
+#include <Engine/AssetManager.h>
 
 namespace gE
 {
@@ -48,60 +49,36 @@ namespace gE
 		const Reference<GL::Shader> _shader;
 		const DepthFunction _depthFunc;
 		const CullMode _cullMode;
+
+		GL::Uniform<GL::Texture2D> _colorUniform, _depthUniform;
 	};
 
 	template<class T>
 	class ValueUniform : private GL::Uniform<T>
 	{
 	 public:
-		ValueUniform(const Material* mat, const char* n, const T& t) : GL::Uniform<T>(&mat->GetShader(), n), _t(t)
-		{ };
+		ValueUniform(const Material* mat, const char* n, const T& t) : GL::Uniform<T>(&mat->GetShader(), n), _t(t) { };
+		ValueUniform(const Material* mat, const char* n, T&& t) : GL::Uniform<T>(&mat->GetShader(), n), _t(t) { };
+		ValueUniform(const Material* mat, u32 l, const T& t) : GL::Uniform<T>(&mat->GetShader(), l), _t(t) { };
+		ValueUniform(const Material* mat, u32 l, T&& t) : GL::Uniform<T>(&mat->GetShader(), l), _t(t) { };
 
-		ValueUniform(const Material* mat, const char* n, T&& t) : GL::Uniform<T>(&mat->GetShader(), n), _t(t)
-		{ };
-
-		ValueUniform(const Material* mat, u32 l, const T& t) : GL::Uniform<T>(&mat->GetShader(), l), _t(t)
-		{ };
-
-		ValueUniform(const Material* mat, u32 l, T&& t) : GL::Uniform<T>(&mat->GetShader(), l), _t(t)
-		{ };
 		ValueUniform(const ValueUniform&) = default;
 		ValueUniform(ValueUniform&&) = default;
 
-		ALWAYS_INLINE ValueUniform& operator=(const T& t)
-		{
-
-			_t = t;
-			return *this;
-		}
-
-		ALWAYS_INLINE ValueUniform& operator=(T&& t) noexcept
-		{
-
-			_t = t;
-			return *this;
-		}
+		ALWAYS_INLINE ValueUniform& operator=(const T& t){ _t = t; return *this; }
+		ALWAYS_INLINE ValueUniform& operator=(T&& t) noexcept { _t = t; return *this; }
 
 		ALWAYS_INLINE ValueUniform& operator=(ValueUniform&&) noexcept = default;
 		ALWAYS_INLINE ValueUniform& operator=(const ValueUniform&) = default;
+		ALWAYS_INLINE T* operator->() const { return _t; }
+		ALWAYS_INLINE T& operator*() const { return *_t; }
+		ALWAYS_INLINE operator bool() const { return (bool) _t; } // NOLINT
+		ALWAYS_INLINE operator T*() const { return _t; } // NOLINT
+		ALWAYS_INLINE operator T&() const { return *_t; } // NOLINT
 
-		ALWAYS_INLINE T* operator->() const
-		{ return _t; }
-
-		ALWAYS_INLINE T& operator*() const
-		{ return *_t; }
-
-		ALWAYS_INLINE operator bool() const
-		{ return (bool) _t; } // NOLINT
-		ALWAYS_INLINE operator T*() const
-		{ return _t; } // NOLINT
-		ALWAYS_INLINE operator T&() const
-		{ return *_t; } // NOLINT
-		ALWAYS_INLINE void Set() const
-		{ GL::Uniform<T>::Set(_t); }
+		ALWAYS_INLINE void Set() const { GL::Uniform<T>::Set(_t); }
 
 		GET_SET(T &, , _t);
-
 		SET_XVAL(T, , _t);
 
 	 private:

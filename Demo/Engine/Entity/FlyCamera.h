@@ -24,14 +24,15 @@ namespace VoxelDemo
 	 public:
 		explicit FlyCamera(gE::Window* window) :
 			gE::Entity(window),
-			_camera(this, { gE::CameraSettings2D(FlyCameraSettings, window->GetSize()) }),
+			_camera(&window->GetCameras(), this, gE::CameraSettings2D(FlyCameraSettings, GetWindow().GetSize())),
 			_movement(this)
-		{}
+		{
+		}
 
 		GET(gE::PerspectiveCamera&, Camera, _camera);
 
 	 private:
-		gE::PerspectiveCamera _camera;
+		gE::RegistryPair<gE::PerspectiveCamera, gE::Camera> _camera;
 		Movement _movement;
 	};
 }

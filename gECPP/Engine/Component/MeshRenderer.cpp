@@ -8,10 +8,10 @@
 gE::MeshRenderer::MeshRenderer(gE::Entity* owner, const gETF::MeshReference& mesh, const gE::MaterialHolder* mat)
 	: Component(owner), _mesh(mesh), _materialHolder(mat)
 {
-	Window->GetRenderers().Register(this);
+	GetWindow().GetRenderers().Register(this);
 	if(_mesh->VAO) return;
 
-	_mesh->CreateVAO(Window);
+	_mesh->CreateVAO(&GetWindow());
 	_mesh->Free();
 }
 
@@ -19,10 +19,10 @@ void gE::MeshRenderer::OnUpdate(float delta) { }
 
 void gE::MeshRenderer::OnRender(float delta)
 {
-	DefaultPipeline::Buffers& buffers = Window->GetPipelineBuffers();
+	DefaultPipeline::Buffers& buffers = GetWindow().GetPipelineBuffers();
 
 	buffers.Scene.InstanceCount = 1;
-	buffers.Scene.Time = Window->GetTime();
+	buffers.Scene.Time = GetWindow().GetTime();
 	buffers.Scene.Model[0] = GetOwner()->GetTransform().Model();
 	buffers.Scene.Normal[0] = glm::mat3(1);
 	buffers.UpdateScene(offsetof(GL::Scene, Normal[1]), offsetof(GL::Scene, InstanceCount));
@@ -38,5 +38,5 @@ void gE::MeshRenderer::OnRender(float delta)
 gE::Material& gE::MaterialHolder::GetMaterial(u8 i) const
 {
 	GE_ASSERT(i < GE_MAX_MATERIAL, "MATERIAL OUT OF RANGE");
-	return _materials[i] || Window->GetDefaultMaterial();
+	return _materials[i] || GetWindow().GetDefaultMaterial();
 }

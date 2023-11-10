@@ -19,8 +19,7 @@ namespace GL
 
 		NODISCARD u8 Increment(const Texture* t);
 
-		ALWAYS_INLINE void Reset()
-		{ _index = 0; }
+		ALWAYS_INLINE void Reset() { _index = 0; }
 
 	 private:
 		const Texture* _textures[GL_MAX_TEXTURE_SLOT]{};

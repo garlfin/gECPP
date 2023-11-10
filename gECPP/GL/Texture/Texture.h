@@ -30,7 +30,7 @@ namespace GL
 		TextureHandle GetHandle();
 		virtual void CopyFrom(const GL::Texture&) = 0;
 
-		explicit ALWAYS_INLINE operator TextureHandle() const { return _handle; }
+		explicit ALWAYS_INLINE operator TextureHandle() { GetHandle(); return _handle; }
 
 		GET_CONST_VALUE(GLenum, Format, Format);
 		GET_CONST_VALUE(GLenum, Target, Target);

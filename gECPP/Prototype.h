@@ -29,7 +29,7 @@ namespace gE
 	};
 
 	template<class T>
-	concept IsComponent = requires(T t)
+	concept IsComponent = requires(T& t)
 	{
 		t.OnUpdate(0.f);
 		t.OnRender(0.f);

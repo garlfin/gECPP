@@ -14,7 +14,7 @@ namespace gE
 		explicit Component(Entity* o);;
 
 		GET_CONST_VALUE(Entity*, Owner, _owner);
-		GET_CONST_VALUE(Window*, Window, Window);
+		GET_CONST_VALUE(Window&, Window, *_window);
 		GET_CONST_VALUE(Flags, Flags, Flags);
 		GET_CONST_VALUE(u64, UpdateTick, _updateTick);
 		GET_CONST_VALUE(u64, RenderTick, _renderTick);
@@ -26,11 +26,11 @@ namespace gE
 		virtual ~Component() = default;
 
 	 protected:
-		Window* const Window;
 		Flags& Flags;
 
 	 private:
-		Entity* const _owner;
+		Window* _window;
+		Entity* _owner;
 		u64 _updateTick = 0, _renderTick = 0;
 
 		template<class T> requires IsComponent<T>
