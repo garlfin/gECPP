@@ -27,4 +27,17 @@ namespace gE
 		//bool FutureUse : 1 = false;
 		u8 Layer : 4 = 0;
 	};
+
+	template<class T>
+	concept IsComponent = requires(T t)
+	{
+		t.OnUpdate(0.f);
+		t.OnRender(0.f);
+		t.OnDestroy();
+		t.GetUpdateTick();
+		t.GetRenderTick();
+	};
+
+	template<class T> requires IsComponent<T>
+	class Manager;
 }

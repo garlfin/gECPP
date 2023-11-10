@@ -23,7 +23,8 @@ namespace gE
 		GET_CONST_VALUE(Window*, Window, _window);
 		GET_CONST_VALUE(Entity*, Parent, _parent);
 		GET_CONST_VALUE(Flags, Flags, _flags);
-
+		GET_CONST_VALUE(u64, UpdateTick, _updateTick);
+		GET_CONST_VALUE(u64, RenderTick, _renderTick);
 
 		virtual void OnInit() { };
 		virtual void OnUpdate(float delta) { };
@@ -37,9 +38,13 @@ namespace gE
 		Entity* _parent = nullptr;
 		Flags _flags = (Flags) 0;
 		std::vector<Entity*> _children;
+		u64 _updateTick = 0, _renderTick = 0;
 
 		Transform _transform = Transform(this);
 
 		friend class Component;
+
+		template<class T> requires IsComponent<T>
+		friend class Manager;
 	};
 }

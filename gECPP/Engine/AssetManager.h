@@ -19,7 +19,6 @@ namespace gE
 
 		Reference(Reference&& o) noexcept : _t(o._t), _counter(o._counter)
 		{
-
 			o._t = nullptr;
 			o._counter = nullptr;
 		}
@@ -67,10 +66,10 @@ namespace gE
 		class Reference;
 	};
 
-	template<class T, typename... ARGS>
+	template<class T, typename... ARGS> requires requires(ARGS&&... a) { T(std::forward<ARGS>(a)...); }
 	ALWAYS_INLINE Reference<T> CreateReference(ARGS&& ... args)
 	{
-		return Reference<T>(new T(args...));
+		return Reference<T>(new T(std::forward<ARGS>(args)...));
 	}
 
 	/// Gives ownership of the pointer to the Reference.
@@ -116,10 +115,10 @@ namespace gE
 		class SmartPointer;
 	};
 
-	template<typename T, typename... ARGS>
-	ALWAYS_INLINE SmartPointer<T> CreateSmartPointer(ARGS&& ... args)
+	template<typename T, typename... ARGS> requires requires(ARGS&&... a) { T(std::forward<ARGS>(a)...); }
+	ALWAYS_INLINE SmartPointer<T> CreateSmartPointer(ARGS&&... args)
 	{
-		return SmartPointer<T>(new T(args...));
+		return SmartPointer<T>(new T(std::forward<ARGS>(args)...));
 	}
 
 	/// Gives ownership of the pointer to the SmartPointer.

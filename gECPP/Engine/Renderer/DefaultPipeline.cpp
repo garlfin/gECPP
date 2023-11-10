@@ -10,7 +10,6 @@ namespace gE
 	gE::DefaultPipeline::Buffers::Buffers(Window* window)
 		: _sceneBuffer(window), _cameraBuffer(window)
 	{
-
 		_sceneBuffer.Bind(GL::BufferTarget::Uniform, 0);
 		_cameraBuffer.Bind(GL::BufferTarget::Uniform, 1);
 	}
@@ -35,21 +34,17 @@ namespace gE
 		window->GetRenderers().OnRender(0.f);
 	}
 
-	void DefaultPipeline::RenderPass3D(Window*, Camera3D*)
-	{ }
+	void DefaultPipeline::RenderPass3D(Window*, Camera3D*) { }
 
-	void DefaultPipeline::RenderPassDirectionalShadow(Window*, Camera2D*)
-	{ }
+	void DefaultPipeline::RenderPassDirectionalShadow(Window*, Camera2D*) { }
 
-	#ifdef DEBUG
-
+#ifdef DEBUG
 	// this will only really be used in debug; not too concerned w/ perf
 	bool PostProcessPass::CheckRequirements(const Camera& cam) const
 	{
-
 		const AttachmentSettings& settings = cam.GetSettings().RenderAttachments;
 
-		if(Requirements.Depth != settings.Depth) return false;
+		if(settings.Depth && Requirements.Depth != settings.Depth) return false;
 		if(Requirements.CopyDepth && !settings.CopyDepth) return false;
 
 		for(u8 i = 0; i < GE_MAX_ATTACHMENTS; i++)
@@ -60,6 +55,5 @@ namespace gE
 		}
 		return true;
 	}
-
-	#endif
+#endif
 }

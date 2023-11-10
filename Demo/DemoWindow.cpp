@@ -22,6 +22,7 @@ void DemoWindow::OnUpdate(float delta)
 void DemoWindow::OnRender(float delta)
 {
 	Transforms.OnRender(delta);
+	Behaviors.OnRender(delta);
 	Cameras.OnRender(delta);
 
 	GL::FrameBuffer::Reset();

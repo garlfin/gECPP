@@ -110,6 +110,8 @@ void Window::OnInit()
 
 	BlitShader = CreateSmartPointer<GL::Shader>(this, "Resource/Shader/blit.vert", "Resource/Shader/blit.frag");
 
+	Sun = CreateSmartPointer<gE::DirectionalLight>(this, 256, 10);
+
 	auto defaultShader = CreateReference<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/missing.frag");
 	DefaultMaterial = CreateSmartPointer<gE::Material>(this, defaultShader);
 }

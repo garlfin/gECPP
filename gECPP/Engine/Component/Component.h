@@ -14,10 +14,10 @@ namespace gE
 		explicit Component(Entity* o);;
 
 		GET_CONST_VALUE(Entity*, Owner, _owner);
-
 		GET_CONST_VALUE(Window*, Window, Window);
-
 		GET_CONST_VALUE(Flags, Flags, Flags);
+		GET_CONST_VALUE(u64, UpdateTick, _updateTick);
+		GET_CONST_VALUE(u64, RenderTick, _renderTick);
 
 		virtual void OnUpdate(float) = 0;
 		virtual void OnRender(float) = 0;
@@ -31,6 +31,10 @@ namespace gE
 
 	 private:
 		Entity* const _owner;
+		u64 _updateTick = 0, _renderTick = 0;
+
+		template<class T> requires IsComponent<T>
+		friend class Manager;
 	};
 
 	class Behavior : public Component

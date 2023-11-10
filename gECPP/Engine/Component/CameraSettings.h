@@ -95,12 +95,17 @@ namespace gE
 
 	struct PerspectiveCameraSettings : public CameraSettings2D
 	{
+		PerspectiveCameraSettings(const CameraSettings2D& s, float f = 80.f, AngleType t = AngleType::Degree) : CameraSettings2D(s),
+			FOV(f), Type(t)
+		{}
+
 		float FOV = 80.f;
-		AngleType Type = AngleType::Radian;
+		AngleType Type = AngleType::Degree;
 	};
 
 	struct OrthographicCameraSettings : public CameraSettings2D
 	{
+		OrthographicCameraSettings(const CameraSettings2D& s, const glm::vec4& scale) : CameraSettings2D(s), Scale(scale) {};
 		glm::vec4 Scale;
 	};
 }
