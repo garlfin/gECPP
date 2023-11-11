@@ -35,14 +35,16 @@ void gE::Transform::OnRender(float)
 	_model = glm::scale(_model, Scale);
 }
 
-gE::Transform::Transform(gE::Entity* o)
-	: Component(o)
+gE::Transform::Transform(gE::Entity* o) : Component(o, &o->GetWindow().GetTransforms())
 {
-	GetWindow().GetTransforms().Register(this);
 }
 
 gE::Transform::~Transform()
 {
-	GetWindow().GetTransforms().Remove(this);
+}
+
+gE::Transform::Transform(gE::Entity* o, const gE::TransformData& d) : Component(o, &o->GetWindow().GetTransforms())
+{
+	Set(d);
 }
 

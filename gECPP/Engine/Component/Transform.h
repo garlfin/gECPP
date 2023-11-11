@@ -23,8 +23,7 @@ namespace gE
 	class Transform : public Component, public TransformData
 	{
 	 public:
-		Transform(Entity* o, const TransformData& d) : Component(o)
-		{ Set(d); }
+		Transform(Entity* o, const TransformData& d);
 
 		explicit Transform(Entity* o);
 

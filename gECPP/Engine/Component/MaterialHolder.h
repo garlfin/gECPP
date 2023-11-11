@@ -13,10 +13,10 @@ namespace gE
 	class MaterialHolder : public Component
 	{
 	 public:
-		explicit MaterialHolder(gE::Entity* o) : Component(o) { };
+		explicit MaterialHolder(gE::Entity* o) : Component(o, nullptr) { };
 
 		explicit MaterialHolder(gE::Entity* o, const Array<Reference<Material>>& materials = {})
-			: Component(o)
+			: Component(o, nullptr)
 		{
 			if(materials.Size()) materials.CopyToCArray(_materials);
 		}

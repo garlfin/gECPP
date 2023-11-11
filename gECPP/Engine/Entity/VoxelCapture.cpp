@@ -6,7 +6,7 @@
 #include <Engine/Window.h>
 
 gE::VoxelCapture::VoxelCapture(gE::Window* w, u16 resolution, float size, gE::Entity* p) : Entity(w, p),
-	_camera(this, CameraSettings3D(
+	_camera(this, nullptr, CameraSettings3D(
 	   SizelessCameraSettings{
 		   (RenderPass) VoxelPipeline::RenderPass3D,
 		   { 0.01, resolution },

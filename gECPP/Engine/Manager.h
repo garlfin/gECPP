@@ -12,81 +12,69 @@ namespace gE
 {
 	class Window;
 
-	template<class T> requires IsComponent<T>
-	class Manager : protected std::vector<T*>
+	class Manager : protected std::vector<Updateable*>
 	{
 	 public:
 		Manager() = default;
 
-		inline virtual void Register(T* t) { VEC_T::push_back(t); }
-		inline virtual void Remove(T* t) { RemoveFirstFromVec(*this, t); }
+		inline virtual void Register(Updateable* t) { push_back(t); }
+		inline virtual void Remove(Updateable* t) { RemoveFirstFromVec(*this, t); }
 
+		NODISCARD ALWAYS_INLINE size_t Size() const { return size(); }
+
+	 protected:
 		virtual void OnUpdate(float delta)
 		{
 			_updateTick++;
-			for(T* t: *this)
+			for(Updateable* t: *this)
 			{
+				if(t->_updateTick == _updateTick) continue; // Prevents a component from running twice in a frame
 				if (t->GetFlags().Deletion)
 					t->OnDestroy();
 				else
 					t->OnUpdate(delta);
+				t->_updateTick = _updateTick;
 			}
 		}
 
 		virtual void OnRender(float delta)
 		{
 			_renderTick++;
-			for(T* t: *this)
+			for(Updateable* t: *this)
 			{
-
+				if(t->_renderTick == _renderTick) continue; // Prevents a component from running twice in a frame
 				t->OnRender(delta);
+				t->_renderTick = _renderTick;
 			}
 		}
 
-		NODISCARD ALWAYS_INLINE size_t Size() const { return VEC_T::size(); }
-
-		using std::vector<T*>::operator[];
+		using std::vector<Updateable*>::operator[];
 
 	 protected:
-		typedef std::vector<T*> VEC_T;
-		inline bool Contains(T* v) { return std::find(VEC_T::begin(), VEC_T::end(), v) != VEC_T::end(); }
+		
+		inline bool Contains(Updateable* v) { return std::find(begin(), end(), v) != end(); }
 		u64 _updateTick = 0, _renderTick = 0;
 	};
 
 	template<class T>
-	using ComponentManager = Manager<T>;
+	class TypedManager : public Manager
+	{
+	 public:
+		TypedManager() = default;
 
-	// TODO: Consider moving into Component
+		inline virtual void Register(T* t) { Manager::Register(t); }
+		inline virtual void Remove(T* t) { Manager::Remove(t); }
+
+		using Manager::Size;
+		using Manager::OnUpdate;
+		using Manager::OnRender;
+
+		NODISCARD ALWAYS_INLINE T* operator[](size_t i) const { return (T*) Manager::operator[](i); }
+	};
+
 	template<class T>
-	class Registry
-	{
-	 public:
-		Registry(T* t, Manager<T>* m) : _t(t), _manager(m) { m->Register(t); }
-		~Registry() { _manager->Remove(_t); }
-	 private:
-		T* _t;
-		Manager<T>* _manager;
-	};
+	using ComponentManager = TypedManager<T>;
 
-	template<class T, class I>
-	class RegistryPair : public Registry<I>
-	{
-	 public:
-		template<typename... ARGS>
-		explicit RegistryPair(Manager<I>* m, ARGS&&... args) : Object(std::forward<ARGS>(args)...), Registry<I>(&Object, m) {};
-
-		ALWAYS_INLINE T* Get() const { return Object; }
-
-		ALWAYS_INLINE const T& operator*() const { return Object; }
-		ALWAYS_INLINE T& operator*() { return Object; }
-		ALWAYS_INLINE const T* operator->() const { return &Object; }
-		ALWAYS_INLINE T* operator->() { return &Object; }
-
-		ALWAYS_INLINE operator const T&() const { return Object; } // NOLINT
-		ALWAYS_INLINE operator T&() { return Object; } // NOLINT
-		ALWAYS_INLINE operator const T*() const { return &Object; } // NOLINT
-		ALWAYS_INLINE operator T*() { return &Object; } // NOLINT
-
-		T Object;
-	};
+	template<class T>
+	using EntityManager = TypedManager<T>;
 }

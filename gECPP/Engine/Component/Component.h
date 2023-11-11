@@ -8,33 +8,26 @@
 
 namespace gE
 {
-	class Component
+	class Component : public Updateable
 	{
 	 public:
-		explicit Component(Entity* o);;
+		explicit Component(Entity* o, Manager* manager);
 
 		GET_CONST_VALUE(Entity*, Owner, _owner);
 		GET_CONST_VALUE(Window&, Window, *_window);
-		GET_CONST_VALUE(Flags, Flags, Flags);
-		GET_CONST_VALUE(u64, UpdateTick, _updateTick);
-		GET_CONST_VALUE(u64, RenderTick, _renderTick);
 
-		virtual void OnUpdate(float) = 0;
-		virtual void OnRender(float) = 0;
-		virtual void OnDestroy() { };
+		void OnUpdate(float d) override { }
+		void OnRender(float d) override { }
+		void OnDestroy() override { };
 
-		virtual ~Component() = default;
-
-	 protected:
-		Flags& Flags;
+		~Component() override = default;
 
 	 private:
 		Window* _window;
 		Entity* _owner;
-		u64 _updateTick = 0, _renderTick = 0;
 
-		template<class T> requires IsComponent<T>
 		friend class Manager;
+		template<class T> friend class TypedManager;
 	};
 
 	class Behavior : public Component
@@ -56,7 +49,7 @@ namespace gE
 	class TypedComponent : public Component
 	{
 	 public:
-		inline explicit TypedComponent(gE::Entity* o) : Component(o) { };
+		inline explicit TypedComponent(T* o, Manager* manager = nullptr) : Component(o, manager) { };
 
 		GET_CONST_VALUE(T*, Owner, (T*) Component::GetOwner());
 	};
@@ -65,7 +58,7 @@ namespace gE
 	class TypedBehavior : public Behavior
 	{
 	 public:
-		inline explicit TypedBehavior(gE::Entity* o) : Behavior(o) { };
+		inline explicit TypedBehavior(T* o) : Behavior(o) { };
 
 		GET_CONST_VALUE(T*, Owner, (T*) Component::GetOwner());
 	};

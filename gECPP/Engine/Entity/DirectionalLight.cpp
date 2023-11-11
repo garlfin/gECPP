@@ -15,7 +15,7 @@ namespace gE
 	};
 
 	DirectionalLight::DirectionalLight(Window* w, u16 size, float scale) : Entity(w),
-		_camera(this, { { DirectionalSettings, glm::u32vec2(size) }, glm::vec4(scale) })
+		_camera(this, nullptr, { { DirectionalSettings, glm::u32vec2(size) }, glm::vec4(scale) })
 	{
 
 	}

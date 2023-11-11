@@ -38,7 +38,7 @@ namespace gE
 	class Camera : public Component, protected SizelessCameraSettings
 	{
 	 public:
-		Camera(Entity* e, const SizelessCameraSettings&);
+		Camera(Entity* e, Manager*, const SizelessCameraSettings&);
 
 		void OnUpdate(float delta) override { }
 		void OnRender(float delta) final;
@@ -76,7 +76,7 @@ namespace gE
 	class Camera2D : public Camera
 	{
 	 public:
-		Camera2D(Entity*, const CameraSettings2D&);
+		Camera2D(Entity*, Manager*, const CameraSettings2D&);
 
 		CAMERA_GET(GL::Texture2D);
 		GET_CONST_VALUE(GL::TextureSize2D, Size, _size);
@@ -91,7 +91,7 @@ namespace gE
 	class PerspectiveCamera : public Camera2D
 	{
 	 public:
-		PerspectiveCamera(Entity* e, const PerspectiveCameraSettings& s);
+		PerspectiveCamera(Entity* e, Manager*, const PerspectiveCameraSettings& s);
 
 		template<AngleType T = AngleType::Degree>
 		NODISCARD ALWAYS_INLINE float GetFOV() const
@@ -122,7 +122,7 @@ namespace gE
 	class OrthographicCamera : public Camera2D
 	{
 	 public:
-		OrthographicCamera(Entity* e, const OrthographicCameraSettings& s);
+		OrthographicCamera(Entity* e, Manager*, const OrthographicCameraSettings& s);
 
 		GET_CONST(glm::vec4 &, Scale, _orthographicScale);
 
@@ -136,7 +136,7 @@ namespace gE
 	class Camera3D : public Camera
 	{
 	 public:
-		Camera3D(Entity*, const CameraSettings3D&);
+		Camera3D(Entity*, Manager*, const CameraSettings3D&);
 
 		CAMERA_GET(GL::Texture3D);
 
@@ -154,7 +154,7 @@ namespace gE
 	class CameraCubemap : public Camera
 	{
 	 public:
-		CameraCubemap(Entity*, const CameraSettings1D&);
+		CameraCubemap(Entity*, Manager*, const CameraSettings1D&);
 
 		CAMERA_GET(GL::TextureCube);
 

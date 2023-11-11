@@ -28,16 +28,32 @@ namespace gE
 		u8 Layer : 4 = 0;
 	};
 
-	template<class T>
-	concept IsComponent = requires(T& t)
-	{
-		t.OnUpdate(0.f);
-		t.OnRender(0.f);
-		t.OnDestroy();
-		t.GetUpdateTick();
-		t.GetRenderTick();
-	};
-
-	template<class T> requires IsComponent<T>
 	class Manager;
+
+	template<class T>
+	class TypedManager;
+
+	class Updateable
+	{
+	 public:
+		Updateable(Manager* manager, Flags& flags);
+
+		GET_CONST_VALUE(u64, UpdateTick, _updateTick);
+		GET_CONST_VALUE(u64, RenderTick, _renderTick);
+		GET_CONST_VALUE(Flags, Flags, _flags);
+
+		virtual void OnUpdate(float) = 0;
+		virtual void OnRender(float) = 0;
+		virtual void OnDestroy() = 0;
+
+		virtual ~Updateable();
+
+	 private:
+		Manager* _manager;
+		u64 _updateTick = 0, _renderTick = 0;
+		Flags& _flags;
+
+		friend class Manager;
+		template<class T> friend class TypedManager;
+	};
 }

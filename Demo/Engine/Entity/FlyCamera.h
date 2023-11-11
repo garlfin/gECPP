@@ -22,9 +22,8 @@ namespace VoxelDemo
 	class FlyCamera : public gE::Entity
 	{
 	 public:
-		explicit FlyCamera(gE::Window* window) :
-			gE::Entity(window),
-			_camera(&window->GetCameras(), this, gE::CameraSettings2D(FlyCameraSettings, GetWindow().GetSize())),
+		explicit FlyCamera(gE::Window* window) : gE::Entity(window),
+			_camera(this, &window->GetCameras(), gE::CameraSettings2D(FlyCameraSettings, GetWindow().GetSize())),
 			_movement(this)
 		{
 		}
@@ -32,7 +31,7 @@ namespace VoxelDemo
 		GET(gE::PerspectiveCamera&, Camera, _camera);
 
 	 private:
-		gE::RegistryPair<gE::PerspectiveCamera, gE::Camera> _camera;
+		gE::PerspectiveCamera _camera;
 		Movement _movement;
 	};
 }

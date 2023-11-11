@@ -9,9 +9,10 @@ namespace gE
 	void TransformManager::OnUpdate(float delta)
 	{
 		std::vector<Entity*> stack;
-		for(Transform* t: *this)
+		for(Updateable* t: *this)
 		{
-			stack.push_back(t->GetOwner());
+
+			stack.push_back(((Component*) t)->GetOwner());
 
 			while(!stack.empty())
 			{
@@ -27,6 +28,6 @@ namespace gE
 
 	void TransformManager::Register(Transform* t)
 	{
-		if(!t->GetOwner()->GetParent()) Manager::Register(t);
+		if(!t->GetOwner()->GetParent()) TypedManager::Register(t);
 	}
 }

@@ -8,7 +8,7 @@
 
 namespace gE
 {
-	Entity::Entity(Window* w, Entity* parent) : _window(w), _parent(parent)
+	Entity::Entity(Window* w, Entity* parent, Manager* manager) : Updateable(manager, _flags), _window(w), _parent(parent)
 	{
 		if(parent) parent->_children.push_back(this);
 	}
@@ -40,10 +40,8 @@ namespace gE
 
 	}
 
-	Entity::~Entity() = default;
-
 	Behavior::Behavior(Entity* o)
-		: Component(o)
+		: Component(o, &o->GetWindow().GetBehaviors())
 	{
 		GetWindow().GetBehaviors().Register(this);
 	}
@@ -53,8 +51,7 @@ namespace gE
 		GetWindow().GetBehaviors().Remove(this);
 	}
 
-	Component::Component(Entity* o) : _owner(o), _window(o->_window), Flags(o->_flags)
+	Component::Component(Entity* o, Manager* manager) : Updateable(manager, o->_flags), _owner(o), _window(o->_window)
 	{
-
 	}
 }

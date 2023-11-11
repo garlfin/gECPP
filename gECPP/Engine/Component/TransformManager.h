@@ -10,10 +10,10 @@
 
 namespace gE
 {
-	class TransformManager : public Manager<Transform>
+	class TransformManager : public TypedManager<Transform>
 	{
 	 public:
-		using Manager<Transform>::Manager;
+		using TypedManager<Transform>::TypedManager;
 
 		void Register(Transform* t) override;
 		void OnUpdate(float delta) override;
