@@ -19,7 +19,7 @@ namespace GL
 	struct Camera
 	{
 		glm::vec3 Position;
-		u32 Stage;
+		float Time;
 		GL_ALIGN glm::vec2 ClipPlanes;
 		glm::vec2 Parameters;
 
@@ -30,8 +30,6 @@ namespace GL
 		glm::mat4 PreviousViewProjection;
 		glm::mat4 View[6];
 	};
-
-
 
 	enum class LightType : uint
 	{
@@ -64,7 +62,7 @@ namespace GL
 		Light Lights[GE_MAX_LIGHT];
 		GL_ALIGN Cubemap Cubemaps[GE_MAX_CUBEMAP];
 		uint InstanceCount;
-		float Time;
+		uint Stage;
 		GL_ALIGN glm::mat4 Model[GE_MAX_INSTANCE];
 		glm::mat3x4 Normal[GE_MAX_INSTANCE]; // for alignment purposes.
 	};

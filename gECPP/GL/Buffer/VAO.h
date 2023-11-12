@@ -15,7 +15,7 @@ namespace GL
 	 public:
 		VAO(gE::Window* window, const gETF::Mesh* settings);
 
-		GET_CONST_VALUE(const gETF::Mesh*, Settings, _settings);
+		GET_CONST(const gETF::Mesh*, Settings, _settings);
 
 		ALWAYS_INLINE void Bind() const final
 		{ glBindVertexArray(ID); }

@@ -14,7 +14,7 @@ namespace GL
 		DynamicUniform(Shader*, u32);
 		DynamicUniform(Shader*, const char*);
 
-		GET_CONST_VALUE(u32, , _location);
+		GET_CONST(u32, , _location);
 
 		template<class T>
 		ALWAYS_INLINE void Set(const T& t) const { if(_location != -1) _shader->SetUniform(_location, t); }

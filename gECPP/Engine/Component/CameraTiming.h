@@ -17,8 +17,8 @@ namespace gE
 
 		OPERATOR_EQUALS(CameraTiming);
 
-		GET_CONST_VALUE(u64, Frame, _frame);
-		GET_CONST_VALUE(bool, IsFirst, _isFirst);
+		GET_CONST(u64, Frame, _frame);
+		GET_CONST(bool, IsFirst, _isFirst);
 
 		u8 TickOffset = 0;
 		u8 TickSkip = 1;

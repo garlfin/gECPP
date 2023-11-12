@@ -20,9 +20,11 @@ void main()
     mat4 ViewProjection = Camera.Projection * Camera.View[ViewIndex];
 
     Vertex.FragPos = (Scene.Model[ModelIndex] * vec4(Position, 1)).xyz;
+    Vertex.UV = UV;
+
     gl_Position = ViewProjection * Scene.Model[ModelIndex] * vec4(Vertex.FragPos, 1);
 
-    Vertex.UV = UV;
+    if(Scene.Stage == STAGE_PRE_Z) return;
 
     vec3 v_Normal, v_Tangent, v_Bitangent;
     v_Normal = normalize(Scene.Normal[ModelIndex] * Normal);

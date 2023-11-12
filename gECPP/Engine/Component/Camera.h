@@ -45,18 +45,16 @@ namespace gE
 
 		virtual void GetGLCamera(GL::Camera&);
 
-		GET_CONST_VALUE(CameraTiming, Timing, Timing);
-		GET_CONST_VALUE(gE::RenderPass, RenderPass, RenderPass);
-		GET_CONST_VALUE(gE::ClipPlanes, ClipPlanes, ClipPlanes);
-		GET_CONST(GL::FrameBuffer&, FrameBuffer, FrameBuffer);
-		GET_CONST(SizelessCameraSettings&, Settings, *this);
+		GET_CONST(CameraTiming, Timing, Timing);
+		GET_CONST(gE::RenderPass, RenderPass, RenderPass);
+		GET_CONST(gE::ClipPlanes, ClipPlanes, ClipPlanes);
+		GET_CONST(const GL::FrameBuffer&, FrameBuffer, FrameBuffer);
+		GET_CONST(const SizelessCameraSettings&, Settings, *this);
 
 		CAMERA_GET(GL::Texture);
 
 		template<class TEX_T, class CAM_T>
 		static void CreateAttachments(CAM_T& cam, const gE::AttachmentSettings& settings);
-
-		~Camera() override;
 
 	 protected:
 		virtual void UpdateProjection() = 0;
@@ -79,8 +77,8 @@ namespace gE
 		Camera2D(Entity*, Manager*, const CameraSettings2D&);
 
 		CAMERA_GET(GL::Texture2D);
-		GET_CONST_VALUE(GL::TextureSize2D, Size, _size);
-		GET_CONST_VALUE(float, Aspect, (float) _size.x / _size.y);
+		GET_CONST(GL::TextureSize2D, Size, _size);
+		GET_CONST(float, Aspect, (float) _size.x / _size.y);
 
 		void GetGLCamera(GL::Camera& camera) override;
 
@@ -124,7 +122,7 @@ namespace gE
 	 public:
 		OrthographicCamera(Entity* e, Manager*, const OrthographicCameraSettings& s);
 
-		GET_CONST(glm::vec4 &, Scale, _orthographicScale);
+		GET_CONST(const glm::vec4&, Scale, _orthographicScale);
 
 	 protected:
 		void UpdateProjection() override;
@@ -142,7 +140,7 @@ namespace gE
 
 		void GetGLCamera(GL::Camera&) override;
 
-		GET_CONST_VALUE(GL::TextureSize3D, Size, _size);
+		GET_CONST(GL::TextureSize3D, Size, _size);
 
 	 protected:
 		void UpdateProjection() override;
@@ -158,7 +156,7 @@ namespace gE
 
 		CAMERA_GET(GL::TextureCube);
 
-		GET_CONST_VALUE(GL::TextureSize1D, Size, _size);
+		GET_CONST(GL::TextureSize1D, Size, _size);
 
 		void GetGLCamera(GL::Camera& camera) override;
 

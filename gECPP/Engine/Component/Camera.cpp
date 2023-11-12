@@ -38,15 +38,10 @@ void gE::Camera::OnRender(float delta)
 		if(AttachmentCopies[i]) AttachmentCopies[i]->CopyFrom(Attachments[i]);
 }
 
-gE::Camera::~Camera()
-{
-	GetOwner()->GetWindow().GetCameras().Remove(this);
-}
-
 void gE::Camera::GetGLCamera(GL::Camera& cam)
 {
 	cam.Position = GetOwner()->GetTransform().GlobalTranslation();
-	cam.Stage = (u32) GetWindow().GetRenderStage();
+	cam.Time = GetWindow().GetTime();
 	cam.ClipPlanes = GetClipPlanes();
 	cam.Projection = Projection;
 
@@ -54,7 +49,6 @@ void gE::Camera::GetGLCamera(GL::Camera& cam)
 	else cam.DepthTexture = (GL::TextureHandle) *GetDepthAttachment();
 
 	if(GL::Texture* t = GetAttachment<0, true>()) cam.ColorTexture = (GL::TextureHandle) *t;
-
 	// Parameters, View set by override;
 }
 

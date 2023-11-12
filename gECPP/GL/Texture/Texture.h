@@ -32,9 +32,9 @@ namespace GL
 
 		explicit ALWAYS_INLINE operator TextureHandle() { GetHandle(); return _handle; }
 
-		GET_CONST_VALUE(GLenum, Format, Format);
-		GET_CONST_VALUE(GLenum, Target, Target);
-		GET_CONST_VALUE(GLenum, MipCount, Mips);
+		GET_CONST(GLenum, Format, Format);
+		GET_CONST(GLenum, Target, Target);
+		GET_CONST(GLenum, MipCount, Mips);
 
 		~Texture() override;
 

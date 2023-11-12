@@ -38,9 +38,7 @@ namespace gE
 	 public:
 		Updateable(Manager* manager, Flags& flags);
 
-		GET_CONST_VALUE(u64, UpdateTick, _updateTick);
-		GET_CONST_VALUE(u64, RenderTick, _renderTick);
-		GET_CONST_VALUE(Flags, Flags, _flags);
+		GET_CONST(Flags, Flags, _flags);
 
 		virtual void OnUpdate(float) = 0;
 		virtual void OnRender(float) = 0;
@@ -50,7 +48,6 @@ namespace gE
 
 	 private:
 		Manager* _manager;
-		u64 _updateTick = 0, _renderTick = 0;
 		Flags& _flags;
 
 		friend class Manager;

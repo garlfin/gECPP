@@ -18,16 +18,14 @@ namespace gE
 
 		void Destroy(bool flagChildren = true);
 
-		GET(Transform &, Transform, _transform);
-		GET_CONST(std::vector<Entity*> &, Children, _children);
-		GET_CONST_VALUE(Window&, Window, *_window);
-		GET_CONST_VALUE(Entity*, Parent, _parent);
+		GET_REGULAR(Transform&, Transform, _transform);
+		GET_CONST(const std::vector<Entity*>&, Children, _children);
+		GET_CONST(Window&, Window, *_window);
+		GET_CONST(Entity*, Parent, _parent);
 
 		void OnUpdate(float d) override { };
 		void OnRender(float d) override { };
 		void OnDestroy() override { };
-
-		virtual ~Entity() = default;
 
 	 private:
 		Window* const _window = nullptr;

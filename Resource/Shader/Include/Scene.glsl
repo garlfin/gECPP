@@ -10,6 +10,12 @@
 #define LIGHT_SPOT 3
 #define LIGHT_AREA 4
 
+#define STAGE_CUBEMAP 0
+#define STAGE_VOXEL 1
+#define STAGE_PRE_Z 2
+#define STAGE_COLOR 3
+#define STAGE_TRANSPARENT 4
+
 struct Light
 {
     mat4 ViewProjection;
@@ -32,7 +38,7 @@ struct SceneData
     Light Lights[MAX_LIGHT];
     Cubemap Cubemaps[MAX_CUBEMAP];
     uint InstanceCount;
-    float Time;
+    uint Stage;
     mat4 Model[MAX_OBJECT];
     mat3 Normal[MAX_OBJECT];
 };

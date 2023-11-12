@@ -20,7 +20,7 @@ namespace gE
 		void OnUpdate(float delta) override {};
 		void OnRender(float delta) override;
 
-		GET_CONST_VALUE(gETF::Mesh*, Mesh, _mesh.Get());
+		GET_CONST(gETF::Mesh*, Mesh, _mesh.Get());
 
 	 private:
 		const gETF::MeshReference _mesh;

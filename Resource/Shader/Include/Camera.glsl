@@ -1,15 +1,9 @@
 #include "Bindless.glsl"
 
-#define STAGE_CUBEMAP 0
-#define STAGE_VOXEL 1
-#define STAGE_PRE_Z 2
-#define STAGE_COLOR 3
-#define STAGE_TRANSPARENT 4
-
 struct CameraData
 {
     vec3 Position;
-    uint Stage;
+    float Time;
     vec2 ClipPlanes;
     vec2 Parameters;
 

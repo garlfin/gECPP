@@ -13,14 +13,12 @@ namespace gE
 	 public:
 		explicit Component(Entity* o, Manager* manager);
 
-		GET_CONST_VALUE(Entity*, Owner, _owner);
-		GET_CONST_VALUE(Window&, Window, *_window);
+		GET_CONST(Entity*, Owner, _owner);
+		GET_CONST(Window&, Window, *_window);
 
 		void OnUpdate(float d) override { }
 		void OnRender(float d) override { }
 		void OnDestroy() override { };
-
-		~Component() override = default;
 
 	 private:
 		Window* _window;
@@ -39,7 +37,7 @@ namespace gE
 		void OnRender(float d) override { }
 		void OnDestroy() override { }
 
-		~Behavior() override;
+		~Behavior() override = default;
 	};
 
 #pragma clang diagnostic push
@@ -51,7 +49,7 @@ namespace gE
 	 public:
 		inline explicit TypedComponent(T* o, Manager* manager = nullptr) : Component(o, manager) { };
 
-		GET_CONST_VALUE(T*, Owner, (T*) Component::GetOwner());
+		GET_CONST(T*, Owner, (T*) Component::GetOwner());
 	};
 
 	template<class T>
@@ -60,7 +58,7 @@ namespace gE
 	 public:
 		inline explicit TypedBehavior(T* o) : Behavior(o) { };
 
-		GET_CONST_VALUE(T*, Owner, (T*) Component::GetOwner());
+		GET_CONST(T*, Owner, (T*) Component::GetOwner());
 	};
 
 #pragma clang diagnostic pop

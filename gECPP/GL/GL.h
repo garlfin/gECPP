@@ -27,10 +27,10 @@ namespace GL
 
 		virtual void Bind() const = 0;
 
-		GET_CONST_VALUE(u32, , ID);
-		GET_CONST_VALUE(gE::Window&, Window, *_window);
+		GET_CONST(u32, , ID);
+		GET_CONST(gE::Window&, Window, *_window);
 
-		virtual ~Asset() = 0;
+		virtual ~Asset() = default;
 
 	 protected:
 		Asset(gE::Window* window) : _window(window) { };
@@ -39,6 +39,4 @@ namespace GL
 	 private:
 		gE::Window* _window;
 	};
-
-	inline Asset::~Asset() = default;
 }

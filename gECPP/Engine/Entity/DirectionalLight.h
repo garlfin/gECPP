@@ -14,7 +14,7 @@ namespace gE
 	 public:
 		DirectionalLight(Window*, u16 size, float scale);
 
-		GET_CONST(GL::Texture2D*, Depth, _camera.GetDepthAttachment());
+		GET_CONST(const GL::Texture2D*, Depth, _camera.GetDepthAttachment());
 
 		void OnRender(float delta) override;
 	 private:

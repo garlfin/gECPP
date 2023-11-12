@@ -20,9 +20,8 @@ namespace gE
 		window->SetRenderStage(RenderStage::PreZ);
 
 		glDepthMask(1);
-		glColorMask(1, 1, 1, 1);
-		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 		glColorMask(0, 0, 0, 0);
+		glClear(GL_DEPTH_BUFFER_BIT);
 
 		window->GetRenderers().OnRender(0.f);
 
@@ -31,6 +30,7 @@ namespace gE
 
 		glDepthMask(0);
 		glColorMask(1, 1, 1, 1);
+
 		window->GetRenderers().OnRender(0.f);
 	}
 

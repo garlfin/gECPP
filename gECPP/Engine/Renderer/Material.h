@@ -41,9 +41,7 @@ namespace gE
 
 		void Bind() const override;
 
-		GET_CONST_VALUE(GL::Shader &, Shader, _shader);
-
-		~Material() override = default;
+		GET_CONST(GL::Shader &, Shader, _shader);
 
 	 private:
 		const Reference<GL::Shader> _shader;

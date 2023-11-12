@@ -8,7 +8,6 @@
 gE::MeshRenderer::MeshRenderer(gE::Entity* o, const gETF::MeshReference& mesh, const gE::MaterialHolder* mat)
 	: Component(o, &o->GetWindow().GetRenderers()), _mesh(mesh), _materialHolder(mat)
 {
-	GetWindow().GetRenderers().Register(this);
 	if(_mesh->VAO) return;
 
 	_mesh->CreateVAO(&GetWindow());
@@ -20,7 +19,7 @@ void gE::MeshRenderer::OnRender(float delta)
 	DefaultPipeline::Buffers& buffers = GetWindow().GetPipelineBuffers();
 
 	buffers.Scene.InstanceCount = 1;
-	buffers.Scene.Time = GetWindow().GetTime();
+	buffers.Scene.Stage = (u32) GetWindow().GetRenderStage();
 	buffers.Scene.Model[0] = GetOwner()->GetTransform().Model();
 	buffers.Scene.Normal[0] = glm::mat3(1);
 	buffers.UpdateScene(offsetof(GL::Scene, Normal[1]), offsetof(GL::Scene, InstanceCount));

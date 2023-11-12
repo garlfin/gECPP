@@ -40,16 +40,7 @@ namespace gE
 
 	}
 
-	Behavior::Behavior(Entity* o)
-		: Component(o, &o->GetWindow().GetBehaviors())
-	{
-		GetWindow().GetBehaviors().Register(this);
-	}
-
-	Behavior::~Behavior()
-	{
-		GetWindow().GetBehaviors().Remove(this);
-	}
+	Behavior::Behavior(Entity* o) : Component(o, &o->GetWindow().GetBehaviors()) {}
 
 	Component::Component(Entity* o, Manager* manager) : Updateable(manager, o->_flags), _owner(o), _window(o->_window)
 	{

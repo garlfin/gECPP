@@ -25,35 +25,23 @@ namespace gE
 	 protected:
 		virtual void OnUpdate(float delta)
 		{
-			_updateTick++;
 			for(Updateable* t: *this)
-			{
-				if(t->_updateTick == _updateTick) continue; // Prevents a component from running twice in a frame
-				if (t->GetFlags().Deletion)
+				if(t->GetFlags().Deletion)
 					t->OnDestroy();
 				else
 					t->OnUpdate(delta);
-				t->_updateTick = _updateTick;
-			}
 		}
 
 		virtual void OnRender(float delta)
 		{
-			_renderTick++;
 			for(Updateable* t: *this)
-			{
-				if(t->_renderTick == _renderTick) continue; // Prevents a component from running twice in a frame
 				t->OnRender(delta);
-				t->_renderTick = _renderTick;
-			}
 		}
 
 		using std::vector<Updateable*>::operator[];
 
 	 protected:
-		
 		inline bool Contains(Updateable* v) { return std::find(begin(), end(), v) != end(); }
-		u64 _updateTick = 0, _renderTick = 0;
 	};
 
 	template<class T>

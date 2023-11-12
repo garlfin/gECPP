@@ -1,4 +1,5 @@
 #include "Include/Camera.glsl"
+#include "Include/Scene.glsl"
 #include "Include/Voxel.glsl"
 
 uniform sampler2D Albedo;
@@ -16,7 +17,7 @@ out vec4 FragColor;
 
 void main()
 {
-    if(Camera.Stage == STAGE_PRE_Z) return;
+    if(Scene.Stage == STAGE_PRE_Z) return;
 
     vec3 viewDir = normalize(Vertex.FragPos - Camera.Position);
     float lambert = dot(Vertex.TBN[2], normalize(vec3(1, 1, 1))) * 0.5 + 0.5;
@@ -24,7 +25,7 @@ void main()
     FragColor *= lambert;
     FragColor.rgb = pow(FragColor.rgb, vec3(1.0 / 2.2));
 
-    if(Camera.Stage != STAGE_VOXEL) return;
+    if(Scene.Stage != STAGE_VOXEL) return;
 
     Voxel voxel = Voxel(FragColor.rgb, vec3(0), true);
     //WriteVoxel(Vertex.FragPos, voxel);
