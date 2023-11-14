@@ -23,10 +23,14 @@ void DemoWindow::OnRender(float delta)
 {
 	Transforms.OnRender(delta);
 	Behaviors.OnRender(delta);
+
+	Sun->OnRender(delta);
 	Cameras.OnRender(delta);
 
+	GE_ASSERT(Cameras.CurrentCamera, "CAMERA SHOULD NOT BE NULL!");
+
 	GL::FrameBuffer::Reset();
-	Blit(*Cameras.GetCurrentCamera()->GetAttachment(0));
+	Blit(*Cameras.CurrentCamera->GetAttachment(0));
 }
 
 void DemoWindow::OnInit()
@@ -47,7 +51,7 @@ void DemoWindow::OnInit()
 	mesh->GetMaterials().SetMaterial(0, std::move(rasterMaterial));
 	
 	auto* camera = new FlyCamera(this);
-	Cameras.SetCurrentCamera(&camera->GetCamera());
+	Cameras.CurrentCamera = &camera->GetCamera();
 }
 
 void DemoWindow::OnDestroy()
