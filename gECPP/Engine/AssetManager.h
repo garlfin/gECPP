@@ -61,9 +61,7 @@ namespace gE
 		T* _t = nullptr;
 		u32* _counter = nullptr;
 
-		template<class I>
-		friend
-		class Reference;
+		template<class I> friend class Reference;
 	};
 
 	template<class T, typename... ARGS> requires requires(ARGS&&... a) { T(std::forward<ARGS>(a)...); }
@@ -110,9 +108,7 @@ namespace gE
 	 private:
 		T* _t = nullptr;
 
-		template<class I>
-		friend
-		class SmartPointer;
+		template<class I> friend class SmartPointer;
 	};
 
 	template<typename T, typename... ARGS> requires requires(ARGS&&... a) { T(std::forward<ARGS>(a)...); }

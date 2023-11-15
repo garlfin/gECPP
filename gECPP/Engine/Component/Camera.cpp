@@ -17,7 +17,7 @@ gE::Camera::Camera(gE::Entity* parent, Manager* m, const SizelessCameraSettings&
 
 void gE::Camera::OnRender(float delta)
 {
-	GetWindow().GetCameras().SetCallingCamera(this);
+	GetWindow().GetCameras().CallingCamera = this;
 	if(_isProjectionInvalid) UpdateProjection();
 	_isProjectionInvalid = false;
 

@@ -49,7 +49,7 @@ void DemoWindow::OnInit()
 
 	auto* mesh = new VoxelDemo::StaticMeshEntity(this, file.Meshes[0]);
 	mesh->GetMaterials().SetMaterial(0, std::move(rasterMaterial));
-	
+
 	auto* camera = new FlyCamera(this);
 	Cameras.CurrentCamera = &camera->GetCamera();
 }

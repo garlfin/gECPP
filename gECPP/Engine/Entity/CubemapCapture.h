@@ -13,7 +13,7 @@ namespace gE
 	 public:
 		CubemapCapture(Window*, u16 size);
 
-		GET_REGULAR(GL::TextureCube*, Texture, _camera.GetAttachment(0));
+		GET_CONST(GL::TextureCube*, Texture, _camera.GetAttachment(0));
 		GET(CameraCubemap&, Camera, _camera);
 
 	 private:

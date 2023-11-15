@@ -82,6 +82,8 @@ namespace GL
 	 private:
 		const GL::TextureSize1D _size;
 	};
+
+	typedef TextureCube Cubemap;
 }
 
 namespace PVR

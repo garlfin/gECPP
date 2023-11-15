@@ -21,7 +21,7 @@ namespace gE
 		if((bool) _depthFunc)
 		{
 			glEnable(GL_DEPTH_TEST);
-			glDepthFunc(GetWindow().GetRenderStage() == RenderStage::PreZ ? (GLenum) _depthFunc : GL_EQUAL);
+			glDepthFunc(GetWindow().Stage == RenderStage::PreZ ? (GLenum) _depthFunc : GL_EQUAL);
 		}
 		else
 			glDisable(GL_DEPTH_TEST);
@@ -34,7 +34,7 @@ namespace gE
 		else
 			glDisable(GL_CULL_FACE);
 
-		gE::Camera* camera = GetWindow().GetCameras().GetCallingCamera();
+		gE::Camera* camera = GetWindow().GetCameras().CallingCamera;
 		GE_ASSERT(camera, "NO CALLING CAMERA!");
 
 		if(GL::Texture* t = camera->GetDepthAttachmentCopy()) _depthUniform.Set(*(GL::Texture2D*) t);

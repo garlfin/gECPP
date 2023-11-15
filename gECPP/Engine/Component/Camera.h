@@ -172,12 +172,8 @@ namespace gE
 	 public:
 		using ComponentManager<Camera>::ComponentManager;
 
-		GET_SET_VALUE(Camera*, CurrentCamera, _currentCamera);
-		GET_SET_VALUE(Camera*, CallingCamera, _callingCamera);
-
-	 private:
-		Camera* _currentCamera = nullptr;
-		Camera* _callingCamera = nullptr;
+		Camera* CurrentCamera = nullptr;
+		Camera* CallingCamera = nullptr;
 	};
 }
 

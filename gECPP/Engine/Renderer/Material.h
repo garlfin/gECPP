@@ -76,7 +76,8 @@ namespace gE
 
 		ALWAYS_INLINE void Set() const { GL::Uniform<T>::Set(_t); }
 
-		GET_SET(T &, , _t);
+		// I just prefer the semantics of it being encapsulated
+		GET_SET(T&, , _t);
 		SET_XVAL(T, , _t);
 
 	 private:

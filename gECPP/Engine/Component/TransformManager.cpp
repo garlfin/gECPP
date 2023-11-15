@@ -11,7 +11,6 @@ namespace gE
 		std::vector<Entity*> stack;
 		for(Updateable* t: *this)
 		{
-
 			stack.push_back(((Component*) t)->GetOwner());
 
 			while(!stack.empty())

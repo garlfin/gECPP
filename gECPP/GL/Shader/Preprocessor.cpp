@@ -3,6 +3,7 @@
 //
 
 #include "Shader.h"
+#include <iostream>
 #include <GL/Texture/Texture.h>
 
 #define INCLUDE_DIRECTIVE "#include "

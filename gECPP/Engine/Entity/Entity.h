@@ -18,7 +18,7 @@ namespace gE
 
 		void Destroy(bool flagChildren = true);
 
-		GET_REGULAR(Transform&, Transform, _transform);
+		GET(Transform&, Transform, _transform);
 		GET_CONST(const std::vector<Entity*>&, Children, _children);
 		GET_CONST(Window&, Window, *_window);
 		GET_CONST(Entity*, Parent, _parent);

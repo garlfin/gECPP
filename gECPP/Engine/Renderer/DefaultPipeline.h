@@ -40,7 +40,7 @@ namespace GL
 		Area
 	};
 
-	struct Light
+	struct LightData
 	{
 		glm::mat4 ViewProjection;
 		glm::vec3 Color;
@@ -49,7 +49,7 @@ namespace GL
 		TextureHandle Depth;
 	};
 
-	struct Cubemap
+	struct CubemapData
 	{
 		glm::vec3 Position;
 		float BlendRadius;
@@ -59,8 +59,8 @@ namespace GL
 
 	struct Scene
 	{
-		Light Lights[GE_MAX_LIGHT];
-		GL_ALIGN Cubemap Cubemaps[GE_MAX_CUBEMAP];
+		LightData Lights[GE_MAX_LIGHT];
+		GL_ALIGN CubemapData Cubemaps[GE_MAX_CUBEMAP];
 		uint InstanceCount;
 		uint Stage;
 		GL_ALIGN glm::mat4 Model[GE_MAX_INSTANCE];

@@ -1,8 +1,8 @@
 #include "Bindless.glsl"
 
-#define MAX_OBJECT 64
-#define MAX_LIGHT 4
-#define MAX_CUBEMAP 4
+#define MAX_OBJECTS 64
+#define MAX_LIGHTS 4
+#define MAX_CUBEMAPS 4
 
 #define LIGHT_NONE 0
 #define LIGHT_DIRECTIONAL 1
@@ -35,12 +35,12 @@ struct Cubemap
 
 struct SceneData
 {
-    Light Lights[MAX_LIGHT];
-    Cubemap Cubemaps[MAX_CUBEMAP];
+    Light Lights[MAX_LIGHTS];
+    Cubemap Cubemaps[MAX_CUBEMAPS];
     uint InstanceCount;
     uint Stage;
-    mat4 Model[MAX_OBJECT];
-    mat3 Normal[MAX_OBJECT];
+    mat4 Model[MAX_OBJECTS];
+    mat3 Normal[MAX_OBJECTS];
 };
 
 #ifndef SCENE_UNIFORM_LOCATION
