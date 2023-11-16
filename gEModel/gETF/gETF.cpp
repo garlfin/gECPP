@@ -86,7 +86,6 @@ namespace gETF
 
 	Mesh::~Mesh()
 	{
-		delete[] Name;
 		delete[] Fields;
 		delete[] Materials;
 	}

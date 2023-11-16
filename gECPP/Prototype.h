@@ -36,7 +36,7 @@ namespace gE
 	class Updateable
 	{
 	 public:
-		Updateable(Manager* manager, const Flags& flags);
+		Updateable(Manager* manager, Flags& flags);
 
 		GET_CONST(Flags, Flags, _flags);
 
@@ -48,7 +48,7 @@ namespace gE
 
 	 private:
 		Manager* _manager;
-		const Flags& _flags;
+		Flags& _flags;
 
 		friend class Manager;
 		template<class T> friend class TypedManager;

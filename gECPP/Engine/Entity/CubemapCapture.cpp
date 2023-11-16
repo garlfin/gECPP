@@ -15,7 +15,7 @@ namespace gE
 		};
 
 	CubemapCapture::CubemapCapture(gE::Window* w, u16 size) :
-		CameraCubemap(w, { CubemapSettings, size })
+		Entity(w), _camera(this, nullptr, { CubemapSettings, size })
 	{
 	}
 }

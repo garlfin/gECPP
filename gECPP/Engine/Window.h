@@ -9,6 +9,7 @@
 #include "Engine/AssetManager.h"
 #include "Engine/Component/Transform.h"
 #include "Engine/Component/Camera.h"
+#include "WindowState.h"
 #include "Engine/Renderer/VoxelPipeline.h"
 #include "Engine/Entity/VoxelCapture.h"
 #include "Engine/Component/MeshRenderer.h"
@@ -44,6 +45,7 @@ namespace gE
 		SmartPointer<GL::CubemapData> Cubemap;
 
 		GET(VoxelCapture&, VoxelCapture, VoxelCap);
+		GET(DirectionalLight&, Sun, Sun);
 		GET(gE::Material&, DefaultMaterial, DefaultMaterial);
 
 		// Managers
@@ -52,10 +54,9 @@ namespace gE
 		GET(ComponentManager<Behavior>&, Behaviors, Behaviors);
 		GET(ComponentManager<MeshRenderer>&, Renderers, Renderers);
 		GET(GL::TextureSlotManager &, SlotManager, SlotManager);
-		GET(LightManager&, Lights, Lights);
 
 		// Engine States
-		GL::RenderStage Stage;
+		RenderStage Stage;
 
 		GET_CONST(GL::TextureSize2D, Size, _size);
 		GET_CONST(const Monitor&, Monitor, _monitor);
@@ -81,11 +82,10 @@ namespace gE
 		ComponentManager<Behavior> Behaviors;
 		ComponentManager<MeshRenderer> Renderers;
 		ComponentManager<Entity> Entities;
-		LightManager Lights;
-
 		GL::TextureSlotManager SlotManager;
 
 		SmartPointer<VoxelCapture> VoxelCap;
+		SmartPointer<DirectionalLight> Sun;
 		SmartPointer<gE::Material> DefaultMaterial;
 		SmartPointer<GL::Shader> BlitShader;
 
