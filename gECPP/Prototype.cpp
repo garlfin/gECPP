@@ -7,7 +7,7 @@
 
 namespace gE
 {
-	Updateable::Updateable(Manager* manager, Flags& flags) : _manager(manager), _flags(flags)
+	Updateable::Updateable(Manager* manager, const Flags& flags) : _manager(manager), _flags(flags)
 	{
 		if(manager) manager->Register(this);
 	}

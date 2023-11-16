@@ -19,7 +19,7 @@ void gE::MeshRenderer::OnRender(float delta)
 	DefaultPipeline::Buffers& buffers = GetWindow().GetPipelineBuffers();
 
 	buffers.Scene.InstanceCount = 1;
-	buffers.Scene.Stage = (u32) GetWindow().Stage;
+	buffers.Scene.Stage = GetWindow().Stage;
 	buffers.Scene.Model[0] = GetOwner()->GetTransform().Model();
 	buffers.Scene.Normal[0] = glm::mat3(1);
 	buffers.UpdateScene(offsetof(GL::Scene, Normal[1]), offsetof(GL::Scene, InstanceCount));

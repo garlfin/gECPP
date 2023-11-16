@@ -17,12 +17,9 @@ namespace gE
 	 public:
 		Manager() = default;
 
-		inline virtual void Register(Updateable* t) { push_back(t); }
-		inline virtual void Remove(Updateable* t) { RemoveFirstFromVec(*this, t); }
-
 		NODISCARD ALWAYS_INLINE size_t Size() const { return size(); }
+		using std::vector<Updateable*>::operator[];
 
-	 protected:
 		virtual void OnUpdate(float delta)
 		{
 			for(Updateable* t: *this)
@@ -38,10 +35,13 @@ namespace gE
 				t->OnRender(delta);
 		}
 
-		using std::vector<Updateable*>::operator[];
-
 	 protected:
+		inline void Register(Updateable* t) { push_back(t); }
+		inline virtual void Remove(Updateable* t) { RemoveFirstFromVec(*this, t); }
+
 		inline bool Contains(Updateable* v) { return std::find(begin(), end(), v) != end(); }
+
+		friend class Updateable;
 	};
 
 	template<class T>
@@ -52,12 +52,6 @@ namespace gE
 
 		inline virtual void Register(T* t) { Manager::Register(t); }
 		inline virtual void Remove(T* t) { Manager::Remove(t); }
-
-		using Manager::Size;
-		using Manager::OnUpdate;
-		using Manager::OnRender;
-
-		NODISCARD ALWAYS_INLINE T* operator[](size_t i) const { return (T*) Manager::operator[](i); }
 	};
 
 	template<class T>

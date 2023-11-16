@@ -9,10 +9,10 @@
 
 #define NOT(EXPR) (!(EXPR))
 
-gE::Camera::Camera(gE::Entity* parent, Manager* m, const SizelessCameraSettings& settings) :
-	Component(parent, m), SizelessCameraSettings(settings), FrameBuffer(&parent->GetWindow())
+gE::Camera::Camera(Window* w, const SizelessCameraSettings& s, Entity* o, Manager* m) :
+	Entity(w, o, m), _settings(s), FrameBuffer(w)
 {
-	GE_ASSERT(settings.RenderPass, "RENDERPASS SHOULD NOT BE NULL!");
+	GE_ASSERT(s.RenderPass, "RENDERPASS SHOULD NOT BE NULL!");
 }
 
 void gE::Camera::OnRender(float delta)
@@ -23,15 +23,15 @@ void gE::Camera::OnRender(float delta)
 
 	DefaultPipeline::Buffers& buffers = GetWindow().GetPipelineBuffers();
 
-	bool isFirst = Timing.GetIsFirst();
-	bool shouldTick = Timing.Tick(delta);
-	if NOT(isFirst || !GetOwner()->GetFlags().Static && shouldTick) return;
+	bool isFirst = _settings.Timing.GetIsFirst();
+	bool shouldTick = _settings.Timing.Tick(delta);
+	if NOT(isFirst || !GetFlags().Static && shouldTick) return;
 
 	GetGLCamera(buffers.Camera);
 	buffers.UpdateCamera();
 
 	FrameBuffer.Bind();
-	RenderPass(&GetWindow(), this);
+	_settings.RenderPass(&GetWindow(), this);
 
 	if(DepthCopy) DepthCopy->CopyFrom(DepthTexture);
 	for(u8 i = 0; i < GE_MAX_ATTACHMENTS; i++)
@@ -40,7 +40,7 @@ void gE::Camera::OnRender(float delta)
 
 void gE::Camera::GetGLCamera(GL::Camera& cam)
 {
-	cam.Position = GetOwner()->GetTransform().GlobalTranslation();
+	cam.Position = GetTransform().GlobalTranslation();
 	cam.Time = GetWindow().GetTime();
 	cam.ClipPlanes = GetClipPlanes();
 	cam.Projection = Projection;
@@ -57,8 +57,8 @@ void gE::PerspectiveCamera::UpdateProjection()
 	Projection = glm::perspectiveFov(_fov, (float) GetSize().x, (float) GetSize().y, GetClipPlanes().x, GetClipPlanes().y);
 }
 
-gE::PerspectiveCamera::PerspectiveCamera(gE::Entity* e, Manager* m, const gE::PerspectiveCameraSettings& s)
-	: Camera2D(e, m, s)
+gE::PerspectiveCamera::PerspectiveCamera(Window* w, const PerspectiveCameraSettings& s, Entity* o, Manager* m) :
+	Camera2D(w, s, o, m), _fov(s.FOV)
 {
 	SetFOV(s.FOV);
 }
@@ -68,8 +68,8 @@ void gE::OrthographicCamera::UpdateProjection()
 	Projection = glm::ortho(_orthographicScale.x, _orthographicScale.y, _orthographicScale.z, _orthographicScale.w, GetClipPlanes().x, GetClipPlanes().y);
 }
 
-gE::OrthographicCamera::OrthographicCamera(gE::Entity* e, Manager* m, const gE::OrthographicCameraSettings& s) :
-	Camera2D(e, m, s), _orthographicScale(s.Scale)
+gE::OrthographicCamera::OrthographicCamera(Window* w, const OrthographicCameraSettings& s, Entity* o, Manager* m) :
+	Camera2D(w, s, o, m), _orthographicScale(s.Scale)
 {
 }
 
@@ -93,22 +93,22 @@ void gE::Camera::CreateAttachments(CAM_T& cam, const gE::AttachmentSettings& set
 	}
 }
 
-gE::Camera2D::Camera2D(gE::Entity* parent, Manager* m, const gE::CameraSettings2D& settings) :
-	Camera(parent, m, settings), _size(settings.Size)
+gE::Camera2D::Camera2D(Window* w, const CameraSettings2D& s, Entity* o, Manager* m) :
+	Camera(w, s, o, m), _size(s.Size)
 {
-	CreateAttachments<GL::Texture2D>(*this, settings.RenderAttachments);
+	CreateAttachments<GL::Texture2D>(*this, s.RenderAttachments);
 }
 
 void gE::Camera2D::GetGLCamera(GL::Camera& camera)
 {
 	Camera::GetGLCamera(camera);
-	camera.View[0] = glm::inverse(GetOwner()->GetTransform().Model());
+	camera.View[0] = glm::inverse(GetTransform().Model());
 }
 
-gE::Camera3D::Camera3D(gE::Entity* parent, Manager* m, const gE::CameraSettings3D& settings) :
-	Camera(parent, m, settings), _size(settings.Size)
+gE::Camera3D::Camera3D(Window* w, const CameraSettings3D& s, Entity* o, Manager* m) :
+	Camera(w, s, o, m), _size(s.Size)
 {
-	CreateAttachments<GL::Texture3D>(*this, settings.RenderAttachments);
+	CreateAttachments<GL::Texture3D>(*this, s.RenderAttachments);
 }
 
 void gE::Camera3D::UpdateProjection()
@@ -125,10 +125,10 @@ void gE::Camera3D::GetGLCamera(GL::Camera& cam)
 	cam.View[0] = glm::lookAt(cam.Position, cam.Position + glm::vec3(0, -1, 0), cam.Position + glm::vec3(1, 0, 0));
 }
 
-gE::CameraCubemap::CameraCubemap(gE::Entity* parent, Manager* m, const gE::CameraSettings1D& settings) :
-	Camera(parent, m, settings), _size(settings.Size)
+gE::CameraCubemap::CameraCubemap(Window* w, const CameraSettings1D& s, Entity* o, Manager* m) :
+	Camera(w, s, o, m), _size(s.Size)
 {
-	CreateAttachments<GL::TextureCube>(*this, settings.RenderAttachments);
+	CreateAttachments<GL::TextureCube>(*this, s.RenderAttachments);
 }
 
 void gE::CameraCubemap::UpdateProjection()

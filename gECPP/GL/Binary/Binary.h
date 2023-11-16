@@ -5,6 +5,7 @@
 #pragma once
 
 #include <GL/Math.h>
+#include <vector>
 #include <cstring>
 #include <algorithm>
 

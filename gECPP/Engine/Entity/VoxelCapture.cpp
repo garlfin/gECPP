@@ -5,15 +5,15 @@
 #include "VoxelCapture.h"
 #include <Engine/Window.h>
 
-gE::VoxelCapture::VoxelCapture(gE::Window* w, u16 resolution, float size, gE::Entity* p) : Entity(w, p),
-	_camera(this, nullptr, CameraSettings3D(
+gE::VoxelCapture::VoxelCapture(gE::Window* w, u16 resolution, float size, gE::Entity* p) :
+	Camera3D(w, CameraSettings3D(
 	   SizelessCameraSettings{
 		   (RenderPass) VoxelPipeline::RenderPass3D,
 		   { 0.01, resolution },
 		   gE::CameraTiming(),
 		   VoxelPipeline::Target3D },
 	   GL::TextureSize3D(resolution)
-	)),
+	), nullptr, nullptr),
 	_size(size),
 	_resolution(resolution)
 { }

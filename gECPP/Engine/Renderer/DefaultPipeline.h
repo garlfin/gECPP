@@ -31,7 +31,16 @@ namespace GL
 		glm::mat4 View[6];
 	};
 
-	enum class LightType : uint
+	enum class RenderStage : u32
+	{
+		Cubemap,
+		Voxel,
+		PreZ,
+		Color,
+		Transparent
+	};
+
+	enum class LightType : u32
 	{
 		None,
 		Directional,
@@ -62,7 +71,7 @@ namespace GL
 		LightData Lights[GE_MAX_LIGHT];
 		GL_ALIGN CubemapData Cubemaps[GE_MAX_CUBEMAP];
 		uint InstanceCount;
-		uint Stage;
+		RenderStage Stage;
 		GL_ALIGN glm::mat4 Model[GE_MAX_INSTANCE];
 		glm::mat3x4 Normal[GE_MAX_INSTANCE]; // for alignment purposes.
 	};

@@ -19,19 +19,16 @@ namespace VoxelDemo
 		gE::DefaultPipeline::AttachmentsDefault | gE::DefaultPipeline::AttachmentTAA | gE::DefaultPipeline::AttachmentScreenSpace
 	};
 
-	class FlyCamera : public gE::Entity
+	class FlyCamera : public gE::PerspectiveCamera
 	{
 	 public:
-		explicit FlyCamera(gE::Window* window) : gE::Entity(window),
-			_camera(this, &window->GetCameras(), gE::CameraSettings2D(FlyCameraSettings, GetWindow().GetSize())),
+		explicit FlyCamera(gE::Window* window) :
+			gE::PerspectiveCamera(window, gE::CameraSettings2D(FlyCameraSettings, window->GetSize()), nullptr, &window->GetCameras()),
 			_movement(this)
 		{
 		}
 
-		GET(gE::PerspectiveCamera&, Camera, _camera);
-
 	 private:
-		gE::PerspectiveCamera _camera;
 		Movement _movement;
 	};
 }

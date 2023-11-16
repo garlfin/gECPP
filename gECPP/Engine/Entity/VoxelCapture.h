@@ -9,18 +9,17 @@
 
 namespace gE
 {
-	class VoxelCapture : public Entity
+	class VoxelCapture : public Camera3D
 	{
 	 public:
 		VoxelCapture(Window* w, u16 resolution, float size, Entity* p = nullptr);
 
 		void OnUpdate(float) override;
 
-		GET_CONST(GL::Texture3D*, Color, _camera.GetAttachment(0));
-		GET_CONST(GL::Texture3D*, Data, _camera.GetAttachment(1));
+		GET_CONST(GL::Texture3D*, Color, GetAttachment(0));
+		GET_CONST(GL::Texture3D*, Data, GetAttachment(1));
 
 	 private:
-		Camera3D _camera;
 		float _size;
 		u16 _resolution;
 	};

@@ -72,6 +72,8 @@ namespace gETF
 	{
 		SERIALIZABLE_PROTO;
 
+		const char* Name = nullptr;
+
 		u8 MaterialCount = 0;
 		u8 BufferCount = 0;
 		u8 FieldCount = 0;
@@ -93,6 +95,11 @@ namespace gETF
 	struct File : public Serializable
 	{
 		SERIALIZABLE_PROTO;
+
+		u8 ReferenceCount = 0;
+		gE::Reference<File>* References = nullptr;
+
+		u8 MaterialCount = 0;
 
 		u8 MeshCount = 0;
 		gE::Reference<Mesh>* Meshes = nullptr;

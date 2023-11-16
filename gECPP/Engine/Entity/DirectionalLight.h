@@ -9,15 +9,21 @@
 
 namespace gE
 {
-	class DirectionalLight : public Entity
+	class DirectionalLight : public OrthographicCamera
 	{
 	 public:
 		DirectionalLight(Window*, u16 size, float scale);
 
-		GET_CONST(const GL::Texture2D*, Depth, _camera.GetDepthAttachment());
+		GET_CONST(const GL::Texture2D*, Depth, GetDepthAttachment());
 
 		void OnRender(float delta) override;
-	 private:
-		OrthographicCamera _camera;
+	};
+
+	class LightManager : public TypedManager<Camera>
+	{
+	 public:
+		LightManager() = default;
+
+		DirectionalLight* Sun;
 	};
 }

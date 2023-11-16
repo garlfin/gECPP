@@ -29,27 +29,28 @@ namespace GL
     template<u8 I, bool COPY> \
     NODISCARD ALWAYS_INLINE TYPE* GetAttachment() const \
     { \
+        static_assert(I < GE_MAX_ATTACHMENTS); \
         if constexpr(COPY) return (TYPE*) AttachmentCopies[I].Get(); \
         else return (TYPE*) Attachments[I].Get(); \
     }
 
 namespace gE
 {
-	class Camera : public Component, protected SizelessCameraSettings
+	class Camera : public Entity
 	{
 	 public:
-		Camera(Entity* e, Manager*, const SizelessCameraSettings&);
+		Camera(Window* w, const SizelessCameraSettings&, Entity* = nullptr, Manager* m = nullptr);
 
 		void OnUpdate(float delta) override { }
-		void OnRender(float delta) final;
+		void OnRender(float delta) override;
 
 		virtual void GetGLCamera(GL::Camera&);
 
-		GET_CONST(CameraTiming, Timing, Timing);
-		GET_CONST(gE::RenderPass, RenderPass, RenderPass);
-		GET_CONST(gE::ClipPlanes, ClipPlanes, ClipPlanes);
+		GET_CONST(CameraTiming, Timing, _settings.Timing);
+		GET_CONST(gE::RenderPass, RenderPass, _settings.RenderPass);
+		GET_CONST(gE::ClipPlanes, ClipPlanes, _settings.ClipPlanes);
 		GET_CONST(const GL::FrameBuffer&, FrameBuffer, FrameBuffer);
-		GET_CONST(const SizelessCameraSettings&, Settings, *this);
+		GET_CONST(const SizelessCameraSettings&, Settings, _settings);
 
 		CAMERA_GET(GL::Texture);
 
@@ -69,12 +70,13 @@ namespace gE
 
 	 private:
 		bool _isProjectionInvalid = true;
+		SizelessCameraSettings _settings;
 	};
 
 	class Camera2D : public Camera
 	{
 	 public:
-		Camera2D(Entity*, Manager*, const CameraSettings2D&);
+		Camera2D(Window*, const CameraSettings2D&, Entity* = nullptr, Manager* = nullptr);
 
 		CAMERA_GET(GL::Texture2D);
 		GET_CONST(GL::TextureSize2D, Size, _size);
@@ -89,7 +91,7 @@ namespace gE
 	class PerspectiveCamera : public Camera2D
 	{
 	 public:
-		PerspectiveCamera(Entity* e, Manager*, const PerspectiveCameraSettings& s);
+		PerspectiveCamera(Window*, const PerspectiveCameraSettings&, Entity* = nullptr, Manager* = nullptr);
 
 		template<AngleType T = AngleType::Degree>
 		NODISCARD ALWAYS_INLINE float GetFOV() const
@@ -120,7 +122,7 @@ namespace gE
 	class OrthographicCamera : public Camera2D
 	{
 	 public:
-		OrthographicCamera(Entity* e, Manager*, const OrthographicCameraSettings& s);
+		OrthographicCamera(Window*, const OrthographicCameraSettings&, Entity* = nullptr, Manager* = nullptr);
 
 		GET_CONST(const glm::vec4&, Scale, _orthographicScale);
 
@@ -134,7 +136,7 @@ namespace gE
 	class Camera3D : public Camera
 	{
 	 public:
-		Camera3D(Entity*, Manager*, const CameraSettings3D&);
+		Camera3D(Window*, const CameraSettings3D&, Entity* = nullptr, Manager* = nullptr);
 
 		CAMERA_GET(GL::Texture3D);
 
@@ -152,7 +154,7 @@ namespace gE
 	class CameraCubemap : public Camera
 	{
 	 public:
-		CameraCubemap(Entity*, Manager*, const CameraSettings1D&);
+		CameraCubemap(Window*, const CameraSettings1D&, Entity* = nullptr, Manager* = nullptr);
 
 		CAMERA_GET(GL::TextureCube);
 
@@ -172,7 +174,7 @@ namespace gE
 	 public:
 		using ComponentManager<Camera>::ComponentManager;
 
-		Camera* CurrentCamera = nullptr;
+		Camera2D* CurrentCamera = nullptr;
 		Camera* CallingCamera = nullptr;
 	};
 }

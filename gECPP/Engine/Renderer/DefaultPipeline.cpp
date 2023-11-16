@@ -17,7 +17,7 @@ namespace gE
 	void DefaultPipeline::RenderPass2D(Window* window, Camera2D* camera)
 	{
 		// PRE-Z
-		window->Stage = RenderStage::PreZ;
+		window->Stage = GL::RenderStage::PreZ;
 
 		glDepthMask(1);
 		glColorMask(0, 0, 0, 0);
@@ -26,7 +26,7 @@ namespace gE
 		window->GetRenderers().OnRender(0.f);
 
 		// COLOR
-		window->Stage = RenderStage::Color;
+		window->Stage = GL::RenderStage::Color;
 
 		glDepthMask(0);
 		glColorMask(1, 1, 1, 1);
