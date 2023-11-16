@@ -25,6 +25,10 @@ struct Light
     BINDLESS_TEXTURE(TEXTURE_HANDLE, Depth);
 };
 
+#ifdef FRAGMENT_SHADER
+float GetLighting(vec3, Light);
+#endif
+
 struct Cubemap
 {
     vec3 Position;
@@ -35,12 +39,19 @@ struct Cubemap
 
 struct SceneData
 {
-    Light Lights[MAX_LIGHTS];
-    Cubemap Cubemaps[MAX_CUBEMAPS];
     uint InstanceCount;
     uint Stage;
     mat4 Model[MAX_OBJECTS];
     mat3 Normal[MAX_OBJECTS];
+};
+
+struct LightingData
+{
+    uint LightCount;
+    uint CubemapCount;
+
+    Light Lights[MAX_LIGHTS];
+    Cubemap Cubemaps[MAX_CUBEMAPS];
 };
 
 #ifndef SCENE_UNIFORM_LOCATION
@@ -56,6 +67,19 @@ layout(SCENE_UNIFORM_LAYOUT, binding = SCENE_UNIFORM_LOCATION) uniform SceneUnif
     SceneData Scene;
 };
 
+#ifndef LIGHT_UNIFORM_LOCATION
+#define LIGHT_UNIFORM_LOCATION 2
+#endif
+
+#ifndef LIGHT_UNIFORM_LAYOUT
+#define LIGHT_UNIFORM_LAYOUT std140
+#endif
+
+layout(LIGHT_UNIFORM_LAYOUT, binding = LIGHT_UNIFORM_LOCATION) uniform LightingUniform
+{
+    LightingData Lighting;
+};
+
 #if defined(FRAGMENT_SHADER) && !defined(GL_ARB_bindless_texture)
 uniform sampler2D Lights[MAX_LIGHTS];
 uniform samplerCube Cubemaps[MAX_CUBEMAPS];
@@ -64,4 +88,24 @@ uniform samplerCube Cubemaps[MAX_CUBEMAPS];
 #ifdef VERTEX_SHADER
 uint ViewIndex = gl_InstanceID / Scene.InstanceCount;
 uint ModelIndex = gl_InstanceID % Scene.InstanceCount;
+#endif
+
+#ifdef FRAGMENT_SHADER
+float GetLightingDirectional(vec3, Light);
+
+float GetLighting(vec3 frag, Light light)
+{
+    frag.xy = frag.xy * 0.5 + 0.5;
+
+    switch(light.Type)
+    {
+        case LIGHT_DIRECTIONAL: return GetLightingDirectional(frag, light);
+        default: return 0;
+    }
+}
+
+float GetLightingDirectional(vec3 frag, Light light)
+{
+    return frag.z < texture(sampler2D(light.Depth), frag.xy).r ? 1 : 0;
+}
 #endif

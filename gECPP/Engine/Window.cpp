@@ -15,7 +15,7 @@ char WindowTitleBuf[30];
 #endif
 
 Window::Window(glm::u16vec2 size, const char* name) :
-	_size(size), _name(strdup(name))
+	_size(size), _name(strdup(name)), Lights(this)
 {
 	if(!glfwInit()) GE_FAIL("Failed to initialize GLFW.");
 
@@ -109,8 +109,6 @@ void Window::OnInit()
 	VoxelBuffers = CreateSmartPointer<VoxelPipeline::Buffers>(this);
 
 	BlitShader = CreateSmartPointer<GL::Shader>(this, "Resource/Shader/blit.vert", "Resource/Shader/blit.frag");
-
-	Sun = CreateSmartPointer<gE::DirectionalLight>(this, 256, 10);
 
 	auto defaultShader = CreateReference<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/missing.frag");
 	DefaultMaterial = CreateSmartPointer<gE::Material>(this, defaultShader);

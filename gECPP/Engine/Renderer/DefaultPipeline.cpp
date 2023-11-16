@@ -8,20 +8,24 @@
 namespace gE
 {
 	gE::DefaultPipeline::Buffers::Buffers(Window* window)
-		: _sceneBuffer(window), _cameraBuffer(window)
+		: _sceneBuffer(window), _cameraBuffer(window), _lightBuffer(window)
 	{
 		_sceneBuffer.Bind(GL::BufferTarget::Uniform, 0);
 		_cameraBuffer.Bind(GL::BufferTarget::Uniform, 1);
+		_lightBuffer.Bind(GL::BufferTarget::Uniform, 2);
 	}
 
 	void DefaultPipeline::RenderPass2D(Window* window, Camera2D* camera)
 	{
+		const glm::u32vec2& cameraSize = camera->GetSize();
+
 		// PRE-Z
 		window->Stage = RenderStage::PreZ;
 
 		glDepthMask(1);
 		glColorMask(0, 0, 0, 0);
 		glClear(GL_DEPTH_BUFFER_BIT);
+		glViewport(0, 0, cameraSize.x, cameraSize.y);
 
 		window->GetRenderers().OnRender(0.f);
 
@@ -34,9 +38,21 @@ namespace gE
 		window->GetRenderers().OnRender(0.f);
 	}
 
-	void DefaultPipeline::RenderPass3D(Window*, Camera3D*) { }
+	void DefaultPipeline::RenderPass3D(Window* window, Camera3D* camera) {}
 
-	void DefaultPipeline::RenderPassDirectionalShadow(Window*, Camera2D*) { }
+	void DefaultPipeline::RenderPassShadow(Window* window, Camera2D* camera)
+	{
+		const glm::u32vec2& cameraSize = camera->GetSize();
+
+		window->Stage = RenderStage::PreZ;
+
+		glDepthMask(1);
+		glColorMask(0, 0, 0, 0);
+		glClear(GL_DEPTH_BUFFER_BIT);
+		glViewport(0, 0, cameraSize.x, cameraSize.y);
+
+		window->GetRenderers().OnRender(0.f);
+	}
 
 #ifdef DEBUG
 	// this will only really be used in debug; not too concerned w/ perf

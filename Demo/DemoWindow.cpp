@@ -24,7 +24,7 @@ void DemoWindow::OnRender(float delta)
 	Transforms.OnRender(delta);
 	Behaviors.OnRender(delta);
 
-	Sun->OnRender(delta);
+	Lights.OnRender(delta);
 	Cameras.OnRender(delta);
 
 	GE_ASSERT(Cameras.CurrentCamera, "CAMERA SHOULD NOT BE NULL!");
@@ -49,6 +49,9 @@ void DemoWindow::OnInit()
 
 	auto* mesh = new VoxelDemo::StaticMeshEntity(this, file.Meshes[0]);
 	mesh->GetMaterials().SetMaterial(0, std::move(rasterMaterial));
+
+	auto* sun = new gE::DirectionalLight(this, 256, 3.f);
+	Lights.Sun = sun;
 
 	auto* camera = new FlyCamera(this);
 	Cameras.CurrentCamera = &camera->GetCamera();

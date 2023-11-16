@@ -11,6 +11,7 @@ namespace gE
 		Cubemap,
 		Voxel,
 		PreZ,
+		Shadow = PreZ,
 		Color,
 		Transparent
 	};

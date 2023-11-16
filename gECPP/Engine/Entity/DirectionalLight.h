@@ -9,15 +9,44 @@
 
 namespace gE
 {
-	class DirectionalLight : public Entity
+	class Light : public Entity
+	{
+	 public:
+		Light(Window*, Camera&, Entity* = nullptr);
+
+		GET(Camera&, Camera, _camera);
+		GET(GL::Texture*, Depth, _camera.GetDepthAttachment());
+
+		virtual void GetGLLight(GL::LightData&) = 0;
+
+	 private:
+		Camera& _camera;
+	};
+
+	class DirectionalLight : public Light
 	{
 	 public:
 		DirectionalLight(Window*, u16 size, float scale);
 
-		GET_CONST(const GL::Texture2D*, Depth, _camera.GetDepthAttachment());
+		GET(OrthographicCamera&, Camera, _camera);
+		GET(GL::Texture2D*, Depth, _camera.GetDepthAttachment());
 
+		void GetGLLight(GL::LightData&) override;
 		void OnRender(float delta) override;
+
 	 private:
 		OrthographicCamera _camera;
+	};
+
+	class LightManager : public TypedManager<Light>
+	{
+	 public:
+		LightManager(Window* window) : _window(window) {};
+		DirectionalLight* Sun = nullptr;
+
+		void OnRender(float delta) override;
+
+	 private:
+		Window* _window;
 	};
 }

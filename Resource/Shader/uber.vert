@@ -8,9 +8,11 @@ layout(location = 3) in vec3 Tangent;
 
 struct VertexOut
 {
-vec3 FragPos;
-vec2 UV;
-mat3 TBN;
+    vec3 FragPos;
+    vec2 UV;
+    mat3 TBN;
+
+    vec3 FragPosLightSpace[MAX_LIGHTS];
 };
 
 out VertexOut Vertex;
@@ -32,4 +34,10 @@ void main()
     v_Bitangent = normalize(cross(v_Tangent, v_Normal));
 
     Vertex.TBN = mat3(v_Tangent, v_Bitangent, v_Normal);
+
+    for(uint i = 0; i < Lighting.LightCount; i++)
+    {
+        vec4 lightPos = Lighting.Lights[i].ViewProjection * vec4(Vertex.FragPos, 1);
+        Vertex.FragPosLightSpace[i] = lightPos.xyz / lightPos.w;
+    }
 }

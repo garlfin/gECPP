@@ -45,7 +45,6 @@ namespace gE
 		SmartPointer<GL::CubemapData> Cubemap;
 
 		GET(VoxelCapture&, VoxelCapture, VoxelCap);
-		GET(DirectionalLight&, Sun, Sun);
 		GET(gE::Material&, DefaultMaterial, DefaultMaterial);
 
 		// Managers
@@ -53,6 +52,7 @@ namespace gE
 		GET(TransformManager&, Transforms, Transforms);
 		GET(ComponentManager<Behavior>&, Behaviors, Behaviors);
 		GET(ComponentManager<MeshRenderer>&, Renderers, Renderers);
+		GET(LightManager&, Lights, Lights);
 		GET(GL::TextureSlotManager &, SlotManager, SlotManager);
 
 		// Engine States
@@ -82,10 +82,10 @@ namespace gE
 		ComponentManager<Behavior> Behaviors;
 		ComponentManager<MeshRenderer> Renderers;
 		ComponentManager<Entity> Entities;
+		LightManager Lights;
 		GL::TextureSlotManager SlotManager;
 
 		SmartPointer<VoxelCapture> VoxelCap;
-		SmartPointer<DirectionalLight> Sun;
 		SmartPointer<gE::Material> DefaultMaterial;
 		SmartPointer<GL::Shader> BlitShader;
 

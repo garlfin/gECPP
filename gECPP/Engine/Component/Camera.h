@@ -50,6 +50,7 @@ namespace gE
 		GET_CONST(gE::ClipPlanes, ClipPlanes, ClipPlanes);
 		GET_CONST(const GL::FrameBuffer&, FrameBuffer, FrameBuffer);
 		GET_CONST(const SizelessCameraSettings&, Settings, *this);
+		GET_CONST(const glm::mat4&, Projection, Projection);
 
 		CAMERA_GET(GL::Texture);
 

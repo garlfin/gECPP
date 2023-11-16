@@ -19,7 +19,7 @@ namespace GL
 	const char* GetIncludePath(const char* origin, const char* include);
 
 	template<typename T>
-	bool GetShaderStatus(const T& shader, char* source = nullptr);
+	bool GetShaderStatus(const T& shader, const char* name = nullptr, char* source = nullptr);
 
 	Shader::Shader(gE::Window* window, const char* v, const char* f, const Array<PreprocessorPair>* p) : Asset(window)
 	{
@@ -56,7 +56,7 @@ namespace GL
 		glShaderSource(ID, 1, &bufPtr, nullptr);
 		glCompileShader(ID);
 
-		GetShaderStatus(*this, bufPtr);
+		GetShaderStatus(*this, file, bufPtr);
 	}
 
 	Shader::Shader(gE::Window* window, const ShaderStage& v, const ShaderStage& f) : Asset(window)
@@ -87,7 +87,7 @@ namespace GL
 	}
 
 	template<typename T>
-	bool GetShaderStatus(const T& shader, char* source)
+	bool GetShaderStatus(const T& shader, const char* name, char* source)
 	{
 		u32 id = shader.Get();
 
@@ -105,11 +105,11 @@ namespace GL
 
 		GL_GET(glGetShaderInfoLog, glGetProgramInfoLog, id, shaderStatus - 1, nullptr, infoLog);
 
-		std::cout << "SHADER COMPILE FAILURE:\n" << infoLog << '\n';
-
 		#ifdef DEBUG
 		if(source)
 		{
+			std::cout << "FILE: " << name << ", SHADER COMPILE FAILURE:\n" << infoLog << '\n';
+
 			for(u32 i = 0; *source; source++)
 				if(*source == '\n' || !i)
 				{

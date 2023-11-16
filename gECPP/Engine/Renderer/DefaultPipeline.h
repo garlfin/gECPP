@@ -59,12 +59,19 @@ namespace GL
 
 	struct Scene
 	{
-		LightData Lights[GE_MAX_LIGHT];
-		GL_ALIGN CubemapData Cubemaps[GE_MAX_CUBEMAP];
 		uint InstanceCount;
 		uint Stage;
 		GL_ALIGN glm::mat4 Model[GE_MAX_INSTANCE];
 		glm::mat3x4 Normal[GE_MAX_INSTANCE]; // for alignment purposes.
+	};
+
+	struct Lighting
+	{
+		u32 LightCount = 1;
+		u32 CubemapCount = 1;
+
+		GL_ALIGN LightData Lights[GE_MAX_LIGHT];
+		GL_ALIGN CubemapData Cubemaps[GE_MAX_CUBEMAP];
 	};
 }
 
@@ -72,7 +79,7 @@ namespace gE::DefaultPipeline
 {
 	void RenderPass2D(Window*, Camera2D*);
 	void RenderPass3D(Window*, Camera3D*);
-	void RenderPassDirectionalShadow(Window*, Camera2D*);
+	void RenderPassShadow(Window* window, Camera2D* camera);
 	void RenderPassCubemap(Window*, CameraCubemap*);
 
 	GLOBAL gE::AttachmentSettings AttachmentColor
@@ -127,12 +134,19 @@ namespace gE::DefaultPipeline
 			_sceneBuffer.ReplaceData((u8*) &Scene + offset, size, offset);
 		}
 
+		ALWAYS_INLINE void UpdateLighting(u64 size = sizeof(GL::Lighting), u64 offset = 0) const
+		{
+			_lightBuffer.ReplaceData((u8*) &Scene + offset, size, offset);
+		}
+
 		GL::Camera Camera;
 		GL::Scene Scene;
+		GL::Lighting Lighting;
 
 	 private:
 		GL::Buffer<GL::Camera> _cameraBuffer;
 		GL::Buffer<GL::Scene> _sceneBuffer;
+		GL::Buffer<GL::Lighting> _lightBuffer;
 	};
 }
 

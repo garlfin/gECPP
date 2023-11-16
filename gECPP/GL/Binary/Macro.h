@@ -86,4 +86,9 @@ namespace gETF
     OPERATOR_EQUALS(TYPE); \
     OPERATOR_EQUALS_XVAL(TYPE);
 
+#define OPERATOR_CAST_CONST(TYPE, FIELD) ALWAYS_INLINE operator TYPE() const { return FIELD; }
+#define OPERATOR_CAST(TYPE, FIELD) \
+	ALWAYS_INLINE operator TYPE() { return FIELD; } \
+	OPERATOR_CAST_CONST(const TYPE, FIELD);
+
 // Yapping about newline >: (
