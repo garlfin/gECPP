@@ -39,4 +39,6 @@ namespace gE
 		friend class Manager;
 		template<class T> friend class TypedManager;
 	};
+
+	typedef Entity Empty;
 }
