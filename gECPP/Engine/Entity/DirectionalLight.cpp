@@ -43,23 +43,23 @@ namespace gE
 
 	void DirectionalLight::GetGLLight(GL::LightData& light)
 	{
-		light.Type = GL::LightType::Directional;
-		light.Color = glm::vec3(1);
 		light.ViewProjection = _camera.GetProjection();
-		light.Depth = (GL::TextureHandle) *GetDepth();
-
-		LOG(light.Depth);
+		light.Color = glm::vec3(1);
+		light.Type = GL::LightType::Directional;
+		light.Settings = glm::vec2(0);
+		light.Depth = (GL::TextureHandle) GetDepth();
 	}
 
 	// Registered to behaviors for tick functionality.
 	Light::Light(Window* window, Camera& camera, Entity* parent) : Entity(window, parent, &window->GetBehaviors()),
 		_camera(camera)
 	{
-
 	}
 
 	void LightManager::OnRender(float delta)
 	{
+		TypedManager<Light>::OnRender(delta);
+
 		DefaultPipeline::Buffers& buffers = _window->GetPipelineBuffers();
 
 		Sun->GetGLLight(buffers.Lighting.Lights[0]);

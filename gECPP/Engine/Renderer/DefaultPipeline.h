@@ -136,7 +136,7 @@ namespace gE::DefaultPipeline
 
 		ALWAYS_INLINE void UpdateLighting(u64 size = sizeof(GL::Lighting), u64 offset = 0) const
 		{
-			_lightBuffer.ReplaceData((u8*) &Scene + offset, size, offset);
+			_lightBuffer.ReplaceData((u8*) &Lighting + offset, size, offset);
 		}
 
 		GL::Camera Camera;

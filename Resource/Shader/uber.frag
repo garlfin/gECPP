@@ -26,9 +26,9 @@ void main()
     FragColor = texture(Albedo, Vertex.UV);
     FragColor *= lambert;
 
-    FragColor.rgb *= GetLighting(Vertex.FragPosLightSpace[0], Lighting.Lights[0]);
+    FragColor.rgb = GetLighting(Vertex.FragPosLightSpace[0], Lighting.Lights[0]);
 
-    FragColor.rgb = pow(FragColor.rgb, vec3(1.0 / 2.2));
+    //FragColor.rgb = pow(FragColor.rgb, vec3(1.0 / 2.2));
 
     if(Scene.Stage != STAGE_VOXEL) return;
 
