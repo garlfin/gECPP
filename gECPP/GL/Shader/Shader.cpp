@@ -110,16 +110,24 @@ namespace GL
 		{
 			std::cout << "FILE: " << name << ", SHADER COMPILE FAILURE:\n" << infoLog << '\n';
 
-			for(u32 i = 0; *source; source++)
-				if(*source == '\n' || !i)
-				{
-					if(i) std::cout << "\n0(" << i << "): ";
-					else std::cout << "0(0): " << *source;
-					i++;
-				}
-				else std::cout << *source;
+			gETF::SerializationBuffer debugBuffer;
+			char lineNumberBuffer[5];
+
+			for(u32 i = 0; *source; i++)
+			{
+				debugBuffer.PushPtr<2>("0(");
+				_itoa_s(i, lineNumberBuffer, 10);
+				debugBuffer.StrCat(lineNumberBuffer, false);
+				debugBuffer.PushPtr<3>("): ");
+
+				size_t len = strlenc(source, '\n') + 1;
+				debugBuffer.PushPtr(source, len);
+				source += len;
+			}
+
+			std::cout << debugBuffer.Data() << '\n';
 		}
-		std::cout << '\n';
+
 		#endif
 
 		delete[] infoLog;

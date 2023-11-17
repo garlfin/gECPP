@@ -25,10 +25,6 @@ struct Light
     BINDLESS_TEXTURE(TEXTURE_HANDLE, Depth);
 };
 
-#ifdef FRAGMENT_SHADER
-vec3 GetLighting(vec3, Light);
-#endif
-
 struct Cubemap
 {
     vec3 Position;
@@ -88,28 +84,4 @@ uniform samplerCube Cubemaps[MAX_CUBEMAPS];
 #ifdef VERTEX_SHADER
 uint ViewIndex = gl_InstanceID / Scene.InstanceCount;
 uint ModelIndex = gl_InstanceID % Scene.InstanceCount;
-#endif
-
-#ifdef FRAGMENT_SHADER
-vec3 GetLightingDirectional(vec3, Light);
-
-vec3 GetLighting(vec3 frag, Light light)
-{
-    frag.xy = frag.xy * 0.5 + 0.5;
-
-    switch(light.Type)
-    {
-        case LIGHT_DIRECTIONAL: return GetLightingDirectional(frag, light);
-        default: return vec3(1);
-    }
-}
-
-vec3 GetLightingDirectional(vec3 frag, Light light)
-{
-#ifdef GL_ARB_bindless_texture
-    return texture(sampler2D(light.Depth), frag.xy).rrr;
-#else
-    return vec3(1);
-#endif
-}
 #endif

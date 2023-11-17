@@ -48,3 +48,26 @@ gE::Transform::Transform(gE::Entity* o, const gE::TransformData& d) : Component(
 	Set(d);
 }
 
+void gE::TransformManager::OnUpdate(float delta)
+{
+	std::vector<Entity*> stack;
+	for(Updateable* t : *this)
+	{
+		stack.push_back(((Component*) t)->GetOwner());
+
+		while(!stack.empty())
+		{
+			Entity* back = stack.back();
+			back->GetTransform().OnUpdate(delta);
+			stack.pop_back();
+
+			for(Entity* child: back->GetChildren())
+				stack.push_back(child);
+		}
+	}
+}
+
+void gE::TransformManager::Register(gE::Transform* t)
+{
+	if(!t->GetOwner()->GetParent()) TypedManager::Register(t);
+}

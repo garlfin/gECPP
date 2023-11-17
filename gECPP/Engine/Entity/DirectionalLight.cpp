@@ -12,14 +12,15 @@ namespace gE
 	const SizelessCameraSettings DirectionalSettings
 	{
 		(RenderPass) DefaultPipeline::RenderPassShadow,
-		ClipPlanes(0.1, 100),
+		ClipPlanes(0.1, 25),
 		DefaultCameraTiming,
 		DefaultPipeline::AttachmentShadow
 	};
 
-	DirectionalLight::DirectionalLight(Window* w, u16 size, float scale) : Light(w, _camera),
+	DirectionalLight::DirectionalLight(Window* w, u16 size, float scale, const glm::quat& rot) : Light(w, _camera),
 		_camera(this, &w->GetLights(), { { DirectionalSettings, glm::u32vec2(size) }, glm::vec4(-scale, scale, -scale, scale) })
 	{
+		GetTransform().Rotation = rot;
 	}
 
 	void DirectionalLight::OnRender(float delta)
@@ -37,23 +38,24 @@ namespace gE
 		//		  (far - near) / 2 + near
 		//		  places the middle on the camera
 
-		transform.Position = cameraTransform.Position + offset;
+		transform.Position = glm::floor(cameraTransform.Position) + offset;
 		transform.OnRender(0.f); // Force update on model matrix since it passed its tick.
 	}
 
 	void DirectionalLight::GetGLLight(GL::LightData& light)
 	{
-		light.ViewProjection = _camera.GetProjection();
+		light.ViewProjection = _camera.GetProjection() * glm::inverse(GetTransform().Model());
 		light.Color = glm::vec3(1);
 		light.Type = GL::LightType::Directional;
 		light.Settings = glm::vec2(0);
-		light.Depth = (GL::TextureHandle) GetDepth();
+		light.Depth = (GL::TextureHandle) *GetDepth();
 	}
 
 	// Registered to behaviors for tick functionality.
 	Light::Light(Window* window, Camera& camera, Entity* parent) : Entity(window, parent, &window->GetBehaviors()),
 		_camera(camera)
 	{
+
 	}
 
 	void LightManager::OnRender(float delta)

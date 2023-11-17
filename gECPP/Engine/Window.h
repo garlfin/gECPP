@@ -14,7 +14,6 @@
 #include "Engine/Entity/VoxelCapture.h"
 #include "Engine/Component/MeshRenderer.h"
 #include "Engine/Entity/DirectionalLight.h"
-#include "Engine/Component/TransformManager.h"
 
 struct GLFWwindow;
 struct GLFWvidmode;

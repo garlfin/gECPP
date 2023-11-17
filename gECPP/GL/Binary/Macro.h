@@ -17,7 +17,7 @@
 #endif // #ifdef DEBUG
 
 #ifdef DEBUG
-#define LOG(MSG) std::cout << MSG << '\n'
+#define LOG(MSG) std::cout << MSG << std::endl;
 #else
 #define LOG(MSG) // NOTHING!
 #endif

@@ -26,7 +26,7 @@ namespace gE
 	class DirectionalLight : public Light
 	{
 	 public:
-		DirectionalLight(Window*, u16 size, float scale);
+		DirectionalLight(Window*, u16 size, float scale, const glm::quat& = glm::identity<glm::quat>());
 
 		GET(OrthographicCamera&, Camera, _camera);
 		GET(GL::Texture2D*, Depth, _camera.GetDepthAttachment());

@@ -39,5 +39,6 @@ void main()
     {
         vec4 lightPos = Lighting.Lights[i].ViewProjection * vec4(Vertex.FragPos, 1);
         Vertex.FragPosLightSpace[i] = lightPos.xyz / lightPos.w;
+        Vertex.FragPosLightSpace[i] = Vertex.FragPosLightSpace[i] * 0.5 + 0.5;
     }
 }

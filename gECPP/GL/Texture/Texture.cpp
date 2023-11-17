@@ -94,6 +94,8 @@ namespace GL
 		_handle = glGetTextureHandleARB(ID);
 		glMakeTextureHandleResidentARB(_handle);
 
+		LOG("New handle: " << _handle);
+
 		return _handle;
 	}
 

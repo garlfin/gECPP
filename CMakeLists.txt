@@ -37,7 +37,7 @@ target_link_libraries(gEModel PRIVATE ASSIMP GETF GLAD)
 
 # GECPP
 file(GLOB_RECURSE GECPP_SRC "gECPP/*.cpp" "gECPP/*.h")
-add_library(gECPP STATIC ${GECPP_SRC} gECPP/Engine/Component/TransformManager.h gECPP/Engine/Component/CameraTiming.h gECPP/GL/Binary/Nullable.h gECPP/GL/Binary/SerializationBuffer.h gECPP/GL/Binary/Macro.h)
+add_library(gECPP STATIC ${GECPP_SRC})
 target_link_libraries(gECPP GLAD GLFW GETF)
 
 # VOXELDEMO

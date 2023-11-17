@@ -34,6 +34,7 @@ namespace gE
 
 		glDepthMask(0);
 		glColorMask(1, 1, 1, 1);
+		glClear(GL_COLOR_BUFFER_BIT);
 
 		window->GetRenderers().OnRender(0.f);
 	}

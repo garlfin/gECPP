@@ -9,7 +9,20 @@
 
 namespace GL
 {
-	typedef u64 TextureHandle;
+	// Opaque type to prevent accidental pointer-to-handle conversions
+	struct TextureHandle
+	{
+		inline explicit TextureHandle() = default;
+		inline explicit TextureHandle(u64 i) : ID(i) {};
+
+		ALWAYS_INLINE TextureHandle& operator=(u64 o) { ID = o; return *this; }
+
+		OPERATOR_CAST_CONST(u64, ID);
+
+	 	u64 ID = 0;
+	};
+
+	GLOBAL TextureHandle NullHandle = TextureHandle();
 
 	class Texture : public Asset, public Attachment
 	{
@@ -30,7 +43,7 @@ namespace GL
 		TextureHandle GetHandle();
 		virtual void CopyFrom(const GL::Texture&) = 0;
 
-		explicit ALWAYS_INLINE operator TextureHandle() { GetHandle(); return _handle; }
+		explicit ALWAYS_INLINE operator TextureHandle() { return GetHandle(); }
 
 		GET_CONST(GLenum, Format, Format);
 		GET_CONST(GLenum, Target, Target);
@@ -44,7 +57,7 @@ namespace GL
 		const GLenum Target;
 
 	 private:
-		TextureHandle _handle = 0;
+		TextureHandle _handle = NullHandle;
 	};
 
 	class Texture2D final : public Texture

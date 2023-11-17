@@ -50,7 +50,8 @@ void DemoWindow::OnInit()
 	auto* mesh = new VoxelDemo::StaticMeshEntity(this, file.Meshes[0]);
 	mesh->GetMaterials().SetMaterial(0, std::move(rasterMaterial));
 
-	auto* sun = new gE::DirectionalLight(this, 256, 3.f);
+	glm::vec3 sunRotation(-45.f, 23.f, 0.f);
+	auto* sun = new gE::DirectionalLight(this, 1024, 3.f, glm::quat(sunRotation));
 	Lights.Sun = sun;
 
 	auto* camera = new FlyCamera(this);

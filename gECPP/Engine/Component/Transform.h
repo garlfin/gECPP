@@ -4,7 +4,8 @@
 
 #pragma once
 
-#include "GL/Math.h"
+#include <GL/Math.h>
+#include <Engine/Manager.h>
 #include "Component.h"
 
 namespace gE
@@ -48,5 +49,14 @@ namespace gE
 
 	 private:
 		glm::mat4 _model;
+	};
+
+	class TransformManager : public TypedManager<Transform>
+	{
+	 public:
+		using TypedManager<Transform>::TypedManager;
+
+		void Register(Transform* t) override;
+		void OnUpdate(float delta) override;
 	};
 }
