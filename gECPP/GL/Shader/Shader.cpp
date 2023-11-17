@@ -9,6 +9,8 @@
 #include <Engine/Window.h>
 
 #define VERSION_DIRECTIVE "#version 460 core\n"
+#define EXT_BINDLESS "#define EXT_BINDLESS\n"
+// Weird AMD driver bug doesn't define GL_ARB_bindless_texture
 
 #define GL_GET(FUNC_STAGE, FUNC_SHADER, ARGS...) if constexpr (std::is_same_v<T, ShaderStage>) FUNC_STAGE(ARGS); else FUNC_SHADER(ARGS);
 
@@ -44,6 +46,7 @@ namespace GL
 		gETF::SerializationBuffer incIDBuf{};
 
 		directivesBuf.StrCat(VERSION_DIRECTIVE, false);
+		if(GLAD_GL_ARB_bindless_texture) directivesBuf.StrCat(EXT_BINDLESS, false);
 		directivesBuf.StrCat(ShaderStageDefine(type), false);
 
 		CompileDirectives(directives, directivesBuf);

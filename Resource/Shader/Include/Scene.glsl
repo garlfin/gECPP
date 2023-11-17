@@ -77,7 +77,7 @@ layout(LIGHT_UNIFORM_LAYOUT, binding = LIGHT_UNIFORM_LOCATION) uniform LightingU
     LightingData Lighting;
 };
 
-#if defined(FRAGMENT_SHADER) && !defined(GL_ARB_bindless_texture)
+#if defined(FRAGMENT_SHADER) && !defined(EXT_BINDLESS)
 uniform sampler2D Lights[MAX_LIGHTS];
 uniform samplerCube Cubemaps[MAX_CUBEMAPS];
 #endif

@@ -32,7 +32,7 @@ void main()
         Vertex.FragPos,
         0.0,
         normalize(Vertex.TBN[2]),
-        0.0,
+        0.2,
         albedo,
         1.460
     );

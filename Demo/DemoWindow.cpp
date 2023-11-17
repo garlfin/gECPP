@@ -58,7 +58,4 @@ void DemoWindow::OnInit()
 	Cameras.CurrentCamera = &camera->GetCamera();
 }
 
-void DemoWindow::OnDestroy()
-{
-}
-
+void DemoWindow::OnDestroy() {}
