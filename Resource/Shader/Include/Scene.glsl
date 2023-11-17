@@ -19,9 +19,10 @@
 struct Light
 {
     mat4 ViewProjection;
-    vec3 Color;
+    vec3 Position;
     uint Type;
-    vec2 Settings;
+    vec3 Color;
+    uint PackedSettings;
     BINDLESS_TEXTURE(TEXTURE_HANDLE, Depth);
 };
 

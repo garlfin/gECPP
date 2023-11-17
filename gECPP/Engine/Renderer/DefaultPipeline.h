@@ -43,9 +43,10 @@ namespace GL
 	struct LightData
 	{
 		glm::mat4 ViewProjection;
-		glm::vec3 Color;
+		glm::vec3 Position;
 		LightType Type;
-		glm::vec2 Settings;
+		glm::vec3 Color;
+		u32 PackedSettings;
 		TextureHandle Depth;
 	};
 

@@ -60,6 +60,5 @@ void DemoWindow::OnInit()
 
 void DemoWindow::OnDestroy()
 {
-
 }
 

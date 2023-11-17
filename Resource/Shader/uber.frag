@@ -1,7 +1,6 @@
 #include "Include/Camera.glsl"
 #include "Include/Scene.glsl"
 #include "Include/Voxel.glsl"
-#include "Include/PBR.glsl"
 
 uniform sampler2D Albedo;
 
@@ -16,19 +15,29 @@ struct VertexOut
 
 in VertexOut Vertex;
 
+// TODO: FIX THIS! !
+#include "Include/PBR.glsl"
+
 out vec4 FragColor;
 
 void main()
 {
     if(Scene.Stage == STAGE_PRE_Z) return;
 
-    vec3 viewDir = normalize(Vertex.FragPos - Camera.Position);
-    float lambert = dot(Vertex.TBN[2], normalize(vec3(1, 1, 1))) * 0.5 + 0.5;
-    FragColor = texture(Albedo, Vertex.UV);
-    FragColor *= lambert;
+    vec3 albedo = texture(Albedo, Vertex.UV).rgb;
+    FragColor.rgb = albedo * 0.1;
 
-    FragColor.rgb *= GetLighting(Vertex.FragPosLightSpace[0], Lighting.Lights[0]) * 0.5 + 0.5;
+    PBRFragment fragment = PBRFragment
+    (
+        Vertex.FragPos,
+        0.0,
+        normalize(Vertex.TBN[2]),
+        0.0,
+        albedo,
+        1.460
+    );
 
+    FragColor.rgb += GetLighting(fragment, 0);
     FragColor.rgb = pow(FragColor.rgb, vec3(1.0 / 2.2));
 
     if(Scene.Stage != STAGE_VOXEL) return;

@@ -45,9 +45,10 @@ namespace gE
 	void DirectionalLight::GetGLLight(GL::LightData& light)
 	{
 		light.ViewProjection = _camera.GetProjection() * glm::inverse(GetTransform().Model());
-		light.Color = glm::vec3(1);
+		light.Position = -GetTransform().Forward();
 		light.Type = GL::LightType::Directional;
-		light.Settings = glm::vec2(0);
+		light.Color = glm::vec3(1);
+		light.PackedSettings = 0;
 		light.Depth = (GL::TextureHandle) *GetDepth();
 	}
 
@@ -55,7 +56,6 @@ namespace gE
 	Light::Light(Window* window, Camera& camera, Entity* parent) : Entity(window, parent, &window->GetBehaviors()),
 		_camera(camera)
 	{
-
 	}
 
 	void LightManager::OnRender(float delta)

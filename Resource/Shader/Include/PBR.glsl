@@ -3,34 +3,40 @@
 struct PBRFragment
 {
     vec3 Position;
-    float IOR;
-    vec3 PositionLightSpace;
     float Roughness;
-    vec3 CameraDir;
+    vec3 Normal;
     float Metallic;
+    vec3 Albedo;
+    float IOR;
 };
 
-vec3 GetLighting(inout PBRFragment frag, Light light);
-vec3 GetLightingDirectional(inout PBRFragment frag, Light light);
+vec3 GetLighting(inout PBRFragment frag, uint index);
+vec3 GetLightingDirectional(inout PBRFragment frag, uint index);
 
-vec3 GetLighting(inout PBRFragment frag, Light light)
+vec3 GetLighting(inout PBRFragment frag, uint index)
 {
-    switch(light.Type)
+    switch(Lighting.Lights[index].Type)
     {
-        case LIGHT_DIRECTIONAL: return GetLightingDirectional(frag, light);
+        case LIGHT_DIRECTIONAL: return GetLightingDirectional(frag, index);
         default: return vec3(1);
     }
 }
 
-vec3 GetLightingDirectional(inout PBRFragment frag, Light light)
+vec3 GetLightingDirectional(inout PBRFragment frag, uint index)
 {
-    vec3 lightCoord = frag.PositionLightSpace;
+    const Light light = Lighting.Lights[index];
+    const vec3 lightCoord = Vertex.FragPosLightSpace[index];
+    const vec3 lightDir = normalize(light.Position);
+
+    float lambert = max(dot(frag.Normal, lightDir), 0);
 
 #ifdef GL_ARB_bindless_texture
-    float shadowDelta = lightCoord.z - texture(sampler2D(light.Depth), lightCoord.xy).r;
+    float shadow = lightCoord.z - texture(sampler2D(light.Depth), lightCoord.xy).r;
 #else
-    float shadowDelta = 0;
+    // TODO: THIS!!!
+    float shadow = 0;
 #endif
+    shadow = shadow > 0.003 ? 0 : 1;
 
-    return shadowDelta > 0.003 ? vec3(0) : vec3(1);
+    return frag.Albedo * min(shadow, lambert);
 }
