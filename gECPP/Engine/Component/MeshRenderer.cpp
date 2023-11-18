@@ -16,6 +16,7 @@ gE::MeshRenderer::MeshRenderer(gE::Entity* o, const gETF::MeshReference& mesh, c
 
 void gE::MeshRenderer::OnRender(float delta)
 {
+	// TODO: Switch to instanced rendering.
 	DefaultPipeline::Buffers& buffers = GetWindow().GetPipelineBuffers();
 
 	buffers.Scene.InstanceCount = 1;

@@ -11,6 +11,8 @@ struct PBRFragment
     float IOR;
 };
 
+vec3
+
 bool TexcoordOutOfBounds(vec2 uv) { return any(greaterThan(uv.xy, vec2(1))) || any(lessThan(uv.xy, vec2(0))); }
 vec3 GetLighting(inout PBRFragment frag, uint index);
 vec3 GetLightingDirectional(inout PBRFragment frag, uint index);
@@ -33,11 +35,12 @@ vec3 GetLightingDirectional(inout PBRFragment frag, uint index)
     const vec3 viewDir = normalize(frag.Position - Camera.Position);
 
     float lambert = dot(frag.Normal, lightDir);
-    float bias = mix(0.005, 0.001, abs(lambert));
+    float bias = mix(0.001, 0.0005, abs(lambert));
     float spec = max(dot(reflect(lightDir, frag.Normal), viewDir), 0.0);
 
     spec = pow(spec, pow(2 - frag.Roughness, 8.0));
-    lambert = max(lambert, 0.0);
+    lambert = max(lambert, 0);
+    lambert *= lambert; // I just thought squaring it looked good.
 
 #ifdef EXT_BINDLESS
     float shadow = lightCoord.z - texture(sampler2D(light.Depth), lightCoord.xy).r;
