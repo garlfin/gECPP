@@ -54,6 +54,7 @@ void DemoWindow::OnInit()
 	auto* sun = new gE::DirectionalLight(this, 256, 3.f, glm::quat(sunRotation));
 	Lights.Sun = sun;
 
+
 	auto* camera = new FlyCamera(this);
 	Cameras.CurrentCamera = &camera->GetCamera();
 }
