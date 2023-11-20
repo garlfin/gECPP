@@ -51,7 +51,7 @@ void DemoWindow::OnInit()
 	mesh->GetMaterials().SetMaterial(0, std::move(rasterMaterial));
 
 	glm::vec3 sunRotation(-45.f, 23.f, 0.f);
-	auto* sun = new gE::DirectionalLight(this, 1024, 3.f, glm::quat(sunRotation));
+	auto* sun = new gE::DirectionalLight(this, 256, 3.f, glm::quat(sunRotation));
 	Lights.Sun = sun;
 
 	auto* camera = new FlyCamera(this);
