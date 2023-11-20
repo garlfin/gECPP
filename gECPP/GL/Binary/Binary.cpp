@@ -22,7 +22,7 @@ u8* ReadFile(const char* name, u32& length, bool binary)
 	FILE* file = fopen(name, "rb");
 	if(!file)
 	{
-		LOG("Could not find file: " << name << '\n');
+		LOG("Could not find file: " << name);
 		return nullptr;
 	}
 

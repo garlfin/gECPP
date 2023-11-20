@@ -5,6 +5,7 @@ layout(location = 3) in vec3 Tangent;
 
 #include "Include/Camera.glsl"
 #include "Include/Scene.glsl"
+#include "Include/Shadow.glsl"
 
 struct VertexOut
 {
@@ -15,16 +16,16 @@ struct VertexOut
     vec3 FragPosLightSpace[MAX_LIGHTS];
 };
 
-out VertexOut Vertex;
+out VertexOut VertexIn;
 
 void main()
 {
     mat4 ViewProjection = Camera.Projection * Camera.View[ViewIndex];
 
-    Vertex.FragPos = (Scene.Model[ModelIndex] * vec4(Position, 1)).xyz;
-    Vertex.UV = UV;
+    VertexIn.FragPos = (Scene.Model[ModelIndex] * vec4(Position, 1)).xyz;
+    VertexIn.UV = UV;
 
-    gl_Position = ViewProjection * Scene.Model[ModelIndex] * vec4(Vertex.FragPos, 1);
+    gl_Position = ViewProjection * Scene.Model[ModelIndex] * vec4(VertexIn.FragPos, 1);
 
     if(Scene.Stage == STAGE_PRE_Z) return;
 
@@ -33,12 +34,13 @@ void main()
     v_Tangent = normalize(Scene.Normal[ModelIndex] * Tangent);
     v_Bitangent = normalize(cross(v_Tangent, v_Normal));
 
-    Vertex.TBN = mat3(v_Tangent, v_Bitangent, v_Normal);
+    VertexIn.TBN = mat3(v_Tangent, v_Bitangent, v_Normal);
 
     for(uint i = 0; i < Lighting.LightCount; i++)
     {
-        vec4 lightPos = Lighting.Lights[i].ViewProjection * vec4(Vertex.FragPos, 1);
-        Vertex.FragPosLightSpace[i] = lightPos.xyz / lightPos.w;
-        Vertex.FragPosLightSpace[i] = Vertex.FragPosLightSpace[i] * 0.5 + 0.5;
+        vec4 lightPos = Lighting.Lights[i].ViewProjection * vec4(VertexIn.FragPos, 1);
+        VertexIn.FragPosLightSpace[i] = lightPos.xyz / lightPos.w;
+        VertexIn.FragPosLightSpace[i] = VertexIn.FragPosLightSpace[i] * 0.5 + 0.5;
+        VertexIn.FragPosLightSpace[i].z = LinearizeDepthOrtho(VertexIn.FragPosLightSpace[i].z, Lighting.Lights[i].Planes);
     }
 }

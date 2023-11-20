@@ -18,7 +18,8 @@ namespace gE
 	};
 
 	DirectionalLight::DirectionalLight(Window* w, u16 size, float scale, const glm::quat& rot) : Light(w, _camera),
-		_camera(this, &w->GetLights(), { { DirectionalSettings, glm::u32vec2(size) }, glm::vec4(-scale, scale, -scale, scale) })
+		_camera(this, &w->GetLights(), { { DirectionalSettings, glm::u32vec2(size) }, glm::vec4(-scale, scale, -scale, scale) }),
+		_scale(scale)
 	{
 		GetTransform().Rotation = rot;
 	}
@@ -48,7 +49,8 @@ namespace gE
 		light.Position = -GetTransform().Forward();
 		light.Type = GL::LightType::Directional;
 		light.Color = glm::vec3(1);
-		light.PackedSettings = 0;
+		light.PackedSettings = u32(_scale);
+		light.Planes = DirectionalSettings.ClipPlanes;
 		light.Depth = (GL::TextureHandle) *GetDepth();
 	}
 

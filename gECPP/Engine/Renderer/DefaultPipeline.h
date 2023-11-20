@@ -31,7 +31,7 @@ namespace GL
 		glm::mat4 View[6];
 	};
 
-	enum class LightType : uint
+	enum class LightType : u32
 	{
 		None,
 		Directional,
@@ -47,6 +47,7 @@ namespace GL
 		LightType Type;
 		glm::vec3 Color;
 		u32 PackedSettings;
+		glm::vec2 Planes;
 		TextureHandle Depth;
 	};
 

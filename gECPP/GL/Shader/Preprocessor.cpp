@@ -17,7 +17,6 @@ namespace GL
 
 	void CompileDirectives(const Array<PreprocessorPair>* pairs, gETF::SerializationBuffer& buf)
 	{
-
 		if(!pairs) return;
 		for(u64 i = 0; i < pairs->Size(); i++) (*pairs)[i].WriteDirective(buf);
 	}
@@ -48,12 +47,14 @@ namespace GL
 			else dstBuffer.StrCat(line, true, '\n');
 		} while((line = (char*) IncrementLine(line)));
 
+		// Prevent edge case when not putting newline at EOF.
+		dstBuffer.Push('\n');
+
 		delete[] source;
 	}
 
 	const char* GetIncludePath(const char* origin, const char* include)
 	{
-
 		if(*include == '<') return strdupc(include + 1, '>');
 		else if(*include == '"')
 		{
@@ -81,7 +82,6 @@ namespace GL
 
 	PreprocessorPair::PreprocessorPair(const char* n, const char* v)
 	{
-
 		u32 totalLength = strlen(n) + 1;
 		u32 nameLength = totalLength, valueLength;
 
@@ -98,10 +98,8 @@ namespace GL
 	}
 
 	PreprocessorPair::PreprocessorPair(const PreprocessorPair& o)
-		:
-		Name(), Value(Name + (o.Value - o.Name))
+		: Name(), Value(Name + (o.Value - o.Name))
 	{
-
 		u32 len = strlen(o.Name) + 1;
 		if(o.Value) len += strlen(o.Value) + 1;
 		else Value = nullptr;
@@ -112,7 +110,6 @@ namespace GL
 
 	void PreprocessorPair::WriteDirective(gETF::SerializationBuffer& buf) const
 	{
-
 		if(!Name) return;
 
 		buf.StrCat("#define ");

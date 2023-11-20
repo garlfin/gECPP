@@ -23,6 +23,7 @@ struct Light
     uint Type;
     vec3 Color;
     uint PackedSettings;
+    vec2 Planes;
     BINDLESS_TEXTURE(TEXTURE_HANDLE, Depth);
 };
 

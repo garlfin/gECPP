@@ -30,12 +30,14 @@ namespace gE
 
 		GET(OrthographicCamera&, Camera, _camera);
 		GET(GL::Texture2D*, Depth, _camera.GetDepthAttachment());
+		GET_CONST(float, Scale, _scale);
 
 		void GetGLLight(GL::LightData&) override;
 		void OnRender(float delta) override;
 
 	 private:
 		OrthographicCamera _camera;
+		float _scale;
 	};
 
 	class LightManager : public TypedManager<Light>
