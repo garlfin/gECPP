@@ -47,9 +47,9 @@ namespace gE
 
 	PBRMaterial::PBRMaterial(Window* w, const Reference<GL::Shader>& s, const PBRMaterialSettings& settings) :
 		Material(w, s),
-		_albedo(this, "Albedo", settings.Albedo),
-		_amr(this, 0u, settings.AMR),
-		_normal(this, 0u, settings.Normal)
+		_albedo(this, "AlbedoTex", settings.Albedo),
+		_amr(this, "AMRTex", settings.AMR),
+		_normal(this, "NormalTex", settings.Normal)
 	{
 
 	}
@@ -57,7 +57,10 @@ namespace gE
 	void gE::PBRMaterial::Bind() const
 	{
 		GetWindow().GetSlotManager().Reset();
+
 		_albedo.Set();
+		_amr.Set();
+		_normal.Set();
 
 		Material::Bind();
 	}

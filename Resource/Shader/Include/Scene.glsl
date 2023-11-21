@@ -48,6 +48,8 @@ struct LightingData
     uint LightCount;
     uint CubemapCount;
 
+    BINDLESS_TEXTURE(samplerCube, Skybox);
+
     Light Lights[MAX_LIGHTS];
     Cubemap Cubemaps[MAX_CUBEMAPS];
 };

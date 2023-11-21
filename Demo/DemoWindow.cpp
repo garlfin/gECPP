@@ -38,8 +38,10 @@ void DemoWindow::OnInit()
 	glfwSetInputMode(GLFWWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glClearColor(0.2, 0.2, 1, 1);
 
-	gE::Reference<GL::Texture2D> tex = gE::CreateReferenceFromPointer((GL::Texture2D*) PVR::Read(this, "../x.pvr"));
-	gE::PBRMaterialSettings materialSettings { tex };
+	auto albedo = gE::CreateReferenceFromPointer((GL::Texture2D*) PVR::Read(this, "Resource/Texture/marble_col.pvr"));
+	auto amr = gE::CreateReferenceFromPointer((GL::Texture2D*) PVR::Read(this, "Resource/Texture/marble_amr.pvr"));
+	auto normal = gE::CreateReferenceFromPointer((GL::Texture2D*) PVR::Read(this, "Resource/Texture/marble_nor.pvr"));
+	gE::PBRMaterialSettings materialSettings { albedo, amr, normal };
 
 	auto rasterShader = gE::CreateReference<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/uber.frag");
 	auto rasterMaterial = gE::CreateReference<gE::PBRMaterial>(this, rasterShader, materialSettings);
@@ -50,12 +52,14 @@ void DemoWindow::OnInit()
 	auto* mesh = new VoxelDemo::StaticMeshEntity(this, file.Meshes[0]);
 	mesh->GetMaterials().SetMaterial(0, std::move(rasterMaterial));
 
-	glm::vec3 sunRotation(-45.f, 23.f, 0.f);
-	auto* sun = new gE::DirectionalLight(this, 1024, 3.f, glm::quat(sunRotation));
+	glm::vec3 sunRotation(-31.f, 30.f, 0.f);
+	auto* sun = new gE::DirectionalLight(this, 1024, 3.f, glm::quat(glm::radians(sunRotation)));
 	Lights.Sun = sun;
 
 	auto* camera = new FlyCamera(this);
 	Cameras.CurrentCamera = &camera->GetCamera();
+
+	Cubemaps.Skybox = gE::CreateReferenceFromPointer((GL::TextureCube*) PVR::Read(this, "Resource/Texture/sky.pvr"));
 }
 
 void DemoWindow::OnDestroy() {}

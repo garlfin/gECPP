@@ -19,8 +19,10 @@ struct PBRFragment
 };
 
 // Main Functions
+#ifdef FRAGMENT_SHADER
 vec3 GetLighting(const Vertex vert, const PBRFragment frag, const Light light);
 vec3 GetLightingDirectional(const Vertex vert, const PBRFragment frag, const Light light);
+#endif
 
 // PBR Functions
 // https://blog.selfshadow.com/publications/s2013-shading-course/karis/s2013_pbs_epic_notes_v2.pdf
@@ -29,9 +31,11 @@ float GSchlick(float cosTheta, float roughness); // AKA 'k'
 float GSchlick(float nDotL, float nDotH, float roughness);
 float GSchlickAnalytical(float nDotL, float nDotH, float roughness); // Read more: Section 3, "Specular G"
 vec3 FresnelSchlick(vec3 f0, float nDotV);
+vec3 ImportanceSampleGGX(vec2 xi, vec3 n, float roughness);
 
 // Implementation
 // Main Functions
+#ifdef FRAGMENT_SHADER
 vec3 GetLighting(const Vertex vert, const PBRFragment frag, const Light light)
 {
     // No control flow indirection because it's all in uniforms
@@ -53,7 +57,7 @@ vec3 GetLightingDirectional(const Vertex vert, const PBRFragment frag, const Lig
     float nDotH = max(dot(frag.Normal, halfEye), 0.0);
 
     // PBR Setup
-    vec3 f = FresnelSchlick(frag.F0, max(dot(nDotH, nDotV), 0.0));
+    vec3 f = FresnelSchlick(frag.F0, max(dot(halfEye, eye), 0.0));
     float d = GGXNDF(nDotH, frag.Roughness);
     float g = GSchlickAnalytical(nDotL, nDotV, frag.Roughness);
 
@@ -61,13 +65,14 @@ vec3 GetLightingDirectional(const Vertex vert, const PBRFragment frag, const Lig
 
     // Final Calculations
     vec3 specularBRDF = (f * d * g) / max(4.0 * nDotL * nDotV, EPSILON);
-    vec3 diffuseBRDF = frag.Albedo; // * kD; Maybe a bug? Odd darkness around the edges.
+    vec3 diffuseBRDF = frag.Albedo * kD;
 
     // Falloff of nDotL * nDotL is nicer to me
     float lambert = min(nDotL * nDotL, GetShadowDirectional(vert, light));
 
     return (diffuseBRDF + specularBRDF) * lambert * light.Color;
 }
+#endif
 
 // PBR Functions
 float GGXNDF(float nDotV, float roughness)
@@ -86,13 +91,13 @@ float GSchlick(float cosTheta, float roughness)
 
 float GSchlick(float nDotL, float nDotH, float roughness)
 {
-    float k = roughness / 2;
+    float k = (roughness * roughness) / 2.0;
     return GSchlick(nDotL, k) * GSchlick(nDotH, k);
 }
 
 float GSchlickAnalytical(float nDotL, float nDotH, float roughness)
 {
-    float r = roughness + 1;
+    float r = roughness + 1.0;
     float k = (r * r) / 8;
     return GSchlick(nDotL, k) * GSchlick(nDotH, k);
 }
@@ -100,4 +105,22 @@ float GSchlickAnalytical(float nDotL, float nDotH, float roughness)
 vec3 FresnelSchlick(vec3 f0, float nDotV)
 {
     return f0 + (1.0 - f0) * pow(1.0 - nDotV, 5.0);
+}
+
+// Epic Games black magic
+vec3 ImportanceSampleGGX(vec2 xi, vec3 n, float roughness)
+{
+    float a = roughness * roughness;
+
+    float phi = PI * 2.0 * xi.x;
+    float cosTheta = sqrt((1.0 - xi.y) / (1.0 + (a * a - 1.0) * xi.y));
+    float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
+
+    vec3 h = vec3(sinTheta * cos(phi), sinTheta * sin(phi), cosTheta);
+
+    vec3 up = abs(n.z) < (1.0 - EPSILON) ? vec3(0.0, 0.0, 1.0) : vec3(1, 0.0, 0.0);
+    vec3 tanX = normalize(cross(up, n));
+    vec3 tanY = cross(n, tanX);
+
+    return tanX * h.x + tanY * h.y + n * h.z;
 }

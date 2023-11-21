@@ -24,7 +24,7 @@
 
 #define assertm(exp, msg) assert(((void) msg, exp))
 #define GE_FAIL(ERR) assertm(false, ERR);
-#define GE_ASSERT(COND, ERR) assertm(COND, ERR);
+#define GE_ASSERT(COND, ERR) assertm(COND, ERR)
 
 namespace gETF
 {

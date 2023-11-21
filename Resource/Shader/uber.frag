@@ -1,8 +1,11 @@
 #include "Include/Camera.glsl"
 #include "Include/Scene.glsl"
 #include "Include/Voxel.glsl"
+#include "Include/PBR.glsl"
 
-uniform sampler2D Albedo;
+uniform sampler2D AlbedoTex;
+uniform sampler2D AMRTex;
+uniform sampler2D NormalTex;
 
 struct VertexOut
 {
@@ -15,16 +18,18 @@ struct VertexOut
 
 in VertexOut VertexIn;
 
-// TODO: FIX THIS! !
-#include "Include/PBR.glsl"
-
 out vec4 FragColor;
 
 void main()
 {
     if(Scene.Stage == STAGE_PRE_Z) return;
 
-    vec3 albedo = texture(Albedo, VertexIn.UV).rgb;
+    vec3 albedo = texture(AlbedoTex, VertexIn.UV).rgb;
+    vec3 amr = texture(AMRTex, VertexIn.UV).rgb;
+    vec3 normal = texture(NormalTex, VertexIn.UV * vec2(1, -1)).rgb;
+
+    normal = normalize(VertexIn.TBN * (normal * 2 - 1));
+
     FragColor.rgb = albedo * 0.1;
 
     Vertex vertex = Vertex
@@ -36,16 +41,17 @@ void main()
 
     PBRFragment fragment = PBRFragment
     (
-        normalize(VertexIn.TBN[2]),
-        0.1,
+        normal,
+        amr.b,
         albedo,
-        0.0,
+        amr.g,
         vec3(0.04),
         1.46
     );
 
     FragColor.rgb += GetLighting(vertex, fragment, Lighting.Lights[0]);
     FragColor.rgb = pow(FragColor.rgb, vec3(1.0 / 2.2));
+
     if(Scene.Stage != STAGE_VOXEL) return;
 
     Voxel voxel = Voxel(FragColor.rgb, vec3(0), true);

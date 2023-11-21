@@ -72,6 +72,8 @@ namespace GL
 		u32 LightCount = 1;
 		u32 CubemapCount = 1;
 
+		TextureHandle Skybox;
+
 		GL_ALIGN LightData Lights[GE_MAX_LIGHT];
 		GL_ALIGN CubemapData Cubemaps[GE_MAX_CUBEMAP];
 	};

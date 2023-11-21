@@ -20,6 +20,7 @@ namespace PVR
 		PreMultiplied = 2
 	};
 
+	// TODO: This is actually wrong!
 	enum class PixelFormat : u64
 	{
 		DXT1 = 7,
@@ -27,8 +28,10 @@ namespace PVR
 		DXT5 = 11,
 		BC5 = 13,
 		Depth,
-		RBB8 = 2260630272894834,
+		RGB8 = 2260630272894834,
 		RGBA8 = 7267626108080808,
+		RGB32F = 9042521072232306,
+		RGB16F = 4521260539340658
 	};
 
 	enum class ColorSpace : u32
@@ -54,7 +57,6 @@ namespace PVR
 
 	constexpr GLenum PVRToInternalFormat(PVR::PixelFormat f)
 	{
-
 		switch(f)
 		{
 		case PVR::PixelFormat::DXT1: return GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
@@ -62,6 +64,8 @@ namespace PVR
 		case PVR::PixelFormat::DXT5: return GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
 		case PVR::PixelFormat::BC5: return GL_COMPRESSED_RG_RGTC2;
 		case PVR::PixelFormat::Depth: return GL_DEPTH_COMPONENT16;
+		case PVR::PixelFormat::RGB32F: return GL_RGB32F;
+		case PVR::PixelFormat::RGB16F: return GL_RGB16F;
 		default: return GL_RGB8;
 		}
 	}
@@ -94,8 +98,7 @@ namespace GL
 
 	struct CompressionScheme
 	{
-		CompressionScheme(u8 bls, u8 bs) : BlockSize(bls), ByteSize(bs)
-		{ }
+		CompressionScheme(u8 bls, u8 bs) : BlockSize(bls), ByteSize(bs) { }
 
 		u8 BlockSize;
 		u8 ByteSize;
@@ -103,19 +106,16 @@ namespace GL
 		template<TextureDimension DIMENSION>
 		NODISCARD ALWAYS_INLINE u64 Size(const TextureSize<DIMENSION>& size) const
 		{
-
 			TextureSize<DIMENSION> blocks = DIV_CEIL_T(size, BlockSize, TextureSize<DIMENSION>);
 			if constexpr(DIMENSION == TextureDimension::D1D) return blocks * ByteSize;
 			else if constexpr(DIMENSION == TextureDimension::D2D) return blocks.x * blocks.y * ByteSize;
 			else return blocks.x * blocks.y * blocks.z * ByteSize;
 		}
 
-		NODISCARD ALWAYS_INLINE constexpr operator bool() const
-		{ return BlockSize != 1; } // NOLINT
+		NODISCARD ALWAYS_INLINE constexpr operator bool() const { return BlockSize != 1; } // NOLINT
 
 		static const CompressionScheme& None()
 		{
-
 			static const CompressionScheme none{ 1, 1 };
 			return none;
 		}
@@ -128,8 +128,7 @@ namespace GL
 		FilterMode Filter = FilterMode::Linear;
 		u8 MipCount = 1;
 
-		constexpr operator bool() const
-		{ return (bool) Format; } // NOLINT
+		constexpr operator bool() const { return (bool) Format; } // NOLINT
 	};
 
 	template<TextureDimension DIMENSION>

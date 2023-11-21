@@ -14,6 +14,7 @@
 #include "Engine/Entity/VoxelCapture.h"
 #include "Engine/Component/MeshRenderer.h"
 #include "Engine/Entity/DirectionalLight.h"
+#include "Engine/Entity/CubemapCapture.h"
 
 struct GLFWwindow;
 struct GLFWvidmode;
@@ -41,8 +42,6 @@ namespace gE
 		void Blit(const GL::Texture& texture);
 
 		// Entities & Data
-		SmartPointer<GL::CubemapData> Cubemap;
-
 		GET(VoxelCapture&, VoxelCapture, VoxelCap);
 		GET(gE::Material&, DefaultMaterial, DefaultMaterial);
 
@@ -52,6 +51,7 @@ namespace gE
 		GET(ComponentManager<Behavior>&, Behaviors, Behaviors);
 		GET(ComponentManager<MeshRenderer>&, Renderers, Renderers);
 		GET(LightManager&, Lights, Lights);
+		GET(CubemapManager&, Cubemaps, Cubemaps);
 		GET(GL::TextureSlotManager &, SlotManager, SlotManager);
 
 		// Engine States
@@ -82,6 +82,7 @@ namespace gE
 		ComponentManager<MeshRenderer> Renderers;
 		ComponentManager<Entity> Entities;
 		LightManager Lights;
+		CubemapManager Cubemaps;
 		GL::TextureSlotManager SlotManager;
 
 		SmartPointer<VoxelCapture> VoxelCap;
