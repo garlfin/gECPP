@@ -28,7 +28,7 @@ void main()
     vec3 amr = texture(AMRTex, VertexIn.UV).rgb;
     vec3 normal = texture(NormalTex, VertexIn.UV * vec2(1, -1)).rgb;
 
-    normal = normalize(VertexIn.TBN * (normal * 2 - 1));
+    normal = normalize(VertexIn.TBN * (normal * 2.0 - 1.0));
 
     FragColor.rgb = albedo * 0.1;
 
@@ -50,6 +50,8 @@ void main()
     );
 
     FragColor.rgb += GetLighting(vertex, fragment, Lighting.Lights[0]);
+    FragColor.rgb += GetLighting(vertex, fragment, Lighting.Skybox);
+
     FragColor.rgb = pow(FragColor.rgb, vec3(1.0 / 2.2));
 
     if(Scene.Stage != STAGE_VOXEL) return;

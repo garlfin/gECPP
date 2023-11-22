@@ -37,6 +37,7 @@ namespace gE
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		window->GetRenderers().OnRender(0.f);
+		window->GetCubemaps().DrawSkybox();
 	}
 
 	void DefaultPipeline::RenderPass3D(Window* window, Camera3D* camera) {}
@@ -53,6 +54,11 @@ namespace gE
 		glViewport(0, 0, cameraSize.x, cameraSize.y);
 
 		window->GetRenderers().OnRender(0.f);
+	}
+
+	void DefaultPipeline::RenderPassCubemap(Window*, CameraCubemap*)
+	{
+
 	}
 
 #ifdef DEBUG

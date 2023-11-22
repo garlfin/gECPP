@@ -7,7 +7,7 @@ out vec4 FragColor;
 
 void main()
 {
-   float sine = sin(Camera.Time * PI * 2) * 0.5 + 0.5;
+   float sine = sin(Camera.Frame * PI / 60.0) * 0.5 + 0.5;
    vec2 pos = floor(gl_FragCoord.xy / CHECKER_SIZE);
    float pattern = mod(pos.x + mod(pos.y, 2.0), 2.0);
 

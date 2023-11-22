@@ -33,4 +33,25 @@ namespace gE
 
 		Manager::OnRender(delta);
 	}
+
+	void CubemapManager::DrawSkybox()
+	{
+		if(!_skyboxMesh)
+		{
+			gETF::File skyboxCube;
+			gETF::Read("Resource/Model/skybox.gETF", skyboxCube);
+
+			_skyboxShader = CreateSmartPointer<GL::Shader>(_window, "Resource/Shader/skybox.vert", "Resource/Shader/skybox.frag");
+			_skyboxMesh = skyboxCube.Meshes[0];
+			_skyboxMesh->CreateVAO(_window);
+		}
+
+		_skyboxShader->Bind();
+
+		glEnable(GL_DEPTH_TEST);
+		glDisable(GL_CULL_FACE);
+		glDepthFunc(GL_GEQUAL);
+
+		_skyboxMesh->VAO->Draw(0);
+	}
 }

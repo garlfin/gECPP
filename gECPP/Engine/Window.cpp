@@ -15,7 +15,7 @@ char WindowTitleBuf[30];
 #endif
 
 Window::Window(glm::u16vec2 size, const char* name) :
-	_size(size), _name(strdup(name)), Lights(this)
+	_size(size), _name(strdup(name)), Lights(this), Cubemaps(this)
 {
 	if(!glfwInit()) GE_FAIL("Failed to initialize GLFW.");
 
@@ -107,6 +107,19 @@ void Window::OnInit()
 	VoxelBuffers = CreateSmartPointer<VoxelPipeline::Buffers>(this);
 
 	BlitShader = CreateSmartPointer<GL::Shader>(this, "Resource/Shader/blit.vert", "Resource/Shader/blit.frag");
+
+	{
+		GL::ComputeShader brdfShader(this, "Resource/Shader/brdf.comp");
+		GL::TextureSettings<GL::TextureDimension::D2D> brdfSettings
+		{
+			{ GL_RG16F, GL::WrapMode::Clamp, GL::FilterMode::Linear, 1 },
+			glm::u32vec2(512)
+		};
+
+		BRDFLookup = CreateSmartPointer<GL::Texture2D>(this, brdfSettings);
+		BRDFLookup->Bind(0, GL_WRITE_ONLY);
+		brdfShader.Dispatch(16, 16, 1); // 512px / 32 Group Size = 16 Groups
+	}
 
 	auto defaultShader = CreateReference<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/missing.frag");
 	DefaultMaterial = CreateSmartPointer<gE::Material>(this, defaultShader);

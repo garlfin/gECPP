@@ -112,13 +112,8 @@ namespace GL
 			else return blocks.x * blocks.y * blocks.z * ByteSize;
 		}
 
-		NODISCARD ALWAYS_INLINE constexpr operator bool() const { return BlockSize != 1; } // NOLINT
-
-		static const CompressionScheme& None()
-		{
-			static const CompressionScheme none{ 1, 1 };
-			return none;
-		}
+		NODISCARD ALWAYS_INLINE bool IsCompressed() const { return BlockSize != 1; }
+		NODISCARD ALWAYS_INLINE explicit operator bool() const { return BlockSize != 1; }
 	};
 
 	struct SizelessTextureSettings

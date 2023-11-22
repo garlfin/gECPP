@@ -6,6 +6,7 @@
 namespace gETF
 {
 	struct Mesh;
+	struct MaterialSlot;
 }
 
 namespace GL
@@ -17,8 +18,7 @@ namespace GL
 
 		GET_CONST(const gETF::Mesh*, Settings, _settings);
 
-		ALWAYS_INLINE void Bind() const final
-		{ glBindVertexArray(ID); }
+		ALWAYS_INLINE void Bind() const final { glBindVertexArray(ID); }
 
 		virtual void Draw(u8 index, u16 instanceCount = 1) const;
 
@@ -32,7 +32,7 @@ namespace GL
 			// TODO come up with a better name than this 😭😭
 		};
 
-		const gETF::Mesh* _settings;
+		const gETF::Material* _settings;
 	};
 
 	class IndexedVAO final : public VAO
@@ -40,7 +40,7 @@ namespace GL
 	 public:
 		IndexedVAO(gE::Window* window, const gETF::Mesh* settings);
 
-		inline void Draw(u8 index, u16 instanceCount = 1) const override;
+		void Draw(u8 index, u16 instanceCount = 1) const override;
 
 		friend class VAO;
 	};

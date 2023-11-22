@@ -19,7 +19,7 @@ namespace GL
 	struct Camera
 	{
 		glm::vec3 Position;
-		float Time;
+		u32 Frame;
 		GL_ALIGN glm::vec2 ClipPlanes;
 		glm::vec2 Parameters;
 

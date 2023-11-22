@@ -67,6 +67,7 @@ namespace gE
 		gE::SmartPointer<GL::Texture> DepthCopy;
 		gE::SmartPointer<GL::Texture> Attachments[GE_MAX_ATTACHMENTS]{};
 		gE::SmartPointer<GL::Texture> AttachmentCopies[GE_MAX_ATTACHMENTS]{};
+		u32 Frame = 0;
 
 	 private:
 		bool _isProjectionInvalid = true;

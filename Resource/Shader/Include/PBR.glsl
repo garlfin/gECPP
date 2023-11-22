@@ -6,7 +6,16 @@
 #ifndef PI
 #define PI 3.141592
 #endif
+
+#ifndef EPSILON
 #define EPSILON 0.00001
+#endif
+
+#define HAMMERSLEY_ROUGHNESS_SAMPLE 16
+
+#ifdef FRAGMENT_SHADER
+uniform sampler2D BRDFLutTex;
+#endif
 
 struct PBRFragment
 {
@@ -21,6 +30,7 @@ struct PBRFragment
 // Main Functions
 #ifdef FRAGMENT_SHADER
 vec3 GetLighting(const Vertex vert, const PBRFragment frag, const Light light);
+vec3 GetLighting(const Vertex vert, const PBRFragment frag, samplerCube cubemap);
 vec3 GetLightingDirectional(const Vertex vert, const PBRFragment frag, const Light light);
 #endif
 
@@ -32,6 +42,8 @@ float GSchlick(float nDotL, float nDotH, float roughness);
 float GSchlickAnalytical(float nDotL, float nDotH, float roughness); // Read more: Section 3, "Specular G"
 vec3 FresnelSchlick(vec3 f0, float nDotV);
 vec3 ImportanceSampleGGX(vec2 xi, vec3 n, float roughness);
+float VDCInverse(uint bits);
+vec2 Hammersley(uint i, uint sampleCount);
 
 // Implementation
 // Main Functions
@@ -44,6 +56,19 @@ vec3 GetLighting(const Vertex vert, const PBRFragment frag, const Light light)
         case LIGHT_DIRECTIONAL: return GetLightingDirectional(vert, frag, light);
         default: return vec3(1.0);
     }
+}
+
+vec3 GetLighting(const Vertex vert, const PBRFragment frag, samplerCube cubemap)
+{
+    vec3 eye = normalize(Camera.Position - vert.Position);
+    float nDotV = max(dot(frag.Normal, eye), 0.0);
+    vec3 f = FresnelSchlick(frag.F0, nDotV);
+    vec3 r = reflect(-eye, frag.Normal);
+
+    vec3 specular = texture(cubemap, r, textureQueryLevels(cubemap) * frag.Roughness).rgb;
+    vec2 brdf = texture(BRDFLutTex, vec2(nDotV, frag.Roughness)).rg;
+
+    return (frag.F0 * brdf.x + brdf.y) * specular;
 }
 
 vec3 GetLightingDirectional(const Vertex vert, const PBRFragment frag, const Light light)
@@ -123,4 +148,21 @@ vec3 ImportanceSampleGGX(vec2 xi, vec3 n, float roughness)
     vec3 tanY = cross(n, tanX);
 
     return tanX * h.x + tanY * h.y + n * h.z;
+}
+
+// How someone came up with this, I don't know.
+// http://holger.dammertz.org/stuff/notes_HammersleyOnHemisphere.html
+float VDCInverse(uint bits)
+{
+    bits = (bits << 16u) | (bits >> 16u);
+    bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);
+    bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xCCCCCCCCu) >> 2u);
+    bits = ((bits & 0x0F0F0F0Fu) << 4u) | ((bits & 0xF0F0F0F0u) >> 4u);
+    bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);
+    return float(bits) * 2.3283064365386963e-10; // / 0x100000000
+}
+
+vec2 Hammersley(uint i, uint sampleCount)
+{
+    return vec2(i / sampleCount, VDCInverse(i));
 }

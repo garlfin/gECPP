@@ -34,7 +34,7 @@ namespace GL
 				size = glm::max(size, decltype(size)(1)); // double lazy guy
 				u64 dataSize = data.Scheme.Size<TextureDimension::D2D>(size);
 
-				if(data.Scheme)
+				if(data.Scheme.IsCompressed())
 					glCompressedTextureSubImage2D(ID, i, 0, 0, size.x, size.y, Format, dataSize, dataPtr);
 				else
 					glTextureSubImage2D(ID, i, 0, 0, size.x, size.y, data.PixelFormat, data.PixelType, dataPtr);
@@ -66,7 +66,7 @@ namespace GL
 			size = glm::max(size, decltype(size)(1)); // double lazy guy
 			u64 dataSize = data.Scheme.Size<TextureDimension::D3D>(size);
 
-			if(data.Scheme)
+			if(data.Scheme.IsCompressed())
 				glCompressedTextureSubImage3D(ID, i, 0, 0, 0, size.x, size.y, size.z, Format, dataSize, dataPtr);
 			else
 				glTextureSubImage3D(ID, i, 0, 0, 0, size.x, size.y, size.z, data.PixelFormat, data.PixelType, dataPtr);
@@ -117,12 +117,12 @@ namespace GL
 		for(ubyte i = 0; i < Mips; i++, size >>= 1)
 		{
 			size = glm::max(size, 1u);
-			u64 dataSize = data.Scheme.Size<TextureDimension::D2D>(TextureSize2D(size));
+			u64 dataSize = data.Scheme.Size<TextureDimension::D3D>(TextureSize3D(size, size, 6));
 
-			if(data.Scheme)
-				glCompressedTextureSubImage3D(ID, i, 0, 0, 0, _size, _size, 6, Format, dataSize, dataPtr);
+			if(data.Scheme.IsCompressed())
+				glCompressedTextureSubImage3D(ID, i, 0, 0, 0, size, size, 6, Format, dataSize, dataPtr);
 			else
-				glTextureSubImage3D(ID, i, 0, 0, 0, _size, _size, 6, data.PixelFormat, data.PixelType, dataPtr);
+				glTextureSubImage3D(ID, i, 0, 0, 0, size, size, 6, data.PixelFormat, data.PixelType, dataPtr);
 
 			dataPtr += dataSize;
 		}

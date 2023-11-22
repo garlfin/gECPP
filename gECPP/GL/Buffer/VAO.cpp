@@ -8,11 +8,9 @@
 namespace GL
 {
 	VAO::VAO(gE::Window* window, const gETF::Mesh* settings) : Asset(window),
-															   _settings(settings),
-															   _bufferBuffer(malloc(
-																   sizeof(Buffer<void>) * settings->BufferCount))
+		_settings(settings),
+		_bufferBuffer(malloc(sizeof(Buffer<void>) * settings->BufferCount))
 	{
-
 		glCreateVertexArrays(1, &ID);
 
 		for(u8 i = 0; i < settings->BufferCount; i++)
@@ -38,7 +36,6 @@ namespace GL
 
 	void VAO::Draw(u8 index, u16 instanceCount) const
 	{
-
 		if(!instanceCount) return;
 		Bind();
 		const gETF::MaterialSlot& mesh = _settings->Materials[index];
@@ -47,7 +44,6 @@ namespace GL
 
 	void IndexedVAO::Draw(u8 index, u16 instanceCount) const
 	{
-
 		if(!instanceCount) return;
 		Bind();
 		const gETF::MaterialSlot& mesh = _settings->Materials[index];

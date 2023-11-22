@@ -28,11 +28,8 @@ namespace GL
 		if(!source) return;
 		char* line = source;
 
-		if(idBuffer.Find(file))
-		{
-			LOG(file << " already included, skipping.");
-			return;
-		}
+		if(idBuffer.Find(file)) return;
+
 		idBuffer.StrCat(file);
 
 		do

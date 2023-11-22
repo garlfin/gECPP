@@ -29,5 +29,6 @@ namespace gE
 		const gE::ReferenceUniform<GL::Texture2D> _albedo;
 		const gE::ReferenceUniform<GL::Texture2D> _amr;
 		const gE::ReferenceUniform<GL::Texture2D> _normal;
+		const GL::DynamicUniform _brdfLUT;
 	};
 }

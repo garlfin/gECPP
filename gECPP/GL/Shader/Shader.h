@@ -65,7 +65,8 @@ namespace GL
 
 	class ComputeShader final : public Shader
 	{
-		ComputeShader(gE::Window* window, const char* src, const Array<PreprocessorPair>* pair)
+	 public:
+		ComputeShader(gE::Window* window, const char* src, const Array<PreprocessorPair>* pair = nullptr)
 			: Shader(window, src, pair)
 		{ };
 

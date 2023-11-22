@@ -36,12 +36,14 @@ void gE::Camera::OnRender(float delta)
 	if(DepthCopy) DepthCopy->CopyFrom(DepthTexture);
 	for(u8 i = 0; i < GE_MAX_ATTACHMENTS; i++)
 		if(AttachmentCopies[i]) AttachmentCopies[i]->CopyFrom(Attachments[i]);
+
+	Frame++;
 }
 
 void gE::Camera::GetGLCamera(GL::Camera& cam)
 {
 	cam.Position = GetOwner()->GetTransform().GlobalTranslation();
-	cam.Time = GetWindow().GetTime();
+	cam.Frame = Frame;
 	cam.ClipPlanes = GetClipPlanes();
 	cam.Projection = Projection;
 

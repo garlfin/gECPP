@@ -1,3 +1,4 @@
+#include "Camera.glsl"
 #include "Bindless.glsl"
 #include "Vertex.glsl"
 
@@ -7,7 +8,7 @@
 #endif
 
 #ifndef DIRECTIONAL_SHADOW_SAMPLES
-#define DIRECTIONAL_SHADOW_SAMPLES 16
+#define DIRECTIONAL_SHADOW_SAMPLES 64
 #endif
 
 #ifndef PI
@@ -84,6 +85,7 @@ bool TexcoordOutOfBounds(vec2 uv)
 
 float InterleavedGradientNoise(vec2 uv)
 {
+    uv = uv + 5.588238 * Camera.Frame;
     return fract(52.9829189 * fract(dot(uv, vec2(0.06711056, 0.00583715))));
 }
 

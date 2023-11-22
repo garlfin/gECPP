@@ -25,6 +25,7 @@ void DemoWindow::OnRender(float delta)
 	Behaviors.OnRender(delta);
 
 	Lights.OnRender(delta);
+	Cubemaps.OnRender(delta);
 	Cameras.OnRender(delta);
 
 	GE_ASSERT(Cameras.CurrentCamera, "CAMERA SHOULD NOT BE NULL!");
@@ -35,6 +36,7 @@ void DemoWindow::OnRender(float delta)
 
 void DemoWindow::OnInit()
 {
+	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 	glfwSetInputMode(GLFWWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glClearColor(0.2, 0.2, 1, 1);
 

@@ -44,6 +44,7 @@ namespace gE
 		// Entities & Data
 		GET(VoxelCapture&, VoxelCapture, VoxelCap);
 		GET(gE::Material&, DefaultMaterial, DefaultMaterial);
+		GET(GL::Texture2D&, BRDFLookupTexture, BRDFLookup);
 
 		// Managers
 		GET(CameraManager&, Cameras, Cameras);
@@ -88,6 +89,7 @@ namespace gE
 		SmartPointer<VoxelCapture> VoxelCap;
 		SmartPointer<gE::Material> DefaultMaterial;
 		SmartPointer<GL::Shader> BlitShader;
+		SmartPointer<GL::Texture2D> BRDFLookup;
 
 	 private:
 		GL::TextureSize2D _size;

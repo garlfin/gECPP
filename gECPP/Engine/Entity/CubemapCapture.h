@@ -5,6 +5,8 @@
 #pragma once
 #include "Entity.h"
 #include <Engine/Component/Camera.h>
+#include <gEModel/gETF.h>
+#include <GL/Shader/Shader.h>
 
 namespace gE
 {
@@ -25,13 +27,17 @@ namespace gE
 	class CubemapManager final : public TypedManager<CubemapCapture>
 	{
 	 public:
-		explicit CubemapManager(Window* window) : _window(window) {};
+		explicit CubemapManager(Window* window) : TypedManager<CubemapCapture>(), _window(window) {};
 
 		gE::Reference<GL::TextureCube> Skybox{};
 
+		void DrawSkybox();
 		void OnRender(float delta) override;
 
 	 private:
 		Window* _window;
+
+		gETF::MeshReference _skyboxMesh;
+		SmartPointer<GL::Shader> _skyboxShader;
 	};
 }
