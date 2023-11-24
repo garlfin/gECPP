@@ -36,6 +36,7 @@ namespace gE
 
 	void CubemapManager::DrawSkybox()
 	{
+		return;
 		if(!_skyboxMesh)
 		{
 			gETF::File skyboxCube;

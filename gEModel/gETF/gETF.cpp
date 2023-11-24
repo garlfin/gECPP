@@ -94,29 +94,52 @@ namespace gETF
 	{
 		if(VAO) return;
 
-		if(TriangleMode == TriangleMode::Simple)
-			VAO = gE::SmartPointer<GL::VAO>(new GL::IndexedVAO(w, this));
-		else VAO = gE::SmartPointer<GL::VAO>(new GL::VAO(w, this));
+		GL::IndexedVAOSettings settings;
+		GetVAOSettings(settings);
+
+		if (TriangleMode == TriangleMode::None)
+			VAO = gE::SmartPointer<GL::VAO>(new GL::VAO(w, settings));
+		else
+			VAO = gE::SmartPointer<GL::VAO>(new GL::IndexedVAO(w, settings));
+	}
+
+	void Mesh::GetVAOSettings(GL::VAOSettings& settings)
+	{
+		GE_ASSERT(BufferCount <= GE_MAX_VAO_BUFFER, "TOO MANY BUFFERS!");
+		settings.BufferCount = BufferCount;
+		for(u8 i = 0; i < BufferCount; i++) settings.Buffers[i] = Buffers[i];
+
+		GE_ASSERT(FieldCount <= GE_MAX_VAO_FIELD, "TOO MANY FIELDS!");
+		settings.FieldCount = FieldCount;
+		for(u8 i = 0; i < FieldCount; i++) settings.Fields[i] = Fields[i];
+
+		GE_ASSERT(MaterialCount <= GE_MAX_VAO_MATERIAL, "TOO MANY MATERIALS!");
+		settings.MaterialCount = MaterialCount;
+		for(u8 i = 0; i < MaterialCount; i++) settings.Materials[i] = Materials[i];
+	}
+
+	void Mesh::GetVAOSettings(GL::IndexedVAOSettings& settings)
+	{
+		GE_ASSERT(TriangleMode != TriangleMode::None, "CANNOT GET TRIANGLES!");
+
+		// Not too sure how legal this is
+		GetVAOSettings((GL::VAOSettings&) settings);
+		settings.Triangles = Triangles;
 	}
 
 	void VertexBuffer::Deserialize(gETF::SerializationBuffer& buf) const
 	{
-		buf.Push(Index);
-
 		buf.Push(Stride);
-		buf.Push(Count);
-
-		buf.PushPtr((u8*) Data, Stride * Count);
+		buf.Push(Length);
+		buf.PushPtr((u8*) Data, Stride * Length);
 	}
 
 	void VertexBuffer::Serialize(u8*& ptr)
 	{
-		Index = ::Read<u8>(ptr);
 		Stride = ::Read<u8>(ptr);
+		Length = ::Read<u32>(ptr);
 
-		Count = ::Read<u32>(ptr);
-
-		size_t byteSize = Stride * Count;
+		size_t byteSize = Stride * Length;
 		Data = malloc(byteSize);
 		::Read(ptr, (u8*) Data, byteSize);
 	}

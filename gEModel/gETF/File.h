@@ -20,15 +20,9 @@ namespace gETF
 	// struct Scene;
 	// struct Node;
 
-	struct VertexBuffer : public Serializable
+ 	struct VertexBuffer : public Serializable, public GL::BufferSettings
 	{
 		SERIALIZABLE_PROTO;
-
-		u8 Index = 0;
-		u8 Stride = 0;
-		u32 Count = 0;
-
-		void* Data = nullptr;
 
 		inline void Free() { free(Data); Data = nullptr; }
 		NODISCARD ALWAYS_INLINE bool IsFree() const { return Data; }
@@ -36,29 +30,18 @@ namespace gETF
 		~VertexBuffer() { free(Data); }
 	};
 
-	struct VertexField : public Serializable
+ 	struct VertexField : public Serializable, public GL::VertexField
 	{
 		SERIALIZABLE_PROTO;
 
 		const char* Name;
 
-		GLenum ElementType = 0;
-
-		u8 Index = 0;
-		u8 BufferIndex = 0;
-		u8 ElementCount = 0;
-		u8 Offset = 0;
-
 		~VertexField() { delete[] Name; }
 	};
 
-	struct MaterialSlot : public Serializable
+ 	struct MaterialSlot : public Serializable, public GL::MaterialSlot
 	{
 		SERIALIZABLE_PROTO;
-
-		u8 MaterialIndex = 0;
-		u32 Offset = 0;
-		u32 Count = 0;
 	};
 
 	enum class TriangleMode : u8
@@ -86,6 +69,9 @@ namespace gETF
 
 		void Free() const { for(u8 i = 0; i < BufferCount; i++) Buffers[i].Free(); }
 		void CreateVAO(gE::Window*);
+
+		void GetVAOSettings(GL::VAOSettings&);
+		void GetVAOSettings(GL::IndexedVAOSettings&);
 
 		~Mesh();
 	};

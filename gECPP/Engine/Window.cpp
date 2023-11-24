@@ -36,7 +36,7 @@ Window::Window(glm::u16vec2 size, const char* name) :
 	PVR::Header iconHeader;
 
 	u8* iconData = PVR::Read("Resource/gE.PVR", iconHeader);
-	GLFWimage image(iconHeader.Size.x, iconHeader.Size.y, iconData);
+	GLFWimage image{(int) iconHeader.Size.x, (int) iconHeader.Size.y, iconData};
 	glfwSetWindowIcon(_window, 1, &image);
 
 	delete[] iconData;

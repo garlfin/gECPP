@@ -2,12 +2,15 @@
 // Created by scion on 8/10/2023.
 //
 
+// TODO: Completely RE-DO gEModel
+// Lazily slapped together
+
 #include "gETF.h"
 #include <ASSIMP/Importer.hpp>
 #include <ASSIMP/scene.h>
 #include <ASSIMP/postprocess.h>
 
-#define DEFINE_GL_TYPE(TYPE, VALUE) template<> constexpr u32 GLType<TYPE> = VALUE
+#define DEFINE_GL_TYPE(TYPE, VALUE) template<> GLOBAL GLenum GLType<TYPE> = VALUE
 #define IMPORT_FLAGS (aiProcess_CalcTangentSpace | aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_LimitBoneWeights | aiProcess_ImproveCacheLocality)
 
 template<typename T, typename I>
@@ -17,10 +20,11 @@ template<class T, class I>
 constexpr bool IsVec3 = std::is_same_v<aiVector3t<T>, I>;
 
 template<class T>
-constexpr u32 GLType = 0;
+GLOBAL GLenum GLType = 0;
 
-DEFINE_GL_TYPE(float, GL_FLOAT);
 DEFINE_GL_TYPE(u32, GL_UNSIGNED_INT);
+DEFINE_GL_TYPE(float, GL_FLOAT);
+
 
 void TransformFace(const aiFace& s, aiVector3t<u32>& v)
 {
@@ -39,18 +43,19 @@ template<unsigned int aiMesh::* COUNT_OFFSET, typename INDIVIDUAL_TYPE, typename
 void CreateField(u8 index, gETF::VertexBuffer& buffer, gETF::VertexField& field, aiMesh** source, u8 count, const char* name)
 {
 	field.Index = index;
-	field.Name = strcpy(new char[strlen(name) + 1], name);
+	field.Name = strdup(name);
 	field.ElementType = GLType<INDIVIDUAL_TYPE>;
 	field.ElementCount = IsVec3<INDIVIDUAL_TYPE, I> || std::is_same_v<aiFace, I> ? 3 : 2;
 	field.Offset = 0;
 	field.BufferIndex = index;
 
-	buffer.Index = index;
-	buffer.Stride = GLSizeOf(field.ElementType) * field.ElementCount;
-	buffer.Count = 0;
-	for(u8 i = 0; i < count; i++) buffer.Count += source[i]->*COUNT_OFFSET;
+	GE_ASSERT(field.ElementType, "INVALID TYPE!");
 
-	I* data = (I*) malloc(sizeof(I) * buffer.Count);
+	buffer.Stride = GLSizeOf(field.ElementType) * field.ElementCount;
+	buffer.Length = 0;
+	for(u8 i = 0; i < count; i++) buffer.Length += source[i]->*COUNT_OFFSET;
+
+	I* data = (I*) malloc(sizeof(I) * buffer.Length);
 	buffer.Data = data;
 
 	for(u8 i = 0; i < count; i++)

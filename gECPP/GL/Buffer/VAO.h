@@ -2,21 +2,16 @@
 
 #include "GL/GL.h"
 #include "Buffer.h"
-
-namespace gETF
-{
-	struct Mesh;
-	struct MaterialSlot;
-}
+#include "VAOSettings.h"
 
 namespace GL
 {
 	class VAO : public Asset
 	{
 	 public:
-		VAO(gE::Window* window, const gETF::Mesh* settings);
+		VAO(gE::Window* window, const GL::VAOSettings& settings);
 
-		GET_CONST(const gETF::Mesh*, Settings, _settings);
+		GET_CONST(const GL::VAOSettings&, Slots, _settings);
 
 		ALWAYS_INLINE void Bind() const final { glBindVertexArray(ID); }
 
@@ -25,23 +20,18 @@ namespace GL
 		~VAO() override;
 
 	 protected:
-		union
-		{
-			Buffer<void>* _buffers;
-			void* _bufferBuffer; // Allocation for _buffers, so I don't have to construct them on the spot.
-			// TODO come up with a better name than this 😭😭
-		};
-
-		const gETF::Material* _settings;
+		Buffer<void>** _buffers;
+		const GL::VAOSettings _settings;
 	};
 
 	class IndexedVAO final : public VAO
 	{
 	 public:
-		IndexedVAO(gE::Window* window, const gETF::Mesh* settings);
+		IndexedVAO(gE::Window* window, const GL::IndexedVAOSettings& settings);
 
 		void Draw(u8 index, u16 instanceCount = 1) const override;
 
-		friend class VAO;
+	 private:
+		VertexField _triangles;
 	};
 }
