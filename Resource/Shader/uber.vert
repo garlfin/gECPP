@@ -11,30 +11,33 @@ struct VertexOut
 {
     vec3 FragPos;
     vec2 UV;
-    mat3 TBN;
-
+    vec2 Velocity;
     vec3 FragPosLightSpace[MAX_LIGHTS];
+    mat3 TBN;
 };
 
 out VertexOut VertexIn;
 
 void main()
 {
-    mat4 ViewProjection = Camera.Projection * Camera.View[ViewIndex];
+    mat4 viewProjection = Camera.Projection * Camera.View[ViewIndex];
 
     VertexIn.FragPos = (Scene.Model[ModelIndex] * vec4(Position, 1)).xyz;
     VertexIn.UV = UV;
 
-    gl_Position = ViewProjection * Scene.Model[ModelIndex] * vec4(VertexIn.FragPos, 1);
+    gl_Position = viewProjection * Scene.Model[ModelIndex] * vec4(VertexIn.FragPos, 1);
 
     if(Scene.Stage == STAGE_PRE_Z) return;
 
-    vec3 v_Normal, v_Tangent, v_Bitangent;
-    v_Normal = normalize(Scene.Normal[ModelIndex] * Normal);
-    v_Tangent = normalize(Scene.Normal[ModelIndex] * Tangent);
-    v_Bitangent = normalize(cross(v_Tangent, v_Normal));
+    VertexIn.Velocity = (Camera.PreviousViewProjection * Scene.PreviousModel[ModelIndex] * vec4(VertexIn.FragPos, 1)).xy;
+    VertexIn.Velocity -= gl_Position.xy;
 
-    VertexIn.TBN = mat3(v_Tangent, v_Bitangent, v_Normal);
+    vec3 vNormal, vTangent, vBitangent;
+    vNormal = normalize(Scene.Normal[ModelIndex] * Normal);
+    vTangent = normalize(Scene.Normal[ModelIndex] * Tangent);
+    vBitangent = normalize(cross(vTangent, vNormal));
+
+    VertexIn.TBN = mat3(vTangent, vBitangent, vNormal);
 
     for(uint i = 0; i < Lighting.LightCount; i++)
     {

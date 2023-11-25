@@ -11,15 +11,17 @@ struct VertexOut
 {
     vec3 FragPos;
     vec2 UV;
-    mat3 TBN;
-
+    vec2 Velocity;
     vec3 FragPosLightSpace[MAX_LIGHTS];
+    mat3 TBN;
 };
 
 in VertexOut VertexIn;
 
-out vec4 FragColor;
+layout(location = 0) out vec4 FragColor;
+layout(location = 1) out vec2 Velocity;
 
+layout(early_fragment_tests) in;
 void main()
 {
     if(Scene.Stage == STAGE_PRE_Z) return;
@@ -42,7 +44,7 @@ void main()
     PBRFragment fragment = PBRFragment
     (
         normal,
-        amr.b,
+        0.05,
         albedo,
         amr.g,
         vec3(0.04),
@@ -53,6 +55,7 @@ void main()
     FragColor.rgb += GetLighting(vertex, fragment, Lighting.Skybox);
 
     FragColor.rgb = pow(FragColor.rgb, vec3(1.0 / 2.2));
+    Velocity = VertexIn.Velocity;
 
     if(Scene.Stage != STAGE_VOXEL) return;
 

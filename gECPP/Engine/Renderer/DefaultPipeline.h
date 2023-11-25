@@ -26,8 +26,8 @@ namespace GL
 		TextureHandle ColorTexture;
 		TextureHandle DepthTexture;
 
-		GL_ALIGN glm::mat4 Projection;
-		glm::mat4 PreviousViewProjection;
+		GL_ALIGN glm::mat4 PreviousViewProjection;
+		glm::mat4 Projection;
 		glm::mat4 View[6];
 	};
 
@@ -64,6 +64,7 @@ namespace GL
 		uint InstanceCount;
 		uint Stage;
 		GL_ALIGN glm::mat4 Model[GE_MAX_INSTANCE];
+		glm::mat4 PreviousModel[GE_MAX_INSTANCE];
 		glm::mat3x4 Normal[GE_MAX_INSTANCE]; // for alignment purposes.
 	};
 

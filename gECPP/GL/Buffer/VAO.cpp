@@ -17,9 +17,9 @@ namespace GL
 		{
 			const GL::BufferSettings& bufferSettings = settings.Buffers[i];
 			const size_t size = bufferSettings.Stride * bufferSettings.Length;
-			_buffers[i] = new Buffer<void>(window, size, bufferSettings.Data);
+			const auto* buf = _buffers[i] = new Buffer<void>(window, size, bufferSettings.Data);
 
-			glVertexArrayVertexBuffer(ID, i, _buffers[i]->Get(), 0, bufferSettings.Stride);
+			glVertexArrayVertexBuffer(ID, i, buf->Get(), 0, bufferSettings.Stride);
 		}
 
 		for(u8 i = 0; i < settings.FieldCount; i++)

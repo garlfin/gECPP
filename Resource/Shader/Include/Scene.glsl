@@ -40,6 +40,7 @@ struct SceneData
     uint InstanceCount;
     uint Stage;
     mat4 Model[MAX_OBJECTS];
+    mat4 PreviousModel[MAX_OBJECTS];
     mat3 Normal[MAX_OBJECTS];
 };
 
