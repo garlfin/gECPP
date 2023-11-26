@@ -87,37 +87,29 @@ namespace gE::DefaultPipeline
 	void RenderPassShadow(Window* window, Camera2D* camera);
 	void RenderPassCubemap(Window*, CameraCubemap*);
 
-	GLOBAL gE::AttachmentSettings AttachmentColor
+	CONST_GLOBAL gE::AttachmentSettings AttachmentColor
 	{
 		{ GL_NONE }, // Depth Format
 		{{ GL_RGBA16F }} // Attachments
 	};
 
-	GLOBAL gE::AttachmentSettings AttachmentScreenSpace
-	{
-		{},
-		{},
-		false,
-		{ true }
-	};
-
-	GLOBAL gE::AttachmentSettings AttachmentDepth
+	CONST_GLOBAL gE::AttachmentSettings AttachmentDepth
 	{
 		{ GL_DEPTH_COMPONENT32F }
 	};
 
-	GLOBAL gE::AttachmentSettings AttachmentShadow
+	CONST_GLOBAL gE::AttachmentSettings AttachmentShadow
 	{
 		{ GL_DEPTH_COMPONENT16 }
 	};
 
-	GLOBAL gE::AttachmentSettings AttachmentTAA
+	CONST_GLOBAL gE::AttachmentSettings AttachmentTAA
 	{
 		{},
 		{{}, { GL_RGB16F }} // Velocity
 	};
 
-	GLOBAL gE::AttachmentSettings AttachmentCubemap
+	CONST_GLOBAL gE::AttachmentSettings AttachmentCubemap
 	{
 		{ GL_DEPTH_COMPONENT16 },
 		{{ GL_RGB16F }}

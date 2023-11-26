@@ -47,8 +47,6 @@ namespace gE
 		const Reference<GL::Shader> _shader;
 		const DepthFunction _depthFunc;
 		const CullMode _cullMode;
-
-		GL::Uniform<GL::Texture2D> _colorUniform, _depthUniform;
 	};
 
 	template<class T>

@@ -3,6 +3,7 @@
 #include "GL/GL.h"
 #include "Buffer.h"
 #include "VAOSettings.h"
+#include "Engine/Array.h"
 
 namespace GL
 {
@@ -20,7 +21,7 @@ namespace GL
 		~VAO() override;
 
 	 protected:
-		Buffer<void>** _buffers;
+		Array<Buffer<void>*> _buffers;
 		const GL::VAOSettings _settings;
 	};
 

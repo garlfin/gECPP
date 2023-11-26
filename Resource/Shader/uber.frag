@@ -44,7 +44,7 @@ void main()
     PBRFragment fragment = PBRFragment
     (
         normal,
-        0.05,
+        amr.b,
         albedo,
         amr.g,
         vec3(0.04),

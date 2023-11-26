@@ -63,14 +63,13 @@ vec3 GetLighting(const Vertex vert, const PBRFragment frag, samplerCube cubemap)
     vec3 eye = normalize(Camera.Position - vert.Position);
 
     float nDotV = max(dot(frag.Normal, eye), 0.0);
-    vec3 f = FresnelSchlick(frag.F0, nDotV);
     vec2 xi = Hammersley(int(IGNSample * HAMMERSLEY_ROUGHNESS_SAMPLE), HAMMERSLEY_ROUGHNESS_SAMPLE);
     vec3 n = ImportanceSampleGGX(xi, frag.Normal, frag.Roughness);
 
     vec3 specular = texture(cubemap, reflect(-eye, n)).rgb;
     vec2 brdf = texture(BRDFLutTex, vec2(nDotV, frag.Roughness)).rg;
 
-    return (frag.F0 * brdf.x + brdf.y) * specular;
+    return vec3(frag.F0 * brdf.x + brdf.y) * specular;
 }
 
 vec3 GetLightingDirectional(const Vertex vert, const PBRFragment frag, const Light light)
@@ -116,17 +115,17 @@ float GSchlick(float cosTheta, float roughness)
     return cosTheta / (cosTheta * (1.0 - roughness) + roughness);
 }
 
-float GSchlick(float nDotL, float nDotH, float roughness)
+float GSchlick(float nDotL, float nDotV, float roughness)
 {
     float k = (roughness * roughness) / 2.0;
-    return GSchlick(nDotL, k) * GSchlick(nDotH, k);
+    return GSchlick(nDotL, k) * GSchlick(nDotV, k);
 }
 
-float GSchlickAnalytical(float nDotL, float nDotH, float roughness)
+float GSchlickAnalytical(float nDotL, float nDotV, float roughness)
 {
     float r = roughness + 1.0;
     float k = (r * r) / 8;
-    return GSchlick(nDotL, k) * GSchlick(nDotH, k);
+    return GSchlick(nDotL, k) * GSchlick(nDotV, k);
 }
 
 vec3 FresnelSchlick(vec3 f0, float nDotV)

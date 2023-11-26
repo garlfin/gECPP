@@ -22,7 +22,7 @@ namespace GL
 	 	u64 ID = 0;
 	};
 
-	GLOBAL TextureHandle NullHandle = TextureHandle();
+	CONST_GLOBAL TextureHandle NullHandle = TextureHandle();
 
 	class Texture : public Asset, public Attachment
 	{

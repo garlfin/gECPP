@@ -39,10 +39,12 @@ namespace gETF
 #define MAX(X, Y) ((X) > (Y) ? (X) : (Y))
 #endif
 #define BIT_SIZE(X) (sizeof(decltype(X)) * 8)
-#ifdef GLOBAL
-#error GLOBAL ALREADY DEFINED
-#else
-#define GLOBAL inline constexpr const
+
+#ifndef CONST_GLOBAL
+#define GLOBAL inline const
+#endif
+#ifndef CONST_GLOBAL
+#define CONST_GLOBAL inline constexpr const
 #endif
 
 #define GET_CONST(TYPE, ACCESSOR, FIELD) NODISCARD ALWAYS_INLINE TYPE Get##ACCESSOR() const { return FIELD; }

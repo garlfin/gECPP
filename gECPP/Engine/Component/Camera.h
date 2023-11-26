@@ -23,7 +23,6 @@ namespace GL
 
 #define CAMERA_GET(TYPE) \
     GET(TYPE*, DepthAttachment, (TYPE*) DepthTexture.Get()); \
-    GET(TYPE*, DepthAttachmentCopy, (TYPE*) DepthTexture.Get()); \
     NODISCARD ALWAYS_INLINE TYPE* GetAttachment(u8 i) const { return (TYPE*) Attachments[i].Get(); } \
     NODISCARD ALWAYS_INLINE TYPE* GetAttachmentCopy(u8 i) const { return (TYPE*) AttachmentCopies[i].Get(); } \
     template<u8 I, bool COPY> \
@@ -31,8 +30,12 @@ namespace GL
     { \
         if constexpr(COPY) return (TYPE*) AttachmentCopies[I].Get(); \
         else return (TYPE*) Attachments[I].Get(); \
-    }
-
+    } \
+	NODISCARD ALWAYS_INLINE TYPE* GetAttachment(u8 i, bool copy) \
+	{ \
+		if(copy) return (TYPE*) AttachmentCopies[i].Get(); \
+        else return (TYPE*) Attachments[i].Get(); \
+	}
 namespace gE
 {
 	class Camera : public Component, protected SizelessCameraSettings
@@ -64,7 +67,6 @@ namespace gE
 		glm::mat4 Projection;
 
 		gE::SmartPointer<GL::Texture> DepthTexture;
-		gE::SmartPointer<GL::Texture> DepthCopy;
 		gE::SmartPointer<GL::Texture> Attachments[GE_MAX_ATTACHMENTS]{};
 		gE::SmartPointer<GL::Texture> AttachmentCopies[GE_MAX_ATTACHMENTS]{};
 		u32 Frame = 0;
@@ -96,7 +98,6 @@ namespace gE
 		template<AngleType T = AngleType::Degree>
 		NODISCARD ALWAYS_INLINE float GetFOV() const
 		{
-
 			if constexpr(T == AngleType::Radian)
 				return _fov;
 			return degree_cast<AngleType::Degree>(_fov);
@@ -105,7 +106,6 @@ namespace gE
 		template<AngleType T = AngleType::Degree>
 		ALWAYS_INLINE void SetFOV(float fov)
 		{
-
 			if constexpr(T == AngleType::Radian)
 				_fov = fov;
 			else

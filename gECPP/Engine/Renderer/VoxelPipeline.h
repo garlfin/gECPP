@@ -29,7 +29,7 @@ namespace gE::VoxelPipeline
 {
 	void RenderPass3D(Window*, VoxelCamera*);
 
-	GLOBAL gE::AttachmentSettings Target3D
+	CONST_GLOBAL gE::AttachmentSettings Target3D
 		{
 			{ GL_NONE }, // Depth Format
 			{{ GL_RGB16F }, { GL_RGB5_A1 }}, // Attachments: COLOR, DATA (Metallic, Roughness, Emission, Solid)

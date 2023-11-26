@@ -2,9 +2,10 @@
 
 #include "Include/PBR.glsl"
 
-#define PI2 (PI * 2.0)
 #define SAMPLE_COUNT 1024
 #define UP_VECTOR vec3(0.0, 0.0, 1.0)
+
+#define saturate(x) clamp(x, 0.0, 1.0)
 
 layout(binding = 0, rg16f) restrict writeonly uniform image2D LUTOut;
 
@@ -24,9 +25,9 @@ void main()
         vec3 h = ImportanceSampleGGX(xi, UP_VECTOR, roughness);
         vec3 l = 2.0 * dot(v, h) * h - v;
 
-        float nDotL = max(l.z, 0.0);
-        float nDotH = max(h.z, 0.0);
-        float vDotH = max(dot(v, h), 0.0);
+        float nDotL = saturate(l.z);
+        float nDotH = saturate(h.z);
+        float vDotH = saturate(dot(v, h));
 
         if(nDotL > 0.0)
         {
@@ -39,5 +40,5 @@ void main()
     }
 
     lut /= SAMPLE_COUNT;
-    imageStore(LUTOut, ivec2(gl_GlobalInvocationID), vec4(lut.rg, 0.0, 0.0));
+    imageStore(LUTOut, ivec2(gl_GlobalInvocationID), vec4(lut, 0.0, 0.0));
 }

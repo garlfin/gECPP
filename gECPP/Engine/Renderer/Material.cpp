@@ -11,8 +11,7 @@ namespace gE
 {
 	gE::Material::Material(Window* window, const Reference<GL::Shader>& shader, DepthFunction depthFunc, CullMode cullMode) :
 		GL::Asset(window),
-		_shader(shader), _depthFunc(depthFunc), _cullMode(cullMode),
-		_colorUniform(_shader.Get(), "CameraColor"), _depthUniform(_shader.Get(), "CameraDepth")
+		_shader(shader), _depthFunc(depthFunc), _cullMode(cullMode)
 	{
 	}
 
@@ -36,11 +35,6 @@ namespace gE
 
 		gE::Camera* camera = GetWindow().GetCameras().CallingCamera;
 		GE_ASSERT(camera, "NO CALLING CAMERA!");
-
-		if(GL::Texture* t = camera->GetDepthAttachmentCopy()) _depthUniform.Set(*(GL::Texture2D*) t);
-		else _depthUniform.Set(*(GL::Texture2D*) camera->GetDepthAttachment());
-
-		if(GL::Texture* t = camera->GetAttachment<0, true>()) _colorUniform.Set(*(GL::Texture2D*) t);
 
 		_shader->Bind();
 	}

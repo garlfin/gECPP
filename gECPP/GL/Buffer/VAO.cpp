@@ -3,13 +3,12 @@
 //
 
 #include "VAO.h"
-#include <gEModel/gETF/File.h>
 
 namespace GL
 {
 	VAO::VAO(gE::Window* window, const VAOSettings& settings) : Asset(window),
 		_settings(settings),
-		_buffers(new Buffer<void>*[settings.BufferCount])
+		_buffers(settings.BufferCount)
 	{
 		glCreateVertexArrays(1, &ID);
 
@@ -58,9 +57,7 @@ namespace GL
 	VAO::~VAO()
 	{
 		glDeleteVertexArrays(1, &ID);
-
 		for(u8 i = 0; i < _settings.FieldCount; i++) delete _buffers[i];
-		delete[] _buffers;
 	}
 
 	IndexedVAO::IndexedVAO(gE::Window* window, const GL::IndexedVAOSettings& settings)

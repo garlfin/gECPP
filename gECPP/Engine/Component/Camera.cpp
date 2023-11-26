@@ -33,9 +33,10 @@ void gE::Camera::OnRender(float delta)
 	FrameBuffer.Bind();
 	RenderPass(&GetWindow(), this);
 
-	if(DepthCopy) DepthCopy->CopyFrom(DepthTexture);
 	for(u8 i = 0; i < GE_MAX_ATTACHMENTS; i++)
 		if(AttachmentCopies[i]) AttachmentCopies[i]->CopyFrom(Attachments[i]);
+
+	for(PostProcessPass* pass : PostProcessPasses) pass->Pass(&GetWindow(), this, nullptr);
 
 	Frame++;
 }
@@ -46,12 +47,9 @@ void gE::Camera::GetGLCamera(GL::Camera& cam)
 	cam.Frame = Frame;
 	cam.ClipPlanes = GetClipPlanes();
 	cam.Projection = Projection;
-
-	if(GL::Texture* t = GetDepthAttachmentCopy()) (GL::TextureHandle) *t;
-	else cam.DepthTexture = (GL::TextureHandle) *GetDepthAttachment();
+	cam.DepthTexture = (GL::TextureHandle) *GetDepthAttachment();
 
 	if(GL::Texture* t = GetAttachment<0, true>()) cam.ColorTexture = (GL::TextureHandle) *t;
-	// Parameters, View set by override;
 }
 
 void gE::PerspectiveCamera::UpdateProjection()
@@ -80,18 +78,18 @@ void gE::Camera::CreateAttachments(CAM_T& cam, const gE::AttachmentSettings& set
 {
 	if(settings.Depth)
 	{
-		cam.DepthTexture = SmartPointer<GL::Texture>(new TEX_T(&cam.GetWindow(), { settings.Depth, cam.GetSize() }));
-		if(settings.CopyDepth) cam.DepthCopy = SmartPointer<GL::Texture>(new TEX_T(&cam.GetWindow(), { settings.Depth, cam.GetSize() }));
-		if constexpr(!std::is_same_v<TEX_T, GL::Texture3D>) cam.FrameBuffer.SetDepthAttachment((GL::Texture*) cam.DepthTexture);
+		cam.DepthTexture = (SmartPointer<GL::Texture>)new TEX_T(&cam.GetWindow(), { settings.Depth, cam.GetSize() });
+
+		if constexpr(!std::is_same_v<TEX_T, GL::Texture3D>)
+			cam.FrameBuffer.SetDepthAttachment((GL::Texture*) cam.DepthTexture);
 	}
 
 	for(u8 i = 0; i < GE_MAX_ATTACHMENTS; i++)
 	{
 		if(!settings.Attachments[i]) continue;
 		cam.Attachments[i] = (SmartPointer<GL::Texture>) new TEX_T(&cam.GetWindow(), { settings.Attachments[i], cam.GetSize() });
-		if constexpr(!std::is_same_v<TEX_T, GL::Texture3D>) cam.FrameBuffer.SetAttachment(i, (GL::Texture*) cam.Attachments[i]);
-		if(!settings.CopyAttachment[i]) continue;
-		cam.AttachmentCopies[i] = (SmartPointer<GL::Texture>) new TEX_T(&cam.GetWindow(), { settings.Attachments[i], cam.GetSize() });
+		if constexpr(!std::is_same_v<TEX_T, GL::Texture3D>)
+			cam.FrameBuffer.SetAttachment(i, (GL::Texture*) cam.Attachments[i]);
 	}
 }
 
@@ -138,7 +136,7 @@ void gE::CameraCubemap::UpdateProjection()
 	Projection = glm::perspectiveFov(degree_cast<AngleType::Radian>(90.f), (float) GetSize(), (float) GetSize(), GetClipPlanes().x, GetClipPlanes().y);
 }
 
-GLOBAL glm::vec3 ForwardDirs[]
+CONST_GLOBAL glm::vec3 ForwardDirs[]
 {
 	glm::vec3(1, 0, 0),
 	glm::vec3(-1, 0, 0),
@@ -148,7 +146,7 @@ GLOBAL glm::vec3 ForwardDirs[]
 	glm::vec3(0, 0, -1)
 };
 
-GLOBAL glm::vec3 UpDirs[]
+CONST_GLOBAL glm::vec3 UpDirs[]
 {
 	glm::vec3(0, 1, 0),
 	glm::vec3(0, 1, 0),

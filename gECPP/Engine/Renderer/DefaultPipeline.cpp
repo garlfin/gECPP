@@ -62,21 +62,17 @@ namespace gE
 	}
 
 #ifdef DEBUG
-	// this will only really be used in debug; not too concerned w/ perf
-	bool PostProcessPass::CheckRequirements(const Camera& cam) const
+	// Only for debugging purposes.
+	void PostProcessPass::CheckRequirements(const Camera& cam) const
 	{
 		const AttachmentSettings& settings = cam.GetSettings().RenderAttachments;
 
-		if(settings.Depth && Requirements.Depth != settings.Depth) return false;
-		if(Requirements.CopyDepth && !settings.CopyDepth) return false;
+		if(Requirements.Depth)
+			GE_ASSERT(settings.Depth == Requirements.Depth, "CONFLICTING DEPTH ATTACHMENTS!");
 
 		for(u8 i = 0; i < GE_MAX_ATTACHMENTS; i++)
-		{
-			if(!Requirements.Attachments[i]) continue;
-			if(Requirements.Attachments[i] != settings.Attachments[i]) return false;
-			if(Requirements.CopyAttachment[i] && !settings.CopyAttachment[i]) return false;
-		}
-		return true;
+			if(Requirements.Attachments[i])
+				GE_ASSERT(settings.Attachments[i] == Requirements.Attachments[i], "CONFLICTING COLOR ATTACHMENTS!");
 	}
 #endif
 }

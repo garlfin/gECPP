@@ -23,39 +23,33 @@ namespace gE
 	using RenderPass = void (*)(Window*, Camera*);
 	using PostProcessFunc = void (*)(Window*, Camera*, GL::Texture* out);
 
-	template<class T>
-	using RenderPassT = void (*)(Window*, T*);
-
-	template<class T>
-	using PostProcessFuncT = void (*)(Window*, T*, GL::Texture* out);
-
 	struct AttachmentSettings
 	{
 		GL::SizelessTextureSettings Depth{};
 		GL::SizelessTextureSettings Attachments[GE_MAX_ATTACHMENTS]{};
-		bool CopyDepth = false;
-		bool CopyAttachment[GE_MAX_ATTACHMENTS]{};
 
-		constexpr AttachmentSettings& operator|=(const AttachmentSettings& o)
+		AttachmentSettings& operator|=(const AttachmentSettings& o)
 		{
-			if(!Depth && o.Depth) Depth = o.Depth;
-			else if(Depth && o.Depth) LOG("WARNING: Conflicting depth attachment!");
-
-			CopyDepth |= o.CopyDepth;
+			if(o.Depth)
+			{
+				if(Depth) GE_ASSERT(Depth == o.Depth, "CONFLICTING DEPTH ATTACHMENTS!");
+				Depth = o.Depth;
+			}
 
 			for(u8 i = 0; i < GE_MAX_ATTACHMENTS; i++)
-			{
-				if (!Attachments[i] && o.Attachments[i]) Attachments[i] = o.Attachments[i];
-				else if (Attachments[i] && o.Attachments[i]) LOG("WARNING: Conflicting color attachment!");
-
-				CopyAttachment[i] |= o.CopyAttachment[i];
-			}
+				if(o.Attachments[i])
+				{
+					if(Attachments[i]) GE_ASSERT(Attachments[i] == o.Attachments[i], "CONFLICTING COLOR ATTACHMENTS!");
+					Attachments[i] = o.Attachments[i];
+				}
 
 			return *this;
 		}
 
-		inline constexpr AttachmentSettings operator|(const AttachmentSettings& o) const
+		inline AttachmentSettings operator|(const AttachmentSettings& o) const
 		{
+			if(this == &o) return *this;
+			// Create a copy
 			AttachmentSettings settings = *this;
 			return settings |= o;
 		};
@@ -63,11 +57,10 @@ namespace gE
 
 	struct PostProcessPass
 	{
-		PostProcessFunc Func;
+		PostProcessFunc Pass;
 		const AttachmentSettings& Requirements;
-
 #ifdef DEBUG
-		NODISCARD bool CheckRequirements(const Camera&) const;
+		void CheckRequirements(const Camera&) const;
 #endif
 	};
 
@@ -77,6 +70,7 @@ namespace gE
 		ClipPlanes ClipPlanes = { 0.1, 1000 };
 		CameraTiming Timing = DefaultCameraTiming;
 		AttachmentSettings RenderAttachments;
+		std::vector<PostProcessPass*> PostProcessPasses;
 	};
 
 	template<GL::TextureDimension DIMENSION>

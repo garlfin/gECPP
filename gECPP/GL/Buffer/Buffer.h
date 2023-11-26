@@ -79,6 +79,6 @@ namespace GL
 	template<class T>
 	using DynamicBuffer = Buffer<T, true>;
 
-	Buffer<void>* CreateBuffer(gE::Window*, const BufferSettings&);
+	Buffer<void>* CreateBuffer(gE::Window* window, const BufferSettings& settings);
 	DynamicBuffer<void>* CreateDynamicBuffer(gE::Window*, const BufferSettings&);
 }

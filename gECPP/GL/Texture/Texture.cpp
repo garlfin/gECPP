@@ -14,8 +14,8 @@ namespace GL
 		glCreateTextures(tgt, 1, &ID);
 		glTextureParameteri(ID, GL_TEXTURE_MIN_FILTER, (GLint) settings.Filter + (Mips > 1 ? 0x102 : 0));
 		glTextureParameteri(ID, GL_TEXTURE_MAG_FILTER, (GLint) settings.Filter);
-		glTextureParameteri(ID, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTextureParameteri(ID, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTextureParameteri(ID, GL_TEXTURE_WRAP_S, (GLint) settings.WrapMode);
+		glTextureParameteri(ID, GL_TEXTURE_WRAP_T, (GLint) settings.WrapMode);
 	}
 
 	Texture2D::Texture2D(gE::Window* window, const TextureSettings<TextureDimension::D2D>& settings, const TextureData& data)
