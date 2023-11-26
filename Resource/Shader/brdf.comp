@@ -5,9 +5,8 @@
 #define SAMPLE_COUNT 1024
 #define UP_VECTOR vec3(0.0, 0.0, 1.0)
 
-#define saturate(x) clamp(x, 0.0, 1.0)
-
-layout(binding = 0, rg16f) restrict writeonly uniform image2D LUTOut;
+// Outputs
+layout(binding = 0, rg16f) restrict writeonly uniform image2D ColorOut;
 
 layout(local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
 void main()
@@ -25,11 +24,11 @@ void main()
         vec3 h = ImportanceSampleGGX(xi, UP_VECTOR, roughness);
         vec3 l = 2.0 * dot(v, h) * h - v;
 
-        float nDotL = saturate(l.z);
-        float nDotH = saturate(h.z);
-        float vDotH = saturate(dot(v, h));
+        float nDotL = max(l.z, 0.0);
+        float nDotH = max(h.z, 0.0);
+        float vDotH = max(dot(v, h), 0.0);
 
-        if(nDotL > 0.0)
+        if (nDotL > 0.0)
         {
             float g = GSchlick(nDotV, nDotL, roughness);
             float gVis = (g * vDotH) / (nDotH * nDotV);
@@ -40,5 +39,5 @@ void main()
     }
 
     lut /= SAMPLE_COUNT;
-    imageStore(LUTOut, ivec2(gl_GlobalInvocationID), vec4(lut, 0.0, 0.0));
+    imageStore(ColorOut, ivec2(gl_GlobalInvocationID), vec4(lut, 0.0, 0.0));
 }
