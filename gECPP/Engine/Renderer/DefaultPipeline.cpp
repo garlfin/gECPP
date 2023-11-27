@@ -58,7 +58,6 @@ namespace gE
 
 	void DefaultPipeline::RenderPassCubemap(Window*, CameraCubemap*)
 	{
-
 	}
 
 #ifdef DEBUG
