@@ -8,7 +8,7 @@
 #endif
 
 #ifndef DIRECTIONAL_SHADOW_SAMPLES
-#define DIRECTIONAL_SHADOW_SAMPLES 64
+#define DIRECTIONAL_SHADOW_SAMPLES 16
 #endif
 
 #ifndef PI
@@ -48,7 +48,7 @@ float GetShadowDirectional(const Vertex frag, const Light light)
     {
         vec2 offset = VogelDisk(i, DIRECTIONAL_SHADOW_SAMPLES, IGNSample * PI);
         vec3 uv = frag.PositionLightSpace;
-        uv.xy += VogelDisk(i, DIRECTIONAL_SHADOW_SAMPLES, IGNSample * PI) * 0.01 / light.PackedSettings;
+        uv.xy += VogelDisk(i, DIRECTIONAL_SHADOW_SAMPLES, IGNSample * PI) * 0.05 / light.PackedSettings;
 
     #ifdef EXT_BINDLESS
         float z = texture(sampler2D(light.Depth), uv.xy).r;

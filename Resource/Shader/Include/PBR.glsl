@@ -63,13 +63,14 @@ vec3 GetLighting(const Vertex vert, const PBRFragment frag, samplerCube cubemap)
     vec3 eye = normalize(Camera.Position - vert.Position);
 
     float nDotV = max(dot(frag.Normal, eye), 0.0);
+    vec3 f = FresnelSchlick(frag.F0, nDotV);
     vec2 xi = Hammersley(int(IGNSample * HAMMERSLEY_ROUGHNESS_SAMPLE), HAMMERSLEY_ROUGHNESS_SAMPLE);
     vec3 n = ImportanceSampleGGX(xi, frag.Normal, frag.Roughness);
 
-    vec3 specular = texture(cubemap, reflect(-eye, n)).rgb;
+    vec3 specular = textureLod(cubemap, reflect(-eye, n), 0.0f).rgb;
     vec2 brdf = texture(BRDFLutTex, vec2(nDotV, frag.Roughness)).rg;
 
-    return vec3(frag.F0 * brdf.x + brdf.y) * specular;
+    return (f * brdf.x + brdf.y) * specular;
 }
 
 vec3 GetLightingDirectional(const Vertex vert, const PBRFragment frag, const Light light)

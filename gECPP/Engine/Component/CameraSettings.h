@@ -9,6 +9,8 @@
 #include "Engine/Array.h"
 #include "CameraTiming.h"
 
+namespace GL { struct Texture; }
+
 #define GE_MAX_ATTACHMENTS 2
 
 namespace gE

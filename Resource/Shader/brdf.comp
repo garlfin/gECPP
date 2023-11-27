@@ -11,7 +11,7 @@ layout(binding = 0, rg16f) restrict writeonly uniform image2D ColorOut;
 layout(local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
 void main()
 {
-    const ivec2 size = imageSize(LUTOut);
+    const ivec2 size = imageSize(ColorOut);
     const float nDotV = max(float(gl_GlobalInvocationID.x) / size.x, EPSILON);
     const float roughness = float(gl_GlobalInvocationID.y) / size.y;
 

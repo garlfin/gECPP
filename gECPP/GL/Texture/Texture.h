@@ -5,10 +5,11 @@
 #include "GL/Binary/Binary.h"
 #include <GLAD/glad.h>
 #include "TextureSettings.h"
-#include "Attachment.h"
 
 namespace GL
 {
+	struct FrameBuffer;
+
 	// Opaque type to prevent accidental pointer-to-handle conversions
 	struct TextureHandle
 	{
@@ -24,7 +25,7 @@ namespace GL
 
 	CONST_GLOBAL TextureHandle NullHandle = TextureHandle();
 
-	class Texture : public Asset, public Attachment
+	class Texture : public Asset
 	{
 	 public:
 		Texture(gE::Window* window, GLenum tgt, const SizelessTextureSettings& settings);
@@ -38,7 +39,7 @@ namespace GL
 			return unit;
 		} // NOLINT
 
-		void Attach(GL::FrameBuffer* buffer, GLenum attachment, u8 mip) const override;
+		void Attach(GL::FrameBuffer* buffer, GLenum attachment, u8 mip) const;
 
 		TextureHandle GetHandle();
 		virtual void CopyFrom(const GL::Texture&) = 0;

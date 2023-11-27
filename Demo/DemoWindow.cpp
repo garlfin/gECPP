@@ -61,7 +61,7 @@ void DemoWindow::OnInit()
 	auto* camera = new FlyCamera(this);
 	Cameras.CurrentCamera = &camera->GetCamera();
 
-	Cubemaps.Skybox = gE::CreateReferenceFromPointer((GL::TextureCube*) PVR::Read(this, "Resource/Texture/sky.pvr"));
+	Cubemaps.Skybox = gE::CreateReferenceFromPointer((GL::TextureCube*) PVR::Read(this, "Resource/Texture/sky.pvr", GL::WrapMode::Clamp));
 }
 
 void DemoWindow::OnDestroy() {}

@@ -26,9 +26,9 @@ namespace GL
 
 		inline void Bind() const override { glBindFramebuffer(GL_FRAMEBUFFER, ID); }
 
-		ALWAYS_INLINE void SetDepthAttachment(Attachment* h) { h->Attach(this, GL_DEPTH_ATTACHMENT, 0); }
+		ALWAYS_INLINE void SetDepthAttachment(Texture* h) { h->Attach(this, GL_DEPTH_ATTACHMENT, 0); }
 
-		void SetAttachment(u8 i, Attachment* h);
+		void SetAttachment(u8 i, Texture* h);
 		void SetNoAttatchments(const GL::TextureSize2D& size);
 
 		ALWAYS_INLINE static void Reset() { glBindFramebuffer(GL_FRAMEBUFFER, 0); }

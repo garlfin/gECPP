@@ -3,7 +3,6 @@
 #include <GLAD/glad.h>
 #include "GL/Binary/Binary.h"
 #include <GL/Buffer/FrameBuffer.h>
-#include "RenderBuffer.h"
 #include "TextureSlotManager.h"
 
 namespace GL
@@ -99,14 +98,10 @@ namespace GL
 		return _handle;
 	}
 
-	void RenderBuffer::Attach(GL::FrameBuffer* buffer, GLenum attachment, u8 mip) const
-	{
-		glNamedFramebufferRenderbuffer(ID, attachment, GL_RENDERBUFFER, ID);
-	}
-
 	TextureCube::TextureCube(gE::Window* window, const TextureSettings<TextureDimension::D1D>& settings, const TextureData& data)
 		: Texture(window, GL_TEXTURE_CUBE_MAP, settings), _size(settings.Size)
 	{
+		glTextureParameteri(ID, GL_TEXTURE_WRAP_R, (GLint) settings.WrapMode);
 		glTextureStorage2D(ID, Mips, settings.Format, _size, _size);
 
 		if(!data.Data) return;

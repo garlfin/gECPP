@@ -15,7 +15,7 @@ void GL::FrameBuffer::SetNoAttatchments(const GL::TextureSize2D& size)
 	glNamedFramebufferDrawBuffers(ID, GE_MAX_ATTACHMENTS, _attachmentsEnum);
 }
 
-void GL::FrameBuffer::SetAttachment(u8 i, GL::Attachment* h)
+void GL::FrameBuffer::SetAttachment(u8 i, GL::Texture* h)
 {
 
 	assert(i < GE_MAX_ATTACHMENTS);

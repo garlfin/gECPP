@@ -36,23 +36,24 @@ namespace gE
 
 	void CubemapManager::DrawSkybox()
 	{
-		return;
-		if(!_skyboxMesh)
+		if(!_skyboxVAO)
 		{
-			gETF::File skyboxCube;
-			gETF::Read("Resource/Model/skybox.gETF", skyboxCube);
+			gETF::File skybox;
+			gETF::Read("Resource/Model/skybox.gETF", skybox);
+
+			GL::VAOSettings skyboxSettings;
+			skybox.Meshes[0]->GetVAOSettings(skyboxSettings);
 
 			_skyboxShader = CreateSmartPointer<GL::Shader>(_window, "Resource/Shader/skybox.vert", "Resource/Shader/skybox.frag");
-			_skyboxMesh = skyboxCube.Meshes[0];
-			_skyboxMesh->CreateVAO(_window);
+			_skyboxVAO = CreateSmartPointer<GL::VAO>(_window, skyboxSettings);
 		}
 
 		_skyboxShader->Bind();
 
 		glEnable(GL_DEPTH_TEST);
 		glDisable(GL_CULL_FACE);
-		glDepthFunc(GL_GEQUAL);
+		glDepthFunc(GL_LEQUAL);
 
-		_skyboxMesh->VAO->Draw(0);
+		_skyboxVAO->Draw(0);
 	}
 }

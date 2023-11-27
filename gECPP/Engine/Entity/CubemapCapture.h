@@ -37,7 +37,7 @@ namespace gE
 	 private:
 		Window* _window;
 
-		gETF::MeshReference _skyboxMesh;
+		SmartPointer<GL::VAO> _skyboxVAO;
 		SmartPointer<GL::Shader> _skyboxShader;
 	};
 }
