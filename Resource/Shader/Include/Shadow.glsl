@@ -2,13 +2,29 @@
 #include "Bindless.glsl"
 #include "Vertex.glsl"
 
-// In percents
+// In percent
 #ifndef DIRECTIONAL_SHADOW_BIAS
 #define DIRECTIONAL_SHADOW_BIAS 0.01
 #endif
 
 #ifndef DIRECTIONAL_SHADOW_SAMPLES
-#define DIRECTIONAL_SHADOW_SAMPLES 16
+#define DIRECTIONAL_SHADOW_SAMPLES 8
+#endif
+
+#ifndef DIRECTIONAL_SHADOW_BLOCKER_SAMPLES
+#define DIRECTIONAL_SHADOW_BLOCKER_SAMPLES 8
+#endif
+
+#ifndef DIRECTIONAL_SHADOW_BLOCKER_RADIUS
+#define DIRECTIONAL_SHADOW_BLOCKER_RADIUS 0.1
+#endif
+
+#ifndef DIRECTIONAL_SHADOW_RADIUS
+#define DIRECTIONAL_SHADOW_RADIUS 0.05
+#endif
+
+#ifndef DIRECTIONAL_SHADOW_MIN_RADIUS
+#define DIRECTIONAL_SHADOW_MIN_RADIUS 0.02
 #endif
 
 #ifndef PI
@@ -42,13 +58,38 @@ float GetShadowDirectional(const Vertex frag, const Light light)
     // Linearizing everything now for PCSS later.
     float nDotL = max(dot(frag.Normal, light.Position), 0.0);
     float bias = mix(0.1, 1.0, nDotL) * DIRECTIONAL_SHADOW_BIAS;
+
+    float blocker = 0.0;
+    float blockerCount = 0.0;
     float shadow = 0.0;
+
+    for(uint i = 0; i < DIRECTIONAL_SHADOW_BLOCKER_SAMPLES; i++)
+    {
+        vec2 offset = VogelDisk(i, DIRECTIONAL_SHADOW_BLOCKER_SAMPLES, IGNSample * PI * 2.0);
+        vec3 uv = frag.PositionLightSpace;
+        uv.xy += offset * DIRECTIONAL_SHADOW_BLOCKER_RADIUS / light.PackedSettings;
+
+    #ifdef EXT_BINDLESS
+        float z = texture(sampler2D(light.Depth), uv.xy).r;
+    #else
+        float z = 0;
+    #endif
+        z = LinearizeDepthOrtho(z, light.Planes);
+        z = uv.z - z;
+
+        float shadowSample = z > bias ? 1.0 : 0.0;
+
+        blocker += z * shadowSample;
+        blockerCount += shadowSample;
+    }
+
+    blocker = max(blocker / blockerCount * DIRECTIONAL_SHADOW_RADIUS, DIRECTIONAL_SHADOW_MIN_RADIUS);
 
     for(uint i = 0; i < DIRECTIONAL_SHADOW_SAMPLES; i++)
     {
-        vec2 offset = VogelDisk(i, DIRECTIONAL_SHADOW_SAMPLES, IGNSample * PI);
+        vec2 offset = VogelDisk(i, DIRECTIONAL_SHADOW_SAMPLES, IGNSample * PI * 2.0);
         vec3 uv = frag.PositionLightSpace;
-        uv.xy += VogelDisk(i, DIRECTIONAL_SHADOW_SAMPLES, IGNSample * PI) * 0.05 / light.PackedSettings;
+        uv.xy += offset * blocker / light.PackedSettings;
 
     #ifdef EXT_BINDLESS
         float z = texture(sampler2D(light.Depth), uv.xy).r;
