@@ -16,7 +16,8 @@ namespace VoxelDemo
 		(gE::RenderPass) gE::DefaultPipeline::RenderPass2D,
 		gE::ClipPlanes(0.1, 100),
 		gE::DefaultCameraTiming,
-		gE::DefaultPipeline::AttachmentsDefault | gE::DefaultPipeline::AttachmentTAA
+		gE::DefaultPipeline::DepthFormat,
+		gE::DefaultPipeline::ColorFormat
 	};
 
 	class FlyCamera : public gE::Entity

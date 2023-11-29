@@ -10,8 +10,12 @@
 #define NOT(EXPR) (!(EXPR))
 
 gE::Camera::Camera(gE::Entity* parent, Manager* m, const SizelessCameraSettings& settings) :
-	Component(parent, m), SizelessCameraSettings(settings), FrameBuffer(&parent->GetWindow())
+	Component(parent, m), _settings(settings), FrameBuffer(&parent->GetWindow())
 {
+	// Consolidate requirements
+	for(PostProcessEffect* effect : settings.PostProcessEffects)
+		_settings.Attachments |= effect->GetRequirements();
+
 	GE_ASSERT(settings.RenderPass, "RENDERPASS SHOULD NOT BE NULL!");
 }
 
@@ -23,20 +27,26 @@ void gE::Camera::OnRender(float delta)
 
 	DefaultPipeline::Buffers& buffers = GetWindow().GetPipelineBuffers();
 
-	bool isFirst = Timing.GetIsFirst();
-	bool shouldTick = Timing.Tick(delta);
+	bool isFirst = _settings.Timing.GetIsFirst();
+	bool shouldTick = _settings.Timing.Tick(delta);
 	if NOT(isFirst || !GetOwner()->GetFlags().Static && shouldTick) return;
 
 	GetGLCamera(buffers.Camera);
 	buffers.UpdateCamera();
 
 	FrameBuffer.Bind();
-	RenderPass(&GetWindow(), this);
+	_settings.RenderPass(*this);
 
-	for(u8 i = 0; i < GE_MAX_ATTACHMENTS; i++)
-		if(AttachmentCopies[i]) AttachmentCopies[i]->CopyFrom(Attachments[i]);
+	GL::Texture* in = GetColor();
+	GL::Texture* out = GetColorCopy();
 
-	for(PostProcessPass* pass : PostProcessPasses) pass->Pass(&GetWindow(), this, nullptr);
+	for(uint i = 0; i < _settings.PostProcessEffects.size(); i++)
+	{
+		std::swap(in, out);
+		_settings.PostProcessEffects[i]->RenderPass(*this, *in, *out);
+	}
+
+	if(in && out) in->CopyFrom(*out);
 
 	Frame++;
 }
@@ -47,9 +57,8 @@ void gE::Camera::GetGLCamera(GL::Camera& cam)
 	cam.Frame = Frame;
 	cam.ClipPlanes = GetClipPlanes();
 	cam.Projection = Projection;
-	cam.DepthTexture = (GL::TextureHandle) *GetDepthAttachment();
-
-	if(GL::Texture* t = GetAttachment<0, true>()) cam.ColorTexture = (GL::TextureHandle) *t;
+	cam.DepthTexture = (GL::TextureHandle) *GetDepth();
+	cam.ColorTexture = GetColorCopy() ? ((GL::TextureHandle) *GetColorCopy()) : 0;
 }
 
 void gE::PerspectiveCamera::UpdateProjection()
@@ -74,20 +83,24 @@ gE::OrthographicCamera::OrthographicCamera(gE::Entity* e, Manager* m, const gE::
 }
 
 template<class TEX_T, class CAM_T>
-void gE::Camera::CreateAttachments(CAM_T& cam, const gE::AttachmentSettings& settings)
+void gE::Camera::CreateAttachments(CAM_T& cam)
 {
+	const SizelessCameraSettings& settings = cam.GetSettings();
+	const AttachmentSettings& attachments = cam.GetAttachmentSettings();
+
 	if(settings.Depth)
 	{
-		cam.DepthTexture = (SmartPointer<GL::Texture>)new TEX_T(&cam.GetWindow(), { settings.Depth, cam.GetSize() });
+		cam.Depth = (SmartPointer<GL::Texture>) new TEX_T(&cam.GetWindow(), { settings.Depth, cam.GetSize() });
 
 		if constexpr(!std::is_same_v<TEX_T, GL::Texture3D>)
-			cam.FrameBuffer.SetDepthAttachment((GL::Texture*) cam.DepthTexture);
+			cam.FrameBuffer.SetDepthAttachment((GL::Texture*) cam.Depth);
 	}
 
 	for(u8 i = 0; i < GE_MAX_ATTACHMENTS; i++)
 	{
-		if(!settings.Attachments[i]) continue;
-		cam.Attachments[i] = (SmartPointer<GL::Texture>) new TEX_T(&cam.GetWindow(), { settings.Attachments[i], cam.GetSize() });
+		if(!attachments.Attachments[i]) continue;
+		cam.Attachments[i] = (SmartPointer<GL::Texture>) new TEX_T(&cam.GetWindow(), { attachments.Attachments[i], cam.GetSize() });
+
 		if constexpr(!std::is_same_v<TEX_T, GL::Texture3D>)
 			cam.FrameBuffer.SetAttachment(i, (GL::Texture*) cam.Attachments[i]);
 	}
@@ -96,7 +109,7 @@ void gE::Camera::CreateAttachments(CAM_T& cam, const gE::AttachmentSettings& set
 gE::Camera2D::Camera2D(gE::Entity* parent, Manager* m, const gE::CameraSettings2D& settings) :
 	Camera(parent, m, settings), _size(settings.Size)
 {
-	CreateAttachments<GL::Texture2D>(*this, settings.RenderAttachments);
+	CreateAttachments<GL::Texture2D>(*this);
 }
 
 void gE::Camera2D::GetGLCamera(GL::Camera& camera)
@@ -108,7 +121,7 @@ void gE::Camera2D::GetGLCamera(GL::Camera& camera)
 gE::Camera3D::Camera3D(gE::Entity* parent, Manager* m, const gE::CameraSettings3D& settings) :
 	Camera(parent, m, settings), _size(settings.Size)
 {
-	CreateAttachments<GL::Texture3D>(*this, settings.RenderAttachments);
+	CreateAttachments<GL::Texture3D>(*this);
 }
 
 void gE::Camera3D::UpdateProjection()
@@ -128,7 +141,7 @@ void gE::Camera3D::GetGLCamera(GL::Camera& cam)
 gE::CameraCubemap::CameraCubemap(gE::Entity* parent, Manager* m, const gE::CameraSettings1D& settings) :
 	Camera(parent, m, settings), _size(settings.Size)
 {
-	CreateAttachments<GL::TextureCube>(*this, settings.RenderAttachments);
+	CreateAttachments<GL::TextureCube>(*this);
 }
 
 void gE::CameraCubemap::UpdateProjection()
@@ -136,7 +149,7 @@ void gE::CameraCubemap::UpdateProjection()
 	Projection = glm::perspectiveFov(degree_cast<AngleType::Radian>(90.f), (float) GetSize(), (float) GetSize(), GetClipPlanes().x, GetClipPlanes().y);
 }
 
-CONST_GLOBAL glm::vec3 ForwardDirs[]
+CONSTEXPR_GLOBAL glm::vec3 ForwardDirs[]
 {
 	glm::vec3(1, 0, 0),
 	glm::vec3(-1, 0, 0),
@@ -146,7 +159,7 @@ CONST_GLOBAL glm::vec3 ForwardDirs[]
 	glm::vec3(0, 0, -1)
 };
 
-CONST_GLOBAL glm::vec3 UpDirs[]
+CONSTEXPR_GLOBAL glm::vec3 UpDirs[]
 {
 	glm::vec3(0, 1, 0),
 	glm::vec3(0, 1, 0),
@@ -164,3 +177,8 @@ void gE::CameraCubemap::GetGLCamera(GL::Camera& cam)
 	for(u8 i = 0; i < 6; i++)
 		cam.View[i] = glm::lookAt(cam.Position, cam.Position + ForwardDirs[i], cam.Position + UpDirs[i]);
 }
+
+gE::PostProcessEffect::PostProcessEffect(Window* w, AttachmentSettings& s) : _window(w), _requirements(s)
+{ }
+
+

@@ -12,7 +12,8 @@ namespace gE
 			(RenderPass) gE::DefaultPipeline::RenderPassCubemap,
 			ClipPlanes(0.1, 100),
 			CameraTiming(),
-			gE::DefaultPipeline::AttachmentsDefault
+			gE::DefaultPipeline::DepthFormat,
+			gE::DefaultPipeline::ColorFormat
 		};
 
 	CubemapCapture::CubemapCapture(gE::Window* w, u16 size) :

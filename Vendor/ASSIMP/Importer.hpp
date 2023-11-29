@@ -321,7 +321,7 @@ public:
      *
      * The Importer takes ownership of the object and will destroy it
      * afterwards. The previously assigned handler will be deleted.
-     * Pass nullptr to take again ownership of your IOSystem and reset Assimp
+     * RenderPass nullptr to take again ownership of your IOSystem and reset Assimp
      * to use its default implementation.
      *
      * @param pIOHandler The IO handler to be used in all file accesses
@@ -354,7 +354,7 @@ public:
      *  isn't as periodically as you'd like it to have ...).
      *  This can be used to implement progress bars and loading
      *  timeouts.
-     *  @param pHandler Progress callback interface. Pass nullptr to
+     *  @param pHandler Progress callback interface. RenderPass nullptr to
      *    disable progress reporting.
      *  @note Progress handlers can be used to abort the loading
      *    at almost any time.*/

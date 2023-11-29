@@ -29,11 +29,10 @@ namespace gE::VoxelPipeline
 {
 	void RenderPass3D(Window*, VoxelCamera*);
 
-	CONST_GLOBAL gE::AttachmentSettings Target3D
-		{
-			{ GL_NONE }, // Depth Format
-			{{ GL_RGB16F }, { GL_RGB5_A1 }}, // Attachments: COLOR, DATA (Metallic, Roughness, Emission, Solid)
-		};
+	CONSTEXPR_GLOBAL gE::AttachmentSettings Target3D
+	{
+		{{ GL_RGB16F }, { GL_RGB5_A1 }}, // Attachments: COLOR, DATA (Metallic, Roughness, Emission, Solid)
+	};
 
 	struct Buffers
 	{
@@ -41,7 +40,6 @@ namespace gE::VoxelPipeline
 
 		ALWAYS_INLINE void UpdateScene(u64 size = sizeof(GL::Camera), u64 offset = 0) const
 		{
-
 			_voxelBuffer.ReplaceData((u8*) &Scene + offset, size, offset);
 		}
 

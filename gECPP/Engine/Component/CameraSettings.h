@@ -8,10 +8,10 @@
 #include <Engine/Renderer/DefaultPipeline.h>
 #include "Engine/Array.h"
 #include "CameraTiming.h"
+#include "CameraAttachments.h"
+#include "CameraPostProcess.h"
 
 namespace GL { struct Texture; }
-
-#define GE_MAX_ATTACHMENTS 2
 
 namespace gE
 {
@@ -22,57 +22,16 @@ namespace gE
 
 	typedef glm::vec2 ClipPlanes;
 
-	using RenderPass = void (*)(Window*, Camera*);
-	using PostProcessFunc = void (*)(Window*, Camera*, GL::Texture* out);
-
-	struct AttachmentSettings
-	{
-		GL::SizelessTextureSettings Depth{};
-		GL::SizelessTextureSettings Attachments[GE_MAX_ATTACHMENTS]{};
-
-		AttachmentSettings& operator|=(const AttachmentSettings& o)
-		{
-			if(o.Depth)
-			{
-				if(Depth) GE_ASSERT(Depth == o.Depth, "CONFLICTING DEPTH ATTACHMENTS!");
-				Depth = o.Depth;
-			}
-
-			for(u8 i = 0; i < GE_MAX_ATTACHMENTS; i++)
-				if(o.Attachments[i])
-				{
-					if(Attachments[i]) GE_ASSERT(Attachments[i] == o.Attachments[i], "CONFLICTING COLOR ATTACHMENTS!");
-					Attachments[i] = o.Attachments[i];
-				}
-
-			return *this;
-		}
-
-		inline AttachmentSettings operator|(const AttachmentSettings& o) const
-		{
-			if(this == &o) return *this;
-			// Create a copy
-			AttachmentSettings settings = *this;
-			return settings |= o;
-		};
-	};
-
-	struct PostProcessPass
-	{
-		PostProcessFunc Pass;
-		const AttachmentSettings& Requirements;
-#ifdef DEBUG
-		void CheckRequirements(const Camera&) const;
-#endif
-	};
+	using RenderPass = void (*)(Camera&);
 
 	struct SizelessCameraSettings
 	{
 		RenderPass RenderPass;
 		ClipPlanes ClipPlanes = { 0.1, 1000 };
 		CameraTiming Timing = DefaultCameraTiming;
-		AttachmentSettings RenderAttachments;
-		std::vector<PostProcessPass*> PostProcessPasses;
+		GL::SizelessTextureSettings Depth{};
+		AttachmentSettings Attachments;
+		std::vector<PostProcessEffect*> PostProcessEffects;
 	};
 
 	template<GL::TextureDimension DIMENSION>
@@ -92,7 +51,7 @@ namespace gE
 	struct PerspectiveCameraSettings : public CameraSettings2D
 	{
 		PerspectiveCameraSettings(const CameraSettings2D& s, float f = 80.f, AngleType t = AngleType::Degree) : CameraSettings2D(s),
-			FOV(f), Type(t)
+																												FOV(f), Type(t)
 		{}
 
 		float FOV = 80.f;

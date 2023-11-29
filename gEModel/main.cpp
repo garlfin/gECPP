@@ -10,7 +10,7 @@
 #include <ASSIMP/scene.h>
 #include <ASSIMP/postprocess.h>
 
-#define DEFINE_GL_TYPE(TYPE, VALUE) template<> CONST_GLOBAL GLenum GLType<TYPE> = VALUE
+#define DEFINE_GL_TYPE(TYPE, VALUE) template<> CONSTEXPR_GLOBAL GLenum GLType<TYPE> = VALUE
 #define IMPORT_FLAGS (aiProcess_CalcTangentSpace | aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_LimitBoneWeights | aiProcess_ImproveCacheLocality)
 
 template<typename T, typename I>
@@ -20,7 +20,7 @@ template<class T, class I>
 constexpr bool IsVec3 = std::is_same_v<aiVector3t<T>, I>;
 
 template<class T>
-CONST_GLOBAL GLenum GLType = 0;
+CONSTEXPR_GLOBAL GLenum GLType = 0;
 
 DEFINE_GL_TYPE(u32, GL_UNSIGNED_INT);
 DEFINE_GL_TYPE(float, GL_FLOAT);

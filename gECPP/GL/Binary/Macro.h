@@ -40,11 +40,11 @@ namespace gETF
 #endif
 #define BIT_SIZE(X) (sizeof(decltype(X)) * 8)
 
-#ifndef CONST_GLOBAL
+#ifndef CONSTEXPR_GLOBAL
 #define GLOBAL inline const
 #endif
-#ifndef CONST_GLOBAL
-#define CONST_GLOBAL inline constexpr const
+#ifndef CONSTEXPR_GLOBAL
+#define CONSTEXPR_GLOBAL inline constexpr const
 #endif
 
 #define GET_CONST(TYPE, ACCESSOR, FIELD) NODISCARD ALWAYS_INLINE TYPE Get##ACCESSOR() const { return FIELD; }

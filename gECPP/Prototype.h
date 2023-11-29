@@ -12,6 +12,7 @@ namespace gE
 	class Entity;
 	class Component;
 	class Behavior;
+	class Camera;
 
 	template<class T>
 	class TypedComponent;

@@ -82,40 +82,14 @@ namespace GL
 
 namespace gE::DefaultPipeline
 {
-	void RenderPass2D(Window*, Camera2D*);
-	void RenderPass3D(Window*, Camera3D*);
-	void RenderPassShadow(Window* window, Camera2D* camera);
-	void RenderPassCubemap(Window*, CameraCubemap*);
+	void RenderPass2D(Camera2D&);
+	void RenderPass3D(Camera3D&);
+	void RenderPassShadow(Camera2D&);
+	void RenderPassCubemap(CameraCubemap&);
 
-	CONST_GLOBAL gE::AttachmentSettings AttachmentColor
-	{
-		{ GL_NONE }, // Depth Format
-		{{ GL_RGBA16F }} // Attachments
-	};
-
-	CONST_GLOBAL gE::AttachmentSettings AttachmentDepth
-	{
-		{ GL_DEPTH_COMPONENT32F }
-	};
-
-	CONST_GLOBAL gE::AttachmentSettings AttachmentShadow
-	{
-		{ GL_DEPTH_COMPONENT16 }
-	};
-
-	CONST_GLOBAL gE::AttachmentSettings AttachmentTAA
-	{
-		{},
-		{{}, { GL_RGB16F }} // Velocity
-	};
-
-	CONST_GLOBAL gE::AttachmentSettings AttachmentCubemap
-	{
-		{ GL_DEPTH_COMPONENT16 },
-		{{ GL_RGB16F }}
-	};
-
-	GLOBAL gE::AttachmentSettings AttachmentsDefault = AttachmentColor | AttachmentDepth;
+	CONSTEXPR_GLOBAL GL::SizelessTextureSettings ColorFormat { GL_RGBA16F, GL::WrapMode::Clamp };
+	CONSTEXPR_GLOBAL GL::SizelessTextureSettings DepthFormat { GL_DEPTH_COMPONENT32F, GL::WrapMode::Clamp };
+	CONSTEXPR_GLOBAL GL::SizelessTextureSettings ShadowDepthFormat { GL_DEPTH_COMPONENT16, GL::WrapMode::Clamp };
 
 	struct Buffers
 	{

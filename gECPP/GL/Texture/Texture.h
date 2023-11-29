@@ -23,7 +23,7 @@ namespace GL
 	 	u64 ID = 0;
 	};
 
-	CONST_GLOBAL TextureHandle NullHandle = TextureHandle();
+	CONSTEXPR_GLOBAL TextureHandle NullHandle = TextureHandle();
 
 	class Texture : public Asset
 	{

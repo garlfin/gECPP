@@ -9,10 +9,12 @@
 using namespace gE;
 
 #ifdef DEBUG
-
 char WindowTitleBuf[30];
-
 #endif
+
+#define BRDF_SIZE 512
+#define BRDF_GROUP_SIZE 32
+#define BRDF_GROUP_COUNT ((BRDF_SIZE) / (BRDF_GROUP_SIZE))
 
 Window::Window(glm::u16vec2 size, const char* name) :
 	_size(size), _name(strdup(name)), Lights(this), Cubemaps(this)
@@ -113,12 +115,12 @@ void Window::OnInit()
 		GL::TextureSettings<GL::TextureDimension::D2D> brdfSettings
 		{
 			{ GL_RG16F, GL::WrapMode::Clamp, GL::FilterMode::Linear, 1 },
-			glm::u32vec2(512)
+			glm::u32vec2(BRDF_SIZE)
 		};
 
 		BRDFLookup = CreateSmartPointer<GL::Texture2D>(this, brdfSettings);
 		BRDFLookup->Bind(0, GL_WRITE_ONLY);
-		brdfShader.Dispatch(16, 16, 1); // 512px / 32 Group Size = 16 Groups
+		brdfShader.Dispatch(BRDF_GROUP_COUNT, BRDF_GROUP_COUNT, 1);
 	}
 
 	auto defaultShader = CreateReference<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/missing.frag");

@@ -14,7 +14,7 @@ namespace gE
 		(RenderPass) DefaultPipeline::RenderPassShadow,
 		ClipPlanes(0.1, 25),
 		DefaultCameraTiming,
-		DefaultPipeline::AttachmentShadow
+		DefaultPipeline::ShadowDepthFormat
 	};
 
 	DirectionalLight::DirectionalLight(Window* w, u16 size, float scale, const glm::quat& rot) : Light(w, _camera),

@@ -1485,7 +1485,7 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialProperty(
 /** @brief Retrieve an array of float values with a specific key
  *  from the material
  *
- * Pass one of the AI_MATKEY_XXX constants for the last three parameters (the
+ * RenderPass one of the AI_MATKEY_XXX constants for the last three parameters (the
  * example reads the #AI_MATKEY_UVTRANSFORM property of the first diffuse texture)
  * @code
  * aiUVTransform trafo;
@@ -1518,7 +1518,7 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialFloatArray(
 // ---------------------------------------------------------------------------
 /** @brief Retrieve a single float property with a specific key from the material.
 *
-* Pass one of the AI_MATKEY_XXX constants for the last three parameters (the
+* RenderPass one of the AI_MATKEY_XXX constants for the last three parameters (the
 * example reads the #AI_MATKEY_SHININESS_STRENGTH property of the first diffuse texture)
 * @code
 * float specStrength = 1.f; // default value, remains unmodified if we fail.
@@ -1631,17 +1631,17 @@ ASSIMP_API unsigned int aiGetMaterialTextureCount(const C_STRUCT aiMaterial *pMa
  *     can be converted to an int using a function like atoi.
  *     This parameter must be non-null.
  *  @param mapping The texture mapping mode to be used.
- *      Pass NULL if you're not interested in this information.
+ *      RenderPass NULL if you're not interested in this information.
  *  @param[out] uvindex For UV-mapped textures: receives the index of the UV
  *      source channel. Unmodified otherwise.
- *      Pass NULL if you're not interested in this information.
+ *      RenderPass NULL if you're not interested in this information.
  *  @param[out] blend Receives the blend factor for the texture
- *      Pass NULL if you're not interested in this information.
+ *      RenderPass NULL if you're not interested in this information.
  *  @param[out] op Receives the texture blend operation to be perform between
  *      this texture and the previous texture.
- *      Pass NULL if you're not interested in this information.
+ *      RenderPass NULL if you're not interested in this information.
  *  @param[out] mapmode Receives the mapping modes to be used for the texture.
- *      Pass NULL if you're not interested in this information. Otherwise,
+ *      RenderPass NULL if you're not interested in this information. Otherwise,
  *      pass a pointer to an array of two aiTextureMapMode's (one for each
  *      axis, UV order).
  *  @param[out] flags Receives the the texture flags.

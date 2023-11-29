@@ -15,7 +15,7 @@ namespace gE
 		Light(Window*, Camera&, Entity* = nullptr);
 
 		GET(Camera&, Camera, _camera);
-		GET(GL::Texture*, Depth, _camera.GetDepthAttachment());
+		GET(GL::Texture*, Depth, _camera.GetDepth());
 
 		virtual void GetGLLight(GL::LightData&) = 0;
 
@@ -29,7 +29,7 @@ namespace gE
 		DirectionalLight(Window*, u16 size, float scale, const glm::quat& = glm::identity<glm::quat>());
 
 		GET(OrthographicCamera&, Camera, _camera);
-		GET(GL::Texture2D*, Depth, _camera.GetDepthAttachment());
+		GET(GL::Texture2D*, Depth, _camera.GetDepth());
 		GET_CONST(float, Scale, _camera.GetScale().y);
 
 		void GetGLLight(GL::LightData&) override;

@@ -37,7 +37,7 @@ target_link_libraries(gEModel PRIVATE ASSIMP GETF GLAD)
 
 # GECPP
 file(GLOB_RECURSE GECPP_SRC "gECPP/*.cpp" "gECPP/*.h")
-add_library(gECPP STATIC ${GECPP_SRC} gECPP/GL/Buffer/VAOSettings.h gECPP/GL/Buffer/Buffer.cpp)
+add_library(gECPP STATIC ${GECPP_SRC} gECPP/GL/Buffer/VAOSettings.h gECPP/GL/Buffer/Buffer.cpp gECPP/Engine/Component/CameraPostProcess.h gECPP/Engine/Component/CameraAttachments.h gECPP/Engine/Renderer/TemporalAA.cpp gECPP/Engine/Renderer/TemporalAA.h)
 target_link_libraries(gECPP GLAD GLFW GETF)
 
 # VOXELDEMO

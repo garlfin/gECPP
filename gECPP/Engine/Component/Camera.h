@@ -22,23 +22,19 @@ namespace GL
 #pragma ide diagnostic ignored "HidingNonVirtualFunction"
 
 #define CAMERA_GET(TYPE) \
-    GET(TYPE*, DepthAttachment, (TYPE*) DepthTexture.Get()); \
+    GET(TYPE*, Depth, (TYPE*) Depth.Get()); \
+    GET(TYPE*, Color, (TYPE*) Attachments[0].Get()); \
+    GET(TYPE*, ColorCopy, (TYPE*) Attachments[GE_MAX_ATTACHMENTS].Get()); \
     NODISCARD ALWAYS_INLINE TYPE* GetAttachment(u8 i) const { return (TYPE*) Attachments[i].Get(); } \
-    NODISCARD ALWAYS_INLINE TYPE* GetAttachmentCopy(u8 i) const { return (TYPE*) AttachmentCopies[i].Get(); } \
-    template<u8 I, bool COPY> \
+    template<u8 I> \
     NODISCARD ALWAYS_INLINE TYPE* GetAttachment() const \
     { \
-        if constexpr(COPY) return (TYPE*) AttachmentCopies[I].Get(); \
-        else return (TYPE*) Attachments[I].Get(); \
-    } \
-	NODISCARD ALWAYS_INLINE TYPE* GetAttachment(u8 i, bool copy) \
-	{ \
-		if(copy) return (TYPE*) AttachmentCopies[i].Get(); \
-        else return (TYPE*) Attachments[i].Get(); \
-	}
+        return (TYPE*) Attachments[I].Get(); \
+    }
+
 namespace gE
 {
-	class Camera : public Component, protected SizelessCameraSettings
+	class Camera : public Component
 	{
 	 public:
 		Camera(Entity* e, Manager*, const SizelessCameraSettings&);
@@ -48,17 +44,18 @@ namespace gE
 
 		virtual void GetGLCamera(GL::Camera&);
 
-		GET_CONST(CameraTiming, Timing, Timing);
-		GET_CONST(gE::RenderPass, RenderPass, RenderPass);
-		GET_CONST(gE::ClipPlanes, ClipPlanes, ClipPlanes);
+		GET_CONST(CameraTiming, Timing, _settings.Timing);
+		GET_CONST(gE::RenderPass, RenderPass, _settings.RenderPass);
+		GET_CONST(gE::ClipPlanes, ClipPlanes, _settings.ClipPlanes);
 		GET_CONST(const GL::FrameBuffer&, FrameBuffer, FrameBuffer);
-		GET_CONST(const SizelessCameraSettings&, Settings, *this);
+		GET_CONST(const SizelessCameraSettings&, Settings, _settings);
+		GET_CONST(const AttachmentSettings&, AttachmentSettings, _settings.Attachments);
 		GET_CONST(const glm::mat4&, Projection, Projection);
 
 		CAMERA_GET(GL::Texture);
 
 		template<class TEX_T, class CAM_T>
-		static void CreateAttachments(CAM_T& cam, const gE::AttachmentSettings& settings);
+		static void CreateAttachments(CAM_T&);
 
 	 protected:
 		virtual void UpdateProjection() = 0;
@@ -66,12 +63,14 @@ namespace gE
 		GL::FrameBuffer FrameBuffer;
 		glm::mat4 Projection;
 
-		gE::SmartPointer<GL::Texture> DepthTexture;
-		gE::SmartPointer<GL::Texture> Attachments[GE_MAX_ATTACHMENTS]{};
-		gE::SmartPointer<GL::Texture> AttachmentCopies[GE_MAX_ATTACHMENTS]{};
+		gE::SmartPointer<GL::Texture> Depth;
+		gE::SmartPointer<GL::Texture> Attachments[GE_MAX_ATTACHMENTS + 1]{};
+
 		u32 Frame = 0;
 
 	 private:
+		SizelessCameraSettings _settings;
+
 		bool _isProjectionInvalid = true;
 	};
 

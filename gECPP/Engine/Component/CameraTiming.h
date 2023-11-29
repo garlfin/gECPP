@@ -37,5 +37,5 @@ namespace gE
 		u64 _frame = 0;
 	};
 
-	CONST_GLOBAL CameraTiming DefaultCameraTiming(0, 1);
+	CONSTEXPR_GLOBAL CameraTiming DefaultCameraTiming(0, 1);
 }
