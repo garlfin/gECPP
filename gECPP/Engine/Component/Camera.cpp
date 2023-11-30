@@ -178,7 +178,9 @@ void gE::CameraCubemap::GetGLCamera(GL::Camera& cam)
 		cam.View[i] = glm::lookAt(cam.Position, cam.Position + ForwardDirs[i], cam.Position + UpDirs[i]);
 }
 
-gE::PostProcessEffect::PostProcessEffect(Window* w, AttachmentSettings& s) : _window(w), _requirements(s)
-{ }
+gE::PostProcessEffect::PostProcessEffect(Window* w, const AttachmentSettings& s) :
+	_window(w), _requirements(s)
+{
+}
 
 

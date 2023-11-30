@@ -4,38 +4,44 @@
 
 // In percent
 #ifndef DIRECTIONAL_SHADOW_BIAS
-#define DIRECTIONAL_SHADOW_BIAS 0.01
+    #define DIRECTIONAL_SHADOW_BIAS 0.01
 #endif
 
 #ifndef DIRECTIONAL_SHADOW_SAMPLES
-#define DIRECTIONAL_SHADOW_SAMPLES 8
+    #define DIRECTIONAL_SHADOW_SAMPLES 8
 #endif
 
-#ifndef DIRECTIONAL_SHADOW_BLOCKER_SAMPLES
-#define DIRECTIONAL_SHADOW_BLOCKER_SAMPLES 8
-#endif
+#define SOFT_SHADOW_AVERAGE
 
-#ifndef DIRECTIONAL_SHADOW_BLOCKER_RADIUS
-#define DIRECTIONAL_SHADOW_BLOCKER_RADIUS 0.1
+#define SOFT_SHADOW (defined(SOFT_SHADOW_AVERAGE) || defined(SOFT_SHADOW_MIN))
+
+#if SOFT_SHADOW
+    #ifndef DIRECTIONAL_SHADOW_BLOCKER_SAMPLES
+        #define DIRECTIONAL_SHADOW_BLOCKER_SAMPLES 8
+    #endif
+
+    #ifndef DIRECTIONAL_SHADOW_BLOCKER_RADIUS
+        #define DIRECTIONAL_SHADOW_BLOCKER_RADIUS 0.1
+    #endif
 #endif
 
 #ifndef DIRECTIONAL_SHADOW_RADIUS
-#define DIRECTIONAL_SHADOW_RADIUS 0.05
+    #define DIRECTIONAL_SHADOW_RADIUS 0.05
 #endif
 
 #ifndef DIRECTIONAL_SHADOW_MIN_RADIUS
-#define DIRECTIONAL_SHADOW_MIN_RADIUS 0.02
+    #define DIRECTIONAL_SHADOW_MIN_RADIUS 0.02
 #endif
 
 #ifndef PI
-#define PI 3.141592
+    #define PI 3.141592
 #endif
 
 #define GOLDEN_ANGLE 2.4
 
 // Main Functions
 #ifdef FRAGMENT_SHADER
-float GetShadowDirectional(const Vertex frag, const Light light);
+    float GetShadowDirectional(const Vertex frag, const Light light);
 #endif
 
 // Helper Functions
@@ -47,7 +53,7 @@ vec2 VogelDisk(uint i, uint count, float phi);
 
 // Helper Variables
 #ifdef FRAGMENT_SHADER
-float IGNSample = InterleavedGradientNoise(gl_FragCoord.xy);
+    float IGNSample = InterleavedGradientNoise(gl_FragCoord.xy);
 #endif
 
 // Implementation
@@ -60,9 +66,12 @@ float GetShadowDirectional(const Vertex frag, const Light light)
     float bias = mix(0.1, 1.0, nDotL) * DIRECTIONAL_SHADOW_BIAS;
 
     float blocker = 0.0;
+#ifdef SOFT_SHADOW_AVERAGE
     float blockerCount = 0.0;
+#endif
     float shadow = 0.0;
 
+#if SOFT_SHADOW
     for(uint i = 0; i < DIRECTIONAL_SHADOW_BLOCKER_SAMPLES; i++)
     {
         vec2 offset = VogelDisk(i, DIRECTIONAL_SHADOW_BLOCKER_SAMPLES, IGNSample * PI * 2.0);
@@ -79,11 +88,22 @@ float GetShadowDirectional(const Vertex frag, const Light light)
 
         float shadowSample = z > bias ? 1.0 : 0.0;
 
-        blocker += z * shadowSample;
-        blockerCount += shadowSample;
+        #ifdef SOFT_SHADOW_AVERAGE
+            blocker += z * shadowSample;
+            blockerCount += shadowSample;
+        #else
+            blocker = max(blocker, z * shadowSample);
+        #endif
     }
 
-    blocker = max(blocker / blockerCount * DIRECTIONAL_SHADOW_RADIUS, DIRECTIONAL_SHADOW_MIN_RADIUS);
+    #ifdef SOFT_SHADOW_AVERAGE
+        blocker = max(blocker / blockerCount * DIRECTIONAL_SHADOW_RADIUS, DIRECTIONAL_SHADOW_MIN_RADIUS);
+    #else
+        blocker = max(blocker, DIRECTIONAL_SHADOW_MIN_RADIUS);
+    #endif
+#else
+    blocker = DIRECTIONAL_SHADOW_RADIUS;
+#endif
 
     for(uint i = 0; i < DIRECTIONAL_SHADOW_SAMPLES; i++)
     {
@@ -94,8 +114,9 @@ float GetShadowDirectional(const Vertex frag, const Light light)
     #ifdef EXT_BINDLESS
         float z = texture(sampler2D(light.Depth), uv.xy).r;
     #else
-        float z = 0;
+        float z = 0.0;
     #endif
+
         z = LinearizeDepthOrtho(z, light.Planes);
         z = uv.z - z;
 

@@ -13,7 +13,7 @@ namespace gE
 	class PostProcessEffect
 	{
 	 public:
-		explicit PostProcessEffect(Window* w, AttachmentSettings&);
+		explicit PostProcessEffect(Window* w, const AttachmentSettings&);
 
 		virtual void RenderPass(Camera&, GL::Texture&, GL::Texture&) = 0;
 		GET_CONST(const AttachmentSettings&, Requirements, _requirements);

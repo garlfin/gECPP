@@ -1,24 +1,25 @@
+#ifdef TAA_VELOCITY_FORMAT
+    #define TAA_VELOCITY_FORMAT rg16f
+#endif
+
 #ifndef TAA_COLOR_FORMAT
-#define TAA_COLOR_FORMAT rgba16f
+    #define TAA_COLOR_FORMAT rgba16f
 #endif
 
 #ifndef TAA_SAMPLE_COUNT
-#define TAA_SAMPLE_COUNT 16
+    #define TAA_SAMPLE_COUNT 16
 #endif
 
 #ifdef TAA_MODE_FULL
-#define TAA_BOX_SAMPLE_COUNT 4
+    #define TAA_BOX_SAMPLE_COUNT 4
 #else
-#define TAA_BOX_SAMPLE_COUNT 8
+    #define TAA_BOX_SAMPLE_COUNT 8
 #endif
 
-// Inputs
-layout(location = 0) uniform sampler2D PreviousFrameIn;
-layout(location = 1) uniform sampler2D ColorIn;
-layout(location = 2) uniform sampler2D VelocityIn;
-
-// Outputs
-layout(binding = 0, TAA_IMAGE_FORMAT) restrict writeonly uniform image2d ColorOut;
+// IO
+layout(location = 0) uniform sampler2D ColorIn;
+layout(binding = 0, TAA_VELOCITY_FORMAT) restrict uniform image2d VelocityIn;
+layout(binding = 1, TAA_IMAGE_FORMAT) restrict uniform image2d ColorInOut; // Previous frame in, Color Out
 
 // Variables
 vec2 Offsets[8] =
@@ -32,11 +33,16 @@ void main()
 {
     ivec2 size = imageSize(ColorOut);
     ivec2 texel = ivec2(gl_GlobalInvocationID.xy);
-    vec2 uv = vec2(texel) / size;
+    vec2 uv = (vec2(texel) + 0.5) / size;
 
-    vec2 velocity = texture(VelocityIn, uv);
+    vec2 velocity = imageLoad(VelocityIn, texel);
     vec4 currentFrame = texture(ColorIn, uv);
-    vec4 previousFrame = texture(PreviousFrameIn, uv - velocity);
+
+    vec2 previousUV = uv - velocity;
+    previousUV =
+
+    vec4 previousFrame = imageLoad(ColorInOut, uv - velocity);
+    // We lose some precision, but now I don't have to create an extra texture copy! : )
 
     vec4 boxMin = currentFrame, boxMax = currentFrame;
     for(uint i = 0; i < TAA_BOX_SAMPLE_COUNT; i++)
@@ -49,6 +55,6 @@ void main()
     previousFrame = clamp(previousFrame, boxMin, boxMax);
 
     vec4 color = mix(previousFrame, currentFrame, 1.0 / TAA_SAMPLE_COUNT);
-    imageStore(ColorOut, texel, color);
+    imageStore(ColorInOut, texel, color);
 }
 

@@ -9,7 +9,7 @@
 using namespace gE;
 
 #ifdef DEBUG
-char WindowTitleBuf[30];
+	char WindowTitleBuf[30];
 #endif
 
 #define BRDF_SIZE 512
