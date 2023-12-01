@@ -12,7 +12,7 @@ namespace gE
 		_camera(this, nullptr,
 			CameraSettings3D
 			(
-				SizelessCameraSettings
+				ICameraSettings
 				{
 					(RenderPass) VoxelPipeline::RenderPass3D, ClipPlanes(0.01, resolution),
 					gE::CameraTiming(), { GL_NONE }, VoxelPipeline::Target3D

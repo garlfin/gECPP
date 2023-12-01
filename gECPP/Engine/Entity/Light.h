@@ -5,22 +5,47 @@
 #pragma once
 
 #include "Entity.h"
-#include <Engine/Component/Camera.h>
+#include "Engine/Component/Camera/Camera.h"
 
 namespace gE
 {
+	class IShadowTarget : public IRenderTarget
+	{
+	 public:
+		IShadowTarget(Camera& c, GL::Texture& d) : IRenderTarget(c), _depth(d) { }
+
+		GET(GL::Texture&, Depth, _depth);
+
+	 private:
+		GL::Texture& _depth;
+	};
+
+	class DirectionalShadowTarget : public IShadowTarget
+	{
+	 public:
+		DirectionalShadowTarget(Camera&);
+
+		GET(GL::Texture2D&, Depth, _depth);
+
+		void RenderPass() override;
+
+	 private:
+		GL::Texture2D _depth;
+	};
+
 	class Light : public Entity
 	{
 	 public:
 		Light(Window*, Camera&, Entity* = nullptr);
 
 		GET(Camera&, Camera, _camera);
-		GET(GL::Texture*, Depth, _camera.GetDepth());
+		GET(GL::Texture&, Depth, _target.GetDepth());
 
 		virtual void GetGLLight(GL::LightData&) = 0;
 
 	 private:
 		Camera& _camera;
+		IShadowTarget& _target;
 	};
 
 	class DirectionalLight : public Light
@@ -29,7 +54,9 @@ namespace gE
 		DirectionalLight(Window*, u16 size, float scale, const glm::quat& = glm::identity<glm::quat>());
 
 		GET(OrthographicCamera&, Camera, _camera);
-		GET(GL::Texture2D*, Depth, _camera.GetDepth());
+		GET(DirectionalShadowTarget&, Target, _target);
+		GET(GL::Texture2D&, Depth, _target.GetDepth());
+
 		GET_CONST(float, Scale, _camera.GetScale().y);
 
 		void GetGLLight(GL::LightData&) override;
@@ -37,6 +64,7 @@ namespace gE
 
 	 private:
 		OrthographicCamera _camera;
+		DirectionalShadowTarget _target;
 	};
 
 	class LightManager : public TypedManager<Light>

@@ -5,13 +5,13 @@
 #pragma once
 
 #include "GL/Buffer/VAO.h"
-#include "Engine/Component/Camera.h"
+#include "Engine/Component/Camera/Camera.h"
 #include "Engine/Window.h"
 #include "Demo/Engine/Component/Movement.h"
 
 namespace VoxelDemo
 {
-	gE::SizelessCameraSettings FlyCameraSettings
+	gE::ICameraSettings FlyCameraSettings
 	{
 		(gE::RenderPass) gE::DefaultPipeline::RenderPass2D,
 		gE::ClipPlanes(0.1, 100),

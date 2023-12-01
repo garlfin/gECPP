@@ -2,19 +2,17 @@
 // Created by scion on 10/23/2023.
 //
 
-#include "DirectionalLight.h"
+#include "Light.h"
 #include <Engine/Window.h>
 
 #include <glm/gtx/string_cast.hpp>
 
 namespace gE
 {
-	const SizelessCameraSettings DirectionalSettings
+	const ICameraSettings DirectionalSettings
 	{
-		(RenderPass) DefaultPipeline::RenderPassShadow,
 		ClipPlanes(0.1, 25),
-		DefaultCameraTiming,
-		DefaultPipeline::ShadowDepthFormat
+		DefaultCameraTiming
 	};
 
 	DirectionalLight::DirectionalLight(Window* w, u16 size, float scale, const glm::quat& rot) : Light(w, _camera),
@@ -50,7 +48,7 @@ namespace gE
 		light.Color = glm::vec3(1);
 		light.PackedSettings = u32(GetScale() * 2);
 		light.Planes = DirectionalSettings.ClipPlanes;
-		light.Depth = (GL::TextureHandle) *GetDepth();
+		light.Depth = (GL::handle) *GetDepth();
 	}
 
 	// Registered to behaviors for tick functionality.
@@ -68,6 +66,11 @@ namespace gE
 		Sun->GetGLLight(buffers.Lighting.Lights[0]);
 		buffers.UpdateLighting(offsetof(GL::Lighting, Lights[1]));
 	}
-}
 
+	DirectionalShadowTarget::DirectionalShadowTarget(OrthographicCamera& camera) : IShadowTarget(camera, _depth),
+		_depth(&camera.GetWindow(), )
+	{
+
+	}
+}
 

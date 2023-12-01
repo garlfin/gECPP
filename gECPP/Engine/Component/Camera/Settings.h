@@ -4,12 +4,10 @@
 
 #pragma once
 
-#include <GL/Math.h>
-#include <Engine/Renderer/DefaultPipeline.h>
+#include "GL/Math.h"
+#include "Engine/Renderer/DefaultPipeline.h"
 #include "Engine/Array.h"
-#include "CameraTiming.h"
-#include "CameraAttachments.h"
-#include "CameraPostProcess.h"
+#include "Timing.h"
 
 namespace GL { struct Texture; }
 
@@ -24,21 +22,17 @@ namespace gE
 
 	using RenderPass = void (*)(Camera&);
 
-	struct SizelessCameraSettings
+	struct ICameraSettings
 	{
-		RenderPass RenderPass;
 		ClipPlanes ClipPlanes = { 0.1, 1000 };
 		CameraTiming Timing = DefaultCameraTiming;
-		GL::SizelessTextureSettings Depth{};
-		AttachmentSettings Attachments;
-		std::vector<PostProcessEffect*> PostProcessEffects;
 	};
 
 	template<GL::TextureDimension DIMENSION>
-	struct CameraSettings : public SizelessCameraSettings
+	struct CameraSettings : public ICameraSettings
 	{
-		CameraSettings(const SizelessCameraSettings& settings, const GL::TextureSize<DIMENSION>& size) :
-			SizelessCameraSettings(settings), Size(size)
+		CameraSettings(const ICameraSettings& settings, const GL::TextureSize<DIMENSION>& size) :
+			ICameraSettings(settings), Size(size)
 		{ };
 
 		GL::TextureSize<DIMENSION> Size{ 0 };

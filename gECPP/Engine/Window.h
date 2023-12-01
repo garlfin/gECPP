@@ -8,12 +8,12 @@
 #include "Engine/Manager.h"
 #include "Engine/AssetManager.h"
 #include "Engine/Component/Transform.h"
-#include "Engine/Component/Camera.h"
+#include "Engine/Component/Camera/Camera.h"
 #include "WindowState.h"
 #include "Engine/Renderer/VoxelPipeline.h"
 #include "Engine/Entity/VoxelCapture.h"
 #include "Engine/Component/MeshRenderer.h"
-#include "Engine/Entity/DirectionalLight.h"
+#include "Engine/Entity/Light.h"
 #include "Engine/Entity/CubemapCapture.h"
 
 struct GLFWwindow;

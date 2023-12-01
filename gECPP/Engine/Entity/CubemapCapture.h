@@ -4,7 +4,7 @@
 
 #pragma once
 #include "Entity.h"
-#include <Engine/Component/Camera.h>
+#include "Engine/Component/Camera/Camera.h"
 #include <gEModel/gETF.h>
 #include <GL/Shader/Shader.h>
 

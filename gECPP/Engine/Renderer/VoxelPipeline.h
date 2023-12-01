@@ -7,7 +7,7 @@
 #include <GL/Math.h>
 #include <GL/Texture/Texture.h>
 #include <GL/Buffer/Buffer.h>
-#include <Engine/Component/Camera.h>
+#include "Engine/Component/Camera/Camera.h"
 
 namespace GL
 {

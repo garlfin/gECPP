@@ -4,7 +4,7 @@
 #include "Engine/Renderer/DefaultPipeline.h"
 
 #include <iostream>
-#include <Engine/Component/Camera.h>
+#include "Engine/Component/Camera/Camera.h"
 
 using namespace gE;
 

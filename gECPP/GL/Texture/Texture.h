@@ -10,20 +10,21 @@ namespace GL
 {
 	struct FrameBuffer;
 
+	// Type is more "integral" so i use a lowercase convention
 	// Opaque type to prevent accidental pointer-to-handle conversions
-	struct TextureHandle
+	struct handle
 	{
-		inline explicit TextureHandle() = default;
-		inline explicit TextureHandle(u64 i) : ID(i) {};
+		inline explicit handle() = default;
+		inline explicit handle(u64 i) : ID(i) {};
 
-		ALWAYS_INLINE TextureHandle& operator=(u64 o) { ID = o; return *this; }
+		ALWAYS_INLINE handle& operator=(u64 o) { ID = o; return *this; }
 
 		OPERATOR_CAST_CONST(u64, ID);
 
 	 	u64 ID = 0;
 	};
 
-	CONSTEXPR_GLOBAL TextureHandle NullHandle = TextureHandle();
+	CONSTEXPR_GLOBAL handle NullHandle = handle();
 
 	class Texture : public Asset
 	{
@@ -41,10 +42,10 @@ namespace GL
 
 		void Attach(GL::FrameBuffer* buffer, GLenum attachment, u8 mip) const;
 
-		TextureHandle GetHandle();
+		handle GetHandle();
 		virtual void CopyFrom(const GL::Texture&) = 0;
 
-		explicit ALWAYS_INLINE operator TextureHandle() { return GetHandle(); }
+		explicit ALWAYS_INLINE operator handle() { return GetHandle(); }
 
 		GET_CONST(GLenum, Format, Format);
 		GET_CONST(GLenum, Target, Target);
@@ -58,7 +59,7 @@ namespace GL
 		const GLenum Target;
 
 	 private:
-		TextureHandle _handle = NullHandle;
+		handle _handle = NullHandle;
 	};
 
 	class Texture2D final : public Texture

@@ -7,7 +7,7 @@
 
 namespace gE
 {
-	SizelessCameraSettings CubemapSettings
+	ICameraSettings CubemapSettings
 		{
 			(RenderPass) gE::DefaultPipeline::RenderPassCubemap,
 			ClipPlanes(0.1, 100),
@@ -30,7 +30,7 @@ namespace gE
 		DefaultPipeline::Buffers& buffers = _window->GetPipelineBuffers();
 
 		buffers.Lighting.Skybox = Skybox->GetHandle();
-		buffers.UpdateLighting(sizeof(GL::TextureHandle), offsetof(GL::Lighting, Skybox));
+		buffers.UpdateLighting(sizeof(GL::handle), offsetof(GL::Lighting, Skybox));
 
 		Manager::OnRender(delta);
 	}

@@ -14,14 +14,14 @@ namespace gE
 		explicit Component(Entity* o, Manager* manager);
 
 		GET_CONST(Entity*, Owner, _owner);
-		GET_CONST(Window&, Window, *_window);
+		GET_CONST(Window&, Window, _window);
 
 		void OnUpdate(float d) override { }
 		void OnRender(float d) override { }
 		void OnDestroy() override { };
 
 	 private:
-		Window* _window;
+		Window& _window;
 		Entity* _owner;
 
 		friend class Manager;

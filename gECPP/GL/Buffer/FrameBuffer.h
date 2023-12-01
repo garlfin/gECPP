@@ -5,6 +5,8 @@
 #include <Engine/AssetManager.h>
 #include <Engine/Renderer/DefaultPipeline.h>
 
+#define GL_MAX_ATTACHMENTS 4
+
 namespace GL
 {
 	enum class FrameBufferTarget : GLenum
@@ -36,6 +38,6 @@ namespace GL
 		inline ~FrameBuffer() override { glDeleteFramebuffers(1, &ID); }
 
 	 private:
-		GLenum _attachmentsEnum[GE_MAX_ATTACHMENTS]{};
+		GLenum _attachmentsEnum[GL_MAX_ATTACHMENTS] {};
 	};
 }

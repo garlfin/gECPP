@@ -7,7 +7,7 @@
 #include <GL/Buffer/Buffer.h>
 #include <GL/Texture/TextureSettings.h>
 #include <GL/Texture/Texture.h>
-#include <Engine/Component/CameraSettings.h>
+#include "Engine/Component/Camera/Settings.h"
 
 #define GE_MAX_INSTANCE 64
 #define GE_MAX_LIGHT 4
@@ -23,8 +23,8 @@ namespace GL
 		GL_ALIGN glm::vec2 ClipPlanes;
 		glm::vec2 Parameters;
 
-		TextureHandle ColorTexture;
-		TextureHandle DepthTexture;
+		handle ColorTexture;
+		handle DepthTexture;
 
 		GL_ALIGN glm::mat4 PreviousViewProjection;
 		glm::mat4 Projection;
@@ -48,7 +48,7 @@ namespace GL
 		glm::vec3 Color;
 		u32 PackedSettings;
 		glm::vec2 Planes;
-		TextureHandle Depth;
+		handle Depth;
 	};
 
 	struct CubemapData
@@ -56,7 +56,7 @@ namespace GL
 		glm::vec3 Position;
 		float BlendRadius;
 		glm::vec3 Scale;
-		GL_ALIGN TextureHandle Color;
+		GL_ALIGN handle Color;
 	};
 
 	struct Scene
@@ -73,7 +73,7 @@ namespace GL
 		u32 LightCount = 1;
 		u32 CubemapCount = 1;
 
-		TextureHandle Skybox;
+		handle Skybox;
 
 		GL_ALIGN LightData Lights[GE_MAX_LIGHT];
 		GL_ALIGN CubemapData Cubemaps[GE_MAX_CUBEMAP];

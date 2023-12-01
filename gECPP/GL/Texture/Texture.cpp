@@ -85,7 +85,7 @@ namespace GL
 		glDeleteTextures(1, &ID);
 	}
 
-	TextureHandle Texture::GetHandle()
+	handle Texture::GetHandle()
 	{
 		if(_handle) return _handle;
 		if(!GLAD_GL_ARB_bindless_texture) return _handle = 1;

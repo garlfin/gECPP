@@ -7,11 +7,12 @@
 #include <GL/Texture/Texture.h>
 #include <GL/Buffer/FrameBuffer.h>
 
+#include "RenderTarget.h"
 #include "Engine/Entity/Entity.h"
 #include "Engine/Array.h"
 #include "Engine/Manager.h"
-#include "CameraSettings.h"
-#include "CameraTiming.h"
+#include "Settings.h"
+#include "Timing.h"
 
 namespace GL
 {
@@ -21,55 +22,34 @@ namespace GL
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "HidingNonVirtualFunction"
 
-#define CAMERA_GET(TYPE) \
-    GET(TYPE*, Depth, (TYPE*) Depth.Get()); \
-    GET(TYPE*, Color, (TYPE*) Attachments[0].Get()); \
-    GET(TYPE*, ColorCopy, (TYPE*) Attachments[GE_MAX_ATTACHMENTS].Get()); \
-    NODISCARD ALWAYS_INLINE TYPE* GetAttachment(u8 i) const { return (TYPE*) Attachments[i].Get(); } \
-    template<u8 I> \
-    NODISCARD ALWAYS_INLINE TYPE* GetAttachment() const \
-    { \
-        return (TYPE*) Attachments[I].Get(); \
-    }
-
 namespace gE
 {
 	class Camera : public Component
 	{
 	 public:
-		Camera(Entity* e, Manager*, const SizelessCameraSettings&);
+		Camera(Entity*, Manager*, IRenderTarget&, const ICameraSettings&);
 
 		void OnUpdate(float delta) override { }
 		void OnRender(float delta) final;
 
 		virtual void GetGLCamera(GL::Camera&);
 
+		GET(IRenderTarget &, Target, _target);
+
 		GET_CONST(CameraTiming, Timing, _settings.Timing);
-		GET_CONST(gE::RenderPass, RenderPass, _settings.RenderPass);
 		GET_CONST(gE::ClipPlanes, ClipPlanes, _settings.ClipPlanes);
-		GET_CONST(const GL::FrameBuffer&, FrameBuffer, FrameBuffer);
-		GET_CONST(const SizelessCameraSettings&, Settings, _settings);
-		GET_CONST(const AttachmentSettings&, AttachmentSettings, _settings.Attachments);
+		GET_CONST(const ICameraSettings&, Settings, _settings);
 		GET_CONST(const glm::mat4&, Projection, Projection);
-
-		CAMERA_GET(GL::Texture);
-
-		template<class TEX_T, class CAM_T>
-		static void CreateAttachments(CAM_T&);
 
 	 protected:
 		virtual void UpdateProjection() = 0;
 
-		GL::FrameBuffer FrameBuffer;
 		glm::mat4 Projection;
-
-		gE::SmartPointer<GL::Texture> Depth;
-		gE::SmartPointer<GL::Texture> Attachments[GE_MAX_ATTACHMENTS + 1]{};
-
 		u32 Frame = 0;
 
 	 private:
-		SizelessCameraSettings _settings;
+		ICameraSettings _settings;
+		IRenderTarget& _target;
 
 		bool _isProjectionInvalid = true;
 	};
@@ -77,9 +57,11 @@ namespace gE
 	class Camera2D : public Camera
 	{
 	 public:
-		Camera2D(Entity*, Manager*, const CameraSettings2D&);
+		typedef RenderTarget<Camera2D> TARGET_TYPE;
 
-		CAMERA_GET(GL::Texture2D);
+		Camera2D(Entity*, Manager*, TARGET_TYPE&, const CameraSettings2D&);
+
+		GET(TARGET_TYPE&, Target, (TARGET_TYPE&) Camera::GetTarget());
 		GET_CONST(GL::TextureSize2D, Size, _size);
 		GET_CONST(float, Aspect, (float) _size.x / _size.y);
 
@@ -92,7 +74,7 @@ namespace gE
 	class PerspectiveCamera : public Camera2D
 	{
 	 public:
-		PerspectiveCamera(Entity* e, Manager*, const PerspectiveCameraSettings& s);
+		PerspectiveCamera(Entity*, Manager*, TARGET_TYPE&, const PerspectiveCameraSettings&);
 
 		template<AngleType T = AngleType::Degree>
 		NODISCARD ALWAYS_INLINE float GetFOV() const
@@ -121,7 +103,7 @@ namespace gE
 	class OrthographicCamera : public Camera2D
 	{
 	 public:
-		OrthographicCamera(Entity* e, Manager*, const OrthographicCameraSettings& s);
+		OrthographicCamera(Entity*, Manager*, TARGET_TYPE&, const OrthographicCameraSettings&);
 
 		GET_CONST(const glm::vec4&, Scale, _orthographicScale);
 
@@ -135,13 +117,14 @@ namespace gE
 	class Camera3D : public Camera
 	{
 	 public:
-		Camera3D(Entity*, Manager*, const CameraSettings3D&);
+		typedef RenderTarget<Camera3D> TARGET_TYPE;
 
-		CAMERA_GET(GL::Texture3D);
+		Camera3D(Entity*, Manager*, TARGET_TYPE&, const CameraSettings3D&);
+
+		GET(TARGET_TYPE&, Target, (TARGET_TYPE&) Camera::GetTarget());
+		GET_CONST(GL::TextureSize3D, Size, _size);
 
 		void GetGLCamera(GL::Camera&) override;
-
-		GET_CONST(GL::TextureSize3D, Size, _size);
 
 	 protected:
 		void UpdateProjection() override;
@@ -153,10 +136,11 @@ namespace gE
 	class CameraCubemap : public Camera
 	{
 	 public:
-		CameraCubemap(Entity*, Manager*, const CameraSettings1D&);
+		typedef RenderTarget<CameraCubemap> TARGET_TYPE;
 
-		CAMERA_GET(GL::TextureCube);
+		CameraCubemap(Entity*, Manager*, TARGET_TYPE&, const CameraSettings1D&);
 
+		GET(TARGET_TYPE&, Target, (TARGET_TYPE&) Camera::GetTarget());
 		GET_CONST(GL::TextureSize1D, Size, _size);
 
 		void GetGLCamera(GL::Camera& camera) override;
@@ -174,6 +158,8 @@ namespace gE
 		using ComponentManager<Camera>::ComponentManager;
 
 		Camera* CurrentCamera = nullptr;
+		GL::Texture2D* Color = nullptr;
+
 		Camera* CallingCamera = nullptr;
 	};
 }

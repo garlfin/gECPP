@@ -132,6 +132,10 @@ namespace GL
 		TextureSize<DIMENSION> Size = TextureSize<DIMENSION>(1);
 	};
 
+	typedef TextureSettings<TextureDimension::D1D> TextureSettings1D;
+	typedef TextureSettings<TextureDimension::D2D> TextureSettings2D;
+	typedef TextureSettings<TextureDimension::D3D> TextureSettings3D;
+
 	struct TextureData
 	{
 		GLenum PixelFormat = GL_RGB;
