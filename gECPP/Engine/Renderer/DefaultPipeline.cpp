@@ -40,36 +40,4 @@ namespace gE
 		window.GetRenderers().OnRender(0.f);
 		window.GetCubemaps().DrawSkybox();
 	}
-
-	void DefaultPipeline::RenderPass3D(Camera3D& camera) {}
-
-	void DefaultPipeline::RenderPassShadow(Camera2D& camera)
-	{
-		const glm::u32vec2& cameraSize = camera.GetSize();
-		Window& window = camera.GetWindow();
-
-		window.Stage = RenderStage::PreZ;
-
-		glDepthMask(1);
-		glColorMask(0, 0, 0, 0);
-		glClear(GL_DEPTH_BUFFER_BIT);
-		glViewport(0, 0, cameraSize.x, cameraSize.y);
-
-		window.GetRenderers().OnRender(0.f);
-	}
-
-	void DefaultPipeline::RenderPassCubemap(CameraCubemap& camera)
-	{
-		const u32 cameraSize = camera.GetSize();
-		Window& window = camera.GetWindow();
-
-		window.Stage = RenderStage::PreZ;
-
-		glDepthMask(1);
-		glColorMask(0, 0, 0, 0);
-		glClear(GL_DEPTH_BUFFER_BIT);
-		glViewport(0, 0, cameraSize, cameraSize);
-
-		window.GetRenderers().OnRender(0.f);
-	}
 }

@@ -29,11 +29,6 @@ namespace gE::VoxelPipeline
 {
 	void RenderPass3D(Window*, VoxelCamera*);
 
-	CONSTEXPR_GLOBAL gE::AttachmentSettings Target3D
-	{
-		{{ GL_RGB16F }, { GL_RGB5_A1 }}, // Attachments: COLOR, DATA (Metallic, Roughness, Emission, Solid)
-	};
-
 	struct Buffers
 	{
 		explicit Buffers(Window* window);

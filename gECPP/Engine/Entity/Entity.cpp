@@ -22,12 +22,6 @@ namespace gE
 		std::vector<Entity*> stack{ this };
 
 		if(flagChildren)
-			for(Entity* child: _children)
-			{
-				child->_parent = GetParent();
-				GetParent()->_children.push_back(child);
-			}
-		else
 			while(!stack.empty())
 			{
 				Entity* back = stack.back();
@@ -37,12 +31,17 @@ namespace gE
 				for(Entity* child: back->GetChildren())
 					stack.push_back(child);
 			}
-
+		else
+			for(Entity* child: _children)
+			{
+				child->_parent = GetParent();
+				GetParent()->_children.push_back(child);
+			}
 	}
 
 	Behavior::Behavior(Entity* o) : Component(o, &o->GetWindow().GetBehaviors()) {}
 
-	Component::Component(Entity* o, Manager* manager) : Updateable(manager, o->_flags), _owner(o), _window(o->_window)
+	Component::Component(Entity* o, Manager* manager) : Updateable(manager, o->_flags), _owner(o), _window(*o->_window)
 	{
 	}
 }

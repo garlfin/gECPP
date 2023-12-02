@@ -116,7 +116,7 @@ namespace GL
 		NODISCARD ALWAYS_INLINE explicit operator bool() const { return BlockSize != 1; }
 	};
 
-	struct SizelessTextureSettings
+	struct ITextureSettings
 	{
 		GLenum Format = GL_NONE;
 		WrapMode WrapMode = WrapMode::Repeat;
@@ -127,7 +127,7 @@ namespace GL
 	};
 
 	template<TextureDimension DIMENSION>
-	struct TextureSettings : public SizelessTextureSettings
+	struct TextureSettings : public ITextureSettings
 	{
 		TextureSize<DIMENSION> Size = TextureSize<DIMENSION>(1);
 	};

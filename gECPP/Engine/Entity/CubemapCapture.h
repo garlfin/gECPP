@@ -10,18 +10,31 @@
 
 namespace gE
 {
+	class CubemapTarget : public RenderTarget<CameraCubemap>
+	{
+	 public:
+		explicit CubemapTarget(CameraCubemap&);
+
+		GET(GL::TextureCube&, Color, _color);
+		void RenderPass() override;
+
+	 private:
+		GL::TextureCube _color;
+	};
+
 	class CubemapCapture final : public Entity
 	{
 	 public:
 		CubemapCapture(Window*, u16 size);
 
-		GET_CONST(GL::TextureCube*, Texture, _camera.GetAttachment(0));
+		GET(GL::TextureCube&, Color, _target.GetColor());
 		GET(CameraCubemap&, Camera, _camera);
 
 		void GetGLCubemap(GL::CubemapData&);
 
 	 private:
 		CameraCubemap _camera;
+		CubemapTarget _target;
 	};
 
 	class CubemapManager final : public TypedManager<CubemapCapture>

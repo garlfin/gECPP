@@ -6,41 +6,41 @@
 #include <GLAD/glad.h>
 #include "TextureSettings.h"
 
+// Type is more "integral" so i use a lowercase convention
+// Opaque type to prevent accidental pointer-to-handle conversions
+struct handle
+{
+	inline explicit handle() = default;
+	inline explicit handle(u64 i) : ID(i) {};
+
+	ALWAYS_INLINE handle& operator=(u64 o) { ID = o; return *this; }
+
+	OPERATOR_CAST_CONST(u64, ID);
+
+	u64 ID = 0;
+};
+
 namespace GL
 {
 	struct FrameBuffer;
-
-	// Type is more "integral" so i use a lowercase convention
-	// Opaque type to prevent accidental pointer-to-handle conversions
-	struct handle
-	{
-		inline explicit handle() = default;
-		inline explicit handle(u64 i) : ID(i) {};
-
-		ALWAYS_INLINE handle& operator=(u64 o) { ID = o; return *this; }
-
-		OPERATOR_CAST_CONST(u64, ID);
-
-	 	u64 ID = 0;
-	};
 
 	CONSTEXPR_GLOBAL handle NullHandle = handle();
 
 	class Texture : public Asset
 	{
 	 public:
-		Texture(gE::Window* window, GLenum tgt, const SizelessTextureSettings& settings);
+		Texture(gE::Window* window, GLenum tgt, const ITextureSettings& settings);
 
 		inline void Bind() const override { glBindTexture(Target, ID); }
 
 		ALWAYS_INLINE uint32_t Use(uint32_t slot) const { glBindTextureUnit(slot, ID); return slot; } // NOLINT
-		ALWAYS_INLINE u32 Bind(u32 unit, GLenum access, u8 mip = 0) const
+		inline u32 Bind(u32 unit, GLenum access, u8 mip = 0) const
 		{
 			glBindImageTexture(unit, ID, mip, GL_FALSE, 0, access, Format);
 			return unit;
-		} // NOLINT
+		}
 
-		void Attach(GL::FrameBuffer* buffer, GLenum attachment, u8 mip) const;
+		void Attach(GL::FrameBuffer& buffer, GLenum attachment, u8 mip = 0) const;
 
 		handle GetHandle();
 		virtual void CopyFrom(const GL::Texture&) = 0;

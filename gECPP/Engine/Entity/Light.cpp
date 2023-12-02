@@ -12,11 +12,14 @@ namespace gE
 	const ICameraSettings DirectionalSettings
 	{
 		ClipPlanes(0.1, 25),
-		DefaultCameraTiming
+		DefaultCameraTiming,
 	};
 
-	DirectionalLight::DirectionalLight(Window* w, u16 size, float scale, const glm::quat& rot) : Light(w, _camera),
-		_camera(this, &w->GetLights(), { { DirectionalSettings, glm::u32vec2(size) }, glm::vec4(-scale, scale, -scale, scale) })
+	OrthographicCameraSettings CreateDirectionalSettings(u16, float);
+
+	DirectionalLight::DirectionalLight(Window* w, u16 size, float scale, const glm::quat& rot) : Light(w, _camera, _target),
+		_camera(this, &w->GetLights(), _target, CreateDirectionalSettings(size, scale)),
+		_target(_camera)
 	{
 		GetTransform().Rotation = rot;
 	}
@@ -48,12 +51,12 @@ namespace gE
 		light.Color = glm::vec3(1);
 		light.PackedSettings = u32(GetScale() * 2);
 		light.Planes = DirectionalSettings.ClipPlanes;
-		light.Depth = (GL::handle) *GetDepth();
+		light.Depth = (handle) GetDepth();
 	}
 
 	// Registered to behaviors for tick functionality.
-	Light::Light(Window* window, Camera& camera, Entity* parent) : Entity(window, parent, &window->GetBehaviors()),
-		_camera(camera)
+	Light::Light(Window* w, Camera& c, IDepthTarget& t, Entity* p) : Entity(w, p, &w->GetBehaviors()),
+		_camera(c), _target(t)
 	{
 	}
 
@@ -67,10 +70,41 @@ namespace gE
 		buffers.UpdateLighting(offsetof(GL::Lighting, Lights[1]));
 	}
 
-	DirectionalShadowTarget::DirectionalShadowTarget(OrthographicCamera& camera) : IShadowTarget(camera, _depth),
-		_depth(&camera.GetWindow(), )
-	{
+	CONSTEXPR_GLOBAL GL::ITextureSettings ShadowMapFormat { GL_DEPTH_COMPONENT16, GL::WrapMode::Clamp, GL::FilterMode::Linear };
 
+	DirectionalShadowTarget::DirectionalShadowTarget(OrthographicCamera& camera) : RenderTarget<Camera2D>(camera), IDepthTarget(GetFrameBuffer(), _depth),
+		_depth(&camera.GetWindow(), GL::TextureSettings2D(ShadowMapFormat, camera.GetSize()))
+	{
+	}
+
+	void DirectionalShadowTarget::RenderPass()
+	{
+		OrthographicCamera& camera = GetCamera();
+		Window& window = camera.GetWindow();
+		GL::TextureSize2D size = camera.GetSize();
+
+		window.Stage = RenderStage::Shadow;
+
+		glDepthMask(1);
+		glColorMask(0, 0, 0, 0);
+		glClear(GL_DEPTH_BUFFER_BIT);
+		glViewport(0, 0, size.x, size.y);
+
+		window.GetRenderers().OnRender(0.f);
+	}
+
+	OrthographicCameraSettings CreateDirectionalSettings(u16 size, float scale)
+	{
+		return OrthographicCameraSettings
+		{
+			CameraSettings2D(DirectionalSettings, glm::ivec2(size)),
+			glm::vec4(-scale, scale, -scale, scale)
+		};
+	}
+
+	IDepthTarget::IDepthTarget(GL::FrameBuffer& f, GL::Texture& d) : _depth(d)
+	{
+		f.SetDepthAttachment(d);
 	}
 }
 

@@ -87,9 +87,9 @@ namespace gE::DefaultPipeline
 	void RenderPassShadow(Camera2D&);
 	void RenderPassCubemap(CameraCubemap&);
 
-	CONSTEXPR_GLOBAL GL::SizelessTextureSettings ColorFormat { GL_RGBA16F, GL::WrapMode::Clamp };
-	CONSTEXPR_GLOBAL GL::SizelessTextureSettings DepthFormat { GL_DEPTH_COMPONENT32F, GL::WrapMode::Clamp };
-	CONSTEXPR_GLOBAL GL::SizelessTextureSettings ShadowDepthFormat { GL_DEPTH_COMPONENT16, GL::WrapMode::Clamp };
+	CONSTEXPR_GLOBAL GL::ITextureSettings ColorFormat { GL_RGBA16F, GL::WrapMode::Clamp };
+	CONSTEXPR_GLOBAL GL::ITextureSettings DepthFormat { GL_DEPTH_COMPONENT32F, GL::WrapMode::Clamp };
+	CONSTEXPR_GLOBAL GL::ITextureSettings ShadowDepthFormat { GL_DEPTH_COMPONENT16, GL::WrapMode::Clamp };
 
 	struct Buffers
 	{

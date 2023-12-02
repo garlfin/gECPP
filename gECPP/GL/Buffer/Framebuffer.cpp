@@ -3,6 +3,15 @@
 //
 #include "FrameBuffer.h"
 
+void GL::FrameBuffer::SetAttachment(u8 i, GL::Texture& t)
+{
+	GE_ASSERT(i < GL_MAX_ATTACHMENTS, "INDEX OUT OF RANGE!");
+
+	t.Attach(*this, GL_COLOR_ATTACHMENT0 + i, 0);
+	_attachmentsEnum[i] = GL_COLOR_ATTACHMENT0 + i;
+	glNamedFramebufferDrawBuffers(ID, GL_MAX_ATTACHMENTS, _attachmentsEnum);
+}
+
 void GL::FrameBuffer::SetNoAttatchments(const GL::TextureSize2D& size)
 {
 	glNamedFramebufferParameteri(ID, GL_FRAMEBUFFER_DEFAULT_WIDTH, size.x);
@@ -14,11 +23,4 @@ void GL::FrameBuffer::SetNoAttatchments(const GL::TextureSize2D& size)
 	glNamedFramebufferDrawBuffers(ID, GL_MAX_ATTACHMENTS, _attachmentsEnum);
 }
 
-void GL::FrameBuffer::SetAttachment(u8 i, GL::Texture* h)
-{
-	GE_ASSERT(i < GL_MAX_ATTACHMENTS, "INDEX OUT OF RANGE!");
 
-	h->Attach(this, GL_COLOR_ATTACHMENT0 + i, 0);
-	_attachmentsEnum[i] = GL_COLOR_ATTACHMENT0 + i;
-	glNamedFramebufferDrawBuffers(ID, GL_MAX_ATTACHMENTS, _attachmentsEnum);
-}

@@ -7,7 +7,7 @@
 
 namespace GL
 {
-	Texture::Texture(gE::Window* window, GLenum tgt, const SizelessTextureSettings& settings) :
+	Texture::Texture(gE::Window* window, GLenum tgt, const ITextureSettings& settings) :
 		Asset(window), Mips(settings.MipCount), Format(settings.Format), Target(tgt)
 	{
 		glCreateTextures(tgt, 1, &ID);
@@ -74,9 +74,9 @@ namespace GL
 		}
 	}
 
-	void Texture::Attach(GL::FrameBuffer* buffer, GLenum attachment, u8 mip) const
+	void Texture::Attach(GL::FrameBuffer& buffer, GLenum attachment, u8 mip) const
 	{
-		glNamedFramebufferTexture(buffer->Get(), attachment, ID, mip);
+		glNamedFramebufferTexture(buffer.Get(), attachment, ID, mip);
 	}
 
 	Texture::~Texture()

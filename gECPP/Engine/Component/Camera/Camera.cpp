@@ -45,8 +45,8 @@ namespace gE
 		cam.Projection = Projection;
 
 		// TODO: FIX AFTER REFACTORING
-		cam.DepthTexture = 0; // (GL::handle) *GetDepth();
-		cam.ColorTexture = 0; // GetColorCopy() ? ((GL::handle) *GetColorCopy()) : 0;
+		cam.DepthTexture = 0; // (handle) *GetDepth();
+		cam.ColorTexture = 0; // GetColorCopy() ? ((handle) *GetColorCopy()) : 0;
 	}
 
 	void PerspectiveCamera::UpdateProjection()
@@ -111,24 +111,24 @@ namespace gE
 	}
 
 	CONSTEXPR_GLOBAL glm::vec3 ForwardDirs[]
-		{
-			glm::vec3(1, 0, 0),
-			glm::vec3(-1, 0, 0),
-			glm::vec3(0, 1, 0),
-			glm::vec3(0, -1, 0),
-			glm::vec3(0, 0, 1),
-			glm::vec3(0, 0, -1)
-		};
+	{
+		glm::vec3(1, 0, 0),
+		glm::vec3(-1, 0, 0),
+		glm::vec3(0, 1, 0),
+		glm::vec3(0, -1, 0),
+		glm::vec3(0, 0, 1),
+		glm::vec3(0, 0, -1)
+	};
 
 	CONSTEXPR_GLOBAL glm::vec3 UpDirs[]
-		{
-			glm::vec3(0, 1, 0),
-			glm::vec3(0, 1, 0),
-			glm::vec3(0, 0, 1),
-			glm::vec3(0, 0, -1),
-			glm::vec3(0, 1, 0),
-			glm::vec3(0, 1, 0)
-		};
+	{
+		glm::vec3(0, 1, 0),
+		glm::vec3(0, 1, 0),
+		glm::vec3(0, 0, 1),
+		glm::vec3(0, 0, -1),
+		glm::vec3(0, 1, 0),
+		glm::vec3(0, 1, 0)
+	};
 
 	void CameraCubemap::GetGLCamera(GL::Camera& cam)
 	{

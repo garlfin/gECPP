@@ -9,10 +9,10 @@
 
 namespace gE
 {
-	class IShadowTarget : public IRenderTarget
+	class IDepthTarget
 	{
 	 public:
-		IShadowTarget(Camera& c, GL::Texture& d) : IRenderTarget(c), _depth(d) { }
+		IDepthTarget(GL::FrameBuffer&, GL::Texture& d);
 
 		GET(GL::Texture&, Depth, _depth);
 
@@ -20,12 +20,13 @@ namespace gE
 		GL::Texture& _depth;
 	};
 
-	class DirectionalShadowTarget : public IShadowTarget
+	class DirectionalShadowTarget : public RenderTarget<Camera2D>, public IDepthTarget
 	{
 	 public:
-		DirectionalShadowTarget(Camera&);
+		explicit DirectionalShadowTarget(OrthographicCamera&);
 
 		GET(GL::Texture2D&, Depth, _depth);
+		GET(OrthographicCamera&, Camera, (OrthographicCamera&) RenderTarget<Camera2D>::GetCamera())
 
 		void RenderPass() override;
 
@@ -36,7 +37,7 @@ namespace gE
 	class Light : public Entity
 	{
 	 public:
-		Light(Window*, Camera&, Entity* = nullptr);
+		Light(Window*, Camera&, IDepthTarget&, Entity* = nullptr);
 
 		GET(Camera&, Camera, _camera);
 		GET(GL::Texture&, Depth, _target.GetDepth());
@@ -45,7 +46,7 @@ namespace gE
 
 	 private:
 		Camera& _camera;
-		IShadowTarget& _target;
+		IDepthTarget& _target;
 	};
 
 	class DirectionalLight : public Light

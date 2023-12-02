@@ -7,17 +7,15 @@
 
 namespace gE
 {
-	ICameraSettings CubemapSettings
-		{
-			(RenderPass) gE::DefaultPipeline::RenderPassCubemap,
-			ClipPlanes(0.1, 100),
-			CameraTiming(),
-			gE::DefaultPipeline::DepthFormat,
-			gE::DefaultPipeline::ColorFormat
-		};
+	CONSTEXPR_GLOBAL ICameraSettings CubemapCameraSettings
+	{
+		ClipPlanes(0.1, 100),
+		CameraTiming()
+	};
 
-	CubemapCapture::CubemapCapture(gE::Window* w, u16 size) :
-		Entity(w), _camera(this, nullptr, { CubemapSettings, size })
+	CubemapCapture::CubemapCapture(gE::Window* w, u16 size) : Entity(w),
+		_camera(this, nullptr, _target, { CubemapCameraSettings, size }),
+		_target(_camera)
 	{
 	}
 
@@ -30,7 +28,7 @@ namespace gE
 		DefaultPipeline::Buffers& buffers = _window->GetPipelineBuffers();
 
 		buffers.Lighting.Skybox = Skybox->GetHandle();
-		buffers.UpdateLighting(sizeof(GL::handle), offsetof(GL::Lighting, Skybox));
+		buffers.UpdateLighting(sizeof(handle), offsetof(GL::Lighting, Skybox));
 
 		Manager::OnRender(delta);
 	}
@@ -56,5 +54,34 @@ namespace gE
 		glDepthFunc(GL_LEQUAL);
 
 		_skyboxVAO->Draw(0);
+	}
+
+	void CubemapTarget::RenderPass()
+	{
+		CameraCubemap& camera = GetCamera();
+		Window& window = camera.GetWindow();
+		u32 size = GetCamera().GetSize();
+
+		window.Stage = RenderStage::PreZ;
+
+		glDepthMask(1);
+		glColorMask(0, 0, 0, 0);
+		glClear(GL_DEPTH_BUFFER_BIT);
+		glViewport(0, 0, size, size);
+
+		window.GetRenderers().OnRender(0.f);
+	}
+
+	CONSTEXPR_GLOBAL GL::ITextureSettings CubemapColorSettings
+	{
+		GL_RGB16F,
+		GL::WrapMode::Clamp,
+		GL::FilterMode::Linear
+	};
+
+	CubemapTarget::CubemapTarget(CameraCubemap& camera) : RenderTarget<CameraCubemap>(camera),
+		_color(&camera.GetWindow(), { CubemapColorSettings, camera.GetSize() })
+	{
+		_color.Attach(GetFrameBuffer(), 0);
 	}
 }

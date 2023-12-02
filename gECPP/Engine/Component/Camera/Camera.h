@@ -58,17 +58,18 @@ namespace gE
 	{
 	 public:
 		typedef RenderTarget<Camera2D> TARGET_TYPE;
+		typedef GL::TextureSize2D SIZE_TYPE;
 
 		Camera2D(Entity*, Manager*, TARGET_TYPE&, const CameraSettings2D&);
 
 		GET(TARGET_TYPE&, Target, (TARGET_TYPE&) Camera::GetTarget());
-		GET_CONST(GL::TextureSize2D, Size, _size);
+		GET_CONST(SIZE_TYPE, Size, _size);
 		GET_CONST(float, Aspect, (float) _size.x / _size.y);
 
 		void GetGLCamera(GL::Camera& camera) override;
 
 	 private:
-		const GL::TextureSize2D _size;
+		const SIZE_TYPE _size;
 	};
 
 	class PerspectiveCamera : public Camera2D
@@ -118,11 +119,12 @@ namespace gE
 	{
 	 public:
 		typedef RenderTarget<Camera3D> TARGET_TYPE;
+		typedef GL::TextureSize3D SIZE_TYPE;
 
 		Camera3D(Entity*, Manager*, TARGET_TYPE&, const CameraSettings3D&);
 
 		GET(TARGET_TYPE&, Target, (TARGET_TYPE&) Camera::GetTarget());
-		GET_CONST(GL::TextureSize3D, Size, _size);
+		GET_CONST(SIZE_TYPE, Size, _size);
 
 		void GetGLCamera(GL::Camera&) override;
 
@@ -130,18 +132,19 @@ namespace gE
 		void UpdateProjection() override;
 
 	 private:
-		const GL::TextureSize3D _size;
+		const SIZE_TYPE _size;
 	};
 
 	class CameraCubemap : public Camera
 	{
 	 public:
 		typedef RenderTarget<CameraCubemap> TARGET_TYPE;
+		typedef GL::TextureSize1D SIZE_TYPE;
 
 		CameraCubemap(Entity*, Manager*, TARGET_TYPE&, const CameraSettings1D&);
 
 		GET(TARGET_TYPE&, Target, (TARGET_TYPE&) Camera::GetTarget());
-		GET_CONST(GL::TextureSize1D, Size, _size);
+		GET_CONST(SIZE_TYPE, Size, _size);
 
 		void GetGLCamera(GL::Camera& camera) override;
 
@@ -149,7 +152,7 @@ namespace gE
 		void UpdateProjection() override;
 
 	 public:
-		const GL::TextureSize1D _size;
+		const SIZE_TYPE _size;
 	};
 
 	class CameraManager : public ComponentManager<Camera>

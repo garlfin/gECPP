@@ -14,10 +14,10 @@ namespace gE
  	class IRenderTarget : public GL::Asset
 	{
 	 public:
-		IRenderTarget(Camera&);
+		explicit IRenderTarget(Camera&);
 
 		GET(Camera&, Camera, _camera);
-		GET_CONST(const GL::FrameBuffer&, FrameBuffer, _frameBuffer);
+		GET(GL::FrameBuffer&, FrameBuffer, _frameBuffer);
 
 		virtual void RenderPass() = 0;
 
@@ -34,7 +34,8 @@ namespace gE
 	public:
 		using IRenderTarget::IRenderTarget;
 
-		GET(T&, Camera, (T&) IRenderTarget::GetCamera())
+		GET(T&, Camera, (T&) IRenderTarget::GetCamera());
+		GET_CONST(const T::SIZE_TYPE&, Size, GetCamera().GetSize());
 
 		typedef T CAMERA_TYPE;
 	};
