@@ -13,26 +13,29 @@ namespace VoxelDemo
 {
 	gE::ICameraSettings FlyCameraSettings
 	{
-		(gE::RenderPass) gE::DefaultPipeline::RenderPass2D,
 		gE::ClipPlanes(0.1, 100),
 		gE::DefaultCameraTiming,
-		gE::DefaultPipeline::DepthFormat,
-		gE::DefaultPipeline::ColorFormat
 	};
 
 	class FlyCamera : public gE::Entity
 	{
 	 public:
 		explicit FlyCamera(gE::Window* window) : gE::Entity(window),
-			_camera(this, &window->GetCameras(), gE::CameraSettings2D(FlyCameraSettings, GetWindow().GetSize())),
+			_camera(this, &window->GetCameras(), _target, {{ FlyCameraSettings, window->GetSize() }}),
+			_target(_camera),
 			_movement(this)
 		{
 		}
 
 		GET(gE::PerspectiveCamera&, Camera, _camera);
+		GET(gE::DefaultPipeline::Target2D&, Target, _target);
+		GET(GL::Texture2D&, Color, _target.GetColor());
+		GET(GL::Texture2D&, Depth, _target.GetDepth());
 
 	 private:
 		gE::PerspectiveCamera _camera;
+		gE::DefaultPipeline::Target2D _target;
+
 		Movement _movement;
 	};
 }

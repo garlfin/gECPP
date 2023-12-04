@@ -3,7 +3,6 @@
 #include <GL/GL.h>
 #include <GL/Texture/Texture.h>
 #include <Engine/AssetManager.h>
-#include <Engine/Renderer/DefaultPipeline.h>
 
 #define GL_MAX_ATTACHMENTS 4
 
@@ -24,14 +23,13 @@ namespace GL
 	class FrameBuffer : public Asset
 	{
 	 public:
-		inline explicit FrameBuffer(gE::Window* win) : Asset(win) { glCreateFramebuffers(1, &ID); }
+		explicit FrameBuffer(gE::Window* win);
 
+		void SetDefaultSize(TextureSize2D);
 		inline void Bind() const override { glBindFramebuffer(GL_FRAMEBUFFER, ID); }
 
-		ALWAYS_INLINE void SetDepthAttachment(Texture& h) { h.Attach(*this, GL_DEPTH_ATTACHMENT, 0); }
-
+		void SetDepthAttachment(Texture& h);
 		void SetAttachment(u8, Texture&);
-		void SetNoAttatchments(const GL::TextureSize2D&);
 
 		ALWAYS_INLINE static void Reset() { glBindFramebuffer(GL_FRAMEBUFFER, 0); }
 

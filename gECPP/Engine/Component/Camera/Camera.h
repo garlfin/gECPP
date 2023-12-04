@@ -7,7 +7,6 @@
 #include <GL/Texture/Texture.h>
 #include <GL/Buffer/FrameBuffer.h>
 
-#include "RenderTarget.h"
 #include "Engine/Entity/Entity.h"
 #include "Engine/Array.h"
 #include "Engine/Manager.h"

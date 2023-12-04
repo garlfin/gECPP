@@ -72,8 +72,8 @@ namespace gE
 
 	CONSTEXPR_GLOBAL GL::ITextureSettings ShadowMapFormat { GL_DEPTH_COMPONENT16, GL::WrapMode::Clamp, GL::FilterMode::Linear };
 
-	DirectionalShadowTarget::DirectionalShadowTarget(OrthographicCamera& camera) : RenderTarget<Camera2D>(camera), IDepthTarget(GetFrameBuffer(), _depth),
-		_depth(&camera.GetWindow(), GL::TextureSettings2D(ShadowMapFormat, camera.GetSize()))
+	DirectionalShadowTarget::DirectionalShadowTarget(OrthographicCamera& camera) : RenderTarget<Camera2D>(camera), IDepthTarget((GL::Texture&) _depth),
+		_depth(GetFrameBuffer(), GL::TextureSettings2D(ShadowMapFormat, camera.GetSize()))
 	{
 	}
 
@@ -102,9 +102,8 @@ namespace gE
 		};
 	}
 
-	IDepthTarget::IDepthTarget(GL::FrameBuffer& f, GL::Texture& d) : _depth(d)
+	IDepthTarget::IDepthTarget(GL::Texture& d) : _depth(d)
 	{
-		f.SetDepthAttachment(d);
 	}
 }
 

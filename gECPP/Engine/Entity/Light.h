@@ -5,33 +5,24 @@
 #pragma once
 
 #include "Entity.h"
-#include "Engine/Component/Camera/Camera.h"
+#include <Engine/Renderer/DefaultPipeline.h>
+#include <Engine/Component/Camera/Camera.h>
+#include <Engine/Component/Camera/RenderTarget.h>
 
 namespace gE
 {
-	class IDepthTarget
-	{
-	 public:
-		IDepthTarget(GL::FrameBuffer&, GL::Texture& d);
-
-		GET(GL::Texture&, Depth, _depth);
-
-	 private:
-		GL::Texture& _depth;
-	};
-
 	class DirectionalShadowTarget : public RenderTarget<Camera2D>, public IDepthTarget
 	{
 	 public:
 		explicit DirectionalShadowTarget(OrthographicCamera&);
 
-		GET(GL::Texture2D&, Depth, _depth);
+		GET(GL::Texture2D&, Depth, _depth.Get());
 		GET(OrthographicCamera&, Camera, (OrthographicCamera&) RenderTarget<Camera2D>::GetCamera())
 
 		void RenderPass() override;
 
 	 private:
-		GL::Texture2D _depth;
+		Attachment<GL::Texture2D, GL_DEPTH_ATTACHMENT> _depth;
 	};
 
 	class Light : public Entity

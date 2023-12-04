@@ -31,7 +31,7 @@ void DemoWindow::OnRender(float delta)
 	GE_ASSERT(Cameras.CurrentCamera, "CAMERA SHOULD NOT BE NULL!");
 
 	GL::FrameBuffer::Reset();
-	Blit(*Cameras.CurrentCamera->GetAttachment(0));
+	Blit(*Cameras.Color);
 }
 
 void DemoWindow::OnInit()
@@ -40,9 +40,9 @@ void DemoWindow::OnInit()
 	glfwSetInputMode(GLFWWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glClearColor(0.2, 0.2, 1, 1);
 
-	auto albedo = gE::CreateReferenceFromPointer((GL::Texture2D*) PVR::Read(this, "Resource/Texture/marble_col.pvr"));
-	auto amr = gE::CreateReferenceFromPointer((GL::Texture2D*) PVR::Read(this, "Resource/Texture/marble_amr.pvr"));
-	auto normal = gE::CreateReferenceFromPointer((GL::Texture2D*) PVR::Read(this, "Resource/Texture/marble_nor.pvr"));
+	auto albedo = gE::CreateReferenceFromPointer((GL::Texture2D*) PVR::Read(this, "Resource/Texture/tile_col.pvr"));
+	auto amr = gE::CreateReferenceFromPointer((GL::Texture2D*) PVR::Read(this, "Resource/Texture/tile_amr.pvr"));
+	auto normal = gE::CreateReferenceFromPointer((GL::Texture2D*) PVR::Read(this, "Resource/Texture/tile_nor.pvr"));
 	gE::PBRMaterialSettings materialSettings { albedo, amr, normal };
 
 	auto rasterShader = gE::CreateReference<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/uber.frag");
@@ -60,6 +60,7 @@ void DemoWindow::OnInit()
 
 	auto* camera = new FlyCamera(this);
 	Cameras.CurrentCamera = &camera->GetCamera();
+	Cameras.Color = &camera->GetColor();
 
 	Cubemaps.Skybox = gE::CreateReferenceFromPointer((GL::TextureCube*) PVR::Read(this, "Resource/Texture/sky.pvr", GL::WrapMode::Clamp));
 }

@@ -10,7 +10,7 @@ namespace gE
 	CONSTEXPR_GLOBAL ICameraSettings CubemapCameraSettings
 	{
 		ClipPlanes(0.1, 100),
-		CameraTiming()
+		DefaultCameraTiming
 	};
 
 	CubemapCapture::CubemapCapture(gE::Window* w, u16 size) : Entity(w),
@@ -82,6 +82,5 @@ namespace gE
 	CubemapTarget::CubemapTarget(CameraCubemap& camera) : RenderTarget<CameraCubemap>(camera),
 		_color(&camera.GetWindow(), { CubemapColorSettings, camera.GetSize() })
 	{
-		_color.Attach(GetFrameBuffer(), 0);
 	}
 }

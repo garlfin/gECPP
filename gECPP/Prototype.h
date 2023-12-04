@@ -54,4 +54,9 @@ namespace gE
 		friend class Manager;
 		template<class T> friend class TypedManager;
 	};
+
+	class IRenderTarget;
+
+	template<class T>
+	class RenderTarget;
 }

@@ -7,12 +7,13 @@
 #include <GL/Buffer/Buffer.h>
 #include <GL/Texture/TextureSettings.h>
 #include <GL/Texture/Texture.h>
-#include "Engine/Component/Camera/Settings.h"
+#include <Engine/Component/Camera/Camera.h>
+#include <Engine/Component/Camera/RenderTarget.h>
+#include <Engine/Component/Camera/Settings.h>
 
 #define GE_MAX_INSTANCE 64
 #define GE_MAX_LIGHT 4
 #define GE_MAX_CUBEMAP 4
-#define GL_ALIGN alignas(16)
 
 namespace GL
 {
@@ -82,14 +83,26 @@ namespace GL
 
 namespace gE::DefaultPipeline
 {
-	void RenderPass2D(Camera2D&);
-	void RenderPass3D(Camera3D&);
-	void RenderPassShadow(Camera2D&);
-	void RenderPassCubemap(CameraCubemap&);
-
-	CONSTEXPR_GLOBAL GL::ITextureSettings ColorFormat { GL_RGBA16F, GL::WrapMode::Clamp };
 	CONSTEXPR_GLOBAL GL::ITextureSettings DepthFormat { GL_DEPTH_COMPONENT32F, GL::WrapMode::Clamp };
-	CONSTEXPR_GLOBAL GL::ITextureSettings ShadowDepthFormat { GL_DEPTH_COMPONENT16, GL::WrapMode::Clamp };
+	CONSTEXPR_GLOBAL GL::ITextureSettings ColorFormat { GL_RGBA16F, GL::WrapMode::Clamp };
+	CONSTEXPR_GLOBAL GL::ITextureSettings VelocityFormat { GL_RG16F, GL::WrapMode::Clamp };
+
+ 	class Target2D : public RenderTarget<Camera2D>, public IDepthTarget
+	{
+	 public:
+		explicit Target2D(Camera2D& camera);
+
+		GET(GL::Texture2D&, Depth, _depth.Get());
+		GET(GL::Texture2D&, Color, _color.Get());
+		GET(GL::Texture2D&, Velocity, _velocity.Get());
+
+		void RenderPass() override;
+
+	 private:
+		Attachment<GL::Texture2D, GL_DEPTH_ATTACHMENT> _depth;
+		Attachment<GL::Texture2D, GL_COLOR_ATTACHMENT0> _color;
+		Attachment<GL::Texture2D, GL_COLOR_ATTACHMENT1> _velocity;
+	};
 
 	struct Buffers
 	{

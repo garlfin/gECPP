@@ -7,7 +7,8 @@
 #include <GL/Math.h>
 #include <GL/Texture/Texture.h>
 #include <GL/Buffer/Buffer.h>
-#include "Engine/Component/Camera/Camera.h"
+#include <Engine/Renderer/DefaultPipeline.h>
+#include <Engine/Component/Camera/Camera.h>
 
 namespace GL
 {
@@ -20,17 +21,11 @@ namespace GL
 	};
 }
 
-namespace gE
-{
-	class VoxelCamera;
-}
-
 namespace gE::VoxelPipeline
 {
-	void RenderPass3D(Window*, VoxelCamera*);
-
 	struct Buffers
 	{
+	 public:
 		explicit Buffers(Window* window);
 
 		ALWAYS_INLINE void UpdateScene(u64 size = sizeof(GL::Camera), u64 offset = 0) const
@@ -40,7 +35,25 @@ namespace gE::VoxelPipeline
 
 		GL::VoxelScene Scene;
 
-	 private:
+	private:
 		GL::Buffer<GL::VoxelScene> _voxelBuffer;
+	};
+
+	CONSTEXPR_GLOBAL GL::ITextureSettings ColorFormat { GL_RGB16F, GL::WrapMode::Clamp };
+	CONSTEXPR_GLOBAL GL::ITextureSettings DataFormat { GL_RGB5_A1, GL::WrapMode::Clamp };
+
+	class Target3D : public RenderTarget<Camera3D>
+	{
+	 public:
+		explicit Target3D(Camera3D&);
+
+		GET(GL::Texture3D&, Color, _color);
+		GET(GL::Texture3D&, Data, _data);
+
+		void RenderPass() override;
+
+	 private:
+		GL::Texture3D _color;
+		GL::Texture3D _data;
 	};
 }

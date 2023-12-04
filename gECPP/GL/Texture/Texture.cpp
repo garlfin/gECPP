@@ -74,11 +74,6 @@ namespace GL
 		}
 	}
 
-	void Texture::Attach(GL::FrameBuffer& buffer, GLenum attachment, u8 mip) const
-	{
-		glNamedFramebufferTexture(buffer.Get(), attachment, ID, mip);
-	}
-
 	Texture::~Texture()
 	{
 		if(_handle > 1) glMakeTextureHandleNonResidentARB(_handle);

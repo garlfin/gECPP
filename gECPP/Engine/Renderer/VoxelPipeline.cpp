@@ -4,13 +4,22 @@
 
 #include "VoxelPipeline.h"
 
-gE::VoxelPipeline::Buffers::Buffers(gE::Window* window) :
-	_voxelBuffer(window)
+namespace gE::VoxelPipeline
 {
+	Buffers::Buffers(gE::Window* window) : _voxelBuffer(window)
+	{
+	}
 
+	Target3D::Target3D(Camera3D& camera) : RenderTarget<Camera3D>(camera),
+		_color(&camera.GetWindow(), { VoxelPipeline::ColorFormat, camera.GetSize() }),
+		_data(&camera.GetWindow(), { VoxelPipeline::DataFormat, camera.GetSize() })
+	{
+		GetFrameBuffer().SetDefaultSize(camera.GetSize());
+	}
+
+	void Target3D::RenderPass()
+	{
+		// TODO
+	}
 }
 
-void gE::VoxelPipeline::RenderPass3D(gE::Window*, gE::VoxelCamera*)
-{
-
-}

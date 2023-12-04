@@ -11,8 +11,8 @@ namespace gE
 	struct CameraTiming
 	{
 	 public:
-		CameraTiming(const CameraTiming& t) : TickOffset(t.TickOffset), TickSkip(t.TickSkip) { };
-		inline constexpr CameraTiming(u8 offset, u8 skip) : TickOffset(offset), TickSkip(skip) { };
+		constexpr CameraTiming(const CameraTiming& t) : TickOffset(t.TickOffset), TickSkip(t.TickSkip) { };
+		constexpr CameraTiming(u8 offset, u8 skip) : TickOffset(offset), TickSkip(skip) { };
 		constexpr CameraTiming() = default;
 
 		OPERATOR_EQUALS(CameraTiming);

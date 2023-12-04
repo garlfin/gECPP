@@ -5,11 +5,11 @@
 #include <GL/Shader/Shader.h>
 #include <GL/Texture/TextureSlotManager.h>
 
+#include "WindowState.h"
 #include "Engine/Manager.h"
 #include "Engine/AssetManager.h"
 #include "Engine/Component/Transform.h"
 #include "Engine/Component/Camera/Camera.h"
-#include "WindowState.h"
 #include "Engine/Renderer/VoxelPipeline.h"
 #include "Engine/Entity/VoxelCapture.h"
 #include "Engine/Component/MeshRenderer.h"

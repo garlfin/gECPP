@@ -5,7 +5,6 @@
 #pragma once
 
 #include "GL/Math.h"
-#include "Engine/Renderer/DefaultPipeline.h"
 #include "Engine/Array.h"
 #include "Timing.h"
 
@@ -19,8 +18,6 @@ namespace gE
 	class CameraCubemap;
 
 	typedef glm::vec2 ClipPlanes;
-
-	using RenderPass = void (*)(Camera&);
 
 	struct ICameraSettings
 	{
@@ -44,9 +41,11 @@ namespace gE
 
 	struct PerspectiveCameraSettings : public CameraSettings2D
 	{
-		PerspectiveCameraSettings(const CameraSettings2D& s, float f = 80.f, AngleType t = AngleType::Degree) : CameraSettings2D(s),
-																												FOV(f), Type(t)
-		{}
+		PerspectiveCameraSettings(const CameraSettings2D& s, float f = 80.f, AngleType t = AngleType::Degree) :
+			CameraSettings2D(s),
+			FOV(f), Type(t)
+		{
+		}
 
 		float FOV = 80.f;
 		AngleType Type = AngleType::Degree;

@@ -40,8 +40,6 @@ namespace GL
 			return unit;
 		}
 
-		void Attach(GL::FrameBuffer& buffer, GLenum attachment, u8 mip = 0) const;
-
 		handle GetHandle();
 		virtual void CopyFrom(const GL::Texture&) = 0;
 
