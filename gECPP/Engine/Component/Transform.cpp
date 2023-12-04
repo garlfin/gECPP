@@ -28,6 +28,7 @@ void gE::Transform::Set(const gE::Transform& d)
 
 void gE::Transform::OnRender(float)
 {
+	_previousModel = _model;
 	_model = GetParentTransform();
 
 	_model = glm::translate(_model, Location);

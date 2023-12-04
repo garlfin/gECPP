@@ -33,15 +33,19 @@ namespace gE
 
 		_target.Bind();
 		_target.RenderPass();
+		_target.PostProcessPass();
 
 		Frame++;
 	}
 
 	void Camera::GetGLCamera(GL::Camera& cam)
 	{
-		cam.Position = GetOwner()->GetTransform().GlobalTranslation();
+		Transform& transform = GetOwner()->GetTransform();
+
+		cam.Position = transform.GlobalTranslation();
 		cam.Frame = Frame;
 		cam.ClipPlanes = GetClipPlanes();
+		cam.PreviousViewProjection = Projection * glm::inverse(transform.PreviousModel());
 		cam.Projection = Projection;
 
 		// TODO: FIX AFTER REFACTORING

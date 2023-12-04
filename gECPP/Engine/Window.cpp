@@ -109,6 +109,7 @@ void Window::OnInit()
 	VoxelBuffers = CreateSmartPointer<VoxelPipeline::Buffers>(this);
 
 	BlitShader = CreateSmartPointer<GL::Shader>(this, "Resource/Shader/blit.vert", "Resource/Shader/blit.frag");
+	TAAShader = CreateSmartPointer<GL::ComputeShader>(this, "Resource/Shader/taa.comp");
 
 	{
 		GL::ComputeShader brdfShader(this, "Resource/Shader/brdf.comp");
@@ -120,6 +121,7 @@ void Window::OnInit()
 
 		BRDFLookup = CreateSmartPointer<GL::Texture2D>(this, brdfSettings);
 		BRDFLookup->Bind(0, GL_WRITE_ONLY);
+		brdfShader.Bind();
 		brdfShader.Dispatch(BRDF_GROUP_COUNT, BRDF_GROUP_COUNT, 1);
 	}
 
@@ -145,4 +147,5 @@ Monitor::Monitor(const GLFWvidmode* mode) :
 	Name(nullptr),
 	Size(mode->width, mode->height),
 	RefreshRate(mode->refreshRate)
-{ }
+{
+}

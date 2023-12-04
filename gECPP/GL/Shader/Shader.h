@@ -70,11 +70,12 @@ namespace GL
 			: Shader(window, src, pair)
 		{ };
 
-		ALWAYS_INLINE void Dispatch(u16 x, u16 y, u16 z) const
-		{
-			Bind();
-			glDispatchCompute(x, y, z);
-		}
+		ALWAYS_INLINE void Dispatch(u16 x, u16 y, u16 z) const { glDispatchCompute(x, y, z); }
+		ALWAYS_INLINE void Dispatch(u16 x, u16 y) const { glDispatchCompute(x, y, 1); }
+		ALWAYS_INLINE void Dispatch(u16 x) const { glDispatchCompute(x, 1, 1); }
+
+		ALWAYS_INLINE void Dispatch(glm::u16vec3 s) const { Dispatch(s.x, s.y, s.z); }
+		ALWAYS_INLINE void Dispatch(glm::u16vec2 s) const { Dispatch(s.x, s.y); }
 	};
 
 	class ShaderStage final : public Asset

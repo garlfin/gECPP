@@ -18,15 +18,16 @@ namespace gE
 	DefaultPipeline::Target2D::Target2D(Camera2D& camera) : RenderTarget<Camera2D>(camera), IDepthTarget(_depth.Get()),
 		_depth(GetFrameBuffer(), GL::TextureSettings2D(DefaultPipeline::DepthFormat, camera.GetSize())),
 		_color(GetFrameBuffer(), GL::TextureSettings2D(DefaultPipeline::ColorFormat, camera.GetSize())),
-		_velocity(GetFrameBuffer(), GL::TextureSettings2D(DefaultPipeline::VelocityFormat, camera.GetSize()))
+		_velocity(GetFrameBuffer(), GL::TextureSettings2D(DefaultPipeline::VelocityFormat, camera.GetSize())),
+		_colorBack(&GetWindow(), GL::TextureSettings2D(DefaultPipeline::ColorFormat, camera.GetSize())),
+		_postProcessBack(&GetWindow(), GL::TextureSettings2D(DefaultPipeline::ColorFormat, camera.GetSize()))
 	{
-
 	}
 
 	void DefaultPipeline::Target2D::RenderPass()
 	{
 		Camera2D& camera = GetCamera();
-		const glm::u32vec2& size = camera.GetSize();
+		glm::u32vec2 size = camera.GetSize();
 		Window& window = camera.GetWindow();
 
 		// PRE-Z
@@ -48,5 +49,32 @@ namespace gE
 
 		window.GetRenderers().OnRender(0.f);
 		window.GetCubemaps().DrawSkybox();
+	}
+
+	void DefaultPipeline::Target2D::PostProcessPass()
+	{
+		Camera2D& camera = GetCamera();
+		glm::u32vec2 size = camera.GetSize();
+		Window& window = camera.GetWindow();
+		GL::ComputeShader& taaShader = GetWindow().GetTAAShader();
+
+		GL::Texture2D* front = (GL::Texture2D*) _color, *back = &_postProcessBack;
+
+		_color->Bind(0, GL_READ_ONLY);
+		_velocity->Bind(1, GL_READ_ONLY);
+		_postProcessBack.Bind(2, GL_WRITE_ONLY);
+		taaShader.SetUniform(0, _colorBack.Use(0));
+
+		taaShader.Bind();
+		taaShader.Dispatch(DIV_CEIL(_color->GetSize(), TAA_GROUP_SIZE));
+
+		// Copy TAA result to taa "backbuffer"
+		_colorBack.CopyFrom(*back);
+
+		// Post process loop here
+		// for(PostProcessEffect effect* : PostProcessEffects)...
+
+		// Sync post process "backbuffer" and main color buffer
+		front->CopyFrom(*back);
 	}
 }

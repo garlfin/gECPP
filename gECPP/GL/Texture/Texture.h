@@ -33,7 +33,7 @@ namespace GL
 
 		inline void Bind() const override { glBindTexture(Target, ID); }
 
-		ALWAYS_INLINE uint32_t Use(uint32_t slot) const { glBindTextureUnit(slot, ID); return slot; } // NOLINT
+		ALWAYS_INLINE int32_t Use(int32_t slot) const { glBindTextureUnit(slot, ID); return slot; } // NOLINT
 		inline u32 Bind(u32 unit, GLenum access, u8 mip = 0) const
 		{
 			glBindImageTexture(unit, ID, mip, GL_FALSE, 0, access, Format);

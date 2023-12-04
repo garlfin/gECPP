@@ -39,6 +39,7 @@ namespace gE
 		void OnRender(float) override;
 
 		NODISCARD ALWAYS_INLINE const glm::mat4& Model() const { return _model; }
+		NODISCARD ALWAYS_INLINE const glm::mat4& PreviousModel() const { return _previousModel; }
 		NODISCARD ALWAYS_INLINE glm::vec3 Forward() const { return Rotation * glm::vec3(0, 0, -1); }
 		NODISCARD ALWAYS_INLINE glm::vec3 Up() const { return Rotation * glm::vec3(0, 1, 0); }
 		NODISCARD ALWAYS_INLINE glm::vec3 Right() const { return Rotation * glm::vec3(1, 0, 0); }
@@ -49,6 +50,7 @@ namespace gE
 
 	 private:
 		glm::mat4 _model;
+		glm::mat4 _previousModel;
 	};
 
 	class TransformManager : public TypedManager<Transform>

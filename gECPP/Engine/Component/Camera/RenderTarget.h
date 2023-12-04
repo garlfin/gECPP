@@ -27,8 +27,8 @@ namespace gE
 		Attachment(const Attachment&) = delete;
 		Attachment(Attachment&&) = delete;
 
-		ALWAYS_INLINE T& operator->() { return _texture; }
-		ALWAYS_INLINE const T& operator->() const { return _texture; }
+		ALWAYS_INLINE T* operator->() { return &_texture; }
+		ALWAYS_INLINE const T* operator->() const { return &_texture; }
 
 		explicit operator T&() { return _texture; }
 		explicit operator const T&() const { return _texture; }
@@ -50,6 +50,7 @@ namespace gE
 		GET(GL::FrameBuffer&, FrameBuffer, _frameBuffer);
 
 		virtual void RenderPass() = 0;
+		virtual void PostProcessPass() {};
 
 		inline void Bind() const final { _frameBuffer.Bind(); }
 

@@ -11,6 +11,10 @@
     #define DIRECTIONAL_SHADOW_SAMPLES 8
 #endif
 
+#ifndef TAA_SAMPLE_COUNT
+    #define TAA_SAMPLE_COUNT 16
+#endif
+
 #define SOFT_SHADOW_AVERAGE
 
 #define SOFT_SHADOW (defined(SOFT_SHADOW_AVERAGE) || defined(SOFT_SHADOW_MIN))
@@ -81,7 +85,7 @@ float GetShadowDirectional(const Vertex frag, const Light light)
     #ifdef EXT_BINDLESS
         float z = texture(sampler2D(light.Depth), uv.xy).r;
     #else
-        float z = 0;
+        float z = 1.0;
     #endif
         z = LinearizeDepthOrtho(z, light.Planes);
         z = uv.z - z;
@@ -114,7 +118,7 @@ float GetShadowDirectional(const Vertex frag, const Light light)
     #ifdef EXT_BINDLESS
         float z = texture(sampler2D(light.Depth), uv.xy).r;
     #else
-        float z = 0.0;
+        float z = 1.0;
     #endif
 
         z = LinearizeDepthOrtho(z, light.Planes);
@@ -147,7 +151,7 @@ bool TexcoordOutOfBounds(vec2 uv)
 
 float InterleavedGradientNoise(vec2 uv)
 {
-    uv = uv + 5.588238 * Camera.Frame;
+    uv = uv + 5.588238 * (Camera.Frame % (TAA_SAMPLE_COUNT * 2));
     return fract(52.9829189 * fract(dot(uv, vec2(0.06711056, 0.00583715))));
 }
 

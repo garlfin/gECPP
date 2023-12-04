@@ -19,6 +19,8 @@
 struct GLFWwindow;
 struct GLFWvidmode;
 
+#define TAA_GROUP_SIZE 32
+
 namespace gE
 {
 	struct Monitor
@@ -45,6 +47,7 @@ namespace gE
 		GET(VoxelCapture&, VoxelCapture, VoxelCap);
 		GET(gE::Material&, DefaultMaterial, DefaultMaterial);
 		GET(GL::Texture2D&, BRDFLookupTexture, BRDFLookup);
+		GET(GL::ComputeShader&, TAAShader, TAAShader);
 
 		// Managers
 		GET(CameraManager&, Cameras, Cameras);
@@ -90,6 +93,7 @@ namespace gE
 		SmartPointer<gE::Material> DefaultMaterial;
 		SmartPointer<GL::Shader> BlitShader;
 		SmartPointer<GL::Texture2D> BRDFLookup;
+		SmartPointer<GL::ComputeShader> TAAShader;
 
 	 private:
 		GL::TextureSize2D _size;

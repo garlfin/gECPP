@@ -97,11 +97,15 @@ namespace gE::DefaultPipeline
 		GET(GL::Texture2D&, Velocity, _velocity.Get());
 
 		void RenderPass() override;
+		void PostProcessPass() override;
 
 	 private:
 		Attachment<GL::Texture2D, GL_DEPTH_ATTACHMENT> _depth;
 		Attachment<GL::Texture2D, GL_COLOR_ATTACHMENT0> _color;
 		Attachment<GL::Texture2D, GL_COLOR_ATTACHMENT1> _velocity;
+
+		GL::Texture2D _colorBack;
+		GL::Texture2D _postProcessBack;
 	};
 
 	struct Buffers

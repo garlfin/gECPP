@@ -9,7 +9,7 @@
 #include "GLAD/glad.h"
 #include "GL/Binary/Binary.h"
 
-#define DIV_CEIL(X, Y) (((X) + (Y) - decltype(X)(1)) / (Y))
+#define DIV_CEIL(X, Y) (((X) + decltype(X)(Y) - decltype(X)(1)) / decltype(X)(Y))
 #define DIV_CEIL_T(X, Y, T) (((T)(X) + (T)(Y) - (T)(1)) / (T)(Y))
 
 namespace PVR

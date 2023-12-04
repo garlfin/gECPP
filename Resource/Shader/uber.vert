@@ -29,8 +29,13 @@ void main()
 
     if(Scene.Stage == STAGE_PRE_Z) return;
 
-    VertexIn.Velocity = (Camera.PreviousViewProjection * Scene.PreviousModel[ModelIndex] * vec4(VertexIn.FragPos, 1)).xy;
-    VertexIn.Velocity -= gl_Position.xy;
+    vec3 previousFragPos = (Scene.PreviousModel[ModelIndex] * vec4(Position, 1)).xyz;
+    vec4 previousGLPosition = Camera.PreviousViewProjection * vec4(previousFragPos, 1);
+
+    vec2 newNDC = (gl_Position.xy / gl_Position.w) * 0.5 + 0.5;
+    vec2 oldNDC = (previousGLPosition.xy / previousGLPosition.w) * 0.5 + 0.5;
+
+    VertexIn.Velocity = newNDC - oldNDC;
 
     vec3 vNormal, vTangent, vBitangent;
     vNormal = normalize(Scene.Normal[ModelIndex] * Normal);

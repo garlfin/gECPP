@@ -52,8 +52,9 @@ void main()
     );
 
     FragColor.rgb += GetLighting(vertex, fragment, Lighting.Lights[0]);
+#ifdef EXT_BINDLESS
     FragColor.rgb += GetLighting(vertex, fragment, Lighting.Skybox);
-
+#endif
     FragColor.rgb = pow(FragColor.rgb, vec3(1.0 / 2.2));
     Velocity = VertexIn.Velocity;
 
