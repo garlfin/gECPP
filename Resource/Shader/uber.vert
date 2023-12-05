@@ -11,9 +11,8 @@ struct VertexOut
 {
     vec3 FragPos;
     vec2 UV;
+	vec4 Velocity;
     vec4 FragPosLightSpace[MAX_LIGHTS];
-	vec4 CurrentPosition;
-	vec4 PreviousPosition;
     mat3 TBN;
 };
 
@@ -30,9 +29,10 @@ void main()
 
     if(Scene.Stage == STAGE_PRE_Z) return;
 
-    VertexIn.PreviousPosition = Scene.PreviousModel[ModelIndex] * vec4(Position, 1);
-    VertexIn.PreviousPosition = Camera.PreviousViewProjection * vec4(VertexIn.PreviousPosition.xyz, 1);
-	VertexIn.CurrentPosition = gl_Position;
+    vec4 previousUV = Scene.PreviousModel[ModelIndex] * vec4(Position, 1);
+    previousUV = Camera.PreviousViewProjection * vec4(previousUV.xyz, 1);
+
+	VertexIn.Velocity = previousUV;
 
     vec3 vNormal, vTangent, vBitangent;
     vNormal = normalize(Scene.Normal[ModelIndex] * Normal);

@@ -45,10 +45,12 @@ namespace gE
 		cam.Position = transform.GlobalTranslation();
 		cam.Frame = Frame;
 		cam.ClipPlanes = GetClipPlanes();
+
 		if(Frame)
 			cam.PreviousViewProjection = Projection * glm::inverse(transform.PreviousModel());
 		else
 			cam.PreviousViewProjection = Projection * glm::inverse(transform.Model());
+
 		cam.Projection = Projection;
 
 		// TODO: FIX AFTER REFACTORING

@@ -1,7 +1,3 @@
-#ifndef VELOCITY_FORMAT
-    #define TAA_VELOCITY_FORMAT rg16f
-#endif
-
 #ifndef COLOR_FORMAT
     #define TAA_COLOR_FORMAT rgba16f
 #endif
@@ -19,8 +15,9 @@
 // IO
 layout(location = 0) uniform sampler2D ColorIn;
 layout(location = 1) uniform sampler2D PreviousColorIn;
-layout(binding = 0, TAA_VELOCITY_FORMAT) restrict readonly uniform image2D VelocityIn;
-layout(binding = 1, TAA_COLOR_FORMAT) restrict writeonly uniform image2D ColorOut;
+layout(location = 2) uniform sampler2D VelocityIn;
+
+layout(binding = 0, TAA_COLOR_FORMAT) restrict writeonly uniform image2D ColorOut;
 
 // Variables
 vec2 Offsets[8] =
@@ -39,9 +36,7 @@ void main()
     ivec2 texel = ivec2(gl_GlobalInvocationID.xy);
     vec2 uv = (vec2(texel) + 0.5) / size;
 
-    vec2 velocity = imageLoad(VelocityIn, texel).xy;
-    vec2 previousUV = uv - velocity * 0.5;
-
+    vec2 previousUV = texture(VelocityIn, uv).xy;
     vec4 currentColor = texture(ColorIn, uv);
     vec4 previousColor = texture(PreviousColorIn, previousUV);
 

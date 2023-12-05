@@ -60,11 +60,11 @@ namespace gE
 		glm::u32vec2 size = camera.GetSize();
 		GL::ComputeShader& taaShader = GetWindow().GetTAAShader();
 
-		_velocity->Bind(0, GL_READ_ONLY);
-		_postProcessBack.Bind(1, GL_WRITE_ONLY);
+		_postProcessBack.Bind(0, GL_WRITE_ONLY);
 
 		taaShader.SetUniform(0, _color->Use(0));
 		taaShader.SetUniform(1, _colorBack.Use(1));
+		taaShader.SetUniform(2, _velocity->Use(2));
 
 		taaShader.Bind();
 		taaShader.Dispatch(DIV_CEIL(_color->GetSize(), TAA_GROUP_SIZE));
