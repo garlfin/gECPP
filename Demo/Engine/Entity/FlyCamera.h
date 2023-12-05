@@ -22,7 +22,7 @@ namespace VoxelDemo
 	 public:
 		explicit FlyCamera(gE::Window* window) : gE::Entity(window),
 			_camera(this, &window->GetCameras(), _target, {{ FlyCameraSettings, window->GetSize() }}),
-			_target(_camera, {}),
+			_target(_camera, { &window->GetExposureEffect() }),
 			_movement(this)
 		{
 		}

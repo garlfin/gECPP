@@ -10,7 +10,7 @@
 
 namespace gE::DefaultPipeline
 {
-	class Exposure : PostProcessEffect<Target2D>
+	class Exposure : public PostProcessEffect<Target2D>
 	{
 	 public:
 		explicit Exposure(Window*);

@@ -112,6 +112,8 @@ void Window::OnInit()
 	BlitShader = CreateSmartPointer<GL::Shader>(this, "Resource/Shader/blit.vert", "Resource/Shader/blit.frag");
 	TAAShader = CreateSmartPointer<GL::ComputeShader>(this, "Resource/Shader/taa.comp");
 
+	ExposureEffect = CreateSmartPointer<DefaultPipeline::Exposure>(this);
+
 	{
 		GL::ComputeShader brdfShader(this, "Resource/Shader/brdf.comp");
 		GL::TextureSettings<GL::TextureDimension::D2D> brdfSettings

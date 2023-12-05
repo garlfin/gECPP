@@ -16,8 +16,7 @@ void main()
     ivec2 texel = ivec2(gl_GlobalInvocationID.xy);
 
     vec4 color = imageLoad(ColorIn, texel);
-
-    color.rgb = pow(color.rgb, vec2(1.0 / GAMMA));
+    color.rgb = pow(color.rgb, vec3(1.0 / GAMMA));
 
     imageStore(ColorOut, texel, color);
 }
