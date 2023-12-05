@@ -10,6 +10,7 @@
 #include <Engine/Component/Camera/Camera.h>
 #include <Engine/Component/Camera/RenderTarget.h>
 #include <Engine/Component/Camera/Settings.h>
+#include <Engine/Component/Camera/PostProcessEffect.h>
 
 #define GE_MAX_INSTANCE 64
 #define GE_MAX_LIGHT 4
@@ -90,7 +91,7 @@ namespace gE::DefaultPipeline
  	class Target2D : public RenderTarget<Camera2D>, public IDepthTarget
 	{
 	 public:
-		explicit Target2D(Camera2D& camera);
+		explicit Target2D(Camera2D& camera, std::vector<PostProcessEffect<Target2D>*>);
 
 		GET(GL::Texture2D&, Depth, _depth.Get());
 		GET(GL::Texture2D&, Color, _color.Get());
@@ -106,6 +107,8 @@ namespace gE::DefaultPipeline
 
 		GL::Texture2D _colorBack;
 		GL::Texture2D _postProcessBack;
+
+		std::vector<PostProcessEffect<Target2D>*> _effects;
 	};
 
 	struct Buffers

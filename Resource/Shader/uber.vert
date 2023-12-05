@@ -11,8 +11,9 @@ struct VertexOut
 {
     vec3 FragPos;
     vec2 UV;
-    vec2 Velocity;
-    vec3 FragPosLightSpace[MAX_LIGHTS];
+    vec4 FragPosLightSpace[MAX_LIGHTS];
+	vec4 CurrentPosition;
+	vec4 PreviousPosition;
     mat3 TBN;
 };
 
@@ -29,13 +30,9 @@ void main()
 
     if(Scene.Stage == STAGE_PRE_Z) return;
 
-    vec3 previousFragPos = (Scene.PreviousModel[ModelIndex] * vec4(Position, 1)).xyz;
-    vec4 previousGLPosition = Camera.PreviousViewProjection * vec4(previousFragPos, 1);
-
-    vec2 newNDC = (gl_Position.xy / gl_Position.w) * 0.5 + 0.5;
-    vec2 oldNDC = (previousGLPosition.xy / previousGLPosition.w) * 0.5 + 0.5;
-
-    VertexIn.Velocity = newNDC - oldNDC;
+    VertexIn.PreviousPosition = Scene.PreviousModel[ModelIndex] * vec4(Position, 1);
+    VertexIn.PreviousPosition = Camera.PreviousViewProjection * vec4(VertexIn.PreviousPosition.xyz, 1);
+	VertexIn.CurrentPosition = gl_Position;
 
     vec3 vNormal, vTangent, vBitangent;
     vNormal = normalize(Scene.Normal[ModelIndex] * Normal);
@@ -45,10 +42,5 @@ void main()
     VertexIn.TBN = mat3(vTangent, vBitangent, vNormal);
 
     for(uint i = 0; i < Lighting.LightCount; i++)
-    {
-        vec4 lightPos = Lighting.Lights[i].ViewProjection * vec4(VertexIn.FragPos, 1);
-        VertexIn.FragPosLightSpace[i] = lightPos.xyz / lightPos.w;
-        VertexIn.FragPosLightSpace[i] = VertexIn.FragPosLightSpace[i] * 0.5 + 0.5;
-        VertexIn.FragPosLightSpace[i].z = LinearizeDepthOrtho(VertexIn.FragPosLightSpace[i].z, Lighting.Lights[i].Planes);
-    }
+    	VertexIn.FragPosLightSpace[i] = Lighting.Lights[i].ViewProjection * vec4(VertexIn.FragPos, 1);
 }

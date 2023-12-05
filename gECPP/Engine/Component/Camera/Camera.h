@@ -33,7 +33,7 @@ namespace gE
 
 		virtual void GetGLCamera(GL::Camera&);
 
-		GET(IRenderTarget &, Target, _target);
+		GET(IRenderTarget&, Target, _target);
 
 		GET_CONST(CameraTiming, Timing, _settings.Timing);
 		GET_CONST(gE::ClipPlanes, ClipPlanes, _settings.ClipPlanes);

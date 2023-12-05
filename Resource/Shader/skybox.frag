@@ -2,7 +2,9 @@
 #include "Include/Scene.glsl"
 
 in vec3 FragPos;
-out vec4 FragColor;
+
+layout(location = 0) out vec4 FragColor;
+layout(location = 1) out vec2 Velocity;
 
 void main()
 {
@@ -11,5 +13,6 @@ void main()
 #else
     FragColor = vec4(1.0);
 #endif
-    FragColor.rgb = pow(FragColor.rgb, vec3(1.0 / 2.2));
+
+	Velocity = vec2(0.0);
 }

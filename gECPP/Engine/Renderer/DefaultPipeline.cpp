@@ -5,6 +5,8 @@
 #include "DefaultPipeline.h"
 #include <Engine/Window.h>
 
+#include <utility>
+
 namespace gE
 {
 	gE::DefaultPipeline::Buffers::Buffers(Window* window) :
@@ -15,12 +17,14 @@ namespace gE
 		_lightBuffer.Bind(GL::BufferTarget::Uniform, 2);
 	}
 
-	DefaultPipeline::Target2D::Target2D(Camera2D& camera) : RenderTarget<Camera2D>(camera), IDepthTarget(_depth.Get()),
+	DefaultPipeline::Target2D::Target2D(Camera2D& camera, std::vector<PostProcessEffect<Target2D>*> effects) :
+		RenderTarget<Camera2D>(camera), IDepthTarget(_depth.Get()),
 		_depth(GetFrameBuffer(), GL::TextureSettings2D(DefaultPipeline::DepthFormat, camera.GetSize())),
 		_color(GetFrameBuffer(), GL::TextureSettings2D(DefaultPipeline::ColorFormat, camera.GetSize())),
 		_velocity(GetFrameBuffer(), GL::TextureSettings2D(DefaultPipeline::VelocityFormat, camera.GetSize())),
 		_colorBack(&GetWindow(), GL::TextureSettings2D(DefaultPipeline::ColorFormat, camera.GetSize())),
-		_postProcessBack(&GetWindow(), GL::TextureSettings2D(DefaultPipeline::ColorFormat, camera.GetSize()))
+		_postProcessBack(&GetWindow(), GL::TextureSettings2D(DefaultPipeline::ColorFormat, camera.GetSize())),
+		_effects(std::move(effects))
 	{
 	}
 
@@ -45,7 +49,6 @@ namespace gE
 
 		glDepthMask(0);
 		glColorMask(1, 1, 1, 1);
-		glClear(GL_COLOR_BUFFER_BIT);
 
 		window.GetRenderers().OnRender(0.f);
 		window.GetCubemaps().DrawSkybox();
@@ -55,15 +58,15 @@ namespace gE
 	{
 		Camera2D& camera = GetCamera();
 		glm::u32vec2 size = camera.GetSize();
-		Window& window = camera.GetWindow();
 		GL::ComputeShader& taaShader = GetWindow().GetTAAShader();
 
 		GL::Texture2D* front = (GL::Texture2D*) _color, *back = &_postProcessBack;
 
-		_color->Bind(0, GL_READ_ONLY);
-		_velocity->Bind(1, GL_READ_ONLY);
-		_postProcessBack.Bind(2, GL_WRITE_ONLY);
-		taaShader.SetUniform(0, _colorBack.Use(0));
+		_velocity->Bind(0, GL_READ_ONLY);
+		_postProcessBack.Bind(1, GL_WRITE_ONLY);
+
+		taaShader.SetUniform(0, _color->Use(0));
+		taaShader.SetUniform(1, _colorBack.Use(1));
 
 		taaShader.Bind();
 		taaShader.Dispatch(DIV_CEIL(_color->GetSize(), TAA_GROUP_SIZE));
@@ -72,7 +75,11 @@ namespace gE
 		_colorBack.CopyFrom(*back);
 
 		// Post process loop here
-		// for(PostProcessEffect effect* : PostProcessEffects)...
+		for(PostProcessEffect<Target2D>* effect : _effects)
+		{
+			std::swap(front, back);
+			effect->RenderPass(*this, *front, *back);
+		}
 
 		// Sync post process "backbuffer" and main color buffer
 		front->CopyFrom(*back);

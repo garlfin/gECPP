@@ -11,8 +11,9 @@ struct VertexOut
 {
     vec3 FragPos;
     vec2 UV;
-    vec2 Velocity;
-    vec3 FragPosLightSpace[MAX_LIGHTS];
+    vec4 FragPosLightSpace[MAX_LIGHTS];
+	vec4 CurrentPosition;
+	vec4 PreviousPosition;
     mat3 TBN;
 };
 
@@ -55,8 +56,11 @@ void main()
 #ifdef EXT_BINDLESS
     FragColor.rgb += GetLighting(vertex, fragment, Lighting.Skybox);
 #endif
-    FragColor.rgb = pow(FragColor.rgb, vec3(1.0 / 2.2));
-    Velocity = VertexIn.Velocity;
+
+	vec2 previousUV = VertexIn.PreviousPosition.xy / VertexIn.PreviousPosition.w;
+	vec2 currentUV = VertexIn.CurrentPosition.xy / VertexIn.CurrentPosition.w;
+
+	Velocity = currentUV - previousUV;
 
     if(Scene.Stage != STAGE_VOXEL) return;
 

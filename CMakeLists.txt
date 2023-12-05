@@ -19,7 +19,7 @@ FILE(COPY "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/GLFW/glfw3.dll" DESTINATION ${CMAK
 
 # ASSIMP
 add_library(ASSIMP STATIC IMPORTED gECPP/GL/Binary/Binary.cpp
-        gECPP/Engine/Component/TransformManager.h)
+        gECPP/Engine/Component/TransformManager.h gECPP/Engine/Renderer/PostProcess/Exposure.cpp gECPP/Engine/Renderer/PostProcess/Exposure.h)
 set_property(TARGET ASSIMP PROPERTY IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ASSIMP/libassimp-5.dll")
 FILE(COPY "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ASSIMP/libassimp-5.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 

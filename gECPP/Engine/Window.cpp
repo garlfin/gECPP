@@ -60,6 +60,7 @@ void DebugMessage(GLenum source, GLenum type, GLuint id, GLenum severity, GLsize
 {
 	std::cout << message << std::endl;
 }
+
 #endif
 
 void Window::Run()

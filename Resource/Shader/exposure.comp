@@ -1,0 +1,24 @@
+#ifndef COLOR_FORMAT
+    #define COLOR_FORMAT rgba16f
+#endif
+
+#ifndef GAMMA
+    #define GAMMA 2.2
+#endif
+
+// IO
+layout(binding = 0, COLOR_FORMAT) restrict readonly uniform image2D ColorIn;
+layout(binding = 1, COLOR_FORMAT) restrict writeonly uniform image2D ColorOut;
+
+layout(local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
+void main()
+{
+    ivec2 texel = ivec2(gl_GlobalInvocationID.xy);
+
+    vec4 color = imageLoad(ColorIn, texel);
+
+    color.rgb = pow(color.rgb, vec2(1.0 / GAMMA));
+
+    imageStore(ColorOut, texel, color);
+}
+

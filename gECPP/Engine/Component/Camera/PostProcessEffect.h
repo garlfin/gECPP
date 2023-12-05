@@ -14,14 +14,13 @@ namespace gE
 	class PostProcessEffect
 	{
 	 public:
-		explicit PostProcessEffect(T& target) : _target(target) {};
+		explicit PostProcessEffect(Window* window) : _window(*window) {};
 
 		virtual void RenderPass(T&, GL::Texture&, GL::Texture&) = 0;
 
-		GET(T&, Target, _target);
-		GET(T::CAMERA_TYPE&, Camera, _target.GetCamera());
+		GET(Window&, Window, _window);
 
 	 private:
-		T& _target;
+		Window& _window;
 	};
 }

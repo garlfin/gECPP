@@ -54,6 +54,7 @@ float LinearizeDepth(float, vec2);
 bool TexcoordOutOfBounds(vec2 uv);
 float InterleavedGradientNoise(vec2 uv);
 vec2 VogelDisk(uint i, uint count, float phi);
+vec3 NDCLight(vec4, vec2);
 
 // Helper Variables
 #ifdef FRAGMENT_SHADER
@@ -68,6 +69,7 @@ float GetShadowDirectional(const Vertex frag, const Light light)
     // Linearizing everything now for PCSS later.
     float nDotL = max(dot(frag.Normal, light.Position), 0.0);
     float bias = mix(0.1, 1.0, nDotL) * DIRECTIONAL_SHADOW_BIAS;
+	vec3 fragPos = NDCLight(frag.PositionLightSpace, light.Planes);
 
     float blocker = 0.0;
 #ifdef SOFT_SHADOW_AVERAGE
@@ -79,7 +81,7 @@ float GetShadowDirectional(const Vertex frag, const Light light)
     for(uint i = 0; i < DIRECTIONAL_SHADOW_BLOCKER_SAMPLES; i++)
     {
         vec2 offset = VogelDisk(i, DIRECTIONAL_SHADOW_BLOCKER_SAMPLES, IGNSample * PI * 2.0);
-        vec3 uv = frag.PositionLightSpace;
+        vec3 uv = fragPos;
         uv.xy += offset * DIRECTIONAL_SHADOW_BLOCKER_RADIUS / light.PackedSettings;
 
     #ifdef EXT_BINDLESS
@@ -112,7 +114,7 @@ float GetShadowDirectional(const Vertex frag, const Light light)
     for(uint i = 0; i < DIRECTIONAL_SHADOW_SAMPLES; i++)
     {
         vec2 offset = VogelDisk(i, DIRECTIONAL_SHADOW_SAMPLES, IGNSample * PI * 2.0);
-        vec3 uv = frag.PositionLightSpace;
+        vec3 uv = fragPos;
         uv.xy += offset * blocker / light.PackedSettings;
 
     #ifdef EXT_BINDLESS
@@ -160,4 +162,12 @@ vec2 VogelDisk(uint i, uint count, float phi)
     float radius = sqrt((i + 0.5) / count);
     float theta = i * GOLDEN_ANGLE + phi;
     return vec2(cos(theta), sin(theta)) * radius;
+}
+
+vec3 NDCLight(vec4 frag, vec2 planes)
+{
+	frag.xyz = frag.xyz / frag.w;
+	frag.xyz = frag.xyz * 0.5 + 0.5;
+	frag.z = LinearizeDepthOrtho(frag.z, planes);
+	return frag.xyz;
 }

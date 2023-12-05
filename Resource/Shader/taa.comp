@@ -1,8 +1,8 @@
-#ifndef TAA_VELOCITY_FORMAT
+#ifndef VELOCITY_FORMAT
     #define TAA_VELOCITY_FORMAT rg16f
 #endif
 
-#ifndef TAA_COLOR_FORMAT
+#ifndef COLOR_FORMAT
     #define TAA_COLOR_FORMAT rgba16f
 #endif
 
@@ -17,10 +17,10 @@
 #endif
 
 // IO
-layout(location = 0) uniform sampler2D PreviousColorIn;
-layout(binding = 0, TAA_COLOR_FORMAT) restrict readonly uniform  image2D ColorIn;
-layout(binding = 1, TAA_VELOCITY_FORMAT) restrict readonly uniform image2D VelocityIn;
-layout(binding = 2, TAA_COLOR_FORMAT) restrict writeonly uniform image2D ColorOut;
+layout(location = 0) uniform sampler2D ColorIn;
+layout(location = 1) uniform sampler2D PreviousColorIn;
+layout(binding = 0, TAA_VELOCITY_FORMAT) restrict readonly uniform image2D VelocityIn;
+layout(binding = 1, TAA_COLOR_FORMAT) restrict writeonly uniform image2D ColorOut;
 
 // Variables
 vec2 Offsets[8] =
@@ -37,22 +37,22 @@ void main()
     vec2 uv = (vec2(texel) + 0.5) / size;
 
     vec2 velocity = imageLoad(VelocityIn, texel).xy;
-    vec4 currentFrame = imageLoad(ColorIn, texel);
-    vec2 previousUV = uv - velocity;
+    vec4 currentFrame = texture(ColorIn, uv);
+    vec2 previousUV = uv;// - velocity;
 
     vec4 previousFrame = texture(PreviousColorIn, previousUV);
 
     vec4 boxMin = currentFrame, boxMax = currentFrame;
     for(uint i = 0; i < TAA_BOX_SAMPLE_COUNT; i++)
     {
-        vec4 boxSample = texture(PreviousColorIn, uv + Offsets[i] / size);
+        vec4 boxSample = texture(ColorIn, uv + Offsets[i] / size);
         boxMin = min(boxMin, boxSample);
         boxMax = max(boxMax, boxSample);
     }
 
     previousFrame = clamp(previousFrame, boxMin, boxMax);
 
-    vec4 color = mix(previousFrame, currentFrame, 1.0 / TAA_SAMPLE_COUNT);
+    vec4 color = mix(previousFrame, currentFrame, 1.0 / sqrt(TAA_SAMPLE_COUNT));
     imageStore(ColorOut, texel, color);
 }
 

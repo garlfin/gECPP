@@ -66,7 +66,7 @@ namespace gE
 		using IRenderTarget::IRenderTarget;
 
 		GET(T&, Camera, (T&) IRenderTarget::GetCamera());
-		GET_CONST(const T::SIZE_TYPE&, Size, GetCamera().GetSize());
+		GET_CONST(T::SIZE_TYPE, Size, GetCamera().GetSize());
 
 		typedef T CAMERA_TYPE;
 	};

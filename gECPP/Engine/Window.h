@@ -56,7 +56,7 @@ namespace gE
 		GET(ComponentManager<MeshRenderer>&, Renderers, Renderers);
 		GET(LightManager&, Lights, Lights);
 		GET(CubemapManager&, Cubemaps, Cubemaps);
-		GET(GL::TextureSlotManager &, SlotManager, SlotManager);
+		GET(GL::TextureSlotManager&, SlotManager, SlotManager);
 
 		// Engine States
 		RenderStage Stage;
