@@ -60,8 +60,6 @@ namespace gE
 		glm::u32vec2 size = camera.GetSize();
 		GL::ComputeShader& taaShader = GetWindow().GetTAAShader();
 
-		GL::Texture2D* front = (GL::Texture2D*) _color, *back = &_postProcessBack;
-
 		_velocity->Bind(0, GL_READ_ONLY);
 		_postProcessBack.Bind(1, GL_WRITE_ONLY);
 
@@ -72,9 +70,10 @@ namespace gE
 		taaShader.Dispatch(DIV_CEIL(_color->GetSize(), TAA_GROUP_SIZE));
 
 		// Copy TAA result to taa "backbuffer"
-		_colorBack.CopyFrom(*back);
+		_colorBack.CopyFrom(_postProcessBack);
 
-		// Post process loop here
+		// Post process loop
+		GL::Texture2D* front = (GL::Texture2D*) _color, *back = &_postProcessBack;
 		for(PostProcessEffect<Target2D>* effect : _effects)
 		{
 			std::swap(front, back);
@@ -82,6 +81,6 @@ namespace gE
 		}
 
 		// Sync post process "backbuffer" and main color buffer
-		front->CopyFrom(*back);
+		if(front == (GL::Texture2D*) _color) front->CopyFrom(*back);
 	}
 }
