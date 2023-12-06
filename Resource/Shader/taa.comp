@@ -27,7 +27,7 @@ vec2 Offsets[8] =
 };
 
 // Helper Functions
-vec4 HDRLuminance(vec3 color);
+float Luminance(vec3);
 
 layout(local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
 void main()
@@ -36,12 +36,9 @@ void main()
     ivec2 texel = ivec2(gl_GlobalInvocationID.xy);
     vec2 uv = (vec2(texel) + 0.5) / size;
 
-    vec2 previousUV = texture(VelocityIn, uv).xy;
+    vec2 previousUV = uv - texture(VelocityIn, uv).xy;
     vec4 currentColor = texture(ColorIn, uv);
     vec4 previousColor = texture(PreviousColorIn, previousUV);
-
-    float currentAlpha = currentColor.a;
-    currentColor = HDRLuminance(currentColor.rgb);
 
     vec3 boxMin = currentColor.rgb, boxMax = currentColor.rgb;
     for(uint i = 0; i < TAA_BOX_SAMPLE_COUNT; i++)
@@ -51,20 +48,15 @@ void main()
         boxMax = max(boxMax, boxSample);
     }
 
-    previousColor = HDRLuminance(clamp(previousColor.rgb, boxMin, boxMax));
+    previousColor.rgb = clamp(previousColor.rgb, boxMin, boxMax);
 
-    float currentWeight = (1.0 / TAA_SAMPLE_COUNT) * currentColor.a;
-    float previousWeight = (1.0 - 1.0 / TAA_SAMPLE_COUNT) * previousColor.a;
+    float currentWeight = (1.0 / TAA_SAMPLE_COUNT) * (1.0 / (1.0 + Luminance(currentColor.rgb)));
+    float previousWeight = (1.0 - 1.0 / TAA_SAMPLE_COUNT) * (1.0 / (1.0 + Luminance(previousColor.rgb)));
 
     vec3 color = (currentColor.rgb * currentWeight + previousColor.rgb * previousWeight);
-    color /= currentWeight + previousWeight;
+    color /= max(currentWeight + previousWeight, 0.001);
 
-    imageStore(ColorOut, texel, vec4(color.rgb, currentAlpha));
+    imageStore(ColorOut, texel, vec4(color.rgb, currentColor.a));
 }
 
-vec4 HDRLuminance(vec3 color)
-{
-    float luminance = dot(color, vec3(0.299, 0.587, 0.114));
-    float luminanceWeight = 1.0 / (1.0 + luminance);
-    return vec4(color, luminanceWeight);
-}
+float Luminance(vec3 color) { return dot(color, vec3(0.299, 0.587, 0.114)); }

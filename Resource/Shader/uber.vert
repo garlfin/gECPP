@@ -6,12 +6,14 @@ layout(location = 3) in vec3 Tangent;
 #include "Include/Camera.glsl"
 #include "Include/Scene.glsl"
 #include "Include/Shadow.glsl"
+#include "Include/TAA.glsl"
 
 struct VertexOut
 {
     vec3 FragPos;
     vec2 UV;
-	vec4 Velocity;
+	vec4 PreviousUV;
+    vec4 CurrentUV;
     vec4 FragPosLightSpace[MAX_LIGHTS];
     mat3 TBN;
 };
@@ -25,14 +27,15 @@ void main()
     VertexIn.FragPos = (Scene.Model[ModelIndex] * vec4(Position, 1)).xyz;
     VertexIn.UV = UV;
 
-    gl_Position = viewProjection * Scene.Model[ModelIndex] * vec4(VertexIn.FragPos, 1);
+    vec2 jitter = Jitter(Camera.Frame % 16, ivec2(1280, 720));
+
+    VertexIn.CurrentUV = viewProjection * Scene.Model[ModelIndex] * vec4(VertexIn.FragPos, 1);
+    gl_Position = JitterMat(jitter) * VertexIn.CurrentUV;
 
     if(Scene.Stage == STAGE_PRE_Z) return;
 
-    vec4 previousUV = Scene.PreviousModel[ModelIndex] * vec4(Position, 1);
-    previousUV = Camera.PreviousViewProjection * vec4(previousUV.xyz, 1);
-
-	VertexIn.Velocity = previousUV;
+    VertexIn.PreviousUV = Scene.PreviousModel[ModelIndex] * vec4(Position, 1);
+    VertexIn.PreviousUV = Camera.PreviousViewProjection * vec4(VertexIn.PreviousUV.xyz, 1);
 
     vec3 vNormal, vTangent, vBitangent;
     vNormal = normalize(Scene.Normal[ModelIndex] * Normal);
