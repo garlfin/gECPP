@@ -83,7 +83,7 @@ namespace gE
 		Window& window = camera.GetWindow();
 		GL::TextureSize2D size = camera.GetSize();
 
-		window.Stage = RenderStage::Shadow;
+		window.State = State::Shadow;
 
 		glDepthMask(1);
 		glColorMask(0, 0, 0, 0);

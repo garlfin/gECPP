@@ -27,12 +27,15 @@ void main()
     VertexIn.FragPos = (Scene.Model[ModelIndex] * vec4(Position, 1)).xyz;
     VertexIn.UV = UV;
 
-    vec2 jitter = Jitter(Camera.Frame % 16, ivec2(1280, 720));
-
     VertexIn.CurrentUV = viewProjection * Scene.Model[ModelIndex] * vec4(VertexIn.FragPos, 1);
-    gl_Position = JitterMat(jitter) * VertexIn.CurrentUV;
 
-    if(Scene.Stage == STAGE_PRE_Z) return;
+    if(bool(Scene.State & ENABLE_JITTER))
+    {
+        vec2 jitter = Jitter(Camera.Frame % 16, ivec2(1280, 720));
+        gl_Position = JitterMat(jitter) * VertexIn.CurrentUV;
+    } else gl_Position = VertexIn.CurrentUV;
+
+    if(!bool(Scene.State & WRITE_MODE_COLOR)) return;
 
     VertexIn.PreviousUV = Scene.PreviousModel[ModelIndex] * vec4(Position, 1);
     VertexIn.PreviousUV = Camera.PreviousViewProjection * vec4(VertexIn.PreviousUV.xyz, 1);

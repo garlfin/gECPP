@@ -61,7 +61,7 @@ namespace gE
 		GET(GL::TextureSlotManager&, SlotManager, SlotManager);
 
 		// Engine States
-		RenderStage Stage;
+		RenderFlags State;
 
 		GET_CONST(GL::TextureSize2D, Size, _size);
 		GET_CONST(const Monitor&, Monitor, _monitor);

@@ -25,7 +25,7 @@ layout(location = 1) out vec2 Velocity;
 layout(early_fragment_tests) in;
 void main()
 {
-    if(Scene.Stage == STAGE_PRE_Z) return;
+    if(!bool(Scene.State & WRITE_MODE_COLOR)) return;
 
     vec3 albedo = texture(AlbedoTex, VertexIn.UV).rgb;
     vec3 amr = texture(AMRTex, VertexIn.UV).rgb;
@@ -53,13 +53,17 @@ void main()
     );
 
     FragColor.rgb += GetLighting(vertex, fragment, Lighting.Lights[0]);
-#ifdef EXT_BINDLESS
-    FragColor.rgb += GetLighting(vertex, fragment, Lighting.Skybox);
-#endif
+
+    if(bool(Scene.State & ENABLE_SPECULAR))
+    {
+    #ifdef EXT_BINDLESS
+        FragColor.rgb += GetLighting(vertex, fragment, Lighting.Skybox);
+    #endif
+    }
 
 	Velocity = ((VertexIn.CurrentUV.xy / VertexIn.CurrentUV.w) - (VertexIn.PreviousUV.xy / VertexIn.PreviousUV.w)) * 0.5;
 
-    if(Scene.Stage != STAGE_VOXEL) return;
+    if(!bool(Scene.State & VOXEL_WRITE_MODE_WRITE)) return;
 
     Voxel voxel = Voxel(FragColor.rgb, vec3(0), true);
     //WriteVoxel(Vertex.FragPos, voxel);

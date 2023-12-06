@@ -11,6 +11,7 @@
 #include <Engine/Component/Camera/RenderTarget.h>
 #include <Engine/Component/Camera/Settings.h>
 #include <Engine/Component/Camera/PostProcessEffect.h>
+#include "Engine/WindowState.h"
 
 #define GE_MAX_INSTANCE 64
 #define GE_MAX_LIGHT 4
@@ -64,7 +65,7 @@ namespace GL
 	struct Scene
 	{
 		uint InstanceCount;
-		uint Stage;
+		gE::RenderFlags State;
 		GL_ALIGN glm::mat4 Model[GE_MAX_INSTANCE];
 		glm::mat4 PreviousModel[GE_MAX_INSTANCE];
 		glm::mat3x4 Normal[GE_MAX_INSTANCE]; // for alignment purposes.

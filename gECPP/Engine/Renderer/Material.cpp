@@ -17,15 +17,21 @@ namespace gE
 
 	void gE::Material::Bind() const
 	{
-		if((bool) _depthFunc)
+		gE::RenderFlags state = GetWindow().State;
+
+		if((bool) _depthFunc && state.WriteMode != WriteMode::None)
 		{
 			glEnable(GL_DEPTH_TEST);
-			glDepthFunc(GetWindow().Stage == RenderStage::PreZ ? (GLenum) _depthFunc : GL_EQUAL);
+
+			GLenum depthFunc = (GLenum) _depthFunc;
+			if(state.WriteMode == WriteMode::Color) depthFunc = GL_EQUAL;
+
+			glDepthFunc(depthFunc);
 		}
 		else
 			glDisable(GL_DEPTH_TEST);
 
-		if((bool) _cullMode)
+		if((bool) _cullMode && state.WriteMode != WriteMode::None)
 		{
 			glEnable(GL_CULL_FACE);
 			glCullFace((GLenum) _cullMode);

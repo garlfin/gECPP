@@ -62,10 +62,10 @@ namespace gE
 		Window& window = camera.GetWindow();
 		u32 size = GetCamera().GetSize();
 
-		window.Stage = RenderStage::PreZ;
+		window.State = State::Cubemap;
 
 		glDepthMask(1);
-		glColorMask(0, 0, 0, 0);
+		glColorMask(1, 1, 1, 1);
 		glClear(GL_DEPTH_BUFFER_BIT);
 		glViewport(0, 0, size, size);
 

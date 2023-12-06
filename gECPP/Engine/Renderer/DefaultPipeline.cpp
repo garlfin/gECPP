@@ -35,7 +35,7 @@ namespace gE
 		Window& window = camera.GetWindow();
 
 		// PRE-Z
-		window.Stage = RenderStage::PreZ;
+		window.State = State::PreZ;
 
 		glDepthMask(1);
 		glColorMask(0, 0, 0, 0);
@@ -45,7 +45,7 @@ namespace gE
 		window.GetRenderers().OnRender(0.f);
 
 		// COLOR
-		window.Stage = RenderStage::Color;
+		window.State = State::Color;
 
 		glDepthMask(0);
 		glColorMask(1, 1, 1, 1);
