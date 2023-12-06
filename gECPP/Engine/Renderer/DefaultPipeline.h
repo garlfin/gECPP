@@ -23,13 +23,14 @@ namespace GL
 	{
 		glm::vec3 Position;
 		u32 Frame;
-		GL_ALIGN glm::vec2 ClipPlanes;
-		glm::vec2 Parameters;
+		glm::vec2 ClipPlanes;
+		glm::vec2 Size;
+		glm::vec4 Parameters;
 
 		handle ColorTexture;
 		handle DepthTexture;
 
-		GL_ALIGN glm::mat4 PreviousViewProjection;
+		glm::mat4 PreviousViewProjection;
 		glm::mat4 Projection;
 		glm::mat4 View[6];
 	};

@@ -1,3 +1,7 @@
+#ifndef TAA_SAMPLE_COUNT
+    #define TAA_SAMPLE_COUNT 16
+#endif
+
 const vec2 HaltonSequence[16] =
 {
     vec2(0.5, 0.333333),
@@ -18,9 +22,10 @@ const vec2 HaltonSequence[16] =
     vec2(0.03125, 0.592593)
 };
 
-vec2 Jitter(uint i, ivec2 size)
+vec2 Jitter(uint i, vec2 size)
 {
-    return (HaltonSequence[i] * 2.0 - 1.0) / size;
+    vec2 halton = HaltonSequence[i % TAA_SAMPLE_COUNT];
+    return (halton * 2.0 - 1.0)  / size;
 }
 
 mat4 JitterMat(vec2 offset)

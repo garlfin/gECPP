@@ -26,6 +26,7 @@ namespace gE
 		_postProcessBack(&GetWindow(), GL::TextureSettings2D(DefaultPipeline::ColorFormat, camera.GetSize())),
 		_effects(std::move(effects))
 	{
+
 	}
 
 	void DefaultPipeline::Target2D::RenderPass()

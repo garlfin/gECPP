@@ -88,6 +88,7 @@ namespace gE
 	{
 		Camera::GetGLCamera(camera);
 		camera.View[0] = glm::inverse(GetOwner()->GetTransform().Model());
+		camera.Size = GetSize();
 	}
 
 	Camera3D::Camera3D(Entity* p, Manager* m, TARGET_TYPE& t, const CameraSettings3D& s) :

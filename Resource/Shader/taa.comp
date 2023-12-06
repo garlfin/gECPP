@@ -6,10 +6,12 @@
     #define TAA_SAMPLE_COUNT 16
 #endif
 
+#define TAA_MODE_FULL
+
 #ifdef TAA_MODE_FULL
-    #define TAA_BOX_SAMPLE_COUNT 4
-#else
     #define TAA_BOX_SAMPLE_COUNT 8
+#else
+    #define TAA_BOX_SAMPLE_COUNT 4
 #endif
 
 // IO
@@ -50,8 +52,9 @@ void main()
 
     previousColor.rgb = clamp(previousColor.rgb, boxMin, boxMax);
 
-    float currentWeight = (1.0 / TAA_SAMPLE_COUNT) * (1.0 / (1.0 + Luminance(currentColor.rgb)));
-    float previousWeight = (1.0 - 1.0 / TAA_SAMPLE_COUNT) * (1.0 / (1.0 + Luminance(previousColor.rgb)));
+    float weight = 1.0 / TAA_SAMPLE_COUNT;
+    float currentWeight = weight * (1.0 / (1.0 + Luminance(currentColor.rgb)));
+    float previousWeight = (1.0 - weight) * (1.0 / (1.0 + Luminance(previousColor.rgb)));
 
     vec3 color = (currentColor.rgb * currentWeight + previousColor.rgb * previousWeight);
     color /= max(currentWeight + previousWeight, 0.001);
