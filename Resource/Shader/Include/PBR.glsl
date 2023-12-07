@@ -62,7 +62,7 @@ vec3 GetLighting(const Vertex vert, const PBRFragment frag, samplerCube cubemap)
 {
     vec3 eye = normalize(Camera.Position - vert.Position);
 
-    float nDotV = max(dot(frag.Normal, eye), 0.0);
+    float nDotV = clamp(dot(frag.Normal, eye), 0.0, 1.0);
     vec3 f = FresnelSchlick(frag.F0, nDotV);
     vec2 xi = Hammersley(int(IGNSample * HAMMERSLEY_ROUGHNESS_SAMPLE), HAMMERSLEY_ROUGHNESS_SAMPLE);
     vec3 n = ImportanceSampleGGX(xi, frag.Normal, frag.Roughness);
@@ -79,12 +79,13 @@ vec3 GetLightingDirectional(const Vertex vert, const PBRFragment frag, const Lig
     vec3 eye = normalize(Camera.Position - vert.Position);
     vec3 halfEye = normalize(light.Position + eye);
 
-    float nDotV = max(dot(frag.Normal, eye), 0.0);
-    float nDotL = max(dot(frag.Normal, light.Position), 0.0);
-    float nDotH = max(dot(frag.Normal, halfEye), 0.0);
+    float nDotV = clamp(dot(frag.Normal, eye), 0.0, 1.0);
+    float nDotL = clamp(dot(frag.Normal, light.Position), 0.0, 1.0);
+    float nDotH = clamp(dot(frag.Normal, halfEye), 0.0, 1.0);
+    float eDotH = clamp(dot(halfEye, eye), 0.0, 1.0);
 
     // PBR Setup
-    vec3 f = FresnelSchlick(frag.F0, max(dot(halfEye, eye), 0.0));
+    vec3 f = FresnelSchlick(frag.F0, eDotH);
     float d = GGXNDF(nDotH, frag.Roughness);
     float g = GSchlickAnalytical(nDotL, nDotV, frag.Roughness);
 

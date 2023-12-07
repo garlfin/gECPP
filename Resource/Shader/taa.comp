@@ -118,5 +118,5 @@ vec4 ClipAABB(vec4 color, float a, vec3 minB, vec3 maxB)
     vec3 repeat = abs(offset.xyz / extent);
     repeat.x = max(repeat.x, max(repeat.y, repeat.z));
 
-    return max(repeat.x > 1.0 ? vec4(center, a) + offset / repeat.x : color, vec4(0.0));
+    return repeat.x > 1.0 ? vec4(center, a) + offset / repeat.x : color;
 }
