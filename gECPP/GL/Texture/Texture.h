@@ -6,6 +6,8 @@
 #include <GLAD/glad.h>
 #include "TextureSettings.h"
 
+#define GE_ANISOTROPY_COUNT 8
+
 // Type is more "integral" so i use a lowercase convention
 // Opaque type to prevent accidental pointer-to-handle conversions
 struct handle
@@ -29,7 +31,7 @@ namespace GL
 	class Texture : public Asset
 	{
 	 public:
-		Texture(gE::Window* window, GLenum tgt, const ITextureSettings& settings);
+		Texture(gE::Window* window, GLenum target, const ITextureSettings& settings);
 
 		inline void Bind() const override { glBindTexture(Target, ID); }
 

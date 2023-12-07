@@ -26,7 +26,6 @@ namespace gE
 		_postProcessBack(&GetWindow(), GL::TextureSettings2D(DefaultPipeline::ColorFormat, camera.GetSize())),
 		_effects(std::move(effects))
 	{
-
 	}
 
 	void DefaultPipeline::Target2D::RenderPass()
@@ -80,6 +79,7 @@ namespace gE
 			std::swap(front, back);
 			effect->RenderPass(*this, *front, *back);
 		}
+
 
 		// Sync post process "backbuffer" and main color buffer
 		if(front == (GL::Texture2D*) _color) front->CopyFrom(*back);

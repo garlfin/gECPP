@@ -2,19 +2,23 @@
 #include <iostream>
 #include <GLAD/glad.h>
 #include "GL/Binary/Binary.h"
-#include <GL/Buffer/FrameBuffer.h>
 #include "TextureSlotManager.h"
 
 namespace GL
 {
-	Texture::Texture(gE::Window* window, GLenum tgt, const ITextureSettings& settings) :
-		Asset(window), Mips(settings.MipCount), Format(settings.Format), Target(tgt)
+	Texture::Texture(gE::Window* window, GLenum target, const ITextureSettings& settings) :
+		Asset(window), Mips(settings.MipCount), Format(settings.Format), Target(target)
 	{
-		glCreateTextures(tgt, 1, &ID);
+		glCreateTextures(target, 1, &ID);
 		glTextureParameteri(ID, GL_TEXTURE_MIN_FILTER, (GLint) settings.Filter + (Mips > 1 ? 0x102 : 0));
 		glTextureParameteri(ID, GL_TEXTURE_MAG_FILTER, (GLint) settings.Filter);
 		glTextureParameteri(ID, GL_TEXTURE_WRAP_S, (GLint) settings.WrapMode);
 		glTextureParameteri(ID, GL_TEXTURE_WRAP_T, (GLint) settings.WrapMode);
+
+		if(target == GL_TEXTURE_CUBE_MAP)
+			glTextureParameteri(ID, GL_TEXTURE_WRAP_R, (GLint) settings.WrapMode);
+		else if (target == GL_TEXTURE_2D)
+			glTextureParameteri(ID, GL_TEXTURE_MAX_ANISOTROPY, GE_ANISOTROPY_COUNT);
 	}
 
 	Texture2D::Texture2D(gE::Window* window, const TextureSettings<TextureDimension::D2D>& settings, const TextureData& data)
@@ -96,7 +100,6 @@ namespace GL
 	TextureCube::TextureCube(gE::Window* window, const TextureSettings<TextureDimension::D1D>& settings, const TextureData& data)
 		: Texture(window, GL_TEXTURE_CUBE_MAP, settings), _size(settings.Size)
 	{
-		glTextureParameteri(ID, GL_TEXTURE_WRAP_R, (GLint) settings.WrapMode);
 		glTextureStorage2D(ID, Mips, settings.Format, _size, _size);
 
 		if(!data.Data) return;
