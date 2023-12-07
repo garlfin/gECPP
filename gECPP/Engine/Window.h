@@ -15,7 +15,7 @@
 #include "Engine/Component/MeshRenderer.h"
 #include "Engine/Entity/Light.h"
 #include "Engine/Entity/CubemapCapture.h"
-#include <Engine/Renderer/PostProcess/Exposure.h>
+#include <Engine/Renderer/PostProcess/Tonemap.h>
 
 struct GLFWwindow;
 struct GLFWvidmode;
@@ -49,7 +49,7 @@ namespace gE
 		GET(gE::Material&, DefaultMaterial, DefaultMaterial);
 		GET(GL::Texture2D&, BRDFLookupTexture, BRDFLookup);
 		GET(GL::ComputeShader&, TAAShader, TAAShader);
-		GET(DefaultPipeline::Exposure&, ExposureEffect, ExposureEffect);
+		GET(DefaultPipeline::Tonemap&, TonemapEffect, TonemapEffect);
 
 		// Managers
 		GET(CameraManager&, Cameras, Cameras);
@@ -96,7 +96,7 @@ namespace gE
 		SmartPointer<GL::Shader> BlitShader;
 		SmartPointer<GL::Texture2D> BRDFLookup;
 		SmartPointer<GL::ComputeShader> TAAShader;
-		SmartPointer<DefaultPipeline::Exposure> ExposureEffect;
+		SmartPointer<DefaultPipeline::Tonemap> TonemapEffect;
 
 	 private:
 		GL::TextureSize2D _size;

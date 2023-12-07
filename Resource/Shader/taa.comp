@@ -1,3 +1,6 @@
+#define TAA_MODE_FULL
+#define TAA_CLIP_AABB
+
 #ifndef COLOR_FORMAT
     #define TAA_COLOR_FORMAT rgba16f
 #endif
@@ -5,9 +8,6 @@
 #ifndef TAA_SAMPLE_COUNT
     #define TAA_SAMPLE_COUNT 16
 #endif
-
-#define TAA_MODE_FULL
-#define TAA_CLIP_AABB
 
 #ifdef TAA_MODE_FULL
     #define TAA_BOX_SAMPLE_COUNT 8

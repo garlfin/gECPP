@@ -75,6 +75,7 @@ namespace gE
 	DirectionalShadowTarget::DirectionalShadowTarget(OrthographicCamera& camera) : RenderTarget<Camera2D>(camera), IDepthTarget((GL::Texture&) _depth),
 		_depth(GetFrameBuffer(), GL::TextureSettings2D(ShadowMapFormat, camera.GetSize()))
 	{
+
 	}
 
 	void DirectionalShadowTarget::RenderPass()

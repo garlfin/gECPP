@@ -2,18 +2,18 @@
 // Created by scion on 12/4/2023.
 //
 
-#include "Exposure.h"
+#include "Tonemap.h"
 
 #define EXPOSURE_GROUP_SIZE 32
 
 namespace gE::DefaultPipeline
 {
-	Exposure::Exposure(Window* window) : PostProcessEffect<Target2D>(window),
-		_shader(window, "Resource/Shader/exposure.comp")
+	Tonemap::Tonemap(Window* window) : PostProcessEffect<Target2D>(window),
+										_shader(window, "Resource/Shader/tonemap.comp")
 	{
 	}
 
-	void Exposure::RenderPass(DefaultPipeline::Target2D& t, GL::Texture& in, GL::Texture& out)
+	void Tonemap::RenderPass(DefaultPipeline::Target2D& t, GL::Texture& in, GL::Texture& out)
 	{
 		_shader.Bind();
 

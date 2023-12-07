@@ -10,10 +10,10 @@
 
 namespace gE::DefaultPipeline
 {
-	class Exposure : public PostProcessEffect<Target2D>
+	class Tonemap : public PostProcessEffect<Target2D>
 	{
 	 public:
-		explicit Exposure(Window*);
+		explicit Tonemap(Window*);
 
 		void RenderPass(DefaultPipeline::Target2D& t, GL::Texture& texture, GL::Texture& texture1) override;
 

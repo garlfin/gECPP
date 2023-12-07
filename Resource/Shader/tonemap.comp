@@ -1,3 +1,5 @@
+// tonemap.comp, for now really just gamma.comp
+
 #ifndef COLOR_FORMAT
     #define COLOR_FORMAT rgba16f
 #endif
