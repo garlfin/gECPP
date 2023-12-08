@@ -15,7 +15,7 @@ namespace gE::DefaultPipeline
 	 public:
 		explicit Tonemap(Window*);
 
-		void RenderPass(DefaultPipeline::Target2D& t, GL::Texture& texture, GL::Texture& texture1) override;
+		void RenderPass(DefaultPipeline::Target2D& t, GL::Texture& in, GL::Texture& out) override;
 
 	 private:
 		GL::ComputeShader _shader;

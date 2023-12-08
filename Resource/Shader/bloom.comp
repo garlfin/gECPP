@@ -1,27 +1,120 @@
 #define BLOOM_MODE_COMPOSITE 0
-#define BLOOM_MODE_DOWNSAMPLE
-#define BLOOM_MODE_UPSAMPLE
+#define BLOOM_MODE_PREFILTER 1
+#define BLOOM_MODE_DOWNSAMPLE 2
+#define BLOOM_MODE_UPSAMPLE 3
+
+#ifndef BLOOM_MAX_BRIGHTNESS
+    #define BLOOM_MAX_BRIGHTNESS 15.0
+#endif
+
+#ifndef BLOOM_TENT_RADIUS
+    #define BLOOM_TENT_RADIUS 1.0
+#endif
+
+#ifndef EPSILON
+    #define EPSILON 0.001
+#endif
 
 // IO
 layout(location = 0) uniform sampler2D ColorIn;
 layout(location = 1) uniform sampler2D BloomIn;
-layout(location = 2) uniform vec4 Settings; // Knee, Threshold, Exposure, MIP
+layout(location = 2) uniform vec4 Settings; // Threshold, Knee, Mode, MIP
 
 layout(binding = 0) restrict writeonly uniform image2D ColorOut;
 
 // Helper Functions
-vec4 QuadraticThreshold(vec4, float t, float k);
+float Luminance(vec3);
+vec3 Prefilter(vec3, float t, float k);
+vec3 Downsample(sampler2D, vec2, vec2, uint);
+vec3 Upsample(sampler2D, vec2, vec2, uint);
 
 layout(local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
 void main()
 {
     ivec2 size = imageSize(ColorOut);
     ivec2 texel = ivec2(gl_GlobalInvocationID.xy);
-    vec2 uv = (vec2(texel) + 0.5) / size;
+    vec2 texelSize = 1.0 / size;
+    vec2 uv = (vec2(texel) + 0.5) * texelsize;
 
-    vec4 color = vec4(0);
+    vec4 color = vec4(0.0);
 
-
+    switch(Settings.z)
+    {
+    case BLOOM_MODE_PREFILTER:
+        color.rgb = Downsample(BloomIn, uv, texelSize, uint(Settings.w));
+        color.rgb = Prefilter(color, Settings.x, Settings.y);
+    break;
+    case BLOOM_MODE_DOWNSAMPLE:
+        color.rgb = Downsample(BloomIn, uv, texelSize, uint(Settings.w));
+    break;
+    case BLOOM_MODE_UPSAMPLE:
+        color = textureLod(ColorIn, uv, settings.w);
+        color += Upsample(BloomIn, uv, texelSize, uint(Settings.w));
+    break;
+    case BLOOM_MODE_COMPOSITE:
+        color = textureLod(ColorIn, uv, 0.0);
+        color += textureLod(BloomIn, uv, 0.0);
+    break;
+    }
 
     imageStore(ColorOut, texel, color);
 }
+
+vec3 Prefilter(vec3 color, float threshold, float knee)
+{
+    color = min(color, vec3(BLOOM_MAX_BRIGHTNESS));
+
+    // Quadratic threshold
+#ifdef BLOOM_USE_LUMA
+    float brightness = Luminance(color);
+#else
+    float brightness = max(color.r, max(color.g, color.b));
+#endif
+
+    float rq = clamp(brightness - threshold - knee, 0.0, knee * 2.0);
+    rq = (rq * rq) * (0.25 / knee);
+    color *= max(rq, brightness - threshold) / max(brightness, EPSILON);
+
+    return color;
+}
+
+vec3 Downsample(sampler2D tex, vec2 uv, vec2 texelSize, uint mip)
+{
+    vec2 halfSize = texelSize * 0.5;
+
+    // a - b - c
+    // - d - e -
+    // f - g - h
+    // - i - k -
+    // k - l - m
+
+    // Outside box
+    vec3 a = texture(tex, uv + vec2(-1.0, 1.0) * texelSize).rgb;
+    vec3 b = texture(tex, uv + vec2(0.0, 1.0) * texelSize).rgb;
+    vec3 c = texture(tex, uv + vec2(1.0, 1.0) * texelSize).rgb;
+
+    vec3 f = texture(tex, uv + vec2(-1.0, 0.0) * texelSize).rgb;
+    vec3 g = texture(tex, uv + vec2(0.0, 0.0) * texelSize).rgb;
+    vec3 h = texture(tex, uv + vec2(1.0, 0.0) * texelSize).rgb;
+
+    vec3 k = texture(tex, uv + vec2(-1.0, -1.0) * texelSize).rgb;
+    vec3 l = texture(tex, uv + vec2(0.0, -1.0) * texelSize).rgb;
+    vec3 m = texture(tex, uv + vec2(1.0, -1.0) * texelSize).rgb;
+
+    // Inside box
+    vec3 d = texture(tex, uv + vec2(-1.0, 1.0) * halfSize).rgb;
+    vec3 e = texture(tex, uv + vec2(1.0, 1.0) * halfSize).rgb;
+    vec3 i = texture(tex, uv + vec2(-1.0, -1.0) * halfSize).rgb;
+    vec3 k = texture(tex, uv + vec2(1.0, -1.0) * halfSize).rgb;
+
+    vec3 color = vec3(0.0);
+
+    return color;
+}
+
+vec3 Upsample(sampler2D tex, vec2 uv, vec2 texelSize, uint mip)
+{
+    return vec3(0.0);
+}
+
+float Luminance(vec3 color) { return dot(color, vec3(0.299, 0.587, 0.114)); }
