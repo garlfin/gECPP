@@ -56,8 +56,6 @@ namespace gE
 
 	void DefaultPipeline::Target2D::PostProcessPass()
 	{
-		Camera2D& camera = GetCamera();
-		glm::u32vec2 size = camera.GetSize();
 		GL::ComputeShader& taaShader = GetWindow().GetTAAShader();
 
 		taaShader.Bind();

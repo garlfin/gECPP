@@ -20,7 +20,6 @@ namespace gE::DefaultPipeline
 		PrefilterDownsample,
 		Downsample,
 		Upsample,
-		UpsampleComposite
 	};
 	class Bloom : public PostProcessEffect<Target2D>
 	{
