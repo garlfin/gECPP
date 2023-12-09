@@ -6,15 +6,16 @@
 #include <GL/Texture/TextureSlotManager.h>
 
 #include "WindowState.h"
-#include "Engine/Manager.h"
-#include "Engine/AssetManager.h"
-#include "Engine/Component/Transform.h"
-#include "Engine/Component/Camera/Camera.h"
-#include "Engine/Renderer/VoxelPipeline.h"
-#include "Engine/Entity/VoxelCapture.h"
-#include "Engine/Component/MeshRenderer.h"
-#include "Engine/Entity/Light.h"
-#include "Engine/Entity/CubemapCapture.h"
+#include <Engine/Manager.h>
+#include <Engine/AssetManager.h>
+#include <Engine/Component/Transform.h>
+#include <Engine/Component/Camera/Camera.h>
+#include <Engine/Renderer/VoxelPipeline.h>
+#include <Engine/Entity/VoxelCapture.h>
+#include <Engine/Component/MeshRenderer.h>
+#include <Engine/Entity/Light.h>
+#include <Engine/Entity/CubemapCapture.h>
+#include <Engine/Renderer/PostProcess/Bloom.h>
 #include <Engine/Renderer/PostProcess/Tonemap.h>
 
 struct GLFWwindow;
@@ -50,6 +51,7 @@ namespace gE
 		GET(GL::Texture2D&, BRDFLookupTexture, BRDFLookup);
 		GET(GL::ComputeShader&, TAAShader, TAAShader);
 		GET(DefaultPipeline::Tonemap&, TonemapEffect, TonemapEffect);
+		GET(DefaultPipeline::Bloom&, BloomEffect, BloomEffect);
 
 		// Managers
 		GET(CameraManager&, Cameras, Cameras);
@@ -97,6 +99,7 @@ namespace gE
 		SmartPointer<GL::Texture2D> BRDFLookup;
 		SmartPointer<GL::ComputeShader> TAAShader;
 		SmartPointer<DefaultPipeline::Tonemap> TonemapEffect;
+		SmartPointer<DefaultPipeline::Bloom> BloomEffect;
 
 	 private:
 		GL::TextureSize2D _size;

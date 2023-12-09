@@ -11,7 +11,7 @@ void main()
 #ifdef EXT_BINDLESS
     FragColor = texture(Lighting.Skybox, FragPos);
 #else
-    FragColor = vec4(1.0);
+    FragColor = vec4(2.0);
 #endif
 
 	Velocity = vec2(0.0);

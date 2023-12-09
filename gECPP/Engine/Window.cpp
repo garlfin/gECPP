@@ -113,6 +113,7 @@ void Window::OnInit()
 	TAAShader = CreateSmartPointer<GL::ComputeShader>(this, "Resource/Shader/taa.comp");
 
 	TonemapEffect = CreateSmartPointer<DefaultPipeline::Tonemap>(this);
+	BloomEffect = CreateSmartPointer<DefaultPipeline::Bloom>(this);
 
 	{
 		GL::ComputeShader brdfShader(this, "Resource/Shader/brdf.comp");

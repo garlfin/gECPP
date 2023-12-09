@@ -8,14 +8,24 @@
 #include <Engine/Component/Camera/PostProcessEffect.h>
 #include <GL/Shader/Shader.h>
 
-#define TONEMAP_GROUP_SIZE 32
+#define BLOOM_GROUP_SIZE 32
+#define BLOOM_MAX_ITERATIONS 5
+#define BLOOM_THRESHOLD 1.f
+#define BLOOM_KNEE 0.5f
 
 namespace gE::DefaultPipeline
 {
-	class Tonemap : public PostProcessEffect<Target2D>
+	enum class BloomStage : u8
+	{
+		PrefilterDownsample,
+		Downsample,
+		Upsample,
+		UpsampleComposite
+	};
+	class Bloom : public PostProcessEffect<Target2D>
 	{
 	 public:
-		explicit Tonemap(Window*);
+		explicit Bloom(Window*);
 
 		void RenderPass(DefaultPipeline::Target2D& t, GL::Texture2D& in, GL::Texture2D& out) override;
 

@@ -1,7 +1,5 @@
-// tonemap.comp, for now really just gamma.comp
-
-#ifndef COLOR_FORMAT
-    #define COLOR_FORMAT rgba16f
+#ifndef PIPELINE_COLOR_FORMAT
+    #define PIPELINE_COLOR_FORMAT rgba16f
 #endif
 
 #ifndef GAMMA
@@ -9,8 +7,8 @@
 #endif
 
 // IO
-layout(binding = 0, COLOR_FORMAT) restrict readonly uniform image2D ColorIn;
-layout(binding = 1, COLOR_FORMAT) restrict writeonly uniform image2D ColorOut;
+layout(binding = 0, PIPELINE_COLOR_FORMAT) restrict readonly uniform image2D ColorIn;
+layout(binding = 1, PIPELINE_COLOR_FORMAT) restrict writeonly uniform image2D ColorOut;
 
 // Helper Functions
 vec3 ACESNarkowicz(vec3);
@@ -28,6 +26,7 @@ void main()
     imageStore(ColorOut, texel, color);
 }
 
+// https://knarkowicz.wordpress.com/2016/01/06/aces-filmic-tone-mapping-curve/
 vec3 ACESNarkowicz(vec3 x)
 {
     float a = 2.51;

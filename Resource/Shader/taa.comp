@@ -1,8 +1,8 @@
 #define TAA_MODE_FULL
 #define TAA_CLIP_AABB
 
-#ifndef COLOR_FORMAT
-    #define TAA_COLOR_FORMAT rgba16f
+#ifndef PIPELINE_COLOR_FORMAT
+    #define PIPELINE_COLOR_FORMAT rgba16f
 #endif
 
 #ifndef TAA_SAMPLE_COUNT
@@ -20,7 +20,7 @@ layout(location = 0) uniform sampler2D ColorIn;
 layout(location = 1) uniform sampler2D PreviousColorIn;
 layout(location = 2) uniform sampler2D VelocityIn;
 
-layout(binding = 0, TAA_COLOR_FORMAT) restrict writeonly uniform image2D ColorOut;
+layout(binding = 0, PIPELINE_COLOR_FORMAT) restrict writeonly uniform image2D ColorOut;
 
 // Variables
 vec2 Offsets[8] =

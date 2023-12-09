@@ -24,6 +24,7 @@ namespace GL
 	Texture2D::Texture2D(gE::Window* window, const TextureSettings<TextureDimension::D2D>& settings, const TextureData& data)
 		: Texture(window, GL_TEXTURE_2D, settings), _size(settings.Size)
 	{
+		if(!Mips) Mips = ::GL::GetMipCount<TextureDimension::D2D>(_size);
 		glTextureStorage2D(ID, Mips, Format, _size.x, _size.y);
 
 		if(!data.Data) return;
@@ -57,6 +58,7 @@ namespace GL
 		:
 		Texture(window, GL_TEXTURE_3D, settings), _size(settings.Size)
 	{
+		if(!Mips) Mips = ::GL::GetMipCount<TextureDimension::D3D>(_size);
 		glTextureStorage3D(ID, Mips, Format, _size.x, _size.y, _size.z);
 
 		if(!data.Data) return;
@@ -100,6 +102,7 @@ namespace GL
 	TextureCube::TextureCube(gE::Window* window, const TextureSettings<TextureDimension::D1D>& settings, const TextureData& data)
 		: Texture(window, GL_TEXTURE_CUBE_MAP, settings), _size(settings.Size)
 	{
+		if(!Mips) Mips = ::GL::GetMipCount<TextureDimension::D1D>(_size);
 		glTextureStorage2D(ID, Mips, settings.Format, _size, _size);
 
 		if(!data.Data) return;

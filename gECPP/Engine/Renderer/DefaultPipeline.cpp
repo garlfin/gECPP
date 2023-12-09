@@ -60,13 +60,14 @@ namespace gE
 		glm::u32vec2 size = camera.GetSize();
 		GL::ComputeShader& taaShader = GetWindow().GetTAAShader();
 
-		_postProcessBack.Bind(0, GL_WRITE_ONLY);
+		taaShader.Bind();
 
+		_postProcessBack.Bind(0, GL_WRITE_ONLY);
 		taaShader.SetUniform(0, _color->Use(0));
 		taaShader.SetUniform(1, _colorBack.Use(1));
 		taaShader.SetUniform(2, _velocity->Use(2));
 
-		taaShader.Bind();
+		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 		taaShader.Dispatch(DIV_CEIL(_color->GetSize(), TAA_GROUP_SIZE));
 
 		// Copy TAA result to taa "backbuffer"
@@ -80,7 +81,7 @@ namespace gE
 			effect->RenderPass(*this, *front, *back);
 		}
 
-
+		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 		// Sync post process "backbuffer" and main color buffer
 		if(front == (GL::Texture2D*) _color) front->CopyFrom(*back);
 	}

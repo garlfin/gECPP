@@ -87,12 +87,13 @@ namespace GL
 namespace gE::DefaultPipeline
 {
 	CONSTEXPR_GLOBAL GL::ITextureSettings DepthFormat { GL_DEPTH_COMPONENT32F, GL::WrapMode::Clamp };
-	CONSTEXPR_GLOBAL GL::ITextureSettings ColorFormat { GL_RGBA16F, GL::WrapMode::Clamp };
-	CONSTEXPR_GLOBAL GL::ITextureSettings VelocityFormat { GL_RG32F, GL::WrapMode::Clamp };
+	CONSTEXPR_GLOBAL GL::ITextureSettings ColorFormat { GL_RGBA16F, GL::WrapMode::Clamp, GL::FilterMode::Linear, 0 };
+	CONSTEXPR_GLOBAL GL::ITextureSettings VelocityFormat { GL_RG32F, GL::WrapMode::Clamp  };
 
  	class Target2D : public RenderTarget<Camera2D>, public IDepthTarget
 	{
 	 public:
+		typedef GL::Texture2D TEX_T;
 		explicit Target2D(Camera2D& camera, std::vector<PostProcessEffect<Target2D>*>);
 
 		GET(GL::Texture2D&, Depth, _depth.Get());

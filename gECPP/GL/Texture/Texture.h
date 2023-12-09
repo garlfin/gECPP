@@ -28,6 +28,18 @@ namespace GL
 
 	CONSTEXPR_GLOBAL handle NullHandle = handle();
 
+	template<TextureDimension T>
+	u8 GetMipCount(const TextureSize<T>& size)
+	{
+		u32 largest;
+
+		if constexpr(T == TextureDimension::D1D) largest = size;
+		else if constexpr(T == TextureDimension::D2D) largest = glm::max(size.x, size.y);
+		else largest = glm::max(size.x, glm::max(size.y, size.z));
+
+		return 32 - __builtin_clz(largest);
+	}
+
 	class Texture : public Asset
 	{
 	 public:
@@ -49,12 +61,12 @@ namespace GL
 
 		GET_CONST(GLenum, Format, Format);
 		GET_CONST(GLenum, Target, Target);
-		GET_CONST(GLenum, MipCount, Mips);
+		GET_CONST(u8, MipCount, Mips);
 
 		~Texture() override;
 
 	 protected:
-		const uint8_t Mips;
+		uint8_t Mips;
 		const GLenum Format;
 		const GLenum Target;
 
