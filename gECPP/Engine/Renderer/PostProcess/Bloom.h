@@ -9,9 +9,9 @@
 #include <GL/Shader/Shader.h>
 
 #define BLOOM_GROUP_SIZE 32
-#define BLOOM_MAX_ITERATIONS 5
-#define BLOOM_THRESHOLD 1.f
-#define BLOOM_KNEE 0.5f
+#define BLOOM_MAX_ITERATIONS 7
+#define BLOOM_THRESHOLD 1.25f
+#define BLOOM_KNEE 0.8f
 
 namespace gE::DefaultPipeline
 {

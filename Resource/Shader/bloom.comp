@@ -44,11 +44,11 @@ void main()
 
     if(stage == BLOOM_STAGE_PREFILTER)
     {
-        color.rgb = textureLod(BloomIn, uv, Settings.w).rgb; // Downsample(BloomIn, uv, texelSize, Settings.w);
+        color.rgb = Downsample(BloomIn, uv, texelSize, Settings.w);
         color.rgb = Prefilter(color.rgb, Settings.x, Settings.y);
     }
     else if (stage == BLOOM_STAGE_DOWNSAMPLE)
-        color.rgb = textureLod(BloomIn, uv, Settings.w).rgb;
+        color.rgb = Downsample(BloomIn, uv, texelSize, Settings.w);
     else if (stage == BLOOM_STAGE_UPSAMPLE)
     {
         color = imageLoad(ColorIn, texel);
