@@ -18,6 +18,9 @@
     #define EPSILON 0.001
 #endif
 
+#define BLOOM_USE_LUMA
+#define BLOOM_USE_KARIS_AVG
+
 // IO
 layout(location = 0) uniform sampler2D BloomIn;
 layout(location = 1) uniform vec4 Settings; // Threshold, Knee, Mode, MIP
@@ -30,6 +33,7 @@ float Luminance(vec3);
 vec3 Prefilter(vec3, float, float); // threshold, knee
 vec3 Downsample(sampler2D, vec2, vec2, float);
 vec3 Upsample(sampler2D, vec2, vec2, float);
+vec3 KarisAverage(vec3 color, out float weight);
 
 layout(local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
 void main()
@@ -81,6 +85,7 @@ vec3 Downsample(sampler2D tex, vec2 uv, vec2 texelSize, float mip)
 {
     vec2 halfSize = texelSize * 0.5;
     vec3 color = vec3(0.0);
+    float weight = 0.0;
 
     // a - b - c
     // - d - e -
@@ -107,12 +112,27 @@ vec3 Downsample(sampler2D tex, vec2 uv, vec2 texelSize, float mip)
     vec3 i = textureLod(tex, uv + vec2(-1.0, -1.0) * halfSize, mip).rgb;
     vec3 j = textureLod(tex, uv + vec2(1.0, -1.0) * halfSize, mip).rgb;
 
-    color += (a + b + f + g) * 0.125;
-    color += (b + c + g + h) * 0.125;
-    color += (f + g + k + l) * 0.125;
-    color += (g + h + l + m) * 0.125;
-    color += (d + e + i + j) * 0.5;
-    color *= 0.25;
+#ifdef BLOOM_USE_KARIS_AVG
+    if(uint(Settings.w) == 0)
+    {
+        color += KarisAverage((a + b + f + g) * 0.125, weight);
+        color += KarisAverage((b + c + g + h) * 0.125, weight);
+        color += KarisAverage((f + g + k + l) * 0.125, weight);
+        color += KarisAverage((g + h + l + m) * 0.125, weight);
+        color += KarisAverage((d + e + i + j) * 0.5, weight);
+        color /= max(weight * 4.0, EPSILON); // 4 samples each
+    }
+    else
+#endif
+    {
+        color += (a + b + f + g) * 0.125;
+        color += (b + c + g + h) * 0.125;
+        color += (f + g + k + l) * 0.125;
+        color += (g + h + l + m) * 0.125;
+        color += (d + e + i + j) * 0.5;
+    }
+
+    color *= 0.25; // 4 samples each
 
     return color;
 }
@@ -138,3 +158,9 @@ vec3 Upsample(sampler2D tex, vec2 uv, vec2 texelSize, float mip)
 }
 
 float Luminance(vec3 color) { return dot(color, vec3(0.299, 0.587, 0.114)); }
+vec3 KarisAverage(vec3 color, out float weight)
+{
+    float w = 1.0 / (1.0 + Luminance(color));
+    weight += w;
+    return color * w;
+}

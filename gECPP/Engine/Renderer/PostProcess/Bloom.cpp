@@ -9,7 +9,6 @@ namespace gE::DefaultPipeline
 	Bloom::Bloom(Window* window) : PostProcessEffect(window),
 		   _shader(window, "Resource/Shader/bloom.comp")
 	{
-
 	}
 
 	void Bloom::RenderPass(Target2D& t, GL::Texture2D& in, GL::Texture2D& out)

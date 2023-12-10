@@ -7,6 +7,7 @@
 #include <GL/Math.h>
 #include <cstring>
 #include <algorithm>
+#include <vector>
 
 #include "Macro.h"
 #include "SerializationBuffer.h"

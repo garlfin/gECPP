@@ -15,6 +15,10 @@
     #define TAA_BOX_SAMPLE_COUNT 4
 #endif
 
+#ifndef TAA_WEIGHT
+    #define TAA_WEIGHT (1.0 / TAA_SAMPLE_COUNT)
+#endif
+
 // IO
 layout(location = 0) uniform sampler2D ColorIn;
 layout(location = 1) uniform sampler2D PreviousColorIn;
@@ -59,9 +63,8 @@ void main()
     previousColor.rgb = clamp(previousColor.rgb, boxMin, boxMax);
 #endif
 
-    float weight = 1.0 / TAA_SAMPLE_COUNT;
-    float currentWeight = weight * (1.0 / (1.0 + Luminance(currentColor.rgb)));
-    float previousWeight = (1.0 - weight) * (1.0 / (1.0 + Luminance(previousColor.rgb)));
+    float currentWeight = TAA_WEIGHT / (1.0 + Luminance(currentColor.rgb));
+    float previousWeight = (1.0 - TAA_WEIGHT) / (1.0 + Luminance(previousColor.rgb));
 
     vec3 color = (currentColor.rgb * currentWeight + previousColor.rgb * previousWeight);
     color /= max(currentWeight + previousWeight, 0.001);
