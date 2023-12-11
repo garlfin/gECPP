@@ -17,8 +17,6 @@
     #define EPSILON 0.001
 #endif
 
-#define BLOOM_USE_KARIS_AVG
-
 // IO
 layout(location = 0) uniform sampler2D BloomIn;
 layout(location = 1) uniform vec4 Settings; // Threshold, Knee, Intensity, MODE/MIP
@@ -157,7 +155,7 @@ vec3 Upsample(sampler2D tex, vec2 uv, vec2 texelSize, float mip)
 float Luminance(vec3 color) { return dot(color, vec3(0.299, 0.587, 0.114)); }
 vec3 KarisAverage(vec3 color, out float weight)
 {
-    float w = 1.0 / (1.0 + Luminance(color / 4));
+    float w = 1.0 + Luminance(color * 0.25);
     weight += w;
-    return color * w * 0.25;
+    return color / w;
 }
