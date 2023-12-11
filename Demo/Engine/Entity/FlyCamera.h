@@ -22,7 +22,8 @@ namespace VoxelDemo
 	 public:
 		explicit FlyCamera(gE::Window* window) : gE::Entity(window),
 			_camera(this, &window->GetCameras(), _target, {{ FlyCameraSettings, window->GetSize() }}),
-			_target(_camera, { &window->GetBloomEffect(), &window->GetTonemapEffect() }),
+			_target(_camera, { &_bloom, &_tonemap }),
+			_bloom(_target), _tonemap(_target),
 			_movement(this)
 		{
 		}
@@ -34,7 +35,10 @@ namespace VoxelDemo
 
 	 private:
 		gE::PerspectiveCamera _camera;
+
 		gE::DefaultPipeline::Target2D _target;
+		gE::DefaultPipeline::Bloom _bloom;
+		gE::DefaultPipeline::Tonemap _tonemap;
 
 		Movement _movement;
 	};

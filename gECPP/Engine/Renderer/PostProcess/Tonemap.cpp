@@ -3,22 +3,23 @@
 //
 
 #include "Tonemap.h"
+#include <Engine/Window.h>
 
 namespace gE::DefaultPipeline
 {
-	Tonemap::Tonemap(Window* window) : PostProcessEffect<Target2D>(window),
-		_shader(window, "Resource/Shader/tonemap.comp")
+	Tonemap::Tonemap(Target2D& target) : PostProcessEffect<Target2D>(target)
 	{
 	}
 
-	void Tonemap::RenderPass(DefaultPipeline::Target2D& t, GL::Texture2D& in, GL::Texture2D& out)
+	void Tonemap::RenderPass(GL::Texture2D& in, GL::Texture2D& out)
 	{
-		_shader.Bind();
+		GL::ComputeShader& shader = GetTarget().GetWindow().GetTonemapShader();
+		shader.Bind();
 
 		in.Bind(0, GL_READ_ONLY);
 		out.Bind(1, GL_WRITE_ONLY);
 
 		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-		_shader.Dispatch(DIV_CEIL_T(t.GetSize(), TONEMAP_GROUP_SIZE, GL::TextureSize2D));
+		shader.Dispatch(DIV_CEIL_T(GetTarget().GetSize(), TONEMAP_GROUP_SIZE, GL::TextureSize2D));
 	}
 }

@@ -3,52 +3,57 @@
 //
 
 #include "Bloom.h"
+#include <Engine/Window.h>
+
+#define BLOOM_STAGE_DOWNSAMPLE 1
+#define BLOOM_STAGE_UPSAMPLE -1
 
 namespace gE::DefaultPipeline
 {
-	Bloom::Bloom(Window* window) : PostProcessEffect(window),
-		   _shader(window, "Resource/Shader/bloom.comp")
+	Bloom::Bloom(Target2D& target) : PostProcessEffect(target)
 	{
 	}
 
-	void Bloom::RenderPass(Target2D& t, GL::Texture2D& in, GL::Texture2D& out)
+	Bloom::Bloom(Target2D& target, u8, float t, float k) : Bloom(target)
 	{
-		_shader.Bind();
+		Threshold = t;
+		Knee = k;
+	}
 
-		u8 mipCount = glm::min<u8>(in.GetMipCount(), BLOOM_MAX_ITERATIONS);
-		glm::vec4 settings { BLOOM_THRESHOLD, BLOOM_KNEE, 0, 0 }; // Threshold, Knee, Mode, MIP
+	void Bloom::RenderPass(GL::Texture2D& in, GL::Texture2D& out)
+	{
+		GL::ComputeShader& shader = GetTarget().GetWindow().GetBloomShader();
+		u8 mipCount = glm::min<u8>(in.GetMipCount(), Iterations);
+		glm::vec4 settings { Threshold, Knee, Intensity, 0.f }; // Mode/MIP
+
+		shader.Bind();
 
 		// Downsample
 		for(u8 i = 1; i < mipCount; i++)
 		{
-			settings.z = i == 1 ? (float) BloomStage::PrefilterDownsample : (float) BloomStage::Downsample;
-			settings.w = i - 1.0;
-
-			_shader.SetUniform(0, in.Use(0));
-			_shader.SetUniform(1, settings);
+			settings.w = BLOOM_STAGE_DOWNSAMPLE * (i - 1);
+			shader.SetUniform(0, in.Use(0));
+			shader.SetUniform(1, settings);
 
 			in.Bind(1, GL_WRITE_ONLY, i);
 
 			glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-			_shader.Dispatch(DIV_CEIL_T(out.GetSize(i), BLOOM_GROUP_SIZE, GL::TextureSize2D));
+			shader.Dispatch(DIV_CEIL_T(out.GetSize(i), BLOOM_GROUP_SIZE, GL::TextureSize2D));
 		}
 
-		// Upsample
-		settings.z = (float) BloomStage::Upsample;
 		for(u8 i = 1; i < mipCount; i++)
 		{
 			u8 mip = mipCount - i - 1;
-
-			settings.w = mip + 1.f;
-
-			_shader.SetUniform(1, settings);
+			settings.w = BLOOM_STAGE_UPSAMPLE * (mip + 1.f);
 
 			in.Bind(0, GL_READ_WRITE, mip);
 			if(mip == 0) out.Bind(1, GL_WRITE_ONLY, 0);
 			else in.Bind(1, GL_WRITE_ONLY, mip);
 
+			shader.SetUniform(1, settings);
+
 			glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-			_shader.Dispatch(DIV_CEIL_T(out.GetSize(mip), BLOOM_GROUP_SIZE, GL::TextureSize2D));
+			shader.Dispatch(DIV_CEIL_T(out.GetSize(mip), BLOOM_GROUP_SIZE, GL::TextureSize2D));
 		}
 	}
 }

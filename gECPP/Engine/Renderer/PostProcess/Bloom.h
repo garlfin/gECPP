@@ -9,26 +9,21 @@
 #include <GL/Shader/Shader.h>
 
 #define BLOOM_GROUP_SIZE 32
-#define BLOOM_MAX_ITERATIONS 7
-#define BLOOM_THRESHOLD 1.25f
-#define BLOOM_KNEE 0.8f
 
 namespace gE::DefaultPipeline
 {
-	enum class BloomStage : u8
-	{
-		PrefilterDownsample,
-		Downsample,
-		Upsample,
-	};
 	class Bloom : public PostProcessEffect<Target2D>
 	{
 	 public:
-		explicit Bloom(Window*);
+		explicit Bloom(Target2D&);
+		explicit Bloom(Target2D&, u8, float t, float k);
 
-		void RenderPass(DefaultPipeline::Target2D& t, GL::Texture2D& in, GL::Texture2D& out) override;
+		float Threshold = 2.f;
+		float Knee = 0.7f;
+		float Intensity = 1.f;
 
-	 private:
-		GL::ComputeShader _shader;
+		u8 Iterations = 7;
+
+		void RenderPass(GL::Texture2D& in, GL::Texture2D& out) override;
 	};
 }

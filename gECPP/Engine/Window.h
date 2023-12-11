@@ -49,9 +49,11 @@ namespace gE
 		GET(VoxelCapture&, VoxelCapture, VoxelCap);
 		GET(gE::Material&, DefaultMaterial, DefaultMaterial);
 		GET(GL::Texture2D&, BRDFLookupTexture, BRDFLookup);
+
+		// Post Process Data
 		GET(GL::ComputeShader&, TAAShader, TAAShader);
-		GET(DefaultPipeline::Tonemap&, TonemapEffect, TonemapEffect);
-		GET(DefaultPipeline::Bloom&, BloomEffect, BloomEffect);
+		GET(GL::ComputeShader&, TonemapShader, TonemapShader);
+		GET(GL::ComputeShader&, BloomShader, BloomShader);
 
 		// Managers
 		GET(CameraManager&, Cameras, Cameras);
@@ -98,8 +100,8 @@ namespace gE
 		SmartPointer<GL::Shader> BlitShader;
 		SmartPointer<GL::Texture2D> BRDFLookup;
 		SmartPointer<GL::ComputeShader> TAAShader;
-		SmartPointer<DefaultPipeline::Tonemap> TonemapEffect;
-		SmartPointer<DefaultPipeline::Bloom> BloomEffect;
+		SmartPointer<GL::ComputeShader> TonemapShader;
+		SmartPointer<GL::ComputeShader> BloomShader;
 
 	 private:
 		GL::TextureSize2D _size;

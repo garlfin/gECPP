@@ -111,9 +111,8 @@ void Window::OnInit()
 
 	BlitShader = CreateSmartPointer<GL::Shader>(this, "Resource/Shader/blit.vert", "Resource/Shader/blit.frag");
 	TAAShader = CreateSmartPointer<GL::ComputeShader>(this, "Resource/Shader/taa.comp");
-
-	TonemapEffect = CreateSmartPointer<DefaultPipeline::Tonemap>(this);
-	BloomEffect = CreateSmartPointer<DefaultPipeline::Bloom>(this);
+	TonemapShader = CreateSmartPointer<GL::ComputeShader>(this, "Resource/Shader/tonemap.comp");
+	BloomShader = CreateSmartPointer<GL::ComputeShader>(this, "Resource/Shader/bloom.comp");
 
 	{
 		GL::ComputeShader brdfShader(this, "Resource/Shader/brdf.comp");

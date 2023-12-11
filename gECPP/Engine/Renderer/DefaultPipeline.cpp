@@ -76,7 +76,7 @@ namespace gE
 		for(PostProcessEffect<Target2D>* effect : _effects)
 		{
 			std::swap(front, back);
-			effect->RenderPass(*this, *front, *back);
+			effect->RenderPass(*front, *back);
 		}
 
 		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);

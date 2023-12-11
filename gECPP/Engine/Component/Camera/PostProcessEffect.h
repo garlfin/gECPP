@@ -17,13 +17,13 @@ namespace gE
 	class PostProcessEffect
 	{
 	 public:
-		explicit PostProcessEffect(Window* window) : _window(*window) {};
+		explicit PostProcessEffect(T& target) : _target(target) {};
 
-		virtual void RenderPass(T&, T::TEX_T&, T::TEX_T&) = 0;
+		virtual void RenderPass(T::TEX_T&, T::TEX_T&) = 0;
 
-		GET(Window&, Window, _window);
+		GET(T&, Target, _target);
 
 	 private:
-		Window& _window;
+		T& _target;
 	};
 }

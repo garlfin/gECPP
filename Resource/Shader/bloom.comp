@@ -1,6 +1,5 @@
-#define BLOOM_STAGE_PREFILTER 0
 #define BLOOM_STAGE_DOWNSAMPLE 1
-#define BLOOM_STAGE_UPSAMPLE 2
+#define BLOOM_STAGE_UPSAMPLE -1
 
 #ifndef PIPELINE_COLOR_FORMAT
     #define PIPELINE_COLOR_FORMAT rgba16f
@@ -22,7 +21,7 @@
 
 // IO
 layout(location = 0) uniform sampler2D BloomIn;
-layout(location = 1) uniform vec4 Settings; // Threshold, Knee, Mode, MIP
+layout(location = 1) uniform vec4 Settings; // Threshold, Knee, Intensity, MODE/MIP
 
 layout(binding = 0, PIPELINE_COLOR_FORMAT) restrict readonly uniform image2D ColorIn;
 layout(binding = 1, PIPELINE_COLOR_FORMAT) restrict writeonly uniform image2D ColorOut;
@@ -41,21 +40,21 @@ void main()
     ivec2 texel = ivec2(gl_GlobalInvocationID.xy);
     vec2 texelSize = 1.0 / size;
     vec2 uv = (vec2(texel) + 0.5) * texelSize;
-    uint stage = uint(Settings.z);
+
+    int stage = int(Settings.w) < 0 ? -1 : 1;
+    float mip = abs(Settings.w);
 
     vec4 color = vec4(0.0);
 
-    if(stage == BLOOM_STAGE_PREFILTER)
+    if (stage == BLOOM_STAGE_DOWNSAMPLE)
     {
-        color.rgb = Downsample(BloomIn, uv, texelSize, Settings.w);
-        color.rgb = Prefilter(color.rgb, Settings.x, Settings.y);
+        color.rgb = Downsample(BloomIn, uv, texelSize, mip);
+        if(uint(mip) == 0) color.rgb = Prefilter(color.rgb, Settings.x, Settings.y);
     }
-    else if (stage == BLOOM_STAGE_DOWNSAMPLE)
-        color.rgb = Downsample(BloomIn, uv, texelSize, Settings.w);
     else if (stage == BLOOM_STAGE_UPSAMPLE)
     {
         color = imageLoad(ColorIn, texel);
-        color.rgb += Upsample(BloomIn, uv, texelSize * 2, Settings.w);
+        color.rgb += Upsample(BloomIn, uv, texelSize * 2, mip) * (uint(mip) == 1 ? Settings.z : 1.f);
     }
 
     imageStore(ColorOut, texel, color);
@@ -112,14 +111,14 @@ vec3 Downsample(sampler2D tex, vec2 uv, vec2 texelSize, float mip)
     vec3 j = textureLod(tex, uv + vec2(1.0, -1.0) * halfSize, mip).rgb;
 
 #ifdef BLOOM_USE_KARIS_AVG
-    if(uint(Settings.w) == 0)
+    if(uint(mip) == 0)
     {
         color += KarisAverage((a + b + f + g) * 0.125, weight);
         color += KarisAverage((b + c + g + h) * 0.125, weight);
         color += KarisAverage((f + g + k + l) * 0.125, weight);
         color += KarisAverage((g + h + l + m) * 0.125, weight);
         color += KarisAverage((d + e + i + j) * 0.5, weight);
-        color /= max(weight, EPSILON); // 4 samples each
+        color /= max(weight, EPSILON);
     }
     else
 #endif
@@ -160,5 +159,5 @@ vec3 KarisAverage(vec3 color, out float weight)
 {
     float w = 1.0 / (1.0 + Luminance(color / 4));
     weight += w;
-    return color * w;
+    return color * w * 0.25;
 }

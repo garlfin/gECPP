@@ -15,11 +15,7 @@ namespace gE::DefaultPipeline
 	class Tonemap : public PostProcessEffect<Target2D>
 	{
 	 public:
-		explicit Tonemap(Window*);
-
-		void RenderPass(DefaultPipeline::Target2D& t, GL::Texture2D& in, GL::Texture2D& out) override;
-
-	 private:
-		GL::ComputeShader _shader;
+		explicit Tonemap(Target2D&);
+		void RenderPass(GL::Texture2D& in, GL::Texture2D& out) override;
 	};
 }
