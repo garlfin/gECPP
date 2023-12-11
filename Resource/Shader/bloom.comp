@@ -18,6 +18,8 @@
     #define EPSILON 0.001
 #endif
 
+#define BLOOM_USE_KARIS_AVG
+
 // IO
 layout(location = 0) uniform sampler2D BloomIn;
 layout(location = 1) uniform vec4 Settings; // Threshold, Knee, Mode, MIP
@@ -117,7 +119,7 @@ vec3 Downsample(sampler2D tex, vec2 uv, vec2 texelSize, float mip)
         color += KarisAverage((f + g + k + l) * 0.125, weight);
         color += KarisAverage((g + h + l + m) * 0.125, weight);
         color += KarisAverage((d + e + i + j) * 0.5, weight);
-        color /= max(weight * 4.0, EPSILON); // 4 samples each
+        color /= max(weight, EPSILON); // 4 samples each
     }
     else
 #endif
@@ -127,9 +129,8 @@ vec3 Downsample(sampler2D tex, vec2 uv, vec2 texelSize, float mip)
         color += (f + g + k + l) * 0.125;
         color += (g + h + l + m) * 0.125;
         color += (d + e + i + j) * 0.5;
+        color *= 0.25; // 4 samples each
     }
-
-    color *= 0.25; // 4 samples each
 
     return color;
 }
@@ -157,7 +158,7 @@ vec3 Upsample(sampler2D tex, vec2 uv, vec2 texelSize, float mip)
 float Luminance(vec3 color) { return dot(color, vec3(0.299, 0.587, 0.114)); }
 vec3 KarisAverage(vec3 color, out float weight)
 {
-    float w = 1.0 / (1.0 + Luminance(color));
+    float w = 1.0 / (1.0 + Luminance(color / 4));
     weight += w;
     return color * w;
 }

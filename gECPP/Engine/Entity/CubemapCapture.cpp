@@ -47,7 +47,6 @@ namespace gE
 			_skyboxVAO = CreateSmartPointer<GL::VAO>(_window, skyboxSettings);
 		}
 
-		
 		_skyboxShader->Bind();
 
 		glEnable(GL_DEPTH_TEST);
