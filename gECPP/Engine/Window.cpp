@@ -15,6 +15,7 @@ using namespace gE;
 #define BRDF_SIZE 512
 #define BRDF_GROUP_SIZE 32
 #define BRDF_GROUP_COUNT ((BRDF_SIZE) / (BRDF_GROUP_SIZE))
+#define FPS_POLL_RATE 4
 
 Window::Window(glm::u16vec2 size, const char* name) :
 	_size(size), _name(strdup(name)), Lights(this), Cubemaps(this)
@@ -94,6 +95,7 @@ void Window::Run()
 		if(frameDelta < 1.0 / _monitor.RefreshRate) continue;
 
 	#ifdef DEBUG
+		if(!framed)
 		sprintf_s(WindowTitleBuf, "FPS: %u, TICK: %f", (unsigned) std::ceil(1.0 / frameDelta), delta);
 		glfwSetWindowTitle(_window, WindowTitleBuf);
 	#endif

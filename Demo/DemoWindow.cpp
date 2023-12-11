@@ -49,7 +49,7 @@ void DemoWindow::OnInit()
 	auto rasterMaterial = gE::CreateReference<gE::PBRMaterial>(this, rasterShader, materialSettings);
 
 	gETF::File file;
-	gETF::Read("cube.gETF", file);
+	gETF::Read("Resource/Model/cube.gETF", file);
 
 	auto* mesh = new VoxelDemo::StaticMeshEntity(this, file.Meshes[0]);
 	mesh->GetMaterials().SetMaterial(0, std::move(rasterMaterial));
