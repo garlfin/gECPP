@@ -8,14 +8,14 @@
 
 using namespace gE;
 
-#ifdef DEBUG
+#ifdef ENABLE_STATISTICS
 	char WindowTitleBuf[30];
 #endif
 
 #define BRDF_SIZE 512
 #define BRDF_GROUP_SIZE 32
 #define BRDF_GROUP_COUNT ((BRDF_SIZE) / (BRDF_GROUP_SIZE))
-#define FPS_POLL_RATE 4
+#define FPS_POLL_RATE 0.1
 
 Window::Window(glm::u16vec2 size, const char* name) :
 	_size(size), _name(strdup(name)), Lights(this), Cubemaps(this)
@@ -71,6 +71,9 @@ void Window::Run()
 	glDebugMessageCallback(DebugMessage, nullptr);
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 #endif
+#ifdef ENABLE_STATISTICS
+	u64 pollTick = 0;
+#endif
 
 	Window::OnInit();
 	glfwSwapInterval(0);
@@ -80,6 +83,7 @@ void Window::Run()
 	_time = glfwGetTime();
 	double newTime;
 	double delta, frameDelta = 0;
+	u64 frame = 0;
 
 	while(!glfwWindowShouldClose(_window))
 	{
@@ -94,10 +98,13 @@ void Window::Run()
 
 		if(frameDelta < 1.0 / _monitor.RefreshRate) continue;
 
-	#ifdef DEBUG
-		if(!framed)
-		sprintf_s(WindowTitleBuf, "FPS: %u, TICK: %f", (unsigned) std::ceil(1.0 / frameDelta), delta);
-		glfwSetWindowTitle(_window, WindowTitleBuf);
+	#ifdef ENABLE_STATISTICS
+		if(_time > FPS_POLL_RATE * pollTick)
+		{
+			sprintf_s(WindowTitleBuf, "FPS: %u, TICK: %f", (unsigned) std::ceil(1.0 / frameDelta), delta);
+			glfwSetWindowTitle(_window, WindowTitleBuf);
+			pollTick++;
+		}
 	#endif
 
 		frameDelta = 0;
