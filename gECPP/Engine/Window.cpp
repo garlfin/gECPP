@@ -6,14 +6,16 @@
 #include <iostream>
 #include "Engine/Component/Camera/Camera.h"
 
+#define ENABLE_STATISTICS
+
 using namespace gE;
 
 #ifdef ENABLE_STATISTICS
-	char WindowTitleBuf[30];
+	char WindowTitleBuf[50];
 #endif
 
 #define BRDF_SIZE 512
-#define BRDF_GROUP_SIZE 32
+#define BRDF_GROUP_SIZE 8
 #define BRDF_GROUP_COUNT ((BRDF_SIZE) / (BRDF_GROUP_SIZE))
 #define FPS_POLL_RATE 0.1
 
@@ -31,20 +33,23 @@ Window::Window(glm::u16vec2 size, const char* name) :
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 	glfwWindowHint(GLFW_MAXIMIZED, false);
 
-	_window = glfwCreateWindow(size.x, size.y, name, nullptr, nullptr);
+	GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
+	_monitor = Monitor(glfwGetVideoMode(primaryMonitor));
+	if((glm::u16vec2) _monitor.Size != size) primaryMonitor = nullptr;
+
+	_window = glfwCreateWindow(size.x, size.y, name, primaryMonitor, nullptr);
 	if(!_window) GE_FAIL("Failed to create Window.");
 
 	glfwMakeContextCurrent(_window);
 
 	PVR::Header iconHeader;
-
 	u8* iconData = PVR::Read("Resource/gE.PVR", iconHeader);
+
 	GLFWimage image{(int) iconHeader.Size.x, (int) iconHeader.Size.y, iconData};
 	glfwSetWindowIcon(_window, 1, &image);
 
 	delete[] iconData;
 
-	_monitor = Monitor(glfwGetVideoMode(glfwGetPrimaryMonitor()));
 
 	if(!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) GE_FAIL("Failed to initialize GLAD.");
 }
@@ -83,7 +88,6 @@ void Window::Run()
 	_time = glfwGetTime();
 	double newTime;
 	double delta, frameDelta = 0;
-	u64 frame = 0;
 
 	while(!glfwWindowShouldClose(_window))
 	{
@@ -96,20 +100,22 @@ void Window::Run()
 
 		OnUpdate((float) delta);
 
+	#ifdef CLAMP_FPS
 		if(frameDelta < 1.0 / _monitor.RefreshRate) continue;
-
+	#endif
 	#ifdef ENABLE_STATISTICS
 		if(_time > FPS_POLL_RATE * pollTick)
 		{
-			sprintf_s(WindowTitleBuf, "FPS: %u, TICK: %f", (unsigned) std::ceil(1.0 / frameDelta), delta);
+			sprintf_s(WindowTitleBuf, "FPS: %u, TICK: %f, RENDER: %f", (unsigned) std::ceil(1.0 / frameDelta), delta, frameDelta);
 			glfwSetWindowTitle(_window, WindowTitleBuf);
 			pollTick++;
 		}
 	#endif
 
-		frameDelta = 0;
 		OnRender((float) frameDelta);
 		glfwSwapBuffers(_window);
+
+		frameDelta = 0;
 	}
 }
 
@@ -153,6 +159,26 @@ void Window::Blit(const GL::Texture& texture)
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
+}
+
+void Window::OnUpdate(float delta)
+{
+	Behaviors.OnUpdate(delta);
+}
+
+void Window::OnRender(float delta)
+{
+	Transforms.OnRender(delta);
+	Behaviors.OnRender(delta);
+
+	Lights.OnRender(delta);
+	Cubemaps.OnRender(delta);
+	Cameras.OnRender(delta);
+
+	GE_ASSERT(Cameras.CurrentCamera, "CAMERA SHOULD NOT BE NULL!");
+
+	GL::FrameBuffer::Reset();
+	Blit(*Cameras.Color);
 }
 
 Monitor::Monitor(const GLFWvidmode* mode) :

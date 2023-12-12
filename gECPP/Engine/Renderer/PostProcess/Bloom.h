@@ -8,7 +8,7 @@
 #include <Engine/Component/Camera/PostProcessEffect.h>
 #include <GL/Shader/Shader.h>
 
-#define BLOOM_GROUP_SIZE 32
+#define BLOOM_GROUP_SIZE 8
 
 namespace gE::DefaultPipeline
 {

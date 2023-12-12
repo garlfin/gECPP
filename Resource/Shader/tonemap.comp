@@ -13,7 +13,7 @@ layout(binding = 1, PIPELINE_COLOR_FORMAT) restrict writeonly uniform image2D Co
 // Helper Functions
 vec3 ACESNarkowicz(vec3);
 
-layout(local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 void main()
 {
     ivec2 texel = ivec2(gl_GlobalInvocationID.xy);

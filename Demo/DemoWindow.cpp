@@ -14,26 +14,6 @@
 
 using namespace VoxelDemo;
 
-void DemoWindow::OnUpdate(float delta)
-{
-	Behaviors.OnUpdate(delta);
-}
-
-void DemoWindow::OnRender(float delta)
-{
-	Transforms.OnRender(delta);
-	Behaviors.OnRender(delta);
-
-	Lights.OnRender(delta);
-	Cubemaps.OnRender(delta);
-	Cameras.OnRender(delta);
-
-	GE_ASSERT(Cameras.CurrentCamera, "CAMERA SHOULD NOT BE NULL!");
-
-	GL::FrameBuffer::Reset();
-	Blit(*Cameras.Color);
-}
-
 void DemoWindow::OnInit()
 {
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
@@ -64,5 +44,3 @@ void DemoWindow::OnInit()
 
 	Cubemaps.Skybox = gE::CreateReferenceFromPointer((GL::TextureCube*) PVR::Read(this, "Resource/Texture/sky.pvr", GL::WrapMode::Clamp));
 }
-
-void DemoWindow::OnDestroy() {}

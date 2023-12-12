@@ -2,19 +2,19 @@
 #define BLOOM_STAGE_UPSAMPLE -1
 
 #ifndef PIPELINE_COLOR_FORMAT
-    #define PIPELINE_COLOR_FORMAT rgba16f
+#define PIPELINE_COLOR_FORMAT rgba16f
 #endif
 
 #ifndef BLOOM_MAX_BRIGHTNESS
-    #define BLOOM_MAX_BRIGHTNESS 15.0
+#define BLOOM_MAX_BRIGHTNESS 15.0
 #endif
 
 #ifndef BLOOM_TENT_RADIUS
-    #define BLOOM_TENT_RADIUS 1.0
+#define BLOOM_TENT_RADIUS 1
 #endif
 
 #ifndef EPSILON
-    #define EPSILON 0.001
+#define EPSILON 0.001
 #endif
 
 // IO
@@ -31,7 +31,7 @@ vec3 Downsample(sampler2D, vec2, vec2, float);
 vec3 Upsample(sampler2D, vec2, vec2, float);
 vec3 KarisAverage(vec3 color, out float weight);
 
-layout(local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 void main()
 {
     ivec2 size = imageSize(ColorOut);
@@ -62,11 +62,11 @@ vec3 Prefilter(vec3 color, float threshold, float knee)
 {
     color = min(color, vec3(BLOOM_MAX_BRIGHTNESS));
 
-#ifdef BLOOM_USE_LUMA
+    #ifdef BLOOM_USE_LUMA
     float brightness = Luminance(color);
-#else
+    #else
     float brightness = max(color.r, max(color.g, color.b));
-#endif
+    #endif
 
     // Quadratic threshold - Based on Unity Post Processing Stack v2
     float rq = clamp(brightness - threshold - knee, 0.0, knee * 2.0);
@@ -79,7 +79,6 @@ vec3 Prefilter(vec3 color, float threshold, float knee)
 // Next-Gen Post Processing in COD: Advanced Warfare
 vec3 Downsample(sampler2D tex, vec2 uv, vec2 texelSize, float mip)
 {
-    vec2 halfSize = texelSize * 0.5;
     vec3 color = vec3(0.0);
     float weight = 0.0;
 
@@ -90,25 +89,25 @@ vec3 Downsample(sampler2D tex, vec2 uv, vec2 texelSize, float mip)
     // k - l - m
 
     // Outside box
-    vec3 a = textureLod(tex, uv + vec2(-1.0, 1.0) * texelSize, mip).rgb;
-    vec3 b = textureLod(tex, uv + vec2(0.0, 1.0) * texelSize, mip).rgb;
-    vec3 c = textureLod(tex, uv + vec2(1.0, 1.0) * texelSize, mip).rgb;
+    vec3 a = textureLodOffset(tex, uv, mip, ivec2(-1, 1)).rgb;
+    vec3 b = textureLodOffset(tex, uv, mip, ivec2(0, 1)).rgb;
+    vec3 c = textureLodOffset(tex, uv, mip, ivec2(1, 1)).rgb;
 
-    vec3 f = textureLod(tex, uv + vec2(-1.0, 0.0) * texelSize, mip).rgb;
-    vec3 g = textureLod(tex, uv + vec2(0.0, 0.0) * texelSize, mip).rgb;
-    vec3 h = textureLod(tex, uv + vec2(1.0, 0.0) * texelSize, mip).rgb;
+    vec3 f = textureLodOffset(tex, uv, mip, ivec2(-1, 0)).rgb;
+    vec3 g = textureLodOffset(tex, uv, mip, ivec2(0, 0)).rgb;
+    vec3 h = textureLodOffset(tex, uv, mip, ivec2(1, 0)).rgb;
 
-    vec3 k = textureLod(tex, uv + vec2(-1.0, -1.0) * texelSize, mip).rgb;
-    vec3 l = textureLod(tex, uv + vec2(0.0, -1.0) * texelSize, mip).rgb;
-    vec3 m = textureLod(tex, uv + vec2(1.0, -1.0) * texelSize, mip).rgb;
+    vec3 k = textureLodOffset(tex, uv, mip, ivec2(-0, -1)).rgb;
+    vec3 l = textureLodOffset(tex, uv, mip, ivec2(0, -1)).rgb;
+    vec3 m = textureLodOffset(tex, uv, mip, ivec2(1, -1)).rgb;
 
     // Inside box
-    vec3 d = textureLod(tex, uv + vec2(-1.0, 1.0) * halfSize, mip).rgb;
-    vec3 e = textureLod(tex, uv + vec2(1.0, 1.0) * halfSize, mip).rgb;
-    vec3 i = textureLod(tex, uv + vec2(-1.0, -1.0) * halfSize, mip).rgb;
-    vec3 j = textureLod(tex, uv + vec2(1.0, -1.0) * halfSize, mip).rgb;
+    vec3 d = textureLod(tex, uv + vec2(-0.5, 0.5) * texelSize, mip).rgb;
+    vec3 e = textureLod(tex, uv + vec2(0.5, 0.5) * texelSize, mip).rgb;
+    vec3 i = textureLod(tex, uv + vec2(-0.5, -0.5) * texelSize, mip).rgb;
+    vec3 j = textureLod(tex, uv + vec2(0.5, -0.5) * texelSize, mip).rgb;
 
-#ifdef BLOOM_USE_KARIS_AVG
+    #ifdef BLOOM_USE_KARIS_AVG
     if(uint(mip) == 0)
     {
         color += KarisAverage((a + b + f + g) * 0.125, weight);
@@ -119,7 +118,7 @@ vec3 Downsample(sampler2D tex, vec2 uv, vec2 texelSize, float mip)
         color /= max(weight, EPSILON);
     }
     else
-#endif
+    #endif
     {
         color += (a + b + f + g) * 0.125;
         color += (b + c + g + h) * 0.125;
@@ -137,17 +136,17 @@ vec3 Upsample(sampler2D tex, vec2 uv, vec2 texelSize, float mip)
 {
     vec3 color = vec3(0.0);
 
-    color += textureLod(tex, uv + vec2(-1.0, 1.0) * texelSize * BLOOM_TENT_RADIUS, mip).rgb * 0.0625; // 1 / 16
-    color += textureLod(tex, uv + vec2(0.0, 1.0) * texelSize * BLOOM_TENT_RADIUS, mip).rgb * 0.125; // 2 / 16
-    color += textureLod(tex, uv + vec2(1.0, 1.0) * texelSize * BLOOM_TENT_RADIUS, mip).rgb * 0.0625; // 1 / 16
+    color += textureLodOffset(tex, uv, mip, ivec2(-1.0, 1.0) * BLOOM_TENT_RADIUS).rgb * 0.0625; // 1 / 16
+    color += textureLodOffset(tex, uv, mip, ivec2(0.0, 1.0) * BLOOM_TENT_RADIUS).rgb * 0.125; // 2 / 16
+    color += textureLodOffset(tex, uv, mip, ivec2(1.0, 1.0) * BLOOM_TENT_RADIUS).rgb * 0.0625; // 1 / 16
 
-    color += textureLod(tex, uv + vec2(-1.0, 0.0) * texelSize * BLOOM_TENT_RADIUS, mip).rgb * 0.125; // 2 / 16
-    color += textureLod(tex, uv + vec2(0.0, 0.0) * texelSize * BLOOM_TENT_RADIUS, mip).rgb * 0.25; // 4 / 16
-    color += textureLod(tex, uv + vec2(1.0, 0.0) * texelSize * BLOOM_TENT_RADIUS, mip).rgb * 0.125; // 2 / 16
+    color += textureLodOffset(tex, uv, mip, ivec2(-1.0, 0.0) * BLOOM_TENT_RADIUS).rgb * 0.125; // 2 / 16
+    color += textureLodOffset(tex, uv, mip, ivec2(0.0, 0.0) * BLOOM_TENT_RADIUS).rgb * 0.25; // 4 / 16
+    color += textureLodOffset(tex, uv, mip, ivec2(1.0, 0.0) * BLOOM_TENT_RADIUS).rgb * 0.125; // 2 / 16
 
-    color += textureLod(tex, uv + vec2(-1.0, -1.0) * texelSize * BLOOM_TENT_RADIUS, mip).rgb * 0.0625; // 1 / 16
-    color += textureLod(tex, uv + vec2(0.0, -1.0) * texelSize * BLOOM_TENT_RADIUS, mip).rgb * 0.125; // 2 / 16
-    color += textureLod(tex, uv + vec2(1.0, -1.0) * texelSize * BLOOM_TENT_RADIUS, mip).rgb * 0.0625; // 1 / 16
+    color += textureLodOffset(tex, uv, mip, ivec2(-1.0, -1.0) * BLOOM_TENT_RADIUS).rgb * 0.0625; // 1 / 16
+    color += textureLodOffset(tex, uv, mip, ivec2(0.0, -1.0) * BLOOM_TENT_RADIUS).rgb * 0.125; // 2 / 16
+    color += textureLodOffset(tex, uv, mip, ivec2(1.0, -1.0) * BLOOM_TENT_RADIUS).rgb * 0.0625; // 1 / 16
 
     return color;
 }

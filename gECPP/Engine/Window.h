@@ -21,7 +21,7 @@
 struct GLFWwindow;
 struct GLFWvidmode;
 
-#define TAA_GROUP_SIZE 32
+#define TAA_GROUP_SIZE 8
 
 namespace gE
 {
@@ -79,9 +79,9 @@ namespace gE
 
 	 protected:
 		virtual void OnInit();
-		virtual void OnUpdate(float) = 0;
-		virtual void OnRender(float) = 0;
-		virtual void OnDestroy() = 0;
+		virtual void OnUpdate(float);
+		virtual void OnRender(float);
+		virtual void OnDestroy() {};
 
 		SmartPointer<DefaultPipeline::Buffers> PipelineBuffers;
 		SmartPointer<VoxelPipeline::Buffers> VoxelBuffers;

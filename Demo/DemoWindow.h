@@ -20,8 +20,5 @@ namespace VoxelDemo
 
 	 private:
 		void OnInit() override;
-		void OnUpdate(float) override;
-		void OnRender(float) override;
-		void OnDestroy() override;
 	};
 }
