@@ -9,15 +9,16 @@
     #define TAA_SAMPLE_COUNT 16
 #endif
 
-#ifdef TAA_MODE_FULL
-    #define TAA_BOX_SAMPLE_COUNT 8
-#else
-    #define TAA_BOX_SAMPLE_COUNT 4
-#endif
-
 #ifndef TAA_WEIGHT
     #define TAA_WEIGHT (1.0 / TAA_SAMPLE_COUNT)
 #endif
+
+#define SAMPLE_OFFSET(OFFSET) \
+    { \
+    vec3 boxSample = textureLodOffset(ColorIn, uv, 0.f, OFFSET).rgb; \
+    boxMin = min(boxMin, boxSample); \
+    boxMax = max(boxMax, boxSample); \
+    }
 
 // IO
 layout(location = 0) uniform sampler2D ColorIn;
@@ -25,13 +26,6 @@ layout(location = 1) uniform sampler2D PreviousColorIn;
 layout(location = 2) uniform sampler2D VelocityIn;
 
 layout(binding = 0, PIPELINE_COLOR_FORMAT) restrict writeonly uniform image2D ColorOut;
-
-// Variables
-ivec2 Offsets[8] =
-{
-    ivec2(0, 1), ivec2(-1, 0), ivec2(1, 0), ivec2(0, -1), // Plus
-    ivec2(-1, 1), ivec2(1, 1), ivec2(-1, -1), ivec2(1, -1) // Outside
-};
 
 // Helper Functions
 float Luminance(vec3 col);
@@ -50,12 +44,19 @@ void main()
     vec4 previousColor = CatmullRom(PreviousColorIn, previousUV, size);
 
     vec3 boxMin = currentColor.rgb, boxMax = currentColor.rgb;
-    for(uint i = 0; i < TAA_BOX_SAMPLE_COUNT; i++)
-    {
-        vec3 boxSample = textureLodOffset(ColorIn, uv, 0.f, Offsets[i]).rgb;
-        boxMin = min(boxMin, boxSample);
-        boxMax = max(boxMax, boxSample);
-    }
+
+    // Manual loop unroll because AMD's driver is whiney...
+    SAMPLE_OFFSET(ivec2(0, 1));
+    SAMPLE_OFFSET(ivec2(-1, 0));
+    SAMPLE_OFFSET(ivec2(1, 0));
+    SAMPLE_OFFSET(ivec2(0, -1));
+
+#ifdef TAA_MODE_FULL
+    SAMPLE_OFFSET(ivec2(-1, 1));
+    SAMPLE_OFFSET(ivec2(1, 1));
+    SAMPLE_OFFSET(ivec2(-1, -1));
+    SAMPLE_OFFSET(ivec2(1, -1));
+#endif
 
 #ifdef TAA_CLIP_AABB
     previousColor = ClipAABB(previousColor, 1, boxMin, boxMax);

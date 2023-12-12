@@ -62,11 +62,11 @@ vec3 Prefilter(vec3 color, float threshold, float knee)
 {
     color = min(color, vec3(BLOOM_MAX_BRIGHTNESS));
 
-    #ifdef BLOOM_USE_LUMA
+#ifdef BLOOM_USE_LUMA
     float brightness = Luminance(color);
-    #else
+#else
     float brightness = max(color.r, max(color.g, color.b));
-    #endif
+#endif
 
     // Quadratic threshold - Based on Unity Post Processing Stack v2
     float rq = clamp(brightness - threshold - knee, 0.0, knee * 2.0);
@@ -107,7 +107,7 @@ vec3 Downsample(sampler2D tex, vec2 uv, vec2 texelSize, float mip)
     vec3 i = textureLod(tex, uv + vec2(-0.5, -0.5) * texelSize, mip).rgb;
     vec3 j = textureLod(tex, uv + vec2(0.5, -0.5) * texelSize, mip).rgb;
 
-    #ifdef BLOOM_USE_KARIS_AVG
+#ifdef BLOOM_USE_KARIS_AVG
     if(uint(mip) == 0)
     {
         color += KarisAverage((a + b + f + g) * 0.125, weight);
@@ -118,7 +118,7 @@ vec3 Downsample(sampler2D tex, vec2 uv, vec2 texelSize, float mip)
         color /= max(weight, EPSILON);
     }
     else
-    #endif
+#endif
     {
         color += (a + b + f + g) * 0.125;
         color += (b + c + g + h) * 0.125;
