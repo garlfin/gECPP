@@ -26,7 +26,7 @@ namespace gE
 	class Camera : public Component
 	{
 	 public:
-		Camera(Entity*, Manager*, IRenderTarget&, const ICameraSettings&);
+		Camera(Entity*, Manager*, GL::TextureSize2D, IRenderTarget&, const ICameraSettings&);
 
 		void OnUpdate(float delta) override { }
 		void OnRender(float delta) final;
@@ -39,6 +39,7 @@ namespace gE
 		GET_CONST(gE::ClipPlanes, ClipPlanes, _settings.ClipPlanes);
 		GET_CONST(const ICameraSettings&, Settings, _settings);
 		GET_CONST(const glm::mat4&, Projection, Projection);
+		GET_CONST(GL::TextureSize2D, ViewportSize, _viewportSize);
 
 	 protected:
 		virtual void UpdateProjection() = 0;
@@ -50,6 +51,7 @@ namespace gE
 		ICameraSettings _settings;
 		IRenderTarget& _target;
 
+		GL::TextureSize2D _viewportSize;
 		bool _isProjectionInvalid = true;
 	};
 
@@ -62,13 +64,10 @@ namespace gE
 		Camera2D(Entity*, Manager*, TARGET_TYPE&, const CameraSettings2D&);
 
 		GET(TARGET_TYPE&, Target, (TARGET_TYPE&) Camera::GetTarget());
-		GET_CONST(SIZE_TYPE, Size, _size);
-		GET_CONST(float, Aspect, (float) _size.x / _size.y);
+		GET_CONST(SIZE_TYPE, Size, GetViewportSize());
+		GET_CONST(float, Aspect, (float) GetSize().x / GetSize().y);
 
 		void GetGLCamera(GL::Camera& camera) override;
-
-	 private:
-		const SIZE_TYPE _size;
 	};
 
 	class PerspectiveCamera : public Camera2D
@@ -123,7 +122,7 @@ namespace gE
 		Camera3D(Entity*, Manager*, TARGET_TYPE&, const CameraSettings3D&);
 
 		GET(TARGET_TYPE&, Target, (TARGET_TYPE&) Camera::GetTarget());
-		GET_CONST(SIZE_TYPE, Size, _size);
+		GET_CONST(SIZE_TYPE, Size, SIZE_TYPE(GetViewportSize(), _sizeZ));
 
 		void GetGLCamera(GL::Camera&) override;
 
@@ -131,7 +130,7 @@ namespace gE
 		void UpdateProjection() override;
 
 	 private:
-		const SIZE_TYPE _size;
+		const GL::TextureSize1D _sizeZ;
 	};
 
 	class CameraCubemap : public Camera
@@ -143,15 +142,12 @@ namespace gE
 		CameraCubemap(Entity*, Manager*, TARGET_TYPE&, const CameraSettings1D&);
 
 		GET(TARGET_TYPE&, Target, (TARGET_TYPE&) Camera::GetTarget());
-		GET_CONST(SIZE_TYPE, Size, _size);
+		GET_CONST(SIZE_TYPE, Size, GetViewportSize().x);
 
 		void GetGLCamera(GL::Camera& camera) override;
 
 	 protected:
 		void UpdateProjection() override;
-
-	 public:
-		const SIZE_TYPE _size;
 	};
 
 	class CameraManager : public ComponentManager<Camera>

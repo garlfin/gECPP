@@ -2,19 +2,19 @@
 #define BLOOM_STAGE_UPSAMPLE -1
 
 #ifndef PIPELINE_COLOR_FORMAT
-#define PIPELINE_COLOR_FORMAT rgba16f
+    #define PIPELINE_COLOR_FORMAT rgba16f
 #endif
 
 #ifndef BLOOM_MAX_BRIGHTNESS
-#define BLOOM_MAX_BRIGHTNESS 15.0
+    #define BLOOM_MAX_BRIGHTNESS 15.0
 #endif
 
 #ifndef BLOOM_TENT_RADIUS
-#define BLOOM_TENT_RADIUS 1
+    #define BLOOM_TENT_RADIUS 1
 #endif
 
 #ifndef EPSILON
-#define EPSILON 0.001
+    #define EPSILON 0.001
 #endif
 
 // IO
@@ -136,17 +136,17 @@ vec3 Upsample(sampler2D tex, vec2 uv, vec2 texelSize, float mip)
 {
     vec3 color = vec3(0.0);
 
-    color += textureLodOffset(tex, uv, mip, ivec2(-1.0, 1.0) * BLOOM_TENT_RADIUS).rgb * 0.0625; // 1 / 16
-    color += textureLodOffset(tex, uv, mip, ivec2(0.0, 1.0) * BLOOM_TENT_RADIUS).rgb * 0.125; // 2 / 16
-    color += textureLodOffset(tex, uv, mip, ivec2(1.0, 1.0) * BLOOM_TENT_RADIUS).rgb * 0.0625; // 1 / 16
+    color += textureLodOffset(tex, uv, mip, ivec2(-1, 1) * BLOOM_TENT_RADIUS).rgb * 0.0625; // 1 / 16
+    color += textureLodOffset(tex, uv, mip, ivec2(0, 1) * BLOOM_TENT_RADIUS).rgb * 0.125; // 2 / 16
+    color += textureLodOffset(tex, uv, mip, ivec2(1, 1) * BLOOM_TENT_RADIUS).rgb * 0.0625; // 1 / 16
 
-    color += textureLodOffset(tex, uv, mip, ivec2(-1.0, 0.0) * BLOOM_TENT_RADIUS).rgb * 0.125; // 2 / 16
-    color += textureLodOffset(tex, uv, mip, ivec2(0.0, 0.0) * BLOOM_TENT_RADIUS).rgb * 0.25; // 4 / 16
-    color += textureLodOffset(tex, uv, mip, ivec2(1.0, 0.0) * BLOOM_TENT_RADIUS).rgb * 0.125; // 2 / 16
+    color += textureLodOffset(tex, uv, mip, ivec2(-1, 0) * BLOOM_TENT_RADIUS).rgb * 0.125; // 2 / 16
+    color += textureLodOffset(tex, uv, mip, ivec2(0, 0) * BLOOM_TENT_RADIUS).rgb * 0.25; // 4 / 16
+    color += textureLodOffset(tex, uv, mip, ivec2(1, 0) * BLOOM_TENT_RADIUS).rgb * 0.125; // 2 / 16
 
-    color += textureLodOffset(tex, uv, mip, ivec2(-1.0, -1.0) * BLOOM_TENT_RADIUS).rgb * 0.0625; // 1 / 16
-    color += textureLodOffset(tex, uv, mip, ivec2(0.0, -1.0) * BLOOM_TENT_RADIUS).rgb * 0.125; // 2 / 16
-    color += textureLodOffset(tex, uv, mip, ivec2(1.0, -1.0) * BLOOM_TENT_RADIUS).rgb * 0.0625; // 1 / 16
+    color += textureLodOffset(tex, uv, mip, ivec2(-1, -1) * BLOOM_TENT_RADIUS).rgb * 0.0625; // 1 / 16
+    color += textureLodOffset(tex, uv, mip, ivec2(0, -1) * BLOOM_TENT_RADIUS).rgb * 0.125; // 2 / 16
+    color += textureLodOffset(tex, uv, mip, ivec2(1, -1) * BLOOM_TENT_RADIUS).rgb * 0.0625; // 1 / 16
 
     return color;
 }

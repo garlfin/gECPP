@@ -11,8 +11,8 @@
 namespace gE
 {
 
-	Camera::Camera(Entity* p, Manager* m, IRenderTarget& t, const ICameraSettings& s) :
-		Component(p, m), _settings(s), _target(t)
+	Camera::Camera(Entity* p, Manager* m, GL::TextureSize2D size, IRenderTarget& t, const ICameraSettings& s) :
+		Component(p, m), _settings(s), _target(t), _viewportSize(size)
 	{
 	}
 
@@ -45,13 +45,9 @@ namespace gE
 		cam.Position = transform.GlobalTranslation();
 		cam.Frame = Frame;
 		cam.ClipPlanes = GetClipPlanes();
-
-		if(Frame)
-			cam.PreviousViewProjection = Projection * glm::inverse(transform.PreviousModel());
-		else
-			cam.PreviousViewProjection = Projection * glm::inverse(transform.Model());
-
+		cam.Size = _viewportSize;
 		cam.Projection = Projection;
+		cam.PreviousViewProjection = Projection * glm::inverse(transform.PreviousModel());
 
 		// TODO: FIX AFTER REFACTORING
 		cam.DepthTexture = 0; // (handle) *GetDepth();
@@ -64,7 +60,7 @@ namespace gE
 	}
 
 	Camera2D::Camera2D(Entity* p, Manager* m, TARGET_TYPE& t, const CameraSettings2D& s) :
-		Camera(p, m, t, s), _size(s.Size)
+		Camera(p, m, s.Size, t, s)
 	{
 	}
 
@@ -88,11 +84,10 @@ namespace gE
 	{
 		Camera::GetGLCamera(camera);
 		camera.View[0] = glm::inverse(GetOwner()->GetTransform().Model());
-		camera.Size = GetSize();
 	}
 
 	Camera3D::Camera3D(Entity* p, Manager* m, TARGET_TYPE& t, const CameraSettings3D& s) :
-		Camera(p, m, t, s), _size(s.Size)
+		Camera(p, m, s.Size, t, s), _sizeZ(s.Size.z)
 	{
 	}
 
@@ -111,13 +106,13 @@ namespace gE
 	}
 
 	CameraCubemap::CameraCubemap(Entity* p, Manager* m, TARGET_TYPE& t, const CameraSettings1D& s) :
-		Camera(p, m, t, s), _size(s.Size)
+		Camera(p, m, GL::TextureSize2D(s.Size), t, s)
 	{
 	}
 
 	void CameraCubemap::UpdateProjection()
 	{
-		Projection = glm::perspectiveFov(degree_cast<AngleType::Radian>(90.f), (float) GetSize(), (float) GetSize(), GetClipPlanes().x, GetClipPlanes().y);
+		Projection = glm::perspectiveFov(degree_cast<AngleType::Radian>(90.f), 1.f, 1.f, GetClipPlanes().x, GetClipPlanes().y);
 	}
 
 	CONSTEXPR_GLOBAL glm::vec3 ForwardDirs[]

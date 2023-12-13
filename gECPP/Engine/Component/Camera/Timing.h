@@ -18,22 +18,20 @@ namespace gE
 		OPERATOR_EQUALS(CameraTiming);
 
 		GET_CONST(u64, Frame, _frame);
-		GET_CONST(bool, IsFirst, _isFirst);
+		GET_CONST(bool, IsFirst, !_frame);
 
 		u8 TickOffset = 0;
 		u8 TickSkip = 1;
 
 		NODISCARD bool Tick(float delta)
 		{
-			_isFirst = false;
-			_frame++;
-
-			return _isFirst || !TickSkip ||                                      // first frame or no skip
-				   _frame >= TickOffset && (_frame - TickOffset) % TickSkip == 0; // equal to tick
+			bool v = !_frame || TickSkip &&                                          // first frame or no skip
+					  _frame >= TickOffset && (_frame - TickOffset) % TickSkip == 0; // equal to tick
+			 _frame++;
+			return v;
 		}
 
 	 private:
-		bool _isFirst = true; // padded anyways, no need for bitfield
 		u64 _frame = 0;
 	};
 

@@ -149,6 +149,9 @@ void Window::OnInit()
 
 void Window::Blit(const GL::Texture& texture)
 {
+	// This function is really sketchy, vertices are all in the shader.
+	// It needs a VAO to be previously bound to work.
+
 	BlitShader->Bind();
 
 	glDisable(GL_DEPTH_TEST);
