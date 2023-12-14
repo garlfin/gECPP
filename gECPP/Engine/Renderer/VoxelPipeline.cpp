@@ -17,7 +17,7 @@ namespace gE::VoxelPipeline
 		GetFrameBuffer().SetDefaultSize(camera.GetSize());
 	}
 
-	void Target3D::RenderPass()
+	void Target3D::RenderPass(float, Camera*)
 	{
 		// TODO
 	}

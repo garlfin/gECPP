@@ -11,15 +11,15 @@
 
 namespace gE
 {
-	class DirectionalShadowTarget : public RenderTarget<Camera2D>, public IDepthTarget
+	class DirectionalLightTarget : public RenderTarget<Camera2D>, public IDepthTarget
 	{
 	 public:
-		explicit DirectionalShadowTarget(OrthographicCamera&);
+		explicit DirectionalLightTarget(OrthographicCamera&);
 
 		GET(GL::Texture2D&, Depth, _depth.Get());
 		GET(OrthographicCamera&, Camera, (OrthographicCamera&) RenderTarget<Camera2D>::GetCamera())
 
-		void RenderPass() override;
+		void RenderPass(float, Camera*) override;
 
 	 private:
 		Attachment<GL::Texture2D, GL_DEPTH_ATTACHMENT> _depth;
@@ -46,17 +46,16 @@ namespace gE
 		DirectionalLight(Window*, u16 size, float scale, const glm::quat& = glm::identity<glm::quat>());
 
 		GET(OrthographicCamera&, Camera, _camera);
-		GET(DirectionalShadowTarget&, Target, _target);
+		GET(DirectionalLightTarget &, Target, _target);
 		GET(GL::Texture2D&, Depth, _target.GetDepth());
 
 		GET_CONST(float, Scale, _camera.GetScale().y);
 
 		void GetGLLight(GL::LightData&) override;
-		void OnRender(float delta) override;
 
 	 private:
 		OrthographicCamera _camera;
-		DirectionalShadowTarget _target;
+		DirectionalLightTarget _target;
 	};
 
 	class LightManager : public TypedManager<Light>

@@ -19,7 +19,7 @@ namespace gE
 		explicit CubemapTarget(CameraCubemap&);
 
 		GET(GL::TextureCube&, Color, _color);
-		void RenderPass() override;
+		void RenderPass(float, Camera*) override;
 
 	 private:
 		GL::TextureCube _color;

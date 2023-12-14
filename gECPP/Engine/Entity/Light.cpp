@@ -24,25 +24,6 @@ namespace gE
 		GetTransform().Rotation = rot;
 	}
 
-	void DirectionalLight::OnRender(float delta)
-	{
-		// Right now this system is only set up for one camera, but that's ok :)
-		GE_ASSERT(GetWindow().GetCameras().CurrentCamera, "CAMERA SHOULD NOT BE NULL");
-
-		Entity* camera = GetWindow().GetCameras().CurrentCamera->GetOwner();
-		Transform& transform = GetTransform();
-		Transform& cameraTransform = camera->GetTransform();
-
-		glm::vec2 planes = _camera.GetClipPlanes();
-		glm::vec3 offset = -transform.Forward();
-		offset *= (planes.y - planes.x) * 0.5 + planes.x;
-		//		  (far - near) / 2 + near
-		//		  places the middle on the camera
-
-		transform.Position = glm::floor(cameraTransform.Position) + offset;
-		transform.OnRender(0.f); // Force update on model matrix since it passed its tick.
-	}
-
 	void DirectionalLight::GetGLLight(GL::LightData& light)
 	{
 		light.ViewProjection = _camera.GetProjection() * glm::inverse(GetTransform().Model());
@@ -72,17 +53,31 @@ namespace gE
 
 	CONSTEXPR_GLOBAL GL::ITextureSettings ShadowMapFormat { GL_DEPTH_COMPONENT16, GL::WrapMode::Clamp, GL::FilterMode::Linear };
 
-	DirectionalShadowTarget::DirectionalShadowTarget(OrthographicCamera& camera) : RenderTarget<Camera2D>(camera), IDepthTarget((GL::Texture&) _depth),
+	DirectionalLightTarget::DirectionalLightTarget(OrthographicCamera& camera) : RenderTarget<Camera2D>(camera), IDepthTarget((GL::Texture&) _depth),
 		_depth(GetFrameBuffer(), GL::TextureSettings2D(ShadowMapFormat, camera.GetSize()))
 	{
 
 	}
 
-	void DirectionalShadowTarget::RenderPass()
+	void DirectionalLightTarget::RenderPass(float, Camera* callingCamera)
 	{
+		if(!callingCamera) return;
+
+		Window& window = GetWindow();
 		OrthographicCamera& camera = GetCamera();
-		Window& window = camera.GetWindow();
 		GL::TextureSize2D size = camera.GetSize();
+
+		Transform& transform = camera.GetOwner()->GetTransform();
+		Transform& cameraTransform = callingCamera->GetOwner()->GetTransform();
+
+		glm::vec2 planes = GetCamera().GetClipPlanes();
+		glm::vec3 offset = -transform.Forward();
+		offset *= (planes.y - planes.x) * 0.5 + planes.x;
+		//		  (far - near) / 2 + near
+		//		  places the middle on the camera
+
+		transform.Position = glm::floor(cameraTransform.Position) + offset;
+		transform.OnRender(0.f); // Force update on model matrix since it passed its tick.
 
 		window.State = State::Shadow;
 

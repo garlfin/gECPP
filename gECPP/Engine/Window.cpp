@@ -7,11 +7,12 @@
 #include "Engine/Component/Camera/Camera.h"
 
 #define ENABLE_STATISTICS
+#define CLAMP_FPS
 
 using namespace gE;
 
 #ifdef ENABLE_STATISTICS
-	char WindowTitleBuf[50];
+	char WindowTitleBuf[51];
 #endif
 
 #define BRDF_SIZE 512
@@ -45,11 +46,10 @@ Window::Window(glm::u16vec2 size, const char* name) :
 	PVR::Header iconHeader;
 	u8* iconData = PVR::Read("Resource/gE.PVR", iconHeader);
 
-	GLFWimage image{(int) iconHeader.Size.x, (int) iconHeader.Size.y, iconData};
+	GLFWimage image{ (int) iconHeader.Size.x, (int) iconHeader.Size.y, iconData };
 	glfwSetWindowIcon(_window, 1, &image);
 
 	delete[] iconData;
-
 
 	if(!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) GE_FAIL("Failed to initialize GLAD.");
 }
@@ -66,7 +66,6 @@ void DebugMessage(GLenum source, GLenum type, GLuint id, GLenum severity, GLsize
 {
 	std::cout << message << std::endl;
 }
-
 #endif
 
 void Window::Run()
@@ -103,6 +102,7 @@ void Window::Run()
 	#ifdef CLAMP_FPS
 		if(frameDelta < 1.0 / _monitor.RefreshRate) continue;
 	#endif
+
 	#ifdef ENABLE_STATISTICS
 		if(_time > FPS_POLL_RATE * pollTick)
 		{
@@ -134,7 +134,7 @@ void Window::OnInit()
 		GL::TextureSettings<GL::TextureDimension::D2D> brdfSettings
 		{
 			{ GL_RG16F, GL::WrapMode::Clamp, GL::FilterMode::Linear, 1 },
-			glm::u32vec2(BRDF_SIZE)
+			GL::TextureSize2D(BRDF_SIZE)
 		};
 
 		BRDFLookup = CreateSmartPointer<GL::Texture2D>(this, brdfSettings);

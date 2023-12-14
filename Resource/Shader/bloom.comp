@@ -19,7 +19,7 @@
 
 // IO
 layout(location = 0) uniform sampler2D BloomIn;
-layout(location = 1) uniform vec4 Settings; // Threshold, Knee, Intensity, MODE/MIP
+layout(location = 1) uniform vec4 Settings; // Threshold, Knee, Intensity, MODE * MIP
 
 layout(binding = 0, PIPELINE_COLOR_FORMAT) restrict readonly uniform image2D ColorIn;
 layout(binding = 1, PIPELINE_COLOR_FORMAT) restrict writeonly uniform image2D ColorOut;
@@ -115,7 +115,7 @@ vec3 Downsample(sampler2D tex, vec2 uv, vec2 texelSize, float mip)
         color += KarisAverage((f + g + k + l) * 0.125, weight);
         color += KarisAverage((g + h + l + m) * 0.125, weight);
         color += KarisAverage((d + e + i + j) * 0.5, weight);
-        color /= max(weight, EPSILON);
+        color *= max(weight, EPSILON);
     }
     else
 #endif

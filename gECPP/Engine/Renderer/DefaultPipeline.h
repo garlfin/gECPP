@@ -100,8 +100,9 @@ namespace gE::DefaultPipeline
 		GET(GL::Texture2D&, Color, _color.Get());
 		GET(GL::Texture2D&, Velocity, _velocity.Get());
 
-		void RenderPass() override;
-		void PostProcessPass() override;
+		void RenderDependencies(float);
+		void RenderPass(float, Camera*) override;
+		void PostProcessPass(float) override;
 
 	 private:
 		Attachment<GL::Texture2D, GL_DEPTH_ATTACHMENT> _depth;

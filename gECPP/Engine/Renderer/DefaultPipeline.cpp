@@ -28,7 +28,7 @@ namespace gE
 	{
 	}
 
-	void DefaultPipeline::Target2D::RenderPass()
+	void DefaultPipeline::Target2D::RenderPass(float delta, Camera*)
 	{
 		Camera2D& camera = GetCamera();
 		glm::u32vec2 size = camera.GetSize();
@@ -54,7 +54,7 @@ namespace gE
 		window.GetCubemaps().DrawSkybox();
 	}
 
-	void DefaultPipeline::Target2D::PostProcessPass()
+	void DefaultPipeline::Target2D::PostProcessPass(float)
 	{
 		GL::ComputeShader& taaShader = GetWindow().GetTAAShader();
 
@@ -72,7 +72,7 @@ namespace gE
 		_colorBack.CopyFrom(_postProcessBack);
 
 		// Post process loop
-		GL::Texture2D* front = (GL::Texture2D*) _color, *back = &_postProcessBack;
+		GL::Texture2D* front = *_color, *back = &_postProcessBack;
 		for(PostProcessEffect<Target2D>* effect : _effects)
 		{
 			std::swap(front, back);
@@ -81,6 +81,11 @@ namespace gE
 
 		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 		// Sync post process "backbuffer" and main color buffer
-		if(front == (GL::Texture2D*) _color) front->CopyFrom(*back);
+		if(front == *_color) front->CopyFrom(*back);
+	}
+
+	void DefaultPipeline::Target2D::RenderDependencies(float delta)
+	{
+		GetWindow().GetLights().Sun->GetCamera().Draw(delta, &GetCamera());
 	}
 }

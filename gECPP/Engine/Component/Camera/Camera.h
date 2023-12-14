@@ -28,10 +28,11 @@ namespace gE
 	 public:
 		Camera(Entity*, Manager*, GL::TextureSize2D, IRenderTarget&, const ICameraSettings&);
 
-		void OnUpdate(float delta) override { }
-		void OnRender(float delta) final;
+		inline void OnUpdate(float delta) override { }
+		inline void OnRender(float delta) override { Draw(delta, nullptr); }
 
 		virtual void GetGLCamera(GL::Camera&);
+		void Draw(float, Camera*);
 
 		GET(IRenderTarget&, Target, _target);
 
@@ -157,8 +158,6 @@ namespace gE
 
 		Camera* CurrentCamera = nullptr;
 		GL::Texture2D* Color = nullptr;
-
-		Camera* CallingCamera = nullptr;
 	};
 }
 

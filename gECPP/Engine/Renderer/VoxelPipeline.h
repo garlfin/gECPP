@@ -50,7 +50,7 @@ namespace gE::VoxelPipeline
 		GET(GL::Texture3D&, Color, _color);
 		GET(GL::Texture3D&, Data, _data);
 
-		void RenderPass() override;
+		void RenderPass(float, Camera*) override;
 
 	 private:
 		GL::Texture3D _color;

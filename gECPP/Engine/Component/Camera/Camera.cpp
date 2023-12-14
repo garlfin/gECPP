@@ -16,28 +16,6 @@ namespace gE
 	{
 	}
 
-	void Camera::OnRender(float delta)
-	{
-		GetWindow().GetCameras().CallingCamera = this;
-		if(_isProjectionInvalid) UpdateProjection();
-		_isProjectionInvalid = false;
-
-		DefaultPipeline::Buffers& buffers = GetWindow().GetPipelineBuffers();
-
-		bool isFirst = _settings.Timing.GetIsFirst();
-		bool shouldTick = _settings.Timing.Tick(delta);
-		if NOT(isFirst || !GetOwner()->GetFlags().Static && shouldTick) return;
-
-		GetGLCamera(buffers.Camera);
-		buffers.UpdateCamera();
-
-		_target.Bind();
-		_target.RenderPass();
-		_target.PostProcessPass();
-
-		Frame++;
-	}
-
 	void Camera::GetGLCamera(GL::Camera& cam)
 	{
 		Transform& transform = GetOwner()->GetTransform();
@@ -47,11 +25,39 @@ namespace gE
 		cam.ClipPlanes = GetClipPlanes();
 		cam.Size = _viewportSize;
 		cam.Projection = Projection;
-		cam.PreviousViewProjection = Projection * glm::inverse(transform.PreviousModel());
+
+		if(GetTiming().GetIsFirst())
+			cam.PreviousViewProjection = Projection * glm::inverse(transform.PreviousModel());
+		else
+			cam.PreviousViewProjection = Projection * glm::inverse(transform.Model());
 
 		// TODO: FIX AFTER REFACTORING
 		cam.DepthTexture = 0; // (handle) *GetDepth();
 		cam.ColorTexture = 0; // GetColorCopy() ? ((handle) *GetColorCopy()) : 0;
+	}
+
+	void Camera::Draw(float delta, Camera* callingCamera)
+	{
+		if(_isProjectionInvalid) UpdateProjection();
+		_isProjectionInvalid = false;
+
+		DefaultPipeline::Buffers& buffers = GetWindow().GetPipelineBuffers();
+
+		bool isFirst = _settings.Timing.GetIsFirst();
+		bool shouldTick = _settings.Timing.Tick(delta);
+		if NOT(isFirst || !GetOwner()->GetFlags().Static && shouldTick) return;
+
+		// Limits "recursion"
+		if(!callingCamera) _target.RenderDependencies(delta);
+
+		GetGLCamera(buffers.Camera);
+		buffers.UpdateCamera();
+
+		_target.Bind();
+		_target.RenderPass(delta, callingCamera);
+		_target.PostProcessPass(delta);
+
+		Frame++;
 	}
 
 	void PerspectiveCamera::UpdateProjection()

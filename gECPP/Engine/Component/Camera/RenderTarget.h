@@ -29,6 +29,7 @@ namespace gE
 
 		ALWAYS_INLINE T* operator->() { return &_texture; }
 		ALWAYS_INLINE const T* operator->() const { return &_texture; }
+		ALWAYS_INLINE T* operator*() { return &_texture; }
 
 		explicit operator T&() { return _texture; }
 		explicit operator const T&() const { return _texture; }
@@ -49,8 +50,9 @@ namespace gE
 		GET(Camera&, Camera, _camera);
 		GET(GL::FrameBuffer&, FrameBuffer, _frameBuffer);
 
-		virtual void RenderPass() = 0;
-		virtual void PostProcessPass() {};
+		virtual void RenderDependencies(float) {};
+		virtual void RenderPass(float, Camera*) = 0;
+		virtual void PostProcessPass(float) {};
 
 		inline void Bind() const final { _frameBuffer.Bind(); }
 

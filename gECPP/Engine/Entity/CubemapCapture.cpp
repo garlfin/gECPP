@@ -56,7 +56,7 @@ namespace gE
 		_skyboxVAO->Draw(0);
 	}
 
-	void CubemapTarget::RenderPass()
+	void CubemapTarget::RenderPass(float, Camera*)
 	{
 		CameraCubemap& camera = GetCamera();
 		Window& window = camera.GetWindow();

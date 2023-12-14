@@ -39,9 +39,6 @@ namespace gE
 		else
 			glDisable(GL_CULL_FACE);
 
-		gE::Camera* camera = GetWindow().GetCameras().CallingCamera;
-		GE_ASSERT(camera, "NO CALLING CAMERA!");
-
 		_shader->Bind();
 	}
 
@@ -52,7 +49,6 @@ namespace gE
 		_normal(this, "NormalTex", settings.Normal),
 		_brdfLUT(&this->GetShader(), "BRDFLutTex")
 	{
-
 	}
 
 	void gE::PBRMaterial::Bind() const
