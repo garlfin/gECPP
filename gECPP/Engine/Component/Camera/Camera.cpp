@@ -25,11 +25,7 @@ namespace gE
 		cam.ClipPlanes = GetClipPlanes();
 		cam.Size = _viewportSize;
 		cam.Projection = Projection;
-
-		if(GetTiming().GetIsFirst())
-			cam.PreviousViewProjection = Projection * glm::inverse(transform.PreviousModel());
-		else
-			cam.PreviousViewProjection = Projection * glm::inverse(transform.Model());
+		cam.PreviousViewProjection = Projection * glm::inverse(transform.PreviousModel());
 
 		// TODO: FIX AFTER REFACTORING
 		cam.DepthTexture = 0; // (handle) *GetDepth();
@@ -45,10 +41,13 @@ namespace gE
 
 		bool isFirst = _settings.Timing.GetIsFirst();
 		bool shouldTick = _settings.Timing.Tick(delta);
-		if NOT(isFirst || !GetOwner()->GetFlags().Static && shouldTick) return;
+
+		if(!isFirst && (!shouldTick || GetOwner()->GetFlags().Static)) return;
 
 		// Limits "recursion"
 		if(!callingCamera) _target.RenderDependencies(delta);
+
+		_target.Setup(delta, callingCamera);
 
 		GetGLCamera(buffers.Camera);
 		buffers.UpdateCamera();

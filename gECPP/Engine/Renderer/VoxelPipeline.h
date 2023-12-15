@@ -21,6 +21,11 @@ namespace GL
 	};
 }
 
+namespace gE
+{
+	class VoxelCapture;
+}
+
 namespace gE::VoxelPipeline
 {
 	struct Buffers
@@ -45,7 +50,7 @@ namespace gE::VoxelPipeline
 	class Target3D : public RenderTarget<Camera3D>
 	{
 	 public:
-		explicit Target3D(Camera3D&);
+		explicit Target3D(VoxelCapture&, Camera3D&);
 
 		GET(GL::Texture3D&, Color, _color);
 		GET(GL::Texture3D&, Data, _data);

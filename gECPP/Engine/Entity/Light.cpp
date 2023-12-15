@@ -17,9 +17,10 @@ namespace gE
 
 	OrthographicCameraSettings CreateDirectionalSettings(u16, float);
 
-	DirectionalLight::DirectionalLight(Window* w, u16 size, float scale, const glm::quat& rot) : Light(w, _camera, _target),
-		_camera(this, &w->GetLights(), _target, CreateDirectionalSettings(size, scale)),
-		_target(_camera)
+	DirectionalLight::DirectionalLight(Window* w, u16 size, float scale, const glm::quat& rot) :
+		Light(w, _camera, _target),
+		_camera(this, nullptr, _target, CreateDirectionalSettings(size, scale)),
+		_target(*this, _camera)
 	{
 		GetTransform().Rotation = rot;
 	}
@@ -35,8 +36,7 @@ namespace gE
 		light.Depth = (handle) GetDepth();
 	}
 
-	// Registered to behaviors for tick functionality.
-	Light::Light(Window* w, Camera& c, IDepthTarget& t, Entity* p) : Entity(w, p, &w->GetBehaviors()),
+	Light::Light(Window* w, Camera& c, IDepthTarget& t, Entity* p) : Entity(w, p),
 		_camera(c), _target(t)
 	{
 	}
@@ -44,16 +44,12 @@ namespace gE
 	void LightManager::OnRender(float delta)
 	{
 		TypedManager<Light>::OnRender(delta);
-
-		DefaultPipeline::Buffers& buffers = _window->GetPipelineBuffers();
-
-		Sun->GetGLLight(buffers.Lighting.Lights[0]);
-		buffers.UpdateLighting(offsetof(GL::Lighting, Lights[1]));
 	}
 
 	CONSTEXPR_GLOBAL GL::ITextureSettings ShadowMapFormat { GL_DEPTH_COMPONENT16, GL::WrapMode::Clamp, GL::FilterMode::Linear };
 
-	DirectionalLightTarget::DirectionalLightTarget(OrthographicCamera& camera) : RenderTarget<Camera2D>(camera), IDepthTarget((GL::Texture&) _depth),
+	DirectionalLightTarget::DirectionalLightTarget(Light& light, OrthographicCamera& camera) :
+		RenderTarget<Camera2D>(light, camera), IDepthTarget((GL::Texture&) _depth),
 		_depth(GetFrameBuffer(), GL::TextureSettings2D(ShadowMapFormat, camera.GetSize()))
 	{
 
@@ -63,6 +59,27 @@ namespace gE
 	{
 		if(!callingCamera) return;
 
+		Window& window = GetWindow();
+		OrthographicCamera& camera = GetCamera();
+		GL::TextureSize2D size = camera.GetSize();
+
+		DefaultPipeline::Buffers& buffers = window.GetPipelineBuffers();
+
+		GetOwner().GetGLLight(buffers.Lighting.Lights[0]);
+		buffers.UpdateLighting(offsetof(GL::Lighting, Lights[1]));
+
+		window.State = State::Shadow;
+
+		glDepthMask(1);
+		glColorMask(0, 0, 0, 0);
+		glClear(GL_DEPTH_BUFFER_BIT);
+		glViewport(0, 0, size.x, size.y);
+
+		window.GetRenderers().OnRender(0.f);
+	}
+
+	void DirectionalLightTarget::Setup(float, Camera* callingCamera)
+	{
 		Window& window = GetWindow();
 		OrthographicCamera& camera = GetCamera();
 		GL::TextureSize2D size = camera.GetSize();
@@ -78,15 +95,6 @@ namespace gE
 
 		transform.Position = glm::floor(cameraTransform.Position) + offset;
 		transform.OnRender(0.f); // Force update on model matrix since it passed its tick.
-
-		window.State = State::Shadow;
-
-		glDepthMask(1);
-		glColorMask(0, 0, 0, 0);
-		glClear(GL_DEPTH_BUFFER_BIT);
-		glViewport(0, 0, size.x, size.y);
-
-		window.GetRenderers().OnRender(0.f);
 	}
 
 	OrthographicCameraSettings CreateDirectionalSettings(u16 size, float scale)

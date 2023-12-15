@@ -3,6 +3,7 @@
 //
 
 #include "VoxelPipeline.h"
+#include <Engine/Entity/VoxelCapture.h>
 
 namespace gE::VoxelPipeline
 {
@@ -10,7 +11,7 @@ namespace gE::VoxelPipeline
 	{
 	}
 
-	Target3D::Target3D(Camera3D& camera) : RenderTarget<Camera3D>(camera),
+	Target3D::Target3D(VoxelCapture& capture, Camera3D& camera) : RenderTarget<Camera3D>(capture, camera),
 		_color(&camera.GetWindow(), { VoxelPipeline::ColorFormat, camera.GetSize() }),
 		_data(&camera.GetWindow(), { VoxelPipeline::DataFormat, camera.GetSize() })
 	{

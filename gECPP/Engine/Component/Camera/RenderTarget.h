@@ -45,11 +45,13 @@ namespace gE
  	class IRenderTarget : public GL::Asset
 	{
 	 public:
-		explicit IRenderTarget(Camera&);
+		explicit IRenderTarget(Entity&, Camera&);
 
 		GET(Camera&, Camera, _camera);
+		GET(Entity&, Owner, _owner);
 		GET(GL::FrameBuffer&, FrameBuffer, _frameBuffer);
 
+		virtual void Setup(float, Camera*) {};
 		virtual void RenderDependencies(float) {};
 		virtual void RenderPass(float, Camera*) = 0;
 		virtual void PostProcessPass(float) {};
@@ -58,6 +60,7 @@ namespace gE
 
 	 private:
 		Camera& _camera;
+		Entity& _owner;
 		GL::FrameBuffer _frameBuffer;
 	};
 

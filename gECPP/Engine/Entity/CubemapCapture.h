@@ -13,12 +13,15 @@
 
 namespace gE
 {
+	class CubemapCapture;
+
 	class CubemapTarget : public RenderTarget<CameraCubemap>
 	{
 	 public:
-		explicit CubemapTarget(CameraCubemap&);
+		explicit CubemapTarget(CubemapCapture&, CameraCubemap&);
 
 		GET(GL::TextureCube&, Color, _color);
+		GET(CubemapCapture&, Owner, (CubemapCapture&) IRenderTarget::GetOwner());
 		void RenderPass(float, Camera*) override;
 
 	 private:

@@ -94,13 +94,13 @@ namespace gE::DefaultPipeline
 	{
 	 public:
 		typedef GL::Texture2D TEX_T;
-		explicit Target2D(Camera2D& camera, std::vector<PostProcessEffect<Target2D>*>);
+		explicit Target2D(Entity&, Camera2D& camera, std::vector<PostProcessEffect<Target2D>*>);
 
 		GET(GL::Texture2D&, Depth, _depth.Get());
 		GET(GL::Texture2D&, Color, _color.Get());
 		GET(GL::Texture2D&, Velocity, _velocity.Get());
 
-		void RenderDependencies(float);
+		void RenderDependencies(float) override;
 		void RenderPass(float, Camera*) override;
 		void PostProcessPass(float) override;
 

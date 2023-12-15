@@ -106,7 +106,7 @@ void Window::Run()
 	#ifdef ENABLE_STATISTICS
 		if(_time > FPS_POLL_RATE * pollTick)
 		{
-			sprintf_s(WindowTitleBuf, "FPS: %u, TICK: %f, RENDER: %f", (unsigned) std::ceil(1.0 / frameDelta), delta, frameDelta);
+			sprintf_s(WindowTitleBuf, "FPS: %u, TICK: %f, RENDER: %f", (unsigned) std::ceil(1.0 / frameDelta), delta * 100, frameDelta * 100);
 			glfwSetWindowTitle(_window, WindowTitleBuf);
 			pollTick++;
 		}

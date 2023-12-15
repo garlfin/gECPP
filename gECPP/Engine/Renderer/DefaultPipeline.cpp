@@ -17,8 +17,8 @@ namespace gE
 		_lightBuffer.Bind(GL::BufferTarget::Uniform, 2);
 	}
 
-	DefaultPipeline::Target2D::Target2D(Camera2D& camera, std::vector<PostProcessEffect<Target2D>*> effects) :
-		RenderTarget<Camera2D>(camera), IDepthTarget(_depth.Get()),
+	DefaultPipeline::Target2D::Target2D(Entity& owner, Camera2D& camera, std::vector<PostProcessEffect<Target2D>*> effects) :
+		RenderTarget<Camera2D>(owner, camera), IDepthTarget(_depth.Get()),
 		_depth(GetFrameBuffer(), GL::TextureSettings2D(DefaultPipeline::DepthFormat, camera.GetSize())),
 		_color(GetFrameBuffer(), GL::TextureSettings2D(DefaultPipeline::ColorFormat, camera.GetSize())),
 		_velocity(GetFrameBuffer(), GL::TextureSettings2D(DefaultPipeline::VelocityFormat, camera.GetSize())),

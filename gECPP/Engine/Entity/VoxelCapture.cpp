@@ -11,7 +11,7 @@ namespace gE
 
 	VoxelCapture::VoxelCapture(gE::Window* w, u16 resolution, float size) : Entity(w),
 		_camera(this, nullptr, _target, CreateVoxelSettings(resolution)),
-		_target(_camera),
+		_target(*this, _camera),
 		_size(size)
 	{
 	}

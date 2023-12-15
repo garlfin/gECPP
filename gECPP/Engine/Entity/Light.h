@@ -11,14 +11,18 @@
 
 namespace gE
 {
+	class Light;
+
 	class DirectionalLightTarget : public RenderTarget<Camera2D>, public IDepthTarget
 	{
 	 public:
-		explicit DirectionalLightTarget(OrthographicCamera&);
+		explicit DirectionalLightTarget(Light&, OrthographicCamera&);
 
 		GET(GL::Texture2D&, Depth, _depth.Get());
+		GET(Light&, Owner, (Light&) IRenderTarget::GetOwner());
 		GET(OrthographicCamera&, Camera, (OrthographicCamera&) RenderTarget<Camera2D>::GetCamera())
 
+		void Setup(float, Camera*) override;
 		void RenderPass(float, Camera*) override;
 
 	 private:
@@ -46,7 +50,7 @@ namespace gE
 		DirectionalLight(Window*, u16 size, float scale, const glm::quat& = glm::identity<glm::quat>());
 
 		GET(OrthographicCamera&, Camera, _camera);
-		GET(DirectionalLightTarget &, Target, _target);
+		GET(DirectionalLightTarget&, Target, _target);
 		GET(GL::Texture2D&, Depth, _target.GetDepth());
 
 		GET_CONST(float, Scale, _camera.GetScale().y);

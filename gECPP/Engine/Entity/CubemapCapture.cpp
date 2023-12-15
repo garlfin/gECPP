@@ -15,7 +15,7 @@ namespace gE
 
 	CubemapCapture::CubemapCapture(gE::Window* w, u16 size) : Entity(w),
 		_camera(this, nullptr, _target, { CubemapCameraSettings, size }),
-		_target(_camera)
+		_target(*this, _camera)
 	{
 	}
 
@@ -79,7 +79,8 @@ namespace gE
 		GL::FilterMode::Linear
 	};
 
-	CubemapTarget::CubemapTarget(CameraCubemap& camera) : RenderTarget<CameraCubemap>(camera),
+	CubemapTarget::CubemapTarget(CubemapCapture& capture, CameraCubemap& camera) :
+		RenderTarget<CameraCubemap>(capture, camera),
 		_color(&camera.GetWindow(), { CubemapColorSettings, camera.GetSize() })
 	{
 	}
