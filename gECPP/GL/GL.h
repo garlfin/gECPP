@@ -12,8 +12,8 @@ namespace GL
 {
 	struct Version
 	{
-		ubyte Major;
-		ubyte Minor;
+		u8 Major;
+		u8 Minor;
 	};
 
 	struct Asset

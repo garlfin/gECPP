@@ -13,8 +13,8 @@ namespace gE
 		DefaultCameraTiming
 	};
 
-	CubemapCapture::CubemapCapture(gE::Window* w, u16 size) : Entity(w),
-		_camera(this, nullptr, _target, { CubemapCameraSettings, size }),
+	CubemapCapture::CubemapCapture(gE::Window* w, u16 size) : Entity(w, Flags(true, UINT8_MAX)),
+		_camera(this, &w->GetCubemaps(), _target, { CubemapCameraSettings, size }),
 		_target(*this, _camera)
 	{
 	}
@@ -72,7 +72,7 @@ namespace gE
 		window.GetRenderers().OnRender(0.f);
 	}
 
-	CONSTEXPR_GLOBAL GL::ITextureSettings CubemapColorSettings
+	CONSTEXPR_GLOBAL GL::ITextureSettings CubemapColorFormat
 	{
 		GL_RGB16F,
 		GL::WrapMode::Clamp,
@@ -80,8 +80,9 @@ namespace gE
 	};
 
 	CubemapTarget::CubemapTarget(CubemapCapture& capture, CameraCubemap& camera) :
-		RenderTarget<CameraCubemap>(capture, camera),
-		_color(&camera.GetWindow(), { CubemapColorSettings, camera.GetSize() })
+		RenderTarget<CameraCubemap>(capture, camera), IDepthTarget(_depth.Get()),
+		_color(GetFrameBuffer(), GL::TextureSettings1D(CubemapColorFormat, camera.GetSize())),
+		_depth(GetFrameBuffer(), GL::TextureSettings1D(DefaultPipeline::DepthFormat, camera.GetSize()))
 	{
 	}
 }

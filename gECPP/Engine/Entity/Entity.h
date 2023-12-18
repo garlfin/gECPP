@@ -14,7 +14,7 @@ namespace gE
 	class Entity : public Updateable
 	{
 	 public:
-		explicit Entity(Window*, Entity* parent = nullptr, Manager* manager = nullptr);
+		explicit Entity(Window*, Flags = Flags(), Entity* parent = nullptr, Manager* manager = nullptr);
 
 		void Destroy(bool flagChildren = true);
 
@@ -30,7 +30,7 @@ namespace gE
 	 private:
 		Window* const _window = nullptr;
 		Entity* _parent = nullptr;
-		Flags _flags = (Flags) 0;
+		Flags _flags;
 		std::vector<Entity*> _children;
 
 		Transform _transform = Transform(this);

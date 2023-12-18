@@ -117,7 +117,7 @@ namespace gE
 
 	void CameraCubemap::UpdateProjection()
 	{
-		Projection = glm::perspectiveFov(degree_cast<AngleType::Radian>(90.f), 1.f, 1.f, GetClipPlanes().x, GetClipPlanes().y);
+		Projection = glm::perspectiveFov(glm::radians(90.f), 1.f, 1.f, GetClipPlanes().x, GetClipPlanes().y);
 	}
 
 	CONSTEXPR_GLOBAL glm::vec3 ForwardDirs[]
@@ -144,7 +144,6 @@ namespace gE
 	{
 		Camera::GetGLCamera(cam);
 
-		cam.Projection = Projection;
 		for(u8 i = 0; i < 6; i++)
 			cam.View[i] = glm::lookAt(cam.Position, cam.Position + ForwardDirs[i], cam.Position + UpDirs[i]);
 	}

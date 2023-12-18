@@ -1,3 +1,5 @@
+#extension GL_ARB_shader_viewport_layer_array : require
+
 layout(location = 0) in vec3 Position;
 layout(location = 1) in vec2 UV;
 layout(location = 2) in vec3 Normal;
@@ -28,6 +30,7 @@ void main()
     VertexIn.UV = UV;
 
     gl_Position = VertexIn.CurrentUV = viewProjection * Scene.Model[ModelIndex] * vec4(VertexIn.FragPos, 1);
+    gl_Layer = gl_InstanceID / int(Scene.InstanceCount);
 
     if(bool(Scene.State & ENABLE_JITTER))
     {
@@ -48,5 +51,5 @@ void main()
     VertexIn.TBN = mat3(vTangent, vBitangent, vNormal);
 
     for(uint i = 0; i < Lighting.LightCount; i++)
-    	VertexIn.FragPosLightSpace[i] = Lighting.Lights[i].ViewProjection * vec4(VertexIn.FragPos, 1);
+        VertexIn.FragPosLightSpace[i] = Lighting.Lights[i].ViewProjection * vec4(VertexIn.FragPos, 1);
 }

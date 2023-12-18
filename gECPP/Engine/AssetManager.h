@@ -72,7 +72,7 @@ namespace gE
 
 	/// Gives ownership of the pointer to the Reference.
 	template<class T>
-	ALWAYS_INLINE Reference<T> CreateReferenceFromPointer(T* t)
+	ALWAYS_INLINE Reference<T> ref_cast(T* t)
 	{
 		return Reference<T>(t);
 	}
@@ -119,7 +119,7 @@ namespace gE
 
 	/// Gives ownership of the pointer to the SmartPointer.
 	template<typename T>
-	ALWAYS_INLINE SmartPointer<T> CreateSmartPointerFromPointer(T* t)
+	ALWAYS_INLINE SmartPointer<T> ptr_cast(T* t)
 	{
 		return SmartPointer<T>(t);
 	}

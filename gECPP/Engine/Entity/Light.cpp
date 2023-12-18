@@ -36,7 +36,7 @@ namespace gE
 		light.Depth = (handle) GetDepth();
 	}
 
-	Light::Light(Window* w, Camera& c, IDepthTarget& t, Entity* p) : Entity(w, p),
+	Light::Light(Window* w, Camera& c, IDepthTarget& t, Entity* p) : Entity(w, Flags(), p),
 		_camera(c), _target(t)
 	{
 	}
@@ -99,6 +99,8 @@ namespace gE
 
 	OrthographicCameraSettings CreateDirectionalSettings(u16 size, float scale)
 	{
+		scale *= 0.5f;
+
 		return OrthographicCameraSettings
 		{
 			CameraSettings2D(DirectionalSettings, glm::ivec2(size)),

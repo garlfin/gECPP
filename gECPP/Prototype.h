@@ -22,9 +22,12 @@ namespace gE
 
 	struct Flags
 	{
+		Flags() = default;
+		Flags(bool s, u8 l) : Static(s), Layer(l) {};
+
+		bool Static : 1 = false;
 		bool Enabled : 1 = true;
 		bool Deletion : 1 = false;
-		bool Static : 1 = false;
 		//bool FutureUse : 1 = false;
 		u8 Layer : 4 = 0;
 	};

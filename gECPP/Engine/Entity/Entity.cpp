@@ -8,7 +8,8 @@
 
 namespace gE
 {
-	Entity::Entity(Window* w, Entity* parent, Manager* manager) : Updateable(manager, _flags), _window(w), _parent(parent)
+	Entity::Entity(Window* w, Flags flags, Entity* parent, Manager* manager) : Updateable(manager, _flags),
+		_window(w), _parent(parent), _flags(flags)
 	{
 		if(parent) parent->_children.push_back(this);
 	}

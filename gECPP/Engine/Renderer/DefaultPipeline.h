@@ -65,7 +65,7 @@ namespace GL
 
 	struct Scene
 	{
-		uint InstanceCount;
+		u32 InstanceCount;
 		gE::RenderFlags State;
 		GL_ALIGN glm::mat4 Model[GE_MAX_INSTANCE];
 		glm::mat4 PreviousModel[GE_MAX_INSTANCE];

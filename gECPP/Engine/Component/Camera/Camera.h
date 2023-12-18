@@ -81,7 +81,7 @@ namespace gE
 		{
 			if constexpr(T == AngleType::Radian)
 				return _fov;
-			return degree_cast<AngleType::Degree>(_fov);
+			return glm::degrees(_fov);
 		}
 
 		template<AngleType T = AngleType::Degree>
@@ -90,7 +90,7 @@ namespace gE
 			if constexpr(T == AngleType::Radian)
 				_fov = fov;
 			else
-				_fov = degree_cast<AngleType::Radian>(fov);
+				_fov = glm::radians(fov);
 		}
 
 	 protected:

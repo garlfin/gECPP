@@ -79,38 +79,47 @@ void Window::Run()
 	u64 pollTick = 0;
 #endif
 
+	_time = glfwGetTime();
+
 	Window::OnInit();
 	glfwSwapInterval(0);
 
 	OnInit();
+	glMemoryBarrier(GL_ALL_BARRIER_BITS);
 
+	LOG("INIT TOOK " << _time);
 	_time = glfwGetTime();
-	double newTime;
-	double delta, frameDelta = 0;
+
+	double currentTime;
+	double delta, frameDelta = 0.0;
 
 	while(!glfwWindowShouldClose(_window))
 	{
 		glfwPollEvents();
 
-		newTime = glfwGetTime();
-		delta = newTime - _time;
-		frameDelta += delta;
-		_time = newTime;
+		currentTime = glfwGetTime();
+		delta = currentTime - _time;
+		_time = currentTime;
 
 		OnUpdate((float) delta);
 
+		currentTime = glfwGetTime();
+		frameDelta += delta + currentTime - _time;
+		_time = currentTime;
+
 	#ifdef CLAMP_FPS
-		if(frameDelta < 1.0 / _monitor.RefreshRate) continue;
+		if(frameDelta < 1.0 / _monitor.RefreshRate || frameDelta == 0) continue;
 	#endif
 
-	#ifdef ENABLE_STATISTICS
+		#ifdef ENABLE_STATISTICS
 		if(_time > FPS_POLL_RATE * pollTick)
 		{
-			sprintf_s(WindowTitleBuf, "FPS: %u, TICK: %f, RENDER: %f", (unsigned) std::ceil(1.0 / frameDelta), delta * 100, frameDelta * 100);
+			sprintf_s(WindowTitleBuf, "FPS: %u, TICK: %f, RENDER: %f", (unsigned) std::ceil(1.0 / frameDelta),
+				delta * 100, frameDelta * 100);
 			glfwSetWindowTitle(_window, WindowTitleBuf);
 			pollTick++;
 		}
-	#endif
+		#endif
 
 		OnRender((float) frameDelta);
 		glfwSwapBuffers(_window);

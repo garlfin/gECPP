@@ -25,14 +25,13 @@ void gE::MeshRenderer::OnRender(float delta)
 	buffers.Scene.PreviousModel[0] = GetOwner()->GetTransform().PreviousModel();
 	buffers.Scene.Normal[0] = glm::mat3(1);
 
-
 	buffers.UpdateScene();
 
 	uint8_t meshCount = _mesh->MaterialCount;
 	for(uint8_t i = 0; i < meshCount; i++)
 	{
 		_materialHolder->GetMaterial(i).Bind();
-		_mesh->VAO->Draw(i);
+		_mesh->VAO->Draw(i, GetWindow().State.Enable6X ? 6 : 1);
 	}
 }
 

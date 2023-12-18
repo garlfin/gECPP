@@ -33,7 +33,7 @@ namespace GL
 		u8* dataPtr = (u8*) data.Data;
 
 		if(data.SentAllMips)
-			for(ubyte i = 0; i < Mips; i++, size >>= decltype(size)(1)) // lazy guy
+			for(u8 i = 0; i < Mips; i++, size >>= decltype(size)(1)) // lazy guy
 			{
 				size = glm::max(size, decltype(size)(1)); // double lazy guy
 				u64 dataSize = data.Scheme.Size<TextureDimension::D2D>(size);
@@ -66,7 +66,7 @@ namespace GL
 		glm::u32vec3 size = _size;
 		u8* dataPtr = (u8*) data.Data;
 
-		for(ubyte i = 0; i < Mips; i++, size >>= decltype(size)(1)) // lazy guy
+		for(u8 i = 0; i < Mips; i++, size >>= decltype(size)(1)) // lazy guy
 		{
 			size = glm::max(size, decltype(size)(1)); // double lazy guy
 			u64 dataSize = data.Scheme.Size<TextureDimension::D3D>(size);
@@ -94,8 +94,6 @@ namespace GL
 		_handle = glGetTextureHandleARB(ID);
 		glMakeTextureHandleResidentARB(_handle);
 
-		LOG("New handle: " << _handle);
-
 		return _handle;
 	}
 
@@ -110,7 +108,7 @@ namespace GL
 		u32 size = _size;
 		u8* dataPtr = (u8*) data.Data;
 
-		for(ubyte i = 0; i < Mips; i++, size >>= 1)
+		for(u8 i = 0; i < Mips; i++, size >>= 1)
 		{
 			size = glm::max(size, 1u);
 			u64 dataSize = data.Scheme.Size<TextureDimension::D3D>(TextureSize3D(size, size, 6));

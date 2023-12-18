@@ -32,7 +32,7 @@ namespace VoxelDemo
 			_rot.x += mouseDelta.y * 0.1f;
 			_rot.x = std::clamp(_rot.x, -89.9f, 89.9f);
 
-			_transform.SetRotation(degree_cast<AngleType::Radian>(_rot));
+			_transform.SetRotation(glm::radians(_rot));
 
 			glm::vec3 dir(0.f);
 			if(glfwGetKey(_window, GLFW_KEY_W)) dir.z -= 1;

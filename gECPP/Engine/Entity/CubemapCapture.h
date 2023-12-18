@@ -15,17 +15,19 @@ namespace gE
 {
 	class CubemapCapture;
 
-	class CubemapTarget : public RenderTarget<CameraCubemap>
+	class CubemapTarget : public RenderTarget<CameraCubemap>, public IDepthTarget
 	{
 	 public:
 		explicit CubemapTarget(CubemapCapture&, CameraCubemap&);
 
-		GET(GL::TextureCube&, Color, _color);
+		GET(GL::TextureCube&, Color, _color.Get());
+		GET(GL::TextureCube&, Depth, _depth.Get());
 		GET(CubemapCapture&, Owner, (CubemapCapture&) IRenderTarget::GetOwner());
 		void RenderPass(float, Camera*) override;
 
 	 private:
-		GL::TextureCube _color;
+		Attachment<GL::TextureCube, GL_DEPTH_ATTACHMENT> _depth;
+		Attachment<GL::TextureCube, GL_COLOR_ATTACHMENT0> _color;
 	};
 
 	class CubemapCapture final : public Entity
