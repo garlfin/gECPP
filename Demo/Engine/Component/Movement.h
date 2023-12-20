@@ -14,11 +14,9 @@ namespace VoxelDemo
 	class Movement : public gE::Behavior
 	{
 	 public:
-		explicit Movement(gE::Entity* o) :
-			gE::Behavior(o),
+		explicit Movement(gE::Entity* o) : gE::Behavior(o),
 			_transform(o->GetTransform()), _window(o->GetWindow().GLFWWindow())
 		{
-
 		}
 
 		void OnUpdate(float d) override
@@ -41,7 +39,7 @@ namespace VoxelDemo
 			if(glfwGetKey(_window, GLFW_KEY_A)) dir.x -= 1;
 
 			dir = glm::normalize(dir);
-			if(!glm::isnan(dir.x)) _transform.Position += _transform.LocalRotationMatrix() * dir * d;
+			if(!glm::isnan(dir.x)) _transform.Position += _transform.Rotation * dir * d;
 		}
 
 	 private:

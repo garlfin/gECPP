@@ -23,6 +23,8 @@ namespace gE
 		GET(GL::TextureCube&, Color, _color.Get());
 		GET(GL::TextureCube&, Depth, _depth.Get());
 		GET(CubemapCapture&, Owner, (CubemapCapture&) IRenderTarget::GetOwner());
+
+		void RenderDependencies(float d) override;
 		void RenderPass(float, Camera*) override;
 
 	 private:
@@ -45,12 +47,12 @@ namespace gE
 		CubemapTarget _target;
 	};
 
-	class CubemapManager final : public TypedManager<CubemapCapture>
+	class CubemapManager final : public TypedManager<CameraCubemap>
 	{
 	 public:
-		explicit CubemapManager(Window* window) : TypedManager<CubemapCapture>(), _window(window) {};
+		explicit CubemapManager(Window* window) : TypedManager<CameraCubemap>(), _window(window) {};
 
-		gE::Reference<GL::TextureCube> Skybox{};
+		Reference<GL::TextureCube> Skybox{};
 
 		void DrawSkybox();
 		void OnRender(float delta) override;

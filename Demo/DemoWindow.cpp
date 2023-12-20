@@ -28,20 +28,22 @@ void DemoWindow::OnInit()
 	auto rasterShader = gE::CreateReference<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/uber.frag");
 	auto rasterMaterial = gE::CreateReference<gE::PBRMaterial>(this, rasterShader, materialSettings);
 
-	gETF::File file;
-	gETF::Read("Resource/Model/cube.gETF", file);
+	gETF::File cube;
+	gETF::Read("Resource/Model/cube.gETF", cube);
 
-	auto* mesh = new VoxelDemo::StaticMeshEntity(this, file.Meshes[0]);
+	auto* mesh = new VoxelDemo::StaticMeshEntity(this, cube.Meshes[0]);
 	mesh->GetMaterials().SetMaterial(0, std::move(rasterMaterial));
 
 	glm::vec3 sunRotation(-31.f, 30.f, 0.f);
-	auto* sun = new gE::DirectionalLight(this, 1024, 3.f, glm::quat(glm::radians(sunRotation)));
+	auto* sun = new gE::DirectionalLight(this, 1024, 10.f, glm::quat(glm::radians(sunRotation)));
 	Lights.Sun = sun;
 
 	auto* camera = new FlyCamera(this);
 	Cameras.CurrentCamera = &camera->GetCamera();
 	Cameras.Color = &camera->GetColor();
 
-	new gE::CubemapCapture(this, 256);
+	auto* capture = new gE::CubemapCapture(this, 256);
+	capture->GetTransform().Position.y = 4;
+
 	Cubemaps.Skybox = gE::ref_cast((GL::TextureCube*) PVR::Read(this, "Resource/Texture/sky.pvr", GL::WrapMode::Clamp));
 }

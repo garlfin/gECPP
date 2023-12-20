@@ -14,20 +14,31 @@ namespace gE
 	};
 
 	CubemapCapture::CubemapCapture(gE::Window* w, u16 size) : Entity(w, Flags(true, UINT8_MAX)),
-		_camera(this, &w->GetCubemaps(), _target, { CubemapCameraSettings, size }),
+		_camera(this, nullptr, _target, { CubemapCameraSettings, size }),
 		_target(*this, _camera)
 	{
 	}
 
 	void CubemapCapture::GetGLCubemap(GL::CubemapData& cubemap)
 	{
+		Transform& transform = GetTransform();
+
+		cubemap.Position = transform.GetGlobalTransform().Position;
+		cubemap.Scale = transform.GetGlobalTransform().Scale;
+		cubemap.BlendRadius = 0.f;
+
+		cubemap.Color = (handle) GetColor();
 	}
 
 	void CubemapManager::OnRender(float delta)
 	{
 		DefaultPipeline::Buffers& buffers = _window->GetPipelineBuffers();
+		GL::Lighting& lighting = buffers.Lighting;
 
-		buffers.Lighting.Skybox = Skybox->GetHandle();
+		lighting.Skybox = Skybox->GetHandle();
+		lighting.CubemapCount = 1;
+		((CubemapCapture*) at(0))->GetGLCubemap(lighting.Cubemaps[0]);
+
 		buffers.UpdateLighting(sizeof(handle), offsetof(GL::Lighting, Skybox));
 
 		Manager::OnRender(delta);
@@ -53,23 +64,23 @@ namespace gE
 		glDisable(GL_CULL_FACE);
 		glDepthFunc(GL_LEQUAL);
 
-		_skyboxVAO->Draw(0);
+		_skyboxVAO->Draw(0, _window->State.Enable6X ? 6 : 1);
 	}
 
 	void CubemapTarget::RenderPass(float, Camera*)
 	{
 		CameraCubemap& camera = GetCamera();
 		Window& window = camera.GetWindow();
-		u32 size = GetCamera().GetSize();
 
 		window.State = State::Cubemap;
 
 		glDepthMask(1);
 		glColorMask(1, 1, 1, 1);
+		glViewport(0, 0, GetSize(), GetSize());
 		glClear(GL_DEPTH_BUFFER_BIT);
-		glViewport(0, 0, size, size);
 
 		window.GetRenderers().OnRender(0.f);
+		window.GetCubemaps().DrawSkybox();
 	}
 
 	CONSTEXPR_GLOBAL GL::ITextureSettings CubemapColorFormat
@@ -84,5 +95,10 @@ namespace gE
 		_color(GetFrameBuffer(), GL::TextureSettings1D(CubemapColorFormat, camera.GetSize())),
 		_depth(GetFrameBuffer(), GL::TextureSettings1D(DefaultPipeline::DepthFormat, camera.GetSize()))
 	{
+	}
+
+	void CubemapTarget::RenderDependencies(float d)
+	{
+		GetWindow().GetLights().Sun->GetCamera().Draw(d, &GetCamera());
 	}
 }

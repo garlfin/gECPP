@@ -185,12 +185,13 @@ void Window::OnRender(float delta)
 
 	Lights.OnRender(delta);
 	Cubemaps.OnRender(delta);
+
 	Cameras.OnRender(delta);
 
 	GE_ASSERT(Cameras.CurrentCamera, "CAMERA SHOULD NOT BE NULL!");
 
 	GL::FrameBuffer::Reset();
-	Blit(*Cameras.Color);
+	Blit(Cameras.CurrentCamera->GetColor());
 }
 
 Monitor::Monitor(const GLFWvidmode* mode) :

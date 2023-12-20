@@ -49,7 +49,7 @@ void main()
         albedo,
         amr.g,
         vec3(0.04),
-        1.46
+        bool(Scene.State & ENABLE_SPECULAR) ? 1.0 : 0.0
     );
 
     FragColor.rgb += GetLighting(vertex, fragment, Lighting.Lights[0]);

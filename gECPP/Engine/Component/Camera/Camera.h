@@ -12,6 +12,7 @@
 #include "Engine/Manager.h"
 #include "Settings.h"
 #include "Timing.h"
+#include "RenderTarget.h"
 
 namespace GL
 {
@@ -156,8 +157,7 @@ namespace gE
 	 public:
 		using ComponentManager<Camera>::ComponentManager;
 
-		Camera* CurrentCamera = nullptr;
-		GL::Texture2D* Color = nullptr;
+		IColorTarget* CurrentCamera = nullptr;
 	};
 }
 

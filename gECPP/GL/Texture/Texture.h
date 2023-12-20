@@ -8,7 +8,7 @@
 
 #define GE_ANISOTROPY_COUNT 8
 
-// Type is more "integral" so i use a lowercase convention
+// Type is more "integral" so I use a lowercase convention
 // Opaque type to prevent accidental pointer-to-handle conversions
 struct handle
 {

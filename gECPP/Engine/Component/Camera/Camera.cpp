@@ -10,7 +10,6 @@
 
 namespace gE
 {
-
 	Camera::Camera(Entity* p, Manager* m, GL::TextureSize2D size, IRenderTarget& t, const ICameraSettings& s) :
 		Component(p, m), _settings(s), _target(t), _viewportSize(size)
 	{
@@ -20,7 +19,7 @@ namespace gE
 	{
 		Transform& transform = GetOwner()->GetTransform();
 
-		cam.Position = transform.GlobalTranslation();
+		cam.Position = transform.GetGlobalTransform().Position;
 		cam.Frame = Frame;
 		cam.ClipPlanes = GetClipPlanes();
 		cam.Size = _viewportSize;
@@ -132,12 +131,12 @@ namespace gE
 
 	CONSTEXPR_GLOBAL glm::vec3 UpDirs[]
 	{
-		glm::vec3(0, 1, 0),
-		glm::vec3(0, 1, 0),
+		glm::vec3(0, -1, 0),
+		glm::vec3(0, -1, 0),
 		glm::vec3(0, 0, 1),
 		glm::vec3(0, 0, -1),
-		glm::vec3(0, 1, 0),
-		glm::vec3(0, 1, 0)
+		glm::vec3(0, -1, 0),
+		glm::vec3(0, -1, 0)
 	};
 
 	void CameraCubemap::GetGLCamera(GL::Camera& cam)
@@ -145,6 +144,6 @@ namespace gE
 		Camera::GetGLCamera(cam);
 
 		for(u8 i = 0; i < 6; i++)
-			cam.View[i] = glm::lookAt(cam.Position, cam.Position + ForwardDirs[i], cam.Position + UpDirs[i]);
+			cam.View[i] = glm::lookAt(cam.Position, cam.Position + ForwardDirs[i], UpDirs[i]);
 	}
 }

@@ -1,3 +1,5 @@
+#extension GL_ARB_shader_viewport_layer_array : require
+
 layout(location = 0) in vec3 Position;
 
 #include "Include/Camera.glsl"
@@ -12,4 +14,5 @@ void main()
     FragPos = (Scene.Model[ModelIndex] * vec4(Position, 1)).xyz;
 
     gl_Position = (ViewProjection * Scene.Model[ModelIndex] * vec4(FragPos, 1)).xyww;
+    gl_Layer = gl_InstanceID;
 }

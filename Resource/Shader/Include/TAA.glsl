@@ -2,6 +2,8 @@
     #define TAA_SAMPLE_COUNT 16
 #endif
 
+#define TAA_SAMPLE_SQUARED (TAA_SAMPLE_COUNT * TAA_SAMPLE_COUNT)
+
 const vec2 HaltonSequence[16] =
 {
     vec2(0.5, 0.333333),

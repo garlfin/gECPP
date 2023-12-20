@@ -3,8 +3,8 @@
 //
 
 #include "Transform.h"
-#include "Engine/Entity/Entity.h"
-#include "Engine/Window.h"
+#include <Engine/Entity/Entity.h>
+#include <Engine/Window.h>
 
 void gE::Transform::Set(const gE::TransformData& d)
 {
@@ -34,6 +34,23 @@ void gE::Transform::OnRender(float)
 	_model = glm::translate(_model, Location);
 	_model *= glm::toMat4(Rotation);
 	_model = glm::scale(_model, Scale);
+
+	_globalTransform.Position = _model[3];
+	_globalTransform.Scale = glm::vec3
+	{
+		glm::length(_model[0]),
+		glm::length(_model[1]),
+		glm::length(_model[2])
+	};
+
+	glm::mat3 rotation =
+	{
+		glm::vec3(_model[0]) / Scale.x,
+		glm::vec3(_model[1]) / Scale.y,
+		glm::vec3(_model[2]) / Scale.z,
+	};
+
+	_globalTransform.Rotation = glm::quat(rotation);
 }
 
 gE::Transform::Transform(gE::Entity* o) : Component(o, &o->GetWindow().GetTransforms()), _model(1.0)

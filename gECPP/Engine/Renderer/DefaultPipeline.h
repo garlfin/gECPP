@@ -44,7 +44,7 @@ namespace GL
 		Area
 	};
 
-	struct LightData
+	struct Light
 	{
 		glm::mat4 ViewProjection;
 		glm::vec3 Position;
@@ -79,7 +79,7 @@ namespace GL
 
 		handle Skybox;
 
-		GL_ALIGN LightData Lights[GE_MAX_LIGHT];
+		GL_ALIGN Light Lights[GE_MAX_LIGHT];
 		GL_ALIGN CubemapData Cubemaps[GE_MAX_CUBEMAP];
 	};
 }

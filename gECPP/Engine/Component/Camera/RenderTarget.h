@@ -29,12 +29,14 @@ namespace gE
 
 		ALWAYS_INLINE T* operator->() { return &_texture; }
 		ALWAYS_INLINE const T* operator->() const { return &_texture; }
-		ALWAYS_INLINE T* operator*() { return &_texture; }
 
-		explicit operator T&() { return _texture; }
-		explicit operator const T&() const { return _texture; }
-		explicit operator T*() { return &_texture; }
-		explicit operator const T*() { return &_texture; }
+		ALWAYS_INLINE T& operator*() { return _texture; }
+		ALWAYS_INLINE const T& operator*() const { return _texture; }
+
+		ALWAYS_INLINE explicit operator T&() { return _texture; }
+		ALWAYS_INLINE explicit operator const T&() const { return _texture; }
+		ALWAYS_INLINE explicit operator T*() { return &_texture; }
+		ALWAYS_INLINE explicit operator const T*() { return &_texture; }
 
 		GET(T&, , _texture)
 
@@ -79,11 +81,21 @@ namespace gE
 	class IDepthTarget
 	{
 	 public:
-		explicit IDepthTarget(GL::Texture& d);
+		explicit IDepthTarget(GL::Texture& d) : _depth(d) {};
 
 		GET(GL::Texture&, Depth, _depth);
 
 	 private:
 		GL::Texture& _depth;
+	};
+
+	class IColorTarget
+	{
+	 public:
+		explicit IColorTarget(GL::Texture& c) : _color(c) {};
+
+		GET(GL::Texture&, Color, _color);
+	 private:
+		GL::Texture& _color;
 	};
 }

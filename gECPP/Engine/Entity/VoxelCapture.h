@@ -9,6 +9,16 @@
 
 namespace gE
 {
+	class VoxelCamera : public Camera3D
+	{
+	 public:
+		VoxelCamera(Entity*, TARGET_TYPE&, u16, float);
+		void GetGLVoxelScene(GL::VoxelScene&);
+
+	 private:
+		float _size;
+	};
+
 	class VoxelCapture : public Entity
 	{
 	 public:
@@ -18,11 +28,8 @@ namespace gE
 		GET(GL::Texture3D&, Color, _target.GetColor());
 		GET(GL::Texture3D&, Data, _target.GetData());
 
-		void OnUpdate(float) override;
-
 	 private:
-		Camera3D _camera;
+		VoxelCamera _camera;
 		VoxelPipeline::Target3D _target;
-		float _size;
 	};
 }

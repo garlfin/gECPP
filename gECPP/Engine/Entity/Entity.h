@@ -11,10 +11,10 @@
 
 namespace gE
 {
-	class Entity : public Updateable
+	class Entity
 	{
 	 public:
-		explicit Entity(Window*, Flags = Flags(), Entity* parent = nullptr, Manager* manager = nullptr);
+		explicit Entity(Window*, Flags = Flags(), Entity* parent = nullptr);
 
 		void Destroy(bool flagChildren = true);
 
@@ -22,10 +22,7 @@ namespace gE
 		GET_CONST(const std::vector<Entity*>&, Children, _children);
 		GET_CONST(Window&, Window, *_window);
 		GET_CONST(Entity*, Parent, _parent);
-
-		void OnUpdate(float d) override { };
-		void OnRender(float d) override { };
-		void OnDestroy() override { };
+		GET_CONST(Flags, Flags, _flags);
 
 	 private:
 		Window* const _window = nullptr;

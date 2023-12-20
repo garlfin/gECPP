@@ -1,6 +1,7 @@
 #include "Camera.glsl"
 #include "Bindless.glsl"
 #include "Vertex.glsl"
+#include "TAA.glsl"
 
 // In percent
 #ifndef DIRECTIONAL_SHADOW_BIAS
@@ -8,11 +9,7 @@
 #endif
 
 #ifndef DIRECTIONAL_SHADOW_SAMPLES
-    #define DIRECTIONAL_SHADOW_SAMPLES 8
-#endif
-
-#ifndef TAA_SAMPLE_COUNT
-    #define TAA_SAMPLE_COUNT 16
+    #define DIRECTIONAL_SHADOW_SAMPLES 16
 #endif
 
 #define SOFT_SHADOW_AVERAGE
@@ -153,7 +150,7 @@ bool TexcoordOutOfBounds(vec2 uv)
 
 float InterleavedGradientNoise(vec2 uv)
 {
-    uv = uv + 5.588238 * (Camera.Frame % (TAA_SAMPLE_COUNT * TAA_SAMPLE_COUNT));
+    uv = uv + 5.588238 * (Camera.Frame % TAA_SAMPLE_SQUARED);
     return fract(52.9829189 * fract(dot(uv, vec2(0.06711056, 0.00583715))));
 }
 

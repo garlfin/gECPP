@@ -18,22 +18,11 @@ namespace gE
 	OrthographicCameraSettings CreateDirectionalSettings(u16, float);
 
 	DirectionalLight::DirectionalLight(Window* w, u16 size, float scale, const glm::quat& rot) :
-		Light(w, _camera, _target),
+		Entity(w, Flags(true, UINT8_MAX)),
 		_camera(this, nullptr, _target, CreateDirectionalSettings(size, scale)),
 		_target(*this, _camera)
 	{
 		GetTransform().Rotation = rot;
-	}
-
-	void DirectionalLight::GetGLLight(GL::LightData& light)
-	{
-		light.ViewProjection = _camera.GetProjection() * glm::inverse(GetTransform().Model());
-		light.Position = -GetTransform().Forward();
-		light.Type = GL::LightType::Directional;
-		light.Color = glm::vec3(1);
-		light.PackedSettings = u32(GetScale() * 2);
-		light.Planes = DirectionalSettings.ClipPlanes;
-		light.Depth = (handle) GetDepth();
 	}
 
 	Light::Light(Window* w, Camera& c, IDepthTarget& t, Entity* p) : Entity(w, Flags(), p),
@@ -57,7 +46,7 @@ namespace gE
 
 	void DirectionalLightTarget::RenderPass(float, Camera* callingCamera)
 	{
-		if(!callingCamera) return;
+		GE_ASSERT(callingCamera, "DIRECTIONAL LIGHT SHOULD ALWAYS BE CALLED BY ANOTHER CAMERA!");
 
 		Window& window = GetWindow();
 		OrthographicCamera& camera = GetCamera();
@@ -80,7 +69,6 @@ namespace gE
 
 	void DirectionalLightTarget::Setup(float, Camera* callingCamera)
 	{
-		Window& window = GetWindow();
 		OrthographicCamera& camera = GetCamera();
 		GL::TextureSize2D size = camera.GetSize();
 
@@ -97,6 +85,20 @@ namespace gE
 		transform.OnRender(0.f); // Force update on model matrix since it passed its tick.
 	}
 
+	void DirectionalLightTarget::GetGLLight(GL::Light& light)
+	{
+		Transform& transform = GetOwner().GetTransform();
+		OrthographicCamera& camera = GetCamera();
+
+		light.ViewProjection = camera.GetProjection() * glm::inverse(transform.Model());
+		light.Position = -transform.Forward();
+		light.Type = GL::LightType::Directional;
+		light.Color = glm::vec3(1);
+		light.PackedSettings = u32(camera.GetScale().y * 2);
+		light.Planes = DirectionalSettings.ClipPlanes;
+		light.Depth = (handle) GetDepth();
+	}
+
 	OrthographicCameraSettings CreateDirectionalSettings(u16 size, float scale)
 	{
 		scale *= 0.5f;
@@ -106,10 +108,6 @@ namespace gE
 			CameraSettings2D(DirectionalSettings, glm::ivec2(size)),
 			glm::vec4(-scale, scale, -scale, scale)
 		};
-	}
-
-	IDepthTarget::IDepthTarget(GL::Texture& d) : _depth(d)
-	{
 	}
 }
 

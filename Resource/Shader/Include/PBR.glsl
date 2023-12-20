@@ -8,10 +8,10 @@
 #endif
 
 #ifndef EPSILON
-#define EPSILON 0.00001
+    #define EPSILON 0.00001
 #endif
 
-#define HAMMERSLEY_ROUGHNESS_SAMPLE 256
+#define HAMMERSLEY_ROUGHNESS_SAMPLE TAA_SAMPLE_SQUARED
 
 #ifdef FRAGMENT_SHADER
     uniform sampler2D BRDFLutTex;
@@ -24,7 +24,7 @@ struct PBRFragment
     vec3 Albedo;
     float Metallic;
     vec3 F0;
-    float IOR;
+    float Specular;
 };
 
 // Main Functions
@@ -50,9 +50,9 @@ vec2 Hammersley(uint i, uint sampleCount);
 #ifdef FRAGMENT_SHADER
 vec3 GetLighting(const Vertex vert, const PBRFragment frag, const Light light)
 {
-    // No control flow indirection because it's all in uniforms
     switch(light.Type)
     {
+
         case LIGHT_DIRECTIONAL: return GetLightingDirectional(vert, frag, light);
         default: return vec3(1.0);
     }
@@ -98,7 +98,7 @@ vec3 GetLightingDirectional(const Vertex vert, const PBRFragment frag, const Lig
     // Falloff of nDotL * nDotL is nicer to me
     float lambert = min(nDotL * nDotL, GetShadowDirectional(vert, light));
 
-    return (diffuseBRDF + specularBRDF) * lambert * light.Color;
+    return (diffuseBRDF + specularBRDF * frag.Specular) * lambert * light.Color;
 }
 #endif
 

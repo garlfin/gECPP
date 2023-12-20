@@ -19,6 +19,11 @@ namespace gE
 		};
 		glm::vec3 Scale = glm::vec3(1.f);
 		glm::quaternion Rotation = glm::quaternion();
+
+		NODISCARD ALWAYS_INLINE glm::vec3 Forward() const { return Rotation * glm::vec3(0, 0, -1); }
+		NODISCARD ALWAYS_INLINE glm::vec3 Up() const { return Rotation * glm::vec3(0, 1, 0); }
+		NODISCARD ALWAYS_INLINE glm::vec3 Right() const { return Rotation * glm::vec3(1, 0, 0); }
+		GET_CONST(glm::mat3, RotationMatrix, glm::toMat3(Rotation));
 	};
 
 	class Transform : public Component, public TransformData
@@ -40,17 +45,15 @@ namespace gE
 
 		NODISCARD ALWAYS_INLINE const glm::mat4& Model() const { return _model; }
 		NODISCARD ALWAYS_INLINE const glm::mat4& PreviousModel() const { return _previousModel; }
-		NODISCARD ALWAYS_INLINE glm::vec3 Forward() const { return Rotation * glm::vec3(0, 0, -1); }
-		NODISCARD ALWAYS_INLINE glm::vec3 Up() const { return Rotation * glm::vec3(0, 1, 0); }
-		NODISCARD ALWAYS_INLINE glm::vec3 Right() const { return Rotation * glm::vec3(1, 0, 0); }
-		NODISCARD ALWAYS_INLINE glm::mat3 LocalRotationMatrix() const { return glm::toMat3(Rotation); }
-		NODISCARD ALWAYS_INLINE glm::vec3 GlobalTranslation() const { return (glm::vec3) _model[3]; }
+
+		GET_CONST(const TransformData&, GlobalTransform, _globalTransform);
 
 		~Transform() override;
 
 	 private:
 		glm::mat4 _model;
 		glm::mat4 _previousModel;
+		TransformData _globalTransform;
 	};
 
 	class TransformManager : public TypedManager<Transform>
