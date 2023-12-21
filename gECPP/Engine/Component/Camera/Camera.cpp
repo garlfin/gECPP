@@ -26,9 +26,8 @@ namespace gE
 		cam.Projection = Projection;
 		cam.PreviousViewProjection = Projection * glm::inverse(transform.PreviousModel());
 
-		// TODO: FIX AFTER REFACTORING
-		cam.DepthTexture = 0; // (handle) *GetDepth();
-		cam.ColorTexture = 0; // GetColorCopy() ? ((handle) *GetColorCopy()) : 0;
+		cam.DepthTexture = (handle) 0u;
+		cam.ColorTexture = (handle) 0u;
 	}
 
 	void Camera::Draw(float delta, Camera* callingCamera)

@@ -17,7 +17,9 @@ namespace GL
 		glm::vec3 Minimum{};
 		float VoxelScale = 0;
 		glm::vec3 Maximum{};
-		GL_ALIGN u64 Texture = 0;
+
+		GL_ALIGN handle Color;
+		GL_ALIGN handle Data;
 	};
 }
 

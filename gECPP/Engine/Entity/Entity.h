@@ -11,10 +11,10 @@
 
 namespace gE
 {
-	class Entity
+	class Entity : public Managed<IEntityManager, Entity>
 	{
 	 public:
-		explicit Entity(Window*, Flags = Flags(), Entity* parent = nullptr);
+		explicit Entity(Window*, Flags = Flags(), Entity* = nullptr, IEntityManager* = nullptr);
 
 		void Destroy(bool flagChildren = true);
 

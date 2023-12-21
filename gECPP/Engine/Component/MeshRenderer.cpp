@@ -31,7 +31,7 @@ void gE::MeshRenderer::OnRender(float delta)
 	for(uint8_t i = 0; i < meshCount; i++)
 	{
 		_materialHolder->GetMaterial(i).Bind();
-		_mesh->VAO->Draw(i, GetWindow().State.Enable6X ? 6 : 1);
+		_mesh->VAO->Draw(i, GetWindow().State.InstanceMultiplier);
 	}
 }
 

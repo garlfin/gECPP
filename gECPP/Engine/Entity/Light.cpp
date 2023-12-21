@@ -18,23 +18,23 @@ namespace gE
 	OrthographicCameraSettings CreateDirectionalSettings(u16, float);
 
 	DirectionalLight::DirectionalLight(Window* w, u16 size, float scale, const glm::quat& rot) :
-		Entity(w, Flags(true, UINT8_MAX)),
+		Light(w, _camera, _target),
 		_camera(this, nullptr, _target, CreateDirectionalSettings(size, scale)),
-		_target(_camera)
+		_target(*this, _camera)
 	{
 		GetTransform().Rotation = rot;
 	}
 
 	void LightManager::OnRender(float delta)
 	{
-		ComponentManager<Camera>::OnRender(delta);
+		Manager<Light>::OnRender(delta);
 	}
 
 	CONSTEXPR_GLOBAL GL::ITextureSettings ShadowMapFormat { GL_DEPTH_COMPONENT16, GL::WrapMode::Clamp, GL::FilterMode::Linear };
 
-	DirectionalLightTarget::DirectionalLightTarget(OrthographicCamera& camera) :
-		RenderTarget<Camera2D>(*camera.GetOwner(), camera), ILightTarget((GL::Texture&) _depth),
-		_depth(GetFrameBuffer(), GL::TextureSettings2D(ShadowMapFormat, camera.GetSize()))
+	DirectionalLightTarget::DirectionalLightTarget(Light& l, OrthographicCamera& c) :
+		RenderTarget<Camera2D>(l, c), IDepthTarget((GL::Texture&) _depth),
+		_depth(GetFrameBuffer(), GL::TextureSettings2D{ ShadowMapFormat, c.GetSize() })
 	{
 	}
 
@@ -48,7 +48,7 @@ namespace gE
 
 		DefaultPipeline::Buffers& buffers = window.GetPipelineBuffers();
 
-		GetGLLight(buffers.Lighting.Lights[0]);
+		GetOwner().GetGLLight(buffers.Lighting.Lights[0]);
 		buffers.UpdateLighting(offsetof(GL::Lighting, Lights[1]));
 
 		window.State = State::Shadow;
@@ -79,7 +79,7 @@ namespace gE
 		transform.OnRender(0.f); // Force update on model matrix since it passed its tick.
 	}
 
-	void DirectionalLightTarget::GetGLLight(GL::Light& light)
+	void DirectionalLight::GetGLLight(GL::Light& light)
 	{
 		Transform& transform = GetCamera().GetOwner()->GetTransform();
 		OrthographicCamera& camera = GetCamera();
@@ -102,6 +102,13 @@ namespace gE
 			CameraSettings2D(DirectionalSettings, glm::ivec2(size)),
 			glm::vec4(-scale, scale, -scale, scale)
 		};
+	}
+
+	Light::Light(Window* w, Camera& c, IDepthTarget& d) :
+		Entity(w, Flags(true, UINT8_MAX), nullptr, &GetWindow.GetLights()),
+		IDepthTarget(d),
+		_camera(c)
+	{
 	}
 }
 

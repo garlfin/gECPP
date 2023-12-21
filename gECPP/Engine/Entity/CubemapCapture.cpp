@@ -13,8 +13,9 @@ namespace gE
 		DefaultCameraTiming
 	};
 
-	CubemapCapture::CubemapCapture(gE::Window* w, u16 size) : Entity(w, Flags(true, UINT8_MAX)),
-		_camera(this, &w->GetCubemaps(), _target, { CubemapCameraSettings, size }),
+	CubemapCapture::CubemapCapture(gE::Window* w, u16 size) :
+		Entity(w, Flags(true, UINT8_MAX), nullptr, &GetWindow().GetCubemaps()),
+		_camera(this, nullptr, _target, { CubemapCameraSettings, size }),
 		_target(_camera)
 	{
 	}
@@ -41,7 +42,7 @@ namespace gE
 
 		buffers.UpdateLighting(sizeof(handle), offsetof(GL::Lighting, Skybox));
 
-		Manager::OnRender(delta);
+		Manager<CubemapCapture>::OnRender(delta);
 	}
 
 	void CubemapManager::DrawSkybox()
@@ -64,7 +65,7 @@ namespace gE
 		glDisable(GL_CULL_FACE);
 		glDepthFunc(GL_LEQUAL);
 
-		_skyboxVAO->Draw(0, _window->State.Enable6X ? 6 : 1);
+		_skyboxVAO->Draw(0, _window->State.InstanceMultiplier);
 	}
 
 	void CubemapTarget::RenderPass(float, Camera*)
@@ -90,10 +91,11 @@ namespace gE
 		GL::FilterMode::Linear
 	};
 
+
 	CubemapTarget::CubemapTarget(CameraCubemap& camera) :
 		RenderTarget<CameraCubemap>(*camera.GetOwner(), camera), IDepthTarget(_depth.Get()),
-		_color(GetFrameBuffer(), GL::TextureSettings1D(CubemapColorFormat, camera.GetSize())),
-		_depth(GetFrameBuffer(), GL::TextureSettings1D(DefaultPipeline::DepthFormat, camera.GetSize()))
+		_color(GetFrameBuffer(), GL::TextureSettings1D{ CubemapColorFormat, camera.GetSize() }),
+		_depth(GetFrameBuffer(), GL::TextureSettings1D{ DefaultPipeline::DepthFormat, camera.GetSize() })
 	{
 	}
 

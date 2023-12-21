@@ -8,7 +8,7 @@
 
 namespace gE
 {
-	class Component : public Managed<Component, IComponentManager>
+	class Component : public Managed<IComponentManager, Component>
 	{
 	 public:
 		explicit Component(Entity* o, IComponentManager* manager);

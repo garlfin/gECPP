@@ -17,7 +17,11 @@ namespace gE
 	{
 	 public:
 		typedef std::vector<T*> VEC_T;
+		typedef T I;
+
 		Manager() = default;
+		Manager(const Manager&) = delete;
+		Manager(Manager&&) = delete;
 
 		inline virtual void Register(T* t) { VEC_T::push_back(t); }
 		inline virtual void Remove(T* t) { RemoveFirstFromVec(*this, t); }
@@ -33,6 +37,12 @@ namespace gE
 		inline bool Contains(T* v) { return std::find(VEC_T::begin(), VEC_T::end(), v) != VEC_T::end(); }
 	};
 
+	class IEntityManager : public Manager<Entity>
+	{
+	 public:
+		using Manager<Entity>::Manager;
+	};
+
 	class IComponentManager : public Manager<Component>
 	{
 	 public:
@@ -43,28 +53,33 @@ namespace gE
 	};
 
 	template<class T>
+	class EntityManager : public IEntityManager
+	{
+	 public:
+		using IEntityManager::IEntityManager;
+
+		inline virtual void Register(T* t) { IEntityManager::Register(t); }
+		inline virtual void Remove(T* t) { IEntityManager::Remove(t); }
+	};
+
+	template<class T>
 	class ComponentManager : public IComponentManager
 	{
 	 public:
 		using IComponentManager::IComponentManager;
 
-		using IComponentManager::OnRender;
-		using IComponentManager::OnUpdate;
-		using IComponentManager::Size;
-
 		inline virtual void Register(T* t) { IComponentManager::Register(t); }
 		inline virtual void Remove(T* t) { IComponentManager::Remove(t); }
 	};
 
-	template<class I, class T>
+	template<class T, class I>
 	class Managed
 	{
 	 public:
-		Managed(I* obj, T* manager) : _manager(manager), _this(obj) { if(_manager) _manager->Register(obj); }
-		~Managed() { if(_manager) _manager->Remove(_this); }
+		Managed(T* manager) : _manager(manager) { if(_manager) _manager->Register((I*) this); }
+		~Managed() { if(_manager) _manager->Remove((I*) this); }
 
 	 private:
 		T* _manager;
-		I* _this;
 	};
 }

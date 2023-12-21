@@ -9,8 +9,8 @@ namespace gE
 {
 	CameraSettings3D CreateVoxelSettings(u16);
 
-	VoxelCapture::VoxelCapture(gE::Window* w, u16 resolution, float size) : Entity(w),
-		_camera(this, _target, resolution, size),
+	VoxelCapture::VoxelCapture(gE::Window* w, u16 r, float s) : Entity(w),
+		_camera(this, _target, r, s),
 		_target(*this, _camera)
 	{
 	}
@@ -22,7 +22,9 @@ namespace gE
 		scene.VoxelScale = _size / GetSize().x;
 		scene.Minimum = transform.Position - transform.Scale / 2.f;
 		scene.Maximum = transform.Position + transform.Scale / 2.f;
-		scene.Texture = (handle) ((IColorTarget&) GetTarget()).GetColor();
+
+		scene.Color = (handle) GetTarget().GetColor();
+		scene.Data = (handle) GetTarget().GetData();
 	}
 
 	CameraSettings3D CreateVoxelSettings(u16 resolution, float size)
@@ -34,7 +36,7 @@ namespace gE
 		};
 	}
 
-	VoxelCamera::VoxelCamera(Entity* o, Camera3D::TARGET_TYPE& t, u16 r, float s) :
+	VoxelCamera::VoxelCamera(Entity* o, TARGET_TYPE& t, u16 r, float s) :
 		Camera3D(o, nullptr, t, CreateVoxelSettings(r)),
 		_size(s)
 	{

@@ -12,13 +12,13 @@
 #define WRITE_MODE_DEPTH 1
 #define WRITE_MODE_COLOR 2
 
-#define VOXEL_WRITE_MODE_OFFSET 3
+#define VOXEL_WRITE_MODE_OFFSET 2
 #define VOXEL_WRITE_MODE_READ 1
 #define VOXEL_WRITE_MODE_WRITE 2
 
-#define ENABLE_JITTER (1 << 5)
-#define ENABLE_SSEFFECTS (1 << 6)
-#define ENABLE_SPECULAR (1 << 7)
+#define ENABLE_JITTER (1 << 4)
+#define ENABLE_SSEFFECTS (1 << 5)
+#define ENABLE_SPECULAR (1 << 6)
 
 struct Light
 {

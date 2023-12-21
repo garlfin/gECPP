@@ -47,10 +47,10 @@ namespace gE
 		CubemapTarget _target;
 	};
 
-	class CubemapManager final : public ComponentManager<CameraCubemap>
+	class CubemapManager final : public Manager<CubemapCapture>
 	{
 	 public:
-		explicit CubemapManager(Window* window) : ComponentManager<CameraCubemap>(), _window(window) {};
+		explicit CubemapManager(Window* window) : Manager<CubemapCapture>(), _window(window) {};
 
 		Reference<GL::TextureCube> Skybox{};
 

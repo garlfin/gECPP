@@ -35,13 +35,15 @@ namespace gE
 	template<class T>
 	class Manager;
 
-	typedef Manager<Entity> EntityManager;
-
+	class IEntityManager;
 	class IComponentManager;
+
+	template<class T>
+	class EntityManager;
 
 	template<class T>
 	class ComponentManager;
 
-	template<class I, class T>
+	template<class T, class I>
 	class Managed;
 }
