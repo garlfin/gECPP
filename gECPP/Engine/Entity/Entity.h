@@ -31,10 +31,6 @@ namespace gE
 		std::vector<Entity*> _children;
 
 		Transform _transform = Transform(this);
-
-		friend class Component;
-		friend class Manager;
-		template<class T> friend class TypedManager;
 	};
 
 	typedef Entity Empty;

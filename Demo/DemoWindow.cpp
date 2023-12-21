@@ -39,8 +39,7 @@ void DemoWindow::OnInit()
 	Lights.Sun = sun;
 
 	auto* camera = new FlyCamera(this);
-	Cameras.CurrentCamera = &camera->GetCamera();
-	Cameras.Color = &camera->GetColor();
+	Cameras.CurrentCamera = &camera->GetTarget();
 
 	auto* capture = new gE::CubemapCapture(this, 256);
 	capture->GetTransform().Position.y = 4;

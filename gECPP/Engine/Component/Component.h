@@ -8,24 +8,23 @@
 
 namespace gE
 {
-	class Component : public Updateable
+	class Component : public Managed<Component, IComponentManager>
 	{
 	 public:
-		explicit Component(Entity* o, Manager* manager);
+		explicit Component(Entity* o, IComponentManager* manager);
 
 		GET_CONST(Entity*, Owner, _owner);
 		GET_CONST(Window&, Window, _window);
 
-		void OnUpdate(float d) override { }
-		void OnRender(float d) override { }
-		void OnDestroy() override { };
+		virtual void OnUpdate(float d) { }
+		virtual void OnRender(float d) { }
+		virtual void OnDestroy() { };
+
+		virtual ~Component() = default;
 
 	 private:
 		Window& _window;
 		Entity* _owner;
-
-		friend class Manager;
-		template<class T> friend class TypedManager;
 	};
 
 	class Behavior : public Component
@@ -36,8 +35,6 @@ namespace gE
 		void OnUpdate(float d) override { }
 		void OnRender(float d) override { }
 		void OnDestroy() override { }
-
-		~Behavior() override = default;
 	};
 
 #pragma clang diagnostic push
@@ -47,7 +44,7 @@ namespace gE
 	class TypedComponent : public Component
 	{
 	 public:
-		inline explicit TypedComponent(T* o, Manager* manager = nullptr) : Component(o, manager) { };
+		inline explicit TypedComponent(T* o, IComponentManager* manager = nullptr) : Component(o, manager) { };
 
 		GET_CONST(T*, Owner, (T*) Component::GetOwner());
 	};

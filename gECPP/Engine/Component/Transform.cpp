@@ -69,7 +69,7 @@ gE::Transform::Transform(gE::Entity* o, const gE::TransformData& d) : Component(
 void gE::TransformManager::OnUpdate(float delta)
 {
 	std::vector<Entity*> stack;
-	for(Updateable* t : *this)
+	for(Component* t : *this)
 	{
 		stack.push_back(((Component*) t)->GetOwner());
 
@@ -87,5 +87,5 @@ void gE::TransformManager::OnUpdate(float delta)
 
 void gE::TransformManager::Register(gE::Transform* t)
 {
-	if(!t->GetOwner()->GetParent()) TypedManager::Register(t);
+	if(!t->GetOwner()->GetParent()) IComponentManager::Register(t);
 }

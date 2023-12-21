@@ -4,65 +4,67 @@
 
 #pragma once
 
+#include <Prototype.h>
 #include <vector>
 #include <algorithm>
-#include "Component/Component.h"
 
 namespace gE
 {
 	class Window;
 
-	class Manager : protected std::vector<Updateable*>
+	template<class T>
+	class Manager : protected std::vector<T*>
 	{
 	 public:
+		typedef std::vector<T*> VEC_T;
 		Manager() = default;
 
-		inline virtual void Register(Updateable* t) { push_back(t); }
-		inline virtual void Remove(Updateable* t) { RemoveFirstFromVec(*this, t); }
+		inline virtual void Register(T* t) { VEC_T::push_back(t); }
+		inline virtual void Remove(T* t) { RemoveFirstFromVec(*this, t); }
 
-		NODISCARD ALWAYS_INLINE size_t Size() const { return size(); }
+		virtual void OnUpdate(float) {};
+		virtual void OnRender(float) {};
 
-	 protected:
-		virtual void OnUpdate(float delta)
-		{
-			for(Updateable* t: *this)
-				if(t->GetFlags().Deletion)
-					t->OnDestroy();
-				else
-					t->OnUpdate(delta);
-		}
+		NODISCARD ALWAYS_INLINE size_t Size() const { return VEC_T::size(); }
 
-		virtual void OnRender(float delta)
-		{
-			for(Updateable* t: *this)
-				t->OnRender(delta);
-		}
-
-		using std::vector<Updateable*>::operator[];
+		using std::vector<T*>::operator[];
 
 	 protected:
-		inline bool Contains(Updateable* v) { return std::find(begin(), end(), v) != end(); }
+		inline bool Contains(T* v) { return std::find(VEC_T::begin(), VEC_T::end(), v) != VEC_T::end(); }
 	};
 
-	template<class T>
-	class TypedManager : public Manager
+	class IComponentManager : public Manager<Component>
 	{
 	 public:
-		TypedManager() = default;
+		using Manager<Component>::Manager;
 
-		inline virtual void Register(T* t) { Manager::Register(t); }
-		inline virtual void Remove(T* t) { Manager::Remove(t); }
-
-		using Manager::Size;
-		using Manager::OnUpdate;
-		using Manager::OnRender;
-
-		NODISCARD ALWAYS_INLINE T* operator[](size_t i) const { return (T*) Manager::operator[](i); }
+		void OnUpdate(float d) override;
+		void OnRender(float d) override;
 	};
 
 	template<class T>
-	using ComponentManager = TypedManager<T>;
+	class ComponentManager : public IComponentManager
+	{
+	 public:
+		using IComponentManager::IComponentManager;
 
-	template<class T>
-	using EntityManager = TypedManager<T>;
+		using IComponentManager::OnRender;
+		using IComponentManager::OnUpdate;
+		using IComponentManager::Size;
+
+		inline virtual void Register(T* t) { IComponentManager::Register(t); }
+		inline virtual void Remove(T* t) { IComponentManager::Remove(t); }
+	};
+
+	template<class I, class T>
+	class Managed
+	{
+	 public:
+		Managed(I* obj, T* manager) : _manager(manager), _this(obj) { if(_manager) _manager->Register(obj); }
+		~Managed() { if(_manager) _manager->Remove(_this); }
+
+	 private:
+		T* _manager;
+		I* _this;
+	};
 }

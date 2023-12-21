@@ -18,7 +18,7 @@ namespace gE
 	class CubemapTarget : public RenderTarget<CameraCubemap>, public IDepthTarget
 	{
 	 public:
-		explicit CubemapTarget(CubemapCapture&, CameraCubemap&);
+		explicit CubemapTarget(CameraCubemap&);
 
 		GET(GL::TextureCube&, Color, _color.Get());
 		GET(GL::TextureCube&, Depth, _depth.Get());
@@ -47,10 +47,10 @@ namespace gE
 		CubemapTarget _target;
 	};
 
-	class CubemapManager final : public TypedManager<CameraCubemap>
+	class CubemapManager final : public ComponentManager<CameraCubemap>
 	{
 	 public:
-		explicit CubemapManager(Window* window) : TypedManager<CameraCubemap>(), _window(window) {};
+		explicit CubemapManager(Window* window) : ComponentManager<CameraCubemap>(), _window(window) {};
 
 		Reference<GL::TextureCube> Skybox{};
 

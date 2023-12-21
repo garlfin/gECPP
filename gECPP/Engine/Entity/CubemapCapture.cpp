@@ -14,8 +14,8 @@ namespace gE
 	};
 
 	CubemapCapture::CubemapCapture(gE::Window* w, u16 size) : Entity(w, Flags(true, UINT8_MAX)),
-		_camera(this, nullptr, _target, { CubemapCameraSettings, size }),
-		_target(*this, _camera)
+		_camera(this, &w->GetCubemaps(), _target, { CubemapCameraSettings, size }),
+		_target(_camera)
 	{
 	}
 
@@ -90,8 +90,8 @@ namespace gE
 		GL::FilterMode::Linear
 	};
 
-	CubemapTarget::CubemapTarget(CubemapCapture& capture, CameraCubemap& camera) :
-		RenderTarget<CameraCubemap>(capture, camera), IDepthTarget(_depth.Get()),
+	CubemapTarget::CubemapTarget(CameraCubemap& camera) :
+		RenderTarget<CameraCubemap>(*camera.GetOwner(), camera), IDepthTarget(_depth.Get()),
 		_color(GetFrameBuffer(), GL::TextureSettings1D(CubemapColorFormat, camera.GetSize())),
 		_depth(GetFrameBuffer(), GL::TextureSettings1D(DefaultPipeline::DepthFormat, camera.GetSize()))
 	{
@@ -99,6 +99,7 @@ namespace gE
 
 	void CubemapTarget::RenderDependencies(float d)
 	{
-		GetWindow().GetLights().Sun->GetCamera().Draw(d, &GetCamera());
+		LightManager& lights = GetOwner().GetWindow().GetLights();
+		lights.Sun->GetCamera().Draw(d, &GetCamera());
 	}
 }

@@ -32,34 +32,16 @@ namespace gE
 		u8 Layer : 4 = 0;
 	};
 
+	template<class T>
 	class Manager;
 
-	template<class T>
-	class TypedManager;
+	typedef Manager<Entity> EntityManager;
 
-	class Updateable
-	{
-	 public:
-		Updateable(Manager* manager, Flags& flags);
-
-		GET_CONST(Flags, Flags, _flags);
-
-		virtual void OnUpdate(float) = 0;
-		virtual void OnRender(float) = 0;
-		virtual void OnDestroy() = 0;
-
-		virtual ~Updateable();
-
-	 private:
-		Manager* _manager;
-		Flags& _flags;
-
-		friend class Manager;
-		template<class T> friend class TypedManager;
-	};
-
-	class IRenderTarget;
+	class IComponentManager;
 
 	template<class T>
-	class RenderTarget;
+	class ComponentManager;
+
+	template<class I, class T>
+	class Managed;
 }

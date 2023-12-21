@@ -20,41 +20,35 @@ namespace gE
 	DirectionalLight::DirectionalLight(Window* w, u16 size, float scale, const glm::quat& rot) :
 		Entity(w, Flags(true, UINT8_MAX)),
 		_camera(this, nullptr, _target, CreateDirectionalSettings(size, scale)),
-		_target(*this, _camera)
+		_target(_camera)
 	{
 		GetTransform().Rotation = rot;
 	}
 
-	Light::Light(Window* w, Camera& c, IDepthTarget& t, Entity* p) : Entity(w, Flags(), p),
-		_camera(c), _target(t)
-	{
-	}
-
 	void LightManager::OnRender(float delta)
 	{
-		TypedManager<Light>::OnRender(delta);
+		ComponentManager<Camera>::OnRender(delta);
 	}
 
 	CONSTEXPR_GLOBAL GL::ITextureSettings ShadowMapFormat { GL_DEPTH_COMPONENT16, GL::WrapMode::Clamp, GL::FilterMode::Linear };
 
-	DirectionalLightTarget::DirectionalLightTarget(Light& light, OrthographicCamera& camera) :
-		RenderTarget<Camera2D>(light, camera), IDepthTarget((GL::Texture&) _depth),
+	DirectionalLightTarget::DirectionalLightTarget(OrthographicCamera& camera) :
+		RenderTarget<Camera2D>(*camera.GetOwner(), camera), ILightTarget((GL::Texture&) _depth),
 		_depth(GetFrameBuffer(), GL::TextureSettings2D(ShadowMapFormat, camera.GetSize()))
 	{
-
 	}
 
 	void DirectionalLightTarget::RenderPass(float, Camera* callingCamera)
 	{
 		GE_ASSERT(callingCamera, "DIRECTIONAL LIGHT SHOULD ALWAYS BE CALLED BY ANOTHER CAMERA!");
 
-		Window& window = GetWindow();
+		Window& window = callingCamera->GetWindow();
 		OrthographicCamera& camera = GetCamera();
 		GL::TextureSize2D size = camera.GetSize();
 
 		DefaultPipeline::Buffers& buffers = window.GetPipelineBuffers();
 
-		GetOwner().GetGLLight(buffers.Lighting.Lights[0]);
+		GetGLLight(buffers.Lighting.Lights[0]);
 		buffers.UpdateLighting(offsetof(GL::Lighting, Lights[1]));
 
 		window.State = State::Shadow;
@@ -72,7 +66,7 @@ namespace gE
 		OrthographicCamera& camera = GetCamera();
 		GL::TextureSize2D size = camera.GetSize();
 
-		Transform& transform = camera.GetOwner()->GetTransform();
+		Transform& transform = GetOwner().GetTransform();
 		Transform& cameraTransform = callingCamera->GetOwner()->GetTransform();
 
 		glm::vec2 planes = GetCamera().GetClipPlanes();
@@ -87,7 +81,7 @@ namespace gE
 
 	void DirectionalLightTarget::GetGLLight(GL::Light& light)
 	{
-		Transform& transform = GetOwner().GetTransform();
+		Transform& transform = GetCamera().GetOwner()->GetTransform();
 		OrthographicCamera& camera = GetCamera();
 
 		light.ViewProjection = camera.GetProjection() * glm::inverse(transform.Model());

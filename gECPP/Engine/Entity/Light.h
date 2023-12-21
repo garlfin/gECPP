@@ -14,13 +14,14 @@ namespace gE
 	class ILightTarget : public IDepthTarget
 	{
 	 public:
+		using IDepthTarget::IDepthTarget;
 		virtual void GetGLLight(GL::Light&) = 0;
 	};
 
 	class DirectionalLightTarget : public RenderTarget<Camera2D>, public ILightTarget
 	{
 	 public:
-		explicit DirectionalLightTarget(Entity&, OrthographicCamera&);
+		explicit DirectionalLightTarget(OrthographicCamera&);
 
 		GET(GL::Texture2D&, Depth, *_depth);
 		GET(OrthographicCamera&, Camera, (OrthographicCamera&) RenderTarget<Camera2D>::GetCamera())
@@ -49,7 +50,7 @@ namespace gE
 		DirectionalLightTarget _target;
 	};
 
-	class LightManager : public TypedManager<Light>
+	class LightManager : public ComponentManager<Camera>
 	{
 	 public:
 		explicit LightManager(Window* window) : _window(window) {};

@@ -58,7 +58,7 @@ namespace gE
 		virtual void RenderPass(float, Camera*) = 0;
 		virtual void PostProcessPass(float) {};
 
-		inline void Bind() const final { _frameBuffer.Bind(); }
+		inline void Bind() const { _frameBuffer.Bind(); }
 
 	 private:
 		Camera& _camera;

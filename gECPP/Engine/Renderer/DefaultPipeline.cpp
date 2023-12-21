@@ -18,7 +18,7 @@ namespace gE
 	}
 
 	DefaultPipeline::Target2D::Target2D(Entity& owner, Camera2D& camera, std::vector<PostProcessEffect<Target2D>*> effects) :
-		RenderTarget<Camera2D>(owner, camera), IDepthTarget(_depth.Get()),
+		RenderTarget<Camera2D>(owner, camera), IDepthTarget(_depth.Get()), IColorTarget(_color.Get()),
 		_depth(GetFrameBuffer(), GL::TextureSettings2D(DefaultPipeline::DepthFormat, camera.GetSize())),
 		_color(GetFrameBuffer(), GL::TextureSettings2D(DefaultPipeline::ColorFormat, camera.GetSize())),
 		_velocity(GetFrameBuffer(), GL::TextureSettings2D(DefaultPipeline::VelocityFormat, camera.GetSize())),
@@ -72,7 +72,7 @@ namespace gE
 		_colorBack.CopyFrom(_postProcessBack);
 
 		// Post process loop
-		GL::Texture2D* front = *_color, *back = &_postProcessBack;
+		GL::Texture2D* front = &*_color, *back = &_postProcessBack;
 		for(PostProcessEffect<Target2D>* effect : _effects)
 		{
 			std::swap(front, back);
@@ -81,7 +81,7 @@ namespace gE
 
 		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 		// Sync post process "backbuffer" and main color buffer
-		if(front == *_color) front->CopyFrom(*back);
+		if(front == &*_color) front->CopyFrom(*back);
 	}
 
 	void DefaultPipeline::Target2D::RenderDependencies(float delta)

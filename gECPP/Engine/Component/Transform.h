@@ -56,10 +56,10 @@ namespace gE
 		TransformData _globalTransform;
 	};
 
-	class TransformManager : public TypedManager<Transform>
+	class TransformManager : public ComponentManager<Transform>
 	{
 	 public:
-		using TypedManager<Transform>::TypedManager;
+		using ComponentManager<Transform>::ComponentManager;
 
 		void Register(Transform* t) override;
 		void OnUpdate(float delta) override;

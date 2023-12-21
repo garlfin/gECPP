@@ -90,7 +90,6 @@ namespace gE
 		TransformManager Transforms;
 		ComponentManager<Behavior> Behaviors;
 		ComponentManager<MeshRenderer> Renderers;
-		ComponentManager<Entity> Entities;
 		LightManager Lights;
 		CubemapManager Cubemaps;
 		GL::TextureSlotManager SlotManager;

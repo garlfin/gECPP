@@ -4,17 +4,18 @@
 
 #include "Prototype.h"
 #include <Engine/Manager.h>
+#include <Engine/Component/Component.h>
 
 namespace gE
 {
-	Updateable::Updateable(Manager* manager, Flags& flags) : _manager(manager), _flags(flags)
+	void IComponentManager::OnUpdate(float d)
 	{
-		if(manager) manager->Register(this);
+		for(Component* component : *this) component->OnUpdate(d);
 	}
 
-	Updateable::~Updateable()
+	void IComponentManager::OnRender(float d)
 	{
-		if(_manager) _manager->Remove(this);
+		for(Component* component : *this) component->OnRender(d);
 	}
 }
 

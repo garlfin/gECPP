@@ -90,7 +90,7 @@ namespace gE::DefaultPipeline
 	CONSTEXPR_GLOBAL GL::ITextureSettings ColorFormat { GL_RGBA16F, GL::WrapMode::Clamp, GL::FilterMode::Linear, 0 };
 	CONSTEXPR_GLOBAL GL::ITextureSettings VelocityFormat { GL_RG32F, GL::WrapMode::Clamp  };
 
- 	class Target2D : public RenderTarget<Camera2D>, public IDepthTarget
+ 	class Target2D : public RenderTarget<Camera2D>, public IDepthTarget, public IColorTarget
 	{
 	 public:
 		typedef GL::Texture2D TEX_T;
