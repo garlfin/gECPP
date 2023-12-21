@@ -44,6 +44,6 @@ namespace gE
 	template<class T>
 	class ComponentManager;
 
-	template<class T, class I>
+	template<class T>
 	class Managed;
 }

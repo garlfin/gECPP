@@ -7,6 +7,7 @@
 #include <Prototype.h>
 #include <vector>
 #include <algorithm>
+#include <Engine/Component/Component.h>
 
 namespace gE
 {
@@ -37,49 +38,25 @@ namespace gE
 		inline bool Contains(T* v) { return std::find(VEC_T::begin(), VEC_T::end(), v) != VEC_T::end(); }
 	};
 
-	class IEntityManager : public Manager<Entity>
+	template<class T>
+	class ComponentManager : public Manager<T>
 	{
 	 public:
-		using Manager<Entity>::Manager;
-	};
+		using Manager<T>::Manager;
 
-	class IComponentManager : public Manager<Component>
-	{
-	 public:
-		using Manager<Component>::Manager;
-
-		void OnUpdate(float d) override;
-		void OnRender(float d) override;
+		void OnUpdate(float d) override { for(Component* c : *this) c->OnUpdate(d); }
+		void OnRender(float d) override { for(Component* c : *this) c->OnRender(d); }
 	};
 
 	template<class T>
-	class EntityManager : public IEntityManager
-	{
-	 public:
-		using IEntityManager::IEntityManager;
-
-		inline virtual void Register(T* t) { IEntityManager::Register(t); }
-		inline virtual void Remove(T* t) { IEntityManager::Remove(t); }
-	};
-
-	template<class T>
-	class ComponentManager : public IComponentManager
-	{
-	 public:
-		using IComponentManager::IComponentManager;
-
-		inline virtual void Register(T* t) { IComponentManager::Register(t); }
-		inline virtual void Remove(T* t) { IComponentManager::Remove(t); }
-	};
-
-	template<class T, class I>
 	class Managed
 	{
 	 public:
-		Managed(T* manager) : _manager(manager) { if(_manager) _manager->Register((I*) this); }
-		~Managed() { if(_manager) _manager->Remove((I*) this); }
+		Managed(T& t, Manager<T>& m) : _t(t), _manager(m) { _manager.Register(&t); }
+		~Managed() { _manager.Remove(&_t); }
 
 	 private:
-		T* _manager;
+		T& _t;
+		Manager<T>& _manager;
 	};
 }

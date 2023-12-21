@@ -27,7 +27,7 @@ namespace gE
 		Window* _window;
 	};
 
-	class Light : public Entity, public IDepthTarget
+	class Light : public Entity, public IDepthTarget, public Managed<Light>
 	{
 	 public:
 		Light(Window*, Camera&, IDepthTarget&);

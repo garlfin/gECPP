@@ -13,10 +13,10 @@ namespace gE
 	class MaterialHolder : public Component
 	{
 	 public:
-		explicit MaterialHolder(gE::Entity* o) : Component(o, nullptr) { };
+		explicit MaterialHolder(gE::Entity* o) : Component(o) { };
 
 		explicit MaterialHolder(gE::Entity* o, const Array<Reference<Material>>& materials = {})
-			: Component(o, nullptr)
+			: Component(o)
 		{
 			if(materials.Size()) materials.CopyToCArray(_materials);
 		}
@@ -46,7 +46,6 @@ namespace gE
 
 		~MaterialHolder() override = default;
 
-	 protected:
 	 private:
 		Reference<Material> _materials[GE_MAX_MATERIAL]{};
 	};

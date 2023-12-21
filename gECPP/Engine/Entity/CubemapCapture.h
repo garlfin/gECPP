@@ -32,7 +32,7 @@ namespace gE
 		Attachment<GL::TextureCube, GL_COLOR_ATTACHMENT0> _color;
 	};
 
-	class CubemapCapture final : public Entity
+	class CubemapCapture final : public Entity, public Managed<CubemapCapture>
 	{
 	 public:
 		CubemapCapture(Window*, u16 size);

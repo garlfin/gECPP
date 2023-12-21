@@ -8,10 +8,10 @@
 
 namespace gE
 {
-	class Component : public Managed<IComponentManager, Component>
+	class Component
 	{
 	 public:
-		explicit Component(Entity* o, IComponentManager* manager);
+		explicit Component(Entity* o);
 
 		GET_CONST(Entity*, Owner, _owner);
 		GET_CONST(Window&, Window, _window);
@@ -27,16 +27,6 @@ namespace gE
 		Entity* _owner;
 	};
 
-	class Behavior : public Component
-	{
-	 public:
-		explicit Behavior(Entity* o);
-
-		void OnUpdate(float d) override { }
-		void OnRender(float d) override { }
-		void OnDestroy() override { }
-	};
-
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "HidingNonVirtualFunction"
 
@@ -45,15 +35,6 @@ namespace gE
 	{
 	 public:
 		inline explicit TypedComponent(T* o, IComponentManager* manager = nullptr) : Component(o, manager) { };
-
-		GET_CONST(T*, Owner, (T*) Component::GetOwner());
-	};
-
-	template<class T>
-	class TypedBehavior : public Behavior
-	{
-	 public:
-		inline explicit TypedBehavior(T* o) : Behavior(o) { };
 
 		GET_CONST(T*, Owner, (T*) Component::GetOwner());
 	};

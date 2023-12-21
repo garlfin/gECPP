@@ -3,13 +3,13 @@
 //
 
 #include "Entity.h"
-#include "Engine/Component/Component.h"
+#include <Engine/Component/Component.h>
+#include <Engine/Component/Behavior.h>
 #include "Engine/Window.h"
 
 namespace gE
 {
-	Entity::Entity(Window* w, Flags flags, Entity* parent, EntityManager* m) :
-		Managed<EntityManager, Entity>(m),
+	Entity::Entity(Window* w, Flags flags, Entity* parent) :
 		_window(w), _parent(parent), _flags(flags)
 	{
 		if(parent) parent->_children.push_back(this);
@@ -41,10 +41,9 @@ namespace gE
 			}
 	}
 
-	Behavior::Behavior(Entity* o) : Component(o, &o->GetWindow().GetBehaviors()) {}
+	Behavior::Behavior(Entity* o) : Component(o), Managed<Behavior>(*this, o->GetWindow().GetBehaviors())
+	{}
 
-	Component::Component(Entity* o, IComponentManager* manager) : Managed<IComponentManager, Component>(manager),
-		_owner(o), _window(o->GetWindow())
-	{
-	}
+	Component::Component(Entity* o) : _owner(o), _window(o->GetWindow())
+	{}
 }

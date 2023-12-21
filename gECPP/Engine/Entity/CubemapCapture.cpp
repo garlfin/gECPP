@@ -14,7 +14,8 @@ namespace gE
 	};
 
 	CubemapCapture::CubemapCapture(gE::Window* w, u16 size) :
-		Entity(w, Flags(true, UINT8_MAX), nullptr, &GetWindow().GetCubemaps()),
+		Entity(w, Flags(true, UINT8_MAX)),
+		Managed<CubemapCapture>(*this, GetWindow().GetCubemaps()),
 		_camera(this, nullptr, _target, { CubemapCameraSettings, size }),
 		_target(_camera)
 	{

@@ -12,7 +12,7 @@
 
 namespace gE
 {
-	class MeshRenderer : public Component
+	class MeshRenderer : public Component, public Managed<MeshRenderer>
 	{
 	 public:
 		MeshRenderer(Entity* o, const gETF::MeshReference& mesh, const MaterialHolder* mat);

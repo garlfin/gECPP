@@ -105,8 +105,9 @@ namespace gE
 	}
 
 	Light::Light(Window* w, Camera& c, IDepthTarget& d) :
-		Entity(w, Flags(true, UINT8_MAX), nullptr, &GetWindow.GetLights()),
+		Entity(w, Flags(true, UINT8_MAX)),
 		IDepthTarget(d),
+		Managed<Light>(*this, GetWindow().GetLights()),
 		_camera(c)
 	{
 	}
