@@ -26,7 +26,7 @@ namespace gE
 		GET_CONST(glm::mat3, RotationMatrix, glm::toMat3(Rotation));
 	};
 
-	class Transform : public Component, public TransformData, public Managed<Transform>
+	class Transform : public Component, public TransformData
 	{
 	 public:
 		Transform(Entity* o, const TransformData& d);
@@ -59,7 +59,8 @@ namespace gE
 	 public:
 		using ComponentManager<Transform>::ComponentManager;
 
-		void Register(Transform* t) override;
+	 protected:
+		void Register(Component* t) override;
 		void OnUpdate(float delta) override;
 	};
 }

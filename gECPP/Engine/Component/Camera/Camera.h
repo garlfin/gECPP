@@ -27,7 +27,7 @@ namespace gE
 	class Camera : public Component
 	{
 	 public:
-		Camera(Entity*, GL::TextureSize2D, IRenderTarget&, const ICameraSettings&);
+		Camera(Entity*, GL::TextureSize2D, IRenderTarget&, const ICameraSettings&, ComponentManager<Camera>* = nullptr);
 
 		inline void OnUpdate(float delta) override { }
 		inline void OnRender(float delta) override { Draw(delta, nullptr); }
@@ -63,7 +63,7 @@ namespace gE
 		typedef RenderTarget<Camera2D> TARGET_TYPE;
 		typedef GL::TextureSize2D SIZE_TYPE;
 
-		Camera2D(Entity*, TARGET_TYPE&, const CameraSettings2D&);
+		Camera2D(Entity*, TARGET_TYPE&, const CameraSettings2D&, ComponentManager<Camera>* = nullptr);
 
 		GET(TARGET_TYPE&, Target, (TARGET_TYPE&) Camera::GetTarget());
 		GET_CONST(SIZE_TYPE, Size, GetViewportSize());
@@ -75,7 +75,7 @@ namespace gE
 	class PerspectiveCamera : public Camera2D
 	{
 	 public:
-		PerspectiveCamera(Entity*, TARGET_TYPE&, const PerspectiveCameraSettings&);
+		PerspectiveCamera(Entity*, TARGET_TYPE&, const PerspectiveCameraSettings&, ComponentManager<Camera>* = nullptr);
 
 		template<AngleType T = AngleType::Degree>
 		NODISCARD ALWAYS_INLINE float GetFOV() const
@@ -104,7 +104,7 @@ namespace gE
 	class OrthographicCamera : public Camera2D
 	{
 	 public:
-		OrthographicCamera(Entity*, TARGET_TYPE&, const OrthographicCameraSettings&);
+		OrthographicCamera(Entity*, TARGET_TYPE&, const OrthographicCameraSettings&, ComponentManager<Camera>* = nullptr);
 
 		GET_CONST(const glm::vec4&, Scale, _orthographicScale);
 
@@ -121,7 +121,7 @@ namespace gE
 		typedef RenderTarget<Camera3D> TARGET_TYPE;
 		typedef GL::TextureSize3D SIZE_TYPE;
 
-		Camera3D(Entity*, TARGET_TYPE&, const CameraSettings3D&);
+		Camera3D(Entity*, TARGET_TYPE&, const CameraSettings3D&, ComponentManager<Camera>* = nullptr);
 
 		GET(TARGET_TYPE&, Target, (TARGET_TYPE&) Camera::GetTarget());
 		GET_CONST(SIZE_TYPE, Size, SIZE_TYPE(GetViewportSize(), _sizeZ));
@@ -141,7 +141,7 @@ namespace gE
 		typedef RenderTarget<CameraCubemap> TARGET_TYPE;
 		typedef GL::TextureSize1D SIZE_TYPE;
 
-		CameraCubemap(Entity*, TARGET_TYPE&, const CameraSettings1D&);
+		CameraCubemap(Entity*, TARGET_TYPE&, const CameraSettings1D&, ComponentManager<Camera>* = nullptr);
 
 		GET(TARGET_TYPE&, Target, (TARGET_TYPE&) Camera::GetTarget());
 		GET_CONST(SIZE_TYPE, Size, GetViewportSize().x);

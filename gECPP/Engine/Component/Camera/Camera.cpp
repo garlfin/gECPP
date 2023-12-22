@@ -10,8 +10,9 @@
 
 namespace gE
 {
-	Camera::Camera(Entity* p, GL::TextureSize2D size, IRenderTarget& t, const ICameraSettings& s) :
-		Component(p), _settings(s), _target(t), _viewportSize(size)
+	Camera::Camera(Entity* p, GL::TextureSize2D size, IRenderTarget& t, const ICameraSettings& s, ComponentManager<Camera>* m) :
+		Component(p, m),
+		_settings(s), _target(t), _viewportSize(size)
 	{
 	}
 
@@ -61,19 +62,19 @@ namespace gE
 		Projection = glm::perspectiveFov(_fov, (float) GetSize().x, (float) GetSize().y, GetClipPlanes().x, GetClipPlanes().y);
 	}
 
-	Camera2D::Camera2D(Entity* p, TARGET_TYPE& t, const CameraSettings2D& s) :
-		Camera(p, s.Size, t, s)
+	Camera2D::Camera2D(Entity* p, TARGET_TYPE& t, const CameraSettings2D& s, ComponentManager<Camera>* m) :
+		Camera(p, s.Size, t, s, m)
 	{
 	}
 
-	PerspectiveCamera::PerspectiveCamera(Entity* p, TARGET_TYPE& t, const PerspectiveCameraSettings& s) :
-		Camera2D(p, t, s)
+	PerspectiveCamera::PerspectiveCamera(Entity* p, TARGET_TYPE& t, const PerspectiveCameraSettings& s, ComponentManager<Camera>* m) :
+		Camera2D(p, t, s, m)
 	{
 		SetFOV(s.FOV);
 	}
 
-	OrthographicCamera::OrthographicCamera(Entity* p, TARGET_TYPE& t, const OrthographicCameraSettings& s) :
-		Camera2D(p, t, s), _orthographicScale(s.Scale)
+	OrthographicCamera::OrthographicCamera(Entity* p, TARGET_TYPE& t, const OrthographicCameraSettings& s, ComponentManager<Camera>* m) :
+		Camera2D(p, t, s, m), _orthographicScale(s.Scale)
 	{
 	}
 
@@ -88,8 +89,8 @@ namespace gE
 		camera.View[0] = glm::inverse(GetOwner()->GetTransform().Model());
 	}
 
-	Camera3D::Camera3D(Entity* p, TARGET_TYPE& t, const CameraSettings3D& s) :
-		Camera(p, s.Size, t, s), _sizeZ(s.Size.z)
+	Camera3D::Camera3D(Entity* p, TARGET_TYPE& t, const CameraSettings3D& s, ComponentManager<Camera>* m) :
+		Camera(p, s.Size, t, s, m), _sizeZ(s.Size.z)
 	{
 	}
 
@@ -107,8 +108,8 @@ namespace gE
 		cam.View[0] = glm::lookAt(cam.Position, cam.Position + glm::vec3(0, -1, 0), cam.Position + glm::vec3(1, 0, 0));
 	}
 
-	CameraCubemap::CameraCubemap(Entity* p, TARGET_TYPE& t, const CameraSettings1D& s) :
-		Camera(p, GL::TextureSize2D(s.Size), t, s)
+	CameraCubemap::CameraCubemap(Entity* p, TARGET_TYPE& t, const CameraSettings1D& s, ComponentManager<Camera>* m) :
+		Camera(p, GL::TextureSize2D(s.Size), t, s, m)
 	{
 	}
 

@@ -5,13 +5,14 @@
 #pragma once
 
 #include "Prototype.h"
+#include <Engine/Manager.h>
 
 namespace gE
 {
-	class Component
+	class Component : public Managed<Component>
 	{
 	 public:
-		explicit Component(Entity* o);
+		explicit Component(Entity* o, Manager<Component>* = nullptr);
 
 		GET_CONST(Entity*, Owner, _owner);
 		GET_CONST(Window&, Window, _window);
@@ -40,4 +41,15 @@ namespace gE
 	};
 
 #pragma clang diagnostic pop
+
+	template<class T>
+	class ComponentManager : public Manager<Component>
+	{
+	 public:
+		static_assert(std::is_base_of<Component, T>::value);
+		using Manager<Component>::Manager;
+
+		void OnUpdate(float d) override { for(Component* c : *this) c->OnUpdate(d); }
+		void OnRender(float d) override { for(Component* c : *this) c->OnRender(d); }
+	};
 }

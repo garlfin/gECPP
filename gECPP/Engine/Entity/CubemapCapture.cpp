@@ -19,6 +19,7 @@ namespace gE
 		_camera(this, _target, { CubemapCameraSettings, size }),
 		_target(_camera)
 	{
+		Managed<CubemapCapture>::Register();
 	}
 
 	void CubemapCapture::GetGLCubemap(GL::CubemapData& cubemap)

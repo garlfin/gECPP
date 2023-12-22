@@ -77,6 +77,8 @@ namespace gE
 
 		transform.Position = glm::floor(cameraTransform.Position) + offset;
 		transform.OnRender(0.f); // Force update on model matrix since it passed its tick.
+
+		return true;
 	}
 
 	void DirectionalLight::GetGLLight(GL::Light& light)
@@ -105,11 +107,12 @@ namespace gE
 	}
 
 	Light::Light(Window* w, Camera& c, IDepthTarget& d) :
-		Entity(w, Flags(true, UINT8_MAX)),
+		Entity(w, Flags(false, UINT8_MAX)),
 		IDepthTarget(d),
 		Managed<Light>(*this, GetWindow().GetLights()),
 		_camera(c)
 	{
+		Managed<Light>::Register();
 	}
 }
 

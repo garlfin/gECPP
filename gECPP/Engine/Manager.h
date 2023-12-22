@@ -7,7 +7,6 @@
 #include <Prototype.h>
 #include <vector>
 #include <algorithm>
-#include <Engine/Component/Component.h>
 
 namespace gE
 {
@@ -26,9 +25,6 @@ namespace gE
 		Manager<T>& operator=(const Manager&) = delete;
 		Manager<T>& operator=(Manager&&) noexcept = delete;
 
-		inline virtual void Register(T* t) { VEC_T::push_back(t); }
-		inline virtual void Remove(T* t) { RemoveFirstFromVec(*this, t); }
-
 		virtual void OnUpdate(float) = 0;
 		virtual void OnRender(float) = 0;
 
@@ -36,34 +32,46 @@ namespace gE
 
 		using std::vector<T*>::operator[];
 
+		friend class Managed<T>;
+
+	 protected:
+		inline virtual void Register(T* t) { VEC_T::push_back(t); }
+		inline virtual void Remove(T* t) { RemoveFirstFromVec(*this, t); }
+
 	 protected:
 		inline bool Contains(T* v) { return std::find(VEC_T::begin(), VEC_T::end(), v) != VEC_T::end(); }
-	};
-
-	template<class T>
-	class ComponentManager : public Manager<T>
-	{
-	 public:
-		using Manager<T>::Manager;
-
-		ALWAYS_INLINE operator Manager<Component>&() { return *(Manager<Component>*) this; }
-		ALWAYS_INLINE operator const Manager<Component>&() const { return *(const Manager<Component>*) this; }
-
-		void OnUpdate(float d) override { for(Component* c : *this) c->OnUpdate(d); }
-		void OnRender(float d) override { for(Component* c : *this) c->OnRender(d); }
 	};
 
 	template<class T>
 	class Managed
 	{
 	 public:
-		explicit inline Managed(T& t, Manager<T>* m = nullptr) : _t(t), _manager(m) { if(m) m->Register(&t); }
-		inline Managed(T& t, Manager<T>& m) : Managed(t, &m) {}
+		explicit inline Managed(T& t, Manager<T>* m = nullptr) : _t(t), _manager(m) {};
+		inline Managed(T& t, Manager<T>& m) : Managed(t, &m) {};
 
-		inline ~Managed() { if(_manager) _manager->Remove(&_t); }
+		inline void Register()
+		{
+		#ifdef DEBUG
+			_registered = true;
+		#endif
+			if(_manager) _manager->Register(&_t);
+		}
+
+		inline ~Managed()
+		{
+		#ifdef DEBUG
+			if(!_registered && _manager)
+				LOG("COMPONENT HAS A MANAGER, BUT IS NOT REGISTERED; DID YOU FORGET TO USE 'BASE::REGISTER();'?");
+		#endif
+			if(_manager) _manager->Remove(&_t);
+		}
 
 	 private:
 		T& _t;
 		Manager<T>* _manager;
+
+	#ifdef DEBUG
+		bool _registered = false;
+	#endif
 	};
 }

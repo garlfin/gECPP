@@ -9,7 +9,7 @@
 
 namespace gE
 {
-	class Behavior : public Component, public Managed<Behavior>
+	class Behavior : public Component
 	{
 	 public:
 		explicit Behavior(Entity* o);

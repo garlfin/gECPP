@@ -36,6 +36,7 @@ namespace gE
 		static CONSTEXPR_GLOBAL RenderFlags Color { WriteMode::Color, VoxelWriteMode::Read, true, true, true, 1 };
 		static CONSTEXPR_GLOBAL RenderFlags PreZ { WriteMode::Depth, VoxelWriteMode::None, true, false, false, 1 };
 		static CONSTEXPR_GLOBAL RenderFlags Shadow { WriteMode::Depth, VoxelWriteMode::None, false, false, false, 1 };
+		static CONSTEXPR_GLOBAL RenderFlags ShadowCube { WriteMode::Depth, VoxelWriteMode::None, false, false, false, 6 };
 		static CONSTEXPR_GLOBAL RenderFlags Cubemap { WriteMode::Both, VoxelWriteMode::None, false, false, false, 6 };
 		static CONSTEXPR_GLOBAL RenderFlags Voxel { WriteMode::None, VoxelWriteMode::Write, false, false, false, 1 };
 	}
