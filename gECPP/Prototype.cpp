@@ -8,14 +8,5 @@
 
 namespace gE
 {
-	void IComponentManager::OnUpdate(float d)
-	{
-		for(Component* component : *this) component->OnUpdate(d);
-	}
-
-	void IComponentManager::OnRender(float d)
-	{
-		for(Component* component : *this) component->OnRender(d);
-	}
 }
 

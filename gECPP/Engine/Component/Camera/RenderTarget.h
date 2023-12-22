@@ -53,12 +53,12 @@ namespace gE
 		GET(Entity&, Owner, _owner);
 		GET(GL::FrameBuffer&, FrameBuffer, _frameBuffer);
 
-		virtual void Setup(float, Camera*) {};
+		virtual bool Setup(float, Camera*) { return true; }
 		virtual void RenderDependencies(float) {};
 		virtual void RenderPass(float, Camera*) = 0;
 		virtual void PostProcessPass(float) {};
 
-		inline void Bind() const { _frameBuffer.Bind(); }
+		inline void Bind() const override { _frameBuffer.Bind(); }
 
 	 private:
 		Camera& _camera;

@@ -53,15 +53,14 @@ void gE::Transform::OnRender(float)
 	_globalTransform.Rotation = glm::quat(rotation);
 }
 
-gE::Transform::Transform(gE::Entity* o) : Component(o, &o->GetWindow().GetTransforms()), _model(1.0)
-{
-}
+gE::Transform::Transform(gE::Entity* o) : Component(o),
+	Managed<Transform>(*this, GetWindow().GetTransforms()),
+	_model(1.0)
+{}
 
-gE::Transform::~Transform()
-{
-}
-
-gE::Transform::Transform(gE::Entity* o, const gE::TransformData& d) : Component(o, &o->GetWindow().GetTransforms()), _model(1.0)
+gE::Transform::Transform(gE::Entity* o, const gE::TransformData& d) : Component(o),
+	Managed<Transform>(*this, GetWindow().GetTransforms()),
+	_model(1.0)
 {
 	Set(d);
 }
@@ -87,5 +86,5 @@ void gE::TransformManager::OnUpdate(float delta)
 
 void gE::TransformManager::Register(gE::Transform* t)
 {
-	if(!t->GetOwner()->GetParent()) IComponentManager::Register(t);
+	if(!t->GetOwner()->GetParent()) ComponentManager::Register(t);
 }

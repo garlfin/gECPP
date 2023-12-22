@@ -18,17 +18,19 @@ namespace gE
 	{
 	 public:
 		typedef std::vector<T*> VEC_T;
-		typedef T I;
 
 		Manager() = default;
+
 		Manager(const Manager&) = delete;
-		Manager(Manager&&) = delete;
+		Manager(Manager&&) noexcept = delete;
+		Manager<T>& operator=(const Manager&) = delete;
+		Manager<T>& operator=(Manager&&) noexcept = delete;
 
 		inline virtual void Register(T* t) { VEC_T::push_back(t); }
 		inline virtual void Remove(T* t) { RemoveFirstFromVec(*this, t); }
 
-		virtual void OnUpdate(float) {};
-		virtual void OnRender(float) {};
+		virtual void OnUpdate(float) = 0;
+		virtual void OnRender(float) = 0;
 
 		NODISCARD ALWAYS_INLINE size_t Size() const { return VEC_T::size(); }
 
@@ -44,6 +46,9 @@ namespace gE
 	 public:
 		using Manager<T>::Manager;
 
+		ALWAYS_INLINE operator Manager<Component>&() { return *(Manager<Component>*) this; }
+		ALWAYS_INLINE operator const Manager<Component>&() const { return *(const Manager<Component>*) this; }
+
 		void OnUpdate(float d) override { for(Component* c : *this) c->OnUpdate(d); }
 		void OnRender(float d) override { for(Component* c : *this) c->OnRender(d); }
 	};
@@ -52,11 +57,13 @@ namespace gE
 	class Managed
 	{
 	 public:
-		Managed(T& t, Manager<T>& m) : _t(t), _manager(m) { _manager.Register(&t); }
-		~Managed() { _manager.Remove(&_t); }
+		explicit inline Managed(T& t, Manager<T>* m = nullptr) : _t(t), _manager(m) { if(m) m->Register(&t); }
+		inline Managed(T& t, Manager<T>& m) : Managed(t, &m) {}
+
+		inline ~Managed() { if(_manager) _manager->Remove(&_t); }
 
 	 private:
 		T& _t;
-		Manager<T>& _manager;
+		Manager<T>* _manager;
 	};
 }

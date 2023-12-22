@@ -26,7 +26,7 @@ namespace gE
 		GET_CONST(glm::mat3, RotationMatrix, glm::toMat3(Rotation));
 	};
 
-	class Transform : public Component, public TransformData
+	class Transform : public Component, public TransformData, public Managed<Transform>
 	{
 	 public:
 		Transform(Entity* o, const TransformData& d);
@@ -47,8 +47,6 @@ namespace gE
 		NODISCARD ALWAYS_INLINE const glm::mat4& PreviousModel() const { return _previousModel; }
 
 		GET_CONST(const TransformData&, GlobalTransform, _globalTransform);
-
-		~Transform() override;
 
 	 private:
 		glm::mat4 _model;

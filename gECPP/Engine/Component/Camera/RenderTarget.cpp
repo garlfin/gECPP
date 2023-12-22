@@ -11,6 +11,5 @@ namespace gE
 		_camera(camera),
 		_owner(owner),
 		_frameBuffer(&camera.GetWindow())
-	{
-	}
+	{}
 }

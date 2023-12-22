@@ -19,7 +19,7 @@ namespace gE
 
 	DirectionalLight::DirectionalLight(Window* w, u16 size, float scale, const glm::quat& rot) :
 		Light(w, _camera, _target),
-		_camera(this, nullptr, _target, CreateDirectionalSettings(size, scale)),
+		_camera(this, _target, CreateDirectionalSettings(size, scale)),
 		_target(*this, _camera)
 	{
 		GetTransform().Rotation = rot;
@@ -27,7 +27,7 @@ namespace gE
 
 	void LightManager::OnRender(float delta)
 	{
-		Manager<Light>::OnRender(delta);
+		for(Light* l : *this) l->GetCamera().OnRender(delta);
 	}
 
 	CONSTEXPR_GLOBAL GL::ITextureSettings ShadowMapFormat { GL_DEPTH_COMPONENT16, GL::WrapMode::Clamp, GL::FilterMode::Linear };
@@ -40,8 +40,6 @@ namespace gE
 
 	void DirectionalLightTarget::RenderPass(float, Camera* callingCamera)
 	{
-		GE_ASSERT(callingCamera, "DIRECTIONAL LIGHT SHOULD ALWAYS BE CALLED BY ANOTHER CAMERA!");
-
 		Window& window = callingCamera->GetWindow();
 		OrthographicCamera& camera = GetCamera();
 		GL::TextureSize2D size = camera.GetSize();
@@ -61,8 +59,10 @@ namespace gE
 		window.GetRenderers().OnRender(0.f);
 	}
 
-	void DirectionalLightTarget::Setup(float, Camera* callingCamera)
+	bool DirectionalLightTarget::Setup(float, Camera* callingCamera)
 	{
+		if(!callingCamera) return false;
+
 		OrthographicCamera& camera = GetCamera();
 		GL::TextureSize2D size = camera.GetSize();
 

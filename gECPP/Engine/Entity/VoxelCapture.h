@@ -23,5 +23,6 @@ namespace gE
 	 private:
 		Camera3D _camera;
 		VoxelPipeline::Target3D _target;
+		float _size;
 	};
 }

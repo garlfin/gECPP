@@ -21,7 +21,7 @@ namespace VoxelDemo
 	{
 	 public:
 		explicit FlyCamera(gE::Window* window) : gE::Entity(window),
-			_camera(this, &window->GetCameras(), _target, {{ FlyCameraSettings, window->GetSize() }}),
+			_camera(this, _target, {{ FlyCameraSettings, window->GetSize() }}),
 			_target(*this, _camera, { &_bloom, &_tonemap }),
 			_bloom(_target), _tonemap(_target),
 			_movement(this)

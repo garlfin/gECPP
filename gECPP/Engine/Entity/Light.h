@@ -21,6 +21,7 @@ namespace gE
 
 		DirectionalLight* Sun = nullptr;
 
+		void OnUpdate(float) {};
 		void OnRender(float delta) override;
 
 	 private:
@@ -49,7 +50,7 @@ namespace gE
 		GET(Light&, Owner, (Light&) IRenderTarget::GetOwner());
 		GET(OrthographicCamera&, Camera, (OrthographicCamera&) RenderTarget<Camera2D>::GetCamera())
 
-		void Setup(float, Camera*) override;
+		bool Setup(float, Camera*) override;
 		void RenderPass(float, Camera*) override;
 
 	 private:

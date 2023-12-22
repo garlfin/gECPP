@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "Engine/Component/Component.h"
+#include "Engine/Component/Behavior.h"
 #include "Engine/Entity/Entity.h"
 #include "Engine/Window.h"
 #include "GLFW/glfw3.h"

@@ -34,7 +34,7 @@ namespace gE
 	class TypedComponent : public Component
 	{
 	 public:
-		inline explicit TypedComponent(T* o, IComponentManager* manager = nullptr) : Component(o, manager) { };
+		inline explicit TypedComponent(T* o) : Component(o) { };
 
 		GET_CONST(T*, Owner, (T*) Component::GetOwner());
 	};

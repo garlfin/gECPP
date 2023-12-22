@@ -55,6 +55,8 @@ namespace gE
 		Reference<GL::TextureCube> Skybox{};
 
 		void DrawSkybox();
+
+		void OnUpdate(float delta) {};
 		void OnRender(float delta) override;
 
 	 private:

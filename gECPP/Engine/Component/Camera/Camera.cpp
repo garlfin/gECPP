@@ -10,8 +10,8 @@
 
 namespace gE
 {
-	Camera::Camera(Entity* p, IComponentManager* m, GL::TextureSize2D size, IRenderTarget& t, const ICameraSettings& s) :
-		Component(p, m), _settings(s), _target(t), _viewportSize(size)
+	Camera::Camera(Entity* p, GL::TextureSize2D size, IRenderTarget& t, const ICameraSettings& s) :
+		Component(p), _settings(s), _target(t), _viewportSize(size)
 	{
 	}
 
@@ -44,8 +44,7 @@ namespace gE
 
 		// Limits "recursion"
 		if(!callingCamera) _target.RenderDependencies(delta);
-
-		_target.Setup(delta, callingCamera);
+		if(!_target.Setup(delta, callingCamera)) return;
 
 		GetGLCamera(buffers.Camera);
 		buffers.UpdateCamera();
@@ -62,19 +61,19 @@ namespace gE
 		Projection = glm::perspectiveFov(_fov, (float) GetSize().x, (float) GetSize().y, GetClipPlanes().x, GetClipPlanes().y);
 	}
 
-	Camera2D::Camera2D(Entity* p, IComponentManager* m, TARGET_TYPE& t, const CameraSettings2D& s) :
-		Camera(p, m, s.Size, t, s)
+	Camera2D::Camera2D(Entity* p, TARGET_TYPE& t, const CameraSettings2D& s) :
+		Camera(p, s.Size, t, s)
 	{
 	}
 
-	PerspectiveCamera::PerspectiveCamera(Entity* p, IComponentManager* m, TARGET_TYPE& t, const PerspectiveCameraSettings& s) :
-		Camera2D(p, m, t, s)
+	PerspectiveCamera::PerspectiveCamera(Entity* p, TARGET_TYPE& t, const PerspectiveCameraSettings& s) :
+		Camera2D(p, t, s)
 	{
 		SetFOV(s.FOV);
 	}
 
-	OrthographicCamera::OrthographicCamera(Entity* p, IComponentManager* m, TARGET_TYPE& t, const OrthographicCameraSettings& s) :
-		Camera2D(p, m, t, s), _orthographicScale(s.Scale)
+	OrthographicCamera::OrthographicCamera(Entity* p, TARGET_TYPE& t, const OrthographicCameraSettings& s) :
+		Camera2D(p, t, s), _orthographicScale(s.Scale)
 	{
 	}
 
@@ -89,8 +88,8 @@ namespace gE
 		camera.View[0] = glm::inverse(GetOwner()->GetTransform().Model());
 	}
 
-	Camera3D::Camera3D(Entity* p, IComponentManager* m, TARGET_TYPE& t, const CameraSettings3D& s) :
-		Camera(p, m, s.Size, t, s), _sizeZ(s.Size.z)
+	Camera3D::Camera3D(Entity* p, TARGET_TYPE& t, const CameraSettings3D& s) :
+		Camera(p, s.Size, t, s), _sizeZ(s.Size.z)
 	{
 	}
 
@@ -108,8 +107,8 @@ namespace gE
 		cam.View[0] = glm::lookAt(cam.Position, cam.Position + glm::vec3(0, -1, 0), cam.Position + glm::vec3(1, 0, 0));
 	}
 
-	CameraCubemap::CameraCubemap(Entity* p, IComponentManager* m, TARGET_TYPE& t, const CameraSettings1D& s) :
-		Camera(p, m, GL::TextureSize2D(s.Size), t, s)
+	CameraCubemap::CameraCubemap(Entity* p, TARGET_TYPE& t, const CameraSettings1D& s) :
+		Camera(p, GL::TextureSize2D(s.Size), t, s)
 	{
 	}
 

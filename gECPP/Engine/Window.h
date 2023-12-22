@@ -8,6 +8,7 @@
 #include "WindowState.h"
 #include <Engine/Manager.h>
 #include <Engine/AssetManager.h>
+#include <Engine/Component/Behavior.h>
 #include <Engine/Component/Transform.h>
 #include <Engine/Component/Camera/Camera.h>
 #include <Engine/Renderer/VoxelPipeline.h>

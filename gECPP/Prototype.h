@@ -35,11 +35,8 @@ namespace gE
 	template<class T>
 	class Manager;
 
-	class IEntityManager;
-	class IComponentManager;
-
 	template<class T>
-	class EntityManager;
+	class ComponentManager;
 
 	template<class T>
 	class ComponentManager;
