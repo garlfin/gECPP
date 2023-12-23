@@ -20,14 +20,14 @@ namespace gE
 		_target(_camera)
 	{}
 
-	void CubemapCapture::GetGLCubemap(GL::CubemapData& cubemap)
+	void CubemapCapture::GetGLCubemap(GL::Cubemap& cubemap)
 	{
 		Transform& transform = GetTransform();
 
 		cubemap.Position = transform.GetGlobalTransform().Position;
 		cubemap.Scale = transform.GetGlobalTransform().Scale;
 		cubemap.BlendRadius = 0.f;
-
+		cubemap.Type = GL::CubemapType::AABB;
 		cubemap.Color = (handle) GetColor();
 	}
 
@@ -41,6 +41,7 @@ namespace gE
 		((CubemapCapture*) at(0))->GetGLCubemap(lighting.Cubemaps[0]);
 
 		buffers.UpdateLighting(sizeof(handle), offsetof(GL::Lighting, Skybox));
+		buffers.UpdateLighting(sizeof(GL::Cubemap), offsetof(GL::Lighting, Cubemaps[0]));
 
 		for(CubemapCapture* c : *this) c->GetCamera().OnRender(delta);
 	}

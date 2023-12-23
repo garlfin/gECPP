@@ -40,7 +40,7 @@ namespace gE
 		GET(GL::TextureCube&, Color, _target.GetColor());
 		GET(CameraCubemap&, Camera, _camera);
 
-		void GetGLCubemap(GL::CubemapData&);
+		void GetGLCubemap(GL::Cubemap&);
 
 	 private:
 		CameraCubemap _camera;

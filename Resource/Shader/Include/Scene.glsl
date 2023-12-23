@@ -9,6 +9,10 @@
 #define LIGHT_SPOT 3
 #define LIGHT_AREA 4
 
+#define CUBEMAP_NONE 0
+#define CUBEMAP_AABB 1
+#define CUBEMAP_SPHERE 2
+
 #define WRITE_MODE_DEPTH 1
 #define WRITE_MODE_COLOR 2
 
@@ -36,6 +40,7 @@ struct Cubemap
     vec3 Position;
     float BlendRadius;
     vec3 Scale;
+    uint Type;
     BINDLESS_TEXTURE(samplerCube, Color);
 };
 

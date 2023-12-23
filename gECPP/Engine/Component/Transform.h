@@ -43,6 +43,7 @@ namespace gE
 		void OnUpdate(float) override { };
 		void OnRender(float) override;
 
+		ALWAYS_INLINE operator const glm::mat4&() const { return _model; }
 		NODISCARD ALWAYS_INLINE const glm::mat4& Model() const { return _model; }
 		NODISCARD ALWAYS_INLINE const glm::mat4& PreviousModel() const { return _previousModel; }
 

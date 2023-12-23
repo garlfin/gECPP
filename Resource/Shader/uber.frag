@@ -54,12 +54,13 @@ void main()
 
     FragColor.rgb += GetLighting(vertex, fragment, Lighting.Lights[0]);
 
+#ifdef EXT_BINDLESS
     if(bool(Scene.State & ENABLE_SPECULAR))
     {
-    #ifdef EXT_BINDLESS
-        FragColor.rgb += GetLighting(vertex, fragment, Lighting.Skybox);
-    #endif
+        for(uint i = 0; i < Lighting.CubemapCount; i++)
+            FragColor.rgb += GetLighting(vertex, fragment, Lighting.Cubemaps[i]);
     }
+#endif
 
 	Velocity = ((VertexIn.CurrentUV.xy / VertexIn.CurrentUV.w) - (VertexIn.PreviousUV.xy / VertexIn.PreviousUV.w)) * 0.5;
 

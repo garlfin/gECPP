@@ -55,11 +55,18 @@ namespace GL
 		handle Depth;
 	};
 
-	struct CubemapData
+	enum class CubemapType : u32 {
+		None,
+		AABB,
+		Sphere,
+	};
+
+	struct Cubemap
 	{
 		glm::vec3 Position;
 		float BlendRadius;
 		glm::vec3 Scale;
+		CubemapType Type;
 		GL_ALIGN handle Color;
 	};
 
@@ -80,7 +87,7 @@ namespace GL
 		handle Skybox;
 
 		GL_ALIGN Light Lights[GE_MAX_LIGHT];
-		GL_ALIGN CubemapData Cubemaps[GE_MAX_CUBEMAP];
+		GL_ALIGN Cubemap Cubemaps[GE_MAX_CUBEMAP];
 	};
 }
 

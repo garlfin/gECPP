@@ -44,6 +44,7 @@ vec3 FresnelSchlick(vec3 f0, float nDotV);
 vec3 ImportanceSampleGGX(vec2 xi, vec3 n, float roughness);
 float VDCInverse(uint bits);
 vec2 Hammersley(uint i, uint sampleCount);
+vec3 CubemapParallax(vec3, vec3, Cubemap);
 
 // Implementation
 // Main Functions
@@ -52,13 +53,12 @@ vec3 GetLighting(const Vertex vert, const PBRFragment frag, const Light light)
 {
     switch(light.Type)
     {
-
         case LIGHT_DIRECTIONAL: return GetLightingDirectional(vert, frag, light);
         default: return vec3(1.0);
     }
 }
 
-vec3 GetLighting(const Vertex vert, const PBRFragment frag, samplerCube cubemap)
+vec3 GetLighting(const Vertex vert, const PBRFragment frag, Cubemap cubemap)
 {
     vec3 eye = normalize(Camera.Position - vert.Position);
 
@@ -67,7 +67,10 @@ vec3 GetLighting(const Vertex vert, const PBRFragment frag, samplerCube cubemap)
     vec2 xi = Hammersley(int(IGNSample * HAMMERSLEY_ROUGHNESS_SAMPLE), HAMMERSLEY_ROUGHNESS_SAMPLE);
     vec3 n = ImportanceSampleGGX(xi, frag.Normal, frag.Roughness);
 
-    vec3 specular = textureLod(cubemap, reflect(-eye, n), 0.0f).rgb;
+    vec3 r = normalize(reflect(-eye, n));
+    r = CubemapParallax(vert.Position, r, cubemap);
+
+    vec3 specular = textureLod(cubemap.Color, r, 0.0f).rgb;
     vec2 brdf = texture(BRDFLutTex, vec2(nDotV, frag.Roughness)).rg;
 
     return (f * brdf.x + brdf.y) * specular;
@@ -168,4 +171,26 @@ float VDCInverse(uint bits)
 vec2 Hammersley(uint i, uint sampleCount)
 {
     return vec2(float(i) / float(sampleCount), VDCInverse(i));
+}
+
+vec3 CubemapParallax(vec3 pos, vec3 dir, Cubemap cubemap)
+{
+    switch(cubemap.Type)
+    {
+        case CUBEMAP_AABB:
+
+            vec3 boxMin = cubemap.Position - cubemap.Scale;
+            vec3 boxMax = cubemap.Position + cubemap.Scale;
+
+            vec3 first = (boxMin - pos) / dir;
+            vec3 second = (boxMax - pos) / dir;
+
+            first = max(first, second);
+            float dist = min(first.x, min(first.y, first.z));
+
+            return (pos + dir * dist) - cubemap.Position;
+
+        default:
+            return dir;
+    }
 }
