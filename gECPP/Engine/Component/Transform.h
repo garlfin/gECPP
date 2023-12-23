@@ -60,7 +60,6 @@ namespace gE
 		using ComponentManager<Transform>::ComponentManager;
 
 	 protected:
-		void Register(Component* t) override;
 		void OnUpdate(float delta) override;
 	};
 }

@@ -81,8 +81,3 @@ void gE::TransformManager::OnUpdate(float delta)
 		}
 	}
 }
-
-void gE::TransformManager::Register(gE::Component* t)
-{
-	if(!t->GetOwner()->GetParent()) ComponentManager::Register(t);
-}

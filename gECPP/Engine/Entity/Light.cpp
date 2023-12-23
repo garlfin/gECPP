@@ -112,7 +112,6 @@ namespace gE
 		Managed<Light>(*this, GetWindow().GetLights()),
 		_camera(c)
 	{
-		Managed<Light>::Register();
 	}
 }
 
