@@ -56,8 +56,8 @@ namespace gE
 			GL::VAOSettings skyboxSettings;
 			skybox.Meshes[0]->GetVAOSettings(skyboxSettings);
 
-			_skyboxShader = CreateSmartPointer<GL::Shader>(_window, "Resource/Shader/skybox.vert", "Resource/Shader/skybox.frag");
-			_skyboxVAO = CreateSmartPointer<GL::VAO>(_window, skyboxSettings);
+			_skyboxShader = ptr_create<GL::Shader>(_window, "Resource/Shader/skybox.vert", "Resource/Shader/skybox.frag");
+			_skyboxVAO = ptr_create<GL::VAO>(_window, skyboxSettings);
 		}
 
 		_skyboxShader->Bind();
@@ -65,6 +65,7 @@ namespace gE
 		glEnable(GL_DEPTH_TEST);
 		glDisable(GL_CULL_FACE);
 		glDepthFunc(GL_LEQUAL);
+
 
 		_skyboxVAO->Draw(0, _window->State.InstanceMultiplier);
 	}
@@ -91,7 +92,6 @@ namespace gE
 		GL::WrapMode::Clamp,
 		GL::FilterMode::Linear
 	};
-
 
 	CubemapTarget::CubemapTarget(CameraCubemap& camera) :
 		RenderTarget<CameraCubemap>(*camera.GetOwner(), camera), IDepthTarget(_depth.Get()),

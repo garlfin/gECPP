@@ -65,7 +65,7 @@ namespace gE
 	};
 
 	template<class T, typename... ARGS> requires requires(ARGS&&... a) { T(std::forward<ARGS>(a)...); }
-	ALWAYS_INLINE Reference<T> CreateReference(ARGS&& ... args)
+	ALWAYS_INLINE Reference<T> ref_create(ARGS&& ... args)
 	{
 		return Reference<T>(new T(std::forward<ARGS>(args)...));
 	}
@@ -112,7 +112,7 @@ namespace gE
 	};
 
 	template<typename T, typename... ARGS> requires requires(ARGS&&... a) { T(std::forward<ARGS>(a)...); }
-	ALWAYS_INLINE SmartPointer<T> CreateSmartPointer(ARGS&&... args)
+	ALWAYS_INLINE SmartPointer<T> ptr_create(ARGS&&... args)
 	{
 		return SmartPointer<T>(new T(std::forward<ARGS>(args)...));
 	}

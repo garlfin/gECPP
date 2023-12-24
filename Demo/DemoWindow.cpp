@@ -25,11 +25,12 @@ void DemoWindow::OnInit()
 	auto normal = gE::ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/tile_nor.pvr"));
 	gE::PBRMaterialSettings materialSettings { albedo, amr, normal };
 
-	auto rasterShader = gE::CreateReference<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/uber.frag");
-	auto rasterMaterial = gE::CreateReference<gE::PBRMaterial>(this, rasterShader, materialSettings);
+	auto rasterShader = gE::ref_create<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/uber.frag");
+	auto rasterMaterial = gE::ref_create<gE::PBRMaterial>(this, rasterShader, materialSettings);
 
 	gETF::File cube;
 	gETF::Read("Resource/Model/cube.gETF", cube);
+
 
 	auto* mesh = new VoxelDemo::StaticMeshEntity(this, cube.Meshes[0]);
 	mesh->GetMaterials().SetMaterial(0, std::move(rasterMaterial));
@@ -42,8 +43,7 @@ void DemoWindow::OnInit()
 	Cameras.CurrentCamera = &camera->GetTarget();
 
 	auto* capture = new gE::CubemapCapture(this, 256);
-	capture->GetTransform().Position.y = 2.f;
-	capture->GetTransform().Scale = glm::vec3(7, 3, 7);
-
+	capture->GetTransform().Position.y = 2.5f;
+	capture->GetTransform().Scale = glm::vec3(5, 2.5f, 5);
 	Cubemaps.Skybox = gE::ref_cast((GL::TextureCube*) PVR::Read(this, "Resource/Texture/sky.pvr", GL::WrapMode::Clamp));
 }

@@ -130,13 +130,13 @@ void Window::Run()
 
 void Window::OnInit()
 {
-	PipelineBuffers = CreateSmartPointer<DefaultPipeline::Buffers>(this);
-	VoxelBuffers = CreateSmartPointer<VoxelPipeline::Buffers>(this);
+	PipelineBuffers = ptr_create<DefaultPipeline::Buffers>(this);
+	VoxelBuffers = ptr_create<VoxelPipeline::Buffers>(this);
 
-	BlitShader = CreateSmartPointer<GL::Shader>(this, "Resource/Shader/blit.vert", "Resource/Shader/blit.frag");
-	TAAShader = CreateSmartPointer<GL::ComputeShader>(this, "Resource/Shader/taa.comp");
-	TonemapShader = CreateSmartPointer<GL::ComputeShader>(this, "Resource/Shader/tonemap.comp");
-	BloomShader = CreateSmartPointer<GL::ComputeShader>(this, "Resource/Shader/bloom.comp");
+	BlitShader = ptr_create<GL::Shader>(this, "Resource/Shader/blit.vert", "Resource/Shader/blit.frag");
+	TAAShader = ptr_create<GL::ComputeShader>(this, "Resource/Shader/taa.comp");
+	TonemapShader = ptr_create<GL::ComputeShader>(this, "Resource/Shader/tonemap.comp");
+	BloomShader = ptr_create<GL::ComputeShader>(this, "Resource/Shader/bloom.comp");
 
 	{
 		GL::ComputeShader brdfShader(this, "Resource/Shader/brdf.comp");
@@ -146,14 +146,14 @@ void Window::OnInit()
 			GL::TextureSize2D(BRDF_SIZE)
 		};
 
-		BRDFLookup = CreateSmartPointer<GL::Texture2D>(this, brdfSettings);
+		BRDFLookup = ptr_create<GL::Texture2D>(this, brdfSettings);
 		BRDFLookup->Bind(0, GL_WRITE_ONLY);
 		brdfShader.Bind();
 		brdfShader.Dispatch(BRDF_GROUP_COUNT, BRDF_GROUP_COUNT, 1);
 	}
 
-	auto defaultShader = CreateReference<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/missing.frag");
-	DefaultMaterial = CreateSmartPointer<gE::Material>(this, defaultShader);
+	auto defaultShader = ref_create<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/missing.frag");
+	DefaultMaterial = ptr_create<gE::Material>(this, defaultShader);
 }
 
 void Window::Blit(const GL::Texture& texture)

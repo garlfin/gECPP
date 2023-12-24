@@ -70,7 +70,11 @@ vec3 GetLighting(const Vertex vert, const PBRFragment frag, Cubemap cubemap)
     vec3 r = normalize(reflect(-eye, n));
     r = CubemapParallax(vert.Position, r, cubemap);
 
+#ifdef EXT_BINDLESS
     vec3 specular = textureLod(cubemap.Color, r, 0.0f).rgb;
+#else
+    vec3 specular = vec3(0);
+#endif
     vec2 brdf = texture(BRDFLutTex, vec2(nDotV, frag.Roughness)).rg;
 
     return (f * brdf.x + brdf.y) * specular;
@@ -188,6 +192,7 @@ vec3 CubemapParallax(vec3 pos, vec3 dir, Cubemap cubemap)
             first = max(first, second);
             float dist = min(first.x, min(first.y, first.z));
 
+            if(any(greaterThan(abs(pos - cubemap.Position), cubemap.Scale))) return dir;
             return (pos + dir * dist) - cubemap.Position;
 
         default:
