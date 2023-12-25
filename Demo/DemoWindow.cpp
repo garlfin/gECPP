@@ -31,7 +31,6 @@ void DemoWindow::OnInit()
 	gETF::File cube;
 	gETF::Read("Resource/Model/cube.gETF", cube);
 
-
 	auto* mesh = new VoxelDemo::StaticMeshEntity(this, cube.Meshes[0]);
 	mesh->GetMaterials().SetMaterial(0, std::move(rasterMaterial));
 

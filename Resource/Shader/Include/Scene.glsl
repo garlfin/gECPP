@@ -4,10 +4,10 @@
 #define MAX_LIGHTS 4
 #define MAX_CUBEMAPS 4
 
-#define LIGHT_DIRECTIONAL 1
-#define LIGHT_POINT 2
-#define LIGHT_SPOT 3
-#define LIGHT_AREA 4
+#define LIGHT_DIRECTIONAL 0
+#define LIGHT_POINT 1
+#define LIGHT_SPOT 2
+#define LIGHT_AREA 3
 
 #define CUBEMAP_NONE 0
 #define CUBEMAP_AABB 1
@@ -17,12 +17,12 @@
 #define WRITE_MODE_COLOR 2
 
 #define VOXEL_WRITE_MODE_OFFSET 2
-#define VOXEL_WRITE_MODE_READ 1
-#define VOXEL_WRITE_MODE_WRITE 2
+#define VOXEL_WRITE_MODE_READ 0
+#define VOXEL_WRITE_MODE_WRITE 1
 
-#define ENABLE_JITTER (1 << 4)
-#define ENABLE_SSEFFECTS (1 << 5)
-#define ENABLE_SPECULAR (1 << 6)
+#define ENABLE_JITTER (1 << 3)
+#define ENABLE_SSEFFECTS (1 << 4)
+#define ENABLE_SPECULAR (1 << 5)
 
 struct Light
 {

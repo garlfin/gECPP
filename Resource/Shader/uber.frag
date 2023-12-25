@@ -66,6 +66,6 @@ void main()
 
     if(!bool(Scene.State & VOXEL_WRITE_MODE_WRITE)) return;
 
-    Voxel voxel = Voxel(FragColor.rgb, vec3(0), true);
-    //WriteVoxel(Vertex.FragPos, voxel);
+    Voxel voxel = Voxel(FragColor.rgb, vec4(fragment.Metallic, fragment.Roughness, 0.0, 1.0));
+    WriteVoxel(VertexIn.FragPos, voxel);
 }

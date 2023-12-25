@@ -37,7 +37,6 @@ namespace GL
 
 	enum class LightType : u32
 	{
-		None,
 		Directional,
 		Point,
 		Spot,
@@ -55,10 +54,12 @@ namespace GL
 		handle Depth;
 	};
 
-	enum class CubemapType : u32 {
-		None,
+	enum class CubemapType : u32
+	{
+		Infinite,
 		AABB,
 		Sphere,
+		None = Infinite
 	};
 
 	struct Cubemap
