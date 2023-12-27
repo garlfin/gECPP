@@ -15,8 +15,7 @@ namespace GL
 	struct VoxelScene
 	{
 		glm::vec3 Center;
-		GL_ALIGN glm::vec3 Size;
-
+		float Scale;
 		GL_ALIGN handle Color;
 	};
 }

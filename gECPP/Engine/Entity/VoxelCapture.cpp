@@ -21,7 +21,7 @@ namespace gE
 		Transform& transform = GetTransform();
 
 		scene.Center = transform.Position;
-		scene.Size = transform.Scale;
+		scene.Scale = transform.Scale.x;
 		scene.Color = (handle) GetTarget().GetColor();
 	}
 
