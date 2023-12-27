@@ -22,18 +22,16 @@ in VertexOut VertexIn;
 layout(location = 0) out vec4 FragColor;
 layout(location = 1) out vec2 Velocity;
 
-layout(early_fragment_tests) in;
 void main()
 {
-    if(!bool(Scene.State & WRITE_MODE_COLOR)) return;
+    if(!bool(Scene.State & ENABLE_COLOR)) return;
 
     vec3 albedo = texture(AlbedoTex, VertexIn.UV).rgb;
     vec3 amr = texture(AMRTex, VertexIn.UV).rgb;
     vec3 normal = texture(NormalTex, VertexIn.UV * vec2(1, -1)).rgb;
 
     normal = normalize(VertexIn.TBN * (normal * 2.0 - 1.0));
-
-    FragColor.rgb = albedo * 0.1;
+    if(!gl_FrontFacing) normal *= -1;
 
     Vertex vertex = Vertex
     (
@@ -52,9 +50,10 @@ void main()
         bool(Scene.State & ENABLE_SPECULAR) ? 1.0 : 0.0
     );
 
+    FragColor.rgb = albedo * 0.1;
     FragColor.rgb += GetLighting(vertex, fragment, Lighting.Lights[0]);
 
-#ifdef EXT_BINDLESS
+#ifdef GL_ARB_bindless_texture
     if(bool(Scene.State & ENABLE_SPECULAR))
     {
         for(uint i = 0; i < Lighting.CubemapCount; i++)
@@ -64,8 +63,8 @@ void main()
 
 	Velocity = ((VertexIn.CurrentUV.xy / VertexIn.CurrentUV.w) - (VertexIn.PreviousUV.xy / VertexIn.PreviousUV.w)) * 0.5;
 
-    if(!bool(Scene.State & VOXEL_WRITE_MODE_WRITE)) return;
+    if(!bool(Scene.State & ENABLE_VOXEL_WRITE)) return;
 
-    Voxel voxel = Voxel(FragColor.rgb, vec4(fragment.Metallic, fragment.Roughness, 0.0, 1.0));
-    WriteVoxel(VertexIn.FragPos, voxel);
+    Voxel voxel = Voxel(FragColor.rgb, vec4(fragment.Roughness, fragment.Specular, fragment.Metallic, 1.0));
+    WriteVoxel(vertex.Position, voxel);
 }

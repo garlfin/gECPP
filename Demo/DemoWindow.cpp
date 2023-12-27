@@ -41,8 +41,11 @@ void DemoWindow::OnInit()
 	auto* camera = new FlyCamera(this);
 	Cameras.CurrentCamera = &camera->GetTarget();
 
-	auto* capture = new gE::CubemapCapture(this, 256);
-	capture->GetTransform().Position.y = 2.5f;
-	capture->GetTransform().Scale = glm::vec3(5, 2.5f, 5);
+	auto* cubemapCap = new gE::CubemapCapture(this, 256);
+	cubemapCap->GetTransform().Position.y = 2.5f;
+	cubemapCap->GetTransform().Scale = glm::vec3(5, 2.5f, 5);
+
 	Cubemaps.Skybox = gE::ref_cast((GL::TextureCube*) PVR::Read(this, "Resource/Texture/sky.pvr", GL::WrapMode::Clamp));
+
+	VoxelSceneCapture = new gE::VoxelCapture(this, 128, 10.f);
 }

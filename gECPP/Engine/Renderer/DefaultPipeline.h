@@ -11,7 +11,7 @@
 #include <Engine/Component/Camera/RenderTarget.h>
 #include <Engine/Component/Camera/Settings.h>
 #include <Engine/Component/Camera/PostProcessEffect.h>
-#include "Engine/WindowState.h"
+#include <Engine/WindowState.h>
 
 #define GE_MAX_INSTANCE 64
 #define GE_MAX_LIGHT 4

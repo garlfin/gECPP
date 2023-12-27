@@ -38,7 +38,7 @@ void main()
         gl_Position.xy += jitter * gl_Position.w;
     }
 
-    if(!bool(Scene.State & WRITE_MODE_COLOR)) return;
+    if(!bool(Scene.State & ENABLE_COLOR)) return;
 
     VertexIn.PreviousUV = Scene.PreviousModel[ModelIndex] * vec4(Position, 1);
     VertexIn.PreviousUV = Camera.PreviousViewProjection * vec4(VertexIn.PreviousUV.xyz, 1);

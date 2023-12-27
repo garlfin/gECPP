@@ -19,8 +19,8 @@ namespace gE
 
 	DefaultPipeline::Target2D::Target2D(Entity& owner, Camera2D& camera, std::vector<PostProcessEffect<Target2D>*> effects) :
 		RenderTarget<Camera2D>(owner, camera), IDepthTarget(_depth.Get()), IColorTarget(_color.Get()),
-		_depth(GetFrameBuffer(), GL::TextureSettings2D(DefaultPipeline::DepthFormat, camera.GetSize())),
-		_color(GetFrameBuffer(), GL::TextureSettings2D(DefaultPipeline::ColorFormat, camera.GetSize())),
+			_depth(GetFrameBuffer(), GL::TextureSettings2D(DefaultPipeline::DepthFormat, camera.GetSize())),
+			_color(GetFrameBuffer(), GL::TextureSettings2D(DefaultPipeline::ColorFormat, camera.GetSize())),
 		_velocity(GetFrameBuffer(), GL::TextureSettings2D(DefaultPipeline::VelocityFormat, camera.GetSize())),
 		_colorBack(&GetWindow(), GL::TextureSettings2D(DefaultPipeline::ColorFormat, camera.GetSize())),
 		_postProcessBack(&GetWindow(), GL::TextureSettings2D(DefaultPipeline::ColorFormat, camera.GetSize())),
@@ -86,6 +86,7 @@ namespace gE
 
 	void DefaultPipeline::Target2D::RenderDependencies(float delta)
 	{
+		GetWindow().GetVoxelCapture()->GetCamera().Draw(delta, &GetCamera());
 		GetWindow().GetLights().Sun->GetCamera().Draw(delta, &GetCamera());
 	}
 }

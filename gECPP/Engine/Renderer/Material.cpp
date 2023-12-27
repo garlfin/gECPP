@@ -19,7 +19,7 @@ namespace gE
 	{
 		gE::RenderFlags state = GetWindow().State;
 
-		if((bool) _depthFunc && state.WriteMode != WriteMode::None)
+		if((bool) _depthFunc && bool(state.WriteMode & WriteMode::Depth))
 		{
 			glEnable(GL_DEPTH_TEST);
 
@@ -31,7 +31,7 @@ namespace gE
 		else
 			glDisable(GL_DEPTH_TEST);
 
-		if((bool) _cullMode && state.WriteMode != WriteMode::None)
+		if((bool) _cullMode && state.EnableFaceCull)
 		{
 			glEnable(GL_CULL_FACE);
 			glCullFace((GLenum) _cullMode);

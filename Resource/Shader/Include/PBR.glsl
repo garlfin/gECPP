@@ -70,7 +70,7 @@ vec3 GetLighting(const Vertex vert, const PBRFragment frag, Cubemap cubemap)
     vec3 r = normalize(reflect(-eye, n));
     r = CubemapParallax(vert.Position, r, cubemap);
 
-#ifdef EXT_BINDLESS
+#ifdef GL_ARB_bindless_texture
     vec3 specular = textureLod(cubemap.Color, r, 0.0f).rgb;
 #else
     vec3 specular = vec3(0);

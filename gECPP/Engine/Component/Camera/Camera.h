@@ -52,9 +52,7 @@ namespace gE
 	 private:
 		ICameraSettings _settings;
 		IRenderTarget& _target;
-
 		GL::TextureSize2D _viewportSize;
-		bool _isProjectionInvalid = true;
 	};
 
 	class Camera2D : public Camera

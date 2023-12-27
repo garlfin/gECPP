@@ -9,7 +9,7 @@
 #endif
 
 uniform layout(binding = VOXEL_TEXTURE_LOCATION, rgba16f) restrict writeonly image3D VoxelColorOut;
-uniform layout(binding = VOXEL_DATA_LOCATION, rgba16f) restrict writeonly image3D VoxelDataOut;
+uniform layout(binding = VOXEL_DATA_LOCATION, r8ui) restrict writeonly uimage3D VoxelDataOut;
 
 struct VoxelGridData
 {
@@ -42,25 +42,30 @@ layout(VOXEL_UNIFORM_LAYOUT, binding = VOXEL_UNIFORM_LOCATION) uniform VoxelGrid
 struct Voxel
 {
     vec3 Color;
-    vec4 MREA; // Meal Ready to Eat! (Metallic, Roughness, Emission, Alpha)
+    vec4 RSMA; // (Metallic, Roughness, Specular, Alpha)
 };
 
 void WriteVoxel(vec3 pos, Voxel voxel)
 {
     // Outside the grid
-
-    vec3 boxMin = VoxelGrid.Center - VoxelGrid.Scale;
-    vec3 boxMax = VoxelGrid.Center + VoxelGrid.Scale;
-
     // if(any(lessThan(pos, boxMin)) || any(greaterThan(pos, boxMax))) return;
 
-    vec3 localPos = (pos - boxMin) / (VoxelGrid.Scale * 2.0);
-    ivec3 coord = ivec3(round(localPos * imageSize(VoxelColorOut)));
+    vec3 localPos = (pos - VoxelGrid.Center) / VoxelGrid.Scale;
+    localPos = localPos * 0.5 + 0.5;
+
+    ivec3 coord = ivec3(floor(localPos * imageSize(VoxelColorOut)));
+
+    voxel.RSMA = clamp(voxel.RSMA, vec4(0.0), vec4(1.0));
+
+    uint packedRSMA = 0; // 3, 3, 1, 1
+    packedRSMA |= uint(voxel.RSMA.r * 32.0); // Roughness
+    packedRSMA |= uint(voxel.RSMA.g * 32.0) << 3; // Specular
+    packedRSMA |= uint(voxel.RSMA.b) << 6; // Metallic
+    packedRSMA |= uint(voxel.RSMA.a) << 7; // Alpha (Solid)
 
     imageStore(VoxelColorOut, coord, vec4(voxel.Color, 1.0));
-    imageStore(VoxelDataOut, coord, voxel.MREA);
+    imageStore(VoxelDataOut, coord, ivec4(packedRSMA));
 }
 
-
-
-
+// Voxel ReadVoxel(vec3);
+// Voxel ReadVoxel(ivec3);

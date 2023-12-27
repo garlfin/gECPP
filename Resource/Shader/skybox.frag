@@ -8,7 +8,7 @@ layout(location = 1) out vec2 Velocity;
 
 void main()
 {
-#ifdef EXT_BINDLESS
+#ifdef GL_ARB_bindless_texture
     FragColor = texture(Lighting.Skybox, FragPos);
 #else
     FragColor = vec4(2.0);

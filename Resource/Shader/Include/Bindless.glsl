@@ -2,7 +2,7 @@
 
 #define TEXTURE_HANDLE uvec2
 
-#ifdef EXT_BINDLESS
+#ifdef GL_ARB_bindless_texture
     #define BINDLESS_TEXTURE(TYPE, NAME) TYPE NAME
 #else
     #define BINDLESS_TEXTURE(TYPE, NAME) vec2 _pad##NAME

@@ -14,12 +14,11 @@ namespace GL
 {
 	struct VoxelScene
 	{
-		glm::vec3 Minimum{};
-		float VoxelScale = 0;
-		glm::vec3 Maximum{};
+		glm::vec3 Center;
+		GL_ALIGN glm::vec3 Size;
 
 		GL_ALIGN handle Color;
-		GL_ALIGN handle Data;
+		handle Data;
 	};
 }
 
@@ -35,7 +34,7 @@ namespace gE::VoxelPipeline
 	 public:
 		explicit Buffers(Window* window);
 
-		ALWAYS_INLINE void UpdateScene(u64 size = sizeof(GL::Camera), u64 offset = 0) const
+		ALWAYS_INLINE void UpdateScene(u64 size = sizeof(GL::VoxelScene), u64 offset = 0) const
 		{
 			_voxelBuffer.ReplaceData((u8*) &Scene + offset, size, offset);
 		}
@@ -56,7 +55,9 @@ namespace gE::VoxelPipeline
 
 		GET(GL::Texture3D&, Color, _color);
 		GET(GL::Texture3D&, Data, _data);
+		GET(VoxelCapture&, Owner, (VoxelCapture&) RenderTarget<Camera3D>::GetOwner());
 
+		bool Setup(float d, Camera* camera) override;
 		void RenderPass(float, Camera*) override;
 
 	 private:

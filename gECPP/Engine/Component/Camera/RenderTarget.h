@@ -92,7 +92,7 @@ namespace gE
 	class IColorTarget
 	{
 	 public:
-		explicit IColorTarget(GL::Texture& c) : _color(c) {};
+		explicit IColorTarget(GL::Texture& col) : _color(col) {};
 
 		GET(GL::Texture&, Color, _color);
 	 private:

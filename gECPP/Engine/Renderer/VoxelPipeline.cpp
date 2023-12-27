@@ -4,11 +4,13 @@
 
 #include "VoxelPipeline.h"
 #include <Engine/Entity/VoxelCapture.h>
+#include <Engine/Window.h>
 
 namespace gE::VoxelPipeline
 {
 	Buffers::Buffers(gE::Window* window) : _voxelBuffer(window)
 	{
+		_voxelBuffer.Bind(GL::BufferTarget::Uniform, 4);
 	}
 
 	Target3D::Target3D(VoxelCapture& capture, Camera3D& camera) : RenderTarget<Camera3D>(capture, camera),
@@ -18,9 +20,37 @@ namespace gE::VoxelPipeline
 		GetFrameBuffer().SetDefaultSize(camera.GetSize());
 	}
 
-	void Target3D::RenderPass(float, Camera*)
+	void Target3D::RenderPass(float d, Camera* camera)
 	{
-		// TODO
+		Window& window = GetWindow();
+		GL::TextureSize2D size = GetSize();
+
+		window.State = gE::State::Voxel;
+
+		glDepthMask(0);
+		glColorMask(1, 1, 1, 1);
+		glViewport(0, 0, size.x, size.y);
+
+		GetColor().Bind(0, GL_WRITE_ONLY, 0, GL_RGBA16F);
+
+		window.GetRenderers().OnRender(d);
+	}
+
+	bool Target3D::Setup(float d, Camera* camera)
+	{
+		if(!camera) return false;
+
+		VoxelPipeline::Buffers& buffers = GetWindow().GetVoxelBuffers();
+		Transform& transform = GetOwner().GetTransform();
+		Transform& cameraTransform = GetOwner().GetTransform();
+
+		transform.Position = glm::floor(cameraTransform.Position);
+		transform.OnRender(0.f);
+
+		GetOwner().GetGLVoxelScene(buffers.Scene);
+		buffers.UpdateScene();
+
+		return true;
 	}
 }
 

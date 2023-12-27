@@ -47,7 +47,7 @@ namespace gE
 		void Blit(const GL::Texture& texture);
 
 		// Entities & Data
-		GET(VoxelCapture&, VoxelCapture, VoxelCap);
+		GET(VoxelCapture*, VoxelCapture, VoxelSceneCapture);
 		GET(gE::Material&, DefaultMaterial, DefaultMaterial);
 		GET(GL::Texture2D&, BRDFLookupTexture, BRDFLookup);
 
@@ -87,15 +87,18 @@ namespace gE
 		SmartPointer<DefaultPipeline::Buffers> PipelineBuffers;
 		SmartPointer<VoxelPipeline::Buffers> VoxelBuffers;
 
-		CameraManager Cameras{};
+		VoxelCapture* VoxelSceneCapture;
+
+		CameraManager Cameras;
 		TransformManager Transforms;
-		ComponentManager<Behavior> Behaviors;
-		ComponentManager<MeshRenderer> Renderers;
 		LightManager Lights;
 		CubemapManager Cubemaps;
+
+		ComponentManager<Behavior> Behaviors;
+		ComponentManager<MeshRenderer> Renderers;
+
 		GL::TextureSlotManager SlotManager;
 
-		SmartPointer<VoxelCapture> VoxelCap;
 		SmartPointer<gE::Material> DefaultMaterial;
 		SmartPointer<GL::Shader> BlitShader;
 		SmartPointer<GL::Texture2D> BRDFLookup;

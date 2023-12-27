@@ -13,16 +13,13 @@
 #define CUBEMAP_AABB 1
 #define CUBEMAP_SPHERE 2
 
-#define WRITE_MODE_DEPTH 1
-#define WRITE_MODE_COLOR 2
-
-#define VOXEL_WRITE_MODE_OFFSET 2
-#define VOXEL_WRITE_MODE_READ 0
-#define VOXEL_WRITE_MODE_WRITE 1
-
+#define ENABLE_DEPTH (1 << 0)
+#define ENABLE_COLOR (1 << 1)
+#define ENABLE_VOXEL_WRITE (1 << 2)
 #define ENABLE_JITTER (1 << 3)
 #define ENABLE_SSEFFECTS (1 << 4)
 #define ENABLE_SPECULAR (1 << 5)
+#define ENABLE_FACE_CULL (1 << 6)
 
 struct Light
 {
@@ -90,7 +87,7 @@ layout(LIGHT_UNIFORM_LAYOUT, binding = LIGHT_UNIFORM_LOCATION) uniform LightingU
     LightingData Lighting;
 };
 
-#if defined(FRAGMENT_SHADER) && !defined(EXT_BINDLESS)
+#if defined(FRAGMENT_SHADER) && !defined(GL_ARB_bindless_texture)
     uniform sampler2D Lights[MAX_LIGHTS];
     uniform samplerCube Cubemaps[MAX_CUBEMAPS];
 #endif

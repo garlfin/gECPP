@@ -5,8 +5,30 @@
 #include "Camera.h"
 #include "Engine/Component/Transform.h"
 #include "Engine/Window.h"
+#include <glm/gtx/string_cast.hpp>
 
 #define NOT(EXPR) (!(EXPR))
+
+CONSTEXPR_GLOBAL glm::vec3 ForwardDirs[]
+{
+	glm::vec3(1, 0, 0),
+	glm::vec3(-1, 0, 0),
+	glm::vec3(0, 1, 0),
+	glm::vec3(0, -1, 0),
+	glm::vec3(0, 0, 1),
+	glm::vec3(0, 0, -1)
+};
+
+CONSTEXPR_GLOBAL glm::vec3 UpDirs[]
+{
+	glm::vec3(0, -1, 0),
+	glm::vec3(0, -1, 0),
+	glm::vec3(0, 0, 1),
+	glm::vec3(0, 0, -1),
+	glm::vec3(0, -1, 0),
+	glm::vec3(0, -1, 0)
+};
+
 
 namespace gE
 {
@@ -33,8 +55,7 @@ namespace gE
 
 	void Camera::Draw(float delta, Camera* callingCamera)
 	{
-		if(_isProjectionInvalid) UpdateProjection();
-		_isProjectionInvalid = false;
+		UpdateProjection();
 
 		DefaultPipeline::Buffers& buffers = GetWindow().GetPipelineBuffers();
 
@@ -44,8 +65,8 @@ namespace gE
 		if(!isFirst && (!shouldTick || GetOwner()->GetFlags().Static)) return;
 
 		// Limits "recursion"
-		if(!callingCamera) _target.RenderDependencies(delta);
 		if(!_target.Setup(delta, callingCamera)) return;
+		_target.RenderDependencies(delta);
 
 		GetGLCamera(buffers.Camera);
 		buffers.UpdateCamera();
@@ -96,16 +117,18 @@ namespace gE
 
 	void Camera3D::UpdateProjection()
 	{
-		glm::vec2 halfSize = glm::vec2(GetSize().x, GetSize().z) / 2.f;
-		Projection = glm::ortho(-halfSize.x, -halfSize.y, halfSize.x, halfSize.y, GetClipPlanes().x, GetClipPlanes().y);
+		glm::vec3& scale = GetOwner()->GetTransform().Scale;
+		Projection = glm::ortho(-scale.x, scale.x, -scale.z, scale.z, 0.01f, scale.y * 2.f);
 	}
 
 	void Camera3D::GetGLCamera(GL::Camera& cam)
 	{
 		Camera::GetGLCamera(cam);
 
-		cam.Projection = Projection;
-		cam.View[0] = glm::lookAt(cam.Position, cam.Position + glm::vec3(0, -1, 0), cam.Position + glm::vec3(1, 0, 0));
+		glm::vec3 scale = GetOwner()->GetTransform().Scale;
+
+		for(u8 i = 0; i < 3; i++)
+			cam.View[i] = glm::lookAt(cam.Position - scale * ForwardDirs[i * 2], cam.Position, UpDirs[i * 2]);
 	}
 
 	CameraCubemap::CameraCubemap(Entity* p, TARGET_TYPE& t, const CameraSettings1D& s, ComponentManager<Camera>* m) :
@@ -117,26 +140,6 @@ namespace gE
 	{
 		Projection = glm::perspectiveFov(glm::radians(90.f), 1.f, 1.f, GetClipPlanes().x, GetClipPlanes().y);
 	}
-
-	CONSTEXPR_GLOBAL glm::vec3 ForwardDirs[]
-	{
-		glm::vec3(1, 0, 0),
-		glm::vec3(-1, 0, 0),
-		glm::vec3(0, 1, 0),
-		glm::vec3(0, -1, 0),
-		glm::vec3(0, 0, 1),
-		glm::vec3(0, 0, -1)
-	};
-
-	CONSTEXPR_GLOBAL glm::vec3 UpDirs[]
-	{
-		glm::vec3(0, -1, 0),
-		glm::vec3(0, -1, 0),
-		glm::vec3(0, 0, 1),
-		glm::vec3(0, 0, -1),
-		glm::vec3(0, -1, 0),
-		glm::vec3(0, -1, 0)
-	};
 
 	void CameraCubemap::GetGLCamera(GL::Camera& cam)
 	{
