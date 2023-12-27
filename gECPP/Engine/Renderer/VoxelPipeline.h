@@ -45,7 +45,7 @@ namespace gE::VoxelPipeline
 		GL::Buffer<GL::VoxelScene> _voxelBuffer;
 	};
 
-	CONSTEXPR_GLOBAL GL::ITextureSettings ColorFormat { GL_RGB16F, GL::WrapMode::Clamp };
+	CONSTEXPR_GLOBAL GL::ITextureSettings ColorFormat { GL_RGBA16F, GL::WrapMode::Clamp };
 	CONSTEXPR_GLOBAL GL::ITextureSettings DataFormat { GL_RGB5_A1, GL::WrapMode::Clamp };
 
 	class Target3D : public RenderTarget<Camera3D>

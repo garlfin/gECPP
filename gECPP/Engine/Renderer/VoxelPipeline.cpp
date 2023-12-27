@@ -31,7 +31,7 @@ namespace gE::VoxelPipeline
 		glColorMask(1, 1, 1, 1);
 		glViewport(0, 0, size.x, size.y);
 
-		GetColor().Bind(0, GL_WRITE_ONLY, 0, GL_RGBA16F);
+		GetColor().Bind(0, GL_WRITE_ONLY, 0);
 
 		window.GetRenderers().OnRender(d);
 	}

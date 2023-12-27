@@ -47,5 +47,5 @@ void DemoWindow::OnInit()
 
 	Cubemaps.Skybox = gE::ref_cast((GL::TextureCube*) PVR::Read(this, "Resource/Texture/sky.pvr", GL::WrapMode::Clamp));
 
-	VoxelSceneCapture = new gE::VoxelCapture(this, 128, 10.f);
+	VoxelSceneCapture = new gE::VoxelCapture(this, 128, 5.f);
 }
