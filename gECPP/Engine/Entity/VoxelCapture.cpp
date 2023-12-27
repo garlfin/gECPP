@@ -22,9 +22,7 @@ namespace gE
 
 		scene.Center = transform.Position;
 		scene.Size = transform.Scale;
-
 		scene.Color = (handle) GetTarget().GetColor();
-		scene.Data = (handle) GetTarget().GetData();
 	}
 
 	CameraSettings3D CreateVoxelSettings(u16 resolution, float size)

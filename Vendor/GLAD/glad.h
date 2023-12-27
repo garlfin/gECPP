@@ -4933,6 +4933,17 @@ typedef void (APIENTRYP PFNGLVERTEXWEIGHTHVNVPROC)(const GLhalfNV *weight);
 GLAPI PFNGLVERTEXWEIGHTHVNVPROC glad_glVertexWeighthvNV;
 #define glVertexWeighthvNV glad_glVertexWeighthvNV
 #endif
+#define GL_CONSERVATIVE_RASTERIZATION_NV 0x9346
+#define GL_SUBPIXEL_PRECISION_BIAS_X_BITS_NV 0x9347
+#define GL_SUBPIXEL_PRECISION_BIAS_Y_BITS_NV 0x9348
+#define GL_MAX_SUBPIXEL_PRECISION_BIAS_BITS_NV 0x9349
+#ifndef GL_NV_conservative_raster
+#define GL_NV_conservative_raster 1
+GLAPI int GLAD_GL_NV_conservative_raster;
+typedef void (APIENTRYP PFNGLSUBPIXELPRECISIONBIASNVPROC)(GLuint xbits, GLuint ybits);
+GLAPI PFNGLSUBPIXELPRECISIONBIASNVPROC glad_glSubpixelPrecisionBiasNV;
+#define glSubpixelPrecisionBiasNV glad_glSubpixelPrecisionBiasNV
+#endif
 
 #ifdef __cplusplus
 }

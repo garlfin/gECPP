@@ -22,6 +22,12 @@ namespace gE
 		Write
 	};
 
+	enum class RasterMode : u8
+	{
+		Normal,
+		Conservative
+	};
+
 	struct RenderFlags
 	{
 		WriteMode WriteMode : 2;
@@ -30,16 +36,18 @@ namespace gE
 		bool EnableSSEffects : 1;
 		bool EnableSpecular : 1;
 		bool EnableFaceCull : 1;
+		bool EnableDepthTest : 1;
+		RasterMode RasterMode : 1;
 		u8 InstanceMultiplier : 3;
 	};
 
 	namespace State
 	{
-		static CONSTEXPR_GLOBAL RenderFlags Color { WriteMode::Color, VoxelWriteMode::Read, true, true, true, true, 1 };
-		static CONSTEXPR_GLOBAL RenderFlags PreZ { WriteMode::Depth, VoxelWriteMode::Read, true, false, false, true, 1 };
-		static CONSTEXPR_GLOBAL RenderFlags Shadow { WriteMode::Depth, VoxelWriteMode::Read, false, false, false, false, 1 };
-		static CONSTEXPR_GLOBAL RenderFlags ShadowCube { WriteMode::Depth, VoxelWriteMode::Read, false, false, false, false, 6 };
-		static CONSTEXPR_GLOBAL RenderFlags Cubemap { WriteMode::Both, VoxelWriteMode::Read, false, false, false, true, 6 };
-		static CONSTEXPR_GLOBAL RenderFlags Voxel { WriteMode::Color, VoxelWriteMode::Write, false, false, false, false, 3 };
+		CONSTEXPR_GLOBAL RenderFlags Color { WriteMode::Color, VoxelWriteMode::Read, true, true, true, true, true, RasterMode::Normal, 1 };
+		CONSTEXPR_GLOBAL RenderFlags PreZ { WriteMode::Depth, VoxelWriteMode::Read, true, false, false, true, true, RasterMode::Normal, 1 };
+		CONSTEXPR_GLOBAL RenderFlags Shadow { WriteMode::Depth, VoxelWriteMode::Read, false, false, false, false, true, RasterMode::Normal, 1 };
+		CONSTEXPR_GLOBAL RenderFlags ShadowCube { WriteMode::Depth, VoxelWriteMode::Read, false, false, false, false, true, RasterMode::Normal, 6 };
+		CONSTEXPR_GLOBAL RenderFlags Cubemap { WriteMode::Both, VoxelWriteMode::Read, false, false, false, true, true, RasterMode::Normal, 6 };
+		CONSTEXPR_GLOBAL RenderFlags Voxel { WriteMode::Color, VoxelWriteMode::Write, false, false, false, false, false, RasterMode::Conservative, 3 };
 	}
 }

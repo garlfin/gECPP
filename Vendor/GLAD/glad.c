@@ -1384,6 +1384,8 @@ PFNGLSECONDARYCOLOR3HNVPROC glad_glSecondaryColor3hNV = NULL;
 PFNGLSECONDARYCOLOR3HVNVPROC glad_glSecondaryColor3hvNV = NULL;
 PFNGLVERTEXWEIGHTHNVPROC glad_glVertexWeighthNV = NULL;
 PFNGLVERTEXWEIGHTHVNVPROC glad_glVertexWeighthvNV = NULL;
+int GLAD_GL_NV_conservative_raster = 0;
+PFNGLSUBPIXELPRECISIONBIASNVPROC glad_glSubpixelPrecisionBiasNV = NULL;
 static void load_GL_VERSION_1_0(GLADloadproc load) {
 	if(!GLAD_GL_VERSION_1_0) return;
 	glad_glCullFace = (PFNGLCULLFACEPROC)load("glCullFace");
@@ -2660,6 +2662,12 @@ static void load_GL_NV_half_float(GLADloadproc load) {
 	glad_glVertexWeighthNV = (PFNGLVERTEXWEIGHTHNVPROC)load("glVertexWeighthNV");
 	glad_glVertexWeighthvNV = (PFNGLVERTEXWEIGHTHVNVPROC)load("glVertexWeighthvNV");
 }
+
+static void load_GL_NV_conservative_raster(GLADloadproc load) {
+	if(!GLAD_GL_NV_conservative_raster) return;
+	glad_glSubpixelPrecisionBiasNV = (PFNGLSUBPIXELPRECISIONBIASNVPROC)load("glSubpixelPrecisionBiasNV");
+}
+
 static int find_extensionsGL(void) {
 	if (!get_exts()) return 0;
 	GLAD_GL_AMD_debug_output = has_ext("GL_AMD_debug_output");
@@ -2690,6 +2698,7 @@ static int find_extensionsGL(void) {
 	GLAD_GL_NV_bindless_multi_draw_indirect = has_ext("GL_NV_bindless_multi_draw_indirect");
 	GLAD_GL_NV_bindless_multi_draw_indirect_count = has_ext("GL_NV_bindless_multi_draw_indirect_count");
 	GLAD_GL_NV_half_float = has_ext("GL_NV_half_float");
+	GLAD_GL_NV_conservative_raster = has_ext("GL_NV_conservative_raster");
 	free_exts();
 	return 1;
 }
@@ -2798,6 +2807,7 @@ int gladLoadGLLoader(GLADloadproc load) {
 	load_GL_NV_bindless_multi_draw_indirect(load);
 	load_GL_NV_bindless_multi_draw_indirect_count(load);
 	load_GL_NV_half_float(load);
+	load_GL_NV_conservative_raster(load);
 	return GLVersion.major != 0 || GLVersion.minor != 0;
 }
 

@@ -18,7 +18,6 @@ namespace GL
 		GL_ALIGN glm::vec3 Size;
 
 		GL_ALIGN handle Color;
-		handle Data;
 	};
 }
 
@@ -45,8 +44,8 @@ namespace gE::VoxelPipeline
 		GL::Buffer<GL::VoxelScene> _voxelBuffer;
 	};
 
-	CONSTEXPR_GLOBAL GL::ITextureSettings ColorFormat { GL_RGBA16F, GL::WrapMode::Clamp };
-	CONSTEXPR_GLOBAL GL::ITextureSettings DataFormat { GL_RGB5_A1, GL::WrapMode::Clamp };
+	CONSTEXPR_GLOBAL GL::ITextureSettings ColorFormat { GL_R11F_G11F_B10F, GL::WrapMode::Clamp, GL::FilterMode::Linear, 0 };
+	CONSTEXPR_GLOBAL GL::ITextureSettings DataFormat { GL_R8UI, GL::WrapMode::Clamp, GL::FilterMode::Nearest, 0 };
 
 	class Target3D : public RenderTarget<Camera3D>
 	{

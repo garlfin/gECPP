@@ -19,7 +19,7 @@ namespace gE
 	{
 		gE::RenderFlags state = GetWindow().State;
 
-		if((bool) _depthFunc && bool(state.WriteMode & WriteMode::Depth))
+		if((bool) _depthFunc && state.EnableDepthTest)
 		{
 			glEnable(GL_DEPTH_TEST);
 
@@ -38,6 +38,14 @@ namespace gE
 		}
 		else
 			glDisable(GL_CULL_FACE);
+
+		if(GLAD_GL_NV_conservative_raster)
+		{
+			if(state.RasterMode == RasterMode::Conservative)
+				glEnable(GL_CONSERVATIVE_RASTERIZATION_NV);
+			else
+				glDisable(GL_CONSERVATIVE_RASTERIZATION_NV);
+		}
 
 		_shader->Bind();
 	}
