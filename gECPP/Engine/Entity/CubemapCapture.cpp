@@ -88,7 +88,7 @@ namespace gE
 
 	CONSTEXPR_GLOBAL GL::ITextureSettings CubemapColorFormat
 	{
-		GL_RGB16F,
+		GL_R11F_G11F_B10F,
 		GL::WrapMode::Clamp,
 		GL::FilterMode::Linear
 	};

@@ -177,6 +177,7 @@ vec2 Hammersley(uint i, uint sampleCount)
     return vec2(float(i) / float(sampleCount), VDCInverse(i));
 }
 
+// https://seblagarde.wordpress.com/2012/09/29/image-based-lighting-approaches-and-parallax-corrected-cubemap/
 vec3 CubemapParallax(vec3 pos, vec3 dir, Cubemap cubemap)
 {
     switch(cubemap.Type)

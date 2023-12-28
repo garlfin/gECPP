@@ -31,7 +31,8 @@ namespace gE::VoxelPipeline
 		glColorMask(1, 1, 1, 1);
 		glViewport(0, 0, size.x, size.y);
 
-		GetColor().Bind(0, GL_WRITE_ONLY, 0);
+		GetColor().Bind(0, GL_READ_WRITE, 0);
+		GetData().Bind(1, GL_READ_WRITE, 0);
 
 		window.GetRenderers().OnRender(d);
 	}
@@ -42,10 +43,10 @@ namespace gE::VoxelPipeline
 
 		VoxelPipeline::Buffers& buffers = GetWindow().GetVoxelBuffers();
 		Transform& transform = GetOwner().GetTransform();
-		Transform& cameraTransform = GetOwner().GetTransform();
+		Transform& cameraTransform = camera->GetOwner()->GetTransform();
 
-		transform.Position = glm::floor(cameraTransform.Position);
-		transform.OnRender(0.f);
+		// transform.Position = glm::floor(cameraTransform.Position);
+		// transform.OnRender(0.f);
 
 		GetOwner().GetGLVoxelScene(buffers.Scene);
 		buffers.UpdateScene();

@@ -12,15 +12,20 @@
     #define VOXEL_TRACE_MAX_ITERATIONS 64
 #endif
 
+#ifndef EPSILON
+    #define EPSILON 0.0001
+#endif
+
 uniform layout(binding = VOXEL_TEXTURE_LOCATION, r11f_g11f_b10f) restrict image3D VoxelColorOut;
 uniform layout(binding = VOXEL_DATA_LOCATION, r8ui) restrict uimage3D VoxelDataOut;
 
 struct VoxelGridData
 {
-    vec3 Center;
+    vec3 Position;
     float Scale;
-    uint MipCount; // Cleaner than textureQueryLevels, but I might switch it out if I need different data there
+    uint CellCount; // AKA Texture Size
     BINDLESS_TEXTURE(sampler3D, Color);
+    BINDLESS_TEXTURE(sampler3D, Data);
 };
 
 #if defined(FRAGMENT_SHADER) && !defined(GL_ARB_bindless_texture)
@@ -70,24 +75,24 @@ Voxel ReadVoxel(ivec3);
 
 // Helper Functions
 vec3 WorldToUV(vec3);
-ivec3 UVToTexel(vec3);
-ivec3 WorldToTexel(vec3);
+ivec3 UVToTexel(vec3, uint);
+ivec3 WorldToTexel(vec3, uint);
 
 // Implementation
 vec3 WorldToUV(vec3 pos)
 {
-    vec3 uv = (pos - VoxelGrid.Center) / VoxelGrid.Scale;
+    vec3 uv = (pos - VoxelGrid.Position) / VoxelGrid.Scale;
     return uv * 0.5 + 0.5;
 }
 
-ivec3 UVToTexel(vec3 uv)
+ivec3 UVToTexel(vec3 uv, uint cellCount)
 {
-    return ivec3(floor(uv * imageSize(VoxelColorOut)));
+    return ivec3(uv * cellCount);
 }
 
-ivec3 WorldToTexel(vec3 pos)
+ivec3 WorldToTexel(vec3 pos, uint cellCount)
 {
-    return UVToTexel(WorldToUV(pos));
+    return UVToTexel(WorldToUV(pos), cellCount);
 }
 
 void WriteVoxel(vec3 pos, Voxel voxel)
@@ -95,7 +100,7 @@ void WriteVoxel(vec3 pos, Voxel voxel)
     // Outside the grid
     // if(any(lessThan(pos, boxMin)) || any(greaterThan(pos, boxMax))) return;
 
-    ivec3 texel = WorldToTexel(pos);
+    ivec3 texel = WorldToTexel(pos, VoxelGrid.CellCount);
 
     voxel.RSMA = clamp(voxel.RSMA, vec4(0.0), vec4(1.0));
 
@@ -112,19 +117,17 @@ void WriteVoxel(vec3 pos, Voxel voxel)
 Voxel ReadVoxel(vec3 pos)
 {
     vec3 uv = WorldToUV(pos);
-    ivec3 texel = UVToTexel(uv);
+    ivec3 texel = UVToTexel(uv, VoxelGrid.CellCount);
 
     Voxel voxel;
 
-#ifdef GL_ARB_bindless_texture
     voxel.Color = textureLod(VoxelGrid.Color, uv, 0.0).rgb;
-#endif
 
     uint packedRSMA = imageLoad(VoxelDataOut, texel).r;
     voxel.RSMA.r = float(packedRSMA & 7u) / 8.0;
     voxel.RSMA.g = float(packedRSMA >> 3 & 7u) / 8.0;
     voxel.RSMA.b = float(packedRSMA >> 6 & 1u);
-    voxel.RSMA.b = float(packedRSMA >> 7 & 1u);
+    voxel.RSMA.a = float(packedRSMA >> 7 & 1u);
 
     return voxel;
 }
@@ -139,26 +142,45 @@ Voxel ReadVoxel(ivec3 texel)
     voxel.RSMA.r = float(packedRSMA & 7u) / 8.0;
     voxel.RSMA.g = float(packedRSMA >> 3 & 7u) / 8.0;
     voxel.RSMA.b = float(packedRSMA >> 6 & 1u);
-    voxel.RSMA.b = float(packedRSMA >> 7 & 1u);
+    voxel.RSMA.a = float(packedRSMA >> 7 & 1u);
 
     return voxel;
 }
 
+vec3 CrossCell(uint cellCount, vec3 position, vec3 direction)
+{
+    float cellSize = (VoxelGrid.Scale * 2.0) / cellCount;
+
+    vec3 cellMin = VoxelGrid.Position + WorldToTexel(position, cellCount) * cellSize;
+    vec3 cellMax = cellMin + cellSize;
+
+    vec3 first = (cellMin - position) / direction;
+    vec3 second = (cellMax - position) / direction;
+
+    first = max(first, second);
+    float dist = min(first.x, min(first.y, first.z));
+
+    return position + direction * dist;
+}
+
+// Adapted from two sources:
+// https://www.jpgrenier.org/ssr.html
+// https://seblagarde.wordpress.com/2012/09/29/image-based-lighting-approaches-and-parallax-corrected-cubemap/
 RayResult Trace(Ray ray, out Voxel voxel)
 {
-    RayResult result = RayResult(ray.Position, 0.0, vec3(0), false);
     ray.Direction = normalize(ray.Direction);
-    ray.Position -= VoxelGrid.Position;
 
-    vec3 step = sign(ray.Direction);
-    vec3 deltaDistance = 1.0 / abs(ray.Direction);
-    vec3 sideDistance = (step)
+    RayResult result = RayResult(ray.Position, 0.0, vec3(0), false);
 
-
+    vec3 rayABS = abs(ray.Position - VoxelGrid.Position);
+    if(max(rayABS.x, max(rayABS.y, rayABS.z)) > VoxelGrid.Scale) return result;
 
     for(uint i = 0; i < VOXEL_TRACE_MAX_ITERATIONS; i++)
     {
+        result.Position = CrossCell(VoxelGrid.CellCount, result.Position, ray.Direction);
 
+        voxel = ReadVoxel(result.Position);
+        if(voxel.RSMA.a == 1.0) break;
     }
 
     return result;

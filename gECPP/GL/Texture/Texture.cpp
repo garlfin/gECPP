@@ -4,6 +4,8 @@
 #include "GL/Binary/Binary.h"
 #include "TextureSlotManager.h"
 
+CONSTEXPR_GLOBAL float WhiteBorderColor[4] { 1.f, 1.f, 1.f, 0.f };
+
 namespace GL
 {
 	Texture::Texture(gE::Window* window, GLenum target, const ITextureSettings& settings) :
@@ -15,11 +17,15 @@ namespace GL
 		glTextureParameteri(ID, GL_TEXTURE_WRAP_S, (GLint) settings.WrapMode);
 		glTextureParameteri(ID, GL_TEXTURE_WRAP_T, (GLint) settings.WrapMode);
 
-		if(target == GL_TEXTURE_CUBE_MAP)
+		// if(settings.WrapMode == WrapMode::Border)
+		//	glTextureParameterfv(ID, GL_TEXTURE_BORDER_COLOR, WhiteBorderColor);
+
+		if(target == GL_TEXTURE_CUBE_MAP || target == GL_TEXTURE_3D)
 			glTextureParameteri(ID, GL_TEXTURE_WRAP_R, (GLint) settings.WrapMode);
 		else if (target == GL_TEXTURE_2D)
 			glTextureParameteri(ID, GL_TEXTURE_MAX_ANISOTROPY, GE_ANISOTROPY_COUNT);
 	}
+
 
 	Texture2D::Texture2D(gE::Window* window, const TextureSettings<TextureDimension::D2D>& settings, const TextureData& data)
 		: Texture(window, GL_TEXTURE_2D, settings), _size(settings.Size)

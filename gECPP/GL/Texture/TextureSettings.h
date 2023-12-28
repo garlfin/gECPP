@@ -82,7 +82,8 @@ namespace GL
 	enum class WrapMode : GLenum
 	{
 		Clamp = GL_CLAMP_TO_EDGE,
-		Repeat = GL_REPEAT
+		Repeat = GL_REPEAT,
+		Border = GL_CLAMP_TO_BORDER
 	};
 
 	enum class TextureDimension : u8

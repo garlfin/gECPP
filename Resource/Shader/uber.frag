@@ -31,16 +31,15 @@ void main()
     vec3 normal = texture(NormalTex, VertexIn.UV * vec2(1, -1)).rgb;
 
     normal = normalize(VertexIn.TBN * (normal * 2.0 - 1.0));
-    if(!gl_FrontFacing) normal *= -1;
 
-    Vertex vertex = Vertex
+    Vertex vert = Vertex
     (
         VertexIn.FragPos,
         normalize(VertexIn.TBN[2]),
         VertexIn.FragPosLightSpace[0]
     );
 
-    PBRFragment fragment = PBRFragment
+    PBRFragment frag = PBRFragment
     (
         normal,
         amr.b,
@@ -51,13 +50,22 @@ void main()
     );
 
     FragColor.rgb = albedo * 0.1;
-    FragColor.rgb += GetLighting(vertex, fragment, Lighting.Lights[0]);
+    FragColor.rgb += GetLighting(vert, frag, Lighting.Lights[0]);
 
 #ifdef GL_ARB_bindless_texture
     if(bool(Scene.State & ENABLE_SPECULAR))
     {
-        for(uint i = 0; i < Lighting.CubemapCount; i++)
-            FragColor.rgb += GetLighting(vertex, fragment, Lighting.Cubemaps[i]);
+        //for(uint i = 0; i < Lighting.CubemapCount; i++)
+        //    FragColor.rgb += GetLighting(vert, frag, Lighting.Cubemaps[i]);
+
+        vec3 eye = normalize(Camera.Position - vert.Position);
+        vec3 r = normalize(reflect(-eye, vert.Normal));
+
+        Voxel voxel;
+        Ray ray = Ray(vert.Position, 10.f, r);
+        RayResult result = Trace(ray, voxel);
+
+        FragColor.rgb = voxel.Color;
     }
 #endif
 
@@ -65,6 +73,6 @@ void main()
 
     if(!bool(Scene.State & ENABLE_VOXEL_WRITE)) return;
 
-    Voxel voxel = Voxel(FragColor.rgb, vec4(fragment.Roughness, fragment.Specular, fragment.Metallic, 1.0));
-    WriteVoxel(vertex.Position, voxel);
+    Voxel voxel = Voxel(FragColor.rgb, vec4(frag.Roughness, frag.Specular, frag.Metallic, 1.0));
+    WriteVoxel(vert.Position, voxel);
 }
