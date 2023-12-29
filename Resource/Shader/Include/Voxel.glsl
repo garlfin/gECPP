@@ -186,9 +186,16 @@ RayResult Trace(Ray ray)
     vec3 rayABS = abs(ray.Position - VoxelGrid.Position);
     if(max(rayABS.x, max(rayABS.y, rayABS.z)) > VoxelGrid.Scale) return result;
 
+    if(ReadVoxelData(result.Position, 0).a == 1.0)
+    {
+        result.Hit = true;
+        return result;
+    }
+
     for(uint i = 0; i < VOXEL_TRACE_MAX_ITERATIONS; i++)
     {
         result.Position = CrossCell(result.Position, ray.Direction, VoxelGrid.CellCount);
+
         if(ReadVoxelData(result.Position, 0).a != 1.0) continue;
 
         result.Hit = true;
@@ -200,5 +207,26 @@ RayResult Trace(Ray ray)
 
 RayResult TraceOffset(Ray ray, vec3 normal)
 {
+    float cellSize = (VoxelGrid.Scale * 2.0) / VoxelGrid.CellCount;
+
+    ray.Position += cellSize * normal;
+    ray.Position += cellSize * ray.Direction * 0.5;
+
+    // vec3 norAbs = abs(normal);
+    // vec3 cellMin = AlignWorldToCell(ray.Position, VoxelGrid.CellCount);
+    // vec3 cellMax = cellMin + cellSize;
+    //
+    // vec3 first = (cellMin - ray.Position) / normal;
+    // vec3 second = (cellMax - ray.Position) / normal;
+    //
+    // first = max(first, second);
+    //
+    // if(norAbs.x > norAbs.y && norAbs.x > norAbs.z)
+    //     ray.Position += normal * (first.x + EPSILON);
+    // else if(norAbs.y > norAbs.z)
+    //     ray.Position += normal * (first.y + EPSILON);
+    // else
+    //     ray.Position += normal * (first.z + EPSILON);
+
     return Trace(ray);
 }

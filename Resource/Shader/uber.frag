@@ -55,10 +55,18 @@ void main()
     FragColor.rgb += GetLighting(vert, frag, Lighting.Lights[0]);
 
 #ifdef GL_ARB_bindless_texture
+#ifdef ENABLE_VOXEL_TRACE
+    RayResult result;
+    vec3 voxelColor = GetLightingVoxel(vert, frag, result);
+#endif
+
     if(bool(Scene.State & ENABLE_SPECULAR))
     {
-        for(uint i = 0; i < Lighting.CubemapCount; i++)
-            FragColor.rgb += GetLighting(vert, frag, Lighting.Cubemaps[i]);
+    #ifdef ENABLE_VOXEL_TRACE
+        FragColor.rgb += mix(GetLighting(vert, frag, Lighting.Cubemaps[0]), voxelColor, result.Hit ? 1.0 : 0.0);
+    #else
+        FragColor.rgb += GetLighting(vert, frag, Lighting.Cubemaps[0]);
+    #endif
     }
 #endif
 

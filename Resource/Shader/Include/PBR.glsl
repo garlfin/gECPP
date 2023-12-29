@@ -71,12 +71,6 @@ vec3 GetLighting(const Vertex vert, const PBRFragment frag, Cubemap cubemap)
     vec3 r = normalize(reflect(-eye, n));
     r = CubemapParallax(vert.Position, r, cubemap);
 
-#ifdef ENABLE_VOXEL_TRACE
-    Ray ray = Ray(vert.Position, 5.f, r);
-    RayResult result = TraceOffset(ray, vert.Normal);
-    if(result.Hit) r = result.Position - cubemap.Position;
-#endif
-
 #ifdef GL_ARB_bindless_texture
     vec3 specular = textureLod(cubemap.Color, r, 0.0f).rgb;
 #else
@@ -85,6 +79,24 @@ vec3 GetLighting(const Vertex vert, const PBRFragment frag, Cubemap cubemap)
     vec2 brdf = texture(BRDFLutTex, vec2(nDotV, frag.Roughness)).rg;
 
     return (f * brdf.x + brdf.y) * specular;
+}
+
+vec3 GetLightingVoxel(const Vertex vert, const PBRFragment frag, out RayResult result)
+{
+    vec3 eye = normalize(Camera.Position - vert.Position);
+
+    float nDotV = max(dot(frag.Normal, eye), 0.0);
+    vec3 f = FresnelSchlick(frag.F0, min(nDotV, 1.0));
+    vec2 xi = Hammersley(int(IGNSample * HAMMERSLEY_ROUGHNESS_SAMPLE), HAMMERSLEY_ROUGHNESS_SAMPLE);
+    vec3 n = ImportanceSampleGGX(xi, frag.Normal, frag.Roughness);
+
+    vec2 brdf = texture(BRDFLutTex, vec2(nDotV, frag.Roughness)).rg;
+
+    Ray ray = Ray(vert.Position, 5.f, normalize(reflect(-eye, n)));
+    result = TraceOffset(ray, vert.Normal);
+    Voxel voxel = ReadVoxel(result.Position, 0);
+
+    return (f * brdf.x + brdf.y) * voxel.Color;
 }
 
 vec3 GetLightingDirectional(const Vertex vert, const PBRFragment frag, const Light light)
