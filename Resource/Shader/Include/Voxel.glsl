@@ -77,6 +77,8 @@ Voxel ReadVoxel(ivec3);
 vec3 WorldToUV(vec3);
 ivec3 UVToTexel(vec3, uint);
 ivec3 WorldToTexel(vec3, uint);
+vec3 AlignWorldToCell(vec3, uint);
+vec3 CrossCell(uint, vec3, vec3);
 
 // Implementation
 vec3 WorldToUV(vec3 pos)
@@ -147,11 +149,21 @@ Voxel ReadVoxel(ivec3 texel)
     return voxel;
 }
 
+vec3 AlignWorldToCell(vec3 position, uint cellCount)
+{
+    float cellSize = (VoxelGrid.Scale * 2.0) / cellCount;
+
+    vec3 mapped = (position - VoxelGrid.Position) / cellSize;
+    mapped = floor(mapped) * cellSize;
+
+    return VoxelGrid.Position + mapped;
+}
+
 vec3 CrossCell(uint cellCount, vec3 position, vec3 direction)
 {
     float cellSize = (VoxelGrid.Scale * 2.0) / cellCount;
 
-    vec3 cellMin = VoxelGrid.Position + WorldToTexel(position, cellCount) * cellSize;
+    vec3 cellMin = AlignWorldToCell(position, cellCount);
     vec3 cellMax = cellMin + cellSize;
 
     vec3 first = (cellMin - position) / direction;
@@ -160,7 +172,7 @@ vec3 CrossCell(uint cellCount, vec3 position, vec3 direction)
     first = max(first, second);
     float dist = min(first.x, min(first.y, first.z));
 
-    return position + direction * dist;
+    return position + direction * (dist + EPSILON);
 }
 
 // Adapted from two sources:
@@ -174,6 +186,8 @@ RayResult Trace(Ray ray, out Voxel voxel)
 
     vec3 rayABS = abs(ray.Position - VoxelGrid.Position);
     if(max(rayABS.x, max(rayABS.y, rayABS.z)) > VoxelGrid.Scale) return result;
+
+    // TODO: avoid self-intersection;
 
     for(uint i = 0; i < VOXEL_TRACE_MAX_ITERATIONS; i++)
     {

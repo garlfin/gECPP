@@ -17,6 +17,8 @@ using namespace VoxelDemo;
 void DemoWindow::OnInit()
 {
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+	glDisable(GL_MULTISAMPLE);
+
 	glfwSetInputMode(GLFWWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glClearColor(0.2, 0.2, 1, 1);
 

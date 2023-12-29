@@ -62,7 +62,7 @@ void main()
         vec3 r = normalize(reflect(-eye, vert.Normal));
 
         Voxel voxel;
-        Ray ray = Ray(vert.Position, 10.f, r);
+        Ray ray = Ray(vert.Position, 5.f, r);
         RayResult result = Trace(ray, voxel);
 
         FragColor.rgb = voxel.Color;
