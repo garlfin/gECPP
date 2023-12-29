@@ -2,6 +2,7 @@
 #include "Camera.glsl"
 #include "Shadow.glsl"
 #include "Vertex.glsl"
+#include "Voxel.glsl"
 
 #ifndef PI
 #define PI 3.141592
@@ -69,6 +70,12 @@ vec3 GetLighting(const Vertex vert, const PBRFragment frag, Cubemap cubemap)
 
     vec3 r = normalize(reflect(-eye, n));
     r = CubemapParallax(vert.Position, r, cubemap);
+
+#ifdef ENABLE_VOXEL_TRACE
+    Ray ray = Ray(vert.Position, 5.f, r);
+    RayResult result = TraceOffset(ray, vert.Normal);
+    if(result.Hit) r = result.Position - cubemap.Position;
+#endif
 
 #ifdef GL_ARB_bindless_texture
     vec3 specular = textureLod(cubemap.Color, r, 0.0f).rgb;

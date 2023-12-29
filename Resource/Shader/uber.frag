@@ -1,3 +1,5 @@
+#define ENABLE_VOXEL_TRACE
+
 #include "Include/Camera.glsl"
 #include "Include/Scene.glsl"
 #include "Include/Voxel.glsl"
@@ -55,17 +57,8 @@ void main()
 #ifdef GL_ARB_bindless_texture
     if(bool(Scene.State & ENABLE_SPECULAR))
     {
-        //for(uint i = 0; i < Lighting.CubemapCount; i++)
-        //    FragColor.rgb += GetLighting(vert, frag, Lighting.Cubemaps[i]);
-
-        vec3 eye = normalize(Camera.Position - vert.Position);
-        vec3 r = normalize(reflect(-eye, vert.Normal));
-
-        Voxel voxel;
-        Ray ray = Ray(vert.Position, 5.f, r);
-        RayResult result = Trace(ray, voxel);
-
-        FragColor.rgb = voxel.Color;
+        for(uint i = 0; i < Lighting.CubemapCount; i++)
+            FragColor.rgb += GetLighting(vert, frag, Lighting.Cubemaps[i]);
     }
 #endif
 

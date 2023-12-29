@@ -25,7 +25,7 @@ struct VoxelGridData
     float Scale;
     uint CellCount; // AKA Texture Size
     BINDLESS_TEXTURE(sampler3D, Color);
-    BINDLESS_TEXTURE(sampler3D, Data);
+    BINDLESS_TEXTURE(usampler3D, Data);
 };
 
 #if defined(FRAGMENT_SHADER) && !defined(GL_ARB_bindless_texture)
@@ -68,17 +68,29 @@ struct RayResult
 };
 
 // Functions
-RayResult Trace(Ray, out Voxel);
+RayResult Trace(Ray);
+RayResult TraceOffset(Ray, vec3);
+
 void WriteVoxel(vec3, Voxel);
-Voxel ReadVoxel(vec3);
-Voxel ReadVoxel(ivec3);
+void WriteVoxel(ivec3, Voxel);
+
+Voxel ReadVoxel(vec3, uint); // LOD
+Voxel ReadVoxel(ivec3, uint); // LOD
+Voxel ReadVoxelUV(vec3, uint); // LOD
+
+vec4 ReadVoxelData(vec3, uint); // LOD
+vec4 ReadVoxelData(ivec3, uint); // LOD
+vec4 ReadVoxelDataUV(vec3, uint); // LOD
+
 
 // Helper Functions
 vec3 WorldToUV(vec3);
-ivec3 UVToTexel(vec3, uint);
-ivec3 WorldToTexel(vec3, uint);
-vec3 AlignWorldToCell(vec3, uint);
-vec3 CrossCell(uint, vec3, vec3);
+vec3 TexelToUV(vec3, uint); // CellCount
+ivec3 UVToTexel(vec3, uint); // CellCount
+ivec3 WorldToTexel(vec3, uint); // CellCount
+
+vec3 AlignWorldToCell(vec3, uint); // CellCount
+vec3 CrossCell(vec3, vec3, uint); // CellCount
 
 // Implementation
 vec3 WorldToUV(vec3 pos)
@@ -87,23 +99,12 @@ vec3 WorldToUV(vec3 pos)
     return uv * 0.5 + 0.5;
 }
 
-ivec3 UVToTexel(vec3 uv, uint cellCount)
+vec3 TexelToUV(ivec3 texel, uint cellCount) { return texel * ((VoxelGrid.Scale * 2.0) / cellCount); }
+ivec3 UVToTexel(vec3 uv, uint cellCount) { return ivec3(uv * cellCount); }
+ivec3 WorldToTexel(vec3 pos, uint cellCount) { return UVToTexel(WorldToUV(pos), cellCount); }
+
+void WriteVoxel(ivec3 texel, Voxel voxel)
 {
-    return ivec3(uv * cellCount);
-}
-
-ivec3 WorldToTexel(vec3 pos, uint cellCount)
-{
-    return UVToTexel(WorldToUV(pos), cellCount);
-}
-
-void WriteVoxel(vec3 pos, Voxel voxel)
-{
-    // Outside the grid
-    // if(any(lessThan(pos, boxMin)) || any(greaterThan(pos, boxMax))) return;
-
-    ivec3 texel = WorldToTexel(pos, VoxelGrid.CellCount);
-
     voxel.RSMA = clamp(voxel.RSMA, vec4(0.0), vec4(1.0));
 
     uint packedRSMA = 0; // 3, 3, 1, 1
@@ -116,38 +117,36 @@ void WriteVoxel(vec3 pos, Voxel voxel)
     imageStore(VoxelDataOut, texel, ivec4(packedRSMA));
 }
 
-Voxel ReadVoxel(vec3 pos)
-{
-    vec3 uv = WorldToUV(pos);
-    ivec3 texel = UVToTexel(uv, VoxelGrid.CellCount);
+void WriteVoxel(vec3 pos, Voxel voxel) { WriteVoxel(WorldToTexel(pos, VoxelGrid.CellCount), voxel); }
 
+Voxel ReadVoxel(vec3 pos, uint lod) { return ReadVoxelUV(WorldToUV(pos), lod); }
+Voxel ReadVoxel(ivec3 texel, uint lod) { return ReadVoxelUV(TexelToUV(texel, VoxelGrid.CellCount >> lod), lod); }
+
+Voxel ReadVoxelUV(vec3 uv, uint lod)
+{
     Voxel voxel;
 
-    voxel.Color = textureLod(VoxelGrid.Color, uv, 0.0).rgb;
-
-    uint packedRSMA = imageLoad(VoxelDataOut, texel).r;
-    voxel.RSMA.r = float(packedRSMA & 7u) / 8.0;
-    voxel.RSMA.g = float(packedRSMA >> 3 & 7u) / 8.0;
-    voxel.RSMA.b = float(packedRSMA >> 6 & 1u);
-    voxel.RSMA.a = float(packedRSMA >> 7 & 1u);
+    voxel.Color = textureLod(VoxelGrid.Color, uv, float(lod)).rgb;
+    voxel.RSMA = ReadVoxelDataUV(uv, lod);
 
     return voxel;
 }
 
-Voxel ReadVoxel(ivec3 texel)
+vec4 ReadVoxelDataUV(vec3 uv, uint lod)
 {
-    Voxel voxel;
+    vec4 unpackedRSMA;
+    uint packedRSMA = textureLod(VoxelGrid.Data, uv, float(lod)).r;
 
-    voxel.Color = imageLoad(VoxelColorOut, texel).rgb;
-    uint packedRSMA = imageLoad(VoxelDataOut, texel).r;
+    unpackedRSMA.r = float(packedRSMA & 7u) / 8.0;
+    unpackedRSMA.g = float(packedRSMA >> 3 & 7u) / 8.0;
+    unpackedRSMA.b = float(packedRSMA >> 6 & 1u);
+    unpackedRSMA.a = float(packedRSMA >> 7 & 1u);
 
-    voxel.RSMA.r = float(packedRSMA & 7u) / 8.0;
-    voxel.RSMA.g = float(packedRSMA >> 3 & 7u) / 8.0;
-    voxel.RSMA.b = float(packedRSMA >> 6 & 1u);
-    voxel.RSMA.a = float(packedRSMA >> 7 & 1u);
-
-    return voxel;
+    return unpackedRSMA;
 }
+
+vec4 ReadVoxelData(vec3 pos, uint lod) { return ReadVoxelDataUV(WorldToUV(pos), lod); }
+vec4 ReadVoxelData(ivec3 texel, uint lod) { return ReadVoxelDataUV(TexelToUV(texel, VoxelGrid.CellCount >> lod), lod); }
 
 vec3 AlignWorldToCell(vec3 position, uint cellCount)
 {
@@ -159,7 +158,7 @@ vec3 AlignWorldToCell(vec3 position, uint cellCount)
     return VoxelGrid.Position + mapped;
 }
 
-vec3 CrossCell(uint cellCount, vec3 position, vec3 direction)
+vec3 CrossCell(vec3 position, vec3 direction, uint cellCount)
 {
     float cellSize = (VoxelGrid.Scale * 2.0) / cellCount;
 
@@ -178,7 +177,7 @@ vec3 CrossCell(uint cellCount, vec3 position, vec3 direction)
 // Adapted from two sources:
 // https://www.jpgrenier.org/ssr.html
 // https://seblagarde.wordpress.com/2012/09/29/image-based-lighting-approaches-and-parallax-corrected-cubemap/
-RayResult Trace(Ray ray, out Voxel voxel)
+RayResult Trace(Ray ray)
 {
     ray.Direction = normalize(ray.Direction);
 
@@ -187,15 +186,19 @@ RayResult Trace(Ray ray, out Voxel voxel)
     vec3 rayABS = abs(ray.Position - VoxelGrid.Position);
     if(max(rayABS.x, max(rayABS.y, rayABS.z)) > VoxelGrid.Scale) return result;
 
-    // TODO: avoid self-intersection;
-
     for(uint i = 0; i < VOXEL_TRACE_MAX_ITERATIONS; i++)
     {
-        result.Position = CrossCell(VoxelGrid.CellCount, result.Position, ray.Direction);
+        result.Position = CrossCell(result.Position, ray.Direction, VoxelGrid.CellCount);
+        if(ReadVoxelData(result.Position, 0).a != 1.0) continue;
 
-        voxel = ReadVoxel(result.Position);
-        if(voxel.RSMA.a == 1.0) break;
+        result.Hit = true;
+        break;
     }
 
     return result;
+}
+
+RayResult TraceOffset(Ray ray, vec3 normal)
+{
+    return Trace(ray);
 }
