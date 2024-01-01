@@ -16,8 +16,20 @@
     #define EPSILON 0.0001
 #endif
 
-uniform layout(binding = VOXEL_TEXTURE_LOCATION, r11f_g11f_b10f) restrict image3D VoxelColorOut;
-uniform layout(binding = VOXEL_DATA_LOCATION, r8ui) restrict uimage3D VoxelDataOut;
+#ifndef PIPELINE_COLOR_FORMAT
+    #define PIPELINE_COLOR_FORMAT rgb10_a2
+#endif
+
+#ifndef PIPELINE_DATA_FORMAT
+    #define PIPELINE_DATA_FORMAT r8ui
+#endif
+
+#ifndef VOXEL_COLOR_RANGE
+    #define VOXEL_COLOR_RANGE 2.f
+#endif
+
+uniform layout(binding = VOXEL_TEXTURE_LOCATION, PIPELINE_COLOR_FORMAT) restrict image3D VoxelColorOut;
+uniform layout(binding = VOXEL_DATA_LOCATION, PIPELINE_DATA_FORMAT) restrict uimage3D VoxelDataOut;
 
 struct VoxelGridData
 {
@@ -82,7 +94,6 @@ vec4 ReadVoxelData(vec3, uint); // LOD
 vec4 ReadVoxelData(ivec3, uint); // LOD
 vec4 ReadVoxelDataUV(vec3, uint); // LOD
 
-
 // Helper Functions
 vec3 WorldToUV(vec3);
 vec3 TexelToUV(vec3, uint); // CellCount
@@ -91,6 +102,8 @@ ivec3 WorldToTexel(vec3, uint); // CellCount
 
 vec3 AlignWorldToCell(vec3, uint); // CellCount
 vec3 CrossCell(vec3, vec3, uint); // CellCount
+
+vec4 UnpackRSMA(uint);
 
 // Implementation
 vec3 WorldToUV(vec3 pos)
@@ -113,7 +126,9 @@ void WriteVoxel(ivec3 texel, Voxel voxel)
     packedRSMA |= uint(voxel.RSMA.b) << 6; // Metallic
     packedRSMA |= uint(voxel.RSMA.a) << 7; // Alpha (Solid)
 
-    imageStore(VoxelColorOut, texel, vec4(voxel.Color, 1.0));
+    vec3 color = pow(voxel.Color / VOXEL_COLOR_RANGE, vec3(1.0 / 2.2));
+
+    imageStore(VoxelColorOut, texel, vec4(color, 1.0));
     imageStore(VoxelDataOut, texel, ivec4(packedRSMA));
 }
 
@@ -127,22 +142,27 @@ Voxel ReadVoxelUV(vec3 uv, uint lod)
     Voxel voxel;
 
     voxel.Color = textureLod(VoxelGrid.Color, uv, float(lod)).rgb;
+    voxel.Color = pow(voxel.Color, vec3(2.2)) * VOXEL_COLOR_RANGE;
+
     voxel.RSMA = ReadVoxelDataUV(uv, lod);
 
     return voxel;
 }
 
-vec4 ReadVoxelDataUV(vec3 uv, uint lod)
+vec4 UnpackRSMA(uint packedRSMA)
 {
     vec4 unpackedRSMA;
-    uint packedRSMA = textureLod(VoxelGrid.Data, uv, float(lod)).r;
-
     unpackedRSMA.r = float(packedRSMA & 7u) / 8.0;
     unpackedRSMA.g = float(packedRSMA >> 3 & 7u) / 8.0;
     unpackedRSMA.b = float(packedRSMA >> 6 & 1u);
     unpackedRSMA.a = float(packedRSMA >> 7 & 1u);
-
     return unpackedRSMA;
+}
+
+vec4 ReadVoxelDataUV(vec3 uv, uint lod)
+{
+    uint packedRSMA = textureLod(VoxelGrid.Data, uv, float(lod)).r;
+    return UnpackRSMA(packedRSMA);
 }
 
 vec4 ReadVoxelData(vec3 pos, uint lod) { return ReadVoxelDataUV(WorldToUV(pos), lod); }
@@ -179,8 +199,6 @@ vec3 CrossCell(vec3 position, vec3 direction, uint cellCount)
 // https://seblagarde.wordpress.com/2012/09/29/image-based-lighting-approaches-and-parallax-corrected-cubemap/
 RayResult Trace(Ray ray)
 {
-    ray.Direction = normalize(ray.Direction);
-
     RayResult result = RayResult(ray.Position, 0.0, vec3(0), false);
 
     vec3 rayABS = abs(ray.Position - VoxelGrid.Position);
@@ -195,8 +213,9 @@ RayResult Trace(Ray ray)
     for(uint i = 0; i < VOXEL_TRACE_MAX_ITERATIONS; i++)
     {
         result.Position = CrossCell(result.Position, ray.Direction, VoxelGrid.CellCount);
+        float dist = distance(result.Position, ray.Position);
 
-        if(ReadVoxelData(result.Position, 0).a != 1.0) continue;
+        if(dist <= ray.MaximumDistance && ReadVoxelData(result.Position, 0).a != 1.0) continue;
 
         result.Hit = true;
         break;

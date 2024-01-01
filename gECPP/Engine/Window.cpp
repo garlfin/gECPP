@@ -137,6 +137,7 @@ void Window::OnInit()
 	TAAShader = ptr_create<GL::ComputeShader>(this, "Resource/Shader/taa.comp");
 	TonemapShader = ptr_create<GL::ComputeShader>(this, "Resource/Shader/tonemap.comp");
 	BloomShader = ptr_create<GL::ComputeShader>(this, "Resource/Shader/bloom.comp");
+	VoxelTAAShader = ptr_create<GL::ComputeShader>(this, "Resource/Shader/voxel.comp");
 
 	{
 		GL::ComputeShader brdfShader(this, "Resource/Shader/brdf.comp");

@@ -45,7 +45,8 @@ namespace gE::VoxelPipeline
 		GL::Buffer<GL::VoxelScene> _voxelBuffer;
 	};
 
-	CONSTEXPR_GLOBAL GL::ITextureSettings ColorFormat { GL_R11F_G11F_B10F, GL::WrapMode::Clamp, GL::FilterMode::Linear, 0 };
+	CONSTEXPR_GLOBAL GL::ITextureSettings ColorFormat { GL_RGB10_A2, GL::WrapMode::Clamp, GL::FilterMode::Nearest, 1 };
+	CONSTEXPR_GLOBAL GL::ITextureSettings ColorBackFormat { GL_RGB10_A2, GL::WrapMode::Clamp, GL::FilterMode::Nearest, 0 };
 	CONSTEXPR_GLOBAL GL::ITextureSettings DataFormat { GL_R8UI, GL::WrapMode::Clamp, GL::FilterMode::Nearest, 0 };
 
 	class Target3D : public RenderTarget<Camera3D>
@@ -53,15 +54,19 @@ namespace gE::VoxelPipeline
 	 public:
 		explicit Target3D(VoxelCapture&, Camera3D&);
 
-		GET(GL::Texture3D&, Color, _color);
+		GET(GL::Texture3D&, Color, _colorBack);
 		GET(GL::Texture3D&, Data, _data);
+
 		GET(VoxelCapture&, Owner, (VoxelCapture&) RenderTarget<Camera3D>::GetOwner());
 
 		bool Setup(float d, Camera* camera) override;
 		void RenderPass(float, Camera*) override;
+		void PostProcessPass(float d) override;
 
 	 private:
 		GL::Texture3D _color;
+		GL::Texture3D _colorBack;
+
 		GL::Texture3D _data;
 	};
 }

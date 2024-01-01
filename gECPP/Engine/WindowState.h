@@ -48,6 +48,6 @@ namespace gE
 		CONSTEXPR_GLOBAL RenderFlags Shadow { WriteMode::Depth, VoxelWriteMode::Read, false, false, false, false, true, RasterMode::Normal, 1 };
 		CONSTEXPR_GLOBAL RenderFlags ShadowCube { WriteMode::Depth, VoxelWriteMode::Read, false, false, false, false, true, RasterMode::Normal, 6 };
 		CONSTEXPR_GLOBAL RenderFlags Cubemap { WriteMode::Both, VoxelWriteMode::Read, false, false, false, true, true, RasterMode::Normal, 6 };
-		CONSTEXPR_GLOBAL RenderFlags Voxel { WriteMode::Color, VoxelWriteMode::Write, false, false, false, false, false, RasterMode::Normal, 3 };
+		CONSTEXPR_GLOBAL RenderFlags Voxel { WriteMode::Color, VoxelWriteMode::Write, true, false, false, false, false, RasterMode::Normal, 3 };
 	}
 }

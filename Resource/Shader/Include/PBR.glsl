@@ -30,9 +30,10 @@ struct PBRFragment
 
 // Main Functions
 #ifdef FRAGMENT_SHADER
-vec3 GetLighting(const Vertex vert, const PBRFragment frag, const Light light);
-vec3 GetLighting(const Vertex vert, const PBRFragment frag, samplerCube cubemap);
-vec3 GetLightingDirectional(const Vertex vert, const PBRFragment frag, const Light light);
+vec3 GetLighting(const Vertex, const PBRFragment, const Light);
+vec3 GetLighting(const Vertex, const PBRFragment, samplerCube);
+vec3 GetLightingDirectional(const Vertex, const PBRFragment, const Light);
+vec3 GetSpecularVoxel(const Vertex, const PBRFragment, const Cubemap);
 #endif
 
 // PBR Functions
@@ -78,25 +79,48 @@ vec3 GetLighting(const Vertex vert, const PBRFragment frag, Cubemap cubemap)
 #endif
     vec2 brdf = texture(BRDFLutTex, vec2(nDotV, frag.Roughness)).rg;
 
-    return (f * brdf.x + brdf.y) * specular;
+    return (f * brdf.r + brdf.g) * specular;
 }
 
-vec3 GetLightingVoxel(const Vertex vert, const PBRFragment frag, out RayResult result)
+vec3 GetSpecularVoxel(const Vertex vert, const PBRFragment frag, const Cubemap cubemap)
 {
     vec3 eye = normalize(Camera.Position - vert.Position);
 
     float nDotV = max(dot(frag.Normal, eye), 0.0);
     vec3 f = FresnelSchlick(frag.F0, min(nDotV, 1.0));
     vec2 xi = Hammersley(int(IGNSample * HAMMERSLEY_ROUGHNESS_SAMPLE), HAMMERSLEY_ROUGHNESS_SAMPLE);
-    vec3 n = ImportanceSampleGGX(xi, frag.Normal, frag.Roughness);
+    vec3 n = ImportanceSampleGGX(xi, frag.Normal, frag.Roughness);\
+    vec3 r = reflect(-eye, n);
 
-    vec2 brdf = texture(BRDFLutTex, vec2(nDotV, frag.Roughness)).rg;
+    Ray ray, cubemapRay;
+    RayResult result, cubemapResult;
 
-    Ray ray = Ray(vert.Position, 5.f, normalize(reflect(-eye, n)));
+    ray = Ray(vert.Position, 10.f, r);
     result = TraceOffset(ray, vert.Normal);
     Voxel voxel = ReadVoxel(result.Position, 0);
 
-    return (f * brdf.x + brdf.y) * voxel.Color;
+    vec3 color = voxel.Color;
+    vec3 cubemapColor = textureLod(cubemap.Color, r, 0.0).rgb;
+
+    if(!result.Hit) color = cubemapColor;
+
+//    if(result.Hit)
+//    {
+//        vec3 rayToCubemap = cubemap.Position - result.Position;
+//        float rayLength = length(rayToCubemap);
+//        rayToCubemap /= rayLength;
+//
+//        cubemapRay = Ray(result.Position, rayLength, rayToCubemap);
+//        //cubemapResult = Trace(cubemapRay);
+//
+//        cubemapUV = -rayToCubemap;
+//    }
+//
+//    color = textureLod(cubemap.Color, cubemapUV, 0.0).rgb;
+
+    vec2 brdf = texture(BRDFLutTex, vec2(nDotV, frag.Roughness)).rg;
+
+    return (f * brdf.r + brdf.g) * color;
 }
 
 vec3 GetLightingDirectional(const Vertex vert, const PBRFragment frag, const Light light)

@@ -64,8 +64,8 @@ void main()
     previousColor.rgb = clamp(previousColor.rgb, boxMin, boxMax);
 #endif
 
-    float currentWeight = TAA_WEIGHT / (1.0 + Luminance(currentColor.rgb));
     float previousWeight = (1.0 - TAA_WEIGHT) / (1.0 + Luminance(previousColor.rgb));
+    float currentWeight = TAA_WEIGHT / (1.0 + Luminance(currentColor.rgb));
 
     vec3 color = (currentColor.rgb * currentWeight + previousColor.rgb * previousWeight);
     color /= max(currentWeight + previousWeight, 0.001);
