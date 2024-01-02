@@ -20,7 +20,8 @@ layout(location = 0) uniform uint Mode;
 
 // Helper Functions
 float Luminance(vec3 col);
-uint LoadTexelWeighted(inout vec3, ivec3);
+vec3 LoadTexelWeighted(inout uint, ivec3);
+vec3 LoadTexelWeighted2(inout uint, ivec3);
 
 layout(local_size_x = 4, local_size_y = 4, local_size_z = 4) in;
 void main()
@@ -36,30 +37,50 @@ void main()
     vec3 currentColor = imageLoad(VoxelColorIn, texel).rgb;
     vec3 previousColor = imageLoad(VoxelColorOut, texel).rgb;
 
-    // slightly faster, at least on nvidia, to not use conditionals
-    vec3 color = vec3(0.0);
-    uint weight = 0;
+    // slightly faster, at least on nvidia, to use conditionals
+    if(max(currentColor.r, max(currentColor.g, currentColor.b)) == 0)
+    {
+        vec3 neighbor = vec3(0.0);
+        uint weight = 0;
 
-    weight += LoadTexelWeighted(color, texel + ivec3(-1, 0, 0));
-    weight += LoadTexelWeighted(color, texel + ivec3(1, 0, 0));
-    weight += LoadTexelWeighted(color, texel + ivec3(0, -1, 0));
-    weight += LoadTexelWeighted(color, texel + ivec3(0, 1, 0));
-    weight += LoadTexelWeighted(color, texel + ivec3(0, 0, -1));
-    weight += LoadTexelWeighted(color, texel + ivec3(0, 0, 1));
-    color /= float(max(weight, 1));
+        neighbor += LoadTexelWeighted(weight, texel + ivec3(-1, -1, -1));
+        neighbor += LoadTexelWeighted(weight, texel + ivec3(1, 1, -1));
+        neighbor += LoadTexelWeighted(weight, texel + ivec3(1, -1, -1));
+        neighbor += LoadTexelWeighted(weight, texel + ivec3(-1, 1, -1));
 
-    if(max(currentColor.r, max(currentColor.g, currentColor.b)) != 0) color = currentColor;
+        neighbor += LoadTexelWeighted(weight, texel + ivec3(-1, -1, 1));
+        neighbor += LoadTexelWeighted(weight, texel + ivec3(1, 1, 1));
+        neighbor += LoadTexelWeighted(weight, texel + ivec3(1, -1, 1));
+        neighbor += LoadTexelWeighted(weight, texel + ivec3(-1, 1, 1));
 
-    color = mix(previousColor, color, VOXEL_TAA_WEIGHT);
+        neighbor += LoadTexelWeighted2(weight, texel + ivec3(-1, 0, 0));
+        neighbor += LoadTexelWeighted2(weight, texel + ivec3(1, 0, 0));
+        neighbor += LoadTexelWeighted2(weight, texel + ivec3(0, -1, 0));
+        neighbor += LoadTexelWeighted2(weight, texel + ivec3(0, 1, 0));
+        neighbor += LoadTexelWeighted2(weight, texel + ivec3(0, 0, -1));
+        neighbor += LoadTexelWeighted2(weight, texel + ivec3(0, 0, 1));
 
-    imageStore(VoxelColorOut, texel, vec4(color, 1.0));
+        neighbor /= max(weight, 1);
+        currentColor = neighbor;
+    }
+
+    currentColor = mix(previousColor, currentColor, VOXEL_TAA_WEIGHT);
+
+    imageStore(VoxelColorOut, texel, vec4(currentColor, 1.0));
 }
 
 float Luminance(vec3 color) { return dot(color, vec3(0.299, 0.587, 0.114)); }
 
-uint LoadTexelWeighted(inout vec3 color, ivec3 texel)
+vec3 LoadTexelWeighted(inout uint weight, ivec3 texel)
 {
     vec3 sampleColor = imageLoad(VoxelColorIn, texel).rgb;
-    color += sampleColor;
-    return uint(max(sampleColor.r, max(sampleColor.g, sampleColor.b)) > 0.0);
+    weight += uint(max(sampleColor.r, max(sampleColor.g, sampleColor.b)) > 0.0);
+    return sampleColor;
+}
+
+vec3 LoadTexelWeighted2(inout uint weight, ivec3 texel)
+{
+    vec3 sampleColor = imageLoad(VoxelColorIn, texel).rgb;
+    weight += uint(max(sampleColor.r, max(sampleColor.g, sampleColor.b)) > 0.0) * 2;
+    return sampleColor * 2;
 }

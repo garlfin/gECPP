@@ -57,11 +57,11 @@ void main()
 #ifdef GL_ARB_bindless_texture
     if(bool(Scene.State & ENABLE_SPECULAR))
     {
-    #ifdef ENABLE_VOXEL_TRACE
-        FragColor.rgb += GetSpecularVoxel(vert, frag, Lighting.Cubemaps[0]);
-    #else
-        FragColor.rgb += GetLighting(vert, frag, Lighting.Cubemaps[0]);
-    #endif
+        #ifdef ENABLE_VOXEL_TRACE
+            FragColor.rgb += GetSpecularVoxel(vert, frag, Lighting.Cubemaps[0]);
+        #else
+            FragColor.rgb += GetLighting(vert, frag, Lighting.Cubemaps[0]);
+        #endif
     }
 #endif
 

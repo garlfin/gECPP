@@ -73,6 +73,7 @@ namespace gE::VoxelPipeline
 		//glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 		voxelShader.SetUniform(0, 1u);
 		voxelShader.Dispatch(DIV_CEIL_T(GetSize(), VOXEL_TAA_GROUP_SIZE, glm::u16vec3));
+
 		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 	}
 }

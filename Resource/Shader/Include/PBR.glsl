@@ -89,7 +89,7 @@ vec3 GetSpecularVoxel(const Vertex vert, const PBRFragment frag, const Cubemap c
     float nDotV = max(dot(frag.Normal, eye), 0.0);
     vec3 f = FresnelSchlick(frag.F0, min(nDotV, 1.0));
     vec2 xi = Hammersley(int(IGNSample * HAMMERSLEY_ROUGHNESS_SAMPLE), HAMMERSLEY_ROUGHNESS_SAMPLE);
-    vec3 n = ImportanceSampleGGX(xi, frag.Normal, frag.Roughness);\
+    vec3 n = ImportanceSampleGGX(xi, frag.Normal, frag.Roughness);
     vec3 r = reflect(-eye, n);
 
     Ray ray, cubemapRay;

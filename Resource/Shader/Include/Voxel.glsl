@@ -61,7 +61,7 @@ layout(VOXEL_UNIFORM_LAYOUT, binding = VOXEL_UNIFORM_LOCATION) uniform VoxelGrid
 struct Voxel
 {
     vec3 Color;
-    vec4 RSMA; // (Metallic, Roughness, Specular, Alpha)
+    vec4 Data; // (Roughness, Specular, Metallic, Alpha)
 };
 
 struct Ray
@@ -118,13 +118,13 @@ ivec3 WorldToTexel(vec3 pos, uint cellCount) { return UVToTexel(WorldToUV(pos), 
 
 void WriteVoxel(ivec3 texel, Voxel voxel)
 {
-    voxel.RSMA = clamp(voxel.RSMA, vec4(0.0), vec4(1.0));
+    voxel.Data = clamp(voxel.Data, vec4(0.0), vec4(1.0));
 
     uint packedRSMA = 0; // 3, 3, 1, 1
-    packedRSMA |= uint(voxel.RSMA.r * 8.0); // Roughness
-    packedRSMA |= uint(voxel.RSMA.g * 8.0) << 3; // Specular
-    packedRSMA |= uint(voxel.RSMA.b) << 6; // Metallic
-    packedRSMA |= uint(voxel.RSMA.a) << 7; // Alpha (Solid)
+    packedRSMA |= uint(voxel.Data.r * 8.0); // Roughness
+    packedRSMA |= uint(voxel.Data.g * 8.0) << 3; // Specular
+    packedRSMA |= uint(voxel.Data.b) << 6; // Metallic
+    packedRSMA |= uint(voxel.Data.a) << 7; // Alpha (Solid)
 
     vec3 color = pow(voxel.Color / VOXEL_COLOR_RANGE, vec3(1.0 / 2.2));
 
@@ -144,7 +144,7 @@ Voxel ReadVoxelUV(vec3 uv, uint lod)
     voxel.Color = textureLod(VoxelGrid.Color, uv, float(lod)).rgb;
     voxel.Color = pow(voxel.Color, vec3(2.2)) * VOXEL_COLOR_RANGE;
 
-    voxel.RSMA = ReadVoxelDataUV(uv, lod);
+    voxel.Data = ReadVoxelDataUV(uv, lod);
 
     return voxel;
 }
