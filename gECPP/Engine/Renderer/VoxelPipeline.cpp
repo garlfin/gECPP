@@ -61,15 +61,18 @@ namespace gE::VoxelPipeline
 
 		voxelShader.Bind();
 
-		voxelShader.SetUniform(0, 0u);
-
 		_colorBack.Bind(0, GL_READ_WRITE);
 		_color.Bind(2, GL_READ_ONLY);
 
-		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+		// voxelShader.SetUniform(0, 0u);
+		// voxelShader.Dispatch(DIV_CEIL_T(GetSize(), VOXEL_TAA_GROUP_SIZE, glm::u16vec3));
+		// glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
-		voxelShader.Dispatch((DIV_CEIL_T(GetSize(), VOXEL_TAA_GROUP_SIZE, glm::u16vec3)));
+		//_color.CopyFrom(_colorBack);
 
+		//glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+		voxelShader.SetUniform(0, 1u);
+		voxelShader.Dispatch(DIV_CEIL_T(GetSize(), VOXEL_TAA_GROUP_SIZE, glm::u16vec3));
 		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 	}
 }

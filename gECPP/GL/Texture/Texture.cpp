@@ -86,6 +86,11 @@ namespace GL
 		}
 	}
 
+	void Texture3D::CopyFrom(const Texture& o)
+	{
+		glCopyImageSubData(o.Get(), GL_TEXTURE_3D, 0, 0, 0, 0, ID, GL_TEXTURE_3D, 0, 0, 0, 0, GetSize().x, GetSize().y, GetSize().z);
+	}
+
 	Texture::~Texture()
 	{
 		if(_handle > 1) glMakeTextureHandleNonResidentARB(_handle);

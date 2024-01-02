@@ -46,7 +46,7 @@ namespace gE::VoxelPipeline
 	};
 
 	CONSTEXPR_GLOBAL GL::ITextureSettings ColorFormat { GL_RGB10_A2, GL::WrapMode::Clamp, GL::FilterMode::Nearest, 1 };
-	CONSTEXPR_GLOBAL GL::ITextureSettings ColorBackFormat { GL_RGB10_A2, GL::WrapMode::Clamp, GL::FilterMode::Nearest, 0 };
+	CONSTEXPR_GLOBAL GL::ITextureSettings ColorBackFormat { GL_RGB10_A2, GL::WrapMode::Clamp, GL::FilterMode::Linear, 0 };
 	CONSTEXPR_GLOBAL GL::ITextureSettings DataFormat { GL_R8UI, GL::WrapMode::Clamp, GL::FilterMode::Nearest, 0 };
 
 	class Target3D : public RenderTarget<Camera3D>

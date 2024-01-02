@@ -112,7 +112,7 @@ vec3 WorldToUV(vec3 pos)
     return uv * 0.5 + 0.5;
 }
 
-vec3 TexelToUV(ivec3 texel, uint cellCount) { return texel * ((VoxelGrid.Scale * 2.0) / cellCount); }
+vec3 TexelToUV(ivec3 texel, uint cellCount) { return (vec3(texel) + 0.5) * ((VoxelGrid.Scale * 2.0) / cellCount); }
 ivec3 UVToTexel(vec3 uv, uint cellCount) { return ivec3(uv * cellCount); }
 ivec3 WorldToTexel(vec3 pos, uint cellCount) { return UVToTexel(WorldToUV(pos), cellCount); }
 
@@ -215,10 +215,14 @@ RayResult Trace(Ray ray)
         result.Position = CrossCell(result.Position, ray.Direction, VoxelGrid.CellCount);
         float dist = distance(result.Position, ray.Position);
 
-        if(dist <= ray.MaximumDistance && ReadVoxelData(result.Position, 0).a != 1.0) continue;
+        if(dist >= ray.MaximumDistance)
+            return result;
 
-        result.Hit = true;
-        break;
+        if(ReadVoxelData(result.Position, 0).a == 1.0)
+        {
+            result.Hit = true;
+            break;
+        }
     }
 
     return result;

@@ -99,28 +99,12 @@ vec3 GetSpecularVoxel(const Vertex vert, const PBRFragment frag, const Cubemap c
     result = TraceOffset(ray, vert.Normal);
     Voxel voxel = ReadVoxel(result.Position, 0);
 
-    vec3 color = voxel.Color;
-    vec3 cubemapColor = textureLod(cubemap.Color, r, 0.0).rgb;
-
-    if(!result.Hit) color = cubemapColor;
-
-//    if(result.Hit)
-//    {
-//        vec3 rayToCubemap = cubemap.Position - result.Position;
-//        float rayLength = length(rayToCubemap);
-//        rayToCubemap /= rayLength;
-//
-//        cubemapRay = Ray(result.Position, rayLength, rayToCubemap);
-//        //cubemapResult = Trace(cubemapRay);
-//
-//        cubemapUV = -rayToCubemap;
-//    }
-//
-//    color = textureLod(cubemap.Color, cubemapUV, 0.0).rgb;
+    vec3 cubemapColor = textureLod(cubemap.Color, CubemapParallax(vert.Position, r, cubemap), 0.0).rgb;
+    if(!result.Hit) voxel.Color = cubemapColor;
 
     vec2 brdf = texture(BRDFLutTex, vec2(nDotV, frag.Roughness)).rg;
 
-    return (f * brdf.r + brdf.g) * color;
+    return (f * brdf.r + brdf.g) * voxel.Color;
 }
 
 vec3 GetLightingDirectional(const Vertex vert, const PBRFragment frag, const Light light)

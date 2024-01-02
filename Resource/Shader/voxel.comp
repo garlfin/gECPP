@@ -8,8 +8,9 @@
     #define VOXEL_TAA_WEIGHT (1.0 / VOXEL_TAA_SAMPLE_COUNT)
 #endif
 
-#define MODE_TAA_COMBINE 0
-#define MODE_TAA_DOWNSAMPLE 1
+#define MODE_TAA_RAFT 0
+#define MODE_TAA_COMBINE 1
+#define MODE_TAA_DOWNSAMPLE 2
 
 // IO
 layout(binding = 2, PIPELINE_COLOR_FORMAT) restrict readonly uniform image3D VoxelColorIn;
@@ -19,6 +20,7 @@ layout(location = 0) uniform uint Mode;
 
 // Helper Functions
 float Luminance(vec3 col);
+uint LoadTexelWeighted(inout vec3, ivec3);
 
 layout(local_size_x = 4, local_size_y = 4, local_size_z = 4) in;
 void main()
@@ -26,27 +28,38 @@ void main()
     ivec3 texel = ivec3(gl_GlobalInvocationID);
     vec3 uv = vec3(texel) / imageSize(VoxelColorOut);
 
-    if(Mode == MODE_TAA_COMBINE)
+    if (Mode == MODE_TAA_DOWNSAMPLE)
     {
-        vec3 currentColor = imageLoad(VoxelColorIn, texel).rgb;
-        vec3 previousColor = imageLoad(VoxelColorOut, texel).rgb;
-
-        currentColor = mix(previousColor, currentColor, VOXEL_TAA_WEIGHT);
-
-        imageStore(VoxelColorOut, texel, vec4(currentColor, 1.0));
-
         return;
     }
 
-    /*float weight = 0.0;
-    vec3 color;
-    vec4 data;
+    vec3 currentColor = imageLoad(VoxelColorIn, texel).rgb;
+    vec3 previousColor = imageLoad(VoxelColorOut, texel).rgb;
 
-    weight = max(weight, 1.0);
+    // slightly faster, at least on nvidia, to not use conditionals
+    vec3 color = vec3(0.0);
+    uint weight = 0;
 
+    weight += LoadTexelWeighted(color, texel + ivec3(-1, 0, 0));
+    weight += LoadTexelWeighted(color, texel + ivec3(1, 0, 0));
+    weight += LoadTexelWeighted(color, texel + ivec3(0, -1, 0));
+    weight += LoadTexelWeighted(color, texel + ivec3(0, 1, 0));
+    weight += LoadTexelWeighted(color, texel + ivec3(0, 0, -1));
+    weight += LoadTexelWeighted(color, texel + ivec3(0, 0, 1));
+    color /= float(max(weight, 1));
 
-    imageStore(ColorOut, texel, vec4(color / weight, 1.0));
-    imageStore(DataOut, texel, vec4(data.rgb / weight, data.a));*/
+    if(max(currentColor.r, max(currentColor.g, currentColor.b)) != 0) color = currentColor;
+
+    color = mix(previousColor, color, VOXEL_TAA_WEIGHT);
+
+    imageStore(VoxelColorOut, texel, vec4(color, 1.0));
 }
 
 float Luminance(vec3 color) { return dot(color, vec3(0.299, 0.587, 0.114)); }
+
+uint LoadTexelWeighted(inout vec3 color, ivec3 texel)
+{
+    vec3 sampleColor = imageLoad(VoxelColorIn, texel).rgb;
+    color += sampleColor;
+    return uint(max(sampleColor.r, max(sampleColor.g, sampleColor.b)) > 0.0);
+}

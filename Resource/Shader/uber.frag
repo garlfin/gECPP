@@ -65,7 +65,6 @@ void main()
     }
 #endif
 
-
 	Velocity = ((VertexIn.CurrentUV.xy / VertexIn.CurrentUV.w) - (VertexIn.PreviousUV.xy / VertexIn.PreviousUV.w)) * 0.5;
 
     if(!bool(Scene.State & ENABLE_VOXEL_WRITE)) return;

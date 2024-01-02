@@ -92,7 +92,7 @@ namespace GL
 		Texture3D(gE::Window* window, const TextureSettings<TextureDimension::D3D>& settings, const TextureData& = {});
 
 		NODISCARD ALWAYS_INLINE GL::TextureSize3D GetSize(u8 mip = 0) const { return _size >> glm::u32vec3(mip); }
-		void CopyFrom(const GL::Texture&) override {};
+		void CopyFrom(const GL::Texture&) override;
 
 	 private:
 		const GL::TextureSize3D _size;
