@@ -69,7 +69,11 @@ vec3 GetLighting(const Vertex vert, const PBRFragment frag, Cubemap cubemap)
     vec2 xi = Hammersley(int(IGNSample * HAMMERSLEY_ROUGHNESS_SAMPLE), HAMMERSLEY_ROUGHNESS_SAMPLE);
     vec3 n = ImportanceSampleGGX(xi, frag.Normal, frag.Roughness);
 
+#ifdef PBR_VISUALIZE_REFLECTIONS
+    vec3 r = normalize(reflect(-eye, vert.Normal));
+#else
     vec3 r = normalize(reflect(-eye, n));
+#endif
     r = CubemapParallax(vert.Position, r, cubemap);
 
 #ifdef GL_ARB_bindless_texture
@@ -79,7 +83,11 @@ vec3 GetLighting(const Vertex vert, const PBRFragment frag, Cubemap cubemap)
 #endif
     vec2 brdf = texture(BRDFLutTex, vec2(nDotV, frag.Roughness)).rg;
 
+#ifdef PBR_VISUALIZE_REFLECTIONS
+    return specular;
+#else
     return (f * brdf.r + brdf.g) * specular;
+#endif
 }
 
 vec3 GetSpecularVoxel(const Vertex vert, const PBRFragment frag, const Cubemap cubemap)
@@ -90,7 +98,12 @@ vec3 GetSpecularVoxel(const Vertex vert, const PBRFragment frag, const Cubemap c
     vec3 f = FresnelSchlick(frag.F0, min(nDotV, 1.0));
     vec2 xi = Hammersley(int(IGNSample * HAMMERSLEY_ROUGHNESS_SAMPLE), HAMMERSLEY_ROUGHNESS_SAMPLE);
     vec3 n = ImportanceSampleGGX(xi, frag.Normal, frag.Roughness);
-    vec3 r = reflect(-eye, n);
+
+#ifdef PBR_VISUALIZE_REFLECTIONS
+    vec3 r = normalize(reflect(-eye, vert.Normal));
+#else
+    vec3 r = normalize(reflect(-eye, n));
+#endif
 
     Ray ray, cubemapRay;
     RayResult result, cubemapResult;
@@ -100,11 +113,15 @@ vec3 GetSpecularVoxel(const Vertex vert, const PBRFragment frag, const Cubemap c
     Voxel voxel = ReadVoxel(result.Position, 0);
 
     vec3 cubemapColor = textureLod(cubemap.Color, CubemapParallax(vert.Position, r, cubemap), 0.0).rgb;
-    if(!result.Hit) voxel.Color = cubemapColor;
+    if(!result.Hit) voxel.Color.rgb = cubemapColor;
 
     vec2 brdf = texture(BRDFLutTex, vec2(nDotV, frag.Roughness)).rg;
 
-    return (f * brdf.r + brdf.g) * voxel.Color;
+#ifdef PBR_VISUALIZE_REFLECTIONS
+    return voxel.Color.rgb;
+#else
+    return (f * brdf.r + brdf.g) * voxel.Color.rgb;
+#endif
 }
 
 vec3 GetLightingDirectional(const Vertex vert, const PBRFragment frag, const Light light)

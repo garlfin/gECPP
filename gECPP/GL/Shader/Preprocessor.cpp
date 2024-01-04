@@ -123,7 +123,6 @@ namespace GL
 
 	const char* ShaderStageDefine(ShaderStageType type)
 	{
-
 		switch(type)
 		{
 		case Fragment: return "#define FRAGMENT_SHADER\n";

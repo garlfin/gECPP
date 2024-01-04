@@ -10,6 +10,8 @@
 #include <Engine/Renderer/DefaultPipeline.h>
 #include <Engine/Component/Camera/Camera.h>
 
+#define VOXEL_MAX_MIPS 4
+
 namespace GL
 {
 	struct VoxelScene
@@ -46,7 +48,7 @@ namespace gE::VoxelPipeline
 	};
 
 	CONSTEXPR_GLOBAL GL::ITextureSettings ColorFormat { GL_RGB10_A2, GL::WrapMode::Clamp, GL::FilterMode::Nearest, 1 };
-	CONSTEXPR_GLOBAL GL::ITextureSettings ColorBackFormat { GL_RGB10_A2, GL::WrapMode::Clamp, GL::FilterMode::Linear, 0 };
+	CONSTEXPR_GLOBAL GL::ITextureSettings ColorBackFormat { GL_RGB10_A2, GL::WrapMode::Clamp, GL::FilterMode::Linear, VOXEL_MAX_MIPS };
 	CONSTEXPR_GLOBAL GL::ITextureSettings DataFormat { GL_R8UI, GL::WrapMode::Clamp, GL::FilterMode::Nearest, 0 };
 
 	class Target3D : public RenderTarget<Camera3D>

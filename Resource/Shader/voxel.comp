@@ -8,19 +8,24 @@
     #define VOXEL_TAA_WEIGHT (1.0 / VOXEL_TAA_SAMPLE_COUNT)
 #endif
 
-#define MODE_TAA_RAFT 0
-#define MODE_TAA_COMBINE 1
-#define MODE_TAA_DOWNSAMPLE 2
+#define VOXEL_TAA_MODE_FULL
+
+#define MODE_TAA_COMBINE 0
+#define MODE_TAA_DOWNSAMPLE 1
 
 // IO
 layout(binding = 2, PIPELINE_COLOR_FORMAT) restrict readonly uniform image3D VoxelColorIn;
-layout(binding = 3, PIPELINE_DATA_FORMAT) restrict uniform uimage3D VoxelDataIn;
+layout(binding = 3, PIPELINE_DATA_FORMAT) restrict readonly uniform uimage3D VoxelDataIn;
 
 layout(location = 0) uniform uint Mode;
 
 // Helper Functions
 float Luminance(vec3 col);
-vec3 LoadTexelWeighted(inout uint, ivec3);
+vec4 LoadTexelWeighted(inout uint, ivec3);
+vec4 AverageNeighbors(ivec3);
+vec4 LoadVoxelData(ivec3);
+vec4 AverageBox4(ivec3);
+vec4 MaxBox4(ivec3);
 
 layout(local_size_x = 4, local_size_y = 4, local_size_z = 4) in;
 void main()
@@ -28,55 +33,118 @@ void main()
     ivec3 texel = ivec3(gl_GlobalInvocationID);
     vec3 uv = vec3(texel) / imageSize(VoxelColorOut);
 
+    vec4 color;
+    vec4 data;
+
     if (Mode == MODE_TAA_DOWNSAMPLE)
     {
-        return;
+        color = AverageBox4(texel);
+        data = MaxBox4(texel);
+
+        uint dataPacked = PackRSMA(data);
+        imageStore(VoxelDataOut, texel, ivec4(dataPacked));
     }
-
-    vec3 currentColor = imageLoad(VoxelColorIn, texel).rgb;
-    vec3 previousColor = imageLoad(VoxelColorOut, texel).rgb;
-
-    // slightly faster to use conditionals
-    if(max(currentColor.r, max(currentColor.g, currentColor.b)) == 0)
+    else
     {
-        vec3 neighbor = vec3(0.0);
-        uint weight = 0;
+        vec4 currentColor = imageLoad(VoxelColorIn, texel);
+        vec3 previousColor = imageLoad(VoxelColorOut, texel).rgb;
 
-        // Inner Box: sample neighbors
-        neighbor += LoadTexelWeighted(weight, texel + ivec3(-1, 0, 0));
-        neighbor += LoadTexelWeighted(weight, texel + ivec3(1, 0, 0));
-        neighbor += LoadTexelWeighted(weight, texel + ivec3(0, -1, 0));
-        neighbor += LoadTexelWeighted(weight, texel + ivec3(0, 1, 0));
-        neighbor += LoadTexelWeighted(weight, texel + ivec3(0, 0, -1));
-        neighbor += LoadTexelWeighted(weight, texel + ivec3(0, 0, 1));
+        // No significant difference in speed using conditionals.
+        vec4 neighbor = AverageNeighbors(texel);
+        if(currentColor.a == 0) currentColor.rgb = neighbor.rgb;
 
-        neighbor *= 2;
-        weight *= 2;
-
-        // Outer Box: Fills gaps
-        neighbor += LoadTexelWeighted(weight, texel + ivec3(-1, -1, -1));
-        neighbor += LoadTexelWeighted(weight, texel + ivec3(1, 1, -1));
-        neighbor += LoadTexelWeighted(weight, texel + ivec3(1, -1, -1));
-        neighbor += LoadTexelWeighted(weight, texel + ivec3(-1, 1, -1));
-
-        neighbor += LoadTexelWeighted(weight, texel + ivec3(-1, -1, 1));
-        neighbor += LoadTexelWeighted(weight, texel + ivec3(1, 1, 1));
-        neighbor += LoadTexelWeighted(weight, texel + ivec3(1, -1, 1));
-        neighbor += LoadTexelWeighted(weight, texel + ivec3(-1, 1, 1));
-
-        neighbor /= max(weight, 1);
-        currentColor = neighbor;
+        color.rgb = mix(previousColor, currentColor.rgb, VOXEL_TAA_WEIGHT);
+        color.a = currentColor.a;
     }
 
-    currentColor = mix(previousColor, currentColor, VOXEL_TAA_WEIGHT);
-    imageStore(VoxelColorOut, texel, vec4(currentColor, 1.0));
+    imageStore(VoxelColorOut, texel, color);
 }
 
 float Luminance(vec3 color) { return dot(color, vec3(0.299, 0.587, 0.114)); }
 
-vec3 LoadTexelWeighted(inout uint weight, ivec3 texel)
+vec4 LoadTexelWeighted(inout uint weight, ivec3 texel)
 {
-    vec3 sampleColor = imageLoad(VoxelColorIn, texel).rgb;
-    weight += uint(max(sampleColor.r, max(sampleColor.g, sampleColor.b)) > 0.0);
+    vec4 sampleColor = imageLoad(VoxelColorIn, texel);
+    weight += uint(sampleColor.a);
     return sampleColor;
+}
+
+vec4 AverageNeighbors(ivec3 texel)
+{
+    vec4 neighbor = vec4(0.0);
+    uint weight = 0;
+
+#ifdef VOXEL_TAA_MODE_FULL
+    // Inner Box: sample neighbors
+    neighbor += LoadTexelWeighted(weight, texel + ivec3(-1, 0, 0));
+    neighbor += LoadTexelWeighted(weight, texel + ivec3(1, 0, 0));
+    neighbor += LoadTexelWeighted(weight, texel + ivec3(0, -1, 0));
+    neighbor += LoadTexelWeighted(weight, texel + ivec3(0, 1, 0));
+    neighbor += LoadTexelWeighted(weight, texel + ivec3(0, 0, -1));
+    neighbor += LoadTexelWeighted(weight, texel + ivec3(0, 0, 1));
+
+    // 2x weighting
+    neighbor *= 2;
+    weight *= 2;
+#endif
+
+    // Outer Box: Fills gaps
+    neighbor += LoadTexelWeighted(weight, texel + ivec3(-1, -1, -1));
+    neighbor += LoadTexelWeighted(weight, texel + ivec3(1, 1, -1));
+    neighbor += LoadTexelWeighted(weight, texel + ivec3(1, -1, -1));
+    neighbor += LoadTexelWeighted(weight, texel + ivec3(-1, 1, -1));
+
+    neighbor += LoadTexelWeighted(weight, texel + ivec3(-1, -1, 1));
+    neighbor += LoadTexelWeighted(weight, texel + ivec3(1, 1, 1));
+    neighbor += LoadTexelWeighted(weight, texel + ivec3(1, -1, 1));
+    neighbor += LoadTexelWeighted(weight, texel + ivec3(-1, 1, 1));
+
+    return neighbor / max(weight, 1);
+}
+
+vec4 AverageBox4(ivec3 texel)
+{
+    // Go up one mip
+    texel *= 2;
+
+    vec4 neighbor = vec4(0.0);
+    uint weight = 0;
+
+    neighbor += LoadTexelWeighted(weight, texel + ivec3(0, 0, 0));
+    neighbor += LoadTexelWeighted(weight, texel + ivec3(0, 1, 0));
+    neighbor += LoadTexelWeighted(weight, texel + ivec3(1, 0, 0));
+    neighbor += LoadTexelWeighted(weight, texel + ivec3(1, 1, 0));
+
+    neighbor += LoadTexelWeighted(weight, texel + ivec3(0, 0, 1));
+    neighbor += LoadTexelWeighted(weight, texel + ivec3(0, 1, 1));
+    neighbor += LoadTexelWeighted(weight, texel + ivec3(1, 0, 1));
+    neighbor += LoadTexelWeighted(weight, texel + ivec3(1, 1, 1));
+
+    return neighbor / max(weight, 1);
+}
+
+vec4 MaxBox4(ivec3 texel)
+{
+    // Go up one mip
+    texel *= 2;
+
+    vec4 neighbor = vec4(0.0);
+
+    neighbor = max(neighbor, LoadVoxelData(texel + ivec3(0, 0, 0)));
+    neighbor = max(neighbor, LoadVoxelData(texel + ivec3(0, 1, 0)));
+    neighbor = max(neighbor, LoadVoxelData(texel + ivec3(1, 0, 0)));
+    neighbor = max(neighbor, LoadVoxelData(texel + ivec3(1, 1, 0)));
+
+    neighbor = max(neighbor, LoadVoxelData(texel + ivec3(0, 0, 1)));
+    neighbor = max(neighbor, LoadVoxelData(texel + ivec3(0, 1, 1)));
+    neighbor = max(neighbor, LoadVoxelData(texel + ivec3(1, 0, 1)));
+    neighbor = max(neighbor, LoadVoxelData(texel + ivec3(1, 1, 1)));
+
+    return neighbor;
+}
+
+vec4 LoadVoxelData(ivec3 texel)
+{
+    uint packedRSMA = imageLoad(VoxelDataIn, texel).r;
+    return UnpackRSMA(packedRSMA);
 }

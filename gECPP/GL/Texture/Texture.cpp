@@ -61,8 +61,7 @@ namespace GL
 	}
 
 	Texture3D::Texture3D(gE::Window* window, const TextureSettings<TextureDimension::D3D>& settings, const TextureData& data)
-		:
-		Texture(window, GL_TEXTURE_3D, settings), _size(settings.Size)
+		: Texture(window, GL_TEXTURE_3D, settings), _size(settings.Size)
 	{
 		if(!Mips) Mips = ::GL::GetMipCount<TextureDimension::D3D>(_size);
 		glTextureStorage3D(ID, Mips, Format, _size.x, _size.y, _size.z);

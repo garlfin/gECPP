@@ -1,4 +1,5 @@
 #define ENABLE_VOXEL_TRACE
+#define PBR_VISUALIZE_REFLECTIONS
 
 #include "Include/Camera.glsl"
 #include "Include/Scene.glsl"
@@ -58,17 +59,19 @@ void main()
     if(bool(Scene.State & ENABLE_SPECULAR))
     {
         #ifdef ENABLE_VOXEL_TRACE
-            FragColor.rgb += GetSpecularVoxel(vert, frag, Lighting.Cubemaps[0]);
+            FragColor.rgb = GetSpecularVoxel(vert, frag, Lighting.Cubemaps[0]);
         #else
             FragColor.rgb += GetLighting(vert, frag, Lighting.Cubemaps[0]);
         #endif
     }
 #endif
 
+    FragColor.a = 1.0;
+
 	Velocity = ((VertexIn.CurrentUV.xy / VertexIn.CurrentUV.w) - (VertexIn.PreviousUV.xy / VertexIn.PreviousUV.w)) * 0.5;
 
     if(!bool(Scene.State & ENABLE_VOXEL_WRITE)) return;
 
-    Voxel voxel = Voxel(FragColor.rgb, vec4(frag.Roughness, frag.Specular, frag.Metallic, 1.0));
+    Voxel voxel = Voxel(FragColor, vec4(frag.Roughness, frag.Specular, frag.Metallic, 1.0));
     WriteVoxel(vert.Position, voxel);
 }

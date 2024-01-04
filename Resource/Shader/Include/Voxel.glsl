@@ -60,7 +60,7 @@ layout(VOXEL_UNIFORM_LAYOUT, binding = VOXEL_UNIFORM_LOCATION) uniform VoxelGrid
 
 struct Voxel
 {
-    vec3 Color;
+    vec4 Color; // Alpha for interpolation (might as well, shrug)
     vec4 Data; // (Roughness, Specular, Metallic, Alpha)
 };
 
@@ -103,6 +103,7 @@ ivec3 WorldToTexel(vec3, uint); // CellCount
 vec3 AlignWorldToCell(vec3, uint); // CellCount
 vec3 CrossCell(vec3, vec3, uint); // CellCount
 
+uint PackRSMA(vec4);
 vec4 UnpackRSMA(uint);
 
 // Implementation
@@ -118,18 +119,13 @@ ivec3 WorldToTexel(vec3 pos, uint cellCount) { return UVToTexel(WorldToUV(pos), 
 
 void WriteVoxel(ivec3 texel, Voxel voxel)
 {
-    voxel.Data = clamp(voxel.Data, vec4(0.0), vec4(1.0));
+    vec4 color = voxel.Color;
+    color.rgb = pow(color.rgb / VOXEL_COLOR_RANGE, vec3(1.0 / 2.2));
 
-    uint packedRSMA = 0; // 3, 3, 1, 1
-    packedRSMA |= uint(voxel.Data.r * 8.0); // Roughness
-    packedRSMA |= uint(voxel.Data.g * 8.0) << 3; // Specular
-    packedRSMA |= uint(voxel.Data.b) << 6; // Metallic
-    packedRSMA |= uint(voxel.Data.a) << 7; // Alpha (Solid)
+    uint data = PackRSMA(voxel.Data);
 
-    vec3 color = pow(voxel.Color / VOXEL_COLOR_RANGE, vec3(1.0 / 2.2));
-
-    imageStore(VoxelColorOut, texel, vec4(color, 1.0));
-    imageStore(VoxelDataOut, texel, ivec4(packedRSMA));
+    imageStore(VoxelColorOut, texel, color);
+    imageStore(VoxelDataOut, texel, ivec4(data));
 }
 
 void WriteVoxel(vec3 pos, Voxel voxel) { WriteVoxel(WorldToTexel(pos, VoxelGrid.CellCount), voxel); }
@@ -141,8 +137,8 @@ Voxel ReadVoxelUV(vec3 uv, uint lod)
 {
     Voxel voxel;
 
-    voxel.Color = textureLod(VoxelGrid.Color, uv, float(lod)).rgb;
-    voxel.Color = pow(voxel.Color, vec3(2.2)) * VOXEL_COLOR_RANGE;
+    voxel.Color = textureLod(VoxelGrid.Color, uv, float(lod));
+    voxel.Color.rgb = pow(voxel.Color.rgb, vec3(2.2)) * VOXEL_COLOR_RANGE;
 
     voxel.Data = ReadVoxelDataUV(uv, lod);
 
@@ -152,11 +148,26 @@ Voxel ReadVoxelUV(vec3 uv, uint lod)
 vec4 UnpackRSMA(uint packedRSMA)
 {
     vec4 unpackedRSMA;
-    unpackedRSMA.r = float(packedRSMA & 7u) / 8.0;
-    unpackedRSMA.g = float(packedRSMA >> 3 & 7u) / 8.0;
-    unpackedRSMA.b = float(packedRSMA >> 6 & 1u);
-    unpackedRSMA.a = float(packedRSMA >> 7 & 1u);
+
+    unpackedRSMA.r = float(packedRSMA & 7u) / 8.0; // Roughness
+    unpackedRSMA.g = float(packedRSMA >> 3 & 7u) / 8.0; // Specular
+    unpackedRSMA.b = float(packedRSMA >> 6 & 1u); // Metallic
+    unpackedRSMA.a = float(packedRSMA >> 7 & 1u); // Alpha (Solid)
+
     return unpackedRSMA;
+}
+
+uint PackRSMA(vec4 unpackedRSMA)
+{
+    uint packedRSMA;
+
+    unpackedRSMA = min(unpackedRSMA, vec4(1.0));
+    packedRSMA |= uint(unpackedRSMA.r * 8.0); // Roughness
+    packedRSMA |= uint(unpackedRSMA.g * 8.0) << 3; // Specular
+    packedRSMA |= uint(unpackedRSMA.b) << 6; // Metallic
+    packedRSMA |= uint(unpackedRSMA.a) << 7; // Alpha (Solid)
+
+    return packedRSMA;
 }
 
 vec4 ReadVoxelDataUV(vec3 uv, uint lod)
@@ -215,7 +226,8 @@ RayResult Trace(Ray ray)
         result.Position = CrossCell(result.Position, ray.Direction, VoxelGrid.CellCount);
         float dist = distance(result.Position, ray.Position);
 
-        if(dist >= ray.MaximumDistance)
+        rayABS = abs(result.Position - VoxelGrid.Position);
+        if(dist >= ray.MaximumDistance || max(rayABS.x, max(rayABS.y, rayABS.z)) > VoxelGrid.Scale)
             return result;
 
         if(ReadVoxelData(result.Position, 0).a == 1.0)
@@ -232,24 +244,8 @@ RayResult TraceOffset(Ray ray, vec3 normal)
 {
     float cellSize = (VoxelGrid.Scale * 2.0) / VoxelGrid.CellCount;
 
-    ray.Position += cellSize * normal;
-    ray.Position += cellSize * ray.Direction * 0.5;
-
-    // vec3 norAbs = abs(normal);
-    // vec3 cellMin = AlignWorldToCell(ray.Position, VoxelGrid.CellCount);
-    // vec3 cellMax = cellMin + cellSize;
-    //
-    // vec3 first = (cellMin - ray.Position) / normal;
-    // vec3 second = (cellMax - ray.Position) / normal;
-    //
-    // first = max(first, second);
-    //
-    // if(norAbs.x > norAbs.y && norAbs.x > norAbs.z)
-    //     ray.Position += normal * (first.x + EPSILON);
-    // else if(norAbs.y > norAbs.z)
-    //     ray.Position += normal * (first.y + EPSILON);
-    // else
-    //     ray.Position += normal * (first.z + EPSILON);
+    ray.Position += cellSize * normal * 1.25;
+    ray.Position += cellSize * ray.Direction * .5;
 
     return Trace(ray);
 }

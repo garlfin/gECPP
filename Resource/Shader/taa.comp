@@ -15,9 +15,9 @@
 
 #define SAMPLE_OFFSET(OFFSET) \
     { \
-    vec3 boxSample = textureLodOffset(ColorIn, uv, 0.f, OFFSET).rgb; \
-    boxMin = min(boxMin, boxSample); \
-    boxMax = max(boxMax, boxSample); \
+        vec3 boxSample = textureLodOffset(ColorIn, uv, 0.f, OFFSET).rgb; \
+        boxMin = min(boxMin, boxSample); \
+        boxMax = max(boxMax, boxSample); \
     }
 
 // IO
