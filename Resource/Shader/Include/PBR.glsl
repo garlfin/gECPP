@@ -112,6 +112,7 @@ vec3 GetSpecularVoxel(const Vertex vert, const PBRFragment frag, const Cubemap c
     result = TraceOffset(ray, vert.Normal);
 
     vec4 color = textureLod(VoxelGrid.Color, WorldToUV(result.Position), 0.0);
+    color = UnpackColor(color);
 
     vec3 cubemapColor = textureLod(cubemap.Color, CubemapParallax(vert.Position, r, cubemap), 0.0).rgb;
     if(!result.Hit) color.rgb = cubemapColor;
