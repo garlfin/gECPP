@@ -71,6 +71,6 @@ void main()
 
     if(!bool(Scene.State & ENABLE_VOXEL_WRITE)) return;
 
-    Voxel voxel = Voxel(FragColor, vec4(frag.Roughness, frag.Specular, frag.Metallic, 1.0));
-    WriteVoxel(vert.Position, voxel);
+    ivec3 texel = WorldToTexel(vert.Position, imageSize(VoxelColorOut).x);
+    imageStore(VoxelColorOut, texel, PackColor(FragColor));
 }

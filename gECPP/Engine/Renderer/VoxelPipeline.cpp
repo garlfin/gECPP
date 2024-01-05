@@ -14,9 +14,8 @@ namespace gE::VoxelPipeline
 	}
 
 	Target3D::Target3D(VoxelCapture& capture, Camera3D& camera) : RenderTarget<Camera3D>(capture, camera),
-		_color(&camera.GetWindow(), { VoxelPipeline::ColorFormat, camera.GetSize() }),
-		_colorBack(&camera.GetWindow(), { VoxelPipeline::ColorBackFormat, camera.GetSize()}),
-		_data(&camera.GetWindow(), { VoxelPipeline::DataFormat, camera.GetSize() })
+																  _colorBack(&camera.GetWindow(), { VoxelPipeline::ColorBackFormat, camera.GetSize() }),
+																  _color(&camera.GetWindow(), { VoxelPipeline::ColorFormat, camera.GetSize()})
 	{
 		GetFrameBuffer().SetDefaultSize(camera.GetSize());
 	}
@@ -32,8 +31,7 @@ namespace gE::VoxelPipeline
 		glColorMask(1, 1, 1, 1);
 		glViewport(0, 0, size.x, size.y);
 
-		_color.Bind(0, GL_READ_WRITE, 0);
-		_data.Bind(1, GL_READ_WRITE, 0);
+		_colorBack.Bind(0, GL_READ_WRITE, 0);
 
 		window.GetRenderers().OnRender(d);
 	}
@@ -61,24 +59,23 @@ namespace gE::VoxelPipeline
 
 		voxelShader.Bind();
 
-		_colorBack.Bind(0, GL_READ_WRITE);
-		_color.Bind(2, GL_READ_ONLY);
+		_color.Bind(0, GL_READ_WRITE);
+		_colorBack.Bind(2, GL_READ_ONLY);
 
 		voxelShader.SetUniform(0, 0u);
-		voxelShader.Dispatch(DIV_CEIL_T(_color.GetSize(), VOXEL_TAA_GROUP_SIZE, glm::u16vec3));
+		voxelShader.Dispatch(DIV_CEIL_T(_colorBack.GetSize(), VOXEL_TAA_GROUP_SIZE, glm::u16vec3));
+
 
 		voxelShader.SetUniform(0, 1u);
 		for(u8 i = 1; i < VOXEL_MAX_MIPS; i++)
 		{
-			_colorBack.Bind(0, GL_READ_WRITE, i);
-			_colorBack.Bind(2, GL_READ_ONLY, i - 1);
-
-			_data.Bind(1, GL_READ_WRITE, i);
-			_data.Bind(3, GL_READ_ONLY, i - 1);
+			_color.Bind(0, GL_READ_WRITE, i);
+			_color.Bind(2, GL_READ_ONLY, i - 1);
 
 			glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-			voxelShader.Dispatch(DIV_CEIL_T(_color.GetSize(i), VOXEL_TAA_GROUP_SIZE, glm::u16vec3));
+			voxelShader.Dispatch(DIV_CEIL_T(_colorBack.GetSize(i), VOXEL_TAA_GROUP_SIZE, glm::u16vec3));
 		}
+
 
 		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 	}

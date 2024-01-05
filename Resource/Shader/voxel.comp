@@ -15,7 +15,6 @@
 
 // IO
 layout(binding = 2, PIPELINE_COLOR_FORMAT) restrict readonly uniform image3D VoxelColorIn;
-layout(binding = 3, PIPELINE_DATA_FORMAT) restrict readonly uniform uimage3D VoxelDataIn;
 
 layout(location = 0) uniform uint Mode;
 
@@ -34,15 +33,10 @@ void main()
     vec3 uv = vec3(texel) / imageSize(VoxelColorOut);
 
     vec4 color;
-    vec4 data;
 
     if (Mode == MODE_TAA_DOWNSAMPLE)
     {
         color = AverageBox4(texel);
-        data = MaxBox4(texel);
-
-        uint dataPacked = PackRSMA(data);
-        imageStore(VoxelDataOut, texel, ivec4(dataPacked));
     }
     else
     {
@@ -120,31 +114,7 @@ vec4 AverageBox4(ivec3 texel)
     neighbor += LoadTexelWeighted(weight, texel + ivec3(1, 0, 1));
     neighbor += LoadTexelWeighted(weight, texel + ivec3(1, 1, 1));
 
+    neighbor.a = ceil(neighbor.a);
+
     return neighbor / max(weight, 1);
-}
-
-vec4 MaxBox4(ivec3 texel)
-{
-    // Go up one mip
-    texel *= 2;
-
-    vec4 neighbor = vec4(0.0);
-
-    neighbor = max(neighbor, LoadVoxelData(texel + ivec3(0, 0, 0)));
-    neighbor = max(neighbor, LoadVoxelData(texel + ivec3(0, 1, 0)));
-    neighbor = max(neighbor, LoadVoxelData(texel + ivec3(1, 0, 0)));
-    neighbor = max(neighbor, LoadVoxelData(texel + ivec3(1, 1, 0)));
-
-    neighbor = max(neighbor, LoadVoxelData(texel + ivec3(0, 0, 1)));
-    neighbor = max(neighbor, LoadVoxelData(texel + ivec3(0, 1, 1)));
-    neighbor = max(neighbor, LoadVoxelData(texel + ivec3(1, 0, 1)));
-    neighbor = max(neighbor, LoadVoxelData(texel + ivec3(1, 1, 1)));
-
-    return neighbor;
-}
-
-vec4 LoadVoxelData(ivec3 texel)
-{
-    uint packedRSMA = imageLoad(VoxelDataIn, texel).r;
-    return UnpackRSMA(packedRSMA);
 }

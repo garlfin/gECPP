@@ -18,9 +18,7 @@ namespace GL
 	{
 		glm::vec3 Center;
 		float Scale;
-		u32 CellCount;
 		handle Color;
-		GL_ALIGN handle Data;
 	};
 }
 
@@ -47,17 +45,15 @@ namespace gE::VoxelPipeline
 		GL::Buffer<GL::VoxelScene> _voxelBuffer;
 	};
 
-	CONSTEXPR_GLOBAL GL::ITextureSettings ColorFormat { GL_RGB10_A2, GL::WrapMode::Clamp, GL::FilterMode::Nearest, 1 };
-	CONSTEXPR_GLOBAL GL::ITextureSettings ColorBackFormat { GL_RGB10_A2, GL::WrapMode::Clamp, GL::FilterMode::Linear, VOXEL_MAX_MIPS };
-	CONSTEXPR_GLOBAL GL::ITextureSettings DataFormat { GL_R8UI, GL::WrapMode::Clamp, GL::FilterMode::Nearest, 0 };
+	CONSTEXPR_GLOBAL GL::ITextureSettings ColorFormat { GL_RGB10_A2, GL::WrapMode::Clamp, GL::FilterMode::Linear, VOXEL_MAX_MIPS };
+	CONSTEXPR_GLOBAL GL::ITextureSettings ColorBackFormat { GL_RGB10_A2, GL::WrapMode::Clamp, GL::FilterMode::Nearest, 1 };
 
 	class Target3D : public RenderTarget<Camera3D>
 	{
 	 public:
 		explicit Target3D(VoxelCapture&, Camera3D&);
 
-		GET(GL::Texture3D&, Color, _colorBack);
-		GET(GL::Texture3D&, Data, _data);
+		GET(GL::Texture3D&, Color, _color);
 
 		GET(VoxelCapture&, Owner, (VoxelCapture&) RenderTarget<Camera3D>::GetOwner());
 
@@ -66,9 +62,7 @@ namespace gE::VoxelPipeline
 		void PostProcessPass(float d) override;
 
 	 private:
-		GL::Texture3D _color;
 		GL::Texture3D _colorBack;
-
-		GL::Texture3D _data;
+		GL::Texture3D _color;
 	};
 }

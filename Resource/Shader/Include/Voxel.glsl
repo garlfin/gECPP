@@ -29,15 +29,12 @@
 #endif
 
 uniform layout(binding = VOXEL_TEXTURE_LOCATION, PIPELINE_COLOR_FORMAT) restrict image3D VoxelColorOut;
-uniform layout(binding = VOXEL_DATA_LOCATION, PIPELINE_DATA_FORMAT) restrict uimage3D VoxelDataOut;
 
 struct VoxelGridData
 {
     vec3 Position;
     float Scale;
-    uint CellCount; // AKA Texture Size
     BINDLESS_TEXTURE(sampler3D, Color);
-    BINDLESS_TEXTURE(usampler3D, Data);
 };
 
 #if defined(FRAGMENT_SHADER) && !defined(GL_ARB_bindless_texture)
@@ -58,12 +55,6 @@ layout(VOXEL_UNIFORM_LAYOUT, binding = VOXEL_UNIFORM_LOCATION) uniform VoxelGrid
     VoxelGridData VoxelGrid;
 };
 
-struct Voxel
-{
-    vec4 Color; // Alpha for interpolation (might as well, shrug)
-    vec4 Data; // (Roughness, Specular, Metallic, Alpha)
-};
-
 struct Ray
 {
     vec3 Position;
@@ -80,31 +71,22 @@ struct RayResult
 };
 
 // Functions
+
+vec4 PackColor(vec4);
+vec4 UnpackColor(vec4);
+
 RayResult Trace(Ray);
 RayResult TraceOffset(Ray, vec3);
-
-void WriteVoxel(vec3, Voxel);
-void WriteVoxel(ivec3, Voxel);
-
-Voxel ReadVoxel(vec3, uint); // LOD
-Voxel ReadVoxel(ivec3, uint); // LOD
-Voxel ReadVoxelUV(vec3, uint); // LOD
-
-vec4 ReadVoxelData(vec3, uint); // LOD
-vec4 ReadVoxelData(ivec3, uint); // LOD
-vec4 ReadVoxelDataUV(vec3, uint); // LOD
 
 // Helper Functions
 vec3 WorldToUV(vec3);
 vec3 TexelToUV(vec3, uint); // CellCount
 ivec3 UVToTexel(vec3, uint); // CellCount
 ivec3 WorldToTexel(vec3, uint); // CellCount
+vec3 WorldToAlignedUV(vec3, uint); // CellCount
 
 vec3 AlignWorldToCell(vec3, uint); // CellCount
 vec3 CrossCell(vec3, vec3, uint); // CellCount
-
-uint PackRSMA(vec4);
-vec4 UnpackRSMA(uint);
 
 // Implementation
 vec3 WorldToUV(vec3 pos)
@@ -117,67 +99,17 @@ vec3 TexelToUV(ivec3 texel, uint cellCount) { return (vec3(texel) + 0.5) * ((Vox
 ivec3 UVToTexel(vec3 uv, uint cellCount) { return ivec3(uv * cellCount); }
 ivec3 WorldToTexel(vec3 pos, uint cellCount) { return UVToTexel(WorldToUV(pos), cellCount); }
 
-void WriteVoxel(ivec3 texel, Voxel voxel)
+vec4 PackColor(vec4 color)
 {
-    vec4 color = voxel.Color;
     color.rgb = pow(color.rgb / VOXEL_COLOR_RANGE, vec3(1.0 / 2.2));
-
-    uint data = PackRSMA(voxel.Data);
-
-    imageStore(VoxelColorOut, texel, color);
-    imageStore(VoxelDataOut, texel, ivec4(data));
+    return color;
 }
 
-void WriteVoxel(vec3 pos, Voxel voxel) { WriteVoxel(WorldToTexel(pos, VoxelGrid.CellCount), voxel); }
-
-Voxel ReadVoxel(vec3 pos, uint lod) { return ReadVoxelUV(WorldToUV(pos), lod); }
-Voxel ReadVoxel(ivec3 texel, uint lod) { return ReadVoxelUV(TexelToUV(texel, VoxelGrid.CellCount >> lod), lod); }
-
-Voxel ReadVoxelUV(vec3 uv, uint lod)
+vec4 UnpackColor(vec4 color)
 {
-    Voxel voxel;
-
-    voxel.Color = textureLod(VoxelGrid.Color, uv, float(lod));
-    voxel.Color.rgb = pow(voxel.Color.rgb, vec3(2.2)) * VOXEL_COLOR_RANGE;
-
-    voxel.Data = ReadVoxelDataUV(uv, lod);
-
-    return voxel;
+    color.rgb = pow(color.rgb, vec3(2.2)) * VOXEL_COLOR_RANGE;
+    return color;
 }
-
-vec4 UnpackRSMA(uint packedRSMA)
-{
-    vec4 unpackedRSMA;
-
-    unpackedRSMA.r = float(packedRSMA & 7u) / 8.0; // Roughness
-    unpackedRSMA.g = float(packedRSMA >> 3 & 7u) / 8.0; // Specular
-    unpackedRSMA.b = float(packedRSMA >> 6 & 1u); // Metallic
-    unpackedRSMA.a = float(packedRSMA >> 7 & 1u); // Alpha (Solid)
-
-    return unpackedRSMA;
-}
-
-uint PackRSMA(vec4 unpackedRSMA)
-{
-    uint packedRSMA;
-
-    unpackedRSMA = min(unpackedRSMA, vec4(1.0));
-    packedRSMA |= uint(unpackedRSMA.r * 8.0); // Roughness
-    packedRSMA |= uint(unpackedRSMA.g * 8.0) << 3; // Specular
-    packedRSMA |= uint(unpackedRSMA.b) << 6; // Metallic
-    packedRSMA |= uint(unpackedRSMA.a) << 7; // Alpha (Solid)
-
-    return packedRSMA;
-}
-
-vec4 ReadVoxelDataUV(vec3 uv, uint lod)
-{
-    uint packedRSMA = textureLod(VoxelGrid.Data, uv, float(lod)).r;
-    return UnpackRSMA(packedRSMA);
-}
-
-vec4 ReadVoxelData(vec3 pos, uint lod) { return ReadVoxelDataUV(WorldToUV(pos), lod); }
-vec4 ReadVoxelData(ivec3 texel, uint lod) { return ReadVoxelDataUV(TexelToUV(texel, VoxelGrid.CellCount >> lod), lod); }
 
 vec3 AlignWorldToCell(vec3 position, uint cellCount)
 {
@@ -187,6 +119,12 @@ vec3 AlignWorldToCell(vec3 position, uint cellCount)
     mapped = floor(mapped) * cellSize;
 
     return VoxelGrid.Position + mapped;
+}
+
+vec3 WorldToAlignedUV(vec3 pos, uint cellCount)
+{
+    ivec3 texel = WorldToTexel(pos, cellCount);
+    return (vec3(texel) + 0.5) / cellCount;
 }
 
 vec3 CrossCell(vec3 position, vec3 direction, uint cellCount)
@@ -215,7 +153,10 @@ RayResult Trace(Ray ray)
     vec3 rayABS = abs(ray.Position - VoxelGrid.Position);
     if(max(rayABS.x, max(rayABS.y, rayABS.z)) > VoxelGrid.Scale) return result;
 
-    if(ReadVoxelData(result.Position, 0).a == 1.0)
+    uint cellCount = textureSize(VoxelGrid.Color, 0).r;
+    vec3 alignedUV = WorldToAlignedUV(result.Position, cellCount);
+
+    if(textureLod(VoxelGrid.Color, alignedUV, 0.0).a > 0.5)
     {
         result.Hit = true;
         return result;
@@ -223,14 +164,16 @@ RayResult Trace(Ray ray)
 
     for(uint i = 0; i < VOXEL_TRACE_MAX_ITERATIONS; i++)
     {
-        result.Position = CrossCell(result.Position, ray.Direction, VoxelGrid.CellCount);
+        result.Position = CrossCell(result.Position, ray.Direction, cellCount);
         float dist = distance(result.Position, ray.Position);
 
         rayABS = abs(result.Position - VoxelGrid.Position);
         if(dist >= ray.MaximumDistance || max(rayABS.x, max(rayABS.y, rayABS.z)) > VoxelGrid.Scale)
             return result;
 
-        if(ReadVoxelData(result.Position, 0).a == 1.0)
+        alignedUV = WorldToAlignedUV(result.Position, cellCount);
+
+        if(textureLod(VoxelGrid.Color, alignedUV, 0.0).a > 0.5)
         {
             result.Hit = true;
             break;
@@ -242,7 +185,8 @@ RayResult Trace(Ray ray)
 
 RayResult TraceOffset(Ray ray, vec3 normal)
 {
-    float cellSize = (VoxelGrid.Scale * 2.0) / VoxelGrid.CellCount;
+    uint cellCount = textureSize(VoxelGrid.Color, 0).r;
+    float cellSize = (VoxelGrid.Scale * 2.0) / cellCount;
 
     ray.Position += cellSize * normal * 1.25;
     ray.Position += cellSize * ray.Direction * .5;

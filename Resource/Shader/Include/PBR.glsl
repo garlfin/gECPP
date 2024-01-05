@@ -110,17 +110,18 @@ vec3 GetSpecularVoxel(const Vertex vert, const PBRFragment frag, const Cubemap c
 
     ray = Ray(vert.Position, 10.f, r);
     result = TraceOffset(ray, vert.Normal);
-    Voxel voxel = ReadVoxel(result.Position, 0);
+
+    vec4 color = textureLod(VoxelGrid.Color, WorldToUV(result.Position), 0.0);
 
     vec3 cubemapColor = textureLod(cubemap.Color, CubemapParallax(vert.Position, r, cubemap), 0.0).rgb;
-    if(!result.Hit) voxel.Color.rgb = cubemapColor;
+    if(!result.Hit) color.rgb = cubemapColor;
 
     vec2 brdf = texture(BRDFLutTex, vec2(nDotV, frag.Roughness)).rg;
 
 #ifdef PBR_VISUALIZE_REFLECTIONS
-    return voxel.Color.rgb;
+    return color.rgb;
 #else
-    return (f * brdf.r + brdf.g) * voxel.Color.rgb;
+    return (f * brdf.r + brdf.g) * color.rgb;
 #endif
 }
 
