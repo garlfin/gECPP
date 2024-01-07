@@ -128,7 +128,7 @@ int main()
 
 		// I may have overcomplicated things
 		CreateField<&aiMesh::mNumVertices, float, aiVector3D, &aiMesh::mVertices>(0, mesh.Buffers[0], mesh.Fields[0], sourceMesh, subCount, "POS");
-		CreateField<&aiMesh::mNumVertices, float, aiVector3D, &aiMesh::FirstMap, glm::lowp_vec2, TransformUV>(1, mesh.Buffers[1], mesh.Fields[1], sourceMesh, subCount, "UV");
+		CreateField<&aiMesh::mNumVertices, float, aiVector3D, &aiMesh::FirstMap, aiVector2D, TransformUV>(1, mesh.Buffers[1], mesh.Fields[1], sourceMesh, subCount, "UV");
 		CreateField<&aiMesh::mNumVertices, float, aiVector3D, &aiMesh::mNormals>(2, mesh.Buffers[2], mesh.Fields[2], sourceMesh, subCount, "NOR");
 		CreateField<&aiMesh::mNumVertices, float, aiVector3D, &aiMesh::mTangents>(3, mesh.Buffers[3], mesh.Fields[3], sourceMesh, subCount, "TAN");
 
