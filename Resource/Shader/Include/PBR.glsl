@@ -111,11 +111,33 @@ vec3 GetSpecularVoxel(const Vertex vert, const PBRFragment frag, const Cubemap c
     ray = Ray(vert.Position, 10.f, r);
     result = TraceOffset(ray, vert.Normal);
 
+    vec3 cubemapDirection;
+
+#ifdef PBR_CUBEMAP_REPROJECTION
+    cubemapDirection = result.Position - cubemap.Position;
+    float cubemapRayLength = length(cubemapDirection);
+    cubemapDirection /= cubemapRayLength;
+
+    if(result.Hit)
+    {
+        cubemapRay = Ray(cubemap.Position, cubemapRayLength, cubemapDirection);
+        cubemapResult = Trace(cubemapRay);
+        cubemapResult.Hit = cubemapResult.Hit && distance(cubemapResult.Position, result.Position) > EPSILON * (1 + IGNSample);
+    }
+    else
+#endif
+        cubemapDirection = CubemapParallax(vert.Position, r, cubemap);
+
     vec4 color = textureLod(VoxelGrid.Color, WorldToUV(result.Position), 0.0);
     color = UnpackColor(color);
 
-    vec3 cubemapColor = textureLod(cubemap.Color, CubemapParallax(vert.Position, r, cubemap), 0.0).rgb;
+    vec3 cubemapColor = textureLod(cubemap.Color, cubemapDirection, 0.0).rgb;
+
+#ifdef PBR_CUBEMAP_REPROJECTION
+    if(!result.Hit || !cubemapResult.Hit) color.rgb = cubemapColor;
+#else
     if(!result.Hit) color.rgb = cubemapColor;
+#endif
 
     vec2 brdf = texture(BRDFLutTex, vec2(nDotV, frag.Roughness)).rg;
 

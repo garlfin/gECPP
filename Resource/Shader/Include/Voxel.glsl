@@ -86,7 +86,7 @@ ivec3 WorldToTexel(vec3, uint); // CellCount
 vec3 WorldToAlignedUV(vec3, uint); // CellCount
 
 vec3 AlignWorldToCell(vec3, uint); // CellCount
-vec3 CrossCell(vec3, vec3, uint); // CellCount
+float CrossCell(inout vec3, vec3, uint); // CellCount
 
 // Implementation
 vec3 WorldToUV(vec3 pos)
@@ -127,7 +127,7 @@ vec3 WorldToAlignedUV(vec3 pos, uint cellCount)
     return (vec3(texel) + 0.5) / cellCount;
 }
 
-vec3 CrossCell(vec3 position, vec3 direction, uint cellCount)
+float CrossCell(inout vec3 position, vec3 direction, uint cellCount)
 {
     float cellSize = (VoxelGrid.Scale * 2.0) / cellCount;
 
@@ -140,7 +140,8 @@ vec3 CrossCell(vec3 position, vec3 direction, uint cellCount)
     first = max(first, second);
     float dist = min(first.x, min(first.y, first.z));
 
-    return position + direction * (dist + EPSILON);
+    position += direction * (dist + EPSILON);
+    return dist;
 }
 
 // Adapted from two sources:
@@ -164,11 +165,10 @@ RayResult Trace(Ray ray)
 
     for(uint i = 0; i < VOXEL_TRACE_MAX_ITERATIONS; i++)
     {
-        result.Position = CrossCell(result.Position, ray.Direction, cellCount);
-        float dist = distance(result.Position, ray.Position);
+        result.Distance += CrossCell(result.Position, ray.Direction, cellCount);
 
         rayABS = abs(result.Position - VoxelGrid.Position);
-        if(dist >= ray.MaximumDistance || max(rayABS.x, max(rayABS.y, rayABS.z)) > VoxelGrid.Scale)
+        if(result.Distance >= ray.MaximumDistance || max(rayABS.x, max(rayABS.y, rayABS.z)) > VoxelGrid.Scale)
             return result;
 
         alignedUV = WorldToAlignedUV(result.Position, cellCount);

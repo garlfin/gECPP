@@ -30,8 +30,6 @@ layout(local_size_x = 4, local_size_y = 4, local_size_z = 4) in;
 void main()
 {
     ivec3 texel = ivec3(gl_GlobalInvocationID);
-    vec3 uv = vec3(texel) / imageSize(VoxelColorOut);
-
     vec4 color;
 
     if (Mode == MODE_TAA_DOWNSAMPLE)

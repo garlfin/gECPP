@@ -65,7 +65,6 @@ namespace gE::VoxelPipeline
 		voxelShader.SetUniform(0, 0u);
 		voxelShader.Dispatch(DIV_CEIL_T(_colorBack.GetSize(), VOXEL_TAA_GROUP_SIZE, glm::u16vec3));
 
-
 		voxelShader.SetUniform(0, 1u);
 		for(u8 i = 1; i < VOXEL_MAX_MIPS; i++)
 		{
@@ -75,7 +74,6 @@ namespace gE::VoxelPipeline
 			glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 			voxelShader.Dispatch(DIV_CEIL_T(_colorBack.GetSize(i), VOXEL_TAA_GROUP_SIZE, glm::u16vec3));
 		}
-
 
 		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 	}
