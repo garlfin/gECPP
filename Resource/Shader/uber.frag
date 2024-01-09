@@ -1,4 +1,5 @@
 #define ENABLE_VOXEL_TRACE
+#define PBR_VISUALIZE_REFLECTIONS
 
 #include "Include/Camera.glsl"
 #include "Include/Scene.glsl"
@@ -58,7 +59,7 @@ void main()
     if(bool(Scene.State & ENABLE_SPECULAR))
     {
         #if defined(ENABLE_VOXEL_TRACE) && defined(EXT_BINDLESS)
-            FragColor.rgb += GetSpecularVoxel(vert, frag, Lighting.Cubemaps[0]);
+            FragColor.rgb = GetSpecularVoxel(vert, frag, Lighting.Cubemaps[0]);
         #else
             FragColor.rgb += GetLighting(vert, frag, Lighting.Cubemaps[0]);
         #endif

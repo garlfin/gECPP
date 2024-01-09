@@ -153,41 +153,28 @@ float CrossCell(inout vec3 position, vec3 direction, uint cellCount)
 RayResult Trace(Ray ray)
 {
     RayResult result = RayResult(ray.Position, 0.0, vec3(0), false);
-
-    vec3 rayABS = abs(ray.Position - VoxelGrid.Position);
-    if(max(rayABS.x, max(rayABS.y, rayABS.z)) > VoxelGrid.Scale) return result;
-
     int size = textureSize(VoxelGrid.Color, 0).r;
     int levels = textureQueryLevels(VoxelGrid.Color) - 1;
-    vec3 alignedUV = WorldToAlignedUV(result.Position, size);
-
-    if(textureLod(VoxelGrid.Color, alignedUV, 0.0).a > 0.5)
-    {
-        result.Hit = true;
-        return result;
-    }
-
     int level = levels;
+
     for(uint i = 0; i < VOXEL_TRACE_MAX_ITERATIONS; i++)
     {
-        ivec3 oldCell = WorldToTexel(result.Position, size >> (level + 1));
-        ivec3 newCell;
-
-        result.Distance += CrossCell(result.Position, ray.Direction, size >> level);
-
-        newCell = WorldToTexel(result.Position, size >> (level + 1));
-        if(newCell != oldCell) level = min(level + 1, levels);
-        alignedUV = WorldToAlignedUV(result.Position, size >> level);
-
-        rayABS = abs(result.Position - VoxelGrid.Position);
+        vec3 alignedUV = WorldToAlignedUV(result.Position, size >> level);
+        vec3 rayABS = abs(result.Position - VoxelGrid.Position);
         if(result.Distance >= ray.MaximumDistance || max(rayABS.x, max(rayABS.y, rayABS.z)) > VoxelGrid.Scale)
             return result;
 
-        if(textureLod(VoxelGrid.Color, alignedUV, float(level)).a > 0.5)
-        {
-            if(level == 0) { result.Hit = true; break; }
-            else level--;
-        }
+        bool hit = textureLod(VoxelGrid.Color, alignedUV, float(level)).a > 0.5;
+
+        ivec3 oldCell = WorldToTexel(result.Position, size >> (level + 1));
+
+        result.Distance += CrossCell(result.Position, ray.Direction, size >> level);
+
+        ivec3 newCell = WorldToTexel(result.Position, size >> (level + 1));
+
+        if(hit && level == 0) { result.Hit = true; break; }
+        if(hit) level--;
+        if(newCell != oldCell) level = min(level + 1, level);
     }
 
     return result;
