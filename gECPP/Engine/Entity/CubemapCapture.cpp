@@ -102,7 +102,6 @@ namespace gE
 
 	void CubemapTarget::RenderDependencies(float d)
 	{
-
 		LightManager& lights = GetOwner().GetWindow().GetLights();
 		lights.Sun->GetCamera().Draw(d, &GetCamera());
 	}
