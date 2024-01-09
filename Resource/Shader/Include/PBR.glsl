@@ -33,7 +33,9 @@ struct PBRFragment
 vec3 GetLighting(const Vertex, const PBRFragment, const Light);
 vec3 GetLighting(const Vertex, const PBRFragment, samplerCube);
 vec3 GetLightingDirectional(const Vertex, const PBRFragment, const Light);
-vec3 GetSpecularVoxel(const Vertex, const PBRFragment, const Cubemap);
+    #ifdef EXT_BINDLESS
+        vec3 GetSpecularVoxel(const Vertex, const PBRFragment, const Cubemap);
+    #endif
 #endif
 
 // PBR Functions
@@ -76,7 +78,7 @@ vec3 GetLighting(const Vertex vert, const PBRFragment frag, Cubemap cubemap)
 #endif
     r = CubemapParallax(vert.Position, r, cubemap);
 
-#ifdef GL_ARB_bindless_texture
+#ifdef EXT_BINDLESS
     vec3 specular = textureLod(cubemap.Color, r, 0.0f).rgb;
 #else
     vec3 specular = vec3(0);
@@ -90,6 +92,7 @@ vec3 GetLighting(const Vertex vert, const PBRFragment frag, Cubemap cubemap)
 #endif
 }
 
+#ifdef EXT_BINDLESS
 vec3 GetSpecularVoxel(const Vertex vert, const PBRFragment frag, const Cubemap cubemap)
 {
     vec3 eye = normalize(Camera.Position - vert.Position);
@@ -147,6 +150,7 @@ vec3 GetSpecularVoxel(const Vertex vert, const PBRFragment frag, const Cubemap c
     return (f * brdf.r + brdf.g) * color.rgb;
 #endif
 }
+#endif
 
 vec3 GetLightingDirectional(const Vertex vert, const PBRFragment frag, const Light light)
 {

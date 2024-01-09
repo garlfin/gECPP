@@ -75,8 +75,10 @@ struct RayResult
 vec4 PackColor(vec4);
 vec4 UnpackColor(vec4);
 
+#ifdef EXT_BINDLESS
 RayResult Trace(Ray);
 RayResult TraceOffset(Ray, vec3);
+#endif
 
 // Helper Functions
 vec3 WorldToUV(vec3);
@@ -95,7 +97,7 @@ vec3 WorldToUV(vec3 pos)
     return uv * 0.5 + 0.5;
 }
 
-vec3 TexelToUV(ivec3 texel, uint cellCount) { return (vec3(texel) + 0.5) * ((VoxelGrid.Scale * 2.0) / cellCount); }
+vec3 TexelToUV(ivec3 texel, uint cellCount) { return (vec3(texel) + 0.5) / cellCount; }
 ivec3 UVToTexel(vec3 uv, uint cellCount) { return ivec3(uv * cellCount); }
 ivec3 WorldToTexel(vec3 pos, uint cellCount) { return UVToTexel(WorldToUV(pos), cellCount); }
 
@@ -124,7 +126,7 @@ vec3 AlignWorldToCell(vec3 position, uint cellCount)
 vec3 WorldToAlignedUV(vec3 pos, uint cellCount)
 {
     ivec3 texel = WorldToTexel(pos, cellCount);
-    return (vec3(texel) + 0.5) / cellCount;
+    return TexelToUV(texel, cellCount);
 }
 
 float CrossCell(inout vec3 position, vec3 direction, uint cellCount)
@@ -147,6 +149,7 @@ float CrossCell(inout vec3 position, vec3 direction, uint cellCount)
 // Adapted from two sources:
 // https://www.jpgrenier.org/ssr.html
 // https://seblagarde.wordpress.com/2012/09/29/image-based-lighting-approaches-and-parallax-corrected-cubemap/
+#ifdef EXT_BINDLESS
 RayResult Trace(Ray ray)
 {
     RayResult result = RayResult(ray.Position, 0.0, vec3(0), false);
@@ -154,8 +157,9 @@ RayResult Trace(Ray ray)
     vec3 rayABS = abs(ray.Position - VoxelGrid.Position);
     if(max(rayABS.x, max(rayABS.y, rayABS.z)) > VoxelGrid.Scale) return result;
 
-    uint cellCount = textureSize(VoxelGrid.Color, 0).r;
-    vec3 alignedUV = WorldToAlignedUV(result.Position, cellCount);
+    int size = textureSize(VoxelGrid.Color, 0).r;
+    int levels = textureQueryLevels(VoxelGrid.Color) - 1;
+    vec3 alignedUV = WorldToAlignedUV(result.Position, size);
 
     if(textureLod(VoxelGrid.Color, alignedUV, 0.0).a > 0.5)
     {
@@ -163,20 +167,26 @@ RayResult Trace(Ray ray)
         return result;
     }
 
+    int level = levels;
     for(uint i = 0; i < VOXEL_TRACE_MAX_ITERATIONS; i++)
     {
-        result.Distance += CrossCell(result.Position, ray.Direction, cellCount);
+        ivec3 oldCell = WorldToTexel(result.Position, size >> (level + 1));
+        ivec3 newCell;
+
+        result.Distance += CrossCell(result.Position, ray.Direction, size >> level);
+
+        newCell = WorldToTexel(result.Position, size >> (level + 1));
+        if(newCell != oldCell) level = min(level + 1, levels);
+        alignedUV = WorldToAlignedUV(result.Position, size >> level);
 
         rayABS = abs(result.Position - VoxelGrid.Position);
         if(result.Distance >= ray.MaximumDistance || max(rayABS.x, max(rayABS.y, rayABS.z)) > VoxelGrid.Scale)
             return result;
 
-        alignedUV = WorldToAlignedUV(result.Position, cellCount);
-
-        if(textureLod(VoxelGrid.Color, alignedUV, 0.0).a > 0.5)
+        if(textureLod(VoxelGrid.Color, alignedUV, float(level)).a > 0.5)
         {
-            result.Hit = true;
-            break;
+            if(level == 0) { result.Hit = true; break; }
+            else level--;
         }
     }
 
@@ -193,3 +203,4 @@ RayResult TraceOffset(Ray ray, vec3 normal)
 
     return Trace(ray);
 }
+#endif

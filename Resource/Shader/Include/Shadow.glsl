@@ -81,7 +81,7 @@ float GetShadowDirectional(const Vertex frag, const Light light)
         vec3 uv = fragPos;
         uv.xy += offset * DIRECTIONAL_SHADOW_BLOCKER_RADIUS / light.PackedSettings;
 
-    #ifdef GL_ARB_bindless_texture
+    #ifdef EXT_BINDLESS
         float z = texture(sampler2D(light.Depth), uv.xy).r;
     #else
         float z = 1.0;
@@ -114,7 +114,7 @@ float GetShadowDirectional(const Vertex frag, const Light light)
         vec3 uv = fragPos;
         uv.xy += offset * blocker / light.PackedSettings;
 
-    #ifdef GL_ARB_bindless_texture
+    #ifdef EXT_BINDLESS
         float z = texture(sampler2D(light.Depth), uv.xy).r;
     #else
         float z = 1.0;

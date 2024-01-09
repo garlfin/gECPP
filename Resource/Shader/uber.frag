@@ -54,10 +54,10 @@ void main()
     FragColor.rgb = albedo * 0.1;
     FragColor.rgb += GetLighting(vert, frag, Lighting.Lights[0]);
 
-#ifdef GL_ARB_bindless_texture
+#ifdef EXT_BINDLESS
     if(bool(Scene.State & ENABLE_SPECULAR))
     {
-        #ifdef ENABLE_VOXEL_TRACE
+        #if defined(ENABLE_VOXEL_TRACE) && defined(EXT_BINDLESS)
             FragColor.rgb += GetSpecularVoxel(vert, frag, Lighting.Cubemaps[0]);
         #else
             FragColor.rgb += GetLighting(vert, frag, Lighting.Cubemaps[0]);
