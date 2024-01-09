@@ -154,27 +154,33 @@ RayResult Trace(Ray ray)
 {
     RayResult result = RayResult(ray.Position, 0.0, vec3(0), false);
     int size = textureSize(VoxelGrid.Color, 0).r;
-    int levels = textureQueryLevels(VoxelGrid.Color) - 1;
-    int level = levels;
+    int mipCount = textureQueryLevels(VoxelGrid.Color) - 1;
+    int mip = mipCount;
 
     for(uint i = 0; i < VOXEL_TRACE_MAX_ITERATIONS; i++)
     {
-        vec3 alignedUV = WorldToAlignedUV(result.Position, size >> level);
         vec3 rayABS = abs(result.Position - VoxelGrid.Position);
         if(result.Distance >= ray.MaximumDistance || max(rayABS.x, max(rayABS.y, rayABS.z)) > VoxelGrid.Scale)
             return result;
 
-        bool hit = textureLod(VoxelGrid.Color, alignedUV, float(level)).a > 0.5;
+        vec3 alignedUV = WorldToAlignedUV(result.Position, size >> mip);
+        if(textureLod(VoxelGrid.Color, alignedUV, float(mip)).a > 0.5)
+        {
+            if(mip == 0)
+            {
+                result.Hit = true;
+                return result;
+            }
+            else mip--;
+        }
+        else
+        {
+            ivec3 oldCell = WorldToTexel(result.Position, size >> (mip + 1));
+            result.Distance += CrossCell(result.Position, ray.Direction, size >> mip);
+            ivec3 newCell = WorldToTexel(result.Position, size >> (mip + 1));
 
-        ivec3 oldCell = WorldToTexel(result.Position, size >> (level + 1));
-
-        result.Distance += CrossCell(result.Position, ray.Direction, size >> level);
-
-        ivec3 newCell = WorldToTexel(result.Position, size >> (level + 1));
-
-        if(hit && level == 0) { result.Hit = true; break; }
-        if(hit) level--;
-        if(newCell != oldCell) level = min(level + 1, level);
+            if(oldCell != newCell) mip = min(mip + 1, mipCount);
+        }
     }
 
     return result;
