@@ -112,7 +112,8 @@ vec4 AverageBox4(ivec3 texel)
     neighbor += LoadTexelWeighted(weight, texel + ivec3(1, 0, 1));
     neighbor += LoadTexelWeighted(weight, texel + ivec3(1, 1, 1));
 
+    neighbor /= max(weight, 1);
     neighbor.a = ceil(neighbor.a);
 
-    return neighbor / max(weight, 1);
+    return neighbor;
 }
