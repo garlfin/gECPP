@@ -19,6 +19,7 @@ using namespace gE;
 #define BRDF_GROUP_SIZE 8
 #define BRDF_GROUP_COUNT ((BRDF_SIZE) / (BRDF_GROUP_SIZE))
 #define FPS_POLL_RATE 0.1
+#define US_TO_MS 1000000.f
 
 Window::Window(glm::u16vec2 size, const char* name) :
 	_size(size), _name(strdup(name)), Lights(this), Cubemaps(this)
@@ -93,6 +94,11 @@ void Window::Run()
 	double currentTime;
 	double delta, frameDelta = 0.0;
 
+	GLuint timer;
+	u64 timerResult;
+
+	glCreateQueries(GL_TIME_ELAPSED, 1, &timer);
+
 	while(!glfwWindowShouldClose(_window))
 	{
 		glfwPollEvents();
@@ -108,21 +114,29 @@ void Window::Run()
 		_time = currentTime;
 
 	#ifdef CLAMP_FPS
-		if(frameDelta < 1.0 / _monitor.RefreshRate || frameDelta == 0) continue;
+		if(frameDelta < 1.0 / _monitor.RefreshRate) continue;
 	#endif
 
-		#ifdef ENABLE_STATISTICS
-		if(_time > FPS_POLL_RATE * pollTick)
-		{
-			sprintf_s(WindowTitleBuf, "FPS: %u, TICK: %f, RENDER: %f", (unsigned) std::ceil(1.0 / frameDelta),
-				delta * 100, frameDelta * 100);
-			glfwSetWindowTitle(_window, WindowTitleBuf);
-			pollTick++;
-		}
-		#endif
+	#ifdef ENABLE_STATISTICS
+		bool tickStatistics = _time > FPS_POLL_RATE * pollTick;
+		if(tickStatistics) glBeginQuery(GL_TIME_ELAPSED, timer);
+	#endif
 
 		OnRender((float) frameDelta);
 		glfwSwapBuffers(_window);
+
+	#ifdef ENABLE_STATISTICS
+		if(tickStatistics)
+		{
+			glEndQuery(GL_TIME_ELAPSED);
+			glGetQueryObjectui64v(timer, GL_QUERY_RESULT, &timerResult);
+
+			sprintf_s(WindowTitleBuf, "FPS: %u, TICK: %f, RENDER: %f", (unsigned) std::ceil(1.0 / frameDelta),
+				delta * US_TO_MS, timerResult / US_TO_MS);
+			glfwSetWindowTitle(_window, WindowTitleBuf);
+			pollTick++;
+		}
+	#endif
 
 		frameDelta = 0;
 	}
