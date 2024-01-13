@@ -8,11 +8,11 @@ namespace GL
 {
 	Buffer<void>* CreateBuffer(gE::Window* window, const BufferSettings& settings)
 	{
-		return new Buffer<void>(window, settings.Length, settings.Data);
+		return new Buffer<void>(window, settings.Count, settings.Data);
 	}
 
 	DynamicBuffer<void>* CreateDynamicBuffer(gE::Window* window, const BufferSettings& settings)
 	{
-		return new DynamicBuffer<void>(window, settings.Length, settings.Data);
+		return new DynamicBuffer<void>(window, settings.Count, settings.Data);
 	}
 }

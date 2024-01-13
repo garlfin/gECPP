@@ -130,16 +130,16 @@ namespace gETF
 	void VertexBuffer::Deserialize(gETF::SerializationBuffer& buf) const
 	{
 		buf.Push(Stride);
-		buf.Push(Length);
-		buf.PushPtr((u8*) Data, Stride * Length);
+		buf.Push(Count);
+		buf.PushPtr((u8*) Data, Stride * Count);
 	}
 
 	void VertexBuffer::Serialize(u8*& ptr)
 	{
 		Stride = ::Read<u8>(ptr);
-		Length = ::Read<u32>(ptr);
+		Count = ::Read < u32 > (ptr);
 
-		size_t byteSize = Stride * Length;
+		size_t byteSize = Stride * Count;
 		Data = malloc(byteSize);
 		::Read(ptr, (u8*) Data, byteSize);
 	}
@@ -175,7 +175,7 @@ namespace gETF
 
 	void VertexField::Serialize(u8*& ptr)
 	{
-		Name = ::ReadPrefixedString(ptr);
+		::Read<char, 4>(ptr, (char*) Name);
 
 		Index = ::Read<u8>(ptr);
 		BufferIndex = ::Read<u8>(ptr);

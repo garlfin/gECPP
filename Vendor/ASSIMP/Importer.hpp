@@ -430,7 +430,7 @@ public:
      * GetErrorString(). The previous scene will be deleted during this call.
      * Calling this method doesn't affect the active IOSystem.
      * @param pBuffer Pointer to the file data
-     * @param pLength Length of pBuffer, in bytes
+     * @param pLength Count of pBuffer, in bytes
      * @param pFlags Optional post processing steps to be executed after
      *   a successful import. Provide a bitwise combination of the
      *   #aiPostProcessSteps flags. If you wish to inspect the imported

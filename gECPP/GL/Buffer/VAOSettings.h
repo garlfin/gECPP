@@ -15,7 +15,7 @@ namespace GL
 	struct BufferSettings
 	{
 		u8 Stride;
-		u32 Length;
+		u32 Count;
 		void* Data;
 	};
 
