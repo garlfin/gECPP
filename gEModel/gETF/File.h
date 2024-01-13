@@ -26,6 +26,7 @@ namespace gETF
 
 		inline void Free() { free(Data); Data = nullptr; }
 		NODISCARD ALWAYS_INLINE bool IsFree() const { return Data; }
+		NODISCARD ALWAYS_INLINE u64 Size() const { return Count * Stride; }
 
 		~VertexBuffer() { free(Data); }
 	};
@@ -34,9 +35,9 @@ namespace gETF
 	{
 		SERIALIZABLE_PROTO;
 
-		const char* Name;
+		VertexField() : Name() {}
 
-		~VertexField() { delete[] Name; }
+		char Name[4];
 	};
 
  	struct MaterialSlot : public Serializable, public GL::MaterialSlot

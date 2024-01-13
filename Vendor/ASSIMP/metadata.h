@@ -144,7 +144,7 @@ inline aiMetadataType GetAiType(const aiMetadata &) {
   */
 // -------------------------------------------------------------------------------
 struct aiMetadata {
-    /** Length of the mKeys and mValues arrays, respectively */
+    /** Count of the mKeys and mValues arrays, respectively */
     unsigned int mNumProperties;
 
     /** Arrays of keys, may not be NULL. Entries in this array may not be NULL as well. */

@@ -29,16 +29,13 @@ namespace gETF
 		void PushLengthString(const char* ptr);
 		void StrCat(const char* str, bool = true, char = 0);
 		void FromFile(const char* file, bool binary = false);
+		void ToFile(const char* file);
 		char* Find(const char* str, char = 0);
 
-		NODISCARD ALWAYS_INLINE u8* Data() const
-		{ return _buf; }
+		NODISCARD ALWAYS_INLINE u8* Data() const { return _buf; }
+		NODISCARD ALWAYS_INLINE u64 Length() const { return _size; }
 
-		NODISCARD ALWAYS_INLINE u64 Length() const
-		{ return _size; }
-
-		~SerializationBuffer()
-		{ free(_buf); }
+		~SerializationBuffer() { free(_buf); }
 
 	 private:
 		u8* _buf;

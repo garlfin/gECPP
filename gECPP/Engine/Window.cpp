@@ -131,8 +131,10 @@ void Window::Run()
 			glEndQuery(GL_TIME_ELAPSED);
 			glGetQueryObjectui64v(timer, GL_QUERY_RESULT, &timerResult);
 
-			sprintf_s(WindowTitleBuf, "FPS: %u, TICK: %f, RENDER: %f", (unsigned) std::ceil(1.0 / frameDelta),
-				delta * US_TO_MS, timerResult / US_TO_MS);
+			float ms = timerResult / US_TO_MS;
+
+			sprintf_s(WindowTitleBuf, "FPS: %u, TICK: %f, RENDER: %f", (unsigned) std::ceil(1.0 / (ms / 1000)),
+				delta * US_TO_MS, ms);
 			glfwSetWindowTitle(_window, WindowTitleBuf);
 			pollTick++;
 		}

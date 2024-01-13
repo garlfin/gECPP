@@ -2,157 +2,109 @@
 // Created by scion on 8/10/2023.
 //
 
-// TODO: Completely RE-DO gEModel
-// Lazily slapped together
-
 #include "gETF.h"
-#include <ASSIMP/Importer.hpp>
-#include <ASSIMP/scene.h>
-#include <ASSIMP/postprocess.h>
+#include "ASSIMP/Importer.hpp"
+#include "ASSIMP/scene.h"
+#include "ASSIMP/postprocess.h"
 
-#define DEFINE_GL_TYPE(TYPE, VALUE) template<> CONSTEXPR_GLOBAL GLenum GLType<TYPE> = VALUE
-#define IMPORT_FLAGS (aiProcess_CalcTangentSpace | aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_LimitBoneWeights | aiProcess_ImproveCacheLocality)
+using pp = aiPostProcessSteps;
 
-template<typename T, typename I>
-using TransformFunc = void(*)(const T&, I&);
-
-template<class T, class I>
-constexpr bool IsVec3 = std::is_same_v<aiVector3t<T>, I>;
+CONSTEXPR_GLOBAL unsigned POST_PROCESS =
+	pp::aiProcess_Triangulate | pp::aiProcess_FindInvalidData | pp::aiProcess_OptimizeMeshes |
+	pp::aiProcess_ImproveCacheLocality | pp::aiProcess_CalcTangentSpace | pp::aiProcess_FindInstances |
+	pp::aiProcess_OptimizeGraph;
 
 template<class T>
 CONSTEXPR_GLOBAL GLenum GLType = 0;
 
-DEFINE_GL_TYPE(u32, GL_UNSIGNED_INT);
-DEFINE_GL_TYPE(float, GL_FLOAT);
+template<>
+CONSTEXPR_GLOBAL GLenum GLType<float> = GL_FLOAT;
 
+template<>
+CONSTEXPR_GLOBAL GLenum GLType<u32> = GL_UNSIGNED_INT;
 
-void TransformFace(const aiFace& s, aiVector3t<u32>& v)
+template<class T, u8 L>
+void AllocateField(char[4], u8, u32, gETF::VertexField&, gETF::VertexBuffer&);
+
+void TransformMesh(const std::vector<aiMesh*>&, gETF::Mesh&);
+
+int main(int argc, char** argv)
 {
-	v.x = s.mIndices[0];
-	v.y = s.mIndices[1];
-	v.z = s.mIndices[2];
-}
-
-void TransformUV(const aiVector3D& s, aiVector2D& v)
-{
-	v.x = s.x;
-	v.y = s.y;
-}
-
-template<unsigned int aiMesh::* COUNT_OFFSET, typename INDIVIDUAL_TYPE, typename T, T* aiMesh::* DATA_OFFSET, typename I = T, TransformFunc<T, I> F = nullptr>
-void CreateField(u8 index, gETF::VertexBuffer& buffer, gETF::VertexField& field, aiMesh** source, u8 count, const char* name)
-{
-	field.Index = index;
-	field.Name = strdup(name);
-	field.ElementType = GLType<INDIVIDUAL_TYPE>;
-	field.ElementCount = IsVec3<INDIVIDUAL_TYPE, I> || std::is_same_v<aiFace, I> ? 3 : 2;
-	field.Offset = 0;
-	field.BufferIndex = index;
-
-	GE_ASSERT(field.ElementType, "INVALID TYPE!");
-
-	buffer.Stride = GLSizeOf(field.ElementType) * field.ElementCount;
-	buffer.Length = 0;
-	for(u8 i = 0; i < count; i++) buffer.Length += source[i]->*COUNT_OFFSET;
-
-	I* data = (I*) malloc(sizeof(I) * buffer.Length);
-	buffer.Data = data;
-
-	for(u8 i = 0; i < count; i++)
-	{
-		u32 meshCount = source[i]->*COUNT_OFFSET;
-		T* arr = source[i]->*DATA_OFFSET;
-
-		if constexpr((bool) F) for(u32 m = 0; m < meshCount; m++) F(arr[m], data[m]);
-		else memcpy(data, arr, sizeof(I) * meshCount);
-
-		data += meshCount;
-	}
-}
-
-#ifdef DEBUG
-#include "iostream"
-#include "chrono"
-using namespace std::chrono;
-#define TIME() std::cout << duration_cast<microseconds>(high_resolution_clock::now() - t1).count() << " microseconds.\n"; t1 = high_resolution_clock::now();
-#define TIME_INIT() time_point<high_resolution_clock> t1 = high_resolution_clock::now();
-#else
-#define TIME()
-#define TIME_INIT()
-#endif
-
-int main()
-{
-	TIME_INIT();
+	GE_ASSERT(argc >= 2, "ARGS SHOULD BE AT LEAST ONE!");
 
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile("cube.dae", IMPORT_FLAGS);
+	const aiScene& scene = *importer.ReadFile(argv[0], POST_PROCESS);
 
-	TIME();
-
-	auto* submeshCount = new u8[scene->mNumMeshes] {};
-	u8 realMeshCount = 0;
-	const aiMesh* previousMesh = nullptr;
-
-	for(u8 i = 0; i < (u8) MIN(scene->mNumMeshes, UINT8_MAX); i++)
+	aiMesh* previousMesh = nullptr;
+	std::vector<std::vector<aiMesh*>> meshes;
+	for(unsigned i = 0; i < scene.mNumMeshes; i++)
 	{
-		const aiMesh* mesh = scene->mMeshes[i];
+		aiMesh* mesh = scene.mMeshes[i];
 
-		if(!previousMesh || !strcmp(previousMesh->mName.data, mesh->mName.data))
-		{
-			submeshCount[realMeshCount]++;
-			realMeshCount++;
-		}
+		if(!previousMesh || mesh->mName != previousMesh->mName)
+			meshes.emplace_back(1).push_back(mesh);
+		else
+			meshes.back().push_back(mesh);
 
 		previousMesh = mesh;
 	}
 
-	gETF::File file {};
+	gETF::File file;
+	file.MeshCount = meshes.size();
+	file.Meshes = new gE::Reference<gETF::Mesh>[meshes.size()];
 
-	file.MeshCount = realMeshCount;
-	file.Meshes = new gETF::MeshReference[realMeshCount];
+	for(unsigned i = 0; i < file.MeshCount; i++)
+		TransformMesh(meshes[i], file.Meshes[i] = gE::ref_create<gETF::Mesh>());
 
-	for(u8 mI = 0, i = 0; i < realMeshCount; mI += submeshCount[i], i++)
+	gETF::SerializationBuffer writeBuffer;
+	file.Deserialize(writeBuffer);
+	writeBuffer.ToFile(argv[1]);
+}
+
+void TransformMesh(const std::vector<aiMesh*>& src, gETF::Mesh& dst)
+{
+	u64 vertexCount = 0, triangleCount = 0;
+
+	dst.MaterialCount = src.size();
+	for(unsigned i = 0; i < dst.MaterialCount; i++)
 	{
-		gETF::Mesh& mesh = *(file.Meshes[i] = gETF::MeshReference(new gETF::Mesh()));
-		aiMesh** sourceMesh = &scene->mMeshes[mI];
-		u32 subCount = submeshCount[i];
+		const aiMesh& mesh = *src[i];
+		gETF::MaterialSlot& material = dst.Materials[i];
 
-		mesh.BufferCount = 5; // POS UV NOR TAN TRI
-		mesh.FieldCount = 4; // POS UV NOR TAN
-		mesh.Buffers = new gETF::VertexBuffer[mesh.BufferCount];
-		mesh.Fields = new gETF::VertexField[mesh.FieldCount];
+		vertexCount += mesh.mNumVertices;
+		triangleCount += mesh.mNumFaces;
 
-		mesh.TriangleMode = gETF::TriangleMode::Simple;
-		CreateField<&aiMesh::mNumFaces, u32, aiFace, &aiMesh::mFaces, aiVector3t<u32>, TransformFace>(4, mesh.Buffers[4], mesh.Triangles, sourceMesh, subCount, "TRI");
-
-		// I may have overcomplicated things
-		CreateField<&aiMesh::mNumVertices, float, aiVector3D, &aiMesh::mVertices>(0, mesh.Buffers[0], mesh.Fields[0], sourceMesh, subCount, "POS");
-		CreateField<&aiMesh::mNumVertices, float, aiVector3D, &aiMesh::FirstMap, aiVector2D, TransformUV>(1, mesh.Buffers[1], mesh.Fields[1], sourceMesh, subCount, "UV");
-		CreateField<&aiMesh::mNumVertices, float, aiVector3D, &aiMesh::mNormals>(2, mesh.Buffers[2], mesh.Fields[2], sourceMesh, subCount, "NOR");
-		CreateField<&aiMesh::mNumVertices, float, aiVector3D, &aiMesh::mTangents>(3, mesh.Buffers[3], mesh.Fields[3], sourceMesh, subCount, "TAN");
-
-		mesh.MaterialCount = submeshCount[i];
-		mesh.Materials = new gETF::MaterialSlot[submeshCount[i]];
-		u32 triOffset = 0;
-
-		for(u8 m = 0; m < submeshCount[i]; m++)
-		{
-			gETF::MaterialSlot& mat = mesh.Materials[i];
-			mat.MaterialIndex = 0;
-			mat.Offset = triOffset;
-			triOffset += mat.Count = sourceMesh[m]->mNumFaces;
-		}
+		material.MaterialIndex = i;
+		material.Count = mesh.mNumFaces;
+		material.Offset = triangleCount;
 	}
-	TIME();
-	gETF::SerializationBuffer buf{};
-	file.Deserialize(buf);
 
+	dst.BufferCount = 5;
+	dst.FieldCount = 4;
 
-	FILE* output = fopen("cube.gETF", "wb");
-	fwrite(buf.Data(), buf.Length(), 1, output);
-	fclose(output);
-	TIME();
+	dst.Buffers = new gETF::VertexBuffer[dst.BufferCount];
+	dst.Fields = new gETF::VertexField[dst.BufferCount];
 
-	return 0;
+	AllocateField<float, 3>("POS\0", 0, vertexCount, dst.Fields[0], dst.Buffers[0]);
+	AllocateField<float, 2>("UV0\0", 1, vertexCount, dst.Fields[1], dst.Buffers[1]);
+	AllocateField<float, 3>("NOR\0", 2, vertexCount, dst.Fields[2], dst.Buffers[2]);
+	AllocateField<float, 3>("TAN\0", 3, vertexCount, dst.Fields[3], dst.Buffers[3]);
+
+	dst.TriangleMode = gETF::TriangleMode::Simple;
+	AllocateField<u32, 3>("TRI\0", 4, triangleCount, dst.Triangles, dst.Buffers[4]);
+}
+
+template<class T, u8 L>
+void AllocateField(char name[], u8 index, u32 count, gETF::VertexField& field, gETF::VertexBuffer& buf)
+{
+	memcpy((void*) field.Name, (void*) name, sizeof(field.Name));
+	field.ElementType = GLType<T>;
+	field.ElementCount = L;
+	field.Index = index;
+	field.BufferIndex = index;
+	field.Offset = 0;
+
+	buf.Count = count;
+	buf.Stride = sizeof(T) * L;
+	buf.Data = malloc(buf.Count * buf.Stride);
 }

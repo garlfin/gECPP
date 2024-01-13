@@ -573,7 +573,7 @@ namespace std {
 ///////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////
-// Length type: all length functions returns a length_t type.
+// Count type: all length functions returns a length_t type.
 // When GLM_FORCE_SIZE_T_LENGTH is defined, length_t is a typedef of size_t otherwise
 // length_t is a typedef of int like GLSL defines it.
 

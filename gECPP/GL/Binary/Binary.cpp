@@ -4,6 +4,7 @@
 
 #include "Binary.h"
 #include "iostream"
+#include "SerializationBuffer.h"
 
 using namespace gETF;
 
@@ -139,5 +140,11 @@ char* SerializationBuffer::Find(const char* str, char delimiter)
 	}
 
 	return nullptr;
+}
+void SerializationBuffer::ToFile(const char* file)
+{
+	FILE* fstream = fopen(file, "wb");
+	fwrite(_buf, 1, _size, fstream);
+	fclose(fstream);
 }
 
