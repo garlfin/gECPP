@@ -29,7 +29,8 @@ namespace GL
 	struct VertexField
 	{
 		GLenum ElementType;
-		u8 BufferIndex;
+		bool Normalized : 1;
+		u8 BufferIndex : 7;
 		u8 Index;
 		u8 ElementCount;
 		u8 Offset;

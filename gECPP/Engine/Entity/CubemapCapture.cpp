@@ -66,7 +66,6 @@ namespace gE
 		glDisable(GL_CULL_FACE);
 		glDepthFunc(GL_LEQUAL);
 
-
 		_skyboxVAO->Draw(0, _window->State.InstanceMultiplier);
 	}
 

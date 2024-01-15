@@ -122,7 +122,6 @@ namespace gETF
 	{
 		GE_ASSERT(TriangleMode != TriangleMode::None, "CANNOT GET TRIANGLES!");
 
-		// Not too sure how legal this is
 		GetVAOSettings((GL::VAOSettings&) settings);
 		settings.Triangles = Triangles;
 	}
@@ -137,7 +136,7 @@ namespace gETF
 	void VertexBuffer::Serialize(u8*& ptr)
 	{
 		Stride = ::Read<u8>(ptr);
-		Count = ::Read < u32 > (ptr);
+		Count = ::Read<u32> (ptr);
 
 		size_t byteSize = Stride * Count;
 		Data = malloc(byteSize);
@@ -182,6 +181,7 @@ namespace gETF
 		ElementCount = ::Read<u8>(ptr);
 		Offset = ::Read<u8>(ptr);
 		ElementType = ::Read<GLenum>(ptr);
+		Normalized = ::Read<bool>(ptr);
 	}
 
 	void VertexField::Deserialize(gETF::SerializationBuffer& buf) const
@@ -193,5 +193,6 @@ namespace gETF
 		buf.Push(ElementCount);
 		buf.Push(Offset);
 		buf.Push(ElementType);
+		buf.Push(Normalized);
 	}
 }

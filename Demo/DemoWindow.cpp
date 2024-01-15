@@ -34,7 +34,9 @@ void DemoWindow::OnInit()
 	gETF::Read("Resource/Model/cube.gETF", cube);
 
 	auto* mesh = new VoxelDemo::StaticMeshEntity(this, cube.Meshes[0]);
-	mesh->GetMaterials().SetMaterial(0, std::move(rasterMaterial));
+
+	mesh->GetTransform().Scale = glm::vec3(0.5);
+	mesh->GetMaterials().SetMaterial(0, rasterMaterial);
 
 	glm::vec3 sunRotation(-31.f, 30.f, 0.f);
 	auto* sun = new gE::DirectionalLight(this, 1024, 10.f, glm::quat(glm::radians(sunRotation)));
@@ -43,11 +45,11 @@ void DemoWindow::OnInit()
 	auto* camera = new FlyCamera(this);
 	Cameras.CurrentCamera = &camera->GetTarget();
 
-	auto* cubemapCap = new gE::CubemapCapture(this, 256);
-	cubemapCap->GetTransform().Position.y = 2.5f;
-	cubemapCap->GetTransform().Scale = glm::vec3(5, 2.5f, 5);
+	auto* cubemapCap = new gE::CubemapCapture(this, 512);
+	cubemapCap->GetTransform().Position.y = 4.1f;
+	cubemapCap->GetTransform().Scale = glm::vec3(2.1f);
 
 	Cubemaps.Skybox = gE::ref_cast((GL::TextureCube*) PVR::Read(this, "Resource/Texture/sky.pvr", GL::WrapMode::Clamp));
 
-	VoxelSceneCapture = new gE::VoxelCapture(this, 128, 5.f);
+	VoxelSceneCapture = new gE::VoxelCapture(this, 128, 4.2f);
 }

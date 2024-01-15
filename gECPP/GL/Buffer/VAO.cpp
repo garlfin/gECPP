@@ -27,7 +27,7 @@ namespace GL
 
 			glEnableVertexArrayAttrib(ID, field.Index);
 			glVertexArrayAttribBinding(ID, field.Index, field.BufferIndex);
-			glVertexArrayAttribFormat(ID, field.Index, field.ElementCount, field.ElementType, false, field.Offset);
+			glVertexArrayAttribFormat(ID, field.Index, field.ElementCount, field.ElementType, field.Normalized, field.Offset);
 		}
 	}
 

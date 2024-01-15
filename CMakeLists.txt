@@ -31,13 +31,15 @@ add_library(GETF STATIC gEModel/gETF.h gEModel/gETF/gETF.cpp gECPP/GL/Binary/Bin
 
 # GEMODEL
 file(GLOB_RECURSE gEMODEL_SRC gEModel/Converter)
-add_executable(gEModel gEModel/main.cpp ${gEMODEL_SRC})
+add_executable(gEModel gEModel/main.cpp ${gEMODEL_SRC}
+        gEModel/Vertex.h)
 target_link_libraries(gEModel PRIVATE ASSIMP GETF GLAD)
 # gotta link glad or it yaps about linking
 
 # GECPP
 file(GLOB_RECURSE GECPP_SRC "gECPP/*.cpp" "gECPP/*.h")
-add_library(gECPP STATIC ${GECPP_SRC})
+add_library(gECPP STATIC ${GECPP_SRC}
+        gECPP/GL/Type.h)
 target_link_libraries(gECPP GLAD GLFW GETF)
 
 # VOXELDEMO

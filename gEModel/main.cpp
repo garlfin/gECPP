@@ -3,6 +3,9 @@
 //
 
 #include "gETF.h"
+#include "Vertex.h"
+
+#include "GL/Type.h"
 #include "ASSIMP/Importer.hpp"
 #include "ASSIMP/scene.h"
 #include "ASSIMP/postprocess.h"
@@ -14,26 +17,32 @@ CONSTEXPR_GLOBAL unsigned POST_PROCESS =
 	pp::aiProcess_ImproveCacheLocality | pp::aiProcess_CalcTangentSpace | pp::aiProcess_FindInstances |
 	pp::aiProcess_OptimizeGraph;
 
+
+template<class T, class F>
+using ConversionFunc = void(u32, const F&, T&);
+
+template<class T, class S>
+gETF::VertexField CreateField(T S::* DST, char[4], u8 i, u8 buf);
+
+template<class T, class S, class F>
+void FillBuffer(T S::* DST, F* aiMesh::* SRC, u32 aiMesh::* COUNT, gETF::VertexBuffer& buf,
+	const std::vector<aiMesh*>& src, ConversionFunc<T, F>* FUNC = nullptr);
+
 template<class T>
-CONSTEXPR_GLOBAL GLenum GLType = 0;
+void AllocateBuffer(u32 aiMesh::* COUNT, gETF::VertexBuffer& buf, const std::vector<aiMesh*>& src);
 
-template<>
-CONSTEXPR_GLOBAL GLenum GLType<float> = GL_FLOAT;
-
-template<>
-CONSTEXPR_GLOBAL GLenum GLType<u32> = GL_UNSIGNED_INT;
-
-template<class T, u8 L>
-void AllocateField(char[4], u8, u32, gETF::VertexField&, gETF::VertexBuffer&);
+void FillUVBuffer(gETF::VertexBuffer& buf, const std::vector<aiMesh*>& src);
 
 void TransformMesh(const std::vector<aiMesh*>&, gETF::Mesh&);
+void ConvertVec(u32, const aiVector3t<float>&, glm::i8vec3&);
+void ConvertFace(u32, const aiFace&, glm::uvec3&);
 
 int main(int argc, char** argv)
 {
-	GE_ASSERT(argc >= 2, "ARGS SHOULD BE AT LEAST ONE!");
+	GE_ASSERT(argc >= 3, "USAGE: in.file out.file!");
 
 	Assimp::Importer importer;
-	const aiScene& scene = *importer.ReadFile(argv[0], POST_PROCESS);
+	const aiScene& scene = *importer.ReadFile(argv[1], POST_PROCESS);
 
 	aiMesh* previousMesh = nullptr;
 	std::vector<std::vector<aiMesh*>> meshes;
@@ -42,7 +51,7 @@ int main(int argc, char** argv)
 		aiMesh* mesh = scene.mMeshes[i];
 
 		if(!previousMesh || mesh->mName != previousMesh->mName)
-			meshes.emplace_back(1).push_back(mesh);
+			meshes.emplace_back().push_back(mesh);
 		else
 			meshes.back().push_back(mesh);
 
@@ -58,7 +67,9 @@ int main(int argc, char** argv)
 
 	gETF::SerializationBuffer writeBuffer;
 	file.Deserialize(writeBuffer);
-	writeBuffer.ToFile(argv[1]);
+	writeBuffer.ToFile(argv[2]);
+
+	return 0;
 }
 
 void TransformMesh(const std::vector<aiMesh*>& src, gETF::Mesh& dst)
@@ -66,45 +77,128 @@ void TransformMesh(const std::vector<aiMesh*>& src, gETF::Mesh& dst)
 	u64 vertexCount = 0, triangleCount = 0;
 
 	dst.MaterialCount = src.size();
+	dst.Materials = new gETF::MaterialSlot[dst.MaterialCount];
 	for(unsigned i = 0; i < dst.MaterialCount; i++)
 	{
 		const aiMesh& mesh = *src[i];
 		gETF::MaterialSlot& material = dst.Materials[i];
 
-		vertexCount += mesh.mNumVertices;
-		triangleCount += mesh.mNumFaces;
-
 		material.MaterialIndex = i;
 		material.Count = mesh.mNumFaces;
 		material.Offset = triangleCount;
+
+		vertexCount += mesh.mNumVertices;
+		triangleCount += mesh.mNumFaces;
 	}
 
-	dst.BufferCount = 5;
+	dst.BufferCount = 2;
 	dst.FieldCount = 4;
 
-	dst.Buffers = new gETF::VertexBuffer[dst.BufferCount];
-	dst.Fields = new gETF::VertexField[dst.BufferCount];
+	dst.Buffers = new gETF::VertexBuffer[dst.BufferCount] {};
+	dst.Fields = new gETF::VertexField[dst.FieldCount];
 
-	AllocateField<float, 3>("POS\0", 0, vertexCount, dst.Fields[0], dst.Buffers[0]);
-	AllocateField<float, 2>("UV0\0", 1, vertexCount, dst.Fields[1], dst.Buffers[1]);
-	AllocateField<float, 3>("NOR\0", 2, vertexCount, dst.Fields[2], dst.Buffers[2]);
-	AllocateField<float, 3>("TAN\0", 3, vertexCount, dst.Fields[3], dst.Buffers[3]);
+	AllocateBuffer<Vertex>(&aiMesh::mNumVertices, dst.Buffers[0], src);
+	AllocateBuffer<Face>(&aiMesh::mNumFaces, dst.Buffers[1], src);
+
+	dst.Fields[0] = CreateField(&Vertex::Position, "POS\0", 0, 0);
+	FillBuffer(&Vertex::Position, &aiMesh::mVertices, &aiMesh::mNumVertices, dst.Buffers[0], src);
+
+	dst.Fields[1] = CreateField(&Vertex::UV, "UV0\0", 1, 0);
+	FillUVBuffer(dst.Buffers[0], src);
+
+	dst.Fields[2] = CreateField(&Vertex::Normal, "NOR\0", 2, 0);
+	FillBuffer(&Vertex::Normal, &aiMesh::mNormals, &aiMesh::mNumVertices, dst.Buffers[0], src, ConvertVec);
+
+	dst.Fields[3] = CreateField(&Vertex::Tangent, "TAN\0", 3, 0);
+	FillBuffer(&Vertex::Tangent, &aiMesh::mTangents, &aiMesh::mNumVertices, dst.Buffers[0], src, ConvertVec);
 
 	dst.TriangleMode = gETF::TriangleMode::Simple;
-	AllocateField<u32, 3>("TRI\0", 4, triangleCount, dst.Triangles, dst.Buffers[4]);
+	dst.Triangles = CreateField(&Face::Triangle, "TRI\0", 0, 1);
+	FillBuffer(&Face::Triangle, &aiMesh::mFaces, &aiMesh::mNumFaces, dst.Buffers[1], src, ConvertFace);
 }
 
-template<class T, u8 L>
-void AllocateField(char name[], u8 index, u32 count, gETF::VertexField& field, gETF::VertexBuffer& buf)
+template<class T, class S>
+gETF::VertexField CreateField(T S::* DST, char name[4], u8 index, u8 bufIndex)
 {
-	memcpy((void*) field.Name, (void*) name, sizeof(field.Name));
-	field.ElementType = GLType<T>;
-	field.ElementCount = L;
-	field.Index = index;
-	field.BufferIndex = index;
-	field.Offset = 0;
+	gETF::VertexField field;
 
-	buf.Count = count;
-	buf.Stride = sizeof(T) * L;
-	buf.Data = malloc(buf.Count * buf.Stride);
+	memcpy((void*) field.Name, (void*) name, sizeof(field.Name));
+	field.ElementType = GLType<typename T::value_type>;
+	field.ElementCount = T::length();
+	field.Index = index;
+
+	field.BufferIndex = bufIndex;
+	field.Offset = (u8) (size_t) &((S*) nullptr->*DST); // Work of the Devil?
+	field.Normalized = !std::is_same_v<typename T::value_type, float>;
+
+	return field;
+}
+
+template<class T, class S, class F>
+void FillBuffer(T S::* DST, F* aiMesh::* SRC, u32 aiMesh::* COUNT, gETF::VertexBuffer& buf,
+	const std::vector<aiMesh*>& src, ConversionFunc<T, F>* FUNC)
+{
+	S* dst = (S*) buf.Data;
+	u32 offset = 0;
+
+	for(aiMesh* mesh : src)
+	{
+		u32 count = mesh->*COUNT;
+		F* source = mesh->*SRC;
+
+		for(u32 i = 0; i < count; i++)
+		{
+			if(FUNC) FUNC(offset, source[i], dst->*DST);
+			else dst->*DST = *(T*) &source[i];
+			dst++;
+		}
+
+		offset += mesh->mNumVertices;
+	}
+}
+
+void ConvertVec(u32, const aiVector3t<float>& src, glm::i8vec3& dst)
+{
+	glm::vec3 vec = *(glm::vec3*) &src; // Work of an Angel?
+	vec = glm::clamp(vec, glm::vec3(-1), glm::vec3(1.0));
+	dst = vec * glm::vec3(INT8_MAX);
+}
+
+void ConvertFace(u32 offset, const aiFace& src, glm::uvec3& dst)
+{
+	dst = *(glm::uvec3*) src.mIndices; // Work of Jesus?
+	dst += offset;
+}
+
+void FillUVBuffer(gETF::VertexBuffer& buf, const std::vector<aiMesh*>& src)
+{
+	auto* dst = (Vertex*) buf.Data;
+	u32 offset = 0;
+
+	for(aiMesh* mesh : src)
+	{
+		u32 count = mesh->mNumVertices;
+
+		for(u32 i = 0; i < count; i++)
+		{
+			dst->UV = *(glm::vec2*) &mesh->mTextureCoords[0][i];
+			dst++;
+		}
+
+		offset += mesh->mNumVertices;
+	}
+}
+
+template<class T>
+void AllocateBuffer(u32 aiMesh::* COUNT, gETF::VertexBuffer& buf, const std::vector<aiMesh*>& src)
+{
+	u32 finalCount = 0;
+	for(aiMesh* mesh : src) finalCount += mesh->*COUNT;
+
+	if(!buf.Data)
+	{
+		buf.Stride = sizeof(T);
+		buf.Count = finalCount;
+		buf.Data = malloc(buf.Stride * buf.Count);
+	}
 }
