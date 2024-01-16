@@ -17,12 +17,11 @@ CONSTEXPR_GLOBAL unsigned POST_PROCESS =
 	pp::aiProcess_ImproveCacheLocality | pp::aiProcess_CalcTangentSpace | pp::aiProcess_FindInstances |
 	pp::aiProcess_OptimizeGraph;
 
-
 template<class T, class F>
 using ConversionFunc = void(u32, const F&, T&);
 
 template<class T, class S>
-gETF::VertexField CreateField(T S::* DST, char[4], u8 i, u8 buf);
+gETF::VertexField CreateField(T S::* DST, const char[4], u8 i, u8 buf);
 
 template<class T, class S, class F>
 void FillBuffer(T S::* DST, F* aiMesh::* SRC, u32 aiMesh::* COUNT, gETF::VertexBuffer& buf,
@@ -74,7 +73,7 @@ int main(int argc, char** argv)
 
 void TransformMesh(const std::vector<aiMesh*>& src, gETF::Mesh& dst)
 {
-	u64 vertexCount = 0, triangleCount = 0;
+	u64 vertexCount = 0;
 
 	dst.MaterialCount = src.size();
 	dst.Materials = new gETF::MaterialSlot[dst.MaterialCount];
@@ -85,10 +84,9 @@ void TransformMesh(const std::vector<aiMesh*>& src, gETF::Mesh& dst)
 
 		material.MaterialIndex = i;
 		material.Count = mesh.mNumFaces;
-		material.Offset = triangleCount;
+		material.Offset = vertexCount;
 
 		vertexCount += mesh.mNumVertices;
-		triangleCount += mesh.mNumFaces;
 	}
 
 	dst.BufferCount = 2;
@@ -118,7 +116,7 @@ void TransformMesh(const std::vector<aiMesh*>& src, gETF::Mesh& dst)
 }
 
 template<class T, class S>
-gETF::VertexField CreateField(T S::* DST, char name[4], u8 index, u8 bufIndex)
+gETF::VertexField CreateField(T S::* DST, const char name[4], u8 index, u8 bufIndex)
 {
 	gETF::VertexField field;
 
@@ -166,7 +164,7 @@ void ConvertVec(u32, const aiVector3t<float>& src, glm::i8vec3& dst)
 
 void ConvertFace(u32 offset, const aiFace& src, glm::uvec3& dst)
 {
-	dst = *(glm::uvec3*) src.mIndices; // Work of Jesus?
+	dst = glm::uvec3(src.mIndices[0], src.mIndices[1], src.mIndices[3]);
 	dst += offset;
 }
 
