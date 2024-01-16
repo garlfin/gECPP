@@ -11,7 +11,7 @@ struct Vertex
 	Vertex() = default;
 
 	glm::vec3 Position;
-	alignas(8) glm::vec2 UV;
+	glm::vec2 UV;
 	glm::i8vec3 Normal;
 	alignas(4) glm::i8vec3 Tangent;
 };

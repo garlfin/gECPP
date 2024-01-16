@@ -136,7 +136,7 @@ namespace gETF
 	void VertexBuffer::Serialize(u8*& ptr)
 	{
 		Stride = ::Read<u8>(ptr);
-		Count = ::Read<u32> (ptr);
+		Count = ::Read<u32>(ptr);
 
 		size_t byteSize = Stride * Count;
 		Data = malloc(byteSize);

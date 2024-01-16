@@ -86,13 +86,13 @@ void TransformMesh(const std::vector<aiMesh*>& src, gETF::Mesh& dst)
 		material.Count = mesh.mNumFaces;
 		material.Offset = vertexCount;
 
-		vertexCount += mesh.mNumVertices;
+		vertexCount += mesh.mNumFaces;
 	}
 
 	dst.BufferCount = 2;
 	dst.FieldCount = 4;
 
-	dst.Buffers = new gETF::VertexBuffer[dst.BufferCount] {};
+	dst.Buffers = new gETF::VertexBuffer[dst.BufferCount];
 	dst.Fields = new gETF::VertexField[dst.FieldCount];
 
 	AllocateBuffer<Vertex>(&aiMesh::mNumVertices, dst.Buffers[0], src);
@@ -164,7 +164,7 @@ void ConvertVec(u32, const aiVector3t<float>& src, glm::i8vec3& dst)
 
 void ConvertFace(u32 offset, const aiFace& src, glm::uvec3& dst)
 {
-	dst = glm::uvec3(src.mIndices[0], src.mIndices[1], src.mIndices[3]);
+	dst = *(glm::uvec3*) src.mIndices;
 	dst += offset;
 }
 
@@ -193,10 +193,7 @@ void AllocateBuffer(u32 aiMesh::* COUNT, gETF::VertexBuffer& buf, const std::vec
 	u32 finalCount = 0;
 	for(aiMesh* mesh : src) finalCount += mesh->*COUNT;
 
-	if(!buf.Data)
-	{
-		buf.Stride = sizeof(T);
-		buf.Count = finalCount;
-		buf.Data = malloc(buf.Stride * buf.Count);
-	}
+	buf.Stride = sizeof(T);
+	buf.Count = finalCount;
+	buf.Data = malloc(buf.Stride * buf.Count);
 }
