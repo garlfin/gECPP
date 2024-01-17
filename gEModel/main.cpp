@@ -15,7 +15,7 @@ using pp = aiPostProcessSteps;
 CONSTEXPR_GLOBAL unsigned POST_PROCESS =
 	pp::aiProcess_Triangulate | pp::aiProcess_FindInvalidData | pp::aiProcess_OptimizeMeshes |
 	pp::aiProcess_ImproveCacheLocality | pp::aiProcess_CalcTangentSpace | pp::aiProcess_FindInstances |
-	pp::aiProcess_OptimizeGraph;
+	pp::aiProcess_OptimizeGraph | aiProcess_JoinIdenticalVertices;
 
 template<class T, class F>
 using ConversionFunc = void(u32, const F&, T&);
@@ -164,8 +164,8 @@ void ConvertVec(u32, const aiVector3t<float>& src, glm::i8vec3& dst)
 
 void ConvertFace(u32 offset, const aiFace& src, glm::uvec3& dst)
 {
-	dst = *(glm::uvec3*) src.mIndices;
-	dst += offset;
+	dst = *(glm::uvec3*)src.mIndices + offset;
+	std::cout << dst.x << ", " << dst.y << ", " << dst.z << '\n';
 }
 
 void FillUVBuffer(gETF::VertexBuffer& buf, const std::vector<aiMesh*>& src)

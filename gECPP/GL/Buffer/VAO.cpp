@@ -44,7 +44,7 @@ namespace GL
 		if(!instanceCount) return;
 		Bind();
 		const GL::MaterialSlot& mesh = _settings.Materials[index];
-		glDrawElementsInstanced(GL_TRIANGLES, mesh.Count * 3, _triangles.ElementType, (void*) u64(mesh.Offset * 3), instanceCount);
+		glDrawElementsInstanced(GL_TRIANGLES, mesh.Count * 3, _triangles.ElementType, (void*) (sizeof(u32) * mesh.Offset * 3), instanceCount);
 	}
 
 	/*void VAO::Realloc(u32 vertexCount, void* data = nullptr)
