@@ -19,15 +19,15 @@
 
 namespace gETF
 {
-	void File::Deserialize(SerializationBuffer& buf) const
+	void File::Deserialize(SerializationBuffer& buf, const File& s) const
 	{
-		buf.PushPtr("gETF", 4);
+		buf.PushPtr<4>("gETF");
 		buf.Push<u8>(GETF_VERSION);
 		buf.Push(MeshCount);
-		for(u8 i = 0; i < MeshCount; i++) buf.Push(*Meshes[i].Get());
+		for(u8 i = 0; i < MeshCount; i++) buf.PushSerializable(*Meshes[i].Get(), s);
 	}
 
-	void File::Serialize(u8*& ptr)
+	void File::Serialize(u8*& ptr, const File& s)
 	{
 		char magic[4];
 		::Read<char, 4>(ptr, magic);
@@ -41,27 +41,27 @@ namespace gETF
 		u8 version = ::Read<u8>(ptr);
 		MeshCount = ::Read<u8>(ptr);
 		Meshes = new MeshReference[MeshCount];
-		for(u8 i = 0; i < MeshCount; i++) Meshes[i] = gE::ref_cast(ReadNew<Mesh>(ptr));
+		for(u8 i = 0; i < MeshCount; i++) Meshes[i] = gE::ref_cast(ReadNewSerializable<Mesh>(ptr, s));
 	}
 
-	void Mesh::Deserialize(gETF::SerializationBuffer& buf) const
+	void Mesh::Deserialize(gETF::SerializationBuffer& buf, const File& s) const
 	{
 		buf.PushPtr<4>("MESH");
 
 		buf.Push(BufferCount);
-		buf.PushPtr(Buffers, BufferCount);
+		buf.PushSerializablePtr(Buffers, s, BufferCount);
 
 		buf.Push(FieldCount);
-		buf.PushPtr(Fields, FieldCount);
+		buf.PushSerializablePtr(Fields, s, FieldCount);
 
 		buf.Push(TriangleMode);
-		if(TriangleMode != TriangleMode::None) buf.Push(Triangles);
+		if(TriangleMode != TriangleMode::None) buf.PushSerializable(Triangles, s);
 
 		buf.Push(MaterialCount);
-		buf.PushPtr(Materials, MaterialCount);
+		buf.PushSerializablePtr(Materials, s, MaterialCount);
 	}
 
-	void Mesh::Serialize(u8*& ptr)
+	void Mesh::Serialize(u8*& ptr, const File& s)
 	{
 		char magic[4];
 		::Read<char, 4>(ptr, magic);
@@ -70,18 +70,18 @@ namespace gETF
 
 		BufferCount = ::Read<u8>(ptr);
 		Buffers = new VertexBuffer[BufferCount];
-		::Read(ptr, Buffers, BufferCount);
+		ReadSerializable(ptr, Buffers, s, BufferCount);
 
 		FieldCount = ::Read<u8>(ptr);
 		Fields = new VertexField[FieldCount];
-		::Read(ptr, Fields, FieldCount);
+		ReadSerializable(ptr, Fields, s, FieldCount);
 
 		TriangleMode = ::Read<enum TriangleMode>(ptr);
-		if(TriangleMode != TriangleMode::None) Triangles.Serialize(ptr);
+		if(TriangleMode != TriangleMode::None) Triangles.Serialize(ptr, s);
 
 		MaterialCount = ::Read<u8>(ptr);
 		Materials = new MaterialSlot[MaterialCount];
-		::Read(ptr, Materials, MaterialCount);
+		ReadSerializable(ptr, Materials, s, MaterialCount);
 	}
 
 	Mesh::~Mesh()
@@ -103,7 +103,7 @@ namespace gETF
 			VAO = gE::SmartPointer<GL::VAO>(new GL::IndexedVAO(w, settings));
 	}
 
-	void Mesh::GetVAOSettings(GL::VAOSettings& settings)
+	void Mesh::GetVAOSettings(GL::VAOSettings& settings) const
 	{
 		GE_ASSERT(BufferCount <= GE_MAX_VAO_BUFFER, "TOO MANY BUFFERS!");
 		settings.BufferCount = BufferCount;
@@ -118,7 +118,7 @@ namespace gETF
 		for(u8 i = 0; i < MaterialCount; i++) settings.Materials[i] = Materials[i];
 	}
 
-	void Mesh::GetVAOSettings(GL::IndexedVAOSettings& settings)
+	void Mesh::GetVAOSettings(GL::IndexedVAOSettings& settings) const
 	{
 		GE_ASSERT(TriangleMode != TriangleMode::None, "CANNOT GET TRIANGLES!");
 
@@ -126,14 +126,14 @@ namespace gETF
 		settings.Triangles = Triangles;
 	}
 
-	void VertexBuffer::Deserialize(gETF::SerializationBuffer& buf) const
+	void VertexBuffer::Deserialize(gETF::SerializationBuffer& buf, const File&) const
 	{
 		buf.Push(Stride);
 		buf.Push(Count);
 		buf.PushPtr((u8*) Data, Stride * Count);
 	}
 
-	void VertexBuffer::Serialize(u8*& ptr)
+	void VertexBuffer::Serialize(u8*& ptr, const File&)
 	{
 		Stride = ::Read<u8>(ptr);
 		Count = ::Read<u32>(ptr);
@@ -143,14 +143,14 @@ namespace gETF
 		::Read(ptr, (u8*) Data, byteSize);
 	}
 
-	void MaterialSlot::Deserialize(gETF::SerializationBuffer& buf) const
+	void MaterialSlot::Deserialize(gETF::SerializationBuffer& buf, const File&) const
 	{
 		buf.Push(MaterialIndex);
 		buf.Push(Offset);
 		buf.Push(Count);
 	}
 
-	void MaterialSlot::Serialize(u8*& ptr)
+	void MaterialSlot::Serialize(u8*& ptr, const File&)
 	{
 		MaterialIndex = ::Read<u8>(ptr);
 		Offset = ::Read<u32>(ptr);
@@ -161,7 +161,7 @@ namespace gETF
 	{
 		u8* src = ReadFile(file, true);
 		u8* srcCpy = src;
-		header.Serialize(srcCpy);
+		header.Serialize(srcCpy, header);
 		delete[] src;
 		return header;
 	}
@@ -172,7 +172,7 @@ namespace gETF
 		return &Read(file, *h);
 	}
 
-	void VertexField::Serialize(u8*& ptr)
+	void VertexField::Serialize(u8*& ptr, const File&)
 	{
 		::Read<char, 4>(ptr, (char*) Name);
 
@@ -184,9 +184,9 @@ namespace gETF
 		Normalized = ::Read<bool>(ptr);
 	}
 
-	void VertexField::Deserialize(gETF::SerializationBuffer& buf) const
+	void VertexField::Deserialize(gETF::SerializationBuffer& buf, const File&) const
 	{
-		buf.PushLengthString(Name);
+		buf.PushPrefixedString(Name);
 
 		buf.Push(Index);
 		buf.Push(BufferIndex);

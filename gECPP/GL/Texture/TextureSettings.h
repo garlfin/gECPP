@@ -5,7 +5,7 @@
 #pragma once
 
 #include <GL/Math.h>
-#include <gEModel/gETF/Prototype.h>
+#include <gEModel/gETF/Serializable.h>
 #include "GLAD/glad.h"
 #include "GL/Binary/Binary.h"
 
@@ -40,7 +40,7 @@ namespace PVR
 		SRGB = 1,
 	};
 
-	struct Header : gETF::Serializable
+	struct Header : gETF::Serializable<u32>
 	{
 		SERIALIZABLE_PROTO;
 

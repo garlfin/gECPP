@@ -24,20 +24,16 @@ bool strcmpb(const char* a, const char(& b)[LENGTH]);
 
 // Various helper functions
 const char* IncrementLine(const char* s, char d = '\n');
-template<class T>
-void RemoveFirstFromVec(std::vector<T>& vec, const T& t);
+template<class T> void RemoveFirstFromVec(std::vector<T>& vec, const T& t);
 
 // Binary helper functions
 char* ReadPrefixedString(u8*& ptr);
 u8* ReadFile(const char* name, u32& length, bool binary = false);
 inline u8* ReadFile(const char* name, bool binary = false);
 
-template<typename T>
-T Read(u8*& src);
-template<typename T>
-void Read(u8*& src, T* ts, u32 count);
-template<typename T, u32 COUNT>
-void Read(u8*& src, T* ts);
+template<typename T> T Read(u8*& src);
+template<typename T> void Read(u8*& src, T* ts, u32 count);
+template<typename T, u32 COUNT> void Read(u8*& src, T* ts);
 
 // Implementation
 template<u32 LENGTH>
@@ -59,7 +55,8 @@ bool strcmpb(const char* a, const char(& b)[LENGTH])
 template<typename T>
 T Read(u8*& src)
 {
-	static_assert(!std::is_base_of_v<gETF::Serializable, T>, "DONT USE THIS W/ SERIALIZABLES!");
+	static_assert(std::is_trivially_constructible_v<T>, "T MUST BE TRIVIALLY CONSTRUCTABLE");
+
 	T t = *(T*) src;
 	src += sizeof(T);
 	return t;
@@ -68,21 +65,19 @@ T Read(u8*& src)
 template<typename T>
 void Read(u8*& src, T* ts, u32 count)
 {
-	if constexpr(std::is_base_of_v<gETF::Serializable, T>)
-	{
-		for(u32 i = 0; i < count; i++)
-			ts[i].Serialize(src);
-	}
-	else
-	{
-		memcpy(ts, src, count * sizeof(T));
-		src += count * sizeof(T);
-	}
+	static_assert(std::is_trivially_constructible_v<T>, "T MUST BE TRIVIALLY CONSTRUCTABLE");
+
+	if(!count) return;
+	memcpy(ts, src, count * sizeof(T));
+	src += count * sizeof(T);
 }
 
 template<typename T, u32 COUNT>
 void Read(u8*& src, T* ts)
 {
+	static_assert(std::is_trivially_constructible_v<T>, "T MUST BE TRIVIALLY CONSTRUCTABLE");
+	static_assert(COUNT > 0);
+
 	memcpy(ts, src, COUNT * sizeof(T));
 	src += COUNT * sizeof(T);
 }

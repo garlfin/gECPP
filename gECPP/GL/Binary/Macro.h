@@ -28,6 +28,7 @@
 
 namespace gETF
 {
+	template<class T>
 	struct Serializable;
 }
 

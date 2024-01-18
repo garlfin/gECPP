@@ -1,7 +1,7 @@
 #pragma once
 
 #include <GL/Math.h>
-#include "Prototype.h"
+#include "Serializable.h"
 #include <Engine/AssetManager.h>
 #include <GL/Buffer/VAO.h>
 
@@ -13,14 +13,22 @@ namespace gETF
 	struct Mesh;
 	struct VertexBuffer;
 	struct MaterialSlot;
-	struct Serializable;
-	struct SerializationBuffer;
 
 	// TODO
 	// struct Scene;
 	// struct Node;
 
- 	struct VertexBuffer : public Serializable, public GL::BufferSettings
+	struct File : public Serializable<File>
+	{
+		SERIALIZABLE_PROTO;
+
+		u8 MeshCount = 0;
+		gE::Reference<Mesh>* Meshes = nullptr;
+
+		~File() { delete[] Meshes; }
+	};
+
+ 	struct VertexBuffer : public Serializable<File>, public GL::BufferSettings
 	{
 		SERIALIZABLE_PROTO;
 
@@ -31,7 +39,7 @@ namespace gETF
 		~VertexBuffer() { free(Data); }
 	};
 
- 	struct VertexField : public Serializable, public GL::VertexField
+ 	struct VertexField : public Serializable<File>, public GL::VertexField
 	{
 		SERIALIZABLE_PROTO;
 
@@ -40,7 +48,7 @@ namespace gETF
 		char Name[4];
 	};
 
- 	struct MaterialSlot : public Serializable, public GL::MaterialSlot
+ 	struct MaterialSlot : public Serializable<File>, public GL::MaterialSlot
 	{
 		SERIALIZABLE_PROTO;
 	};
@@ -52,7 +60,7 @@ namespace gETF
 		Complex
 	};
 
-	struct Mesh : public Serializable
+	struct Mesh : public Serializable<File>
 	{
 		SERIALIZABLE_PROTO;
 
@@ -71,21 +79,13 @@ namespace gETF
 		void Free() const { for(u8 i = 0; i < BufferCount; i++) Buffers[i].Free(); }
 		void CreateVAO(gE::Window*);
 
-		void GetVAOSettings(GL::VAOSettings&);
-		void GetVAOSettings(GL::IndexedVAOSettings&);
+		void GetVAOSettings(GL::VAOSettings&) const;
+		void GetVAOSettings(GL::IndexedVAOSettings&) const;
 
 		~Mesh();
 	};
 
-	struct File : public Serializable
-	{
-		SERIALIZABLE_PROTO;
 
-		u8 MeshCount = 0;
-		gE::Reference<Mesh>* Meshes = nullptr;
-
-		~File() { delete[] Meshes; }
-	};
 
 	File& Read(const char*, File&);
 	NODISCARD File* Read(const char*);

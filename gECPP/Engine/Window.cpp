@@ -76,6 +76,7 @@ void Window::Run()
 	glDebugMessageCallback(DebugMessage, nullptr);
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 #endif
+
 #ifdef ENABLE_STATISTICS
 	u64 pollTick = 0;
 #endif
@@ -88,7 +89,10 @@ void Window::Run()
 	OnInit();
 	glMemoryBarrier(GL_ALL_BARRIER_BITS);
 
+#ifdef ENABLE_STATISTICS
 	LOG("INIT TOOK " << _time);
+#endif
+
 	_time = glfwGetTime();
 
 	double currentTime;

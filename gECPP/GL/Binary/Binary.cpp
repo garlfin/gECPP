@@ -76,10 +76,9 @@ const char* IncrementLine(const char* str, char d)
 	return ++str;
 }
 
-template<>
-void SerializationBuffer::PushPtr<const SerializationBuffer>(const SerializationBuffer* t, u32 count)
+void SerializationBuffer::Push(const SerializationBuffer& t)
 {
-	for(u32 i = 0; i < count; i++) PushPtr(t[i].Data(), t[i].Length());
+	PushPtr(t.Data(), t.Length());
 }
 
 void SerializationBuffer::Realloc(u64 newSize)
@@ -90,7 +89,7 @@ void SerializationBuffer::Realloc(u64 newSize)
 	_size = newSize;
 }
 
-void SerializationBuffer::PushLengthString(const char* ptr)
+void SerializationBuffer::PushPrefixedString(const char* ptr)
 {
 	u8 len = ptr ? MIN(strlen(ptr), UINT8_MAX) : 0;
 	Push(len);

@@ -14,7 +14,7 @@ namespace PVR
 
 		if(!file) return nullptr;
 
-		header.Serialize(textureData);
+		header.Serialize(textureData, 0);
 		size_t copySize = fileLen - (textureData - file);
 		u8* textureDataCopy = (u8*) memcpy(new u8[copySize], textureData, copySize);
 
@@ -82,12 +82,12 @@ namespace PVR
 		return tex;
 	}
 
-	void Header::Serialize(u8*& ptr)
+	void Header::Serialize(u8*& ptr, const u32& version)
 	{
 		Version = ::Read<u32>(ptr);
 		Flags = ::Read<PVR::Flags>(ptr);
 		Format = ::Read<PVR::PixelFormat>(ptr);
-		ColorSpace=::Read< PVR::ColorSpace>(ptr);
+		ColorSpace=::Read<PVR::ColorSpace>(ptr);
 		::Read<uint32_t>(ptr); // This was like bpc or something; unimportant w/ compression
 		Size = ::Read<glm::u32vec2>(ptr);
 		Size = { Size.y, Size.x }; // NOLINT
@@ -99,5 +99,5 @@ namespace PVR
 		ptr += ::Read<u32>(ptr); // I couldn't give two hoots about the metadata
 	}
 
-	void Header::Deserialize(gETF::SerializationBuffer&) const { }
+	void Header::Deserialize(gETF::SerializationBuffer&, const u32&) const { }
 }
