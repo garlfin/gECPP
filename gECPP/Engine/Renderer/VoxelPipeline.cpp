@@ -34,7 +34,7 @@ namespace gE::VoxelPipeline
 
 		_colorBack.Bind(0, GL_READ_WRITE, 0);
 
-		window.GetRenderers().OnRender(d);
+		window.GetRenderers().OnRender(d, &GetCamera());
 	}
 
 	bool Target3D::Setup(float d, Camera* camera)

@@ -25,8 +25,8 @@ namespace gE
 		Manager<T>& operator=(const Manager&) = delete;
 		Manager<T>& operator=(Manager&&) noexcept = delete;
 
-		virtual void OnUpdate(float) = 0;
-		virtual void OnRender(float) = 0;
+		virtual void OnUpdate(float d) = 0;
+		virtual void OnRender(float d, Camera* camera) = 0;
 
 		NODISCARD ALWAYS_INLINE size_t Size() const { return VEC_T::size(); }
 

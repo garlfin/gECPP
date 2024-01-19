@@ -25,9 +25,9 @@ namespace gE
 		GetTransform().Rotation = rot;
 	}
 
-	void LightManager::OnRender(float delta)
+	void LightManager::OnRender(float delta, Camera* camera)
 	{
-		for(Light* l : *this) l->GetCamera().OnRender(delta);
+		for(Light* l : *this) l->GetCamera().OnRender(delta, camera);
 	}
 
 	CONSTEXPR_GLOBAL GL::ITextureSettings ShadowMapFormat { GL_DEPTH_COMPONENT16, GL::WrapMode::Clamp, GL::FilterMode::Linear };
@@ -56,7 +56,7 @@ namespace gE
 		glClear(GL_DEPTH_BUFFER_BIT);
 		glViewport(0, 0, size.x, size.y);
 
-		window.GetRenderers().OnRender(0.f);
+		window.GetRenderers().OnRender(0.f, &camera);
 	}
 
 	bool DirectionalLightTarget::Setup(float, Camera* callingCamera)
@@ -76,7 +76,7 @@ namespace gE
 		//		  places the middle on the camera
 
 		transform.Position = glm::floor(cameraTransform.Position) + offset;
-		transform.OnRender(0.f); // Force update on model matrix since it passed its tick.
+		transform.OnUpdate(0.f); // Force update on model matrix since it passed its tick.
 
 		return true;
 	}

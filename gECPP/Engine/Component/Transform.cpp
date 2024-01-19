@@ -26,7 +26,7 @@ void gE::Transform::Set(const gE::Transform& d)
 	Rotation = d.Rotation;
 }
 
-void gE::Transform::OnRender(float)
+void gE::Transform::OnUpdate(float)
 {
 	_previousModel = _model;
 

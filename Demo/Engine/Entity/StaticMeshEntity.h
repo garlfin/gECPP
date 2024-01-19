@@ -16,7 +16,7 @@ namespace VoxelDemo
 	 public:
 		StaticMeshEntity(gE::Window* window, const gETF::MeshReference& mesh, const Array<gE::Reference<gE::Material>>& mat = {}) :
 			gE::Entity(window),
-			_renderer(this, mesh, &_materialHolder),
+			_renderer(this, mesh, _materialHolder),
 			_materialHolder(this, mat)
 		{ };
 

@@ -22,7 +22,7 @@ namespace gE
 		DirectionalLight* Sun = nullptr;
 
 		void OnUpdate(float) {};
-		void OnRender(float delta) override;
+		void OnRender(float delta, Camera*) override;
 
 	 private:
 		Window* _window;

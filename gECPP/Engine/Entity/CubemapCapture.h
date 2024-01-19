@@ -56,8 +56,8 @@ namespace gE
 
 		void DrawSkybox();
 
-		void OnUpdate(float delta) {};
-		void OnRender(float delta) override;
+		void OnUpdate(float delta) override {};
+		void OnRender(float delta, Camera*) override;
 
 	 private:
 		Window* _window;

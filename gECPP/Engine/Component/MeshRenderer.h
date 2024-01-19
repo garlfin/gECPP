@@ -27,29 +27,31 @@ namespace gE
 
 		const glm::mat4* Model;
 		const glm::mat4* PreviousModel;
-		const gETF::Mesh* mesh;
+		const gETF::Mesh* Mesh;
 	};
 
 	class MeshRenderer : public Component
 	{
 	 public:
-		MeshRenderer(Entity* o, const gETF::MeshReference& mesh, const MaterialHolder* mat);
+		MeshRenderer(Entity* o, const gETF::MeshReference& mesh, const MaterialHolder& mat);
 
 		void OnUpdate(float delta) override {};
-		void OnRender(float delta) override;
+		void OnRender(float delta, Camera*) override;
 
 		GET_CONST(gETF::Mesh*, Mesh, _mesh.Get());
-		GET_CONST(const InstanceInfo&, InstanceInfo, _info);
+		GET_CONST(const InstanceInfo&, InstanceInfo, _instance);
 
 	 private:
 		const gETF::MeshReference _mesh;
-		const MaterialHolder* _materialHolder;
-		InstanceInfo _info;
+		const MaterialHolder& _materialHolder;
+		InstanceInfo _instance;
 	};
 
 	class RendererManager : public ComponentManager<MeshRenderer>
 	{
 	 public:
 		using ComponentManager<MeshRenderer>::ComponentManager;
+
+		void OnRender(float d, Camera* camera) override;
 	};
 }

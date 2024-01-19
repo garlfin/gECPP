@@ -42,7 +42,7 @@ namespace gE
 		}
 
 		void OnUpdate(float d) override { };
-		void OnRender(float d) override { };
+		void OnRender(float d, Camera*) override { };
 
 		~MaterialHolder() override = default;
 

@@ -30,10 +30,9 @@ namespace gE
 		Camera(Entity*, GL::TextureSize2D, IRenderTarget&, const ICameraSettings&, ComponentManager<Camera>* = nullptr);
 
 		inline void OnUpdate(float delta) override { }
-		inline void OnRender(float delta) override { Draw(delta, nullptr); }
+		void OnRender(float delta, Camera* camera) override;
 
 		virtual void GetGLCamera(GL::Camera&);
-		void Draw(float, Camera*);
 
 		GET(IRenderTarget&, Target, _target);
 

@@ -31,7 +31,7 @@ namespace gE
 		cubemap.Color = (handle) GetColor();
 	}
 
-	void CubemapManager::OnRender(float delta)
+	void CubemapManager::OnRender(float delta, Camera* camera)
 	{
 		DefaultPipeline::Buffers& buffers = _window->GetPipelineBuffers();
 		GL::Lighting& lighting = buffers.Lighting;
@@ -43,7 +43,7 @@ namespace gE
 		buffers.UpdateLighting(sizeof(handle), offsetof(GL::Lighting, Skybox));
 		buffers.UpdateLighting(sizeof(GL::Cubemap), offsetof(GL::Lighting, Cubemaps[0]));
 
-		for(CubemapCapture* c : *this) c->GetCamera().OnRender(delta);
+		for(CubemapCapture* c : *this) c->GetCamera().OnRender(delta, camera);
 	}
 
 	void CubemapManager::DrawSkybox()
@@ -81,7 +81,7 @@ namespace gE
 		glViewport(0, 0, GetSize(), GetSize());
 		glClear(GL_DEPTH_BUFFER_BIT);
 
-		window.GetRenderers().OnRender(0.f);
+		window.GetRenderers().OnRender(0.f, &camera);
 		window.GetCubemaps().DrawSkybox();
 	}
 
@@ -102,6 +102,6 @@ namespace gE
 	void CubemapTarget::RenderDependencies(float d)
 	{
 		LightManager& lights = GetOwner().GetWindow().GetLights();
-		lights.Sun->GetCamera().Draw(d, &GetCamera());
+		lights.Sun->GetCamera().OnRender(d, &GetCamera());
 	}
 }

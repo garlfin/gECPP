@@ -196,16 +196,17 @@ void Window::Blit(const GL::Texture& texture)
 
 void Window::OnUpdate(float delta)
 {
+
 	Behaviors.OnUpdate(delta);
 }
 
 void Window::OnRender(float delta)
 {
-	Transforms.OnRender(delta);
+	Transforms.OnUpdate(delta);
 	Behaviors.OnRender(delta);
 
-	Lights.OnRender(delta);
-	Cubemaps.OnRender(delta);
+	Lights.OnRender(delta, nullptr);
+	Cubemaps.OnRender(delta, nullptr);
 
 	Cameras.OnRender(delta);
 

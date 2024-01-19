@@ -15,7 +15,7 @@ namespace gE
 		explicit Behavior(Entity* o);
 
 		void OnUpdate(float d) override { }
-		void OnRender(float d) override { }
+		void OnRender(float d, Camera*) override { }
 		void OnDestroy() override { }
 	};
 

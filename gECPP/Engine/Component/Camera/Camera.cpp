@@ -53,7 +53,7 @@ namespace gE
 		cam.ColorTexture = (handle) 0u;
 	}
 
-	void Camera::Draw(float delta, Camera* callingCamera)
+	void Camera::OnRender(float delta, Camera* callingCamera)
 	{
 		UpdateProjection();
 

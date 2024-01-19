@@ -40,8 +40,8 @@ namespace gE
 		void Set(const TransformData& d);
 		void Set(const Transform& d);
 
-		void OnUpdate(float) override { };
-		void OnRender(float) override;
+		void OnUpdate(float) override;
+		void OnRender(float, Camera*) override {};
 
 		ALWAYS_INLINE operator const glm::mat4&() const { return _model; }
 		NODISCARD ALWAYS_INLINE const glm::mat4& Model() const { return _model; }
@@ -51,7 +51,7 @@ namespace gE
 
 	 private:
 		glm::mat4 _model;
-		glm::mat4 _previousModel;
+		glm::mat4 _previousModel = glm::mat4(1.0);
 		TransformData _globalTransform;
 	};
 
@@ -60,7 +60,6 @@ namespace gE
 	 public:
 		using ComponentManager<Transform>::ComponentManager;
 
-	 protected:
 		void OnUpdate(float delta) override;
 	};
 }

@@ -18,7 +18,7 @@ namespace gE
 		GET_CONST(Window&, Window, _window);
 
 		virtual void OnUpdate(float d) { }
-		virtual void OnRender(float d) { }
+		virtual void OnRender(float d, Camera* camera) { }
 		virtual void OnDestroy() { };
 
 		virtual ~Component() = default;
@@ -50,6 +50,7 @@ namespace gE
 		using Manager<Component>::Manager;
 
 		void OnUpdate(float d) override { for(Component* c : *this) c->OnUpdate(d); }
-		void OnRender(float d) override { for(Component* c : *this) c->OnRender(d); }
+		void OnRender(float d, Camera* camera) override { for(Component* c : *this) c->OnRender(d, camera); }
+		ALWAYS_INLINE void OnRender(float d) { OnRender(d, nullptr); }
 	};
 }
