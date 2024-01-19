@@ -17,23 +17,7 @@ gE::MeshRenderer::MeshRenderer(gE::Entity* o, const gETF::MeshReference& mesh, c
 
 void gE::MeshRenderer::OnRender(float delta)
 {
-	// TODO: Switch to instanced rendering.
-	DefaultPipeline::Buffers& buffers = GetWindow().GetPipelineBuffers();
 
-	buffers.Scene.InstanceCount = 1;
-	buffers.Scene.State = GetWindow().State;
-	buffers.Scene.Model[0] = GetOwner()->GetTransform();
-	buffers.Scene.PreviousModel[0] = GetOwner()->GetTransform().PreviousModel();
-	buffers.Scene.Normal[0] = glm::mat3(1);
-
-	buffers.UpdateScene();
-
-	uint8_t meshCount = _mesh->MaterialCount;
-	for(uint8_t i = 0; i < meshCount; i++)
-	{
-		_materialHolder->GetMaterial(i).Bind();
-		_mesh->VAO->Draw(i, GetWindow().State.InstanceMultiplier);
-	}
 }
 
 gE::Material& gE::MaterialHolder::GetMaterial(u8 i) const

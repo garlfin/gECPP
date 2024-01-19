@@ -62,7 +62,7 @@ namespace gE
 		GET(CameraManager&, Cameras, Cameras);
 		GET(TransformManager&, Transforms, Transforms);
 		GET(ComponentManager<Behavior>&, Behaviors, Behaviors);
-		GET(ComponentManager<MeshRenderer>&, Renderers, Renderers);
+		GET(RendererManager&, Renderers, Renderers);
 		GET(LightManager&, Lights, Lights);
 		GET(CubemapManager&, Cubemaps, Cubemaps);
 		GET(GL::TextureSlotManager&, SlotManager, SlotManager);
@@ -95,9 +95,9 @@ namespace gE
 		TransformManager Transforms;
 		LightManager Lights;
 		CubemapManager Cubemaps;
+		RendererManager Renderers;
 
 		ComponentManager<Behavior> Behaviors;
-		ComponentManager<MeshRenderer> Renderers;
 
 		GL::TextureSlotManager SlotManager;
 

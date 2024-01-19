@@ -12,6 +12,24 @@
 
 namespace gE
 {
+	struct InstanceFlags
+	{
+		u8 LOD : 4;
+		bool Independent : 1;
+		bool Active : 1;
+	};
+
+	struct InstanceInfo
+	{
+		u8 Layer;
+		InstanceFlags Flags;
+		gE::Material* Materials[GE_MAX_MATERIAL];
+
+		const glm::mat4* Model;
+		const glm::mat4* PreviousModel;
+		const gETF::Mesh* mesh;
+	};
+
 	class MeshRenderer : public Component
 	{
 	 public:
@@ -21,9 +39,17 @@ namespace gE
 		void OnRender(float delta) override;
 
 		GET_CONST(gETF::Mesh*, Mesh, _mesh.Get());
+		GET_CONST(const InstanceInfo&, InstanceInfo, _info);
 
 	 private:
 		const gETF::MeshReference _mesh;
 		const MaterialHolder* _materialHolder;
+		InstanceInfo _info;
+	};
+
+	class RendererManager : public ComponentManager<MeshRenderer>
+	{
+	 public:
+		using ComponentManager<MeshRenderer>::ComponentManager;
 	};
 }

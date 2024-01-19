@@ -13,9 +13,10 @@ namespace gE::VoxelPipeline
 		_voxelBuffer.Bind(GL::BufferTarget::Uniform, 4);
 	}
 
-	Target3D::Target3D(VoxelCapture& capture, Camera3D& camera) : RenderTarget<Camera3D>(capture, camera),
-																  _colorBack(&camera.GetWindow(), { VoxelPipeline::ColorBackFormat, camera.GetSize() }),
-																  _color(&camera.GetWindow(), { VoxelPipeline::ColorFormat, camera.GetSize()})
+	Target3D::Target3D(VoxelCapture& capture, Camera3D& camera) :
+		RenderTarget<Camera3D>(capture, camera),
+		_colorBack(&camera.GetWindow(), { VoxelPipeline::ColorBackFormat, camera.GetSize() }),
+		_color(&camera.GetWindow(), { VoxelPipeline::ColorFormat, camera.GetSize()})
 	{
 		GetFrameBuffer().SetDefaultSize(camera.GetSize());
 	}
