@@ -1,7 +1,6 @@
 #pragma once
 
 #include <GL/GL.h>
-#include <gEModel/gETF/Serializable.h>
 #include "GL/Binary/Binary.h"
 #include <GLAD/glad.h>
 #include "TextureSettings.h"

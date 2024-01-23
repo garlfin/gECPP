@@ -14,11 +14,8 @@ namespace gE
 	class Behavior;
 	class Camera;
 
-	template<class T>
-	class TypedComponent;
-
-	template<class T>
-	class TypedBehavior;
+	template<class T> class TypedComponent;
+	template<class T> class TypedBehavior;
 
 	struct Flags
 	{
@@ -32,15 +29,18 @@ namespace gE
 		u8 Layer : 4 = 0;
 	};
 
-	template<class T>
-	class Manager;
-
-	template<class T>
-	class ComponentManager;
-
-	template<class T>
-	class ComponentManager;
-
-	template<class T>
-	class Managed;
+	template<class T> class Manager;
+	template<class T> class ComponentManager;
+	template<class T> class ComponentManager;
+	template<class T> class Managed;
 }
+
+namespace gETF
+{
+	struct File;
+	struct Mesh;
+	struct VertexBuffer;
+	struct MaterialSlot;
+}
+
+template<class T> class Serializable;

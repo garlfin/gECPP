@@ -2,7 +2,7 @@
 // Created by scion on 8/10/2023.
 //
 
-#include "gETF.h"
+#include "gEModel/gETF/gETF.h"
 #include "Vertex.h"
 
 #include "GL/Type.h"

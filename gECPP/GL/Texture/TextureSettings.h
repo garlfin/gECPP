@@ -5,9 +5,8 @@
 #pragma once
 
 #include <GL/Math.h>
-#include <gEModel/gETF/Serializable.h>
-#include "GLAD/glad.h"
-#include "GL/Binary/Binary.h"
+#include <GLAD/glad.h>
+#include <GL/Binary/Binary.h>
 
 #define DIV_CEIL(X, Y) (((X) + decltype(X)(Y) - decltype(X)(1)) / decltype(X)(Y))
 #define DIV_CEIL_T(X, Y, T) (((T)(X) + (T)(Y) - (T)(1)) / (T)(Y))
@@ -40,7 +39,7 @@ namespace PVR
 		SRGB = 1,
 	};
 
-	struct Header : gETF::Serializable<u32>
+	struct Header : Serializable<u32>
 	{
 		SERIALIZABLE_PROTO;
 

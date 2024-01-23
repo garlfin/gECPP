@@ -99,5 +99,5 @@ namespace PVR
 		ptr += ::Read<u32>(ptr); // I couldn't give two hoots about the metadata
 	}
 
-	void Header::Deserialize(gETF::SerializationBuffer&, const u32&) const { }
+	void Header::Deserialize(SerializationBuffer&, const u32&) const { }
 }

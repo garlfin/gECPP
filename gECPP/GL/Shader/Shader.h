@@ -26,7 +26,7 @@ namespace GL
 		char* Name = nullptr;
 		char* Value = nullptr;
 
-		void WriteDirective(gETF::SerializationBuffer&) const;
+		void WriteDirective(SerializationBuffer&) const;
 
 		~PreprocessorPair() { delete[] Name; }
 	};

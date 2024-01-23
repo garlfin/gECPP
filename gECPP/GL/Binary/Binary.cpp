@@ -6,16 +6,12 @@
 #include "iostream"
 #include "SerializationBuffer.h"
 
-using namespace gETF;
-
-char* ReadPrefixedString(u8*& ptr)
+std::string ReadPrefixedString(u8*& ptr)
 {
-	u8 len = Read<u8>(ptr);
-	if(!len) return nullptr;
-	char* str = new char[len + 1];
-	Read<char>(ptr, str, len);
-	str[len] = 0;
-	return str;
+	u8 len = ::Read<u8>(ptr);
+	std::string string((char*) ptr, len);
+	ptr += len;
+	return string;
 }
 
 u8* ReadFile(const char* name, u32& length, bool binary)
@@ -89,11 +85,10 @@ void SerializationBuffer::Realloc(u64 newSize)
 	_size = newSize;
 }
 
-void SerializationBuffer::PushPrefixedString(const char* ptr)
+void SerializationBuffer::PushPrefixedString(const std::string& str)
 {
-	u8 len = ptr ? MIN(strlen(ptr), UINT8_MAX) : 0;
-	Push(len);
-	PushPtr(ptr, len);
+	Push((u8) str.size());
+	PushPtr(str.c_str(), str.size());
 }
 
 void SerializationBuffer::StrCat(const char* str, bool incTerminator, char d)

@@ -8,7 +8,7 @@
 #include <Engine/Component/Camera/Camera.h>
 #include <Engine/Component/Camera/RenderTarget.h>
 #include <Engine/Renderer/DefaultPipeline.h>
-#include <gEModel/gETF.h>
+#include <gETF/File.h>
 #include <GL/Shader/Shader.h>
 
 namespace gE

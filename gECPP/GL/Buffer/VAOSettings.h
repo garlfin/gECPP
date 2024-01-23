@@ -21,7 +21,6 @@ namespace GL
 
 	struct MaterialSlot
 	{
-		u8 MaterialIndex = 0;
 		u32 Offset = 0;
 		u32 Count = 0;
 	};
@@ -36,17 +35,16 @@ namespace GL
 		u8 Offset;
 	};
 
-	// TODO: Stop being LAZY (!!!) and just use dynamic arrays.
 	struct VAOSettings
 	{
 		u8 BufferCount;
 		BufferSettings Buffers[GE_MAX_VAO_BUFFER];
 
-		u8 MaterialCount;
-		MaterialSlot Materials[GE_MAX_VAO_MATERIAL];
-
 		u8 FieldCount;
 		VertexField Fields[GE_MAX_VAO_FIELD];
+
+		u8 MaterialCount;
+		MaterialSlot Materials[GE_MAX_VAO_MATERIAL];
 	};
 
 	struct IndexedVAOSettings : public VAOSettings

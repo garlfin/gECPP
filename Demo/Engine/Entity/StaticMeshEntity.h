@@ -5,7 +5,6 @@
 #pragma once
 
 #include "Engine/Entity/Entity.h"
-#include "gEModel/gETF.h"
 #include "Engine/Component/MeshRenderer.h"
 #include "Engine/Component/MaterialHolder.h"
 
@@ -14,7 +13,7 @@ namespace VoxelDemo
  	class StaticMeshEntity : public gE::Entity
 	{
 	 public:
-		StaticMeshEntity(gE::Window* window, const gETF::MeshReference& mesh, const Array<gE::Reference<gE::Material>>& mat = {}) :
+		StaticMeshEntity(gE::Window* window, const gE::Reference<gETF::Mesh>& mesh, const Array<gE::Reference<gE::Material>>& mat = {}) :
 			gE::Entity(window),
 			_renderer(this, mesh, _materialHolder),
 			_materialHolder(this, mat)

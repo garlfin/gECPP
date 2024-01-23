@@ -11,6 +11,7 @@
 
 #include "Macro.h"
 #include "SerializationBuffer.h"
+#include "Engine/Array.h"
 
 // CSTDLIB alternatives
 size_t strlenc(const char*, char);
@@ -27,7 +28,7 @@ const char* IncrementLine(const char* s, char d = '\n');
 template<class T> void RemoveFirstFromVec(std::vector<T>& vec, const T& t);
 
 // Binary helper functions
-char* ReadPrefixedString(u8*& ptr);
+std::string ReadPrefixedString(u8*& ptr);
 u8* ReadFile(const char* name, u32& length, bool binary = false);
 inline u8* ReadFile(const char* name, bool binary = false);
 
@@ -96,3 +97,4 @@ void RemoveFirstFromVec(std::vector<T>& vec, const T& t)
 	std::iter_swap(f, vec.end() - 1);
 	vec.pop_back();
 }
+

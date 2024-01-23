@@ -18,7 +18,7 @@ namespace gE
 		explicit MaterialHolder(gE::Entity* o, const Array<Reference<Material>>& materials = {})
 			: Component(o)
 		{
-			if(materials.Size()) materials.CopyToCArray(_materials);
+			if(materials.Count()) materials.CopyToCArray(_materials);
 		}
 
 		NODISCARD Material& GetMaterial(u8 i) const;

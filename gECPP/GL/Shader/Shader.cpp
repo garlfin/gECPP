@@ -16,8 +16,8 @@
 
 namespace GL
 {
-	void CompileDirectives(const Array<PreprocessorPair>*, gETF::SerializationBuffer&);
-	void CompileIncludes(const char* file, gETF::SerializationBuffer&, gETF::SerializationBuffer&, gETF::SerializationBuffer& idBuffer);
+	void CompileDirectives(const Array<PreprocessorPair>*, SerializationBuffer&);
+	void CompileIncludes(const char* file, SerializationBuffer&, SerializationBuffer&, SerializationBuffer& idBuffer);
 	const char* GetIncludePath(const char* origin, const char* include);
 
 	template<typename T>
@@ -41,9 +41,9 @@ namespace GL
 	{
 		ID = glCreateShader(type);
 
-		gETF::SerializationBuffer directivesBuf{};
-		gETF::SerializationBuffer sourceBuf{};
-		gETF::SerializationBuffer incIDBuf{};
+		SerializationBuffer directivesBuf{};
+		SerializationBuffer sourceBuf{};
+		SerializationBuffer incIDBuf{};
 
 		directivesBuf.StrCat(VERSION_DIRECTIVE, false);
 		if(GLAD_GL_ARB_bindless_texture) directivesBuf.StrCat(EXT_BINDLESS, false);
@@ -113,7 +113,7 @@ namespace GL
 		{
 			std::cout << "FILE: " << name << ", SHADER COMPILE FAILURE:\n" << infoLog << '\n';
 
-			gETF::SerializationBuffer debugBuffer;
+			SerializationBuffer debugBuffer;
 			char lineNumberBuffer[5];
 
 			for(u32 i = 0; *source; i++)

@@ -11,17 +11,17 @@
 
 namespace GL
 {
-	void CompileDirectives(const Array<PreprocessorPair>*, gETF::SerializationBuffer&);
-	void CompileIncludes(const char* file, gETF::SerializationBuffer&, gETF::SerializationBuffer&, gETF::SerializationBuffer& idBuffer);
+	void CompileDirectives(const Array<PreprocessorPair>*, SerializationBuffer&);
+	void CompileIncludes(const char* file, SerializationBuffer&, SerializationBuffer&, SerializationBuffer& idBuffer);
 	const char* GetIncludePath(const char* origin, const char* include);
 
-	void CompileDirectives(const Array<PreprocessorPair>* pairs, gETF::SerializationBuffer& buf)
+	void CompileDirectives(const Array<PreprocessorPair>* pairs, SerializationBuffer& buf)
 	{
 		if(!pairs) return;
-		for(u64 i = 0; i < pairs->Size(); i++) (*pairs)[i].WriteDirective(buf);
+		for(u64 i = 0; i < pairs->Count(); i++) (*pairs)[i].WriteDirective(buf);
 	}
 
-	void CompileIncludes(const char* file, gETF::SerializationBuffer& dstBuffer, gETF::SerializationBuffer& directivesBuffer, gETF::SerializationBuffer& idBuffer)
+	void CompileIncludes(const char* file, SerializationBuffer& dstBuffer, SerializationBuffer& directivesBuffer, SerializationBuffer& idBuffer)
 	{
 		// Turns out most drivers support GL_ARB_SHADER_LANGUAGE_INCLUDE
 		char* source = (char*) ReadFile(file);
@@ -105,7 +105,7 @@ namespace GL
 		memcpy(Name, o.Name, len);
 	}
 
-	void PreprocessorPair::WriteDirective(gETF::SerializationBuffer& buf) const
+	void PreprocessorPair::WriteDirective(SerializationBuffer& buf) const
 	{
 		if(!Name) return;
 

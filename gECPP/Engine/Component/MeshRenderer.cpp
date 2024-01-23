@@ -5,7 +5,7 @@
 #include "MeshRenderer.h"
 #include <Engine/Window.h>
 
-gE::MeshRenderer::MeshRenderer(gE::Entity* o, const gETF::MeshReference& mesh, const gE::MaterialHolder& mat) :
+gE::MeshRenderer::MeshRenderer(gE::Entity* o, const Reference<gETF::Mesh>& mesh, const gE::MaterialHolder& mat) :
 	Component(o, &o->GetWindow().GetRenderers()),
 	_mesh(mesh), _materialHolder(mat)
 {
@@ -54,7 +54,7 @@ void gE::RendererManager::OnRender(float d, gE::Camera* camera)
 
 		buffers.UpdateScene();
 
-		uint8_t meshCount = info.Mesh->MaterialCount;
+		uint8_t meshCount = info.Mesh->Materials.Count();
 		for(uint8_t i = 0; i < meshCount; i++)
 		{
 			info.Materials[i]->Bind();

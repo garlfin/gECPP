@@ -7,7 +7,6 @@
 #include <GLFW/glfw3.h>
 
 #include "DemoWindow.h"
-#include "gEModel/gETF/File.h"
 #include "Demo/Engine/Entity/FlyCamera.h"
 #include "Demo/Engine/Entity/StaticMeshEntity.h"
 #include "Engine/Renderer/PBRMaterial.h"

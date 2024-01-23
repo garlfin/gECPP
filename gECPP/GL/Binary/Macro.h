@@ -26,12 +26,6 @@
 #define GE_FAIL(ERR) assertm(false, ERR);
 #define GE_ASSERT(COND, ERR) assertm(COND, ERR)
 
-namespace gETF
-{
-	template<class T>
-	struct Serializable;
-}
-
 #define BIT_FIELD(FIELD, INDEX) (((FIELD) >> (INDEX)) & 1)
 #ifndef MIN
 #define MIN(X, Y) ((X) < (Y) ? (X) : (Y))

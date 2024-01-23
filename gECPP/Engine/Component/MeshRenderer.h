@@ -7,7 +7,7 @@
 #include <Engine/Entity/Entity.h>
 #include <GL/Buffer/VAO.h>
 #include <Engine/Renderer/Material.h>
-#include <gEModel/gETF.h>
+#include <gETF/Mesh/Mesh.h>
 #include "MaterialHolder.h"
 
 namespace gE
@@ -33,7 +33,7 @@ namespace gE
 	class MeshRenderer : public Component
 	{
 	 public:
-		MeshRenderer(Entity* o, const gETF::MeshReference& mesh, const MaterialHolder& mat);
+		MeshRenderer(Entity* o, const Reference<gETF::Mesh>& mesh, const MaterialHolder& mat);
 
 		void OnUpdate(float delta) override {};
 		void OnRender(float delta, Camera*) override;
@@ -42,7 +42,7 @@ namespace gE
 		GET_CONST(const InstanceInfo&, InstanceInfo, _instance);
 
 	 private:
-		const gETF::MeshReference _mesh;
+		const Reference<gETF::Mesh> _mesh;
 		const MaterialHolder& _materialHolder;
 		InstanceInfo _instance;
 	};
@@ -53,5 +53,8 @@ namespace gE
 		using ComponentManager<MeshRenderer>::ComponentManager;
 
 		void OnRender(float d, Camera* camera) override;
+
+	 private:
+
 	};
 }
