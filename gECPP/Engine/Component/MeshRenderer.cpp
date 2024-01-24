@@ -27,6 +27,8 @@ void gE::MeshRenderer::OnRender(float delta, Camera*)
 
 	for(u8 i = 0; i < GE_MAX_MATERIAL; i++)
 		_instance.Materials[i] = &_materialHolder.GetMaterial(i);
+
+
 }
 
 gE::Material& gE::MaterialHolder::GetMaterial(u8 i) const
