@@ -31,7 +31,8 @@ namespace gETF
 		buf.Push(0);
 
 		buf.Push(Meshes.Count());
-		for(u8 i = 0; i < Meshes.Count(); i++) buf.PushSerializable(*Meshes[i].Get(), s);
+		for(u8 i = 0; i < Meshes.Count(); i++)
+			buf.PushSerializable(*Meshes[i].Get(), s);
 	}
 
 	void File::Serialize(u8*& ptr, const File& s)

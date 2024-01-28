@@ -18,7 +18,6 @@ gE::MeshRenderer::MeshRenderer(gE::Entity* o, const Reference<gETF::Mesh>& mesh,
 void gE::MeshRenderer::OnRender(float delta, Camera*)
 {
 	DefaultPipeline::Buffers& buffers = GetWindow().GetPipelineBuffers();
-
 }
 
 gE::Material& gE::MaterialHolder::GetMaterial(u8 i) const

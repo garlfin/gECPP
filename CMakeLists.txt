@@ -18,8 +18,7 @@ set_property(TARGET GLFW PROPERTY IMPORTED_IMPLIB "${CMAKE_CURRENT_SOURCE_DIR}/V
 FILE(COPY "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/GLFW/glfw3.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 # ASSIMP
-add_library(ASSIMP STATIC IMPORTED gECPP/GL/Binary/Binary.cpp
-        gECPP/Engine/Component/TransformManager.h gECPP/Engine/Renderer/PostProcess/Exposure.cpp gECPP/Engine/Renderer/PostProcess/Exposure.h gECPP/gETF/Mesh/Mesh.h gECPP/gETF/Mesh/Mesh.cpp)
+add_library(ASSIMP STATIC IMPORTED)
 set_property(TARGET ASSIMP PROPERTY IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ASSIMP/libassimp-5.dll")
 FILE(COPY "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ASSIMP/libassimp-5.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
@@ -27,7 +26,7 @@ FILE(COPY "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ASSIMP/libassimp-5.dll" DESTINATIO
 add_library(GLAD STATIC Vendor/GLAD/glad.c Vendor/GLAD/glad.h)
 
 # GETF
-add_library(GETF STATIC gECPP/gETF/File.h gECPP/gETF/File.cpp gECPP/GL/Binary/Binary.h gECPP/gETF/File.h gECPP/gETF/Serializable.h gECPP/GL/Binary/Binary.cpp gECPP/GL/Buffer/VAO.cpp)
+add_library(GETF STATIC gECPP/gETF/File.h gECPP/gETF/File.cpp gECPP/gETF/Mesh/Mesh.h gECPP/gETF/Mesh/Mesh.cpp gECPP/GL/Binary/Binary.h gECPP/gETF/File.h gECPP/gETF/Serializable.h gECPP/GL/Binary/Binary.cpp gECPP/GL/Buffer/VAO.cpp)
 
 # GEMODEL
 file(GLOB_RECURSE gEMODEL_SRC gEModel/Converter)

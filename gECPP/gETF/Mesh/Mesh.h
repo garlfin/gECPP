@@ -20,7 +20,7 @@ namespace gETF
 		NODISCARD ALWAYS_INLINE bool IsFree() const { return Data; }
 		NODISCARD ALWAYS_INLINE u64 Size() const { return Count * Stride; }
 
-		~VertexBuffer() { free(Data); }
+		~VertexBuffer() { Free(); }
 	};
 
 	struct VertexField : public Serializable<File>, public GL::VertexField

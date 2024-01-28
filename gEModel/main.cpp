@@ -2,13 +2,12 @@
 // Created by scion on 8/10/2023.
 //
 
-#include "gEModel/gETF/gETF.h"
 #include "Vertex.h"
-
 #include "GL/Type.h"
 #include "ASSIMP/Importer.hpp"
 #include "ASSIMP/scene.h"
 #include "ASSIMP/postprocess.h"
+#include <gETF/File.h>
 
 using pp = aiPostProcessSteps;
 
@@ -58,14 +57,13 @@ int main(int argc, char** argv)
 	}
 
 	gETF::File file;
-	file.MeshCount = meshes.size();
-	file.Meshes = new gE::Reference<gETF::Mesh>[meshes.size()];
+	file.Meshes = Array<gE::Reference<gETF::Mesh>>(meshes.size());
 
-	for(unsigned i = 0; i < file.MeshCount; i++)
+	for(unsigned i = 0; i < file.Meshes.Count(); i++)
 		TransformMesh(meshes[i], file.Meshes[i] = gE::ref_create<gETF::Mesh>());
 
-	gETF::SerializationBuffer writeBuffer;
-	file.Deserialize(writeBuffer);
+	SerializationBuffer writeBuffer;
+	file.Deserialize(writeBuffer, file);
 	writeBuffer.ToFile(argv[2]);
 
 	return 0;
@@ -75,25 +73,20 @@ void TransformMesh(const std::vector<aiMesh*>& src, gETF::Mesh& dst)
 {
 	u64 vertexCount = 0;
 
-	dst.MaterialCount = src.size();
-	dst.Materials = new gETF::MaterialSlot[dst.MaterialCount];
-	for(unsigned i = 0; i < dst.MaterialCount; i++)
+	dst.Materials = Array<gETF::MaterialSlot>(dst.Materials.Count());
+	for(unsigned i = 0; i < dst.Materials.Count(); i++)
 	{
 		const aiMesh& mesh = *src[i];
 		gETF::MaterialSlot& material = dst.Materials[i];
 
-		material.MaterialIndex = i;
 		material.Count = mesh.mNumFaces;
 		material.Offset = vertexCount;
 
 		vertexCount += mesh.mNumFaces;
 	}
 
-	dst.BufferCount = 2;
-	dst.FieldCount = 4;
-
-	dst.Buffers = new gETF::VertexBuffer[dst.BufferCount];
-	dst.Fields = new gETF::VertexField[dst.FieldCount];
+	dst.Buffers = Array<gETF::VertexBuffer>(2);
+	dst.Fields = Array<gETF::VertexField>(4);
 
 	AllocateBuffer<Vertex>(&aiMesh::mNumVertices, dst.Buffers[0], src);
 	AllocateBuffer<Face>(&aiMesh::mNumFaces, dst.Buffers[1], src);

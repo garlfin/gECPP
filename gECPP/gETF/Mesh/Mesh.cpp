@@ -11,7 +11,7 @@ void VertexBuffer::Deserialize(SerializationBuffer& buf, const File&) const
 {
 	buf.Push(Stride);
 	buf.Push(Count);
-	buf.PushPtr((u8*) Data, Stride * Count);
+	//buf.PushPtr((u8*) Data, 1);
 }
 
 void VertexBuffer::Serialize(u8*& ptr, const File&)

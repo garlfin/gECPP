@@ -11,7 +11,7 @@ template<typename T>
 class Array
 {
  public:
-	explicit Array(u64 count, T* initialData = nullptr, u64 initialSize = 0);
+	explicit Array(u64 count);
 	Array() = default;
 
 	Array(const Array& o) : _size(o.Count()), _t(new T[_size]{}) { memcpy(_t, o.Data(), o.Count() * sizeof(T)); };
@@ -29,7 +29,7 @@ class Array
 	NODISCARD ALWAYS_INLINE T& operator[](u64 i) { return _t[i]; }
 	NODISCARD ALWAYS_INLINE const T& operator[](u64 i) const { return _t[i]; }
 
-	~Array() { delete[] _t; }
+	~Array() { delete[] _t; _t = nullptr; }
 
  private:
 	u64 _size = 0;
@@ -66,7 +66,7 @@ size_t Array<T>::CopyToCArray(I (& arr)[COUNT]) const
 }
 
 template<typename T>
-Array<T>::Array(u64 count, T* initialData, u64 initialSize) : _size(count), _t(new T[_size])
+Array<T>::Array(u64 count) : _size(count), _t(new T[_size] {})
 {
-	if(initialData && initialSize) memcpy(_t, initialData, initialSize * sizeof(T));
+	for(u64 i = 0; i < count; i++) _t[i] = T();
 }

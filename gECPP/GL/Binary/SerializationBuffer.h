@@ -17,11 +17,11 @@ class SerializationBuffer
 
 	void Push(const SerializationBuffer& t);
 
-	template<class T> ALWAYS_INLINE void PushSerializable(const Serializable<T>& t, T s){ PushSerializablePtr<1, T>(&t, s); }
+	template<class T, class S> ALWAYS_INLINE void PushSerializable(const T& t, const S& s){ PushSerializablePtr<1, T, S>(&t, s); }
 	template<class T> ALWAYS_INLINE void Push(T t) { PushPtr<1, T>(&t); }
 
-	template<class T> void PushSerializablePtr(const Serializable<T>* t, T s, u32 count);
-	template<size_t C, class T> void PushSerializablePtr(const Serializable<T>* t, T s);
+	template<class T, class S> void PushSerializablePtr(const T* t, const S& s, u32 count);
+	template<size_t C, class T, class S> void PushSerializablePtr(const T* t, const S& s);
 
 	template<class T> void PushPtr(const T* t, u32 count);
 	template<size_t C, class T> void PushPtr(const T* t);
@@ -47,15 +47,16 @@ class SerializationBuffer
 	void Realloc(u64 newSize);
 };
 
-template<class T>
-void SerializationBuffer::PushSerializablePtr(const Serializable<T>* t, T s, u32 count)
+template<class T, class S>
+void SerializationBuffer::PushSerializablePtr(const T* t, const S& s, u32 count)
 {
 	if(!count) return;
-	for(u32 i = 0; i < count; i++) t[i].Deserialize(*this, s);
+	for(u32 i = 0; i < count; i++)
+		t[i].Deserialize(*this, s);
 }
 
-template<size_t C, class T>
-void SerializationBuffer::PushSerializablePtr(const Serializable<T>* t, T s)
+template<size_t C, class T, class S>
+void SerializationBuffer::PushSerializablePtr(const T* t, const S& s)
 {
 	static_assert(C > 0);
 	for(u32 i = 0; i < C; i++) t[i].Deserialize(*this, s);
