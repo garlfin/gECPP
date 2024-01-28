@@ -19,16 +19,6 @@ void gE::MeshRenderer::OnRender(float delta, Camera*)
 {
 	DefaultPipeline::Buffers& buffers = GetWindow().GetPipelineBuffers();
 
-	_instance.Mesh = GetMesh();
-	_instance.Flags = InstanceFlags{ 0, false, true };
-	_instance.Model = &GetOwner()->GetTransform().Model();
-	_instance.PreviousModel = &GetOwner()->GetTransform().PreviousModel();
-	_instance.Layer = UINT8_MAX;
-
-	for(u8 i = 0; i < GE_MAX_MATERIAL; i++)
-		_instance.Materials[i] = &_materialHolder.GetMaterial(i);
-
-
 }
 
 gE::Material& gE::MaterialHolder::GetMaterial(u8 i) const
@@ -46,21 +36,21 @@ void gE::RendererManager::OnRender(float d, gE::Camera* camera)
 		gE::Window& window = c->GetWindow();
 		DefaultPipeline::Buffers& buffers = window.GetPipelineBuffers();
 
-		const InstanceInfo& info = ((MeshRenderer*) c)->GetInstanceInfo();
+		const MeshRenderer& info = *(MeshRenderer*) c;
 
 		buffers.Scene.InstanceCount = 1;
 		buffers.Scene.State = window.State;
-		buffers.Scene.Model[0] = *info.Model;
-		buffers.Scene.PreviousModel[0] = *info.PreviousModel;
+		buffers.Scene.Model[0] = info.GetOwner()->GetTransform().Model();
+		buffers.Scene.PreviousModel[0] = info.GetOwner()->GetTransform().PreviousModel();
 		buffers.Scene.Normal[0] = glm::mat3(1);
 
 		buffers.UpdateScene();
 
-		uint8_t meshCount = info.Mesh->Materials.Count();
+		uint8_t meshCount = info.GetMesh()->Materials.Count();
 		for(uint8_t i = 0; i < meshCount; i++)
 		{
-			info.Materials[i]->Bind();
-			info.Mesh->VAO->Draw(i, window.State.InstanceMultiplier);
+			info.GetMaterials().GetMaterial(i).Bind();
+			info.GetMesh()->VAO->Draw(i, window.State.InstanceMultiplier);
 		}
 	}
 }
