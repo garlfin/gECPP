@@ -7,6 +7,7 @@
 #include "Macro.h"
 #include <gETF/Serializable.h>
 #include <GL/Math.h>
+#include <string>
 
 class SerializationBuffer
 {
