@@ -38,7 +38,7 @@ void VertexField::Deserialize(SerializationBuffer& buf, const File&) const
 
 void VertexField::Serialize(u8*& ptr, const File&)
 {
-	::Read<char, 4>(ptr, (char*) Name);
+	::Read<char, 4>(ptr, Name);
 
 	Index = ::Read<u8>(ptr);
 	BufferIndex = ::Read<u8>(ptr);

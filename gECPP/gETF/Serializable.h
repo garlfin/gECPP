@@ -19,6 +19,8 @@ struct Serializable
 
 	virtual void Deserialize(SerializationBuffer& buf, const T& s) const = 0;
 	virtual void Serialize(u8*& ptr, const T& s) = 0;
+
+	virtual ~Serializable() {};
 };
 
 template<typename T, typename S>

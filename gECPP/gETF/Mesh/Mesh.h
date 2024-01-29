@@ -20,7 +20,7 @@ namespace gETF
 		NODISCARD ALWAYS_INLINE bool IsFree() const { return Data; }
 		NODISCARD ALWAYS_INLINE u64 Size() const { return Count * Stride; }
 
-		~VertexBuffer() { Free(); }
+		~VertexBuffer() override { Free(); }
 	};
 
 	struct VertexField : public Serializable<File>, public GL::VertexField
@@ -55,7 +55,7 @@ namespace gETF
 		Array<VertexField> Fields;
 		Array<MaterialSlot> Materials;
 
-		gE::SmartPointer<GL::VAO> VAO { nullptr };
+		gE::SmartPointer<GL::VAO> VAO;
 
 		void Free() { for(u8 i = 0; i < Buffers.Count(); i++) Buffers[i].Free(); }
 		void CreateVAO(gE::Window*);
