@@ -65,17 +65,13 @@ void Mesh::Deserialize(SerializationBuffer& buf, const File& s) const
 {
 	buf.PushPtr<4>("MESH");
 
-	buf.Push(Buffers.Count());
-	buf.PushSerializablePtr(Buffers.Data(), s, Buffers.Count());
+	buf.PushSerializableArray<u8>(Buffers, s);
+	buf.PushSerializableArray<u8>(Fields, s);
 
-	buf.Push(Fields.Count());
-	buf.PushSerializablePtr(Fields.Data(), s, Fields.Count());
+	buf.Push((u8)TriangleMode);
+	if (TriangleMode != TriangleMode::None) buf.PushSerializable(Triangles, s);
 
-	buf.Push(TriangleMode);
-	if(TriangleMode != TriangleMode::None) buf.PushSerializable(Triangles, s);
-
-	buf.Push(Materials.Count());
-	buf.PushSerializablePtr(Materials.Data(), s, Materials.Count());
+	buf.PushSerializableArray<u8>(Materials, s);
 }
 
 void Mesh::Serialize(u8*& ptr, const File& s)
@@ -83,21 +79,16 @@ void Mesh::Serialize(u8*& ptr, const File& s)
 	char magic[4];
 	::Read<char, 4>(ptr, magic);
 
-	if(!strcmpb<4>(magic, "MESH")) std::cout << "Invalid File!\n";
+	if (!strcmpb<4>(magic, "MESH")) std::cout << "Invalid File!\n";
+	if (s.Version >= 2) Name = ReadPrefixedString(ptr);
 
-	if(s.Version >= 2) Name = ReadPrefixedString(ptr);
-
-	Buffers = Array<VertexBuffer>(::Read<u8>(ptr));
-	ReadSerializable(ptr, Buffers.Data(), s, Buffers.Count());
-
-	Fields = Array<VertexField>(::Read<u8>(ptr));
-	ReadSerializable(ptr, Fields.Data(), s, Fields.Count());
+	Buffers = ReadArraySerializable<u8, VertexBuffer>(ptr, s);
+	Fields = ReadArraySerializable<u8, VertexField>(ptr, s);
 
 	TriangleMode = ::Read<enum TriangleMode>(ptr);
-	if(TriangleMode != TriangleMode::None) Triangles.Serialize(ptr, s);
+	if (TriangleMode != TriangleMode::None) Triangles.Serialize(ptr, s);
 
-	Materials = Array<MaterialSlot>(::Read<u8>(ptr));
-	ReadSerializable(ptr, Materials.Data(), s, Materials.Count());
+	Materials = ReadArraySerializable<u8, MaterialSlot>(ptr, s);
 }
 
 void Mesh::CreateVAO(gE::Window* w)

@@ -23,9 +23,11 @@ class SerializationBuffer
 
 	template<class T, class S> void PushSerializablePtr(const T* t, const S& s, u32 count);
 	template<size_t C, class T, class S> void PushSerializablePtr(const T* t, const S& s);
+	template<class I, class T, class S> void PushSerializableArray(const Array<T>&, const S& s);
 
 	template<class T> void PushPtr(const T* t, u32 count);
 	template<size_t C, class T> void PushPtr(const T* t);
+	template<class I, class T, class S> void PushArray(const Array<T>&, const S& s);
 
 	ALWAYS_INLINE u8* ReallocAdd(u64 length);
 
@@ -94,3 +96,16 @@ u8* SerializationBuffer::ReallocAdd(u64 length)
 	return _buf + preSize;
 }
 
+template<class I, class T, class S>
+void SerializationBuffer::PushSerializableArray(const Array<T>& arr, const S& s)
+{
+	Push<I>(arr.Count());
+	for(I i = 0; i < (I) arr.Count(); i++) arr[i].Deserialize(*this, s);
+}
+
+template<class I, class T, class S>
+void SerializationBuffer::PushArray(const Array<T>& arr, const S& s)
+{
+	Push<I>(arr.Count());
+	PushPtr(arr.Data(), arr.Count());
+}

@@ -5,7 +5,6 @@
 #include "File.h"
 #include <iostream>
 #include "GL/Binary/Binary.h"
-#include "GL/Buffer/VAO.h"
 
 /*
  * void Deserialize(SerializationBuffer& ptr);
@@ -50,15 +49,19 @@ namespace gETF
 
 		if (Version >= 2)
 		{
-			::Read<u8>(ptr);
-			::Read<u8>(ptr);
-			::Read<u8>(ptr);
-			::Read<u8>(ptr);
-			::Read<u8>(ptr);
+			ptr += 5;
 		}
 
-		Meshes = Array<gE::Reference<Mesh>>(::Read<u8>(ptr));
-		for(u8 i = 0; i < Meshes.Count(); i++) Meshes[i] = gE::ref_cast(ReadNewSerializable<Mesh>(ptr, s));
+		Meshes = Array<MeshReference>(::Read<u8>(ptr));
+		for(u8 i = 0; i < Meshes.Count(); i++)
+			Meshes[i] = gE::ref_cast(ReadNewSerializable<Mesh>(ptr, s));
+	}
+
+	MeshReference* File::GetMesh(const char* name)
+	{
+		for(u32 i = 0; i < Meshes.Count(); i++)
+			if(!strcmp(name, Meshes[i]->Name.c_str())) return &Meshes[i];
+		return nullptr;
 	}
 
 	File& Read(const char* file, File& header)
