@@ -5,7 +5,6 @@
 #pragma once
 
 #include "GL/Math.h"
-#include "GL/Binary/Binary.h"
 
 template<typename T>
 class Array
@@ -24,7 +23,8 @@ class Array
 	size_t CopyToCArray(T* arr, size_t arrSize) const;
 
 	NODISCARD ALWAYS_INLINE u64 Count() const { return _size; }
-	NODISCARD ALWAYS_INLINE T* Data() const { return _t; }
+	NODISCARD ALWAYS_INLINE T* Data() { return _t; }
+	NODISCARD ALWAYS_INLINE const T* Data() const { return _t; }
 
 	NODISCARD ALWAYS_INLINE T& operator[](u64 i) { return _t[i]; }
 	NODISCARD ALWAYS_INLINE const T& operator[](u64 i) const { return _t[i]; }
@@ -41,7 +41,7 @@ size_t Array<T>::CopyToCArray(T* arr, size_t arrSize) const
 {
 	size_t copyCount = std::min(arrSize, _size);
 
-	if constexpr(std::is_trivially_constructible_v<T>)
+	if constexpr(std::is_trivially_copyable_v<T>)
 		memcpy(arr, _t, copyCount * sizeof(T));
 	else
 		for(size_t i = 0; i < copyCount; i++)
@@ -56,7 +56,7 @@ size_t Array<T>::CopyToCArray(I (& arr)[COUNT]) const
 {
 	size_t copyCount = std::min(COUNT, _size);
 
-	if constexpr(std::is_trivially_constructible_v<T>)
+	if constexpr(std::is_trivially_copyable_v<T>)
 		memcpy(arr, _t, copyCount * sizeof(T));
 	else
 		for(size_t i = 0; i < copyCount; i++)

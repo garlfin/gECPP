@@ -26,6 +26,7 @@ bool strcmpb(const char* a, const char(& b)[LENGTH]);
 // Various helper functions
 const char* IncrementLine(const char* s, char d = '\n');
 template<class T> void RemoveFirstFromVec(std::vector<T>& vec, const T& t);
+template<typename UINT_T, class T> Array<T> ReadArray(u8*&);
 
 // Binary helper functions
 std::string ReadPrefixedString(u8*& ptr);
@@ -56,7 +57,7 @@ bool strcmpb(const char* a, const char(& b)[LENGTH])
 template<typename T>
 T Read(u8*& src)
 {
-	static_assert(std::is_trivially_constructible_v<T>, "T MUST BE TRIVIALLY CONSTRUCTABLE");
+	static_assert(std::is_trivially_copyable_v<T>, "T MUST BE TRIVIALLY COPYABLE");
 
 	T t = *(T*) src;
 	src += sizeof(T);
@@ -66,7 +67,7 @@ T Read(u8*& src)
 template<typename T>
 void Read(u8*& src, T* ts, u32 count)
 {
-	static_assert(std::is_trivially_constructible_v<T>, "T MUST BE TRIVIALLY CONSTRUCTABLE");
+	static_assert(std::is_trivially_copyable_v<T>, "T MUST BE TRIVIALLY COPYABLE");
 
 	if(!count) return;
 	memcpy(ts, src, count * sizeof(T));
@@ -76,7 +77,7 @@ void Read(u8*& src, T* ts, u32 count)
 template<typename T, u32 COUNT>
 void Read(u8*& src, T* ts)
 {
-	static_assert(std::is_trivially_constructible_v<T>, "T MUST BE TRIVIALLY CONSTRUCTABLE");
+	static_assert(std::is_trivially_copyable_v<T>, "T MUST BE TRIVIALLY COPYABLE");
 	static_assert(COUNT > 0);
 
 	memcpy(ts, src, COUNT * sizeof(T));
@@ -98,3 +99,15 @@ void RemoveFirstFromVec(std::vector<T>& vec, const T& t)
 	vec.pop_back();
 }
 
+template<typename UINT_T, class T>
+Array<T> ReadArray(u8*& src)
+{
+	UINT_T count = ::Read<UINT_T>(src);
+	Array<T> arr(count);
+
+	static_assert(std::is_trivially_copyable_v<T>, "T MUST BE TRIVIALLY COPYABLE");
+
+	memcpy(arr.Data(), src, sizeof(T) * count);
+	src += sizeof(T) * count;
+	return arr;
+}
