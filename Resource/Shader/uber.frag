@@ -24,6 +24,7 @@ in VertexOut VertexIn;
 layout(location = 0) out vec4 FragColor;
 layout(location = 1) out vec2 Velocity;
 
+layout(early_fragment_tests) in;
 void main()
 {
     if(!bool(Scene.State & ENABLE_COLOR)) return;
