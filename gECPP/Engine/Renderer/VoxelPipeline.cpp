@@ -6,6 +6,10 @@
 #include <Engine/Entity/VoxelCapture.h>
 #include <Engine/Window.h>
 
+#define MODE_TAA_COMBINE 0u
+#define MODE_TAA_DOWNSAMPLE 1u
+#define MODE_TAA_VELOCITY 2u
+
 namespace gE::VoxelPipeline
 {
 	Buffers::Buffers(gE::Window* window) : _voxelBuffer(window)
@@ -42,14 +46,28 @@ namespace gE::VoxelPipeline
 		if(!camera) return false;
 
 		VoxelPipeline::Buffers& buffers = GetWindow().GetVoxelBuffers();
+		GL::ComputeShader& voxelShader = GetWindow().GetVoxelTAAShader();
 		Transform& transform = GetOwner().GetTransform();
 		Transform& cameraTransform = camera->GetOwner()->GetTransform();
 
-		// transform.Position = glm::floor(cameraTransform.Position);
-		// transform.OnRender(0.f);
+		float cellSize = GetScale() * 2.f / GetSize().x;
+
+		glm::ivec3 pos = glm::floor(cameraTransform.Position / cellSize);
+		_velocity = pos - glm::ivec3(transform.Position / cellSize);
+		transform.Position = glm::vec3(pos) * cellSize;
+		transform.OnUpdate(0.f); // Force update on model matrix since it passed its tick.
 
 		GetOwner().GetGLVoxelScene(buffers.Scene);
 		buffers.UpdateScene();
+
+		voxelShader.Bind();
+
+		_colorBack.CopyFrom(_color);
+		_color.Bind(0, GL_READ_WRITE);
+		_colorBack.Bind(2, GL_READ_WRITE);
+
+		voxelShader.SetUniform(0, glm::ivec4(_velocity, MODE_TAA_VELOCITY));
+		voxelShader.Dispatch(DIV_CEIL_T(_colorBack.GetSize(), VOXEL_TAA_GROUP_SIZE, glm::u16vec3));
 
 		return true;
 	}
@@ -61,20 +79,21 @@ namespace gE::VoxelPipeline
 		voxelShader.Bind();
 
 		_color.Bind(0, GL_READ_WRITE);
-		_colorBack.Bind(2, GL_READ_ONLY);
+		_colorBack.Bind(2, GL_READ_WRITE);
 
-		voxelShader.SetUniform(0, 0u);
+		voxelShader.SetUniform(0, glm::ivec4(MODE_TAA_COMBINE));
 		voxelShader.Dispatch(DIV_CEIL_T(_colorBack.GetSize(), VOXEL_TAA_GROUP_SIZE, glm::u16vec3));
 
-		voxelShader.SetUniform(0, 1u);
+		voxelShader.SetUniform(0, glm::ivec4(MODE_TAA_DOWNSAMPLE));
 		for(u8 i = 1; i < VOXEL_MAX_MIPS; i++)
 		{
 			_color.Bind(0, GL_READ_WRITE, i);
-			_color.Bind(2, GL_READ_ONLY, i - 1);
+			_color.Bind(2, GL_READ_WRITE, i - 1);
 
 			glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 			voxelShader.Dispatch(DIV_CEIL_T(_colorBack.GetSize(i), VOXEL_TAA_GROUP_SIZE, glm::u16vec3));
 		}
+
 
 		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 	}

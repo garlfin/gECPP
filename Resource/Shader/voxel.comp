@@ -12,11 +12,12 @@
 
 #define MODE_TAA_COMBINE 0
 #define MODE_TAA_DOWNSAMPLE 1
+#define MODE_TAA_VELOCITY 2
 
 // IO
-layout(binding = 2, PIPELINE_COLOR_FORMAT) restrict readonly uniform image3D VoxelColorIn;
+layout(binding = 2, PIPELINE_COLOR_FORMAT) restrict uniform image3D VoxelColorIn;
 
-layout(location = 0) uniform uint Mode;
+layout(location = 0) uniform ivec4 Data; // Velocity, Mode
 
 // Helper Functions
 float Luminance(vec3 col);
@@ -32,20 +33,25 @@ void main()
     ivec3 texel = ivec3(gl_GlobalInvocationID);
     vec4 color;
 
-    if (Mode == MODE_TAA_DOWNSAMPLE)
-    {
+    if (Data.w == MODE_TAA_DOWNSAMPLE)
         color = AverageBox4(texel);
+    else if (Data.w == MODE_TAA_VELOCITY)
+    {
+        color = imageLoad(VoxelColorIn, texel + Data.xyz);
+        imageStore(VoxelColorIn, texel + Data.xyz, vec4(0.0));
     }
     else
     {
         vec4 currentColor = imageLoad(VoxelColorIn, texel);
-        vec3 previousColor = imageLoad(VoxelColorOut, texel).rgb;
+        vec4 previousColor = imageLoad(VoxelColorOut, texel);
 
         // No significant difference in speed using conditionals.
         vec4 neighbor = AverageNeighbors(texel);
-        if(currentColor.a == 0) currentColor.rgb = neighbor.rgb;
+        if(currentColor.a == 0.0) currentColor.rgb = neighbor.rgb;
 
-        color.rgb = mix(previousColor, currentColor.rgb, VOXEL_TAA_WEIGHT);
+        if(previousColor.a == 0.0) color.rgb = currentColor.rgb;
+        else color.rgb = mix(previousColor.rgb, currentColor.rgb, VOXEL_TAA_WEIGHT);
+
         color.a = currentColor.a;
     }
 

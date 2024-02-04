@@ -54,7 +54,7 @@ namespace gE::VoxelPipeline
 		explicit Target3D(VoxelCapture&, Camera3D&);
 
 		GET(GL::Texture3D&, Color, _color);
-
+		GET(float, Scale, GetCamera().GetScale());
 		GET(VoxelCapture&, Owner, (VoxelCapture&) RenderTarget<Camera3D>::GetOwner());
 
 		bool Setup(float d, Camera* camera) override;
@@ -62,6 +62,7 @@ namespace gE::VoxelPipeline
 		void PostProcessPass(float d) override;
 
 	 private:
+		glm::ivec3 _velocity;
 		GL::Texture3D _colorBack;
 		GL::Texture3D _color;
 	};
