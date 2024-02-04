@@ -6,9 +6,10 @@
 #include <Engine/Entity/VoxelCapture.h>
 #include <Engine/Window.h>
 
-#define MODE_TAA_COMBINE 0u
-#define MODE_TAA_DOWNSAMPLE 1u
-#define MODE_TAA_VELOCITY 2u
+#define MODE_TAA_COMBINE 0
+#define MODE_TAA_DOWNSAMPLE 1
+#define MODE_TAA_VELOCITY 2
+#define MODE_TAA_COPY 3
 
 namespace gE::VoxelPipeline
 {
@@ -60,14 +61,22 @@ namespace gE::VoxelPipeline
 		GetOwner().GetGLVoxelScene(buffers.Scene);
 		buffers.UpdateScene();
 
+		glm::u16vec3 dispatchSize = DIV_CEIL_T(_colorBack.GetSize(), VOXEL_TAA_GROUP_SIZE, glm::u16vec3);
+
 		voxelShader.Bind();
 
-		_colorBack.CopyFrom(_color);
+		_colorBack.Bind(0, GL_READ_WRITE);
+		_color.Bind(2, GL_READ_WRITE);
+		voxelShader.SetUniform(0, glm::ivec4(_velocity, MODE_TAA_COPY));
+
+		voxelShader.Dispatch(dispatchSize);
+
 		_color.Bind(0, GL_READ_WRITE);
 		_colorBack.Bind(2, GL_READ_WRITE);
-
 		voxelShader.SetUniform(0, glm::ivec4(_velocity, MODE_TAA_VELOCITY));
-		voxelShader.Dispatch(DIV_CEIL_T(_colorBack.GetSize(), VOXEL_TAA_GROUP_SIZE, glm::u16vec3));
+
+		voxelShader.Dispatch(dispatchSize);
+
 
 		return true;
 	}
@@ -93,7 +102,6 @@ namespace gE::VoxelPipeline
 			glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 			voxelShader.Dispatch(DIV_CEIL_T(_colorBack.GetSize(i), VOXEL_TAA_GROUP_SIZE, glm::u16vec3));
 		}
-
 
 		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 	}

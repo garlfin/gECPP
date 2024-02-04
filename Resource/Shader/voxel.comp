@@ -13,6 +13,7 @@
 #define MODE_TAA_COMBINE 0
 #define MODE_TAA_DOWNSAMPLE 1
 #define MODE_TAA_VELOCITY 2
+#define MODE_TAA_COPY 3
 
 // IO
 layout(binding = 2, PIPELINE_COLOR_FORMAT) restrict uniform image3D VoxelColorIn;
@@ -40,17 +41,26 @@ void main()
         color = imageLoad(VoxelColorIn, texel + Data.xyz);
         imageStore(VoxelColorIn, texel + Data.xyz, vec4(0.0));
     }
+    else if(Data.w == MODE_TAA_COPY)
+        color = imageLoad(VoxelColorIn, texel);
     else
     {
         vec4 currentColor = imageLoad(VoxelColorIn, texel);
-        vec4 previousColor = imageLoad(VoxelColorOut, texel);
+        vec4 previousColor = imageLoad(VoxelColorOut, texel + Data.xyz);
 
         // No significant difference in speed using conditionals.
         vec4 neighbor = AverageNeighbors(texel);
         if(currentColor.a == 0.0) currentColor.rgb = neighbor.rgb;
 
         if(previousColor.a == 0.0) color.rgb = currentColor.rgb;
-        else color.rgb = mix(previousColor.rgb, currentColor.rgb, VOXEL_TAA_WEIGHT);
+        else
+        {
+            float previousWeight = (1.0 - VOXEL_TAA_WEIGHT) / (1.0 + Luminance(previousColor.rgb));
+            float currentWeight = VOXEL_TAA_WEIGHT / (1.0 + Luminance(currentColor.rgb));
+
+            color.rgb = (currentColor.rgb * currentWeight + previousColor.rgb * previousWeight);
+            color.rgb /= max(currentWeight + previousWeight, 0.001);
+        }
 
         color.a = currentColor.a;
     }
