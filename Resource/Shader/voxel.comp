@@ -52,7 +52,7 @@ void main()
         vec4 neighbor = AverageNeighbors(texel);
         if(currentColor.a == 0.0) currentColor.rgb = neighbor.rgb;
 
-        if(previousColor.a == 0.0) color.rgb = currentColor.rgb;
+        if(max(previousColor.r, max(previousColor.g, previousColor.b)) == 0) color.rgb = currentColor.rgb;
         else
         {
             float previousWeight = (1.0 - VOXEL_TAA_WEIGHT) / (1.0 + Luminance(previousColor.rgb));

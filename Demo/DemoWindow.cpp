@@ -45,7 +45,7 @@ void DemoWindow::OnInit()
 	Cameras.CurrentCamera = &camera->GetTarget();
 
 	auto* cubemapCap = new gE::CubemapCapture(this, 512);
-	cubemapCap->GetTransform().Position.y = 4.1f;
+	cubemapCap->GetTransform().Position.y = 2.1f;
 	cubemapCap->GetTransform().Scale = glm::vec3(2.1f);
 
 	Cubemaps.Skybox = gE::ref_cast((GL::TextureCube*) PVR::Read(this, "Resource/Texture/sky.pvr", GL::WrapMode::Clamp));

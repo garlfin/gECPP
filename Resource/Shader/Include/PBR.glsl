@@ -5,7 +5,7 @@
 #include "Voxel.glsl"
 
 #ifndef PI
-#define PI 3.141592
+    #define PI 3.141592
 #endif
 
 #ifndef EPSILON
