@@ -184,20 +184,25 @@ vec3 GetLightingDirectional(const Vertex vert, const PBRFragment frag, const Lig
 // PBR Functions
 float GGXNDF(float nDotV, float roughness)
 {
+    roughness = max(roughness, 0.01);
     float alpha = roughness * roughness;
     alpha *= alpha; // Disney reparameterization
 
     float denom = (nDotV * nDotV) * (alpha - 1.0) + 1.0;
-    return alpha / (PI * denom * denom);
+    denom = PI * denom * denom;
+
+    return alpha / max(denom, EPSILON);
 }
 
 float GSchlick(float cosTheta, float roughness)
 {
-    return cosTheta / (cosTheta * (1.0 - roughness) + roughness);
+    float denom = cosTheta * (1.0 - roughness) + roughness;
+    return cosTheta / max(denom, EPSILON);
 }
 
 float GSchlick(float nDotL, float nDotV, float roughness)
 {
+    roughness = max(roughness, EPSILON);
     float k = (roughness * roughness) / 2.0;
     return GSchlick(nDotL, k) * GSchlick(nDotV, k);
 }
@@ -217,6 +222,7 @@ vec3 FresnelSchlick(vec3 f0, float nDotV)
 // Epic Games black magic
 vec3 ImportanceSampleGGX(vec2 xi, vec3 n, float roughness)
 {
+    roughness = max(roughness, EPSILON);
     float a = roughness * roughness;
 
     float phi = PI * 2.0 * xi.x;

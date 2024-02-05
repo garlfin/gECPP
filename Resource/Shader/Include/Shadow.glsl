@@ -100,6 +100,7 @@ float GetShadowDirectional(const Vertex frag, const Light light)
     }
 
     #ifdef SOFT_SHADOW_AVERAGE
+        blockerCount = max(blockerCount, 1.f);
         blocker = max(blocker / blockerCount * DIRECTIONAL_SHADOW_RADIUS, DIRECTIONAL_SHADOW_MIN_RADIUS);
     #else
         blocker = max(blocker, DIRECTIONAL_SHADOW_MIN_RADIUS);
