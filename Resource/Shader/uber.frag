@@ -52,19 +52,22 @@ void main()
         bool(Scene.State & ENABLE_SPECULAR) ? 1.0 : 0.0
     );
 
+    PBRSample pbrSample = ImportanceSample(vert, frag);
+
     FragColor.rgb = albedo * 0.1;
     FragColor.rgb += GetLighting(vert, frag, Lighting.Lights[0]);
 
-#ifdef EXT_BINDLESS
     if(bool(Scene.State & ENABLE_SPECULAR))
     {
-        #if defined(ENABLE_VOXEL_TRACE) && defined(EXT_BINDLESS)
-            FragColor.rgb += GetSpecularVoxel(vert, frag, Lighting.Cubemaps[0]);
-        #else
-            FragColor.rgb += GetLighting(vert, frag, Lighting.Cubemaps[0]);
-        #endif
+        vec3 specular = GetLighting(vert, frag, pbrSample, Lighting.Cubemaps[0]);
+
+    #ifdef ENABLE_VOXEL_TRACE
+        vec4 voxelSpecular = GetLighting(vert, frag, pbrSample, VoxelGrid);
+        specular = mix(specular, voxelSpecular.rgb, voxelSpecular.a);
+    #endif
+
+        FragColor.rgb += specular;
     }
-#endif
 
     FragColor.a = 1.0;
 

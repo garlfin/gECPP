@@ -9,13 +9,17 @@
 #endif
 
 #ifndef EPSILON
-    #define EPSILON 0.00001
+    #define EPSILON 0.001
 #endif
 
 #define HAMMERSLEY_ROUGHNESS_SAMPLE TAA_SAMPLE_SQUARED
 
 #ifdef FRAGMENT_SHADER
     uniform sampler2D BRDFLutTex;
+#endif
+
+#ifndef PBR_VOXEL_LERP_BEGIN
+    #define PBR_VOXEL_LERP_BEGIN 0.8
 #endif
 
 struct PBRFragment
@@ -28,14 +32,24 @@ struct PBRFragment
     float Specular;
 };
 
+struct PBRSample
+{
+    vec2 BRDF;
+    vec3 F;
+    vec3 Specular;
+    vec3 Diffuse;
+};
+
 // Main Functions
 #ifdef FRAGMENT_SHADER
 vec3 GetLighting(const Vertex, const PBRFragment, const Light);
-vec3 GetLighting(const Vertex, const PBRFragment, samplerCube);
 vec3 GetLightingDirectional(const Vertex, const PBRFragment, const Light);
-    #ifdef EXT_BINDLESS
-        vec3 GetSpecularVoxel(const Vertex, const PBRFragment, const Cubemap);
-    #endif
+
+vec3 GetLighting(const Vertex, const PBRFragment, const PBRSample, samplerCube);
+#ifdef EXT_BINDLESS
+    vec3 GetLighting(const Vertex, const PBRFragment, const PBRSample, const Cubemap);
+    vec4 GetLighting(const Vertex, const PBRFragment, const PBRSample, const VoxelGridData);
+#endif
 #endif
 
 // PBR Functions
@@ -45,10 +59,13 @@ float GSchlick(float cosTheta, float roughness); // AKA 'k'
 float GSchlick(float nDotL, float nDotH, float roughness);
 float GSchlickAnalytical(float nDotL, float nDotH, float roughness); // Read more: Section 3, "Specular G"
 vec3 FresnelSchlick(vec3 f0, float nDotV);
+vec3 CubemapParallax(vec3, vec3, Cubemap);
+#ifdef FRAGMENT_SHADER
+PBRSample ImportanceSample(const Vertex, const PBRFragment);
+#endif
 vec3 ImportanceSampleGGX(vec2 xi, vec3 n, float roughness);
 float VDCInverse(uint bits);
 vec2 Hammersley(uint i, uint sampleCount);
-vec3 CubemapParallax(vec3, vec3, Cubemap);
 
 // Implementation
 // Main Functions
@@ -58,99 +75,9 @@ vec3 GetLighting(const Vertex vert, const PBRFragment frag, const Light light)
     switch(light.Type)
     {
         case LIGHT_DIRECTIONAL: return GetLightingDirectional(vert, frag, light);
-        default: return vec3(1.0);
+        default: return vec3(0.0);
     }
 }
-
-vec3 GetLighting(const Vertex vert, const PBRFragment frag, Cubemap cubemap)
-{
-    vec3 eye = normalize(Camera.Position - vert.Position);
-
-    float nDotV = max(dot(frag.Normal, eye), 0.0);
-    vec3 f = FresnelSchlick(frag.F0, min(nDotV, 1.0));
-    vec2 xi = Hammersley(int(IGNSample * HAMMERSLEY_ROUGHNESS_SAMPLE), HAMMERSLEY_ROUGHNESS_SAMPLE);
-    vec3 n = ImportanceSampleGGX(xi, frag.Normal, frag.Roughness);
-
-#ifdef PBR_VISUALIZE_REFLECTIONS
-    vec3 r = normalize(reflect(-eye, vert.Normal));
-#else
-    vec3 r = normalize(reflect(-eye, n));
-#endif
-    r = CubemapParallax(vert.Position, r, cubemap);
-
-#ifdef EXT_BINDLESS
-    vec3 specular = textureLod(cubemap.Color, r, 0.0f).rgb;
-#else
-    vec3 specular = vec3(0);
-#endif
-    vec2 brdf = texture(BRDFLutTex, vec2(nDotV, frag.Roughness)).rg;
-
-#ifdef PBR_VISUALIZE_REFLECTIONS
-    return specular;
-#else
-    return (f * brdf.r + brdf.g) * specular;
-#endif
-}
-
-#ifdef EXT_BINDLESS
-vec3 GetSpecularVoxel(const Vertex vert, const PBRFragment frag, const Cubemap cubemap)
-{
-    vec3 eye = normalize(Camera.Position - vert.Position);
-
-    float nDotV = max(dot(frag.Normal, eye), 0.0);
-    vec3 f = FresnelSchlick(frag.F0, min(nDotV, 1.0));
-    vec2 xi = Hammersley(int(IGNSample * HAMMERSLEY_ROUGHNESS_SAMPLE), HAMMERSLEY_ROUGHNESS_SAMPLE);
-    vec3 n = ImportanceSampleGGX(xi, frag.Normal, frag.Roughness);
-
-#ifdef PBR_VISUALIZE_REFLECTIONS
-    vec3 r = normalize(reflect(-eye, vert.Normal));
-#else
-    vec3 r = normalize(reflect(-eye, n));
-#endif
-
-    Ray ray, cubemapRay;
-    RayResult result, cubemapResult;
-
-    ray = Ray(vert.Position, 10.f, r);
-    result = TraceOffset(ray, vert.Normal);
-
-    vec3 cubemapDirection;
-
-#ifdef PBR_CUBEMAP_REPROJECTION
-    cubemapDirection = result.Position - cubemap.Position;
-    float cubemapRayLength = length(cubemapDirection);
-    cubemapDirection /= cubemapRayLength;
-
-    if(result.Hit)
-    {
-        cubemapRay = Ray(cubemap.Position, cubemapRayLength, cubemapDirection);
-        cubemapResult = Trace(cubemapRay);
-        cubemapResult.Hit = cubemapResult.Hit && distance(cubemapResult.Position, result.Position) > EPSILON * (1 + IGNSample);
-    }
-    else
-#endif
-        cubemapDirection = CubemapParallax(vert.Position, r, cubemap);
-
-    vec4 color = textureLod(VoxelGrid.Color, WorldToUV(result.Position), 0.0);
-    color = UnpackColor(color);
-
-    vec3 cubemapColor = textureLod(cubemap.Color, cubemapDirection, 0.0).rgb;
-
-#ifdef PBR_CUBEMAP_REPROJECTION
-    if(!result.Hit || !cubemapResult.Hit) color.rgb = cubemapColor;
-#else
-    if(!result.Hit) color.rgb = cubemapColor;
-#endif
-
-    vec2 brdf = texture(BRDFLutTex, vec2(nDotV, frag.Roughness)).rg;
-
-#ifdef PBR_VISUALIZE_REFLECTIONS
-    return color.rgb;
-#else
-    return (f * brdf.r + brdf.g) * color.rgb;
-#endif
-}
-#endif
 
 vec3 GetLightingDirectional(const Vertex vert, const PBRFragment frag, const Light light)
 {
@@ -178,6 +105,58 @@ vec3 GetLightingDirectional(const Vertex vert, const PBRFragment frag, const Lig
     float lambert = min(nDotL * nDotL, GetShadowDirectional(vert, light));
 
     return (diffuseBRDF + specularBRDF * frag.Specular) * lambert * light.Color;
+}
+#endif
+
+#if defined(FRAGMENT_SHADER) && defined(EXT_BINDLESS)
+vec3 GetLighting(const Vertex vert, const PBRFragment frag, const PBRSample pbrSample, samplerCube cubemap)
+{
+    vec3 eye = normalize(Camera.Position - vert.Position);
+
+    float nDotV = clamp(dot(frag.Normal, eye), 0.0, 1.0);
+    vec3 f = FresnelSchlick(frag.F0, nDotV);
+    vec2 brdf = pbrSample.BRDF;
+
+    // Final Calculations
+    vec3 specularColor = textureLod(cubemap, pbrSample.Specular, 0.0).rgb;
+
+    return (brdf.g + f * brdf.r) * specularColor;
+}
+
+vec3 GetLighting(const Vertex vert, const PBRFragment frag, const PBRSample pbrSample, const Cubemap cubemap)
+{
+    // PBR Setup
+    vec3 eye = normalize(Camera.Position - vert.Position);
+
+    float nDotV = clamp(dot(frag.Normal, eye), 0.0, 1.0);
+    vec3 f = FresnelSchlick(frag.F0, nDotV);
+    vec3 r = CubemapParallax(vert.Position, pbrSample.Specular, cubemap);
+    vec2 brdf = pbrSample.BRDF;
+
+    // Final Calculations
+    vec3 specularColor = textureLod(cubemap.Color, r, 0.0).rgb;
+
+    return (brdf.g + f * brdf.r) * specularColor;
+}
+
+vec4 GetLighting(const Vertex vert, const PBRFragment frag, const PBRSample pbrSample, const VoxelGridData grid)
+{
+    // PBR Setup
+    vec3 eye = normalize(Camera.Position - vert.Position);
+
+    float nDotV = clamp(dot(frag.Normal, eye), 0.0, 1.0);
+    vec3 f = FresnelSchlick(frag.F0, nDotV);
+    vec3 r = pbrSample.Specular;
+    vec2 brdf = pbrSample.BRDF;
+
+    Ray ray = Ray(vert.Position, 10.f, r);
+    RayResult result = TraceOffset(ray, vert.Normal);
+
+    // Final Calculations
+    vec3 specularColor = textureLod(grid.Color, WorldToUV(result.Position), 0.0).rgb;
+    specularColor *= brdf.g + f * brdf.r;
+
+    return vec4(specularColor, float(result.Hit));
 }
 #endif
 
@@ -278,3 +257,19 @@ vec3 CubemapParallax(vec3 pos, vec3 dir, Cubemap cubemap)
             return dir;
     }
 }
+
+#ifdef FRAGMENT_SHADER
+PBRSample ImportanceSample(const Vertex vert, const PBRFragment frag)
+{
+    vec3 eye = normalize(Camera.Position - vert.Position);
+    float nDotV = max(dot(frag.Normal, eye), 0.0);
+
+    vec2 xi = Hammersley(int(IGNSample * HAMMERSLEY_ROUGHNESS_SAMPLE), HAMMERSLEY_ROUGHNESS_SAMPLE);
+    vec3 n = ImportanceSampleGGX(xi, frag.Normal, frag.Roughness);
+    vec3 r = -reflect(eye, n);
+    vec3 f = FresnelSchlick(frag.F0, nDotV);
+    vec2 brdf = textureLod(BRDFLutTex, vec2(nDotV, frag.Roughness), 0.0).rg;
+
+    return PBRSample(brdf, f, r, vec3(0.0));
+}
+#endif
