@@ -71,27 +71,25 @@ struct RayResult
 };
 
 // Functions
-
 vec4 PackColor(vec4);
 vec4 UnpackColor(vec4);
 
 #ifdef EXT_BINDLESS
-RayResult Trace(Ray);
-RayResult TraceOffset(Ray, vec3);
+RayResult Voxel_Trace(Ray);
+RayResult Voxel_TraceOffset(Ray, vec3);
 #endif
 
 // Helper Functions
-vec3 WorldToUV(vec3);
+vec3 Voxel_WorldToUV(vec3);
 vec3 TexelToUV(vec3, uint); // CellCount
 ivec3 UVToTexel(vec3, uint); // CellCount
 ivec3 WorldToTexel(vec3, uint); // CellCount
-vec3 WorldToAlignedUV(vec3, uint); // CellCount
-
+vec3 Voxel_WorldToAlignedUV(vec3, uint); // CellCount
 vec3 AlignWorldToCell(vec3, uint); // CellCount
-float CrossCell(inout vec3, vec3, uint); // CellCount
+float Voxel_CrossCell(inout vec3, vec3, uint); // CellCount
 
 // Implementation
-vec3 WorldToUV(vec3 pos)
+vec3 Voxel_WorldToUV(vec3 pos)
 {
     vec3 uv = (pos - VoxelGrid.Position) / VoxelGrid.Scale;
     return uv * 0.5 + 0.5;
@@ -99,7 +97,7 @@ vec3 WorldToUV(vec3 pos)
 
 vec3 TexelToUV(ivec3 texel, uint cellCount) { return (vec3(texel) + 0.5) / cellCount; }
 ivec3 UVToTexel(vec3 uv, uint cellCount) { return ivec3(uv * cellCount); }
-ivec3 WorldToTexel(vec3 pos, uint cellCount) { return UVToTexel(WorldToUV(pos), cellCount); }
+ivec3 WorldToTexel(vec3 pos, uint cellCount) { return UVToTexel(Voxel_WorldToUV(pos), cellCount); }
 
 vec4 PackColor(vec4 color)
 {
@@ -123,13 +121,13 @@ vec3 AlignWorldToCell(vec3 position, uint cellCount)
     return VoxelGrid.Position + mapped;
 }
 
-vec3 WorldToAlignedUV(vec3 pos, uint cellCount)
+vec3 Voxel_WorldToAlignedUV(vec3 pos, uint cellCount)
 {
     ivec3 texel = WorldToTexel(pos, cellCount);
     return TexelToUV(texel, cellCount);
 }
 
-float CrossCell(inout vec3 position, vec3 direction, uint cellCount)
+float Voxel_CrossCell(inout vec3 position, vec3 direction, uint cellCount)
 {
     float cellSize = (VoxelGrid.Scale * 2.0) / cellCount;
 
@@ -150,7 +148,7 @@ float CrossCell(inout vec3 position, vec3 direction, uint cellCount)
 // https://www.jpgrenier.org/ssr.html
 // https://seblagarde.wordpress.com/2012/09/29/image-based-lighting-approaches-and-parallax-corrected-cubemap/
 #ifdef EXT_BINDLESS
-RayResult Trace(Ray ray)
+RayResult Voxel_Trace(Ray ray)
 {
     RayResult result = RayResult(ray.Position, 0.0, vec3(0), false);
     int size = textureSize(VoxelGrid.Color, 0).r;
@@ -163,7 +161,7 @@ RayResult Trace(Ray ray)
         if(result.Distance >= ray.MaximumDistance || max(rayABS.x, max(rayABS.y, rayABS.z)) > VoxelGrid.Scale)
             return result;
 
-        vec3 alignedUV = WorldToAlignedUV(result.Position, size >> mip);
+        vec3 alignedUV = Voxel_WorldToAlignedUV(result.Position, size >> mip);
         if(textureLod(VoxelGrid.Color, alignedUV, float(mip)).a > 0.5)
         {
             if(mip == 0)
@@ -176,7 +174,7 @@ RayResult Trace(Ray ray)
         else
         {
             ivec3 oldCell = WorldToTexel(result.Position, size >> (mip + 1));
-            result.Distance += CrossCell(result.Position, ray.Direction, size >> mip);
+            result.Distance += Voxel_CrossCell(result.Position, ray.Direction, size >> mip);
             ivec3 newCell = WorldToTexel(result.Position, size >> (mip + 1));
 
             if(oldCell != newCell) mip = min(mip + 1, mipCount);
@@ -186,7 +184,7 @@ RayResult Trace(Ray ray)
     return result;
 }
 
-RayResult TraceOffset(Ray ray, vec3 normal)
+RayResult Voxel_TraceOffset(Ray ray, vec3 normal)
 {
     uint cellCount = textureSize(VoxelGrid.Color, 0).r;
     float cellSize = (VoxelGrid.Scale * 2.0) / cellCount;
@@ -194,6 +192,6 @@ RayResult TraceOffset(Ray ray, vec3 normal)
     ray.Position += cellSize * normal * 1.25;
     ray.Position += cellSize * ray.Direction * .5;
 
-    return Trace(ray);
+    return Voxel_Trace(ray);
 }
 #endif

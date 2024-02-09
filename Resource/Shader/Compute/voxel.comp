@@ -1,4 +1,4 @@
-#include "Include/Voxel.glsl"
+#include <Resource/Shader/Include/Voxel.glsl>
 
 #ifndef VOXEL_TAA_SAMPLE_COUNT
     #define VOXEL_TAA_SAMPLE_COUNT 32

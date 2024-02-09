@@ -1,6 +1,6 @@
 #define EPSILON 0.001
 
-#include "Include/PBR.glsl"
+#include <Resource/Shader/Include/PBR.glsl>
 
 #ifndef BRDF_FORMAT
 	#define BRDF_FORMAT rg16f

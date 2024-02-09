@@ -154,13 +154,13 @@ void Window::OnInit()
 	VoxelBuffers = ptr_create<VoxelPipeline::Buffers>(this);
 
 	BlitShader = ptr_create<GL::Shader>(this, "Resource/Shader/blit.vert", "Resource/Shader/blit.frag");
-	TAAShader = ptr_create<GL::ComputeShader>(this, "Resource/Shader/taa.comp");
-	TonemapShader = ptr_create<GL::ComputeShader>(this, "Resource/Shader/tonemap.comp");
-	BloomShader = ptr_create<GL::ComputeShader>(this, "Resource/Shader/bloom.comp");
-	VoxelTAAShader = ptr_create<GL::ComputeShader>(this, "Resource/Shader/voxel.comp");
+	TAAShader = ptr_create<GL::ComputeShader>(this, "Resource/Shader/PostProcess/taa.comp");
+	TonemapShader = ptr_create<GL::ComputeShader>(this, "Resource/Shader/PostProcess/tonemap.comp");
+	BloomShader = ptr_create<GL::ComputeShader>(this, "Resource/Shader/PostProcess/bloom.comp");
+	VoxelTAAShader = ptr_create<GL::ComputeShader>(this, "Resource/Shader/Compute/voxel.comp");
 
 	{
-		GL::ComputeShader brdfShader(this, "Resource/Shader/brdf.comp");
+		GL::ComputeShader brdfShader(this, "Resource/Shader/Compute/brdf.comp");
 		GL::TextureSettings<GL::TextureDimension::D2D> brdfSettings
 		{
 			{ GL_RG16F, GL::WrapMode::Clamp, GL::FilterMode::Linear, 1 },
