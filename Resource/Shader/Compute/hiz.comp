@@ -1,41 +1,47 @@
-#ifndef PIPELINE_DEPTH_FORMAT
-#define PIPELINE_DEPTH_FORMAT r32ui
+#ifndef PIPELINE_DEPTH_COPY_FORMAT
+    #define PIPELINE_DEPTH_COPY_FORMAT r32f
 #endif
 
-#define INT_MAX 2147483647
+#define HIZ_MODE_COPY 0
+#define HIZ_MODE_DOWNSAMPLE 1
 
 // IO
-layout(binding = 0, PIPELINE_DEPTH_FORMAT) restrict readonly uniform uimage2D DepthIn;
-layout(binding = 1, PIPELINE_DEPTH_FORMAT) restrict writeonly uniform uimage2D DepthOut;
+layout(location = 0) uniform vec4 Settings; // Mode, MIP, Near, Far
+layout(location = 1) uniform sampler2D DepthIn;
+layout(binding = 0, PIPELINE_DEPTH_COPY_FORMAT) restrict writeonly uniform image2D DepthOut;
 
 // Helper Functions
-uint MinBox4(ivec2);
-void SafeMin(inout uint, ivec2);
+float LinearizeDepth(float, vec2);
+float MinBox4(vec2);
 
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 void main()
 {
     ivec2 texel = ivec2(gl_GlobalInvocationID.xy);
+    vec2 uv = (vec2(texel) + 0.5) / imageSize(DepthOut);
 
-    uint minDepth = MinBox4(texel);
+    float depth = 0.0;
 
-    imageStore(DepthOut, texel, ivec4(minDepth));
+    if(int(Settings.x) == HIZ_MODE_COPY)
+        depth = LinearizeDepth(textureLod(DepthIn, uv, Settings.y).r, Settings.zw);
+    else
+        depth = MinBox4(uv);
+
+    imageStore(DepthOut, texel, vec4(depth));
 }
 
-uint MinBox4(ivec2 texel)
+float LinearizeDepth(float z, vec2 planes)
 {
-    texel *= 2;
-
-    uint minDepth = imageLoad(DepthIn, texel).r;
-    SafeMin(minDepth, texel + ivec2(0, 1));
-    SafeMin(minDepth, texel + ivec2(1, 0));
-    SafeMin(minDepth, texel + ivec2(1, 1));
-
-    return minDepth;
+    return planes.x * planes.y / (planes.y + z * (planes.x - planes.y));
 }
 
-void SafeMin(inout uint minDepth, ivec2 texel)
+float MinBox4(vec2 uv)
 {
-    uint value = imageLoad(DepthIn, texel).r;
-    if(value > 0) minDepth = min(minDepth, value);
+    float depth = textureLod(DepthIn, uv, Settings.y).r;
+    depth = min(depth, textureLodOffset(DepthIn, uv, Settings.y, ivec2(0, 1)).r);
+    depth = min(depth, textureLodOffset(DepthIn, uv, Settings.y, ivec2(1, 0)).r);
+    depth = min(depth, textureLodOffset(DepthIn, uv, Settings.y, ivec2(1, 1)).r);
+
+    return depth;
 }
+

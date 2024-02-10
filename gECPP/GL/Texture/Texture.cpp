@@ -60,6 +60,12 @@ namespace GL
 		glCopyImageSubData(o.Get(), GL_TEXTURE_2D, 0, 0, 0, 0, ID, GL_TEXTURE_2D, 0, 0, 0, 0, GetSize().x, GetSize().y, 1);
 	}
 
+	Texture2D::Texture2D(const Texture2D& tex, const ITextureSettings& settings)
+		: Texture(tex, GL_TEXTURE_2D, settings), _size(tex.GetSize(settings.MipBias))
+	{
+
+	}
+
 	Texture3D::Texture3D(gE::Window* window, const TextureSettings<TextureDimension::D3D>& settings, const TextureData& data)
 		: Texture(window, GL_TEXTURE_3D, settings), _size(settings.Size)
 	{
@@ -90,6 +96,12 @@ namespace GL
 		glCopyImageSubData(o.Get(), GL_TEXTURE_3D, 0, 0, 0, 0, ID, GL_TEXTURE_3D, 0, 0, 0, 0, GetSize().x, GetSize().y, GetSize().z);
 	}
 
+	Texture3D::Texture3D(const Texture3D& tex, const ITextureSettings& settings)
+		: Texture(tex, GL_TEXTURE_3D, settings), _size(tex.GetSize(settings.MipBias))
+	{
+
+	}
+
 	Texture::~Texture()
 	{
 		if(_handle > 1) glMakeTextureHandleNonResidentARB(_handle);
@@ -105,6 +117,27 @@ namespace GL
 		glMakeTextureHandleResidentARB(_handle);
 
 		return _handle;
+	}
+
+	Texture::Texture(const Texture& tex, GLenum target, const ITextureSettings& settings) :
+		Asset(&tex.GetWindow()), Mips(std::min<u8>(settings.MipCount, tex.GetMipCount() - settings.MipBias)),
+		Format(settings.Format), Target(target)
+	{
+		glGenTextures(1, &ID);
+		glTextureView(ID, target, tex.Get(), settings.Format, settings.MipBias, GetMipCount(), 0, 1);
+
+		glTextureParameteri(ID, GL_TEXTURE_MIN_FILTER, (GLint) settings.Filter + (Mips == 1 ? 0 : 0x102));
+		glTextureParameteri(ID, GL_TEXTURE_MAG_FILTER, (GLint) settings.Filter);
+		glTextureParameteri(ID, GL_TEXTURE_WRAP_S, (GLint) settings.WrapMode);
+		glTextureParameteri(ID, GL_TEXTURE_WRAP_T, (GLint) settings.WrapMode);
+
+		// if(settings.WrapMode == WrapMode::Border)
+		//	glTextureParameterfv(ID, GL_TEXTURE_BORDER_COLOR, WhiteBorderColor);
+
+		if(target == GL_TEXTURE_CUBE_MAP || target == GL_TEXTURE_3D)
+			glTextureParameteri(ID, GL_TEXTURE_WRAP_R, (GLint) settings.WrapMode);
+		else if (target == GL_TEXTURE_2D)
+			glTextureParameteri(ID, GL_TEXTURE_MAX_ANISOTROPY, GE_ANISOTROPY_COUNT);
 	}
 
 	TextureCube::TextureCube(gE::Window* window, const TextureSettings<TextureDimension::D1D>& settings, const TextureData& data)
@@ -130,6 +163,11 @@ namespace GL
 
 			dataPtr += dataSize;
 		}
+	}
+
+	TextureCube::TextureCube(const TextureCube& tex, const ITextureSettings& settings)
+		: Texture(tex, GL_TEXTURE_CUBE_MAP, settings), _size(tex.GetSize(settings.MipBias))
+	{
 	}
 
 	u8 TextureSlotManager::Increment(const GL::Texture* t)

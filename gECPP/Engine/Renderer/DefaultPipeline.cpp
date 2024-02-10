@@ -7,6 +7,9 @@
 
 #include <utility>
 
+#define HIZ_MODE_COPY 0
+#define HIZ_MODE_DOWNSAMPLE 1
+
 namespace gE
 {
 	gE::DefaultPipeline::Buffers::Buffers(Window* window) :
@@ -17,14 +20,15 @@ namespace gE
 		_lightBuffer.Bind(GL::BufferTarget::Uniform, 2);
 	}
 
-	DefaultPipeline::Target2D::Target2D(Entity& owner, Camera2D& camera, std::vector<PostProcessEffect<Target2D>*> effects) :
-		RenderTarget<Camera2D>(owner, camera), IDepthTarget(_depth.Get()), IColorTarget(_color.Get()),
+	DefaultPipeline::Target2D::Target2D(Entity& owner, Camera2D& camera, const std::vector<PostProcessEffect<Target2D>*>& effects) :
+		RenderTarget<Camera2D>(owner, camera), IDepthTarget(*_depth), IColorTarget(*_color),
 		_depth(GetFrameBuffer(), GL::TextureSettings2D(DefaultPipeline::DepthFormat, camera.GetSize())),
 		_color(GetFrameBuffer(), GL::TextureSettings2D(DefaultPipeline::ColorFormat, camera.GetSize())),
 		_velocity(GetFrameBuffer(), GL::TextureSettings2D(DefaultPipeline::VelocityFormat, camera.GetSize())),
+		_depthBack(&GetWindow(), GL::TextureSettings2D(DefaultPipeline::HiZFormat, camera.GetSize())),
 		_colorBack(&GetWindow(), GL::TextureSettings2D(DefaultPipeline::ColorFormat, camera.GetSize())),
 		_postProcessBack(&GetWindow(), GL::TextureSettings2D(DefaultPipeline::ColorFormat, camera.GetSize())),
-		_effects(std::move(effects))
+		_effects(effects)
 	{
 	}
 
@@ -48,17 +52,28 @@ namespace gE
 
 		hiZShader.Bind();
 
-		for(u8 i = 1; i < _depth->GetMipCount(); i++)
+		hiZShader.SetUniform(0, glm::vec4(HIZ_MODE_COPY, 0.0, camera.GetClipPlanes()));
+		hiZShader.SetUniform(1, *_depth, 0);
+		_depthBack.Bind(0, GL_WRITE_ONLY, 0);
+
+		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+		hiZShader.Dispatch(DIV_CEIL(_depth->GetSize(), HIZ_GROUP_SIZE));
+
+		hiZShader.SetUniform(1, _depthBack, 0);
+
+		for(u8 i = 1; i < GE_DEFAULT_MAX_DEPTH_MIPS; i++)
 		{
-			GL::TextureSize2D mipSize = _depth->GetSize(i);
+			GL::TextureSize2D mipSize = _depthBack.GetSize(i);
 
-			_depth->Bind(0, GL_READ_ONLY, i - 1, GL_R32UI);
-			_depth->Bind(1, GL_WRITE_ONLY, i, GL_R32UI);
+			hiZShader.SetUniform(0, glm::vec4(HIZ_MODE_DOWNSAMPLE, i - 1, 0, 0));
+			_depthBack.Bind(0, GL_WRITE_ONLY, i);
 
-			glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+			glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 			hiZShader.Dispatch(DIV_CEIL(mipSize, HIZ_GROUP_SIZE));
 		}
-		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
+
+		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
 		// COLOR
 		window.State = State::Color;

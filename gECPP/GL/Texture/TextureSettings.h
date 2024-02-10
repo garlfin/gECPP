@@ -122,6 +122,7 @@ namespace GL
 		WrapMode WrapMode = WrapMode::Repeat;
 		FilterMode Filter = FilterMode::Linear;
 		u8 MipCount = 1;
+		u8 MipBias = 0;
 
 		constexpr operator bool() const { return (bool) Format; } // NOLINT
 	};

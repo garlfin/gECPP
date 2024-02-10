@@ -43,6 +43,7 @@ namespace GL
 	{
 	 public:
 		Texture(gE::Window* window, GLenum target, const ITextureSettings& settings);
+		Texture(const GL::Texture&, GLenum target, const ITextureSettings& settings);
 
 		inline void Bind() const override { glBindTexture(Target, ID); }
 
@@ -77,8 +78,9 @@ namespace GL
 	{
 	 public:
 		Texture2D(gE::Window* window, const TextureSettings<TextureDimension::D2D>& settings, const TextureData& = {});
+		Texture2D(const Texture2D&, const ITextureSettings& settings);
 
-		NODISCARD ALWAYS_INLINE GL::TextureSize2D GetSize(u8 mip = 0) const { return _size >> glm::u32vec2(mip); }
+		NODISCARD ALWAYS_INLINE GL::TextureSize2D GetSize(u8 mip = 0) const { return glm::max(_size >> glm::u32vec2(mip), glm::u32vec2(1)); }
 		void CopyFrom(const GL::Texture&) override;
 
 	 private:
@@ -89,8 +91,9 @@ namespace GL
 	{
 	 public:
 		Texture3D(gE::Window* window, const TextureSettings<TextureDimension::D3D>& settings, const TextureData& = {});
+		Texture3D(const Texture3D&, const ITextureSettings& settings);
 
-		NODISCARD ALWAYS_INLINE GL::TextureSize3D GetSize(u8 mip = 0) const { return _size >> glm::u32vec3(mip); }
+		NODISCARD ALWAYS_INLINE GL::TextureSize3D GetSize(u8 mip = 0) const { return glm::max(_size >> glm::u32vec3(mip), glm::u32vec3(1)); }
 		void CopyFrom(const GL::Texture&) override;
 
 	 private:
@@ -101,13 +104,15 @@ namespace GL
 	{
 	 public:
 		TextureCube(gE::Window* window, const TextureSettings<TextureDimension::D1D>& settings, const TextureData& = {});
+		TextureCube(const TextureCube&, const ITextureSettings& settings);
 
-		NODISCARD ALWAYS_INLINE GL::TextureSize1D GetSize(u8 mip = 0) const { return _size >> mip; }
+		NODISCARD ALWAYS_INLINE GL::TextureSize1D GetSize(u8 mip = 0) const { return MAX(_size >> mip, 1); }
 		void CopyFrom(const GL::Texture&) override {};
 
 	 private:
 		const GL::TextureSize1D _size;
 	};
+
 }
 
 namespace PVR

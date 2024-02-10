@@ -38,6 +38,7 @@ namespace PVR
 				wrapMode,
 				filterMode,
 				(u8) header.MipCount,
+				0,
 				header.Size,
 			};
 
@@ -62,6 +63,7 @@ namespace PVR
 				wrapMode,
 				filterMode,
 				(u8) header.MipCount,
+				0,
 				header.Size.x,
 			};
 

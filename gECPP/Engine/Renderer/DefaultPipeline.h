@@ -16,7 +16,7 @@
 #define GE_MAX_INSTANCE 64
 #define GE_MAX_LIGHT 4
 #define GE_MAX_CUBEMAP 4
-#define GE_DEFAULT_MAX_DEPTH_MIPS 4
+#define GE_DEFAULT_MAX_DEPTH_MIPS 7
 
 namespace GL
 {
@@ -95,7 +95,8 @@ namespace GL
 
 namespace gE::DefaultPipeline
 {
-	CONSTEXPR_GLOBAL GL::ITextureSettings DepthFormat { GL_DEPTH_COMPONENT32, GL::WrapMode::Clamp, GL::FilterMode::Nearest, GE_DEFAULT_MAX_DEPTH_MIPS };
+	CONSTEXPR_GLOBAL GL::ITextureSettings DepthFormat { GL_DEPTH_COMPONENT32, GL::WrapMode::Clamp, GL::FilterMode::Nearest, 1 };
+	CONSTEXPR_GLOBAL GL::ITextureSettings HiZFormat { GL_R32F, GL::WrapMode::Clamp, GL::FilterMode::Nearest, GE_DEFAULT_MAX_DEPTH_MIPS };
 	CONSTEXPR_GLOBAL GL::ITextureSettings ColorFormat { GL_RGBA16F, GL::WrapMode::Clamp, GL::FilterMode::Linear, 0 };
 	CONSTEXPR_GLOBAL GL::ITextureSettings VelocityFormat { GL_RG32F, GL::WrapMode::Clamp  };
 
@@ -103,7 +104,7 @@ namespace gE::DefaultPipeline
 	{
 	 public:
 		typedef GL::Texture2D TEX_T;
-		explicit Target2D(Entity&, Camera2D& camera, std::vector<PostProcessEffect<Target2D>*>);
+		explicit Target2D(Entity&, Camera2D& camera, const std::vector<PostProcessEffect<Target2D>*>&);
 
 		GET(GL::Texture2D&, Depth, _depth.Get());
 		GET(GL::Texture2D&, Color, _color.Get());
@@ -119,6 +120,7 @@ namespace gE::DefaultPipeline
 		Attachment<GL::Texture2D, GL_COLOR_ATTACHMENT1> _velocity;
 
 		GL::Texture2D _colorBack;
+		GL::Texture2D _depthBack;
 		GL::Texture2D _postProcessBack;
 
 		std::vector<PostProcessEffect<Target2D>*> _effects;
