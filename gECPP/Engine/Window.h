@@ -23,6 +23,7 @@ struct GLFWwindow;
 struct GLFWvidmode;
 
 #define TAA_GROUP_SIZE 8
+#define HIZ_GROUP_SIZE 8
 #define VOXEL_TAA_GROUP_SIZE 4
 
 namespace gE
@@ -57,6 +58,7 @@ namespace gE
 		GET(GL::ComputeShader&, TonemapShader, TonemapShader);
 		GET(GL::ComputeShader&, BloomShader, BloomShader);
 		GET(GL::ComputeShader&, VoxelTAAShader, VoxelTAAShader);
+		GET(GL::ComputeShader&, HiZShader, HiZShader);
 
 		// Managers
 		GET(CameraManager&, Cameras, Cameras);
@@ -108,6 +110,7 @@ namespace gE
 		SmartPointer<GL::ComputeShader> TonemapShader;
 		SmartPointer<GL::ComputeShader> BloomShader;
 		SmartPointer<GL::ComputeShader> VoxelTAAShader;
+		SmartPointer<GL::ComputeShader> HiZShader;
 
 	 private:
 		GL::TextureSize2D _size;

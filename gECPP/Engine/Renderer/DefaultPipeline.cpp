@@ -44,6 +44,22 @@ namespace gE
 
 		window.GetRenderers().OnRender(0.f, &camera);
 
+		GL::ComputeShader& hiZShader = window.GetHiZShader();
+
+		hiZShader.Bind();
+
+		for(u8 i = 1; i < _depth->GetMipCount(); i++)
+		{
+			GL::TextureSize2D mipSize = _depth->GetSize(i);
+
+			_depth->Bind(0, GL_READ_ONLY, i - 1, GL_R32UI);
+			_depth->Bind(1, GL_WRITE_ONLY, i, GL_R32UI);
+
+			glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+			hiZShader.Dispatch(DIV_CEIL(mipSize, HIZ_GROUP_SIZE));
+		}
+		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
 		// COLOR
 		window.State = State::Color;
 

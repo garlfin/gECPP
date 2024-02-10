@@ -57,6 +57,7 @@ void main()
     FragColor.rgb = albedo * 0.1;
     FragColor.rgb += GetLighting(vert, frag, Lighting.Lights[0]);
 
+#ifdef EXT_BINDLESS
     if(bool(Scene.State & ENABLE_SPECULAR))
     {
         vec3 specular = GetLighting(vert, frag, pbrSample, Lighting.Cubemaps[0]);
@@ -68,6 +69,7 @@ void main()
 
         FragColor.rgb += specular;
     }
+#endif
 
     FragColor.a = 1.0;
 

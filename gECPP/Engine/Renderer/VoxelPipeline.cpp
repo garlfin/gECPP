@@ -69,16 +69,18 @@ namespace gE::VoxelPipeline
 		_color.Bind(2, GL_READ_WRITE);
 		voxelShader.SetUniform(0, glm::ivec4(_velocity, MODE_TAA_COPY));
 
+		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 		voxelShader.Dispatch(dispatchSize);
 
 		_color.Bind(0, GL_READ_WRITE);
 		_colorBack.Bind(2, GL_READ_WRITE);
 		voxelShader.SetUniform(0, glm::ivec4(_velocity, MODE_TAA_VELOCITY));
 
+		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 		voxelShader.Dispatch(dispatchSize);
 
-
 		return true;
+
 	}
 
 	void Target3D::PostProcessPass(float d)

@@ -1,5 +1,41 @@
-#version 120
+#ifndef PIPELINE_DEPTH_FORMAT
+#define PIPELINE_DEPTH_FORMAT r32ui
+#endif
 
-void main() {
+#define INT_MAX 2147483647
 
+// IO
+layout(binding = 0, PIPELINE_DEPTH_FORMAT) restrict readonly uniform uimage2D DepthIn;
+layout(binding = 1, PIPELINE_DEPTH_FORMAT) restrict writeonly uniform uimage2D DepthOut;
+
+// Helper Functions
+uint MinBox4(ivec2);
+void SafeMin(inout uint, ivec2);
+
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+void main()
+{
+    ivec2 texel = ivec2(gl_GlobalInvocationID.xy);
+
+    uint minDepth = MinBox4(texel);
+
+    imageStore(DepthOut, texel, ivec4(minDepth));
+}
+
+uint MinBox4(ivec2 texel)
+{
+    texel *= 2;
+
+    uint minDepth = imageLoad(DepthIn, texel).r;
+    SafeMin(minDepth, texel + ivec2(0, 1));
+    SafeMin(minDepth, texel + ivec2(1, 0));
+    SafeMin(minDepth, texel + ivec2(1, 1));
+
+    return minDepth;
+}
+
+void SafeMin(inout uint minDepth, ivec2 texel)
+{
+    uint value = imageLoad(DepthIn, texel).r;
+    if(value > 0) minDepth = min(minDepth, value);
 }

@@ -17,7 +17,6 @@ using namespace gE;
 
 #define BRDF_SIZE 512
 #define BRDF_GROUP_SIZE 8
-#define BRDF_GROUP_COUNT ((BRDF_SIZE) / (BRDF_GROUP_SIZE))
 #define FPS_POLL_RATE 0.1
 #define US_TO_MS 1000000.f
 
@@ -158,6 +157,7 @@ void Window::OnInit()
 	TonemapShader = ptr_create<GL::ComputeShader>(this, "Resource/Shader/PostProcess/tonemap.comp");
 	BloomShader = ptr_create<GL::ComputeShader>(this, "Resource/Shader/PostProcess/bloom.comp");
 	VoxelTAAShader = ptr_create<GL::ComputeShader>(this, "Resource/Shader/Compute/voxel.comp");
+	HiZShader = ptr_create<GL::ComputeShader>(this, "Resource/Shader/Compute/hiz.comp");
 
 	{
 		GL::ComputeShader brdfShader(this, "Resource/Shader/Compute/brdf.comp");
@@ -167,10 +167,12 @@ void Window::OnInit()
 			GL::TextureSize2D(BRDF_SIZE)
 		};
 
+		glm::uvec2 brdfGroupSize = DIV_CEIL_T(BRDF_SIZE, BRDF_GROUP_SIZE, glm::uvec2);
+
 		BRDFLookup = ptr_create<GL::Texture2D>(this, brdfSettings);
 		BRDFLookup->Bind(0, GL_WRITE_ONLY);
 		brdfShader.Bind();
-		brdfShader.Dispatch(BRDF_GROUP_COUNT, BRDF_GROUP_COUNT, 1);
+		brdfShader.Dispatch(brdfGroupSize);
 	}
 
 	auto defaultShader = ref_create<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/missing.frag");

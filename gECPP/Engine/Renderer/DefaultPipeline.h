@@ -16,6 +16,7 @@
 #define GE_MAX_INSTANCE 64
 #define GE_MAX_LIGHT 4
 #define GE_MAX_CUBEMAP 4
+#define GE_DEFAULT_MAX_DEPTH_MIPS 4
 
 namespace GL
 {
@@ -94,7 +95,7 @@ namespace GL
 
 namespace gE::DefaultPipeline
 {
-	CONSTEXPR_GLOBAL GL::ITextureSettings DepthFormat { GL_DEPTH_COMPONENT32F, GL::WrapMode::Clamp };
+	CONSTEXPR_GLOBAL GL::ITextureSettings DepthFormat { GL_DEPTH_COMPONENT32, GL::WrapMode::Clamp, GL::FilterMode::Nearest, GE_DEFAULT_MAX_DEPTH_MIPS };
 	CONSTEXPR_GLOBAL GL::ITextureSettings ColorFormat { GL_RGBA16F, GL::WrapMode::Clamp, GL::FilterMode::Linear, 0 };
 	CONSTEXPR_GLOBAL GL::ITextureSettings VelocityFormat { GL_RG32F, GL::WrapMode::Clamp  };
 
