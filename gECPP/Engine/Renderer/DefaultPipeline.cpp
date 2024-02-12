@@ -72,8 +72,13 @@ namespace gE
 			hiZShader.Dispatch(DIV_CEIL(mipSize, HIZ_GROUP_SIZE));
 		}
 
-
 		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
+		DefaultPipeline::Buffers& buf = GetWindow().GetPipelineBuffers();
+
+		buf.Camera.ColorTexture = (handle) _colorBack;
+		buf.Camera.DepthTexture = (handle) _depthBack;
+		buf.UpdateCamera(sizeof(handle) * 2, offsetof(GL::Camera, ColorTexture));
 
 		// COLOR
 		window.State = State::Color;
