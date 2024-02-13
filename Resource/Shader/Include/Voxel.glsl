@@ -81,9 +81,9 @@ RayResult Voxel_TraceOffset(Ray, vec3);
 
 // Helper Functions
 vec3 Voxel_WorldToUV(vec3);
-vec3 TexelToUV(vec3, uint); // CellCount
-ivec3 UVToTexel(vec3, uint); // CellCount
-ivec3 WorldToTexel(vec3, uint); // CellCount
+vec3 Voxel_TexelToUV(vec3, uint); // CellCount
+ivec3 Voxel_UVToTexel(vec3, uint); // CellCount
+ivec3 Voxel_WorldToTexel(vec3, uint); // CellCount
 vec3 Voxel_WorldToAlignedUV(vec3, uint); // CellCount
 vec3 AlignWorldToCell(vec3, uint); // CellCount
 float Voxel_CrossCell(inout vec3, vec3, uint); // CellCount
@@ -95,9 +95,9 @@ vec3 Voxel_WorldToUV(vec3 pos)
     return uv * 0.5 + 0.5;
 }
 
-vec3 TexelToUV(ivec3 texel, uint cellCount) { return (vec3(texel) + 0.5) / cellCount; }
-ivec3 UVToTexel(vec3 uv, uint cellCount) { return ivec3(uv * cellCount); }
-ivec3 WorldToTexel(vec3 pos, uint cellCount) { return UVToTexel(Voxel_WorldToUV(pos), cellCount); }
+vec3 Voxel_TexelToUV(ivec3 texel, uint cellCount) { return (vec3(texel) + 0.5) / cellCount; }
+ivec3 Voxel_UVToTexel(vec3 uv, uint cellCount) { return ivec3(uv * cellCount); }
+ivec3 Voxel_WorldToTexel(vec3 pos, uint cellCount) { return Voxel_UVToTexel(Voxel_WorldToUV(pos), cellCount); }
 
 vec4 PackColor(vec4 color)
 {
@@ -123,8 +123,8 @@ vec3 AlignWorldToCell(vec3 position, uint cellCount)
 
 vec3 Voxel_WorldToAlignedUV(vec3 pos, uint cellCount)
 {
-    ivec3 texel = WorldToTexel(pos, cellCount);
-    return TexelToUV(texel, cellCount);
+    ivec3 texel = Voxel_WorldToTexel(pos, cellCount);
+    return Voxel_TexelToUV(texel, cellCount);
 }
 
 float Voxel_CrossCell(inout vec3 position, vec3 direction, uint cellCount)
@@ -173,9 +173,9 @@ RayResult Voxel_Trace(Ray ray)
         }
         else
         {
-            ivec3 oldCell = WorldToTexel(result.Position, size >> (mip + 1));
+            ivec3 oldCell = Voxel_WorldToTexel(result.Position, size >> (mip + 1));
             result.Distance += Voxel_CrossCell(result.Position, ray.Direction, size >> mip);
-            ivec3 newCell = WorldToTexel(result.Position, size >> (mip + 1));
+            ivec3 newCell = Voxel_WorldToTexel(result.Position, size >> (mip + 1));
 
             if(oldCell != newCell) mip = min(mip + 1, mipCount);
         }

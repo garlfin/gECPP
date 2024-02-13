@@ -77,6 +77,6 @@ void main()
 
     if(!bool(Scene.State & ENABLE_VOXEL_WRITE)) return;
 
-    ivec3 texel = WorldToTexel(vert.Position, imageSize(VoxelColorOut).x);
+    ivec3 texel = Voxel_WorldToTexel(vert.Position, imageSize(VoxelColorOut).x);
     imageStore(VoxelColorOut, texel, PackColor(FragColor));
 }

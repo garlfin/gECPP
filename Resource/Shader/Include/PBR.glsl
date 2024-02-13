@@ -3,6 +3,7 @@
 #include "Shadow.glsl"
 #include "Vertex.glsl"
 #include "Voxel.glsl"
+#include "ScreenSpace.glsl"
 
 #ifndef PI
     #define PI 3.141592
