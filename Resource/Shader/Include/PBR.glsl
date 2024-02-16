@@ -150,15 +150,24 @@ vec4 GetLighting(const Vertex vert, const PBRFragment frag, const PBRSample pbrS
     vec3 r = pbrSample.Specular;
     vec2 brdf = pbrSample.BRDF;
 
-    Ray ray = Ray(vert.Position, 10.f, r);
-    RayResult result = Voxel_TraceOffset(ray, vert.Normal);
+    Ray ray = Ray(vert.Position, 2.f, r);
+    RayResult result = SS_Trace(ray);
+
+    vec3 specularColor = textureLod(Camera.Color, SS_WorldToUV(result.Position).xy, 0.0).rgb;
+
+    if(!result.Hit)
+    {
+        ray = Ray(result.Position, 100.f, r);
+        result = Voxel_TraceOffset(ray, vert.Normal);
+
+        specularColor = textureLod(grid.Color, Voxel_WorldToUV(result.Position), 0.0).rgb;
+        specularColor = UnpackColor(specularColor);
+    }
 
     // Final Calculations
-    vec4 specularColor = textureLod(grid.Color, Voxel_WorldToUV(result.Position), 0.0);
-    specularColor = UnpackColor(specularColor);
-    specularColor.rgb *= brdf.g + f * brdf.r;
+    specularColor *= brdf.g + f * brdf.r;
 
-    return vec4(specularColor.rgb, float(result.Hit));
+    return vec4(specularColor, float(result.Hit));
 }
 #endif
 

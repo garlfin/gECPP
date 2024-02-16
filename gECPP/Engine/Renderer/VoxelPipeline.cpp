@@ -80,7 +80,6 @@ namespace gE::VoxelPipeline
 		voxelShader.Dispatch(dispatchSize);
 
 		return true;
-
 	}
 
 	void Target3D::PostProcessPass(float d)

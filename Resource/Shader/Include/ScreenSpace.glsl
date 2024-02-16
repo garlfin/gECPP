@@ -33,10 +33,10 @@ RayResult SS_Trace(Ray ray)
         vec3 uv = SS_WorldToUV(result.Position);
         float dist = uv.z - textureLod(Camera.Depth, uv.xy, 0.0).r;
 
-        if(uv.x > 1 || uv.y > 1 || uv.x < 0 || uv.y < 0) break;
+        if(any(lessThan(uv.xy, vec2(0.0))) || any(greaterThan(uv.xy, vec2(1.0)))) break;
         if(dist > 0)
         {
-            result.Hit = true;
+            result.Hit = dist < 0.1;
             break;
         }
     }
@@ -46,13 +46,12 @@ RayResult SS_Trace(Ray ray)
 
 vec3 SS_WorldToUV(vec3 pos)
 {
-    vec4 viewSpace = Camera.View[0] * vec4(pos, 1.0);
-    vec4 projSpace = Camera.Projection * viewSpace;
+    vec4 projSpace = Camera.Projection * Camera.View[0] * vec4(pos, 1.0);
 
-    projSpace.xy /= projSpace.w;
+    projSpace.xyz /= projSpace.w;
     projSpace.xy = projSpace.xy * 0.5 + 0.5;
 
-    return vec3(projSpace.xy, viewSpace.z);
+    return vec3(projSpace.xy, LinearizeDepth(projSpace.z, Camera.ClipPlanes));
 }
 
 vec2 SS_TexelToUV(ivec2 texel, uint lod)

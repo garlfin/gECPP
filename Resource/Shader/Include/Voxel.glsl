@@ -72,7 +72,9 @@ struct RayResult
 
 // Functions
 vec4 PackColor(vec4);
+vec3 PackColor(vec3);
 vec4 UnpackColor(vec4);
+vec3 UnpackColor(vec3);
 
 #ifdef EXT_BINDLESS
 RayResult Voxel_Trace(Ray);
@@ -99,10 +101,20 @@ vec3 Voxel_TexelToUV(ivec3 texel, uint cellCount) { return (vec3(texel) + 0.5) /
 ivec3 Voxel_UVToTexel(vec3 uv, uint cellCount) { return ivec3(uv * cellCount); }
 ivec3 Voxel_WorldToTexel(vec3 pos, uint cellCount) { return Voxel_UVToTexel(Voxel_WorldToUV(pos), cellCount); }
 
+vec3 PackColor(vec3 color)
+{
+    return pow(color / VOXEL_COLOR_RANGE, vec3(1.0 / 2.2));
+}
+
 vec4 PackColor(vec4 color)
 {
     color.rgb = pow(color.rgb / VOXEL_COLOR_RANGE, vec3(1.0 / 2.2));
     return color;
+}
+
+vec3 UnpackColor(vec3 color)
+{
+    return pow(color, vec3(2.2)) * VOXEL_COLOR_RANGE;
 }
 
 vec4 UnpackColor(vec4 color)
@@ -159,7 +171,7 @@ RayResult Voxel_Trace(Ray ray)
     {
         vec3 rayABS = abs(result.Position - VoxelGrid.Position);
         if(result.Distance >= ray.MaximumDistance || max(rayABS.x, max(rayABS.y, rayABS.z)) > VoxelGrid.Scale)
-            return result;
+            break;
 
         vec3 alignedUV = Voxel_WorldToAlignedUV(result.Position, size >> mip);
         if(textureLod(VoxelGrid.Color, alignedUV, float(mip)).a > 0.5)
@@ -167,7 +179,7 @@ RayResult Voxel_Trace(Ray ray)
             if(mip == 0)
             {
                 result.Hit = true;
-                return result;
+                break;
             }
             else mip--;
         }

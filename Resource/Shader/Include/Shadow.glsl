@@ -48,6 +48,7 @@
 // Helper Functions
 float LinearizeDepthOrtho(float, vec2);
 float LinearizeDepth(float, vec2);
+float LinearizeDepthNDC(float z, vec2 planes);
 bool TexcoordOutOfBounds(vec2 uv);
 float InterleavedGradientNoise(vec2 uv);
 vec2 VogelDisk(uint i, uint count, float phi);
@@ -138,10 +139,14 @@ float LinearizeDepthOrtho(float z, vec2 planes)
     return planes.x + z * (planes.y - planes.x);
 }
 
+float LinearizeDepthNDC(float z, vec2 planes)
+{
+    return 2.0 * planes.x * planes.y / (planes.y + planes.x - z * (planes.y - planes.x));
+}
+
 float LinearizeDepth(float z, vec2 planes)
 {
-    z = z * 2.0 - 1.0;
-    return 2.0 * planes.x * planes.y / (planes.y + planes.x - z * (planes.y - planes.x));
+    return LinearizeDepthNDC(z * 0.5 + 0.5, planes);
 }
 
 bool TexcoordOutOfBounds(vec2 uv)
