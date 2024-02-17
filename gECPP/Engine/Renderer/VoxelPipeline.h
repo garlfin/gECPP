@@ -18,7 +18,7 @@ namespace GL
 	{
 		glm::vec3 Center;
 		float Scale;
-		handle Color;
+		GL_ALIGN handle Color;
 	};
 }
 

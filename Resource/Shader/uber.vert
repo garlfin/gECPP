@@ -44,12 +44,12 @@ void main()
     VertexIn.PreviousUV = Scene.PreviousModel[ModelIndex] * vec4(Position, 1);
     VertexIn.PreviousUV = Camera.PreviousViewProjection * vec4(VertexIn.PreviousUV.xyz, 1);
 
-    vec3 vNormal, vTangent, vBitangent;
-    vNormal = normalize(Scene.Normal[ModelIndex] * Normal);
-    vTangent = normalize(Scene.Normal[ModelIndex] * Tangent);
-    vBitangent = normalize(cross(vTangent, vNormal));
+    vec3 nor, tan, bitan;
+    nor = normalize(Scene.Normal[ModelIndex] * Normal);
+    tan = normalize(Scene.Normal[ModelIndex] * Tangent);
+    bitan = normalize(cross(tan, nor));
 
-    VertexIn.TBN = mat3(vTangent, vBitangent, vNormal);
+    VertexIn.TBN = mat3(tan, bitan, nor);
 
     for(uint i = 0; i < Lighting.LightCount; i++)
         VertexIn.FragPosLightSpace[i] = Lighting.Lights[i].ViewProjection * vec4(VertexIn.FragPos, 1);

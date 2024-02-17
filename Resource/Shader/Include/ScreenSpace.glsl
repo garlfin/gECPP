@@ -46,12 +46,13 @@ RayResult SS_Trace(Ray ray)
 
 vec3 SS_WorldToUV(vec3 pos)
 {
-    vec4 projSpace = Camera.Projection * Camera.View[0] * vec4(pos, 1.0);
+    vec4 viewSpace = Camera.View[0] * vec4(pos, 1.0);
+    vec4 projSpace = Camera.Projection * viewSpace;
 
     projSpace.xyz /= projSpace.w;
     projSpace.xy = projSpace.xy * 0.5 + 0.5;
 
-    return vec3(projSpace.xy, LinearizeDepth(projSpace.z, Camera.ClipPlanes));
+    return vec3(projSpace.xy, -viewSpace.z);
 }
 
 vec2 SS_TexelToUV(ivec2 texel, uint lod)
