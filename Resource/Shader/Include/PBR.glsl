@@ -150,14 +150,13 @@ vec4 GetLighting(const Vertex vert, const PBRFragment frag, const PBRSample pbrS
     vec3 r = pbrSample.Specular;
     vec2 brdf = pbrSample.BRDF;
 
-    Ray ray = Ray(vert.Position, 2.f, r);
+    Ray ray = Ray(vert.Position, 5.f, r);
     RayResult result = SS_Trace(ray);
 
     vec3 specularColor = textureLod(Camera.Color, SS_WorldToUV(result.Position).xy, 0.0).rgb;
 
     if(!result.Hit)
     {
-        ray = Ray(result.Position, 100.f, r);
         result = Voxel_TraceOffset(ray, vert.Normal);
 
         specularColor = textureLod(grid.Color, Voxel_WorldToUV(result.Position), 0.0).rgb;
@@ -276,7 +275,7 @@ PBRSample ImportanceSample(const Vertex vert, const PBRFragment frag)
     float nDotV = max(dot(frag.Normal, eye), 0.0);
 
     vec2 xi = Hammersley(int(IGNSample * HAMMERSLEY_ROUGHNESS_SAMPLE), HAMMERSLEY_ROUGHNESS_SAMPLE);
-    vec3 n = ImportanceSampleGGX(xi, frag.Normal, frag.Roughness);
+    vec3 n = vert.Normal;//ImportanceSampleGGX(xi, frag.Normal, frag.Roughness);
     vec3 r = -reflect(eye, n);
     vec3 f = FresnelSchlick(frag.F0, nDotV);
     vec2 brdf = textureLod(BRDFLutTex, vec2(nDotV, frag.Roughness), 0.0).rg;

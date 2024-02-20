@@ -3,7 +3,11 @@
 #include "Shadow.glsl"
 
 #ifndef RAY_MAX_ITERATIONS
-    #define RAY_MAX_ITERATIONS 32
+    #define RAY_MAX_ITERATIONS 64
+#endif
+
+#ifndef RAY_THICKNESS
+    #define RAY_THICKNESS 0.1
 #endif
 
 // Functions
@@ -13,36 +17,56 @@ RayResult SS_Trace(Ray);
 
 // Helper Functions
 vec3 SS_WorldToUV(vec3);
-vec2 SS_TexelToUV(ivec2, uint); // Mip
-ivec2 SS_WorldToTexel(vec3, uint); // Mip
-vec2 SS_WorldToAlignedUV(vec3, uint); // Mip
-float SS_CrossCell(inout vec3, vec3, uint); // Mip
+ivec2 SS_UVToTexel(vec2, uint);
+vec2 SS_TexelToUV(ivec2, uint);
+vec2 SS_AlignUVToCell(vec2, uint);
+float SS_CrossCell(inout vec3, vec3, uint);
 
 // Implementation
+#ifdef EXT_BINDLESS
 RayResult SS_Trace(Ray ray)
 {
-    RayResult result = RayResult(ray.Position, 0.0, vec3(0.0), false);
-
+    ray.Position = SS_WorldToUV(ray.Position);
+    ray.Direction = vec3(Camera.View[0] * vec4(ray.Direction, 1.0));
     ray.Direction = normalize(ray.Direction);
-    ray.Direction *= ray.MaximumDistance / RAY_MAX_ITERATIONS;
+
+    RayResult result = RayResult(ray.Position, 0.0, vec3(0.0), false);
+    result.Distance += SS_CrossCell(result.Position, ray.Direction, 0);
+
+    int size = textureSize(Camera.Depth, 0).r;
+    int mipCount = textureQueryLevels(Camera.Depth) - 1;
+    int mip = 0;
 
     for(uint i = 0; i < RAY_MAX_ITERATIONS; i++)
     {
-        result.Position += ray.Direction;
+        if(result.Distance > ray.MaximumDistance || TexcoordOutOfBounds(result.Position.xy)) break;
 
-        vec3 uv = SS_WorldToUV(result.Position);
-        float dist = uv.z - textureLod(Camera.Depth, uv.xy, 0.0).r;
+        ivec2 oldCell = SS_UVToTexel(result.Position.xy, mip);
+        vec2 alignedUV = SS_TexelToUV(oldCell, mip);
 
-        if(any(lessThan(uv.xy, vec2(0.0))) || any(greaterThan(uv.xy, vec2(1.0)))) break;
-        if(dist > 0)
+        float depth = textureLod(Camera.Depth, alignedUV.xy, float(mip)).r;
+
+        if(depth > result.Position.z)
         {
-            result.Hit = dist < 0.1;
-            break;
+            if(mip == 0)
+            {
+                result.Hit = result.Position.z - depth < RAY_THICKNESS;
+                break;
+            }
+            else mip--;
+        }
+        else
+        {
+            result.Distance += SS_CrossCell(result.Position, ray.Direction, mip);
+            ivec2 newCell = SS_UVToTexel(result.Position.xy, size >> (mip + 1));
+
+            if(oldCell >> 1 != newCell) mip = min(mip + 1, mipCount);
         }
     }
 
     return result;
 }
+#endif
 
 vec3 SS_WorldToUV(vec3 pos)
 {
@@ -55,23 +79,35 @@ vec3 SS_WorldToUV(vec3 pos)
     return vec3(projSpace.xy, -viewSpace.z);
 }
 
-vec2 SS_TexelToUV(ivec2 texel, uint lod)
+vec2 SS_TexelToUV(ivec2 texel, uint mip)
 {
-    return (vec2(texel) + 0.5) / textureSize(Camera.Color, int(lod));
+    return (vec2(texel) + 0.5) / textureSize(Camera.Depth, int(mip));
 }
 
-ivec2 SS_WorldToTexel(vec3 pos, uint lod)
+ivec2 SS_UVToTexel(vec2 uv, uint mip)
 {
-    vec2 uv = SS_WorldToUV(pos).xy;
-    return ivec2(uv * textureSize(Camera.Color, int(lod)));
+    return ivec2(uv * textureSize(Camera.Depth, int(mip)));
 }
 
-vec2 SS_WorldToAlignedUV(vec3 pos, uint lod)
+vec2 SS_AlignUVToCell(vec2 uv, uint mip)
 {
-    vec2 uv = SS_WorldToUV(pos).xy;
-    ivec2 size = textureSize(Camera.Color, int(lod));
-
-    return floor(uv * size) / size;
+    return SS_TexelToUV(SS_UVToTexel(uv, mip), mip);
 }
 
-float SS_CrossCell(inout vec3, vec3, uint); // CellCount
+float SS_CrossCell(inout vec3 position, vec3 direction, uint mip)
+{
+    ivec2 size = textureSize(Camera.Depth, int(mip));
+    vec2 cellSize = vec2(1.0) / size;
+
+    vec2 cellMin = SS_AlignUVToCell(position.xy, mip);
+    vec2 cellMax = cellMin + cellSize;
+
+    vec2 first = (cellMin - position.xy) / direction.xy;
+    vec2 second = (cellMax - position.xy) / direction.xy;
+
+    first = max(first, second);
+    float dist = min(first.x, first.y);
+
+    position += direction * (dist + EPSILON);
+    return dist;
+}
