@@ -27,10 +27,10 @@ float SS_CrossCell(inout vec3, vec3, uint);
 RayResult SS_Trace(Ray ray)
 {
     ray.Position = SS_WorldToUV(ray.Position);
-    ray.Direction = vec3(Camera.View[0] * vec4(ray.Direction, 1.0));
-    ray.Direction = normalize(ray.Direction);
+    ray.Direction = vec3(Camera.View[0] * vec4(ray.Direction, 0.0));
+    ray.Direction = normalize(ray.Direction * vec3(1, 1, -1));
 
-    RayResult result = RayResult(ray.Position, 0.0, vec3(0.0), false);
+    RayResult result = RayResult(ray.Position, 0.0, max(ray.Direction, vec3(0.0)), false);
     result.Distance += SS_CrossCell(result.Position, ray.Direction, 0);
 
     int size = textureSize(Camera.Depth, 0).r;

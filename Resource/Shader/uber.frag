@@ -67,7 +67,7 @@ void main()
         specular = mix(specular, voxelSpecular.rgb, voxelSpecular.a);
     #endif
 
-        FragColor.rgb += specular;
+        FragColor.rgb += specular.rgb;
     }
 #endif
 
