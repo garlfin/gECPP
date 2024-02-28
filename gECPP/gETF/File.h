@@ -17,7 +17,7 @@ namespace gETF
 
 	struct File : public Serializable<File>
 	{
-		SERIALIZABLE_PROTO;
+		SERIALIZABLE_PROTO_T;
 
 		u8 Version = GETF_VERSION;
 

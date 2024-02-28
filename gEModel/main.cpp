@@ -37,7 +37,7 @@ void ConvertFace(u32, const aiFace&, glm::uvec3&);
 
 int main(int argc, char** argv)
 {
-	GE_ASSERT(argc >= 3, "USAGE: in.file out.file!");
+	GE_ASSERT(argc >= 3, "USAGE: in.file out.file");
 
 	Assimp::Importer importer;
 	const aiScene& scene = *importer.ReadFile(argv[1], POST_PROCESS);

@@ -14,7 +14,7 @@ namespace gETF
 {
 	struct VertexBuffer : public Serializable<File>, public GL::BufferSettings
 	{
-		SERIALIZABLE_PROTO;
+		SERIALIZABLE_PROTO_T;
 
 		inline void Free() { free(Data); Data = nullptr; }
 		NODISCARD ALWAYS_INLINE bool IsFree() const { return Data; }
@@ -25,14 +25,14 @@ namespace gETF
 
 	struct VertexField : public Serializable<File>, public GL::VertexField
 	{
-		SERIALIZABLE_PROTO;
+		SERIALIZABLE_PROTO_T;
 
 		char Name[4];
 	};
 
 	struct MaterialSlot : public Serializable<File>, public GL::MaterialSlot
 	{
-		SERIALIZABLE_PROTO;
+		SERIALIZABLE_PROTO_T;
 	};
 
 	enum class TriangleMode : u8
@@ -44,7 +44,7 @@ namespace gETF
 
 	struct Mesh : public Serializable<File>
 	{
-		SERIALIZABLE_PROTO;
+		SERIALIZABLE_PROTO_T;
 
 		std::string Name;
 

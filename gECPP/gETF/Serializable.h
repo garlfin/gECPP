@@ -7,12 +7,16 @@
 #include <GL/Math.h>
 #include <Engine/Array.h>
 
-#define SERIALIZABLE_PROTO  void Deserialize(SerializationBuffer& buf, const SETTINGS_T& settings) const override;\
-							void Serialize(u8*& ptr, const SETTINGS_T& settings) override
+#define SERIALIZABLE_PROTO_T void Deserialize(SerializationBuffer& buf, const SETTINGS_T& settings) const override;\
+							 void Serialize(u8*& ptr, const SETTINGS_T& settings) override
+
+#define SERIALIZABLE_PROTO void Deserialize(SerializationBuffer& buf) const override;\
+						   void Serialize(u8*& ptr) override
+
 
 struct SerializationBuffer;
 
-template<class T>
+template<class T = void>
 struct Serializable
 {
 	typedef T SETTINGS_T;
@@ -20,7 +24,16 @@ struct Serializable
 	virtual void Deserialize(SerializationBuffer& buf, const T& s) const = 0;
 	virtual void Serialize(u8*& ptr, const T& s) = 0;
 
-	virtual ~Serializable() {};
+	virtual ~Serializable() = default;
+};
+
+template<>
+struct Serializable<void>
+{
+	virtual void Deserialize(SerializationBuffer& buf) const = 0;
+	virtual void Serialize(u8*& ptr) = 0;
+
+	virtual ~Serializable() = default;
 };
 
 template<typename T, typename S>

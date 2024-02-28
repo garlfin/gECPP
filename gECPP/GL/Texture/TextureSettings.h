@@ -41,7 +41,7 @@ namespace PVR
 
 	struct Header : Serializable<u32>
 	{
-		SERIALIZABLE_PROTO;
+		SERIALIZABLE_PROTO_T;
 
 		uint32_t Version;
 		Flags Flags;

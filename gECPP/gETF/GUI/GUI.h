@@ -4,56 +4,64 @@
 
 #pragma once
 
+#include "Stylesheet.h"
 #include <GL/Texture/Texture.h>
 #include <Engine/AssetManager.h>
 
 namespace gETF::GUI
 {
-	enum class SliceMode : u8
+	class Renderable;
+
+	struct InteractiveState
 	{
-		Stretch,
-		Continuous
+		bool WasHovered : 1;
+		bool WasHeld: 1;
 	};
 
-	enum class TransformMode : u8
-	{
-		Absolute,
-		Percent
-	};
-
-	struct NineSlice
-	{
-		glm::vec2 Border;
-		SliceMode Mode;
-		gE::Reference<GL::Texture2D> Texture;
-	};
-
-	struct Transform2D
-	{
-		glm::vec2 Position;
-		glm::vec2 Scale;
-		float Rotation;
-		u16 Layer;
-		TransformMode Mode;
-	};
+	using GUIFunc = void(*)(gE::Window*, Renderable*);
 
 	class Renderable
 	{
 	 public:
-		Renderable(gE::Window* window) : Window(window) {};
+		explicit Renderable(gE::Window* window) : _window(window) {};
 
-		GET_CONST(gE::Window*, Window, Window);
+		GET_CONST(gE::Window*, Window, _window);
 
 		virtual void Render() = 0;
+		virtual void Update() = 0;
 
-	 protected:
-		gE::Window* const Window;
+	 private:
+		gE::Window* const _window;
 	};
 
-	class Frame : public Renderable
+	class Interactive
 	{
 	 public:
-		Transform2D Transform;
+		explicit Interactive(gE::Window* window) : _window(window) {};
+
+		GET_CONST(gE::Window*, Window, _window);
+		GET_CONST(InteractiveState, State, _state);
+
+		GUIFunc OnEnter = nullptr;
+		GUIFunc OnHover = nullptr;
+		GUIFunc OnExit = nullptr;
+
+		GUIFunc OnClick = nullptr;
+		GUIFunc OnHold = nullptr;
+		GUIFunc OnRelease = nullptr;
+
+	 private:
+		gE::Window* _window;
+		InteractiveState _state;
+	};
+
+	class Frame : public Renderable, Serializable<>
+	{
+	 public:
+	 	GET_CONST(Renderable*, Parent, Parent);
+
+	 private:
+		Renderable* Parent;
 	};
 
 }
