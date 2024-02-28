@@ -7,7 +7,7 @@
 int main()
 {
 	pugi::xml_document file;
-	file.load_file("test.xml");.
+	file.load_file("test.xml");
 	return 0;
 }
 
