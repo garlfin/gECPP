@@ -8,7 +8,7 @@
 #include <GL/Texture/Texture.h>
 #include <Engine/AssetManager.h>
 
-namespace gETF::GUI
+namespace gETF::UI
 {
 	class Renderable;
 

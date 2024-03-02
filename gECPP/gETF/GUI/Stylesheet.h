@@ -9,7 +9,7 @@
 
 #define STYLE_NAME_MAX_LENGTH 16
 
-namespace gETF::GUI
+namespace gETF::UI
 {
 	enum class SliceMode : u8
 	{

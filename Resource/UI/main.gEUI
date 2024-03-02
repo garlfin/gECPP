@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui>
+    <style source="main.gECSS"/>
+
+    <label style="offset">Cool Text :)</label>
+    <button style="offset">Cool Button :)</button>
+</ui>
