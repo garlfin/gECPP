@@ -10,58 +10,30 @@
 
 namespace gETF::UI
 {
-	class Renderable;
-
-	struct InteractiveState
-	{
-		bool WasHovered : 1;
-		bool WasHeld: 1;
-	};
-
-	using GUIFunc = void(*)(gE::Window*, Renderable*);
-
-	class Renderable
+	class Element : public Serializable<File>
 	{
 	 public:
-		explicit Renderable(gE::Window* window) : _window(window) {};
+		SERIALIZABLE_PROTO_T;
 
+		virtual void OnRender(float) = 0;
+		virtual void OnInteract(float) = 0;
+
+		GET_CONST(Element*, Parent, _parent);
 		GET_CONST(gE::Window*, Window, _window);
-
-		virtual void Render() = 0;
-		virtual void Update() = 0;
+		GET(Transform2D&, Transform, _transform);
 
 	 private:
-		gE::Window* const _window;
-	};
-
-	class Interactive
-	{
-	 public:
-		explicit Interactive(gE::Window* window) : _window(window) {};
-
-		GET_CONST(gE::Window*, Window, _window);
-		GET_CONST(InteractiveState, State, _state);
-
-		GUIFunc OnEnter = nullptr;
-		GUIFunc OnHover = nullptr;
-		GUIFunc OnExit = nullptr;
-
-		GUIFunc OnClick = nullptr;
-		GUIFunc OnHold = nullptr;
-		GUIFunc OnRelease = nullptr;
-
-	 private:
+		Element* _parent;
 		gE::Window* _window;
-		InteractiveState _state;
+		Transform2D _transform;
 	};
 
-	class Frame : public Renderable, Serializable<>
+	class Frame : public Element
 	{
 	 public:
-	 	GET_CONST(Renderable*, Parent, Parent);
+		SERIALIZABLE_PROTO_T;
 
-	 private:
-		Renderable* Parent;
+		void OnRender(float d) override;
+		void OnInteract(float d) override;
 	};
-
 }

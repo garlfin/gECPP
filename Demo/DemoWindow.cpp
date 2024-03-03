@@ -30,7 +30,7 @@ void DemoWindow::OnInit()
 	auto rasterMaterial = gE::ref_create<gE::PBRMaterial>(this, rasterShader, materialSettings);
 
 	gETF::File cube;
-	gETF::Read("Resource/Model/cube.gETF", cube);
+	gETF::Read(this, "Resource/Model/cube.gETF", cube);
 
 	auto* mesh = new VoxelDemo::StaticMeshEntity(this, cube.Meshes[0]);
 

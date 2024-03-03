@@ -4,10 +4,10 @@
 
 #pragma once
 
-#include "GL/Math.h"
-#include "gETF/Serializable.h"
-
-#define STYLE_NAME_MAX_LENGTH 16
+#include <GL/Math.h>
+#include <gETF/Serializable.h>
+#include <gECPP/Prototype.h>
+#include <Engine/AssetManager.h>
 
 namespace gETF::UI
 {
@@ -17,17 +17,16 @@ namespace gETF::UI
 		Continuous
 	};
 
+	struct NineSlice : public Serializable<File*>
+	{
+		glm::vec2 Border;
+		SliceMode Mode;
+	};
+
 	enum class TransformMode : u8
 	{
 		Absolute,
 		Percent
-	};
-
-	struct NineSlice
-	{
-		glm::vec2 Border;
-		SliceMode Mode;
-		gE::Reference<GL::Texture2D> Texture;
 	};
 
 	struct TransformSettings
@@ -36,15 +35,10 @@ namespace gETF::UI
 		TransformMode ScaleX : 1, ScaleY : 1;
 	};
 
-	struct Transform2D : public Serializable<>
+	struct Transform2D
 	{
-		SERIALIZABLE_PROTO;
-
-		glm::vec2 RelativePosition;
-		glm::i32vec2 AbsolutePosition;
-
-		glm::vec2 RelativeScale;
-		glm::i32vec2 AbsoluteScale;
+		glm::vec2 Position;
+		glm::vec2 Scale;
 
 		TransformSettings Mode;
 		float Rotation;

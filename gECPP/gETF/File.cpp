@@ -64,8 +64,9 @@ namespace gETF
 		return nullptr;
 	}
 
-	File& Read(const char* file, File& header)
+	File& Read(gE::Window* window, const char* file, File& header)
 	{
+		header.Window = window;
 		u8* src = ReadFile(file, true);
 		u8* srcCpy = src;
 		header.Serialize(srcCpy, header);
@@ -73,9 +74,9 @@ namespace gETF
 		return header;
 	}
 
-	File* Read(const char* file)
+	File* Read(gE::Window* window, const char* file)
 	{
-		auto* h = new File;
-		return &Read(file, *h);
+		auto* h = new File();
+		return &Read(window, file, *h);
 	}
 }

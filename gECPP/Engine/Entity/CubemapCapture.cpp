@@ -51,7 +51,7 @@ namespace gE
 		if(!_skyboxVAO)
 		{
 			gETF::File skybox;
-			gETF::Read("Resource/Model/skybox.gETF", skybox);
+			gETF::Read(_window, "Resource/Model/skybox.gETF", skybox);
 
 			GL::VAOSettings skyboxSettings;
 			skybox.Meshes[0]->GetVAOSettings(skyboxSettings);

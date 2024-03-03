@@ -19,6 +19,7 @@ namespace gETF
 	{
 		SERIALIZABLE_PROTO_T;
 
+		gE::Window* Window;
 		u8 Version = GETF_VERSION;
 
 		Array<MeshReference> Meshes;
@@ -26,6 +27,6 @@ namespace gETF
 		MeshReference* GetMesh(const char*);
 	};
 
-	File& Read(const char*, File&);
-	NODISCARD File* Read(const char*);
+	File& Read(gE::Window*, const char*, File&);
+	NODISCARD File* Read(gE::Window*, const char*);
 }
