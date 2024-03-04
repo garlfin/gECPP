@@ -4,13 +4,14 @@
 
 #include "Binary.h"
 #include "iostream"
-#include "SerializationBuffer.h"
 
-std::string ReadPrefixedString(u8*& ptr)
+std::string ReadPrefixedString(istream& ptr)
 {
 	u8 len = ::Read<u8>(ptr);
-	std::string string((char*) ptr, len);
-	ptr += len;
+
+	std::string string(len, '\n');
+	ptr.read(string.data(), len);
+
 	return string;
 }
 
@@ -72,73 +73,8 @@ const char* IncrementLine(const char* str, char d)
 	return ++str;
 }
 
-void SerializationBuffer::Push(const SerializationBuffer& t)
+void WritePrefixedString(ostream& ptr, const std::string& str)
 {
-	PushPtr(t.Data(), t.Length());
+	Write(ptr, str.length());
+	Write(ptr, str.c_str(), str.length());
 }
-
-void SerializationBuffer::Realloc(u64 newSize)
-{
-	u64 logSize = 1 << (BIT_SIZE(newSize) - __builtin_clzll(newSize)); // count leading zeros
-	if(_alloc != logSize) _buf = (u8*) realloc(_buf, logSize);
-	_alloc = logSize;
-	_size = newSize;
-}
-
-void SerializationBuffer::PushPrefixedString(const std::string& str)
-{
-	Push((u8) str.size());
-	PushPtr(str.c_str(), str.size());
-}
-
-void SerializationBuffer::StrCat(const char* str, bool incTerminator, char d)
-{
-	GE_ASSERT(str, "'str' should have a value.");
-
-	u32 strLen = strlenc(str, d);
-	if(str[strLen] == d) strLen += incTerminator;
-	u64 preSize = Length();
-
-	Realloc(_size + strLen);
-	memcpy(_buf + preSize, str, strLen);
-}
-
-void SerializationBuffer::FromFile(const char* file, bool binary)
-{
-	u64 preSize = _size, length;
-
-	FILE* fstream = fopen(file, "rb");
-
-	fseek(fstream, 0, SEEK_END);
-	length = ftell(fstream);
-
-	Realloc(_size + length + !binary);
-
-	if(!binary) _buf[_size - 1] = 0;
-
-	fseek(fstream, 0, SEEK_SET);
-	fread(_buf + preSize, length, 1, fstream);
-}
-
-char* SerializationBuffer::Find(const char* str, char delimiter)
-{
-	char* s = (char*) _buf;
-	char* end = (char*) _buf + _size;
-	size_t len = strlenc(str, delimiter);
-
-	while(s < end)
-	{
-		if(!memcmp(s, str, std::min(end - s, (long long) len)))
-			return s;
-		s++;
-	}
-
-	return nullptr;
-}
-void SerializationBuffer::ToFile(const char* file)
-{
-	FILE* fstream = fopen(file, "wb");
-	fwrite(_buf, 1, _size, fstream);
-	fclose(fstream);
-}
-

@@ -7,23 +7,23 @@
 
 namespace gETF::UI
 {
-	void Element::Serialize(u8*& ptr, const File& settings)
+	void Element::Serialize(istream& ptr, const File& settings)
 	{
 		_window = nullptr;
-		_transform = ::Read<Transform2D>(ptr);
+		_transform = ::Read<Transform>(ptr);
 	}
 
-	void Element::Deserialize(SerializationBuffer& buf, const File& settings) const
+	void Element::Deserialize(ostream& buf, const File& settings) const
 	{
-		buf.Push(_transform);
+		Write(buf, _transform);
 	}
 
-	void Frame::Serialize(u8*& ptr, const File& settings)
+	void Frame::Serialize(istream& ptr, const File& settings)
 	{
 
 	}
 
-	void Frame::Deserialize(SerializationBuffer& buf, const File& settings) const
+	void Frame::Deserialize(ostream& buf, const File& settings) const
 	{
 
 	}

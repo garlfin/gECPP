@@ -16,12 +16,12 @@
 
 namespace GL
 {
-	void CompileDirectives(const Array<PreprocessorPair>*, SerializationBuffer&);
-	void CompileIncludes(const char* file, SerializationBuffer&, SerializationBuffer&, SerializationBuffer& idBuffer);
+	void CompileDirectives(const Array<PreprocessorPair>& src, std::string& dst);
+	void CompileIncludes(const char* file, std::string& dst, std::string& directives, std::string& includes);
 	const char* GetIncludePath(const char* origin, const char* include);
 
 	template<typename T>
-	bool GetShaderStatus(const T& shader, const char* name = nullptr, char* source = nullptr);
+	bool GetShaderStatus(const T& shader, const char* name = nullptr, const char* source = nullptr);
 
 	Shader::Shader(gE::Window* window, const char* v, const char* f, const Array<PreprocessorPair>* p) : Asset(window)
 	{
@@ -36,30 +36,27 @@ namespace GL
 		GetShaderStatus(*this);
 	}
 
-	ShaderStage::ShaderStage(gE::Window* window, ShaderStageType type, const char* file, const Array<PreprocessorPair>* directives)
+	ShaderStage::ShaderStage(gE::Window* window, ShaderStageType type, const char* file, const Array<PreprocessorPair>* pairs)
 		: Asset(window)
 	{
 		ID = glCreateShader(type);
 
-		SerializationBuffer directivesBuf{};
-		SerializationBuffer sourceBuf{};
-		SerializationBuffer incIDBuf{};
+		std::string source, directives, includes;
 
-		directivesBuf.StrCat(VERSION_DIRECTIVE, false);
-		if(GLAD_GL_ARB_bindless_texture) directivesBuf.StrCat(EXT_BINDLESS, false);
-		directivesBuf.StrCat(ShaderStageDefine(type), false);
+		directives += VERSION_DIRECTIVE;
 
-		CompileDirectives(directives, directivesBuf);
-		CompileIncludes(file, sourceBuf, directivesBuf, incIDBuf);
-		directivesBuf.Push(sourceBuf);
-		directivesBuf.Push('\0');
+		CompileIncludes(file, source, directives, includes);
+		if(pairs) CompileDirectives(*pairs, directives);
+		if(GLAD_GL_ARB_bindless_texture) directives += EXT_BINDLESS;
+		directives += ShaderStageDefine(type);
+		directives += source;
 
-		char* bufPtr = (char*) directivesBuf.Data();
+		const char* src = directives.data();
 
-		glShaderSource(ID, 1, &bufPtr, nullptr);
+		glShaderSource(ID, 1, &src, nullptr);
 		glCompileShader(ID);
 
-		GetShaderStatus(*this, file, bufPtr);
+		GetShaderStatus(*this, file, src);
 	}
 
 	Shader::Shader(gE::Window* window, const ShaderStage& v, const ShaderStage& f) : Asset(window)
@@ -90,7 +87,7 @@ namespace GL
 	}
 
 	template<typename T>
-	bool GetShaderStatus(const T& shader, const char* name, char* source)
+	bool GetShaderStatus(const T& shader, const char* name, const char* source)
 	{
 		u32 id = shader.Get();
 
@@ -111,26 +108,22 @@ namespace GL
 		#ifdef DEBUG
 		if(source)
 		{
-			std::cout << "FILE: " << name << ", SHADER COMPILE FAILURE:\n" << infoLog << '\n';
+			std::cout << "FILE: " << name << '\n';
 
-			SerializationBuffer debugBuffer;
-			char lineNumberBuffer[5];
-
-			for(u32 i = 0; *source; i++)
+			std::string debugBuffer;
+			for(u32 i = 1; *source; i++)
 			{
-				debugBuffer.PushPtr<2>("0(");
-				_itoa_s(i, lineNumberBuffer, 10);
-				debugBuffer.StrCat(lineNumberBuffer, false);
-				debugBuffer.PushPtr<3>("): ");
+				debugBuffer += "0(" + std::to_string(i) + "): ";
 
 				size_t len = strlenc(source, '\n') + 1;
-				debugBuffer.PushPtr(source, len);
+				debugBuffer.append(source, len);
+
 				source += len;
 			}
 
-			std::cout << debugBuffer.Data() << '\n';
+			std::cout << debugBuffer;
 		}
-
+		std::cout << "SHADER COMPILE FAILURE:\n" << infoLog << '\n';
 		#endif
 
 		delete[] infoLog;

@@ -7,14 +7,14 @@
 
 using namespace gETF;
 
-void VertexBuffer::Deserialize(SerializationBuffer& buf, const File&) const
+void VertexBuffer::Deserialize(ostream& buf, const File&) const
 {
-	buf.Push(Stride);
-	buf.Push(Count);
+	Write(buf, Stride);
+	Write(buf, Count);
 	//buf.PushPtr((u8*) Data, 1);
 }
 
-void VertexBuffer::Serialize(u8*& ptr, const File&)
+void VertexBuffer::Serialize(istream& ptr, const File&)
 {
 	Stride = ::Read<u8>(ptr);
 	Count = ::Read<u32>(ptr);
@@ -24,21 +24,21 @@ void VertexBuffer::Serialize(u8*& ptr, const File&)
 	::Read(ptr, (u8*) Data, byteSize);
 }
 
-void VertexField::Deserialize(SerializationBuffer& buf, const File&) const
+void VertexField::Deserialize(ostream& buf, const File&) const
 {
-	buf.PushPrefixedString(Name);
+	WritePrefixedString(buf, Name);
 
-	buf.Push(Index);
-	buf.Push(BufferIndex);
-	buf.Push(ElementCount);
-	buf.Push(Offset);
-	buf.Push(ElementType);
-	buf.Push(Normalized);
+	Write(buf, Index);
+	Write(buf, BufferIndex);
+	Write(buf, ElementCount);
+	Write(buf, Offset);
+	Write(buf, ElementType);
+	Write(buf, Normalized);
 }
 
-void VertexField::Serialize(u8*& ptr, const File&)
+void VertexField::Serialize(istream& ptr, const File&)
 {
-	::Read<char, 4>(ptr, Name);
+	::Read<4, char>(ptr, Name);
 
 	Index = ::Read<u8>(ptr);
 	BufferIndex = ::Read<u8>(ptr);
@@ -48,45 +48,45 @@ void VertexField::Serialize(u8*& ptr, const File&)
 	Normalized = ::Read<bool>(ptr);
 }
 
-void MaterialSlot::Deserialize(SerializationBuffer& buf, const File&) const
+void MaterialSlot::Deserialize(ostream& buf, const File&) const
 {
-	buf.Push(Offset);
-	buf.Push(Count);
+	Write(buf, Offset);
+	Write(buf, Count);
 }
 
-void MaterialSlot::Serialize(u8*& ptr, const File& s)
+void MaterialSlot::Serialize(istream& ptr, const File& s)
 {
 	if(s.Version < 2) ::Read<u8>(ptr);
 	Offset = ::Read<u32>(ptr);
 	Count = ::Read<u32>(ptr);
 }
 
-void Mesh::Deserialize(SerializationBuffer& buf, const File& s) const
+void Mesh::Deserialize(ostream& buf, const File& s) const
 {
-	buf.PushPtr<4>("MESH");
+	Write<4>(buf, "MESH");
 
-	buf.PushSerializableArray<u8>(Buffers, s);
-	buf.PushSerializableArray<u8>(Fields, s);
+	WriteArraySerializable<u8>(buf, Buffers, s);
+	WriteArraySerializable<u8>(buf, Fields, s);
 
-	buf.Push((u8)TriangleMode);
-	if (TriangleMode != TriangleMode::None) buf.PushSerializable(Triangles, s);
+	Write(buf, (u8)TriMode);
+	if (TriMode != TriangleMode::None) Triangles.Deserialize(buf, s);
 
-	buf.PushSerializableArray<u8>(Materials, s);
+	WriteArraySerializable<u8>(buf, Materials, s);
 }
 
-void Mesh::Serialize(u8*& ptr, const File& s)
+void Mesh::Serialize(istream& ptr, const File& s)
 {
 	char magic[4];
-	::Read<char, 4>(ptr, magic);
+	::Read<4, char>(ptr, magic);
 
-	if (!strcmpb<4>(magic, "MESH")) std::cout << "Invalid File!\n";
-	if (s.Version >= 2) Name = ReadPrefixedString(ptr);
+	if(!strcmpb<4>(magic, "MESH")) std::cout << "Invalid File!\n";
+	if(s.Version >= 2) Name = ReadPrefixedString(ptr);
 
 	Buffers = ReadArraySerializable<u8, VertexBuffer>(ptr, s);
 	Fields = ReadArraySerializable<u8, VertexField>(ptr, s);
 
-	TriangleMode = ::Read<enum TriangleMode>(ptr);
-	if (TriangleMode != TriangleMode::None) Triangles.Serialize(ptr, s);
+	TriMode = ::Read<TriangleMode>(ptr);
+	if (TriMode != TriangleMode::None) Triangles.Serialize(ptr, s);
 
 	Materials = ReadArraySerializable<u8, MaterialSlot>(ptr, s);
 }
@@ -98,7 +98,7 @@ void Mesh::CreateVAO(gE::Window* w)
 	GL::IndexedVAOSettings settings;
 	GetVAOSettings(settings);
 
-	if (TriangleMode == TriangleMode::None)
+	if (TriMode == TriangleMode::None)
 		VAO = gE::SmartPointer<GL::VAO>(new GL::VAO(w, settings));
 	else
 		VAO = gE::SmartPointer<GL::VAO>(new GL::IndexedVAO(w, settings));
@@ -121,7 +121,7 @@ void Mesh::GetVAOSettings(GL::VAOSettings& settings) const
 
 void Mesh::GetVAOSettings(GL::IndexedVAOSettings& settings) const
 {
-	GE_ASSERT(TriangleMode != TriangleMode::None, "CANNOT GET TRIANGLES!");
+	GE_ASSERT(TriMode != TriangleMode::None, "CANNOT GET TRIANGLES!");
 
 	GetVAOSettings((GL::VAOSettings&) settings);
 	settings.Triangles = Triangles;

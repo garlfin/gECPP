@@ -103,7 +103,7 @@ void TransformMesh(const std::vector<aiMesh*>& src, gETF::Mesh& dst)
 	dst.Fields[3] = CreateField(&Vertex::Tangent, "TAN\0", 3, 0);
 	FillBuffer(&Vertex::Tangent, &aiMesh::mTangents, &aiMesh::mNumVertices, dst.Buffers[0], src, ConvertVec);
 
-	dst.TriangleMode = gETF::TriangleMode::Simple;
+	dst.TriMode = gETF::TriangleMode::Simple;
 	dst.Triangles = CreateField(&Face::Triangle, "TRI\0", 0, 1);
 	FillBuffer(&Face::Triangle, &aiMesh::mFaces, &aiMesh::mNumFaces, dst.Buffers[1], src, ConvertFace);
 }

@@ -8,10 +8,11 @@
 #include <cstring>
 #include <algorithm>
 #include <vector>
-
+#include <Engine/Array.h>
 #include "Macro.h"
-#include "SerializationBuffer.h"
-#include "Engine/Array.h"
+
+using std::istream;
+using std::ostream;
 
 // CSTDLIB alternatives
 size_t strlenc(const char*, char);
@@ -26,16 +27,22 @@ bool strcmpb(const char* a, const char(& b)[LENGTH]);
 // Various helper functions
 const char* IncrementLine(const char* s, char d = '\n');
 template<class T> void RemoveFirstFromVec(std::vector<T>& vec, const T& t);
-template<typename UINT_T, class T> Array<T> ReadArray(u8*&);
+template<typename UINT_T, class T> Array<T> ReadArray(istream&);
 
 // Binary helper functions
-std::string ReadPrefixedString(u8*& ptr);
+std::string ReadPrefixedString(istream&);
+void WritePrefixedString(ostream&, const std::string&);
+
 u8* ReadFile(const char* name, u32& length, bool binary = false);
 inline u8* ReadFile(const char* name, bool binary = false);
 
-template<typename T> T Read(u8*& src);
-template<typename T> void Read(u8*& src, T* ts, u32 count);
-template<typename T, u32 COUNT> void Read(u8*& src, T* ts);
+template<typename T> T Read(istream& src);
+template<typename T> void Read(istream& src, T* ts, u32 count);
+template<u64 COUNT, typename T> void Read(istream& src, T* ts);
+
+template<typename T> void Write(ostream& src, const T&);
+template<typename T> void Write(ostream& src, T* ts, u32 count);
+template<u32 COUNT, typename T> void Write(ostream& src, T* ts);
 
 // Implementation
 template<u32 LENGTH>
@@ -55,33 +62,31 @@ bool strcmpb(const char* a, const char(& b)[LENGTH])
 }
 
 template<typename T>
-T Read(u8*& src)
+T Read(istream& src)
 {
 	static_assert(std::is_trivially_copyable_v<T>, "T MUST BE TRIVIALLY COPYABLE");
 
-	T t = *(T*) src;
-	src += sizeof(T);
+	T t;
+	src.read((char*) &t, sizeof(T));
 	return t;
 }
 
 template<typename T>
-void Read(u8*& src, T* ts, u32 count)
+void Read(istream& src, T* ts, u32 count)
 {
 	static_assert(std::is_trivially_copyable_v<T>, "T MUST BE TRIVIALLY COPYABLE");
 
 	if(!count) return;
-	memcpy(ts, src, count * sizeof(T));
-	src += count * sizeof(T);
+	src.read((char*) ts, sizeof(T) * count);
 }
 
-template<typename T, u32 COUNT>
-void Read(u8*& src, T* ts)
+template<u64 COUNT, typename T>
+void Read(istream& src, T* ts)
 {
 	static_assert(std::is_trivially_copyable_v<T>, "T MUST BE TRIVIALLY COPYABLE");
 	static_assert(COUNT > 0);
 
-	memcpy(ts, src, COUNT * sizeof(T));
-	src += COUNT * sizeof(T);
+	src.read((char*) ts, sizeof(T) * COUNT);
 }
 
 inline u8* ReadFile(const char* name, bool binary)
@@ -100,14 +105,36 @@ void RemoveFirstFromVec(std::vector<T>& vec, const T& t)
 }
 
 template<typename UINT_T, class T>
-Array<T> ReadArray(u8*& src)
+Array<T> ReadArray(istream& src)
 {
+	static_assert(std::is_trivially_copyable_v<T>, "T MUST BE TRIVIALLY COPYABLE");
+
 	UINT_T count = ::Read<UINT_T>(src);
 	Array<T> arr(count);
 
+	src.read(arr.Data(), sizeof(T) * count);
+	return arr;
+}
+
+template<typename T> void Write(ostream& src, const T& t)
+{
 	static_assert(std::is_trivially_copyable_v<T>, "T MUST BE TRIVIALLY COPYABLE");
 
-	memcpy(arr.Data(), src, sizeof(T) * count);
-	src += sizeof(T) * count;
-	return arr;
+	src.write((char*) &t, sizeof(T));
+}
+
+template<typename T> void Write(ostream& src, T* ts, u32 count)
+{
+	static_assert(std::is_trivially_copyable_v<T>, "T MUST BE TRIVIALLY COPYABLE");
+
+	if(!count) return;
+	src.write(ts, sizeof(T) * count);
+}
+
+template<u32 COUNT, typename T> void Write(ostream& src, T* ts)
+{
+	static_assert(std::is_trivially_copyable_v<T>, "T MUST BE TRIVIALLY COPYABLE");
+	static_assert(COUNT > 0);
+
+	src.write(ts, sizeof(T) * COUNT);
 }

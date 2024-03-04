@@ -40,7 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file config.h
+/** @_file config.h
  *  @brief Defines constants for configurable properties for the library
  *
  *  Typically these properties are set via
@@ -179,9 +179,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @brief Sets the colormap (= palette) to be used to decode embedded
  *         textures in MDL (Quake or 3DGS) files.
  *
- * This must be a valid path to a file. The file is 768 (256*3) bytes
+ * This must be a valid path to a _file. The _file is 768 (256*3) bytes
  * large and contains RGB triplets for each of the 256 palette entries.
- * The default value is colormap.lmp. If the file is not found,
+ * The default value is colormap.lmp. If the _file is not found,
  * a default palette (from Quake 1) is used.
  * Property type: string.
  */
@@ -559,7 +559,7 @@ enum aiComponent
 
 // ---------------------------------------------------------------------------
 /** @brief Set whether the fbx importer will merge all geometry layers present
- *    in the source file or take only the first.
+ *    in the source _file or take only the first.
  *
  * The default value is true (1)
  * Property type: bool
@@ -569,7 +569,7 @@ enum aiComponent
 
 // ---------------------------------------------------------------------------
 /** @brief Set whether the fbx importer will read all materials present in the
- *    source file or take only the referenced materials.
+ *    source _file or take only the referenced materials.
  *
  * This is void unless IMPORT_FBX_READ_MATERIALS=1.
  *
@@ -709,7 +709,7 @@ enum aiComponent
  * \note The default value is 0. This option applies to all importers.
  *   However, it is also possible to override the global setting
  *   for a specific loader. You can use the AI_CONFIG_IMPORT_XXX_KEYFRAME
- *   options (where XXX is a placeholder for the file format for which you
+ *   options (where XXX is a placeholder for the _file format for which you
  *   want to override the global setting).
  * Property type: integer.
  */
@@ -807,7 +807,7 @@ enum aiComponent
 
 // ---------------------------------------------------------------------------
 /** @brief  Configures whether the AC loader evaluates subdivision surfaces (
- *  indicated by the presence of the 'subdiv' attribute in the file). By
+ *  indicated by the presence of the 'subdiv' attribute in the _file). By
  *  default, Assimp performs the subdivision using the standard
  *  Catmull-Clark algorithm
  *
@@ -840,7 +840,7 @@ enum aiComponent
 
 // ---------------------------------------------------------------------------
 /** @brief  Configures the ASE loader to always reconstruct normal vectors
- *  basing on the smoothing groups loaded from the file.
+ *  basing on the smoothing groups loaded from the _file.
  *
  * Some ASE files have carry invalid normals, other don't.
  * * Property type: bool. Default value: true.
@@ -863,7 +863,7 @@ enum aiComponent
 // ---------------------------------------------------------------------------
 /** @brief  Tells the MD3 loader which skin files to load.
  *
- * When loading MD3 files, Assimp checks whether a file
+ * When loading MD3 files, Assimp checks whether a _file
  * [md3_file_name]_[skin_name].skin is existing. These files are used by
  * Quake III to be able to assign different skins (e.g. red and blue team)
  * to models. 'default', 'red', 'blue' are typical skin names.
@@ -882,18 +882,18 @@ enum aiComponent
     "IMPORT_MD3_LOAD_SHADERS"
 
 // ---------------------------------------------------------------------------
-/** @brief  Specify the Quake 3 shader file to be used for a particular
- *  MD3 file. This can also be a search path.
+/** @brief  Specify the Quake 3 shader _file to be used for a particular
+ *  MD3 _file. This can also be a search path.
  *
- * By default Assimp's behaviour is as follows: If a MD3 file
+ * By default Assimp's behaviour is as follows: If a MD3 _file
  * <tt>any_path/models/any_q3_subdir/model_name/file_name.md3</tt> is
- * loaded, the library tries to locate the corresponding shader file in
+ * loaded, the library tries to locate the corresponding shader _file in
  * <tt>any_path/scripts/model_name.shader</tt>. This property overrides this
  * behaviour. It can either specify a full path to the shader to be loaded
  * or alternatively the path (relative or absolute) to the directory where
  * the shaders for all MD3s to be loaded reside. Assimp attempts to open
  * <tt>IMPORT_MD3_SHADER_SRC/model_name.shader</tt> first, <tt>IMPORT_MD3_SHADER_SRC/file_name.shader</tt>
- * is the fallback file. Note that IMPORT_MD3_SHADER_SRC should have a terminal (back)slash.
+ * is the fallback _file. Note that IMPORT_MD3_SHADER_SRC should have a terminal (back)slash.
  * Property type: String. Default value: n/a.
  */
 #define AI_CONFIG_IMPORT_MD3_SHADER_SRC \
@@ -914,12 +914,12 @@ enum aiComponent
     "IMPORT_LWO_ONE_LAYER_ONLY"
 
 // ---------------------------------------------------------------------------
-/** @brief  Configures the MD5 loader to not load the MD5ANIM file for
- *  a MD5MESH file automatically.
+/** @brief  Configures the MD5 loader to not load the MD5ANIM _file for
+ *  a MD5MESH _file automatically.
  *
- * The default strategy is to look for a file with the same name but the
+ * The default strategy is to look for a _file with the same name but the
  * MD5ANIM extension in the same directory. If it is found, it is loaded
- * and combined with the MD5MESH file. This configuration option can be
+ * and combined with the MD5MESH _file. This configuration option can be
  * used to disable this behaviour.
  *
  * * Property type: bool. Default value: false.
@@ -933,13 +933,13 @@ enum aiComponent
  *
  * Assimp provides full conversion of LightWave's envelope system, including
  * pre and post conditions. The loader computes linearly subsampled animation
- * chanels with the frame rate given in the LWS file. This property defines
+ * chanels with the frame rate given in the LWS _file. This property defines
  * the start time. Note: animation channels are only generated if a node
  * has at least one envelope with more tan one key assigned. This property.
  * is given in frames, '0' is the first frame. By default, if this property
  * is not set, the importer takes the animation start from the input LWS
- * file ('FirstFrame' line)<br>
- * Property type: Integer. Default value: taken from file.
+ * _file ('FirstFrame' line)<br>
+ * Property type: Integer. Default value: taken from _file.
  *
  * @see AI_CONFIG_IMPORT_LWS_ANIM_END - end of the imported time range
  */
@@ -960,10 +960,10 @@ enum aiComponent
     "IMPORT_IRR_ANIM_FPS"
 
 // ---------------------------------------------------------------------------
-/** @brief Ogre Importer will try to find referenced materials from this file.
+/** @brief Ogre Importer will try to find referenced materials from this _file.
  *
- * Ogre meshes reference with material names, this does not tell Assimp the file
- * where it is located in. Assimp will try to find the source file in the following
+ * Ogre meshes reference with material names, this does not tell Assimp the _file
+ * where it is located in. Assimp will try to find the source _file in the following
  * order: <material-name>.material, <mesh-filename-base>.material and
  * lastly the material name defined by this config property.
  * <br>
@@ -1059,8 +1059,8 @@ enum aiComponent
 // ---------------------------------------------------------------------------
 /** @brief Specifies whether the Collada loader will ignore the provided up direction.
  *
- * If this property is set to true, the up direction provided in the file header will
- * be ignored and the file will be loaded as is.
+ * If this property is set to true, the up direction provided in the _file header will
+ * be ignored and the _file will be loaded as is.
  * Property type: Bool. Default value: false.
  */
 #define AI_CONFIG_IMPORT_COLLADA_IGNORE_UP_DIRECTION "IMPORT_COLLADA_IGNORE_UP_DIRECTION"
@@ -1097,12 +1097,12 @@ enum aiComponent
  * @brief Specifies the blob name, assimp uses for exporting.
  * 
  * Some formats require auxiliary files to be written, that need to be linked back into 
- * the original file. For example, OBJ files export materials to a separate MTL file and
- * use the `mtllib` keyword to reference this file.
+ * the original _file. For example, OBJ files export materials to a separate MTL _file and
+ * use the `mtllib` keyword to reference this _file.
  * 
  * When exporting blobs using #ExportToBlob, assimp does not know the name of the blob
- * file and thus outputs `mtllib $blobfile.mtl`, which might not be desired, since the 
- * MTL file might be called differently. 
+ * _file and thus outputs `mtllib $blobfile.mtl`, which might not be desired, since the
+ * MTL _file might be called differently.
  * 
  * This property can be used to give the exporter a hint on how to use the magic 
  * `$blobfile` keyword. If the exporter detects the keyword and is provided with a name

@@ -7,6 +7,7 @@
 #include <GL/Math.h>
 #include <GLAD/glad.h>
 #include <GL/Binary/Binary.h>
+#include <gETF/Serializable.h>
 
 #define DIV_CEIL(X, Y) (((X) + decltype(X)(Y) - decltype(X)(1)) / decltype(X)(Y))
 #define DIV_CEIL_T(X, Y, T) (((T)(X) + (T)(Y) - (T)(1)) / (T)(Y))
@@ -39,9 +40,9 @@ namespace PVR
 		SRGB = 1,
 	};
 
-	struct Header : Serializable<u32>
+	struct Header : Serializable<void>
 	{
-		SERIALIZABLE_PROTO_T;
+		SERIALIZABLE_PROTO;
 
 		uint32_t Version;
 		Flags Flags;

@@ -2,24 +2,29 @@
 // Created by scion on 10/25/2023.
 //
 
+#include <fstream>
 #include "Texture.h"
 
 namespace PVR
 {
-	u8* Read(const char* path, PVR::Header& header)
+	u8* Read(const char* file, PVR::Header& header)
 	{
-		u32 fileLen;
-		u8* file = ReadFile(path, fileLen, false);
-		u8* textureData = file;
+		std::ifstream src;
+		src.open(file, std::ios::in | std::ios::binary);
 
 		if(!file) return nullptr;
 
-		header.Serialize(textureData, 0);
-		size_t copySize = fileLen - (textureData - file);
-		u8* textureDataCopy = (u8*) memcpy(new u8[copySize], textureData, copySize);
+		src.seekg(0, std::ios::end);
+		size_t copySize = src.tellg();
+		src.seekg(0, std::ios::beg);
 
-		delete[] file;
-		return textureDataCopy;
+		header.Serialize(src);
+
+		copySize -= src.tellg();
+		u8* data = new u8[copySize];
+		src.read((char*) data, copySize);
+
+		return data;
 	}
 
 	GL::Texture* Read(gE::Window* window, const char* path, GL::WrapMode wrapMode, GL::FilterMode filterMode)
@@ -84,22 +89,22 @@ namespace PVR
 		return tex;
 	}
 
-	void Header::Serialize(u8*& ptr, const u32& version)
+	void Header::Serialize(istream& src)
 	{
-		Version = ::Read<u32>(ptr);
-		Flags = ::Read<PVR::Flags>(ptr);
-		Format = ::Read<PVR::PixelFormat>(ptr);
-		ColorSpace=::Read<PVR::ColorSpace>(ptr);
-		::Read<uint32_t>(ptr); // This was like bpc or something; unimportant w/ compression
-		Size = ::Read<glm::u32vec2>(ptr);
+		Version = ::Read<u32>(src);
+		Flags = ::Read<PVR::Flags>(src);
+		Format = ::Read<PVR::PixelFormat>(src);
+		ColorSpace=::Read<PVR::ColorSpace>(src);
+		::Read<uint32_t>(src); // This was like bpc or something; unimportant w/ compression
+		Size = ::Read<glm::u32vec2>(src);
 		Size = { Size.y, Size.x }; // NOLINT
 		// they store it height, width 🤦‍♂️
-		Depth = ::Read<u32>(ptr);
-		Surfaces = ::Read<u32>(ptr);
-		Faces = ::Read<u32>(ptr);
-		MipCount = ::Read<u32>(ptr);
-		ptr += ::Read<u32>(ptr); // I couldn't give two hoots about the metadata
+		Depth = ::Read<u32>(src);
+		Surfaces = ::Read<u32>(src);
+		Faces = ::Read<u32>(src);
+		MipCount = ::Read<u32>(src);
+		src.seekg(::Read<u32>(src), std::ios::cur); // I couldn't give two hoots about the metadata
 	}
 
-	void Header::Deserialize(SerializationBuffer&, const u32&) const { }
+	void Header::Deserialize(ostream&) const { }
 }

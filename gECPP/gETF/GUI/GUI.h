@@ -20,12 +20,12 @@ namespace gETF::UI
 
 		GET_CONST(Element*, Parent, _parent);
 		GET_CONST(gE::Window*, Window, _window);
-		GET(Transform2D&, Transform, _transform);
+		GET(Transform&, Transform, _transform);
 
 	 private:
 		Element* _parent;
 		gE::Window* _window;
-		Transform2D _transform;
+		Transform _transform;
 	};
 
 	class Frame : public Element

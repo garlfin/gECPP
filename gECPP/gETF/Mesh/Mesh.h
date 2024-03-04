@@ -48,7 +48,7 @@ namespace gETF
 
 		std::string Name;
 
-		TriangleMode TriangleMode = TriangleMode::None;
+		TriangleMode TriMode = TriangleMode::None;
 
 		VertexField Triangles;
 		Array<VertexBuffer> Buffers;

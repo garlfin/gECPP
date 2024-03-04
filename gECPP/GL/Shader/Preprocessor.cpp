@@ -11,41 +11,46 @@
 
 namespace GL
 {
-	void CompileDirectives(const Array<PreprocessorPair>*, SerializationBuffer&);
-	void CompileIncludes(const char* file, SerializationBuffer&, SerializationBuffer&, SerializationBuffer& idBuffer);
+	void CompileDirectives(const Array<PreprocessorPair>& pairs, std::string& buf);
+	void CompileIncludes(const char* file, std::string& dst, std::string& directives, std::string& includes);
 	const char* GetIncludePath(const char* origin, const char* include);
 
-	void CompileDirectives(const Array<PreprocessorPair>* pairs, SerializationBuffer& buf)
+	void CompileDirectives(const Array<PreprocessorPair>& pairs, std::string& buf)
 	{
-		if(!pairs) return;
-		for(u64 i = 0; i < pairs->Count(); i++) (*pairs)[i].WriteDirective(buf);
+		for(u64 i = 0; i < pairs.Count(); i++) pairs[i].Write(buf);
 	}
 
-	void CompileIncludes(const char* file, SerializationBuffer& dstBuffer, SerializationBuffer& directivesBuffer, SerializationBuffer& idBuffer)
+	void CompileIncludes(const char* file, std::string& dst, std::string& directives, std::string& includes)
 	{
 		// Turns out most drivers support GL_ARB_SHADER_LANGUAGE_INCLUDE
 		char* source = (char*) ReadFile(file);
 		if(!source) return;
 		char* line = source;
 
-		if(idBuffer.Find(file)) return;
-
-		idBuffer.StrCat(file);
+		if(includes.find(file) != std::string::npos) return;
+		includes += file;
 
 		do
 		{
 			if(strcmpb(line, INCLUDE_DIRECTIVE))
 			{
 				const char* includePath = GetIncludePath(file, &line[9]);
-				CompileIncludes(includePath, dstBuffer, directivesBuffer, idBuffer);
+				CompileIncludes(includePath, dst, directives, includes);
 				delete[] includePath;
 			}
-			else if(strcmpb(line, EXTENSION_DIRECTIVE)) directivesBuffer.StrCat(line, true, '\n');
-			else dstBuffer.StrCat(line, true, '\n');
+			else if(strcmpb(line, EXTENSION_DIRECTIVE))
+			{
+				size_t len = strlenc(line, '\n');
+				directives.append(line, strlenc(line, '\n') + (line[len] != 0));
+			}
+			else
+			{
+				size_t len = strlenc(line, '\n');
+				dst.append(line, strlenc(line, '\n') + (line[len] != 0));
+			}
 		} while((line = (char*) IncrementLine(line)));
 
-		// Prevent edge case when not putting newline at EOF.
-		dstBuffer.Push('\n');
+		dst += '\n';
 
 		delete[] source;
 	}
@@ -105,20 +110,20 @@ namespace GL
 		memcpy(Name, o.Name, len);
 	}
 
-	void PreprocessorPair::WriteDirective(SerializationBuffer& buf) const
+	void PreprocessorPair::Write(std::string& buf) const
 	{
 		if(!Name) return;
 
-		buf.StrCat("#define ");
-		buf.StrCat(Name);
+		buf += "#define ";
+		buf += Name;
 
 		if(Value)
 		{
-			buf.Push(' ');
-			buf.StrCat(Value);
+			buf += ' ';
+			buf += Value;
 		}
 
-		buf.Push('\n');
+		buf += '\n';
 	}
 
 	const char* ShaderStageDefine(ShaderStageType type)
