@@ -20,7 +20,7 @@ namespace gETF
 {
 	void File::Deserialize(ostream& buf, const File& s) const
 	{
-		Write<4>(buf, "gETF");
+		Write(buf, "gETF", 4);
 		Write(buf, GETF_VERSION);
 
 		Write(buf, 0);
@@ -37,9 +37,9 @@ namespace gETF
 	void File::Serialize(istream& ptr, const File& s)
 	{
 		char magic[4];
-		::Read<4, char>(ptr, magic);
+		::Read<char>(ptr, magic, 4);
 
-		if (!strcmpb<4>(magic, "gETF"))
+		if (!strcmpb(magic, "gETF", 4))
 		{
 			std::cout << "Invalid File!" << std::endl;
 			return;

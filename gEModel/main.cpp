@@ -8,6 +8,7 @@
 #include "ASSIMP/scene.h"
 #include "ASSIMP/postprocess.h"
 #include <gETF/File.h>
+#include <fstream>
 
 using pp = aiPostProcessSteps;
 
@@ -62,9 +63,9 @@ int main(int argc, char** argv)
 	for(unsigned i = 0; i < file.Meshes.Count(); i++)
 		TransformMesh(meshes[i], file.Meshes[i] = gE::ref_create<gETF::Mesh>());
 
-	SerializationBuffer writeBuffer;
-	file.Deserialize(writeBuffer, file);
-	writeBuffer.ToFile(argv[2]);
+	std::ofstream dst;
+	dst.open(argv[2], std::ios::out | std::ios::binary);
+	file.Deserialize(dst, file);
 
 	return 0;
 }

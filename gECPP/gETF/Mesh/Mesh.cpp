@@ -11,7 +11,7 @@ void VertexBuffer::Deserialize(ostream& buf, const File&) const
 {
 	Write(buf, Stride);
 	Write(buf, Count);
-	//buf.PushPtr((u8*) Data, 1);
+	Write(buf, (u8*) Data, Stride * Count);
 }
 
 void VertexBuffer::Serialize(istream& ptr, const File&)
@@ -38,7 +38,7 @@ void VertexField::Deserialize(ostream& buf, const File&) const
 
 void VertexField::Serialize(istream& ptr, const File&)
 {
-	::Read<4, char>(ptr, Name);
+	::Read<char>(ptr, Name, 4);
 
 	Index = ::Read<u8>(ptr);
 	BufferIndex = ::Read<u8>(ptr);
@@ -63,7 +63,7 @@ void MaterialSlot::Serialize(istream& ptr, const File& s)
 
 void Mesh::Deserialize(ostream& buf, const File& s) const
 {
-	Write<4>(buf, "MESH");
+	Write(buf, "MESH", 4);
 
 	WriteArraySerializable<u8>(buf, Buffers, s);
 	WriteArraySerializable<u8>(buf, Fields, s);
@@ -77,9 +77,9 @@ void Mesh::Deserialize(ostream& buf, const File& s) const
 void Mesh::Serialize(istream& ptr, const File& s)
 {
 	char magic[4];
-	::Read<4, char>(ptr, magic);
+	::Read<char>(ptr, magic, 4);
 
-	if(!strcmpb<4>(magic, "MESH")) std::cout << "Invalid File!\n";
+	if(!strcmpb(magic, "MESH", 4)) std::cout << "Invalid File!\n";
 	if(s.Version >= 2) Name = ReadPrefixedString(ptr);
 
 	Buffers = ReadArraySerializable<u8, VertexBuffer>(ptr, s);

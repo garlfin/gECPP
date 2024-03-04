@@ -18,9 +18,8 @@ using std::ostream;
 size_t strlenc(const char*, char);
 size_t strlencLast(const char*, char, char = 0);
 char* strdupc(const char*, char);
+bool strcmpb(const char* a, const char* b, u32 length);
 
-template<u32 LENGTH>
-bool strcmpb(const char* a, const char* b);
 template<u32 LENGTH>
 bool strcmpb(const char* a, const char(& b)[LENGTH]);
 
@@ -36,22 +35,14 @@ void WritePrefixedString(ostream&, const std::string&);
 u8* ReadFile(const char* name, u32& length, bool binary = false);
 inline u8* ReadFile(const char* name, bool binary = false);
 
-template<typename T> T Read(istream& src);
-template<typename T> void Read(istream& src, T* ts, u32 count);
-template<u64 COUNT, typename T> void Read(istream& src, T* ts);
+template<typename T> void Read(istream& src, T*, u64);
+template<typename T> inline void Read(istream& src, T& t) { Read<T>(src, &t, 1); }
+template<typename T> inline T Read(istream& src) { T t; Read<T>(src, t); return t; }
 
-template<typename T> void Write(ostream& src, const T&);
-template<typename T> void Write(ostream& src, T* ts, u32 count);
-template<u32 COUNT, typename T> void Write(ostream& src, T* ts);
+template<typename T> void Write(ostream& src, const T* ts, u64 count);
+template<typename T> inline void Write(ostream& src, const T& t) { Write<T>(src, &t, 1); }
 
 // Implementation
-template<u32 LENGTH>
-bool strcmpb(const char* a, const char* b)
-{
-	for(u32 i = 0; i < LENGTH; i++)
-		if(a[i] != b[i]) return false;
-	return true;
-}
 
 template<u32 LENGTH>
 bool strcmpb(const char* a, const char(& b)[LENGTH])
@@ -62,31 +53,12 @@ bool strcmpb(const char* a, const char(& b)[LENGTH])
 }
 
 template<typename T>
-T Read(istream& src)
-{
-	static_assert(std::is_trivially_copyable_v<T>, "T MUST BE TRIVIALLY COPYABLE");
-
-	T t;
-	src.read((char*) &t, sizeof(T));
-	return t;
-}
-
-template<typename T>
-void Read(istream& src, T* ts, u32 count)
+void Read(istream& src, T* ts, u64 count)
 {
 	static_assert(std::is_trivially_copyable_v<T>, "T MUST BE TRIVIALLY COPYABLE");
 
 	if(!count) return;
 	src.read((char*) ts, sizeof(T) * count);
-}
-
-template<u64 COUNT, typename T>
-void Read(istream& src, T* ts)
-{
-	static_assert(std::is_trivially_copyable_v<T>, "T MUST BE TRIVIALLY COPYABLE");
-	static_assert(COUNT > 0);
-
-	src.read((char*) ts, sizeof(T) * COUNT);
 }
 
 inline u8* ReadFile(const char* name, bool binary)
@@ -116,25 +88,10 @@ Array<T> ReadArray(istream& src)
 	return arr;
 }
 
-template<typename T> void Write(ostream& src, const T& t)
-{
-	static_assert(std::is_trivially_copyable_v<T>, "T MUST BE TRIVIALLY COPYABLE");
-
-	src.write((char*) &t, sizeof(T));
-}
-
-template<typename T> void Write(ostream& src, T* ts, u32 count)
+template<typename T> void Write(ostream& src, const T* ts, u64 count)
 {
 	static_assert(std::is_trivially_copyable_v<T>, "T MUST BE TRIVIALLY COPYABLE");
 
 	if(!count) return;
-	src.write(ts, sizeof(T) * count);
-}
-
-template<u32 COUNT, typename T> void Write(ostream& src, T* ts)
-{
-	static_assert(std::is_trivially_copyable_v<T>, "T MUST BE TRIVIALLY COPYABLE");
-	static_assert(COUNT > 0);
-
-	src.write(ts, sizeof(T) * COUNT);
+	src.write((char*) ts, sizeof(T) * count);
 }

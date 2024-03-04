@@ -78,3 +78,10 @@ void WritePrefixedString(ostream& ptr, const std::string& str)
 	Write(ptr, str.length());
 	Write(ptr, str.c_str(), str.length());
 }
+
+bool strcmpb(const char* a, const char* b, u32 length)
+{
+	for(u32 i = 0; i < length; i++)
+		if(a[i] != b[i]) return false;
+	return true;
+}
