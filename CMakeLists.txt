@@ -42,7 +42,7 @@ target_link_libraries(gEUI PRIVATE PUGIXML GETF GLAD)
 
 # GECPP
 file(GLOB_RECURSE GECPP_SRC "gECPP/*.cpp" "gECPP/*.h")
-add_library(gECPP STATIC ${GECPP_SRC} gECPP/GL/Type.h)
+add_library(gECPP STATIC ${GECPP_SRC} gECPP/GL/Type.h gECPP/gETF/GUI/Delegate.h gECPP/gETF/Prototype.h)
 target_link_libraries(gECPP GLAD GLFW GETF)
 
 # VOXELDEMO

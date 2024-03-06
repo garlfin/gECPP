@@ -3,8 +3,8 @@
 //
 
 #pragma once
-
 #include <GL/GL.h>
+#include <gETF/Prototype.h>
 
 namespace gE
 {
@@ -33,14 +33,6 @@ namespace gE
 	template<class T> class ComponentManager;
 	template<class T> class ComponentManager;
 	template<class T> class Managed;
-}
-
-namespace gETF
-{
-	struct File;
-	struct Mesh;
-	struct VertexBuffer;
-	struct MaterialSlot;
 }
 
 template<class T> class Serializable;

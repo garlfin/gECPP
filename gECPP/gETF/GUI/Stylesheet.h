@@ -13,9 +13,22 @@ namespace gETF::UI
 {
 	struct Transform
 	{
-		float Left;
-		float Right;
-		float Top;
-		float Bottom;
+		glm::vec4 Size;
+		float Rotation;
+
+		GET_SET_VALUE(float, Left, Size.x);
+		GET_SET_VALUE(float, Right, Size.y);
+		GET_SET_VALUE(float, Top, Size.z);
+		GET_SET_VALUE(float, Bottom, Size.w);
+	};
+
+	struct Style
+	{
+		Transform Transform;
+	};
+
+	struct FrameStyle : public Style
+	{
+
 	};
 }

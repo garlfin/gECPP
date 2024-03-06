@@ -19,9 +19,9 @@ class Array
 
 	OPERATOR_EQUALS_BOTH(Array<T>);
 
-	template<size_t COUNT, typename I>
-	size_t CopyToCArray(I(& arr)[COUNT]) const;
 	size_t CopyToCArray(T* arr, size_t arrSize) const;
+	template<size_t COUNT>
+	ALWAYS_INLINE size_t CopyToCArray(T(& arr)[COUNT]) const { return CopyToCArray(arr, COUNT); }
 
 	NODISCARD ALWAYS_INLINE u64 Count() const { return _size; }
 	NODISCARD ALWAYS_INLINE T* Data() { return _t; }
@@ -41,21 +41,6 @@ template<typename T>
 size_t Array<T>::CopyToCArray(T* arr, size_t arrSize) const
 {
 	size_t copyCount = std::min(arrSize, _size);
-
-	if constexpr(std::is_trivially_copyable_v<T>)
-		memcpy(arr, _t, copyCount * sizeof(T));
-	else
-		for(size_t i = 0; i < copyCount; i++)
-			arr[i] = _t[i];
-
-	return copyCount;
-}
-
-template<typename T>
-template<size_t COUNT, typename I>
-size_t Array<T>::CopyToCArray(I (& arr)[COUNT]) const
-{
-	size_t copyCount = std::min(COUNT, _size);
 
 	if constexpr(std::is_trivially_copyable_v<T>)
 		memcpy(arr, _t, copyCount * sizeof(T));

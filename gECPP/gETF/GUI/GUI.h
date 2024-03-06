@@ -15,17 +15,18 @@ namespace gETF::UI
 	 public:
 		SERIALIZABLE_PROTO_T;
 
-		virtual void OnRender(float) = 0;
-		virtual void OnInteract(float) = 0;
-
 		GET_CONST(Element*, Parent, _parent);
 		GET_CONST(gE::Window*, Window, _window);
-		GET(Transform&, Transform, _transform);
+		GET(Style&, Style, *_style);
+		GET(Transform&, GlobalTransform, _globalTransform);
+		GET_CONST(u8, ChildCount, _childCount);
 
 	 private:
 		Element* _parent;
 		gE::Window* _window;
-		Transform _transform;
+		Style* _style;
+		Transform _globalTransform;
+		u16 _childCount;
 	};
 
 	class Frame : public Element
@@ -33,7 +34,9 @@ namespace gETF::UI
 	 public:
 		SERIALIZABLE_PROTO_T;
 
-		void OnRender(float d) override;
-		void OnInteract(float d) override;
+		GET(FrameStyle&, Style, _style);
+
+	 private:
+		FrameStyle _style;
 	};
 }
