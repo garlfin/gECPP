@@ -83,7 +83,7 @@ RayResult Voxel_TraceOffset(Ray, vec3);
 
 // Helper Functions
 vec3 Voxel_WorldToUV(vec3);
-vec3 Voxel_TexelToUV(vec3, uint); // CellCount
+vec3 Voxel_TexelToUV(ivec3, uint); // CellCount
 ivec3 Voxel_UVToTexel(vec3, uint); // CellCount
 ivec3 Voxel_WorldToTexel(vec3, uint); // CellCount
 vec3 Voxel_WorldToAlignedUV(vec3, uint); // CellCount
@@ -164,19 +164,19 @@ RayResult Voxel_Trace(Ray ray)
 {
     RayResult result = RayResult(ray.Position, 0.0, vec3(0), false);
     int size = textureSize(VoxelGrid.Color, 0).r;
-    int mipCount = textureQueryLevels(VoxelGrid.Color) - 1;
-    int mip = 0; // starting from mip 0 improved speed by 0.1ms
+    int mipCount = textureQueryLevels(VoxelGrid.Color);
+    int mip = 0;
 
     for(uint i = 0; i < VOXEL_TRACE_MAX_ITERATIONS; i++)
     {
         vec3 rayABS = abs(result.Position - VoxelGrid.Position);
-        if(result.Distance > ray.MaximumDistance || max(rayABS.x, max(rayABS.y, rayABS.z)) > VoxelGrid.Scale)
-            break;
+        if(result.Distance > ray.MaximumDistance) break;
+        if(max(rayABS.x, max(rayABS.y, rayABS.z)) > VoxelGrid.Scale) break;
 
-        ivec3 oldCell = Voxel_WorldToTexel(result.Position, size >> mip);
-        vec3 alignedUV = Voxel_TexelToUV(oldCell, size >> mip);
-
-        if(textureLod(VoxelGrid.Color, alignedUV, float(mip)).a > 0.5)
+        ivec3 cell = Voxel_WorldToTexel(result.Position, size >> mip);
+        vec3 uv = Voxel_TexelToUV(cell, size >> mip);
+        float solid = textureLod(VoxelGrid.Color, uv, float(mip)).a;
+        if(solid >= 0.5)
         {
             if(mip == 0)
             {
@@ -190,7 +190,7 @@ RayResult Voxel_Trace(Ray ray)
             result.Distance += Voxel_CrossCell(result.Position, ray.Direction, size >> mip);
             ivec3 newCell = Voxel_WorldToTexel(result.Position, size >> (mip + 1));
 
-            if(oldCell >> 1 != newCell) mip = min(mip + 1, mipCount);
+            if (cell >> 1 != newCell) if (mip == mipCount - 1) break; else mip++;
         }
     }
 

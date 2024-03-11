@@ -61,7 +61,7 @@ namespace gE
 
 		hiZShader.SetUniform(1, _depthBack, 0);
 
-		for(u8 i = 1; i < GE_DEFAULT_MAX_DEPTH_MIPS; i++)
+		for(u8 i = 1; i < _depthBack.GetMipCount(); i++)
 		{
 			GL::TextureSize2D mipSize = _depthBack.GetSize(i);
 

@@ -95,7 +95,7 @@ namespace gE::VoxelPipeline
 		voxelShader.Dispatch(DIV_CEIL_T(_colorBack.GetSize(), VOXEL_TAA_GROUP_SIZE, glm::u16vec3));
 
 		voxelShader.SetUniform(0, glm::ivec4(MODE_TAA_DOWNSAMPLE));
-		for(u8 i = 1; i < VOXEL_MAX_MIPS; i++)
+		for(u8 i = 1; i < _color.GetMipCount(); i++)
 		{
 			_color.Bind(0, GL_READ_WRITE, i);
 			_color.Bind(2, GL_READ_WRITE, i - 1);

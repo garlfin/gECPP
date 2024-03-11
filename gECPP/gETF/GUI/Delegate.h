@@ -23,7 +23,7 @@ namespace gETF::UI
 
 		GET_CONST(gE::Entity*, Entity, Entity);
 
-		virtual void OnCall(Element*) = 0;
+		virtual void OnCall(IElement*) = 0;
 
 	 protected:
 		gE::Entity* Entity;

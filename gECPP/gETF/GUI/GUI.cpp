@@ -9,13 +9,14 @@
 
 namespace gETF::UI
 {
-	void Element::Serialize(istream& ptr, const File& settings)
+	void IElement::Serialize(istream& ptr, const File& settings)
 	{
 		_window = nullptr;
 	}
 
-	void Element::Deserialize(ostream& buf, const File& settings) const
+	void IElement::Deserialize(ostream& buf, const File& settings) const
 	{
+
 	}
 
 	void Frame::Serialize(istream& ptr, const File& settings)

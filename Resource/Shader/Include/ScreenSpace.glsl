@@ -28,41 +28,9 @@ RayResult SS_Trace(Ray ray)
 {
     ray.Position = SS_WorldToUV(ray.Position);
     ray.Direction = vec3(Camera.View[0] * vec4(ray.Direction, 0.0));
-    ray.Direction = normalize(ray.Direction * vec3(1, 1, -1));
+    ray.Direction = normalize(ray.Direction);
 
-    RayResult result = RayResult(ray.Position, 0.0, max(ray.Direction, vec3(0.0)), false);
-    result.Distance += SS_CrossCell(result.Position, ray.Direction, 0);
-
-    int size = textureSize(Camera.Depth, 0).r;
-    int mipCount = textureQueryLevels(Camera.Depth) - 1;
-    int mip = 0;
-
-    for(uint i = 0; i < RAY_MAX_ITERATIONS; i++)
-    {
-        if(result.Distance > ray.MaximumDistance || TexcoordOutOfBounds(result.Position.xy)) break;
-
-        ivec2 oldCell = SS_UVToTexel(result.Position.xy, mip);
-        vec2 alignedUV = SS_TexelToUV(oldCell, mip);
-
-        float depth = textureLod(Camera.Depth, alignedUV.xy, float(mip)).r;
-
-        if(depth > result.Position.z)
-        {
-            if(mip == 0)
-            {
-                result.Hit = result.Position.z - depth < RAY_THICKNESS;
-                break;
-            }
-            else mip--;
-        }
-        else
-        {
-            result.Distance += SS_CrossCell(result.Position, ray.Direction, mip);
-            ivec2 newCell = SS_UVToTexel(result.Position.xy, size >> (mip + 1));
-
-            if(oldCell >> 1 != newCell) mip = min(mip + 1, mipCount);
-        }
-    }
+    RayResult result = RayResult(ray.Position, 0.0, ray.Direction, false);
 
     return result;
 }

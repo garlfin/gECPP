@@ -16,5 +16,5 @@ namespace gETF::UI
 {
 	class IDelegate;
 	template<class> class Delegate;
-	class Element;
+	class IElement;
 }
