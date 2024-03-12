@@ -60,14 +60,27 @@ void main()
 #ifdef EXT_BINDLESS
     if(bool(Scene.State & ENABLE_SPECULAR))
     {
-        vec3 specular = GetLighting(vert, frag, pbrSample, Lighting.Cubemaps[0]);
+        vec3 cubemapDir = CubemapParallax(vert.Position, pbrSample.Specular, Lighting.Cubemaps[0]);
+        vec3 specular = textureLod(Lighting.Cubemaps[0].Color, cubemapDir, 0.f).rgb;
 
-    #ifdef ENABLE_VOXEL_TRACE
-        vec4 voxelSpecular = GetLighting(vert, frag, pbrSample, VoxelGrid);
-        specular = mix(specular, voxelSpecular.rgb, voxelSpecular.a);
+    #if defined(ENABLE_SS_TRACE) || defined(ENABLE_VOXEL_TRACE)
+        Ray ray = Ray(vert.Position, 100.f, pbrSample.Specular);
+        RayResult result = SS_Trace(ray);
+        vec3 raySpecular = textureLod(Camera.Color, SS_WorldToUV(result.Position).xy, 0.f).rgb;
+
+        #ifdef ENABLE_VOXEL_TRACE
+            if(!result.Hit)
+            {
+                result = Voxel_TraceOffset(ray, vert.Normal);
+                raySpecular = textureLod(VoxelGrid.Color, Voxel_WorldToUV(result.Position), 0.0).rgb;
+                raySpecular = UnpackColor(raySpecular);
+            }
+        #endif
+
+        if(result.Hit) specular = raySpecular;
     #endif
 
-        FragColor.rgb += specular.rgb;
+        FragColor.rgb += FilterSpecular(vert, frag, pbrSample, specular);
     }
 #endif
 

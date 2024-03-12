@@ -36,6 +36,7 @@ void DemoWindow::OnInit()
 
 	mesh->GetTransform().Scale = glm::vec3(0.5);
 	mesh->GetMaterials().SetMaterial(0, rasterMaterial);
+	mesh->GetMaterials().SetMaterial(1, rasterMaterial);
 
 	glm::vec3 sunRotation(-31.f, 30.f, 0.f);
 	auto* sun = new gE::DirectionalLight(this, 1024, 10.f, glm::quat(glm::radians(sunRotation)));

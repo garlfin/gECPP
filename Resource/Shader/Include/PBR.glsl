@@ -45,12 +45,7 @@ struct PBRSample
 #ifdef FRAGMENT_SHADER
 vec3 GetLighting(const Vertex, const PBRFragment, const Light);
 vec3 GetLightingDirectional(const Vertex, const PBRFragment, const Light);
-
-vec3 GetLighting(const Vertex, const PBRFragment, const PBRSample, samplerCube);
-#ifdef EXT_BINDLESS
-    vec3 GetLighting(const Vertex, const PBRFragment, const PBRSample, const Cubemap);
-    vec4 GetLighting(const Vertex, const PBRFragment, const PBRSample, const VoxelGridData);
-#endif
+vec3 GetLightingSpecular(const PBRSample, vec3);
 #endif
 
 // PBR Functions
@@ -62,7 +57,7 @@ float GSchlickAnalytical(float nDotL, float nDotH, float roughness); // Read mor
 vec3 FresnelSchlick(vec3 f0, float nDotV);
 vec3 CubemapParallax(vec3, vec3, Cubemap);
 #ifdef FRAGMENT_SHADER
-PBRSample ImportanceSample(const Vertex, const PBRFragment);
+vec3 FilterSpecular(const Vertex vert, const PBRFragment frag, const PBRSample pbrSample, vec3 color);
 #endif
 vec3 ImportanceSampleGGX(vec2 xi, vec3 n, float roughness);
 float VDCInverse(uint bits);
@@ -107,69 +102,17 @@ vec3 GetLightingDirectional(const Vertex vert, const PBRFragment frag, const Lig
 
     return (diffuseBRDF + specularBRDF * frag.Specular) * lambert * light.Color;
 }
-#endif
 
-#if defined(FRAGMENT_SHADER) && defined(EXT_BINDLESS)
-vec3 GetLighting(const Vertex vert, const PBRFragment frag, const PBRSample pbrSample, samplerCube cubemap)
-{
-    vec3 eye = normalize(Camera.Position - vert.Position);
-
-    float nDotV = clamp(dot(frag.Normal, eye), 0.0, 1.0);
-    vec3 f = FresnelSchlick(frag.F0, nDotV);
-    vec2 brdf = pbrSample.BRDF;
-
-    // Final Calculations
-    vec3 specularColor = textureLod(cubemap, pbrSample.Specular, 0.0).rgb;
-
-    return (brdf.g + f * brdf.r) * specularColor;
-}
-
-vec3 GetLighting(const Vertex vert, const PBRFragment frag, const PBRSample pbrSample, const Cubemap cubemap)
+vec3 FilterSpecular(const Vertex vert, const PBRFragment frag, const PBRSample pbrSample, vec3 color)
 {
     // PBR Setup
     vec3 eye = normalize(Camera.Position - vert.Position);
 
     float nDotV = clamp(dot(frag.Normal, eye), 0.0, 1.0);
     vec3 f = FresnelSchlick(frag.F0, nDotV);
-    vec3 r = CubemapParallax(vert.Position, pbrSample.Specular, cubemap);
     vec2 brdf = pbrSample.BRDF;
 
-    // Final Calculations
-    vec3 specularColor = textureLod(cubemap.Color, r, 0.0).rgb;
-
-    return (brdf.g + f * brdf.r) * specularColor;
-}
-
-vec4 GetLighting(const Vertex vert, const PBRFragment frag, const PBRSample pbrSample, const VoxelGridData grid)
-{
-    // PBR Setup
-    vec3 eye = normalize(Camera.Position - vert.Position);
-
-    float nDotV = clamp(dot(frag.Normal, eye), 0.0, 1.0);
-    vec3 f = FresnelSchlick(frag.F0, nDotV);
-    vec3 r = pbrSample.Specular;
-    vec2 brdf = pbrSample.BRDF;
-
-    Ray ray = Ray(vert.Position, 5.f, r);
-    RayResult result;
-    vec3 specularColor;
-
-#ifdef ENABLE_SS_TRACE
-    result = SS_Trace(ray);
-    specularColor = textureLod(Camera.Color, result.Position.xy, 0.0).rgb;
-
-    if(!result.Hit)
-#endif
-    {
-        result = Voxel_TraceOffset(ray, vert.Normal);
-        specularColor = textureLod(grid.Color, Voxel_WorldToUV(result.Position), 0.0).rgb;
-        specularColor = UnpackColor(specularColor);
-    }
-
-    // Final Calculations
-    specularColor *= brdf.g + f * brdf.r;
-
-    return vec4(specularColor, float(result.Hit));
+    return (brdf.g + f * brdf.r) * color;
 }
 #endif
 

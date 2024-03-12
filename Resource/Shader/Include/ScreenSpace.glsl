@@ -26,15 +26,25 @@ float SS_CrossCell(inout vec3, vec3, uint);
 #ifdef EXT_BINDLESS
 RayResult SS_Trace(Ray ray)
 {
-    ray.Position = SS_WorldToUV(ray.Position);
-    ray.Direction = vec3(Camera.View[0] * vec4(ray.Direction, 0.0));
-    ray.Direction = normalize(ray.Direction);
+    RayResult result = RayResult(ray.Position, 0.f, vec3(0.f), false);
 
-    RayResult result = RayResult(ray.Position, 0.0, ray.Direction, false);
+    for(int i = 0; i < RAY_MAX_ITERATIONS; i++)
+    {
+        result.Position += ray.Direction * 0.1;
+
+        vec3 viewPos = SS_WorldToUV(result.Position);
+        if(viewPos.x < 0.f || viewPos.x > 1.f || viewPos.y < 0.f || viewPos.y > 1.f) break;
+
+        float depth = textureLod(Camera.Depth, viewPos.xy, 0.f).a;
+        if(viewPos.z < depth)
+        {
+            result.Hit = true;
+            break;
+        }
+    }
 
     return result;
 }
-#endif
 
 vec3 SS_WorldToUV(vec3 pos)
 {
@@ -79,3 +89,4 @@ float SS_CrossCell(inout vec3 position, vec3 direction, uint mip)
     position += direction * (dist + EPSILON);
     return dist;
 }
+#endif
