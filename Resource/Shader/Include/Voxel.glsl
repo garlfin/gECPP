@@ -177,14 +177,12 @@ RayResult Voxel_Trace(Ray ray)
         vec3 uv = Voxel_TexelToUV(cell, size >> mip);
         float solid = textureLod(VoxelGrid.Color, uv, float(mip)).a;
         if(solid >= 0.5)
-        {
             if(mip == 0)
             {
                 result.Hit = true;
                 break;
             }
             else mip--;
-        }
         else
         {
             result.Distance += Voxel_CrossCell(result.Position, ray.Direction, size >> mip);

@@ -17,29 +17,51 @@ RayResult SS_Trace(Ray);
 
 // Helper Functions
 vec3 SS_WorldToUV(vec3);
-ivec2 SS_UVToTexel(vec2, uint);
-vec2 SS_TexelToUV(ivec2, uint);
-vec2 SS_AlignUVToCell(vec2, uint);
-float SS_CrossCell(inout vec3, vec3, uint);
+ivec2 SS_UVToTexel(vec2, int);
+vec2 SS_TexelToUV(ivec2, int);
+vec2 SS_AlignUVToCell(vec2, int);
+float SS_CrossCell(inout vec3, vec3, int);
 
 // Implementation
 #ifdef EXT_BINDLESS
 RayResult SS_Trace(Ray ray)
 {
-    RayResult result = RayResult(ray.Position, 0.f, vec3(0.f), false);
+    ray.Position = SS_WorldToUV(ray.Position);
+    ray.Direction = vec3(Camera.View[0] * vec4(ray.Direction, 0.0)) * vec3(1, 1, -1);
+
+    RayResult result = RayResult(ray.Position, 0.f, ray.Direction, false);
+    if(ray.Direction.z < EPSILON) return result;
+
+    int mip = 0;
+    int mipCount = textureQueryLevels(Camera.Depth);
+
+    result.Distance += SS_CrossCell(result.Position, ray.Direction, 0);
 
     for(int i = 0; i < RAY_MAX_ITERATIONS; i++)
     {
-        result.Position += ray.Direction * 0.1;
+        vec3 uv = result.Position;
+        ivec2 cell = SS_UVToTexel(uv.xy, mip + 1);
+        if(uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) break;
 
-        vec3 viewPos = SS_WorldToUV(result.Position);
-        if(viewPos.x < 0.f || viewPos.x > 1.f || viewPos.y < 0.f || viewPos.y > 1.f) break;
+        float depth = texture(Camera.Depth, uv.xy, float(mip)).r;
+        float offset = uv.z - depth;
 
-        float depth = textureLod(Camera.Depth, viewPos.xy, 0.f).a;
-        if(viewPos.z < depth)
+        if(offset > 0.0)
         {
-            result.Hit = true;
-            break;
+            result.Position -= offset / ray.Direction.z * ray.Direction;
+
+            if(mip == 0)
+            {
+                result.Hit = true;
+                break;
+            } else mip--;
+        }
+        else
+        {
+            result.Distance += SS_CrossCell(result.Position, ray.Direction, mip);
+            ivec2 newCell = SS_UVToTexel(result.Position.xy, mip + 1);
+
+            if(cell != newCell) if(mip == mipCount - 1) break; else mip++;
         }
     }
 
@@ -51,34 +73,32 @@ vec3 SS_WorldToUV(vec3 pos)
     vec4 viewSpace = Camera.View[0] * vec4(pos, 1.0);
     vec4 projSpace = Camera.Projection * viewSpace;
 
-    projSpace.xyz /= projSpace.w;
+    projSpace.xy /= projSpace.w;
     projSpace.xy = projSpace.xy * 0.5 + 0.5;
 
     return vec3(projSpace.xy, -viewSpace.z);
 }
 
-vec2 SS_TexelToUV(ivec2 texel, uint mip)
+vec2 SS_TexelToUV(ivec2 texel, int mip)
 {
-    return (vec2(texel) + 0.5) / textureSize(Camera.Depth, int(mip));
+    return (vec2(texel) + 0.5) / textureSize(Camera.Depth, mip);
 }
 
-ivec2 SS_UVToTexel(vec2 uv, uint mip)
+ivec2 SS_UVToTexel(vec2 uv, int mip)
 {
-    return ivec2(uv * textureSize(Camera.Depth, int(mip)));
+    return ivec2(uv * textureSize(Camera.Depth,mip) );
 }
 
-vec2 SS_AlignUVToCell(vec2 uv, uint mip)
+vec2 SS_AlignUVToCell(vec2 uv, int mip)
 {
     return SS_TexelToUV(SS_UVToTexel(uv, mip), mip);
 }
 
-float SS_CrossCell(inout vec3 position, vec3 direction, uint mip)
+float SS_CrossCell(inout vec3 position, vec3 direction, int mip)
 {
-    ivec2 size = textureSize(Camera.Depth, int(mip));
-    vec2 cellSize = vec2(1.0) / size;
-
-    vec2 cellMin = SS_AlignUVToCell(position.xy, mip);
-    vec2 cellMax = cellMin + cellSize;
+    ivec2 texSize = textureSize(Camera.Depth, mip);
+    vec2 cellMin = floor(position.xy * texSize) / texSize;
+    vec2 cellMax = ceil(position.xy * texSize) / texSize;
 
     vec2 first = (cellMin - position.xy) / direction.xy;
     vec2 second = (cellMax - position.xy) / direction.xy;

@@ -13,7 +13,7 @@
     #define EPSILON 0.001
 #endif
 
-#define HAMMERSLEY_ROUGHNESS_SAMPLE TAA_SAMPLE_SQUARED
+#define HAMMERSLEY_ROUGHNESS_SAMPLE (TAA_SAMPLE_SQUARED * TAA_SAMPLE_SQUARED)
 
 #ifdef FRAGMENT_SHADER
     uniform sampler2D BRDFLutTex;
@@ -222,7 +222,7 @@ PBRSample ImportanceSample(const Vertex vert, const PBRFragment frag)
 
     vec2 xi = Hammersley(int(IGNSample * HAMMERSLEY_ROUGHNESS_SAMPLE), HAMMERSLEY_ROUGHNESS_SAMPLE);
     vec3 n = ImportanceSampleGGX(xi, frag.Normal, frag.Roughness);
-    vec3 r = -reflect(eye, n);
+    vec3 r = -reflect(eye, vert.Normal);
     vec3 f = FresnelSchlick(frag.F0, nDotV);
     vec2 brdf = textureLod(BRDFLutTex, vec2(nDotV, frag.Roughness), 0.0).rg;
 
