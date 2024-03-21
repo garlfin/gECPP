@@ -1,4 +1,4 @@
-#define ENABLE_SS_TRACE
+#define ENABLE_VOXEL_TRACE
 
 #include "Include/Camera.glsl"
 #include "Include/Scene.glsl"
@@ -64,13 +64,14 @@ void main()
         vec3 specular = textureLod(Lighting.Cubemaps[0].Color, cubemapDir, 0.f).rgb;
 
     #if defined(ENABLE_SS_TRACE) || defined(ENABLE_VOXEL_TRACE)
-        Ray ray = Ray(vert.Position + vert.Normal * 0.01, 100.f, pbrSample.Specular);
+        Ray ray = Ray(vert.Position, 10.f, pbrSample.Specular);
         RayResult result = SS_Trace(ray);
         vec3 raySpecular = textureLod(Camera.Color, result.Position.xy, 0.f).rgb;
 
         #ifdef ENABLE_VOXEL_TRACE
             if(!result.Hit)
             {
+                ray.Position = vert.Position + ray.Direction * result.Distance;
                 result = Voxel_TraceOffset(ray, vert.Normal);
                 raySpecular = textureLod(VoxelGrid.Color, Voxel_WorldToUV(result.Position), 0.0).rgb;
                 raySpecular = UnpackColor(raySpecular);
