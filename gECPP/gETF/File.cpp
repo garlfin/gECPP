@@ -21,17 +21,15 @@ namespace gETF
 	void File::Deserialize(ostream& buf, const File& s) const
 	{
 		Write(buf, "gETF", 4);
-		Write(buf, GETF_VERSION);
+		Write<u8>(buf, GETF_VERSION);
 
-		Write(buf, 0);
-		Write(buf, 0);
-		Write(buf, 0);
-		Write(buf, 0);
-		Write(buf, 0);
+		Write<u16>(buf, 0);
+		Write<u16>(buf, 0);
+		Write<u16>(buf, 0);
+		Write<u16>(buf, 0);
+		Write<u16>(buf, 0);
 
-		Write(buf, Meshes.Count());
-		for(u8 i = 0; i < Meshes.Count(); i++)
-			WriteSerializable(buf, &*Meshes[i], s, 1);
+		WriteArraySerializable<u16>(buf, Meshes, *this);
 	}
 
 	void File::Serialize(istream& ptr, const File& s)
@@ -47,17 +45,15 @@ namespace gETF
 
 		Version = ::Read<u8>(ptr);
 
-		if (Version >= 2) ptr.seekg(5, std::ios::cur);
+		if (Version >= 1) ptr.seekg(10, std::ios::cur);
 
-		Meshes = Array<MeshReference>(::Read<u8>(ptr));
-		for(u64 i = 0; i < Meshes.Count(); i++)
-			Meshes[i] = gE::ref_cast(ReadNewSerializable<Mesh>(ptr, s));
+		Meshes = ReadArraySerializable<u16, Mesh>(ptr, s);
 	}
 
-	MeshReference* File::GetMesh(const char* name)
+	Mesh* File::GetMesh(const char* name)
 	{
 		for(u32 i = 0; i < Meshes.Count(); i++)
-			if(!strcmp(name, Meshes[i]->Name.c_str())) return &Meshes[i];
+			if(!strcmp(name, Meshes[i].Name.c_str())) return &Meshes[i];
 		return nullptr;
 	}
 

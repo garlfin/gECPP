@@ -75,7 +75,7 @@ const char* IncrementLine(const char* str, char d)
 
 void WritePrefixedString(ostream& ptr, const std::string& str)
 {
-	Write(ptr, str.length());
+	Write<u8>(ptr, str.length());
 	Write(ptr, str.c_str(), str.length());
 }
 

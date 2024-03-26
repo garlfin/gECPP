@@ -11,7 +11,7 @@
 #endif
 
 #ifndef RAY_THICKNESS
-    #define RAY_THICKNESS 0.3
+    #define RAY_THICKNESS 0.5
 #endif
 
 #ifndef RAY_REFINE_THICKNESS

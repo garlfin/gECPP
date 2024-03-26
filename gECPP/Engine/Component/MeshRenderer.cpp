@@ -5,7 +5,7 @@
 #include "MeshRenderer.h"
 #include <Engine/Window.h>
 
-gE::MeshRenderer::MeshRenderer(gE::Entity* o, const Reference<gETF::Mesh>& mesh, const gE::MaterialHolder& mat) :
+gE::MeshRenderer::MeshRenderer(gE::Entity* o, gETF::Mesh* mesh, const gE::MaterialHolder& mat) :
 	Component(o, &o->GetWindow().GetRenderers()),
 	_mesh(mesh), _materialHolder(mat)
 {

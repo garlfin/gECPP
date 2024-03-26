@@ -13,8 +13,6 @@ namespace gETF
 	// struct Scene;
 	// struct Node;
 
-	typedef gE::Reference<Mesh> MeshReference;
-
 	struct File : public Serializable<File>
 	{
 		SERIALIZABLE_PROTO_T;
@@ -22,9 +20,9 @@ namespace gETF
 		gE::Window* Window;
 		u8 Version = GETF_VERSION;
 
-		Array<MeshReference> Meshes;
+		Array<Mesh> Meshes;
 
-		MeshReference* GetMesh(const char*);
+		Mesh* GetMesh(const char*);
 	};
 
 	File& Read(gE::Window*, const char*, File&);

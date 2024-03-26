@@ -9,6 +9,10 @@
     #define TAA_SAMPLE_COUNT 16
 #endif
 
+#ifndef TAA_CLAMP_MAX
+    #define TAA_CLAMP_MAX 10.f
+#endif
+
 #ifndef TAA_WEIGHT
     #define TAA_WEIGHT (1.0 / TAA_SAMPLE_COUNT)
 #endif
@@ -40,7 +44,7 @@ void main()
     vec2 uv = (vec2(texel) + 0.5) / size;
 
     vec2 previousUV = uv - texture(VelocityIn, uv).xy;
-    vec4 currentColor = texture(ColorIn, uv);
+    vec4 currentColor = clamp(texture(ColorIn, uv), vec4(0.0), vec4(vec3(TAA_CLAMP_MAX), 1.0));
     vec4 previousColor = CatmullRom(PreviousColorIn, previousUV, size);
 
     vec3 boxMin = currentColor.rgb, boxMax = currentColor.rgb;
@@ -108,7 +112,7 @@ vec4 CatmullRom(sampler2D sampler, vec2 uv, vec2 size)
     result += texture(sampler, vec2(texPos12.x, texPos3.y)) * w12.x * w3.y;
     result += texture(sampler, vec2(texPos3.x, texPos3.y)) * w3.x * w3.y;
 
-    return result;
+    return clamp(result, vec4(0.0), vec4(TAA_CLAMP_MAX, TAA_CLAMP_MAX, TAA_CLAMP_MAX, 1.0));
 }
 
 // https://github.com/Unity-Technologies/PostProcessing/blob/v1/PostProcessing/Resources/Shaders/TAA.cginc

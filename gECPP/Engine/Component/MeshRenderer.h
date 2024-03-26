@@ -15,16 +15,16 @@ namespace gE
 	class MeshRenderer : public Component
 	{
 	 public:
-		MeshRenderer(Entity* o, const Reference<gETF::Mesh>& mesh, const MaterialHolder& mat);
+		MeshRenderer(Entity* o, gETF::Mesh* mesh, const MaterialHolder& mat);
 
 		void OnUpdate(float delta) override {};
 		void OnRender(float delta, Camera*) override;
 
-		GET_CONST(gETF::Mesh*, Mesh, _mesh.Get());
+		GET_CONST(gETF::Mesh*, Mesh, _mesh);
 		GET_CONST(const MaterialHolder&, Materials, _materialHolder);
 
 	 private:
-		const Reference<gETF::Mesh> _mesh;
+		gETF::Mesh* _mesh;
 		const MaterialHolder& _materialHolder;
 	};
 

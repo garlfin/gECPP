@@ -54,7 +54,7 @@ namespace gE
 			gETF::Read(_window, "Resource/Model/skybox.gETF", skybox);
 
 			GL::VAOSettings skyboxSettings;
-			skybox.Meshes[0]->GetVAOSettings(skyboxSettings);
+			skybox.Meshes[0].GetVAOSettings(skyboxSettings);
 
 			_skyboxShader = ptr_create<GL::Shader>(_window, "Resource/Shader/skybox.vert", "Resource/Shader/skybox.frag");
 			_skyboxVAO = ptr_create<GL::VAO>(_window, skyboxSettings);

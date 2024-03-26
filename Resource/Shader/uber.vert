@@ -47,7 +47,7 @@ void main()
     vec3 nor, tan, bitan;
     nor = normalize(Scene.Normal[ModelIndex] * Normal);
     tan = normalize(Scene.Normal[ModelIndex] * Tangent);
-    bitan = normalize(cross(tan, nor));
+    bitan = normalize(cross(nor, tan));
 
     VertexIn.TBN = mat3(tan, bitan, nor);
 

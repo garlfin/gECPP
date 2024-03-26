@@ -14,7 +14,7 @@ using pp = aiPostProcessSteps;
 
 CONSTEXPR_GLOBAL unsigned POST_PROCESS =
 	pp::aiProcess_Triangulate | pp::aiProcess_FindInvalidData | pp::aiProcess_OptimizeMeshes |
-	pp::aiProcess_ImproveCacheLocality | pp::aiProcess_CalcTangentSpace | pp::aiProcess_FindInstances |
+	pp::aiProcess_ImproveCacheLocality | pp::aiProcess_FindInstances |
 	pp::aiProcess_OptimizeGraph | aiProcess_JoinIdenticalVertices;
 
 template<class T, class F>
@@ -58,10 +58,10 @@ int main(int argc, char** argv)
 	}
 
 	gETF::File file;
-	file.Meshes = Array<gE::Reference<gETF::Mesh>>(meshes.size());
+	file.Meshes = Array<gETF::Mesh>(meshes.size());
 
 	for(unsigned i = 0; i < file.Meshes.Count(); i++)
-		TransformMesh(meshes[i], file.Meshes[i] = gE::ref_create<gETF::Mesh>());
+		TransformMesh(meshes[i], file.Meshes[i]);
 
 	std::ofstream dst;
 	dst.open(argv[2], std::ios::out | std::ios::binary);
@@ -74,7 +74,7 @@ void TransformMesh(const std::vector<aiMesh*>& src, gETF::Mesh& dst)
 {
 	u64 vertexCount = 0;
 
-	dst.Materials = Array<gETF::MaterialSlot>(dst.Materials.Count());
+	dst.Materials = Array<gETF::MaterialSlot>(src.size());
 	for(unsigned i = 0; i < dst.Materials.Count(); i++)
 	{
 		const aiMesh& mesh = *src[i];

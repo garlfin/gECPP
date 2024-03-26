@@ -21,18 +21,18 @@ void DemoWindow::OnInit()
 	glfwSetInputMode(GLFWWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glClearColor(0.2, 0.2, 1, 1);
 
-	auto albedo = gE::ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/tile_col.pvr"));
-	auto amr = gE::ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/tile_amr.pvr"));
-	auto normal = gE::ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/tile_nor.pvr"));
+	auto albedo = gE::ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/cobble_col.pvr"));
+	auto amr = gE::ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/cobble_armd.pvr"));
+	auto normal = gE::ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/cobble_nor.pvr"));
 	gE::PBRMaterialSettings materialSettings { albedo, amr, normal };
 
 	auto rasterShader = gE::ref_create<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/uber.frag");
 	auto rasterMaterial = gE::ref_create<gE::PBRMaterial>(this, rasterShader, materialSettings);
 
-	gETF::File cube;
-	gETF::Read(this, "Resource/Model/cube.gETF", cube);
+	gETF::File* cube = new gETF::File;
+	gETF::Read(this, "Resource/Model/cube.gETF", *cube);
 
-	auto* mesh = new VoxelDemo::StaticMeshEntity(this, cube.Meshes[0]);
+	auto* mesh = new VoxelDemo::StaticMeshEntity(this, &cube->Meshes[0]);
 
 	mesh->GetTransform().Scale = glm::vec3(0.5);
 	mesh->GetMaterials().SetMaterial(0, rasterMaterial);

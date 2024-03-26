@@ -1,12 +1,13 @@
-#define ENABLE_VOXEL_TRACE
+#define ENABLE_SS_TRACE
 
 #include "Include/Camera.glsl"
 #include "Include/Scene.glsl"
 #include "Include/Voxel.glsl"
 #include "Include/PBR.glsl"
+#include "Include/Effect.glsl"
 
 uniform sampler2D AlbedoTex;
-uniform sampler2D AMRTex;
+uniform sampler2D ARMDTex;
 uniform sampler2D NormalTex;
 
 struct VertexOut
@@ -29,11 +30,16 @@ void main()
 {
     if(!bool(Scene.State & ENABLE_COLOR)) return;
 
-    vec3 albedo = texture(AlbedoTex, VertexIn.UV).rgb;
-    vec3 amr = texture(AMRTex, VertexIn.UV).rgb;
-    vec3 normal = texture(NormalTex, VertexIn.UV * vec2(1, -1)).rgb;
+	ParallaxEffectSettings parallaxSettings = ParallaxEffectSettings(ARMDTex, 0.5f, 16, 32);
+    vec3 viewDir = VertexIn.TBN * normalize(Camera.Position - VertexIn.FragPos);
+    vec2 uv = VertexIn.UV * 10;//ParallaxMapping(VertexIn.UV * 10, viewDir, parallaxSettings);
 
-    normal = normalize(VertexIn.TBN * (normal * 2.0 - 1.0));
+    vec3 albedo = texture(AlbedoTex, uv).rgb;
+    vec3 amr = texture(ARMDTex, uv * vec2(1, -1)).rgb;
+    vec3 normal = texture(NormalTex, uv).rgb;
+
+	normal = normal * 2.0 - 1.0;
+    normal = normalize(VertexIn.TBN * normal);
 
     Vertex vert = Vertex
     (
@@ -45,9 +51,9 @@ void main()
     PBRFragment frag = PBRFragment
     (
         normal,
-        amr.b,
+        amr.y,
         albedo,
-        amr.g,
+        amr.z,
         vec3(0.04),
         bool(Scene.State & ENABLE_SPECULAR) ? 1.0 : 0.0
     );

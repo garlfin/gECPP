@@ -53,7 +53,7 @@ namespace gE
 	PBRMaterial::PBRMaterial(Window* w, const Reference<GL::Shader>& s, const PBRMaterialSettings& settings) :
 		Material(w, s),
 		_albedo(this, "AlbedoTex", settings.Albedo),
-		_amr(this, "AMRTex", settings.AMR),
+		_amr(this, "ARMDTex", settings.AMR),
 		_normal(this, "NormalTex", settings.Normal),
 		_brdfLUT(&this->GetShader(), "BRDFLutTex")
 	{

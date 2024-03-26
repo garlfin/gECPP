@@ -9,8 +9,8 @@ using namespace gETF;
 
 void VertexBuffer::Deserialize(ostream& buf, const File&) const
 {
-	Write(buf, Stride);
-	Write(buf, Count);
+	Write<u8>(buf, Stride);
+	Write<u32>(buf, Count);
 	Write(buf, (u8*) Data, Stride * Count);
 }
 
@@ -27,7 +27,6 @@ void VertexBuffer::Serialize(istream& ptr, const File&)
 void VertexField::Deserialize(ostream& buf, const File&) const
 {
 	WritePrefixedString(buf, Name);
-
 	Write(buf, Index);
 	Write(buf, BufferIndex);
 	Write(buf, ElementCount);
@@ -56,7 +55,6 @@ void MaterialSlot::Deserialize(ostream& buf, const File&) const
 
 void MaterialSlot::Serialize(istream& ptr, const File& s)
 {
-	if(s.Version < 2) ::Read<u8>(ptr);
 	Offset = ::Read<u32>(ptr);
 	Count = ::Read<u32>(ptr);
 }
