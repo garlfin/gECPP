@@ -32,7 +32,7 @@ void main()
 
 	ParallaxEffectSettings parallaxSettings = ParallaxEffectSettings(ARMDTex, 0.5f, 16, 32);
     vec3 viewDir = VertexIn.TBN * normalize(Camera.Position - VertexIn.FragPos);
-    vec2 uv = VertexIn.UV * 10;//ParallaxMapping(VertexIn.UV * 10, viewDir, parallaxSettings);
+    vec2 uv = ParallaxMapping(VertexIn.UV * 10, viewDir, parallaxSettings);
 
     vec3 albedo = texture(AlbedoTex, uv).rgb;
     vec3 amr = texture(ARMDTex, uv * vec2(1, -1)).rgb;

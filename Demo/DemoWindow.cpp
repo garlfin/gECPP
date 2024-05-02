@@ -24,10 +24,16 @@ void DemoWindow::OnInit()
 	auto albedo = gE::ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/cobble_col.pvr"));
 	auto amr = gE::ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/cobble_armd.pvr"));
 	auto normal = gE::ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/cobble_nor.pvr"));
-	gE::PBRMaterialSettings materialSettings { albedo, amr, normal };
+	gE::PBRMaterialSettings cobbleSettings { albedo, amr, normal };
+
+	albedo = gE::ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/tile_col.pvr"));
+	amr = gE::ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/tile_armd.pvr"));
+	normal = gE::ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/tile_nor.pvr"));
+	gE::PBRMaterialSettings tileSettings { albedo, amr, normal };
 
 	auto rasterShader = gE::ref_create<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/uber.frag");
-	auto rasterMaterial = gE::ref_create<gE::PBRMaterial>(this, rasterShader, materialSettings);
+	auto cobbleMaterial = gE::ref_create<gE::PBRMaterial>(this, rasterShader, cobbleSettings);
+	auto tileMaterial = gE::ref_create<gE::PBRMaterial>(this, rasterShader, tileSettings);
 
 	gETF::File* cube = new gETF::File;
 	gETF::Read(this, "Resource/Model/cube.gETF", *cube);
@@ -35,8 +41,8 @@ void DemoWindow::OnInit()
 	auto* mesh = new VoxelDemo::StaticMeshEntity(this, &cube->Meshes[0]);
 
 	mesh->GetTransform().Scale = glm::vec3(0.5);
-	mesh->GetMaterials().SetMaterial(0, rasterMaterial);
-	mesh->GetMaterials().SetMaterial(1, rasterMaterial);
+	mesh->GetMaterials().SetMaterial(0, tileMaterial);
+	mesh->GetMaterials().SetMaterial(1, cobbleMaterial);
 
 	glm::vec3 sunRotation(-31.f, 30.f, 0.f);
 	auto* sun = new gE::DirectionalLight(this, 1024, 10.f, glm::quat(glm::radians(sunRotation)));
