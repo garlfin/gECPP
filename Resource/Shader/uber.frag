@@ -30,9 +30,18 @@ void main()
 {
     if(!bool(Scene.State & ENABLE_COLOR)) return;
 
-	ParallaxEffectSettings parallaxSettings = ParallaxEffectSettings(ARMDTex, 0.5f, 16, 32);
-    vec3 viewDir = VertexIn.TBN * normalize(Camera.Position - VertexIn.FragPos);
-    vec2 uv = ParallaxMapping(VertexIn.UV * 10, viewDir, parallaxSettings);
+    Vertex vert = Vertex
+    (
+        VertexIn.FragPos,
+        normalize(VertexIn.TBN[2]),
+        VertexIn.FragPosLightSpace[0],
+        VertexIn.TBN,
+        VertexIn.UV * 10
+    );
+
+	ParallaxEffectSettings parallaxSettings = ParallaxEffectSettings(0.5f, 16, 32);
+    vec3 viewDir = normalize(Camera.Position - VertexIn.FragPos);
+    vec2 uv = ParallaxMapping(viewDir, ARMDTex, vert, parallaxSettings);
 
     vec3 albedo = texture(AlbedoTex, uv).rgb;
     vec3 amr = texture(ARMDTex, uv * vec2(1, -1)).rgb;
@@ -40,13 +49,6 @@ void main()
 
 	normal = normal * 2.0 - 1.0;
     normal = normalize(VertexIn.TBN * normal);
-
-    Vertex vert = Vertex
-    (
-        VertexIn.FragPos,
-        normalize(VertexIn.TBN[2]),
-        VertexIn.FragPosLightSpace[0]
-    );
 
     PBRFragment frag = PBRFragment
     (

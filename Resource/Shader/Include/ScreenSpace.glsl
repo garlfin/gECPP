@@ -111,7 +111,7 @@ RayResult SS_Trace(Ray ray)
     float iterLength = ray.MaximumDistance / RAY_MAX_ITERATIONS;
 
     RayResult result = RayResult(rayStart, 0.f, vec3(0.f), false);
-
+    
     if(rayDir.z <= 0.0) return result;
     rayDir /= RAY_MAX_ITERATIONS;
 
