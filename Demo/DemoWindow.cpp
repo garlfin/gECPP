@@ -41,8 +41,8 @@ void DemoWindow::OnInit()
 	auto* mesh = new VoxelDemo::StaticMeshEntity(this, &cube->Meshes[0]);
 
 	mesh->GetTransform().Scale = glm::vec3(0.5);
-	mesh->GetMaterials().SetMaterial(0, tileMaterial);
-	mesh->GetMaterials().SetMaterial(1, cobbleMaterial);
+	mesh->GetMaterials().SetMaterial(0, cobbleMaterial);
+	mesh->GetMaterials().SetMaterial(1, tileMaterial);
 
 	glm::vec3 sunRotation(-31.f, 30.f, 0.f);
 	auto* sun = new gE::DirectionalLight(this, 1024, 10.f, glm::quat(glm::radians(sunRotation)));

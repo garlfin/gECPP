@@ -5,6 +5,8 @@ struct ParallaxEffectSettings
     float Depth;
     int MinLayers;
     int MaxLayers;
+    float Min;
+    float Max;
 };
 
 vec2 ParallaxMapping(vec3 viewDir, sampler2D, Vertex, ParallaxEffectSettings s);
@@ -28,14 +30,19 @@ vec2 ParallaxMapping(vec3 viewDir, sampler2D tex, Vertex vert, ParallaxEffectSet
         uv -= delta * vec3(s.Depth, s.Depth, 1.0);
 
         depth = 1.0 - texture(tex, uv.xy * vec2(1, -1)).a;
+        depth = clamp((depth - s.Min) / (s.Max - s.Min), 0.0, 1.0);
+
         if(uv.z > depth) break;
     }
 
-    vec3 previousUV = uv + delta * vec3(s.Depth, s.Depth, 1.0);
-    float afterDepth = depth - uv.z;
-    float beforeDepth = 1.0 - texture(tex, previousUV.xy * vec2(1, -1)).a - uv.z - delta.z;
+    vec3 previousUV = uv + delta * vec3(s.Depth.xx, 1.0);
 
-    // interpolation of texture coordinates
+    float afterDepth = depth - uv.z;
+
+    float beforeDepth = 1.0 - texture(tex, previousUV.xy * vec2(1, -1)).a;
+    beforeDepth = clamp((beforeDepth - s.Min) / (s.Max - s.Min), 0.0, 1.0);
+    beforeDepth -= uv.z + delta.z;
+
     float weight = afterDepth / (afterDepth - beforeDepth);
 
     return mix(uv, previousUV, weight).xy;

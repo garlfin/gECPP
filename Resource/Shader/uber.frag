@@ -39,7 +39,7 @@ void main()
         VertexIn.UV * 10
     );
 
-	ParallaxEffectSettings parallaxSettings = ParallaxEffectSettings(0.5f, 16, 32);
+	ParallaxEffectSettings parallaxSettings = ParallaxEffectSettings(0.5f, 16, 32, 0.0, 0.5);
     vec3 viewDir = normalize(Camera.Position - VertexIn.FragPos);
     vec2 uv = ParallaxMapping(viewDir, ARMDTex, vert, parallaxSettings);
 
