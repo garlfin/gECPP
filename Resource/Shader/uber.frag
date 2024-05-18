@@ -1,4 +1,4 @@
-#define ENABLE_SS_TRACE
+#define ENABLE_VOXEL_TRACE
 
 #include "Include/Camera.glsl"
 #include "Include/Scene.glsl"
@@ -62,7 +62,7 @@ void main()
 
     PBRSample pbrSample = ImportanceSample(vert, frag);
 
-    FragColor.rgb = albedo * 0.1;
+    FragColor.rgb = albedo * 0.1 * SS_AO(vert);
     FragColor.rgb += GetLighting(vert, frag, Lighting.Lights[0]);
 
 #ifdef EXT_BINDLESS

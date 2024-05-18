@@ -21,6 +21,7 @@
 // Functions
 #ifdef EXT_BINDLESS
 RayResult SS_Trace(Ray);
+float SS_AO(Vertex);
 #endif
 
 // Helper Functions
@@ -136,5 +137,10 @@ RayResult SS_Trace(Ray ray)
     }
 
     return result;
+}
+
+float SS_AO(Vertex vert)
+{
+    return 1.0;
 }
 #endif

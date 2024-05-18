@@ -9,7 +9,7 @@ struct ParallaxEffectSettings
     float Max;
 };
 
-vec2 ParallaxMapping(vec3 viewDir, sampler2D, Vertex, ParallaxEffectSettings s);
+vec2 ParallaxMapping(vec3, sampler2D, Vertex, ParallaxEffectSettings);
 
 // Implementation
 vec2 ParallaxMapping(vec3 viewDir, sampler2D tex, Vertex vert, ParallaxEffectSettings s)
