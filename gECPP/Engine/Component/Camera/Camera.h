@@ -91,6 +91,8 @@ namespace gE
 				_fov = glm::radians(fov);
 		}
 
+		void GetGLCamera(GL::Camera& camera) override;
+
 	 protected:
 		void UpdateProjection() override;
 

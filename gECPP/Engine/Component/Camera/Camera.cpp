@@ -93,6 +93,11 @@ namespace gE
 	{
 		SetFOV(s.FOV);
 	}
+	void PerspectiveCamera::GetGLCamera(GL::Camera& camera)
+	{
+		Camera2D::GetGLCamera(camera);
+		camera.Parameters.x = GetFOV<AngleType::Radian>();
+	}
 
 	OrthographicCamera::OrthographicCamera(Entity* p, TARGET_TYPE& t, const OrthographicCameraSettings& s, ComponentManager<Camera>* m) :
 		Camera2D(p, t, s, m), _orthographicScale(s.Scale)

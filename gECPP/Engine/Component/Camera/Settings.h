@@ -47,7 +47,7 @@ namespace gE
 		{
 		}
 
-		float FOV = 80.f;
+		float FOV = 80.f; // Y FOV
 		AngleType Type = AngleType::Degree;
 	};
 

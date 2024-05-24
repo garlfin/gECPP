@@ -11,33 +11,41 @@
 #endif
 
 #ifndef RAY_THICKNESS
-    #define RAY_THICKNESS 0.5
+    #define RAY_THICKNESS 0.1
 #endif
 
-#ifndef RAY_REFINE_THICKNESS
-    #define RAY_REFINE_THICKNESS 0.3
+#ifndef RAY_MAX_MIP
+    #define RAY_MAX_MIP 5
 #endif
+
+struct AOSettings
+{
+    float Radius;
+    float RadiusPixels;
+    float InvRadiusS;
+};
 
 // Functions
 #ifdef EXT_BINDLESS
 RayResult SS_Trace(Ray);
-float SS_AO(Vertex);
+float SS_AO(AOSettings, Vertex);
 #endif
 
 // Helper Functions
 vec3 SS_WorldToUV(vec3);
-ivec2 SS_UVToTexel(vec2, int);
-vec2 SS_TexelToUV(ivec2, int);
-vec2 SS_AlignUVToCell(vec2, int);
-float SS_CrossCell(inout vec3, vec3, int);
+ivec2 SS_UVToTexel(vec2, ivec2);
+vec2 SS_TexelToUV(ivec2, ivec2);
+vec2 SS_AlignUVToCell(vec2, ivec2);
+float SS_CrossCell(inout vec3, vec3, ivec2);
+vec3 SS_DirToView(vec3);
+float LengthSquared(vec3 v) { return dot(v, v); }
 
 // Implementation
 #ifdef EXT_BINDLESS
-float SS_CrossCell(inout vec3 pos, vec3 dir, int mip)
+float SS_CrossCell(inout vec3 pos, vec3 dir, ivec2 size)
 {
-    vec2 size = textureSize(Camera.Depth, mip);
     vec2 cellSize = 1.0 / size;
-    vec2 cellMin = SS_AlignUVToCell(pos.xy, mip);
+    vec2 cellMin = SS_AlignUVToCell(pos.xy, size);
     vec2 cellMax = cellMin + cellSize;
 
     vec2 first = (cellMin - pos.xy) / dir.xy;
@@ -61,45 +69,24 @@ vec3 SS_WorldToUV(vec3 pos)
     return vec3(projSpace.xy, -viewSpace.z);
 }
 
-vec2 SS_TexelToUV(ivec2 texel, int mip)
+vec3 SS_DirToView(vec3 dir)
 {
-    return (vec2(texel) + 0.5) / textureSize(Camera.Depth, mip);
+    return normalize(vec3(Camera.View[0] * vec4(dir, 0.0))) * vec3(1, 1, -1);
 }
 
-ivec2 SS_UVToTexel(vec2 uv, int mip)
+vec2 SS_TexelToUV(ivec2 texel, ivec2 size)
 {
-    return ivec2(uv * textureSize(Camera.Depth, mip));
+    return (vec2(texel) + 0.5) / size;
 }
 
-vec2 SS_AlignUVToCell(vec2 uv, int mip)
+ivec2 SS_UVToTexel(vec2 uv, ivec2 size)
 {
-    vec2 size = textureSize(Camera.Depth, mip);
+    return ivec2(uv * size);
+}
+
+vec2 SS_AlignUVToCell(vec2 uv, ivec2 size)
+{
     return floor(uv * size) / size;
-}
-
-bool SS_Refine(inout vec3 pos, vec3 dir, float near, float far, int index)
-{
-    bool hit = false;
-
-    float mult = 0.5;
-    float dist = float(index) - 0.5;
-    pos -= dir * 0.5;
-
-    for(int i = 0; i < RAY_MAX_REFINE_ITERATIONS; i++)
-    {
-        vec3 uv = pos;
-        uv.z = (near * far) / mix(far, near, dist / RAY_MAX_ITERATIONS);
-
-        float depth = textureLod(Camera.Depth, uv.xy, 0.f).r;
-        float offset = uv.z - depth;
-
-        mult *= 0.5;
-        pos += sign(offset) * dir * mult;
-        dist += sign(offset) * mult;
-        hit = abs(offset) < RAY_REFINE_THICKNESS;
-    }
-
-    return hit;
 }
 
 RayResult SS_Trace(Ray ray)
@@ -108,39 +95,68 @@ RayResult SS_Trace(Ray ray)
     vec3 rayEnd = SS_WorldToUV(ray.Position + ray.Direction * ray.MaximumDistance);
     vec3 rayDir = rayEnd - rayStart;
 
+    float rayLength = length(rayDir.xy);
     float near = rayStart.z, far = rayEnd.z;
-    float iterLength = ray.MaximumDistance / RAY_MAX_ITERATIONS;
+
+    int mip = 0, maxMip = textureQueryLevels(Camera.Depth) - 1;
+
+    #ifdef RAY_MAX_MIP
+        maxMip = min(maxMip, RAY_MAX_MIP);
+    #endif
+
+    ivec2 texSize = textureSize(Camera.Depth, 0);
 
     RayResult result = RayResult(rayStart, 0.f, vec3(0.f), false);
-    
-    if(rayDir.z <= 0.0) return result;
-    rayDir /= RAY_MAX_ITERATIONS;
 
+    if(rayDir.z < 0.0) return result;
+    SS_CrossCell(result.Position, rayDir, texSize);
     for(int i = 0; i < RAY_MAX_ITERATIONS; i++)
     {
-        result.Position += rayDir;
+        float lerp = distance(rayStart.xy, result.Position.xy) / rayLength;
 
         vec3 uv = result.Position;
-        uv.z = (near * far) / mix(far, near, float(i + 1) / RAY_MAX_ITERATIONS);
-
-        float depth = textureLod(Camera.Depth, uv.xy, 0.f).r;
-        float offset = uv.z - depth;
+        uv.z = (near * far) / (near * lerp + far * (1 - lerp));
 
         if(uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) break;
-        if(offset < 0.0) continue;
 
-        result.Hit = offset < RAY_THICKNESS;
-        result.Distance = float(i + 1) / RAY_MAX_ITERATIONS * ray.MaximumDistance;
-        if(result.Hit) result.Hit = SS_Refine(result.Position, rayDir, near, far, i);
+        float depth = textureLod(Camera.Depth, uv.xy, float(mip)).r;
 
-        break;
+        if(depth + 0.01 < uv.z)
+            if(mip == 0) { result.Hit = uv.z - depth < RAY_THICKNESS; break; }
+            else mip--;
+        else
+        {
+            ivec2 cell = SS_UVToTexel(result.Position.xy, texSize >> (mip + 1));
+            SS_CrossCell(result.Position, rayDir, texSize >> mip);
+            ivec2 newCell = SS_UVToTexel(result.Position.xy, texSize >> (mip + 1));
+
+            if(cell != newCell) mip++;
+            mip = min(mip, maxMip);
+        }
     }
 
     return result;
 }
 
-float SS_AO(Vertex vert)
+float SS_ComputeAO(AOSettings s, Vertex vert)
 {
-    return 1.0;
+    return 0.0;
+}
+
+float SS_AO(AOSettings s, Vertex vert)
+{
+    vert.Position = SS_WorldToUV(vert.Position);
+    vert.Normal = SS_DirToView(vert.Normal);
+    float depth = vert.Position.z;
+
+    s.RadiusPixels = s.Radius * 0.5 / tan(Camera.Parameters.x * 0.5) * Camera.Size.y;
+    s.InvRadiusS = -1.0 / (s.RadiusPixels * s.RadiusPixels);
+
+    s.RadiusPixels /= depth;
+
+    if(s.RadiusPixels < 1.0) return 1.0;
+
+    float ao = SS_ComputeAO(s, vert);
+    return clamp(1.0 - ao * 2.0, 0.0, 1.0);
 }
 #endif

@@ -12,7 +12,7 @@ layout(binding = 0, PIPELINE_DEPTH_COPY_FORMAT) restrict writeonly uniform image
 
 // Helper Functions
 float LinearizeDepth(float, vec2);
-float MinBox4(vec2);
+float MinBox4(ivec2);
 
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 void main()
@@ -25,7 +25,7 @@ void main()
     if(int(Settings.x) == HIZ_MODE_COPY)
         depth = LinearizeDepth(textureLod(DepthIn, uv, Settings.y).r, Settings.zw);
     else
-        depth = MinBox4(uv);
+        depth = MinBox4(texel);
 
     imageStore(DepthOut, texel, vec4(depth));
 }
@@ -33,15 +33,37 @@ void main()
 float LinearizeDepth(float z, vec2 planes)
 {
     z = 2.0 * z - 1.0;
-    return  2.0 * planes.x * planes.y / (planes.y + planes.x - z * (planes.y - planes.x));
+    return 2.0 * planes.x * planes.y / (planes.y + planes.x - z * (planes.y - planes.x));
 }
 
-float MinBox4(vec2 uv)
+float MinBox4(ivec2 uv)
 {
-    float depth = textureLod(DepthIn, uv, Settings.y).r;
-    depth = min(depth, textureLodOffset(DepthIn, uv, Settings.y, ivec2(0, 1)).r);
-    depth = min(depth, textureLodOffset(DepthIn, uv, Settings.y, ivec2(1, 0)).r);
-    depth = min(depth, textureLodOffset(DepthIn, uv, Settings.y, ivec2(1, 1)).r);
+    uv *= 2;
+
+    int mip = int(Settings.y);
+
+    float depth = texelFetch(DepthIn, uv, mip).r;
+    depth = min(depth, texelFetch(DepthIn, uv + ivec2(0, 1), mip).r);
+    depth = min(depth, texelFetch(DepthIn, uv + ivec2(1, 0), mip).r);
+    depth = min(depth, texelFetch(DepthIn, uv + ivec2(1, 1), mip).r);
+
+    vec2 oldSize = vec2(textureSize(DepthIn, mip)) / 2.0;
+    vec2 newSize = vec2(textureSize(DepthIn, mip + 1));
+
+    if(oldSize.x != newSize.x)
+    {
+        depth = min(depth, texelFetch(DepthIn, uv + ivec2(2, 0), mip).r);
+        depth = min(depth, texelFetch(DepthIn, uv + ivec2(2, 1), mip).r);
+    }
+
+    if(oldSize.y != newSize.y)
+    {
+        depth = min(depth, texelFetch(DepthIn, uv + ivec2(0, 2), mip).r);
+        depth = min(depth, texelFetch(DepthIn, uv + ivec2(1, 2), mip).r);
+    }
+
+    if(oldSize.x != newSize.x && oldSize.y != newSize.y)
+        depth = min(depth, texelFetch(DepthIn, uv + ivec2(2, 2), mip).r);
 
     return depth;
 }
