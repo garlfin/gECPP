@@ -1,17 +1,13 @@
 #include "Camera.glsl"
 #include "Voxel.glsl"
-#include "Shadow.glsl"
+#include "Noise.glsl"
 
 #ifndef RAY_MAX_ITERATIONS
     #define RAY_MAX_ITERATIONS 64
 #endif
 
-#ifndef RAY_MAX_REFINE_ITERATIONS
-    #define RAY_MAX_REFINE_ITERATIONS 8
-#endif
-
 #ifndef RAY_THICKNESS
-    #define RAY_THICKNESS 0.1
+    #define RAY_THICKNESS 0.2
 #endif
 
 #ifndef RAY_CELL_EPSILON
@@ -25,9 +21,18 @@ struct AOSettings
     float InvRadiusS;
 };
 
+struct LinearRaySettings
+{
+    int Iterations;
+    float MinimumBias;
+    float Bias;
+    vec3 Normal;
+};
+
 // Functions
-#ifdef EXT_BINDLESS
+#if defined(EXT_BINDLESS) && defined(FRAGMENT_SHADER)
 RayResult SS_Trace(Ray);
+RayResult SS_TraceRough(Ray, LinearRaySettings);
 float SS_AO(AOSettings, Vertex);
 #endif
 
@@ -41,7 +46,7 @@ vec3 SS_DirToView(vec3);
 float LengthSquared(vec3 v) { return dot(v, v); }
 
 // Implementation
-#ifdef EXT_BINDLESS
+#if defined(EXT_BINDLESS) && defined(FRAGMENT_SHADER)
 float SS_CrossCell(inout vec3 pos, vec3 dir, out float cross, ivec2 size)
 {
     vec2 cellSize = 1.0 / size;
@@ -93,7 +98,7 @@ vec2 SS_AlignUVToCell(vec2 uv, ivec2 size)
 RayResult SS_Trace(Ray ray)
 {
     vec3 rayStart = SS_WorldToUV(ray.Position);
-    vec3 rayEnd = SS_WorldToUV(ray.Position + ray.Direction * ray.MaximumDistance);
+    vec3 rayEnd = SS_WorldToUV(ray.Position + ray.Direction * ray.Length);
     vec3 rayDir = rayEnd - rayStart;
 
     float rayLength = length(rayDir.xy);
@@ -106,7 +111,7 @@ RayResult SS_Trace(Ray ray)
     int maxMip = min(mipCount - 1, RAY_MAX_MIP);
 #endif
 
-    RayResult result = RayResult(rayStart, 0.f, vec3(0.f), false);
+    RayResult result = RayResult(rayStart, 0.0, vec3(0.0), false);
 
     SS_CrossCell(result.Position, rayDir, cross, textureSize(Camera.Depth, 0));
     result.Position += cross * 2 * rayDir;
@@ -122,7 +127,7 @@ RayResult SS_Trace(Ray ray)
         float lerp = distance(rayStart.xy, result.Position.xy) / rayLength;
 
         vec3 uv = result.Position;
-        uv.z = (near * far) / (near * lerp + far * (1 - lerp));
+        uv.z = (near * far) / (near * lerp + far * (1.0 - lerp));
 
         if(uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) break;
 
@@ -148,9 +153,37 @@ RayResult SS_Trace(Ray ray)
     return result;
 }
 
+RayResult SS_TraceRough(Ray ray, LinearRaySettings settings)
+{
+    vec3 rayStart = SS_WorldToUV(ray.Position);
+    vec3 rayEnd = SS_WorldToUV(ray.Position + ray.Direction * ray.Length);
+    vec3 rayDir = (rayEnd - rayStart) / settings.Iterations;
+
+    float near = rayStart.z, far = rayEnd.z;
+
+    RayResult result = RayResult(rayStart, 0.0, vec3(0.0), false);
+
+    for(int i = 0; i < settings.Iterations; i++)
+    {
+        result.Position += rayDir;
+
+        float lerp = float(i + 1) / settings.Iterations;
+
+        vec3 uv = result.Position;
+        uv.z = (near * far) / (near * lerp + far * (1.0 - lerp));
+
+        if(uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) break;
+
+        float depth = textureLod(Camera.Depth, uv.xy, 0.0).r;
+        if(depth + 0.01 < uv.z) { result.Hit = uv.z - depth < RAY_THICKNESS; break; }
+    }
+
+    return result;
+}
+
 float SS_ComputeAO(AOSettings s, Vertex vert)
 {
-    return 0.0;
+    return 0.5;
 }
 
 float SS_AO(AOSettings s, Vertex vert)
@@ -167,6 +200,6 @@ float SS_AO(AOSettings s, Vertex vert)
     if(s.RadiusPixels < 1.0) return 1.0;
 
     float ao = SS_ComputeAO(s, vert);
-    return clamp(1.0 - ao * 2.0, 0.0, 1.0);
+    return clamp(ao * 2.0 - 1.0, 0.0, 1.0);
 }
 #endif

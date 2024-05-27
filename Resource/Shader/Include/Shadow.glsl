@@ -2,6 +2,8 @@
 #include "Bindless.glsl"
 #include "Vertex.glsl"
 #include "TAA.glsl"
+#include "Noise.glsl"
+#include "ScreenSpace.glsl"
 
 // In percent
 #ifndef DIRECTIONAL_SHADOW_BIAS
@@ -38,7 +40,9 @@
     #define PI 3.141592
 #endif
 
-#define GOLDEN_ANGLE 2.4
+#ifndef GOLDEN_ANGLE
+    #define GOLDEN_ANGLE 2.4
+#endif
 
 // Main Functions
 #ifdef FRAGMENT_SHADER
@@ -50,24 +54,17 @@ float LinearizeDepthOrtho(float, vec2);
 float LinearizeDepth(float, vec2);
 float LinearizeDepthNDC(float z, vec2 planes);
 bool TexcoordOutOfBounds(vec2 uv);
-float InterleavedGradientNoise(vec2 uv);
 vec2 VogelDisk(uint i, uint count, float phi);
 vec3 NDCLight(vec4, vec2);
-
-// Helper Variables
-#ifdef FRAGMENT_SHADER
-    float IGNSample = InterleavedGradientNoise(gl_FragCoord.xy);
-#endif
 
 // Implementation
 // Main Functions
 #ifdef FRAGMENT_SHADER
-float GetShadowDirectional(const Vertex frag, const Light light)
+float GetShadowDirectional(const Vertex vert, const Light light)
 {
-    // Linearizing everything now for PCSS later.
-    float nDotL = max(dot(frag.Normal, light.Position), 0.0);
+    float nDotL = max(dot(vert.Normal, light.Position), 0.0);
     float bias = mix(0.1, 1.0, nDotL) * DIRECTIONAL_SHADOW_BIAS;
-	vec3 fragPos = NDCLight(frag.PositionLightSpace, light.Planes);
+	vec3 fragPos = NDCLight(vert.PositionLightSpace, light.Planes);
 
     float blocker = 0.0;
 #ifdef SOFT_SHADOW_AVERAGE
@@ -152,12 +149,6 @@ float LinearizeDepth(float z, vec2 planes)
 bool TexcoordOutOfBounds(vec2 uv)
 {
     return any(lessThan(uv, vec2(0.0))) || any(greaterThan(uv, vec2(1.0)));
-}
-
-float InterleavedGradientNoise(vec2 uv)
-{
-    uv = uv + 5.588238 * (Camera.Frame % TAA_SAMPLE_SQUARED);
-    return fract(52.9829189 * fract(dot(uv, vec2(0.06711056, 0.00583715))));
 }
 
 vec2 VogelDisk(uint i, uint count, float phi)

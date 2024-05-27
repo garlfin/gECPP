@@ -58,7 +58,7 @@ layout(VOXEL_UNIFORM_LAYOUT, binding = VOXEL_UNIFORM_LOCATION) uniform VoxelGrid
 struct Ray
 {
     vec3 Position;
-    float MaximumDistance;
+    float Length;
     vec3 Direction;
 };
 
@@ -170,7 +170,7 @@ RayResult Voxel_Trace(Ray ray)
     for(uint i = 0; i < VOXEL_TRACE_MAX_ITERATIONS; i++)
     {
         vec3 rayABS = abs(result.Position - VoxelGrid.Position);
-        if(result.Distance > ray.MaximumDistance) break;
+        if(result.Distance > ray.Length) break;
         if(max(rayABS.x, max(rayABS.y, rayABS.z)) > VoxelGrid.Scale) break;
 
         ivec3 cell = Voxel_WorldToTexel(result.Position, size >> mip);
