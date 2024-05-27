@@ -40,13 +40,13 @@ vec3 SS_WorldToUV(vec3);
 ivec2 SS_UVToTexel(vec2, ivec2);
 vec2 SS_TexelToUV(ivec2, ivec2);
 vec2 SS_AlignUVToCell(vec2, ivec2);
-float SS_CrossCell(inout vec3, vec3, ivec2);
+float SS_CrossCell(inout vec3, vec3, ivec2, out float);
 vec3 SS_DirToView(vec3);
 float LengthSquared(vec3 v) { return dot(v, v); }
 
 // Implementation
 #ifdef EXT_BINDLESS
-float SS_CrossCell(inout vec3 pos, vec3 dir, ivec2 size)
+float SS_CrossCell(inout vec3 pos, vec3 dir, ivec2 size, out float cross)
 {
     vec2 cellSize = 1.0 / size;
     vec2 cellMin = SS_AlignUVToCell(pos.xy, size);
@@ -56,7 +56,8 @@ float SS_CrossCell(inout vec3 pos, vec3 dir, ivec2 size)
     vec2 second = (cellMax - pos.xy) / dir.xy;
 
     first = max(first, second);
-    float dist = min(first.x, first.y) - RAY_CELL_EPSILON * min(cellSize.x, cellSize.y);
+    cross = RAY_CELL_EPSILON * min(cellSize.x, cellSize.y);
+    float dist = min(first.x, first.y) - cross;
 
     pos += dist * dir;
     return dist;
@@ -118,7 +119,8 @@ RayResult SS_Trace(Ray ray)
         vec3 oldPos = result.Position;
         ivec2 cell = SS_UVToTexel(result.Position.xy, textureSize(Camera.Depth, mip + 1));
 
-        SS_CrossCell(result.Position, rayDir, textureSize(Camera.Depth, mip));
+        float cross;
+        SS_CrossCell(result.Position, rayDir, textureSize(Camera.Depth, mip), cross);
 
         float lerp = distance(rayStart.xy, result.Position.xy) / rayLength;
 
@@ -133,7 +135,7 @@ RayResult SS_Trace(Ray ray)
             else { mip--; result.Position = oldPos; }
         else
         {
-            result.Position += RAY_CELL_EPSILON * 2 * rayDir;
+            result.Position += cross * 2 * rayDir;
             ivec2 newCell = SS_UVToTexel(result.Position.xy, textureSize(Camera.Depth, mip + 1));
 
             if(cell != newCell) mip++;
