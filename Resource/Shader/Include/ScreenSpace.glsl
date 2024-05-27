@@ -14,10 +14,6 @@
     #define RAY_THICKNESS 0.1
 #endif
 
-#ifndef RAY_MAX_MIP
-    #define RAY_MAX_MIP 4
-#endif
-
 #ifndef RAY_CELL_EPSILON
     #define RAY_CELL_EPSILON 0.01
 #endif
@@ -40,13 +36,13 @@ vec3 SS_WorldToUV(vec3);
 ivec2 SS_UVToTexel(vec2, ivec2);
 vec2 SS_TexelToUV(ivec2, ivec2);
 vec2 SS_AlignUVToCell(vec2, ivec2);
-float SS_CrossCell(inout vec3, vec3, ivec2, out float);
+float SS_CrossCell(inout vec3, vec3, out float, ivec2);
 vec3 SS_DirToView(vec3);
 float LengthSquared(vec3 v) { return dot(v, v); }
 
 // Implementation
 #ifdef EXT_BINDLESS
-float SS_CrossCell(inout vec3 pos, vec3 dir, ivec2 size, out float cross)
+float SS_CrossCell(inout vec3 pos, vec3 dir, out float cross, ivec2 size)
 {
     vec2 cellSize = 1.0 / size;
     vec2 cellMin = SS_AlignUVToCell(pos.xy, size);
@@ -103,11 +99,11 @@ RayResult SS_Trace(Ray ray)
     float rayLength = length(rayDir.xy);
     float near = rayStart.z, far = rayEnd.z;
 
-    int mip = 0, maxMip = textureQueryLevels(Camera.Depth) - 1;
+    int mip = 0, mipCount = textureQueryLevels(Camera.Depth);
 
-    #ifdef RAY_MAX_MIP
-        maxMip = min(maxMip, RAY_MAX_MIP);
-    #endif
+#ifdef RAY_MAX_MIP
+    int maxMip = min(mipCount - 1, RAY_MAX_MIP);
+#endif
 
     ivec2 texSize = textureSize(Camera.Depth, 0);
 
@@ -120,7 +116,7 @@ RayResult SS_Trace(Ray ray)
         ivec2 cell = SS_UVToTexel(result.Position.xy, textureSize(Camera.Depth, mip + 1));
 
         float cross;
-        SS_CrossCell(result.Position, rayDir, textureSize(Camera.Depth, mip), cross);
+        SS_CrossCell(result.Position, rayDir, cross, textureSize(Camera.Depth, mip));
 
         float lerp = distance(rayStart.xy, result.Position.xy) / rayLength;
 
@@ -139,7 +135,12 @@ RayResult SS_Trace(Ray ray)
             ivec2 newCell = SS_UVToTexel(result.Position.xy, textureSize(Camera.Depth, mip + 1));
 
             if(cell != newCell) mip++;
+
+        #ifndef RAY_MAX_MIP
+            if(mip == mipCount) break;
+        #else
             mip = min(mip, maxMip);
+        #endif
         }
     }
 
