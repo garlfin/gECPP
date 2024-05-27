@@ -15,7 +15,11 @@
 #endif
 
 #ifndef RAY_MAX_MIP
-    #define RAY_MAX_MIP 5
+    #define RAY_MAX_MIP 4
+#endif
+
+#ifndef RAY_CELL_EPSILON
+    #define RAY_CELL_EPSILON 0.01
 #endif
 
 struct AOSettings
@@ -52,7 +56,7 @@ float SS_CrossCell(inout vec3 pos, vec3 dir, ivec2 size)
     vec2 second = (cellMax - pos.xy) / dir.xy;
 
     first = max(first, second);
-    float dist = min(first.x, first.y) + 0.1 * min(cellSize.x, cellSize.y);
+    float dist = min(first.x, first.y) - RAY_CELL_EPSILON * min(cellSize.x, cellSize.y);
 
     pos += dist * dir;
     return dist;
@@ -109,9 +113,13 @@ RayResult SS_Trace(Ray ray)
     RayResult result = RayResult(rayStart, 0.f, vec3(0.f), false);
 
     if(rayDir.z < 0.0) return result;
-    SS_CrossCell(result.Position, rayDir, texSize);
     for(int i = 0; i < RAY_MAX_ITERATIONS; i++)
     {
+        vec3 oldPos = result.Position;
+        ivec2 cell = SS_UVToTexel(result.Position.xy, textureSize(Camera.Depth, mip + 1));
+
+        SS_CrossCell(result.Position, rayDir, textureSize(Camera.Depth, mip));
+
         float lerp = distance(rayStart.xy, result.Position.xy) / rayLength;
 
         vec3 uv = result.Position;
@@ -120,15 +128,13 @@ RayResult SS_Trace(Ray ray)
         if(uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) break;
 
         float depth = textureLod(Camera.Depth, uv.xy, float(mip)).r;
-
         if(depth + 0.01 < uv.z)
             if(mip == 0) { result.Hit = uv.z - depth < RAY_THICKNESS; break; }
-            else mip--;
+            else { mip--; result.Position = oldPos; }
         else
         {
-            ivec2 cell = SS_UVToTexel(result.Position.xy, texSize >> (mip + 1));
-            SS_CrossCell(result.Position, rayDir, texSize >> mip);
-            ivec2 newCell = SS_UVToTexel(result.Position.xy, texSize >> (mip + 1));
+            result.Position += RAY_CELL_EPSILON * 2 * rayDir;
+            ivec2 newCell = SS_UVToTexel(result.Position.xy, textureSize(Camera.Depth, mip + 1));
 
             if(cell != newCell) mip++;
             mip = min(mip, maxMip);
