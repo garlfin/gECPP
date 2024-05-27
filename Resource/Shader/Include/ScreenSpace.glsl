@@ -98,6 +98,7 @@ RayResult SS_Trace(Ray ray)
 
     float rayLength = length(rayDir.xy);
     float near = rayStart.z, far = rayEnd.z;
+    float cross;
 
     int mip = 0, mipCount = textureQueryLevels(Camera.Depth);
 
@@ -105,9 +106,10 @@ RayResult SS_Trace(Ray ray)
     int maxMip = min(mipCount - 1, RAY_MAX_MIP);
 #endif
 
-    ivec2 texSize = textureSize(Camera.Depth, 0);
-
     RayResult result = RayResult(rayStart, 0.f, vec3(0.f), false);
+
+    SS_CrossCell(result.Position, rayDir, cross, textureSize(Camera.Depth, 0));
+    result.Position += cross * 2 * rayDir;
 
     if(rayDir.z < 0.0) return result;
     for(int i = 0; i < RAY_MAX_ITERATIONS; i++)
@@ -115,7 +117,6 @@ RayResult SS_Trace(Ray ray)
         vec3 oldPos = result.Position;
         ivec2 cell = SS_UVToTexel(result.Position.xy, textureSize(Camera.Depth, mip + 1));
 
-        float cross;
         SS_CrossCell(result.Position, rayDir, cross, textureSize(Camera.Depth, mip));
 
         float lerp = distance(rayStart.xy, result.Position.xy) / rayLength;
