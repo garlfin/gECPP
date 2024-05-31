@@ -66,6 +66,7 @@ float GetShadowDirectional(const Vertex vert, const Light light)
     float bias = mix(0.1, 1.0, nDotL) * DIRECTIONAL_SHADOW_BIAS;
 	vec3 fragPos = NDCLight(vert.PositionLightSpace, light.Planes);
 
+
     float blocker = 0.0;
 #ifdef SOFT_SHADOW_AVERAGE
     float blockerCount = 0.0;

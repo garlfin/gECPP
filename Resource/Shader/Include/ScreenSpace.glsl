@@ -7,12 +7,18 @@
 #endif
 
 #ifndef RAY_THICKNESS
-    #define RAY_THICKNESS 0.2
+    #define RAY_THICKNESS 0.1
 #endif
 
 #ifndef RAY_CELL_EPSILON
     #define RAY_CELL_EPSILON 0.01
 #endif
+
+#ifndef RAY_EPSILON
+    #define RAY_EPSILON 0.01
+#endif
+
+#define RAY_MAX_MIP 4
 
 struct AOSettings
 {
@@ -24,8 +30,8 @@ struct AOSettings
 struct LinearRaySettings
 {
     int Iterations;
-    float MinimumBias;
-    float Bias;
+    float RayBias;
+    float NormalBias;
     vec3 Normal;
 };
 
@@ -116,7 +122,7 @@ RayResult SS_Trace(Ray ray)
     SS_CrossCell(result.Position, rayDir, cross, textureSize(Camera.Depth, 0));
     result.Position += cross * 2 * rayDir;
 
-    if(rayDir.z < 0.0) return result;
+    if(rayDir.z < 0.0) return result; // Temporary while I debug backwards rays.
     for(int i = 0; i < RAY_MAX_ITERATIONS; i++)
     {
         vec3 oldPos = result.Position;
@@ -155,6 +161,9 @@ RayResult SS_Trace(Ray ray)
 
 RayResult SS_TraceRough(Ray ray, LinearRaySettings settings)
 {
+    ray.Position += settings.Normal * settings.NormalBias * 0.1;
+    ray.Position += ray.Direction * ray.Length / settings.Iterations * settings.RayBias * IGNSample;
+
     vec3 rayStart = SS_WorldToUV(ray.Position);
     vec3 rayEnd = SS_WorldToUV(ray.Position + ray.Direction * ray.Length);
     vec3 rayDir = (rayEnd - rayStart) / settings.Iterations;
@@ -162,20 +171,19 @@ RayResult SS_TraceRough(Ray ray, LinearRaySettings settings)
     float near = rayStart.z, far = rayEnd.z;
 
     RayResult result = RayResult(rayStart, 0.0, vec3(0.0), false);
-
     for(int i = 0; i < settings.Iterations; i++)
     {
         result.Position += rayDir;
 
-        float lerp = float(i + 1) / settings.Iterations;
-
+        float lerp = (i + 1) / settings.Iterations;
         vec3 uv = result.Position;
         uv.z = (near * far) / (near * lerp + far * (1.0 - lerp));
 
         if(uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) break;
 
-        float depth = textureLod(Camera.Depth, uv.xy, 0.0).r;
-        if(depth + 0.01 < uv.z) { result.Hit = uv.z - depth < RAY_THICKNESS; break; }
+        float depth = textureLod(Camera.Depth, uv.xy, 0.f).r;
+
+        if(depth + 0.01 < uv.z) { result.Hit = true; break; }
     }
 
     return result;
