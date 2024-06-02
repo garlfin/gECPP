@@ -4,6 +4,7 @@
 #include "Vertex.glsl"
 #include "Voxel.glsl"
 #include "ScreenSpace.glsl"
+#include "Math.glsl"
 
 #ifndef PI
     #define PI 3.141592
@@ -166,11 +167,7 @@ vec3 ImportanceSampleGGX(vec2 xi, vec3 n, float roughness)
 
     vec3 h = vec3(sinTheta * cos(phi), sinTheta * sin(phi), cosTheta);
 
-    vec3 up = abs(n.z) < (1.0 - EPSILON) ? vec3(0.0, 0.0, 1.0) : vec3(1, 0.0, 0.0);
-    vec3 tanX = normalize(cross(up, n));
-    vec3 tanY = cross(n, tanX);
-
-    return tanX * h.x + tanY * h.y + n * h.z;
+    return GetTangent(n) * h;
 }
 
 // How someone came up with this, I don't know.

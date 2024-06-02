@@ -4,6 +4,10 @@
 #include "TAA.glsl"
 #include "Noise.glsl"
 #include "ScreenSpace.glsl"
+#include "Math.glsl"
+
+#define DIRECTIONAL_CONTACT_SHADOW
+#define SOFT_SHADOW_AVERAGE
 
 // In percent
 #ifndef DIRECTIONAL_SHADOW_BIAS
@@ -14,7 +18,9 @@
     #define DIRECTIONAL_SHADOW_SAMPLES 32
 #endif
 
-#define SOFT_SHADOW_AVERAGE
+#ifndef DIRECTIONAL_CONTACT_SAMPLES
+    #define DIRECTIONAL_CONTACT_SAMPLES 1
+#endif
 
 #define SOFT_SHADOW (defined(SOFT_SHADOW_AVERAGE) || defined(SOFT_SHADOW_MIN))
 
@@ -65,7 +71,6 @@ float GetShadowDirectional(const Vertex vert, const Light light)
     float nDotL = max(dot(vert.Normal, light.Position), 0.0);
     float bias = mix(0.1, 1.0, nDotL) * DIRECTIONAL_SHADOW_BIAS;
 	vec3 fragPos = NDCLight(vert.PositionLightSpace, light.Planes);
-
 
     float blocker = 0.0;
 #ifdef SOFT_SHADOW_AVERAGE
@@ -124,10 +129,35 @@ float GetShadowDirectional(const Vertex vert, const Light light)
         z = uv.z - z;
 
         float shadowSample = z > bias ? 0.0 : 1.0;
-        shadow += TexcoordOutOfBounds(uv.xy) ? 1.0 : shadowSample;
+        shadowSample = TexcoordOutOfBounds(uv.xy) ? 1.0 : shadowSample;
+
+        shadow += shadowSample;
     }
 
-    return shadow / DIRECTIONAL_SHADOW_SAMPLES;
+    shadow /= DIRECTIONAL_SHADOW_SAMPLES;
+
+#ifdef DIRECTIONAL_CONTACT_SHADOW
+    Ray ray;
+    LinearRaySettings raySettings = LinearRaySettings(32, EPSILON, EPSILON, vert.Normal);
+    RayResult result;
+
+    float contactShadow = 0.0;
+
+    for(uint i = 0; i < DIRECTIONAL_CONTACT_SAMPLES; i++)
+    {
+        vec2 offset = VogelDisk(i, DIRECTIONAL_CONTACT_SAMPLES, IGNSample * PI * 2.0) * DIRECTIONAL_SHADOW_RADIUS;
+        vec3 rayDir = GetTangent(light.Position) * vec3(offset, 1.0);
+
+        ray = Ray(vert.Position, DIRECTIONAL_SHADOW_MIN_RADIUS / DIRECTIONAL_SHADOW_RADIUS, rayDir);
+        result = SS_TraceRough(ray, raySettings);
+
+        contactShadow += float(!result.Hit);
+    }
+
+    shadow = min(shadow, contactShadow / DIRECTIONAL_CONTACT_SAMPLES);
+#endif
+
+    return shadow;
 }
 #endif
 

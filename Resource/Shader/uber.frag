@@ -1,4 +1,4 @@
-#define ENABLE_VOXEL_TRACE
+#define ENABLE_SS_TRACE
 
 #include "Include/Camera.glsl"
 #include "Include/Scene.glsl"
