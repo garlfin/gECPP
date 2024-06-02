@@ -1,4 +1,7 @@
-#define ENABLE_SS_TRACE
+#define ENABLE_VOXEL_TRACE
+#define DIRECTIONAL_CONTACT_SHADOW
+#define SOFT_SHADOW_AVERAGE
+#define RAY_MAX_MIP 4
 
 #include "Include/Camera.glsl"
 #include "Include/Scene.glsl"

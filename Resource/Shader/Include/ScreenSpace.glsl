@@ -18,8 +18,6 @@
     #define RAY_EPSILON 0.01
 #endif
 
-#define RAY_MAX_MIP 4
-
 struct AOSettings
 {
     float Radius;
@@ -140,7 +138,7 @@ RayResult SS_Trace(Ray ray)
         if(uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) break;
 
         float depth = textureLod(Camera.Depth, uv.xy, float(mip)).r;
-        if(depth + 0.01 < uv.z)
+        if(depth * 1.02 < uv.z)
             if(mip == 0) { result.Hit = uv.z - depth < RAY_THICKNESS; break; }
             else { mip--; result.Position = oldPos; }
         else

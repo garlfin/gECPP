@@ -6,9 +6,6 @@
 #include "ScreenSpace.glsl"
 #include "Math.glsl"
 
-#define DIRECTIONAL_CONTACT_SHADOW
-#define SOFT_SHADOW_AVERAGE
-
 // In percent
 #ifndef DIRECTIONAL_SHADOW_BIAS
     #define DIRECTIONAL_SHADOW_BIAS 0.01
@@ -136,7 +133,7 @@ float GetShadowDirectional(const Vertex vert, const Light light)
 
     shadow /= DIRECTIONAL_SHADOW_SAMPLES;
 
-#ifdef DIRECTIONAL_CONTACT_SHADOW
+#if defined(DIRECTIONAL_CONTACT_SHADOW) && DIRECTIONAL_CONTACT_SAMPLES > 0
     Ray ray;
     LinearRaySettings raySettings = LinearRaySettings(32, EPSILON, EPSILON, vert.Normal);
     RayResult result;

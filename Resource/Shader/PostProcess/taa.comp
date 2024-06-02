@@ -1,12 +1,10 @@
+#include <Resource/Shader/Include/TAA.glsl>
+
 #define TAA_MODE_FULL
 #define TAA_CLIP_AABB
 
 #ifndef PIPELINE_COLOR_FORMAT
     #define PIPELINE_COLOR_FORMAT rgba16f
-#endif
-
-#ifndef TAA_SAMPLE_COUNT
-    #define TAA_SAMPLE_COUNT 16
 #endif
 
 #ifndef TAA_CLAMP_MAX
