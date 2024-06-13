@@ -7,15 +7,19 @@
 #endif
 
 #ifndef RAY_THICKNESS
-    #define RAY_THICKNESS 0.1
+    #define RAY_THICKNESS 0.2
 #endif
 
 #ifndef RAY_CELL_EPSILON
-    #define RAY_CELL_EPSILON 0.01
+    #define RAY_CELL_EPSILON 0.1
 #endif
 
 #ifndef RAY_EPSILON
     #define RAY_EPSILON 0.01
+#endif
+
+#ifndef RAY_MAX_BIAS
+    #define RAY_MAX_BIAS 0.1
 #endif
 
 struct AOSettings
@@ -35,7 +39,7 @@ struct LinearRaySettings
 
 // Functions
 #if defined(EXT_BINDLESS) && defined(FRAGMENT_SHADER)
-RayResult SS_Trace(Ray);
+RayResult SS_Trace(Ray, out int);
 RayResult SS_TraceRough(Ray, LinearRaySettings);
 float SS_AO(AOSettings, Vertex);
 #endif
@@ -45,27 +49,30 @@ vec3 SS_WorldToUV(vec3);
 ivec2 SS_UVToTexel(vec2, ivec2);
 vec2 SS_TexelToUV(ivec2, ivec2);
 vec2 SS_AlignUVToCell(vec2, ivec2);
-float SS_CrossCell(inout vec3, vec3, out float, ivec2);
+float SS_CrossCell(inout vec3, vec3, ivec2);
 vec3 SS_DirToView(vec3);
 float LengthSquared(vec3 v) { return dot(v, v); }
+float SS_GetDepthWithBias(float d) { return d + min(RAY_MAX_BIAS, d * 0.02); }
+float SS_Sign(float f) { return f < 0 ? -1 : 1; }
+vec2 SS_Sign(vec2 v) { return vec2(SS_Sign(v.x), SS_Sign(v.y)); }
 
 // Implementation
 #if defined(EXT_BINDLESS) && defined(FRAGMENT_SHADER)
-float SS_CrossCell(inout vec3 pos, vec3 dir, out float cross, ivec2 size)
+float SS_CrossCell(inout vec3 pos, vec3 dir, ivec2 size)
 {
-    vec2 cellSize = 1.0 / size;
-    vec2 cellMin = SS_AlignUVToCell(pos.xy, size);
-    vec2 cellMax = cellMin + cellSize;
+    vec2 cellSize = 0.5 / size;
 
-    vec2 first = (cellMin - pos.xy) / dir.xy;
-    vec2 second = (cellMax - pos.xy) / dir.xy;
+    vec2 planes = SS_AlignUVToCell(pos.xy, size) + cellSize;
+    planes += sign(dir.xy) * cellSize;
 
-    first = max(first, second);
-    cross = RAY_CELL_EPSILON * min(cellSize.x, cellSize.y);
-    float dist = min(first.x, first.y) - cross;
+    vec2 solution = (planes - pos.xy) / dir.xy;
+    float dist = min(solution.x, solution.y);
 
-    pos += dist * dir;
-    return dist;
+    float cross = RAY_CELL_EPSILON * dist;
+
+    pos += (dist - cross) * dir;
+
+    return cross;
 }
 
 vec3 SS_WorldToUV(vec3 pos)
@@ -99,7 +106,7 @@ vec2 SS_AlignUVToCell(vec2 uv, ivec2 size)
     return floor(uv * size) / size;
 }
 
-RayResult SS_Trace(Ray ray)
+RayResult SS_Trace(Ray ray, out int m)
 {
     ray.Direction = normalize(ray.Direction);
 
@@ -109,7 +116,7 @@ RayResult SS_Trace(Ray ray)
 
     float rayLength = length(rayDir.xy);
     float near = rayStart.z, far = rayEnd.z;
-    float cross;
+    float cross, oldCross;
 
     int mip = 0, mipCount = textureQueryLevels(Camera.Depth);
 
@@ -117,33 +124,56 @@ RayResult SS_Trace(Ray ray)
     int maxMip = min(mipCount - 1, RAY_MAX_MIP);
 #endif
 
-    RayResult result = RayResult(rayStart, 0.0, vec3(0.0), false);
+    RayResult result = RayResult(rayStart, 0.0, vec3(0.0), RAY_RESULT_NO_HIT);
 
-    SS_CrossCell(result.Position, rayDir, cross, textureSize(Camera.Depth, 0));
-    result.Position += cross * 2 * rayDir;
+    rayDir /= abs(rayDir.z);
+    if(rayDir.z < RAY_EPSILON) return result; // Temporary while I debug backwards rays.
 
-    if(rayDir.z < 0.0) return result; // Temporary while I debug backwards rays.
-    for(int i = 0; i < RAY_MAX_ITERATIONS; i++)
+    int i;
+    for(i = 0; i < RAY_MAX_ITERATIONS; i++)
     {
+        m = mip;
         vec3 oldPos = result.Position;
         ivec2 cell = SS_UVToTexel(result.Position.xy, textureSize(Camera.Depth, mip + 1));
 
-        SS_CrossCell(result.Position, rayDir, cross, textureSize(Camera.Depth, mip));
+        oldCross = cross;
+        cross = SS_CrossCell(result.Position, rayDir, textureSize(Camera.Depth, mip));
 
         float lerp = distance(rayStart.xy, result.Position.xy) / rayLength;
 
         vec3 uv = result.Position;
         uv.z = (near * far) / (near * lerp + far * (1.0 - lerp));
 
-        if(uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) break;
+        if(uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0)
+        {
+            result.Result = RAY_RESULT_OUT_OF_BOUNDS;
+            break;
+        }
 
         float depth = textureLod(Camera.Depth, uv.xy, float(mip)).r;
-        if(depth * 1.02 < uv.z)
-            if(mip == 0) { result.Hit = uv.z - depth < RAY_THICKNESS; break; }
-            else { mip--; result.Position = oldPos; }
+        depth = SS_GetDepthWithBias(depth);
+
+        if(depth < uv.z)
+            if(mip == 0)
+            {
+                float lerp = distance(rayStart.xy, oldPos.xy) / rayLength;
+                float prevZ = (near * far) / (near * lerp + far * (1.0 - lerp));
+
+                bool crossed = uv.z < depth + RAY_THICKNESS;
+                //crossed = crossed || (!crossed && prevZ < depth);
+
+                result.Result = crossed ? RAY_RESULT_HIT : RAY_RESULT_TOO_FAR;
+                break;
+            }
+            else
+            {
+                mip--;
+                result.Position = oldPos;
+                // SS_CrossCell(result.Position, -rayDir, textureSize(Camera.Depth, mip));
+            }
         else
         {
-            result.Position += cross * 2 * rayDir;
+            result.Position += rayDir * cross * 2;
             ivec2 newCell = SS_UVToTexel(result.Position.xy, textureSize(Camera.Depth, mip + 1));
 
             if(cell != newCell) mip++;
@@ -156,6 +186,7 @@ RayResult SS_Trace(Ray ray)
         }
     }
 
+    if(i == RAY_MAX_ITERATIONS) result.Result = RAY_RESULT_EXHAUSTED;
     return result;
 }
 
@@ -172,9 +203,10 @@ RayResult SS_TraceRough(Ray ray, LinearRaySettings settings)
 
     float near = rayStart.z, far = rayEnd.z;
 
-    RayResult result = RayResult(rayStart, 0.0, vec3(0.0), false);
+    RayResult result = RayResult(rayStart, 0.0, vec3(0.0), RAY_RESULT_NO_HIT);
 
-    for(int i = 0; i < settings.Iterations; i++)
+    int i;
+    for(i = 0; i < settings.Iterations; i++)
     {
         result.Position += rayDir;
 
@@ -186,9 +218,14 @@ RayResult SS_TraceRough(Ray ray, LinearRaySettings settings)
 
         float depth = textureLod(Camera.Depth, uv.xy, 0.f).r;
 
-        if(depth * 1.01 < uv.z) { result.Hit = uv.z - depth < RAY_THICKNESS; break; }
+        if(SS_GetDepthWithBias(depth) < uv.z)
+        {
+            result.Result = uv.z - depth < RAY_THICKNESS ? RAY_RESULT_HIT : RAY_RESULT_TOO_FAR;
+            break;
+        }
     }
 
+    if(i == RAY_MAX_ITERATIONS) result.Result = RAY_RESULT_EXHAUSTED;
     return result;
 }
 

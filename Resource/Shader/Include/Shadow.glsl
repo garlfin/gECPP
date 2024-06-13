@@ -16,7 +16,7 @@
 #endif
 
 #ifndef DIRECTIONAL_CONTACT_SAMPLES
-    #define DIRECTIONAL_CONTACT_SAMPLES 1
+    #define DIRECTIONAL_CONTACT_SAMPLES 4
 #endif
 
 #define SOFT_SHADOW (defined(SOFT_SHADOW_AVERAGE) || defined(SOFT_SHADOW_MIN))
@@ -133,7 +133,9 @@ float GetShadowDirectional(const Vertex vert, const Light light)
 
     shadow /= DIRECTIONAL_SHADOW_SAMPLES;
 
-#if defined(DIRECTIONAL_CONTACT_SHADOW) && DIRECTIONAL_CONTACT_SAMPLES > 0
+#if defined(EXT_BINDLESS) && defined(DIRECTIONAL_CONTACT_SHADOW) && DIRECTIONAL_CONTACT_SAMPLES > 0
+    if(shadow < EPSILON) return shadow;
+
     Ray ray;
     LinearRaySettings raySettings = LinearRaySettings(32, EPSILON, EPSILON, vert.Normal);
     RayResult result;
@@ -148,7 +150,7 @@ float GetShadowDirectional(const Vertex vert, const Light light)
         ray = Ray(vert.Position, DIRECTIONAL_SHADOW_MIN_RADIUS / DIRECTIONAL_SHADOW_RADIUS, rayDir);
         result = SS_TraceRough(ray, raySettings);
 
-        contactShadow += float(!result.Hit);
+        contactShadow += float(result.Result == RAY_RESULT_NO_HIT);
     }
 
     shadow = min(shadow, contactShadow / DIRECTIONAL_CONTACT_SAMPLES);

@@ -50,6 +50,13 @@ uniform sampler3D VoxelData;
     #define VOXEL_UNIFORM_LAYOUT std140
 #endif
 
+#define RAY_RESULT_NO_HIT 0
+#define RAY_RESULT_HIT 1
+#define RAY_RESULT_TOO_FAR 2
+#define RAY_RESULT_EXHAUSTED 3
+#define RAY_RESULT_OUT_OF_BOUNDS 4
+#define RAY_RESULT_PRECISION_ERROR 5
+
 layout(VOXEL_UNIFORM_LAYOUT, binding = VOXEL_UNIFORM_LOCATION) uniform VoxelGridUniform
 {
     VoxelGridData VoxelGrid;
@@ -67,7 +74,7 @@ struct RayResult
     vec3 Position;
     float Distance;
     vec3 Normal;
-    bool Hit;
+    int Result;
 };
 
 // Functions
@@ -89,6 +96,7 @@ ivec3 Voxel_WorldToTexel(vec3, uint); // CellCount
 vec3 Voxel_WorldToAlignedUV(vec3, uint); // CellCount
 vec3 AlignWorldToCell(vec3, uint); // CellCount
 float Voxel_CrossCell(inout vec3, vec3, uint); // CellCount
+bool RayHit(RayResult result) { return result.Result == RAY_RESULT_HIT; }
 
 // Implementation
 vec3 Voxel_WorldToUV(vec3 pos)
@@ -162,7 +170,7 @@ float Voxel_CrossCell(inout vec3 position, vec3 direction, uint cellCount)
 #ifdef EXT_BINDLESS
 RayResult Voxel_Trace(Ray ray)
 {
-    RayResult result = RayResult(ray.Position, 0.0, vec3(0), false);
+    RayResult result = RayResult(ray.Position, 0.0, vec3(0), RAY_RESULT_NO_HIT);
     int size = textureSize(VoxelGrid.Color, 0).r;
     int mipCount = textureQueryLevels(VoxelGrid.Color);
     int mip = 0;
@@ -179,7 +187,7 @@ RayResult Voxel_Trace(Ray ray)
         if(solid >= 0.5)
             if(mip == 0)
             {
-                result.Hit = true;
+                result.Result = RAY_RESULT_HIT;
                 break;
             }
             else mip--;

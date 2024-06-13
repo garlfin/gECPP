@@ -1,7 +1,7 @@
-#define ENABLE_VOXEL_TRACE
+#define ENABLE_SS_TRACE
 #define DIRECTIONAL_CONTACT_SHADOW
 #define SOFT_SHADOW_AVERAGE
-#define RAY_MAX_MIP 4
+#define RAY_MAX_MIP 6
 
 #include "Include/Camera.glsl"
 #include "Include/Scene.glsl"
@@ -76,11 +76,12 @@ void main()
 
     #if defined(ENABLE_SS_TRACE) || defined(ENABLE_VOXEL_TRACE)
         Ray ray = Ray(vert.Position, 10.f, pbrSample.Specular);
-        RayResult result = SS_Trace(ray);
+        int mip;
+        RayResult result = SS_Trace(ray, mip);
         vec3 raySpecular = textureLod(Camera.Color, result.Position.xy, 0.f).rgb;
 
         #ifdef ENABLE_VOXEL_TRACE
-            if(!result.Hit)
+            if(result.Result != RAY_RESULT_HIT)
             {
                 ray.Position = vert.Position + ray.Direction * result.Distance;
                 result = Voxel_TraceOffset(ray, vert.Normal);
@@ -89,7 +90,7 @@ void main()
             }
         #endif
 
-        if(result.Hit) specular = raySpecular;
+        if(result.Result == RAY_RESULT_HIT) specular = raySpecular;
     #endif
 
         FragColor.rgb += FilterSpecular(vert, frag, pbrSample, specular);
