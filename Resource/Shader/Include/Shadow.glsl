@@ -150,7 +150,7 @@ float GetShadowDirectional(const Vertex vert, const Light light)
         ray = Ray(vert.Position, DIRECTIONAL_SHADOW_MIN_RADIUS / DIRECTIONAL_SHADOW_RADIUS, rayDir);
         result = SS_TraceRough(ray, raySettings);
 
-        contactShadow += float(result.Result == RAY_RESULT_NO_HIT);
+        contactShadow += float(result.Result != RAY_RESULT_HIT);
     }
 
     shadow = min(shadow, contactShadow / DIRECTIONAL_CONTACT_SAMPLES);
