@@ -3,7 +3,6 @@
 //
 
 #include "File.h"
-#include <fstream>
 #include <GL/Binary/Binary.h>
 
 /*
@@ -18,24 +17,21 @@
 
 namespace gETF
 {
-	void File::Deserialize(ostream& buf, const File& s) const
+	void Header::Deserialize(ostream& buf) const
 	{
 		Write(buf, "gETF", 4);
 		Write<u8>(buf, GETF_VERSION);
 
-		Write<u16>(buf, 0);
-		Write<u16>(buf, 0);
-		Write<u16>(buf, 0);
-		Write<u16>(buf, 0);
+		Write<u64>(buf, 0);
 		Write<u16>(buf, 0);
 
-		WriteArraySerializable<u16>(buf, Meshes, *this);
+		//WriteArraySerializable<u16>(buf, Meshes, *this);
 	}
 
-	void File::Serialize(istream& ptr, const File& s)
+	void Header::Serialize(istream& ptr, const Header& s)
 	{
 		char magic[4];
-		::Read<char>(ptr, magic, 4);
+		Read<char>(ptr, magic, 4);
 
 		if (!strcmpb(magic, "gETF", 4))
 		{
@@ -47,31 +43,20 @@ namespace gETF
 
 		if (Version >= 1) ptr.seekg(10, std::ios::cur);
 
-		Meshes = ReadArraySerializable<u16, Mesh>(ptr, s);
+		//Meshes = ReadArraySerializable<u16, Mesh>(ptr, s);
 	}
 
-	Mesh* File::GetMesh(const char* name)
+	void IFileContainer::Deserialize(std::ostream& buf) const
 	{
-		for(u32 i = 0; i < Meshes.Count(); i++)
-			if(!strcmp(name, Meshes[i].Name.c_str())) return &Meshes[i];
-		return nullptr;
+		Write(buf, _type);
+		WritePrefixedString(buf, _name);
+		_t.Deserialize(buf);
 	}
 
-	File& Read(gE::Window* window, const char* file, File& header)
+	void IFileContainer::Serialize(std::istream& ptr, gE::Window* const& settings)
 	{
-		header.Window = window;
-
-		std::ifstream src;
-		src.open(file, std::ios::in | std::ios::binary);
-
-		header.Serialize(src, header);
-
-		return header;
-	}
-
-	File* Read(gE::Window* window, const char* file)
-	{
-		auto* h = new File();
-		return &Read(window, file, *h);
+		_type = Read<TypeID>(ptr);
+		_name = ReadPrefixedString(ptr);
+		_t.Serialize(ptr, settings);
 	}
 }

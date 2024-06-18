@@ -9,9 +9,6 @@
 #include <GL/Binary/Binary.h>
 #include <gETF/Serializable.h>
 
-#define DIV_CEIL(X, Y) (((X) + decltype(X)(Y) - decltype(X)(1)) / decltype(X)(Y))
-#define DIV_CEIL_T(X, Y, T) (((T)(X) + (T)(Y) - (T)(1)) / (T)(Y))
-
 namespace PVR
 {
 	enum class Flags : u32

@@ -50,14 +50,11 @@ namespace gE
 	{
 		if(!_skyboxVAO)
 		{
-			gETF::File skybox;
-			gETF::Read(_window, "Resource/Model/skybox.gETF", skybox);
-
-			GL::VAOSettings skyboxSettings;
-			skybox.Meshes[0].GetVAOSettings(skyboxSettings);
+			gETF::Mesh skybox;
+			ReadSerializableFromFile(_window, "Resource/Model/skybox.gEMesh", skybox);
 
 			_skyboxShader = ptr_create<GL::Shader>(_window, "Resource/Shader/skybox.vert", "Resource/Shader/skybox.frag");
-			_skyboxVAO = ptr_create<GL::VAO>(_window, skyboxSettings);
+			_skyboxVAO = std::move(skybox.VAO);
 		}
 
 		_skyboxShader->Bind();

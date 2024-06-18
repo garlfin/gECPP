@@ -10,9 +10,12 @@
 #include <Engine/AssetManager.h>
 #include <GL/Buffer/VAO.h>
 
+#define GETF_MESH_MAGIC "GMSH"
+#define GETF_MESH_VERSION 1
+
 namespace gETF
 {
-	struct VertexBuffer : public Serializable<File>, public GL::BufferSettings
+	struct VertexBuffer : public Serializable<Mesh>, public GL::BufferSettings
 	{
 		SERIALIZABLE_PROTO_T;
 
@@ -23,14 +26,14 @@ namespace gETF
 		~VertexBuffer() override { Free(); }
 	};
 
-	struct VertexField : public Serializable<File>, public GL::VertexField
+	struct VertexField : public Serializable<Mesh>, public GL::VertexField
 	{
 		SERIALIZABLE_PROTO_T;
 
 		char Name[4];
 	};
 
-	struct MaterialSlot : public Serializable<File>, public GL::MaterialSlot
+	struct MaterialSlot : public Serializable<Mesh>, public GL::MaterialSlot
 	{
 		SERIALIZABLE_PROTO_T;
 	};
@@ -42,11 +45,12 @@ namespace gETF
 		Complex
 	};
 
-	struct Mesh : public Serializable<File>
+	struct Mesh : public Serializable<gE::Window*>
 	{
 		SERIALIZABLE_PROTO_T;
 
-		std::string Name;
+		gE::Window* Window;
+		u8 Version = GETF_MESH_VERSION;
 
 		TriangleMode TriMode = TriangleMode::None;
 
@@ -60,6 +64,7 @@ namespace gETF
 		void Free() { for(u8 i = 0; i < Buffers.Count(); i++) Buffers[i].Free(); }
 		void CreateVAO(gE::Window*);
 
+	 private:
 		void GetVAOSettings(GL::VAOSettings&) const;
 		void GetVAOSettings(GL::IndexedVAOSettings&) const;
 	};

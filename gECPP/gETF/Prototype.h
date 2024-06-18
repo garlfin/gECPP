@@ -6,7 +6,8 @@
 
 namespace gETF
 {
-	struct File;
+	struct IFileContainer;
+	struct Header;
 	struct Mesh;
 	struct VertexBuffer;
 	struct MaterialSlot;

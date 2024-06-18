@@ -9,22 +9,16 @@
 
 namespace gETF
 {
-	// TODO
-	// struct Scene;
-	// struct Node;
-
-	struct File : public Serializable<File>
+	struct Header : public Serializable<Header>
 	{
+	 public:
 		SERIALIZABLE_PROTO_T;
 
 		gE::Window* Window;
 		u8 Version = GETF_VERSION;
 
-		Array<Mesh> Meshes;
+	 private:
 
-		Mesh* GetMesh(const char*);
+		Array<u8> Files;
 	};
-
-	File& Read(gE::Window*, const char*, File&);
-	NODISCARD File* Read(gE::Window*, const char*);
-}
+  }

@@ -9,6 +9,7 @@
 #include "ASSIMP/postprocess.h"
 #include <gETF/File.h>
 #include <fstream>
+#include <filesystem>
 
 using pp = aiPostProcessSteps;
 
@@ -57,15 +58,17 @@ int main(int argc, char** argv)
 		previousMesh = mesh;
 	}
 
-	gETF::File file;
-	file.Meshes = Array<gETF::Mesh>(meshes.size());
+	std::string basePath(argv[2]);
 
-	for(unsigned i = 0; i < file.Meshes.Count(); i++)
-		TransformMesh(meshes[i], file.Meshes[i]);
+	for(const auto& src : meshes)
+	{
+		std::string path = basePath + src[0]->mName.data + ".gEMesh";
 
-	std::ofstream dst;
-	dst.open(argv[2], std::ios::out | std::ios::binary);
-	file.Deserialize(dst, file);
+		gETF::Mesh mesh;
+		TransformMesh(src, mesh);
+
+		WriteSerializableToFile<gETF::Mesh>(path.c_str(), mesh);
+	}
 
 	return 0;
 }

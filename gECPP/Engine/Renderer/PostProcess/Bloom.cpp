@@ -6,7 +6,7 @@
 #include <Engine/Window.h>
 
 #define BLOOM_STAGE_DOWNSAMPLE 1
-#define BLOOM_STAGE_UPSAMPLE -1
+#define BLOOM_STAGE_UPSAMPLE (-1)
 
 namespace gE::DefaultPipeline
 {
@@ -47,8 +47,8 @@ namespace gE::DefaultPipeline
 			settings.w = BLOOM_STAGE_UPSAMPLE * (mip + 1.f);
 
 			in.Bind(0, GL_READ_WRITE, mip);
-			if(mip == 0) out.Bind(1, GL_WRITE_ONLY, 0);
-			else in.Bind(1, GL_WRITE_ONLY, mip);
+			if(mip) in.Bind(1, GL_WRITE_ONLY, mip);
+			else out.Bind(1, GL_WRITE_ONLY, 0);
 
 			shader.SetUniform(1, settings);
 

@@ -103,6 +103,16 @@ namespace gE
 		explicit ALWAYS_INLINE operator bool() const { return _t; }
 		explicit ALWAYS_INLINE operator T*() const { return _t; } // NOLINT
 
+		template<class O>
+		ALWAYS_INLINE SmartPointer<O> Move()
+		{
+			static_assert(std::is_base_of_v<O, T>);
+
+			T* t = _t;
+			_t = nullptr;
+			return SmartPointer<O>(t);
+		}
+
 		~SmartPointer() { delete _t; }
 
 	 private:

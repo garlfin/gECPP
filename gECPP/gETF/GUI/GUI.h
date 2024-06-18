@@ -10,7 +10,7 @@
 
 namespace gETF::UI
 {
-	class IElement : public Serializable<File>
+	class IElement : public Serializable<Header>
 	{
 	 public:
 		IElement(gE::Window* w, IElement* p, Transform& t) : _window(w), _parent(p), _transform(&t) {};
@@ -52,7 +52,7 @@ namespace gETF::UI
 		SERIALIZABLE_PROTO_T;
 	};
 
-	class Scene : public Serializable<gETF::File>
+	class Scene : public Serializable<gETF::Header>
 	{
 	 public:
 		SERIALIZABLE_PROTO_T;
@@ -61,7 +61,7 @@ namespace gETF::UI
 		Array<IElement> Elements;
 	};
 
- 	struct UI : public Serializable<gETF::File>
+ 	struct UI : public Serializable<gETF::Header>
 	{
 	 public:
 		SERIALIZABLE_PROTO_T;
@@ -72,13 +72,13 @@ namespace gETF::UI
 }
 
 template<class T>
-void gETF::UI::Element<T>::Serialize(istream& ptr, const File& settings)
+void gETF::UI::Element<T>::Serialize(istream& ptr, const Header& settings)
 {
 	IElement::Serialize(ptr, settings);
 }
 
 template<class T>
-void gETF::UI::Element<T>::Deserialize(ostream& buf, const gETF::File& settings) const
+void gETF::UI::Element<T>::Deserialize(ostream& buf) const
 {
-	IElement::Deserialize(buf, settings);
+	IElement::Deserialize(buf);
 }

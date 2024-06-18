@@ -35,10 +35,9 @@ void DemoWindow::OnInit()
 	auto cobbleMaterial = gE::ref_create<gE::PBRMaterial>(this, rasterShader, cobbleSettings);
 	auto tileMaterial = gE::ref_create<gE::PBRMaterial>(this, rasterShader, tileSettings);
 
-	gETF::File* cube = new gETF::File;
-	gETF::Read(this, "Resource/Model/cube.gETF", *cube);
+	auto* cube = ReadSerializableFromFile<gETF::Mesh>(this, "Resource/Model/Plane.001.gEMesh");
 
-	auto* mesh = new VoxelDemo::StaticMeshEntity(this, &cube->Meshes[0]);
+	auto* mesh = new VoxelDemo::StaticMeshEntity(this, cube);
 
 	mesh->GetTransform().Scale = glm::vec3(0.5);
 	mesh->GetMaterials().SetMaterial(0, cobbleMaterial);
