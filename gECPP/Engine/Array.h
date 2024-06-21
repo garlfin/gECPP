@@ -11,10 +11,15 @@ template<typename T>
 class Array
 {
  public:
-	explicit Array(u64 count);
 	Array() = default;
 
-	Array(const Array& o) : _size(o.Count()), _t(new T[_size]{}) { memcpy(_t, o.Data(), o.Count() * sizeof(T)); };
+	template<typename... ARGS>
+	explicit Array(size_t count, ARGS&&... args) : _size(count), _t(new T[count])
+	{
+		for(int i = 0; i < count; i++) _t[i] = T(std::forward<ARGS>(args)...);
+	}
+
+	Array(const Array& o) : _size(o.Count()), _t(new T[_size]) { memcpy(_t, o.Data(), o.Count() * sizeof(T)); };
 	Array(Array&& o) noexcept : _size(o.Count()), _t(o._t) { o._t = nullptr; };
 
 	OPERATOR_EQUALS_BOTH(Array<T>);
@@ -49,10 +54,4 @@ size_t Array<T>::CopyToCArray(T* arr, size_t arrSize) const
 			arr[i] = _t[i];
 
 	return copyCount;
-}
-
-template<typename T>
-Array<T>::Array(u64 count) : _size(count), _t(new T[_size] {})
-{
-	for(u64 i = 0; i < count; i++) _t[i] = T();
 }

@@ -81,11 +81,11 @@ namespace gE
 	class SmartPointer
 	{
 	 public:
-		explicit SmartPointer(T* t) : _t(t) { };
+		ALWAYS_INLINE explicit SmartPointer(T* t) : _t(t) { };
 		SmartPointer() = default;
 
 		SmartPointer(const SmartPointer&) = delete;
-		SmartPointer(SmartPointer&& o) noexcept : _t(o._t) { o._t = nullptr; }
+		ALWAYS_INLINE SmartPointer(SmartPointer&& o) noexcept : _t(o.Release()) { }
 
 		OPERATOR_EQUALS_XVAL(SmartPointer);
 		SmartPointer& operator=(const SmartPointer&) = delete;
@@ -107,11 +107,10 @@ namespace gE
 		ALWAYS_INLINE SmartPointer<O> Move()
 		{
 			static_assert(std::is_base_of_v<O, T>);
-
-			T* t = _t;
-			_t = nullptr;
-			return SmartPointer<O>(t);
+			return SmartPointer<O>(Release());
 		}
+
+		T* Release() { T* t = _t; _t = nullptr; return t; }
 
 		~SmartPointer() { delete _t; }
 

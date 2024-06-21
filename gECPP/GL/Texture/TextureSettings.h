@@ -39,7 +39,10 @@ namespace PVR
 
 	struct Header : Serializable<void>
 	{
-		SERIALIZABLE_PROTO;
+		SERIALIZABLE_PROTO(Header, Serializable<void>);
+
+	 public:
+		Header() = default;
 
 		uint32_t Version;
 		Flags Flags;

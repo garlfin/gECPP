@@ -19,7 +19,6 @@ void DemoWindow::OnInit()
 	glDisable(GL_MULTISAMPLE);
 
 	glfwSetInputMode(GLFWWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	glClearColor(0.2, 0.2, 1, 1);
 
 	auto albedo = gE::ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/cobble_col.pvr"));
 	auto amr = gE::ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/cobble_armd.pvr"));

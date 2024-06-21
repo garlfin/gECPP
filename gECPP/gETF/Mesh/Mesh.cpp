@@ -3,18 +3,17 @@
 //
 
 #include "Mesh.h"
-#include <gETF/File.h>
 
 using namespace gETF;
 
-void VertexBuffer::Deserialize(ostream& buf) const
+void VertexBuffer::IDeserialize(ostream& buf) const
 {
 	Write<u8>(buf, Stride);
 	Write<u32>(buf, Count);
 	Write(buf, (u8*) Data, Stride * Count);
 }
 
-void VertexBuffer::Serialize(istream& ptr, const Mesh&)
+void VertexBuffer::ISerialize(istream& ptr, const Mesh&)
 {
 	Stride = ::Read<u8>(ptr);
 	Count = ::Read<u32>(ptr);
@@ -24,7 +23,7 @@ void VertexBuffer::Serialize(istream& ptr, const Mesh&)
 	Read(ptr, (u8*) Data, byteSize);
 }
 
-void VertexField::Deserialize(ostream& buf) const
+void VertexField::IDeserialize(ostream& buf) const
 {
 	WritePrefixedString(buf, Name);
 	Write(buf, Index);
@@ -35,7 +34,7 @@ void VertexField::Deserialize(ostream& buf) const
 	Write(buf, Normalized);
 }
 
-void VertexField::Serialize(istream& ptr, const Mesh&)
+void VertexField::ISerialize(istream& ptr, const Mesh&)
 {
 	Read<char>(ptr, Name, 4);
 
@@ -47,19 +46,19 @@ void VertexField::Serialize(istream& ptr, const Mesh&)
 	Normalized = ::Read<bool>(ptr);
 }
 
-void MaterialSlot::Deserialize(ostream& buf) const
+void MaterialSlot::IDeserialize(ostream& buf) const
 {
 	Write(buf, Offset);
 	Write(buf, Count);
 }
 
-void MaterialSlot::Serialize(istream& ptr, const Mesh& s)
+void MaterialSlot::ISerialize(istream& ptr, const Mesh& s)
 {
 	Offset = ::Read<u32>(ptr);
 	Count = ::Read<u32>(ptr);
 }
 
-void Mesh::Deserialize(ostream& buf) const
+void Mesh::IDeserialize(ostream& buf) const
 {
 	Write(buf, GETF_MESH_MAGIC, 4);
 	Write(buf, Version);
@@ -73,7 +72,7 @@ void Mesh::Deserialize(ostream& buf) const
 	WriteArraySerializable<u8>(buf, Materials);
 }
 
-void Mesh::Serialize(istream& ptr, gE::Window* const& s)
+void Mesh::ISerialize(istream& ptr, gE::Window* const& s)
 {
 	char magic[4];
 	Read<char>(ptr, magic, 4);

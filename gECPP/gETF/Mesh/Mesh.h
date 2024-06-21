@@ -17,7 +17,10 @@ namespace gETF
 {
 	struct VertexBuffer : public Serializable<Mesh>, public GL::BufferSettings
 	{
-		SERIALIZABLE_PROTO_T;
+		SERIALIZABLE_PROTO_T(VertexBuffer, Serializable<Mesh>);
+
+	 public:
+		VertexBuffer() = default;
 
 		inline void Free() { free(Data); Data = nullptr; }
 		NODISCARD ALWAYS_INLINE bool IsFree() const { return Data; }
@@ -28,14 +31,20 @@ namespace gETF
 
 	struct VertexField : public Serializable<Mesh>, public GL::VertexField
 	{
-		SERIALIZABLE_PROTO_T;
+		SERIALIZABLE_PROTO_T(VertexField, Serializable<Mesh>);
+
+	 public:
+		VertexField() = default;
 
 		char Name[4];
 	};
 
 	struct MaterialSlot : public Serializable<Mesh>, public GL::MaterialSlot
 	{
-		SERIALIZABLE_PROTO_T;
+		SERIALIZABLE_PROTO_T(MaterialSlot, Serializable<Mesh>);
+
+	 public:
+		MaterialSlot() = default;
 	};
 
 	enum class TriangleMode : u8
@@ -47,7 +56,10 @@ namespace gETF
 
 	struct Mesh : public Serializable<gE::Window*>
 	{
-		SERIALIZABLE_PROTO_T;
+		SERIALIZABLE_PROTO_T(Mesh, Serializable<gE::Window*>);
+
+	 public:
+		Mesh() = default;
 
 		gE::Window* Window;
 		u8 Version = GETF_MESH_VERSION;

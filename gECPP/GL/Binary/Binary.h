@@ -11,6 +11,9 @@
 #include <Engine/Array.h>
 #include "Macro.h"
 
+#include <ostream>
+#include <istream>
+
 #define DIV_CEIL(X, Y) (((X) + decltype(X)(Y) - decltype(X)(1)) / decltype(X)(Y))
 #define DIV_CEIL_T(X, Y, T) (((T)(X) + (T)(Y) - (T)(1)) / (T)(Y))
 

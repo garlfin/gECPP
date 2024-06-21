@@ -89,7 +89,7 @@ namespace PVR
 		return tex;
 	}
 
-	void Header::Serialize(istream& src)
+	void Header::ISerialize(istream& src)
 	{
 		Version = ::Read<u32>(src);
 		Flags = ::Read<PVR::Flags>(src);
@@ -106,5 +106,5 @@ namespace PVR
 		src.seekg(::Read<u32>(src), std::ios::cur); // I couldn't give two hoots about the metadata
 	}
 
-	void Header::Deserialize(ostream&) const { }
+	void Header::IDeserialize(ostream&) const { }
 }

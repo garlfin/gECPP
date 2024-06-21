@@ -12,7 +12,7 @@ namespace gETF
 	struct Header : public Serializable<Header>
 	{
 	 public:
-		SERIALIZABLE_PROTO_T;
+		SERIALIZABLE_PROTO_T(Header, Serializable<Header>);
 
 		gE::Window* Window;
 		u8 Version = GETF_VERSION;

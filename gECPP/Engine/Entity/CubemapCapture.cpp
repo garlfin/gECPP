@@ -53,8 +53,8 @@ namespace gE
 			gETF::Mesh skybox;
 			ReadSerializableFromFile(_window, "Resource/Model/skybox.gEMesh", skybox);
 
-			_skyboxShader = ptr_create<GL::Shader>(_window, "Resource/Shader/skybox.vert", "Resource/Shader/skybox.frag");
 			_skyboxVAO = std::move(skybox.VAO);
+			_skyboxShader = ptr_create<GL::Shader>(_window, "Resource/Shader/skybox.vert", "Resource/Shader/skybox.frag");
 		}
 
 		_skyboxShader->Bind();

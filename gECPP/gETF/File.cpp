@@ -17,7 +17,7 @@
 
 namespace gETF
 {
-	void Header::Deserialize(ostream& buf) const
+	void Header::IDeserialize(ostream& buf) const
 	{
 		Write(buf, "gETF", 4);
 		Write<u8>(buf, GETF_VERSION);
@@ -28,7 +28,7 @@ namespace gETF
 		//WriteArraySerializable<u16>(buf, Meshes, *this);
 	}
 
-	void Header::Serialize(istream& ptr, const Header& s)
+	void Header::ISerialize(istream& ptr, const Header& s)
 	{
 		char magic[4];
 		Read<char>(ptr, magic, 4);
@@ -46,17 +46,17 @@ namespace gETF
 		//Meshes = ReadArraySerializable<u16, Mesh>(ptr, s);
 	}
 
-	void IFileContainer::Deserialize(std::ostream& buf) const
+	void IFileContainer::IDeserialize(std::ostream& buf) const
 	{
 		Write(buf, _type);
 		WritePrefixedString(buf, _name);
-		_t.Deserialize(buf);
+		_t->Deserialize(buf);
 	}
 
-	void IFileContainer::Serialize(std::istream& ptr, gE::Window* const& settings)
+	void IFileContainer::ISerialize(std::istream& ptr, gE::Window* const& settings)
 	{
 		_type = Read<TypeID>(ptr);
 		_name = ReadPrefixedString(ptr);
-		_t.Serialize(ptr, settings);
+		_t->Serialize(ptr, settings);
 	}
 }

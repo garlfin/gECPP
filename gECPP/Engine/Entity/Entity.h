@@ -11,7 +11,7 @@
 
 namespace gE
 {
-	class Entity
+ 	class Entity
 	{
 	 public:
 		explicit Entity(Window*, Flags = Flags(), Entity* = nullptr);

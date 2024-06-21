@@ -13,30 +13,56 @@
 using std::istream;
 using std::ostream;
 
-#define SERIALIZABLE_PROTO_T void Deserialize(ostream& buf) const override;\
-							 void Serialize(istream& ptr, const SETTINGS_T& settings) override
+#define SERIALIZABLE_PROTO_T(TYPE, SUPER) \
+	public: \
+		explicit TYPE(istream& ptr, const SETTINGS_T& s) : SUPER(ptr, s) { TYPE::Serialize(ptr, s); } \
+    	void Deserialize(ostream& buf) const override { SUPER::Deserialize(buf); TYPE::IDeserialize(buf); } \
+    	void Serialize(istream& buf, const SETTINGS_T& s) override { SUPER::Serialize(buf, s); TYPE::ISerialize(buf, s); } \
+	protected: \
+		void IDeserialize(ostream& buf) const; \
+    	void ISerialize(istream& buf, const SETTINGS_T& s);
 
-#define SERIALIZABLE_PROTO void Deserialize(ostream& buf) const override;\
-						   void Serialize(istream& ptr) override
+#define SERIALIZABLE_PROTO(TYPE, SUPER) \
+	public: \
+		explicit TYPE(istream& ptr) : SUPER(ptr) { TYPE::Serialize(ptr); } \
+    	void Deserialize(ostream& buf) const override { SUPER::Deserialize(buf); TYPE::IDeserialize(buf); } \
+    	void Serialize(istream& buf) override { SUPER::Serialize(buf); TYPE::ISerialize(buf); } \
+	protected: \
+		void IDeserialize(ostream& buf) const; \
+    	void ISerialize(istream& buf);
 
 template<class T = void>
 struct Serializable
 {
+	Serializable() = default;
+	Serializable(istream& ptr, const T& t) { }
+
 	typedef T SETTINGS_T;
 
-	virtual void Deserialize(ostream& buf) const = 0;
-	virtual void Serialize(istream& ptr, const T& s) = 0;
+	virtual void Deserialize(ostream& ptr) const {};
+	virtual void Serialize(istream& ptr, const T& s) {};
 
 	virtual ~Serializable() = default;
+
+ protected:
+	virtual void IDeserialize(ostream& buf) const = 0;
+	virtual void ISerialize(istream& ptr, const T& s) = 0;
 };
 
 template<>
 struct Serializable<void>
 {
-	virtual void Deserialize(ostream& buf) const = 0;
-	virtual void Serialize(istream& ptr) = 0;
+	Serializable() = default;
+	explicit Serializable(istream& ptr) { }
+
+	virtual void Deserialize(ostream& ptr) const {};
+	virtual void Serialize(istream& ptr) {};
 
 	virtual ~Serializable() = default;
+
+ protected:
+	void IDeserialize(ostream& buf) const {};
+	void ISerialize(istream& ptr) {};
 };
 
 template<typename T, typename S>
@@ -66,10 +92,7 @@ template<typename UINT_T, class T, class S>
 Array<T> ReadArraySerializable(istream& src, const S& s)
 {
 	UINT_T count = ::Read<UINT_T>(src);
-
-	Array<T> arr(count);
-	ReadSerializable(src, arr.Data(), s, count);
-	return arr;
+	return Array<T>(count, src, s);
 }
 
 template<typename UINT_T, class T>
@@ -99,9 +122,9 @@ namespace gETF
 {
  	struct IFileContainer : public Serializable<gE::Window*>
 	{
-	 public:
-		SERIALIZABLE_PROTO_T;
+		SERIALIZABLE_PROTO_T(IFileContainer, Serializable<gE::Window*>);
 
+	 public:
 		template<class T> requires requires { T::Type; }
 		explicit IFileContainer(T& t, const std::string& path) : _name(path), _type(T::Type), _t(&t)
 		{
@@ -122,12 +145,12 @@ namespace gETF
 
 		GET_CONST(const std::string&, Name, _name);
 		GET_CONST(TypeID, Type, _type);
-		GET(Serializable<gE::Window*>&,, _t);
+		GET(Serializable<gE::Window*>&,, *_t);
 
 	 private:
 		std::string _name;
 		TypeID _type;
-		Serializable<gE::Window*>& _t;
+		Serializable<gE::Window*>* _t;
 	};
 
 	template<class T> requires std::is_base_of_v<Serializable<gE::Window*>, T>
