@@ -10,7 +10,7 @@ void VertexBuffer::IDeserialize(ostream& buf) const
 {
 	Write<u8>(buf, Stride);
 	Write<u32>(buf, Count);
-	Write(buf, (u8*) Data, Stride * Count);
+	Write(buf, Data.Data(), Stride * Count);
 }
 
 void VertexBuffer::ISerialize(istream& ptr, const Mesh&)
@@ -19,8 +19,8 @@ void VertexBuffer::ISerialize(istream& ptr, const Mesh&)
 	Count = ::Read<u32>(ptr);
 
 	size_t byteSize = Stride * Count;
-	Data = malloc(byteSize);
-	Read(ptr, (u8*) Data, byteSize);
+	Data = Array<u8>(byteSize);
+	Read(ptr, Data.Data(), byteSize);
 }
 
 void VertexField::IDeserialize(ostream& buf) const
@@ -80,13 +80,13 @@ void Mesh::ISerialize(istream& ptr, gE::Window* const& s)
 
 	if(!strcmpb(magic, GETF_MESH_MAGIC, 4)) std::cout << "Invalid File!\n";
 
-	Buffers = ReadArraySerializable<u8, VertexBuffer>(ptr, *this);
-	Fields = ReadArraySerializable<u8, VertexField>(ptr, *this);
+	ReadArraySerializable<u8, VertexBuffer>(Buffers, ptr, *this);
+	ReadArraySerializable<u8, VertexField>(Fields, ptr, *this);
 
 	TriMode = ::Read<TriangleMode>(ptr);
 	if (TriMode != TriangleMode::None) Triangles.Serialize(ptr, *this);
 
-	Materials = ReadArraySerializable<u8, MaterialSlot>(ptr, *this);
+	ReadArraySerializable<u8, MaterialSlot>(Materials, ptr, *this);
 
 	CreateVAO(s);
 }
@@ -115,15 +115,15 @@ void Mesh::GetVAOSettings(GL::VAOSettings& settings) const
 {
 	GE_ASSERT(Buffers.Count() <= GE_MAX_VAO_BUFFER, "TOO MANY BUFFERS!");
 	settings.BufferCount = Buffers.Count();
-	for(u8 i = 0; i < settings.BufferCount; i++) settings.Buffers[i] = Buffers[i];
+	for(u8 i = 0; i < settings.BufferCount; i++) settings.Buffers[i] = (GL::VertexBuffer) Buffers[i];
 
 	GE_ASSERT(Fields.Count() <= GE_MAX_VAO_FIELD, "TOO MANY FIELDS!");
 	settings.FieldCount = Fields.Count();
-	for(u8 i = 0; i < settings.FieldCount; i++) settings.Fields[i] = Fields[i];
+	for(u8 i = 0; i < settings.FieldCount; i++) settings.Fields[i] = (GL::VertexField) Fields[i];
 
 	GE_ASSERT(Materials.Count() <= GE_MAX_VAO_MATERIAL, "TOO MANY MATERIALS!");
 	settings.MaterialCount = Materials.Count();
-	for(u8 i = 0; i < settings.MaterialCount; i++) settings.Materials[i] = Materials[i];
+	for(u8 i = 0; i < settings.MaterialCount; i++) settings.Materials[i] = (GL::MaterialSlot) Materials[i];
 }
 
 void Mesh::GetVAOSettings(GL::IndexedVAOSettings& settings) const
@@ -131,5 +131,5 @@ void Mesh::GetVAOSettings(GL::IndexedVAOSettings& settings) const
 	GE_ASSERT(TriMode != TriangleMode::None, "CANNOT GET TRIANGLES!");
 
 	GetVAOSettings((GL::VAOSettings&) settings);
-	settings.Triangles = Triangles;
+	settings.Triangles = (GL::VertexField) Triangles;
 }

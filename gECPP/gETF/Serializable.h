@@ -45,8 +45,8 @@ struct Serializable
 	virtual ~Serializable() = default;
 
  protected:
-	virtual void IDeserialize(ostream& buf) const = 0;
-	virtual void ISerialize(istream& ptr, const T& s) = 0;
+	void IDeserialize(ostream& buf) const {};
+	void ISerialize(istream& ptr, const T& s) {};
 };
 
 template<>
@@ -89,10 +89,10 @@ void WriteSerializable(ostream& src, T* ts, u32 count)
 }
 
 template<typename UINT_T, class T, class S>
-Array<T> ReadArraySerializable(istream& src, const S& s)
+void ReadArraySerializable(Array<T>& arr, istream& src, const S& s)
 {
 	UINT_T count = ::Read<UINT_T>(src);
-	return Array<T>(count, src, s);
+	arr = Array<T>(count, src, s);
 }
 
 template<typename UINT_T, class T>

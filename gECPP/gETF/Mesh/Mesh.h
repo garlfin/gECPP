@@ -15,36 +15,65 @@
 
 namespace gETF
 {
-	struct VertexBuffer : public Serializable<Mesh>, public GL::BufferSettings
+	struct VertexBuffer : public Serializable<Mesh>
 	{
 		SERIALIZABLE_PROTO_T(VertexBuffer, Serializable<Mesh>);
 
 	 public:
 		VertexBuffer() = default;
 
-		inline void Free() { free(Data); Data = nullptr; }
-		NODISCARD ALWAYS_INLINE bool IsFree() const { return Data; }
+		u8 Stride = 0;
+		u32 Count = 0;
+		Array<u8> Data;
+
+		inline void Free() { Data.Free(); }
+		NODISCARD ALWAYS_INLINE bool IsFree() const { return Data.IsFree(); }
 		NODISCARD ALWAYS_INLINE u64 Size() const { return Count * Stride; }
+
+		NODISCARD explicit operator GL::VertexBuffer() const
+		{
+			return GL::VertexBuffer(Stride, Count, Data.Data());
+		}
 
 		~VertexBuffer() override { Free(); }
 	};
 
-	struct VertexField : public Serializable<Mesh>, public GL::VertexField
+	struct VertexField : public Serializable<Mesh>
 	{
 		SERIALIZABLE_PROTO_T(VertexField, Serializable<Mesh>);
 
 	 public:
 		VertexField() = default;
 
+		GLenum ElementType;
+		bool Normalized : 1;
+		u8 BufferIndex : 7;
+		u8 Index;
+		u8 ElementCount;
+		u8 Offset;
 		char Name[4];
+
+		NODISCARD explicit operator GL::VertexField() const
+		{
+			return *(GL::VertexField*) &ElementType;
+		}
 	};
 
-	struct MaterialSlot : public Serializable<Mesh>, public GL::MaterialSlot
+	struct MaterialSlot : public Serializable<Mesh>
 	{
 		SERIALIZABLE_PROTO_T(MaterialSlot, Serializable<Mesh>);
 
 	 public:
 		MaterialSlot() = default;
+
+		u32 Offset = 0;
+		u32 Count = 0;
+
+		NODISCARD ALWAYS_INLINE explicit operator GL::MaterialSlot() const
+		{
+			// This will cause chaos one day
+			return *(GL::MaterialSlot*) &Offset;
+		}
 	};
 
 	enum class TriangleMode : u8

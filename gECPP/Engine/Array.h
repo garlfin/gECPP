@@ -16,7 +16,8 @@ class Array
 	template<typename... ARGS>
 	explicit Array(size_t count, ARGS&&... args) : _size(count), _t(new T[count])
 	{
-		for(int i = 0; i < count; i++) _t[i] = T(std::forward<ARGS>(args)...);
+		if constexpr (sizeof...(ARGS))
+			for(int i = 0; i < count; i++) _t[i] = T(std::forward<ARGS>(args)...);
 	}
 
 	Array(const Array& o) : _size(o.Count()), _t(new T[_size]) { memcpy(_t, o.Data(), o.Count() * sizeof(T)); };
@@ -35,7 +36,10 @@ class Array
 	NODISCARD ALWAYS_INLINE T& operator[](u64 i) { return _t[i]; }
 	NODISCARD ALWAYS_INLINE const T& operator[](u64 i) const { return _t[i]; }
 
-	~Array() { delete[] _t; _t = nullptr; }
+	NODISCARD ALWAYS_INLINE bool IsFree() const { return _t; }
+	ALWAYS_INLINE void Free() { delete[] _t; _t = nullptr; _size = 0; }
+
+	~Array() { Free(); }
 
  private:
 	u64 _size = 0;

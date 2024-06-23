@@ -39,7 +39,7 @@ void ConvertFace(u32, const aiFace&, glm::uvec3&);
 
 int main(int argc, char** argv)
 {
-	GE_ASSERT(argc >= 3, "USAGE: in.file out.file");
+	GE_ASSERT(argc >= 3, "USAGE: in.file outDir");
 
 	Assimp::Importer importer;
 	const aiScene& scene = *importer.ReadFile(argv[1], POST_PROCESS);
@@ -133,7 +133,7 @@ template<class T, class S, class F>
 void FillBuffer(T S::* DST, F* aiMesh::* SRC, u32 aiMesh::* COUNT, gETF::VertexBuffer& buf,
 	const std::vector<aiMesh*>& src, ConversionFunc<T, F>* FUNC)
 {
-	S* dst = (S*) buf.Data;
+	S* dst = (S*) buf.Data.Data();
 	u32 offset = 0;
 
 	for(aiMesh* mesh : src)
@@ -166,7 +166,7 @@ void ConvertFace(u32 offset, const aiFace& src, glm::uvec3& dst)
 
 void FillUVBuffer(gETF::VertexBuffer& buf, const std::vector<aiMesh*>& src)
 {
-	auto* dst = (Vertex*) buf.Data;
+	auto* dst = (Vertex*) buf.Data.Data();
 	u32 offset = 0;
 
 	for(aiMesh* mesh : src)
@@ -191,5 +191,5 @@ void AllocateBuffer(u32 aiMesh::* COUNT, gETF::VertexBuffer& buf, const std::vec
 
 	buf.Stride = sizeof(T);
 	buf.Count = finalCount;
-	buf.Data = malloc(buf.Stride * buf.Count);
+	buf.Data = Array<u8>(buf.Stride * buf.Count);
 }

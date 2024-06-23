@@ -12,11 +12,11 @@
 
 namespace GL
 {
-	struct BufferSettings
+	struct VertexBuffer
 	{
 		u8 Stride;
 		u32 Count;
-		void* Data;
+		const void* Data;
 	};
 
 	struct MaterialSlot
@@ -38,7 +38,7 @@ namespace GL
 	struct VAOSettings
 	{
 		u8 BufferCount;
-		BufferSettings Buffers[GE_MAX_VAO_BUFFER];
+		VertexBuffer Buffers[GE_MAX_VAO_BUFFER];
 
 		u8 FieldCount;
 		VertexField Fields[GE_MAX_VAO_FIELD];

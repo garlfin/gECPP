@@ -56,7 +56,6 @@ namespace gE
 			_skyboxVAO = std::move(skybox.VAO);
 			_skyboxShader = ptr_create<GL::Shader>(_window, "Resource/Shader/skybox.vert", "Resource/Shader/skybox.frag");
 		}
-
 		_skyboxShader->Bind();
 
 		glEnable(GL_DEPTH_TEST);

@@ -23,7 +23,7 @@ namespace GL
 	 public:
 		static_assert(!std::is_pointer_v<T>, "Buffer data shouldn't be a pointer!");
 
-		Buffer(gE::Window* window, uint32_t count = 1, T* data = nullptr)
+		Buffer(gE::Window* window, uint32_t count = 1, const T* data = nullptr)
 			: Asset(window)
 		{
 			static constexpr size_t SIZE_T = sizeof(std::conditional_t<std::is_same_v<T, void>, uint8_t, T>);
@@ -78,7 +78,4 @@ namespace GL
 
 	template<class T>
 	using DynamicBuffer = Buffer<T, true>;
-
-	Buffer<void>* CreateBuffer(gE::Window* window, const BufferSettings& settings);
-	DynamicBuffer<void>* CreateDynamicBuffer(gE::Window*, const BufferSettings&);
 }
