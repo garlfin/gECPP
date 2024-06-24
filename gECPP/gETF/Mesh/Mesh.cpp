@@ -10,22 +10,22 @@ void VertexBuffer::IDeserialize(ostream& buf) const
 {
 	Write<u8>(buf, Stride);
 	Write<u32>(buf, Count);
-	Write(buf, Data.Data(), Stride * Count);
+	Write(buf, Stride * Count, Data.Data());
 }
 
-void VertexBuffer::ISerialize(istream& ptr, const Mesh&)
+void VertexBuffer::ISerialize(istream& ptr, Mesh&)
 {
 	Stride = ::Read<u8>(ptr);
 	Count = ::Read<u32>(ptr);
 
 	size_t byteSize = Stride * Count;
 	Data = Array<u8>(byteSize);
-	Read(ptr, Data.Data(), byteSize);
+	Read(ptr, byteSize, Data.Data());
 }
 
 void VertexField::IDeserialize(ostream& buf) const
 {
-	WritePrefixedString(buf, Name);
+	Write(buf, Name);
 	Write(buf, Index);
 	Write(buf, BufferIndex);
 	Write(buf, ElementCount);
@@ -34,9 +34,9 @@ void VertexField::IDeserialize(ostream& buf) const
 	Write(buf, Normalized);
 }
 
-void VertexField::ISerialize(istream& ptr, const Mesh&)
+void VertexField::ISerialize(istream& ptr, Mesh&)
 {
-	Read<char>(ptr, Name, 4);
+	Read<char>(ptr, 4, Name);
 
 	Index = ::Read<u8>(ptr);
 	BufferIndex = ::Read<u8>(ptr);
@@ -52,7 +52,7 @@ void MaterialSlot::IDeserialize(ostream& buf) const
 	Write(buf, Count);
 }
 
-void MaterialSlot::ISerialize(istream& ptr, const Mesh& s)
+void MaterialSlot::ISerialize(istream& ptr, Mesh& s)
 {
 	Offset = ::Read<u32>(ptr);
 	Count = ::Read<u32>(ptr);
@@ -60,33 +60,33 @@ void MaterialSlot::ISerialize(istream& ptr, const Mesh& s)
 
 void Mesh::IDeserialize(ostream& buf) const
 {
-	Write(buf, GETF_MESH_MAGIC, 4);
+	Write(buf, 4, GETF_MESH_MAGIC);
 	Write(buf, Version);
 
-	WriteArraySerializable<u8>(buf, Buffers);
-	WriteArraySerializable<u8>(buf, Fields);
+	WriteArray<u8>(buf, Buffers);
+	WriteArray<u8>(buf, Fields);
 
 	Write(buf, (u8)TriMode);
 	if (TriMode != TriangleMode::None) Triangles.Deserialize(buf);
 
-	WriteArraySerializable<u8>(buf, Materials);
+	WriteArray<u8>(buf, Materials);
 }
 
-void Mesh::ISerialize(istream& ptr, gE::Window* const& s)
+void Mesh::ISerialize(istream& ptr, gE::Window* s)
 {
 	char magic[4];
-	Read<char>(ptr, magic, 4);
+	Read<char>(ptr, 4, magic);
 	Version = Read<u8>(ptr);
 
 	if(!strcmpb(magic, GETF_MESH_MAGIC, 4)) std::cout << "Invalid File!\n";
 
-	ReadArraySerializable<u8, VertexBuffer>(Buffers, ptr, *this);
-	ReadArraySerializable<u8, VertexField>(Fields, ptr, *this);
+	ReadArraySerializable<u8, VertexBuffer>(ptr, Buffers, *this);
+	ReadArraySerializable<u8, VertexField>(ptr, Fields, *this);
 
 	TriMode = ::Read<TriangleMode>(ptr);
 	if (TriMode != TriangleMode::None) Triangles.Serialize(ptr, *this);
 
-	ReadArraySerializable<u8, MaterialSlot>(Materials, ptr, *this);
+	ReadArraySerializable<u8, MaterialSlot>(ptr, Materials, *this);
 
 	CreateVAO(s);
 }

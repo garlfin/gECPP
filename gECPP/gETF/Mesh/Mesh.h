@@ -15,9 +15,9 @@
 
 namespace gETF
 {
-	struct VertexBuffer : public Serializable<Mesh>
+	struct VertexBuffer : public Serializable<Mesh&>
 	{
-		SERIALIZABLE_PROTO_T(VertexBuffer, Serializable<Mesh>);
+		SERIALIZABLE_PROTO_T(VertexBuffer, Serializable<Mesh&>);
 
 	 public:
 		VertexBuffer() = default;
@@ -38,9 +38,9 @@ namespace gETF
 		~VertexBuffer() override { Free(); }
 	};
 
-	struct VertexField : public Serializable<Mesh>
+	struct VertexField : public Serializable<Mesh&>
 	{
-		SERIALIZABLE_PROTO_T(VertexField, Serializable<Mesh>);
+		SERIALIZABLE_PROTO_T(VertexField, Serializable<Mesh&>);
 
 	 public:
 		VertexField() = default;
@@ -59,9 +59,9 @@ namespace gETF
 		}
 	};
 
-	struct MaterialSlot : public Serializable<Mesh>
+	struct MaterialSlot : public Serializable<Mesh&>
 	{
-		SERIALIZABLE_PROTO_T(MaterialSlot, Serializable<Mesh>);
+		SERIALIZABLE_PROTO_T(MaterialSlot, Serializable<Mesh&>);
 
 	 public:
 		MaterialSlot() = default;

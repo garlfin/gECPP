@@ -5,16 +5,6 @@
 #include "Binary.h"
 #include "iostream"
 
-std::string ReadPrefixedString(istream& ptr)
-{
-	u8 len = ::Read<u8>(ptr);
-
-	std::string string(len, '\n');
-	ptr.read(string.data(), len);
-
-	return string;
-}
-
 u8* ReadFile(const char* name, u32& length, bool binary)
 {
 	FILE* file = fopen(name, "rb");
@@ -71,12 +61,6 @@ const char* IncrementLine(const char* str, char d)
 {
 	for(; *str != d; str++) if(!*str) return nullptr;
 	return ++str;
-}
-
-void WritePrefixedString(ostream& ptr, const std::string& str)
-{
-	Write<u8>(ptr, str.length());
-	Write(ptr, str.c_str(), str.length());
 }
 
 bool strcmpb(const char* a, const char* b, u32 length)
