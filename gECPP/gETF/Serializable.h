@@ -18,7 +18,7 @@ using std::ostream;
 		explicit TYPE(istream& ptr, const SETTINGS_T& s) : SUPER(ptr, s) { TYPE::Serialize(ptr, s); } \
     	void Deserialize(ostream& buf) const override { SUPER::Deserialize(buf); TYPE::IDeserialize(buf); } \
     	void Serialize(istream& buf, const SETTINGS_T& s) override { SUPER::Serialize(buf, s); TYPE::ISerialize(buf, s); } \
-	protected: \
+	private: \
 		void IDeserialize(ostream& buf) const; \
     	void ISerialize(istream& buf, const SETTINGS_T& s);
 
@@ -27,7 +27,7 @@ using std::ostream;
 		explicit TYPE(istream& ptr) : SUPER(ptr) { TYPE::Serialize(ptr); } \
     	void Deserialize(ostream& buf) const override { SUPER::Deserialize(buf); TYPE::IDeserialize(buf); } \
     	void Serialize(istream& buf) override { SUPER::Serialize(buf); TYPE::ISerialize(buf); } \
-	protected: \
+	private: \
 		void IDeserialize(ostream& buf) const; \
     	void ISerialize(istream& buf);
 
@@ -43,10 +43,6 @@ struct Serializable
 	virtual void Serialize(istream& ptr, const T& s) {};
 
 	virtual ~Serializable() = default;
-
- protected:
-	void IDeserialize(ostream& buf) const {};
-	void ISerialize(istream& ptr, const T& s) {};
 };
 
 template<>
@@ -59,10 +55,6 @@ struct Serializable<void>
 	virtual void Serialize(istream& ptr) {};
 
 	virtual ~Serializable() = default;
-
- protected:
-	void IDeserialize(ostream& buf) const {};
-	void ISerialize(istream& ptr) {};
 };
 
 template<typename T, typename S>
