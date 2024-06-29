@@ -7,11 +7,11 @@
 #include <Prototype.h>
 #include <vector>
 #include <algorithm>
+#include <Engine/Binary/Macro.h>
+#include <Engine/Binary/Binary.h>
 
 namespace gE
 {
-	class Window;
-
 	template<class T>
 	class Manager : protected std::vector<T*>
 	{

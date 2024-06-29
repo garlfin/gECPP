@@ -3,8 +3,8 @@
 //
 
 #pragma once
-#include <GL/GL.h>
 #include <gETF/Prototype.h>
+#include <GL/Math.h>
 
 namespace gE
 {

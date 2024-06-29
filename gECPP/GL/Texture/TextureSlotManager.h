@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "GL/Binary/Binary.h"
+#include "Engine/Binary/Binary.h"
 
 #define GL_MAX_TEXTURE_SLOT 32
 

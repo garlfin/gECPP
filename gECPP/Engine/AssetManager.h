@@ -6,7 +6,7 @@
 
 #include <vector>
 #include "GL/GL.h"
-#include "GL/Binary/Binary.h"
+#include "Engine/Binary/Binary.h"
 
 namespace gE
 {
@@ -17,15 +17,20 @@ namespace gE
 		explicit inline Reference(T* t) : _t(t) { if(t) _counter = new u32(1); }
 		inline Reference() = default;
 
-		Reference(Reference&& o) noexcept : _t(o._t), _counter(o._counter)
+		OPERATOR_EQUALS(Reference, o,
 		{
+			_t = o._t;
+			_counter = o._counter;
+			if(_counter) (*_counter)++;
+		})
+
+		OPERATOR_EQUALS_XVAL(Reference, o,
+		{
+			_t = o._t;
+			_counter = o._counter;
 			o._t = nullptr;
 			o._counter = nullptr;
-		}
-
-		Reference(const Reference& o) : _t(o._t), _counter(o._counter) { if(_counter) (*_counter)++; }
-
-		OPERATOR_EQUALS_BOTH(Reference);
+		})
 
 		ALWAYS_INLINE T* Get() const { return _t; }
 		ALWAYS_INLINE T* operator->() const { return _t; }
@@ -85,9 +90,9 @@ namespace gE
 		SmartPointer() = default;
 
 		SmartPointer(const SmartPointer&) = delete;
-		ALWAYS_INLINE SmartPointer(SmartPointer&& o) noexcept : _t(o.Release()) { }
 
-		OPERATOR_EQUALS_XVAL(SmartPointer);
+		OPERATOR_EQUALS_XVAL(SmartPointer, o, _t = o.Release())
+
 		SmartPointer& operator=(const SmartPointer&) = delete;
 
 		ALWAYS_INLINE T* Get() const { return _t; }

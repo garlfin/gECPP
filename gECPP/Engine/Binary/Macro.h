@@ -58,30 +58,34 @@
 	GET_CONST(TYPE, ACCESSOR, FIELD)    \
 	SET(TYPE, ACCESSOR, FIELD)
 
-#define OPERATOR_EQUALS_T(TYPE, INTYPE) \
-    TYPE& operator=(const INTYPE& o) \
-    { \
-        if((TYPE*) &o == this) return *this; \
-        this->~TYPE(); \
-        new(this) TYPE(o); \
-        return *this; \
-    }
+#define OPERATOR_EQUALS_XVAL_PROTO(TYPE) \
+    TYPE(TYPE&&) noexcept; \
+	TYPE& operator=(TYPE&&) noexcept;
 
-#define OPERATOR_EQUALS_XVAL_T(TYPE, INTYPE) \
-    TYPE& operator=(INTYPE&& o) noexcept \
-    { \
-        if((TYPE*) &o == this) return *this; \
-        this->~TYPE(); \
-        new(this) TYPE(std::move(o)); \
-        return *this; \
-    }
+#define OPERATOR_EQUALS_PROTO(TYPE) \
+	TYPE(const TYPE&); \
+	TYPE& operator=(const TYPE& ACCESSOR);
 
-#define OPERATOR_EQUALS(TYPE) OPERATOR_EQUALS_T(TYPE, TYPE)
-#define OPERATOR_EQUALS_XVAL(TYPE) OPERATOR_EQUALS_XVAL_T(TYPE, TYPE)
+#define OPERATOR_EQUALS_XVAL_NAMESPACE(NAMESPACE, TYPE, ACCESSOR, CODE) \
+    NAMESPACE##TYPE(TYPE&& ACCESSOR) noexcept { CODE; } \
+	NAMESPACE##TYPE& NAMESPACE##operator=(TYPE&& ACCESSOR) noexcept \
+	{ \
+		if(&ACCESSOR == this) return *this; \
+		CODE; \
+		return* this; \
+	}
 
-#define OPERATOR_EQUALS_BOTH(TYPE) \
-    OPERATOR_EQUALS(TYPE); \
-    OPERATOR_EQUALS_XVAL(TYPE);
+#define OPERATOR_EQUALS_NAMESPACE(NAMESPACE, TYPE, ACCESSOR, CODE) \
+	NAMESPACE##TYPE(const TYPE& ACCESSOR) { CODE; } \
+	NAMESPACE##TYPE& NAMESPACE##operator=(const TYPE& ACCESSOR) \
+	{ \
+		if(&ACCESSOR == this) return *this; \
+		CODE; \
+		return *this; \
+	}
+
+#define OPERATOR_EQUALS_XVAL(TYPE, ACCESSOR, CODE) OPERATOR_EQUALS_XVAL_NAMESPACE(, TYPE, ACCESSOR, CODE)
+#define OPERATOR_EQUALS(TYPE, ACCESSOR, CODE) OPERATOR_EQUALS_NAMESPACE(, TYPE, ACCESSOR, CODE)
 
 #define OPERATOR_CAST_CONST(TYPE, FIELD) ALWAYS_INLINE operator TYPE() const { return FIELD; }
 #define OPERATOR_CAST(TYPE, FIELD) \

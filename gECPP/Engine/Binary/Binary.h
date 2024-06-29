@@ -4,11 +4,11 @@
 
 #pragma once
 
-#include <GL/Math.h>
+#include "GL/Math.h"
 #include <cstring>
 #include <algorithm>
 #include <vector>
-#include <Engine/Array.h>
+#include "Engine/Array.h"
 #include "Macro.h"
 
 #include <ostream>
@@ -32,7 +32,6 @@ bool strcmpb(const char* a, const char(& b)[LENGTH]);
 // Various helper functions
 const char* IncrementLine(const char* s, char d = '\n');
 template<class T> void RemoveFirstFromVec(std::vector<T>& vec, const T& t);
-template<typename UINT_T, class T> Array<T> ReadArray(istream&);
 
 // Binary helper functions
 u8* ReadFile(const char* name, u32& length, bool binary = false);

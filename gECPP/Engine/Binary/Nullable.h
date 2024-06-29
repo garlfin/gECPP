@@ -5,7 +5,7 @@
 #pragma once
 
 #include <cstring>
-#include <GL/Math.h>
+#include "GL/Math.h"
 #include "Macro.h"
 
 template<class T>
@@ -13,10 +13,7 @@ class Nullable
 {
  public:
 	inline explicit Nullable(T* t) : _t(t) { };
-	inline explicit Nullable(const Nullable& o) : _t(o._t) { };
 	Nullable() = default;
-
-	OPERATOR_EQUALS(Nullable);
 
 	GET(T&, Value, _t);
 	SET(T*,, _t);

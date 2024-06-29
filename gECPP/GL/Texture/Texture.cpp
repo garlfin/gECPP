@@ -1,7 +1,7 @@
 #include "Texture.h"
 #include <iostream>
 #include <GLAD/glad.h>
-#include "GL/Binary/Binary.h"
+#include "Engine/Binary/Binary.h"
 #include "TextureSlotManager.h"
 
 CONSTEXPR_GLOBAL float WhiteBorderColor[4] { 1.f, 1.f, 1.f, 0.f };
@@ -9,10 +9,10 @@ CONSTEXPR_GLOBAL float WhiteBorderColor[4] { 1.f, 1.f, 1.f, 0.f };
 namespace GL
 {
 	Texture::Texture(gE::Window* window, GLenum target, const ITextureSettings& settings) :
-		Asset(window), Mips(settings.MipCount), Format(settings.Format), Target(target)
+		Asset(window), Settings(settings), Target(target)
 	{
 		glCreateTextures(target, 1, &ID);
-		glTextureParameteri(ID, GL_TEXTURE_MIN_FILTER, (GLint) settings.Filter + (Mips == 1 ? 0 : 0x102));
+		glTextureParameteri(ID, GL_TEXTURE_MIN_FILTER, (GLint) settings.Filter + (Settings.MipCount == 1 ? 0 : 0x102));
 		glTextureParameteri(ID, GL_TEXTURE_MAG_FILTER, (GLint) settings.Filter);
 		glTextureParameteri(ID, GL_TEXTURE_WRAP_S, (GLint) settings.WrapMode);
 		glTextureParameteri(ID, GL_TEXTURE_WRAP_T, (GLint) settings.WrapMode);
@@ -27,32 +27,31 @@ namespace GL
 	}
 
 
-	Texture2D::Texture2D(gE::Window* window, const TextureSettings<TextureDimension::D2D>& settings, const TextureData& data)
+	Texture2D::Texture2D(gE::Window* window, const TextureSettings<TextureDimension::D2D>& settings, TextureData&& data)
 		: Texture(window, GL_TEXTURE_2D, settings), _size(settings.Size)
 	{
-		if(!Mips) Mips = ::GL::GetMipCount<TextureDimension::D2D>(_size);
-		glTextureStorage2D(ID, Mips, Format, _size.x, _size.y);
+		if(!Settings.MipCount) Settings.MipCount = ::GL::GetMipCount<TextureDimension::D2D>(_size);
+		glTextureStorage2D(ID, Settings.MipCount, Settings.Format, _size.x, _size.y);
 
 		if(!data.Data) return;
 
 		glm::u32vec2 size = _size;
-		u8* dataPtr = (u8*) data.Data;
+		u8* dataPtr = data.Data.Data();
 
-		if(data.SentAllMips)
-			for(u8 i = 0; i < Mips; i++, size >>= decltype(size)(1)) // lazy guy
-			{
-				size = glm::max(size, decltype(size)(1)); // double lazy guy
-				u64 dataSize = data.Scheme.Size<TextureDimension::D2D>(size);
+		for(u8 i = 0; i < data.MipCount; i++, size >>= decltype(size)(1)) // lazy guy
+		{
+			size = glm::max(size, decltype(size)(1)); // double lazy guy
+			u64 dataSize = data.Scheme.Size<TextureDimension::D2D>(size);
 
-				if(data.Scheme.IsCompressed())
-					glCompressedTextureSubImage2D(ID, i, 0, 0, size.x, size.y, Format, dataSize, dataPtr);
-				else
-					glTextureSubImage2D(ID, i, 0, 0, size.x, size.y, data.PixelFormat, data.PixelType, dataPtr);
+			if(data.Scheme.IsCompressed())
+				glCompressedTextureSubImage2D(ID, i, 0, 0, size.x, size.y, Settings.Format, dataSize, dataPtr);
+			else
+				glTextureSubImage2D(ID, i, 0, 0, size.x, size.y, data.PixelFormat, data.PixelType, dataPtr);
 
-				dataPtr += dataSize;
-			}
-		else
-			glGenerateTextureMipmap(ID);
+			dataPtr += dataSize;
+		}
+
+		if(Settings.MipCount > 1 && !data.MipCount) glGenerateTextureMipmap(ID);
 	}
 
 	void Texture2D::CopyFrom(const Texture& o)
@@ -60,35 +59,31 @@ namespace GL
 		glCopyImageSubData(o.Get(), GL_TEXTURE_2D, 0, 0, 0, 0, ID, GL_TEXTURE_2D, 0, 0, 0, 0, GetSize().x, GetSize().y, 1);
 	}
 
-	Texture2D::Texture2D(const Texture2D& tex, const ITextureSettings& settings)
-		: Texture(tex, GL_TEXTURE_2D, settings), _size(tex.GetSize(settings.MipBias))
-	{
-
-	}
-
-	Texture3D::Texture3D(gE::Window* window, const TextureSettings<TextureDimension::D3D>& settings, const TextureData& data)
+	Texture3D::Texture3D(gE::Window* window, const TextureSettings<TextureDimension::D3D>& settings, TextureData&& data)
 		: Texture(window, GL_TEXTURE_3D, settings), _size(settings.Size)
 	{
-		if(!Mips) Mips = ::GL::GetMipCount<TextureDimension::D3D>(_size);
-		glTextureStorage3D(ID, Mips, Format, _size.x, _size.y, _size.z);
+		if(!Settings.MipCount) Settings.MipCount = ::GL::GetMipCount<TextureDimension::D3D>(_size);
+		glTextureStorage3D(ID, Settings.MipCount, Settings.Format, _size.x, _size.y, _size.z);
 
 		if(!data.Data) return;
 
 		glm::u32vec3 size = _size;
-		u8* dataPtr = (u8*) data.Data;
+		u8* dataPtr = data.Data.Data();
 
-		for(u8 i = 0; i < Mips; i++, size >>= decltype(size)(1)) // lazy guy
+		for(u8 i = 0; i < data.MipCount; i++, size >>= decltype(size)(1)) // lazy guy
 		{
 			size = glm::max(size, decltype(size)(1)); // double lazy guy
 			u64 dataSize = data.Scheme.Size<TextureDimension::D3D>(size);
 
 			if(data.Scheme.IsCompressed())
-				glCompressedTextureSubImage3D(ID, i, 0, 0, 0, size.x, size.y, size.z, Format, dataSize, dataPtr);
+				glCompressedTextureSubImage3D(ID, i, 0, 0, 0, size.x, size.y, size.z, Settings.Format, dataSize, dataPtr);
 			else
 				glTextureSubImage3D(ID, i, 0, 0, 0, size.x, size.y, size.z, data.PixelFormat, data.PixelType, dataPtr);
 
 			dataPtr += dataSize;
 		}
+
+		if(Settings.MipCount > 1 && !data.MipCount) glGenerateTextureMipmap(ID);
 	}
 
 	void Texture3D::CopyFrom(const Texture& o)
@@ -96,15 +91,9 @@ namespace GL
 		glCopyImageSubData(o.Get(), GL_TEXTURE_3D, 0, 0, 0, 0, ID, GL_TEXTURE_3D, 0, 0, 0, 0, GetSize().x, GetSize().y, GetSize().z);
 	}
 
-	Texture3D::Texture3D(const Texture3D& tex, const ITextureSettings& settings)
-		: Texture(tex, GL_TEXTURE_3D, settings), _size(tex.GetSize(settings.MipBias))
-	{
-
-	}
-
 	Texture::~Texture()
 	{
-		if(_handle > 1) glMakeTextureHandleNonResidentARB(_handle);
+		if(_handle) glMakeTextureHandleNonResidentARB(_handle);
 		glDeleteTextures(1, &ID);
 	}
 
@@ -119,55 +108,31 @@ namespace GL
 		return _handle;
 	}
 
-	Texture::Texture(const Texture& tex, GLenum target, const ITextureSettings& settings) :
-		Asset(&tex.GetWindow()), Mips(std::min<u8>(settings.MipCount, tex.GetMipCount() - settings.MipBias)),
-		Format(settings.Format), Target(target)
-	{
-		glGenTextures(1, &ID);
-		glTextureView(ID, target, tex.Get(), settings.Format, settings.MipBias, GetMipCount(), 0, 1);
-
-		glTextureParameteri(ID, GL_TEXTURE_MIN_FILTER, (GLint) settings.Filter + (Mips == 1 ? 0 : 0x102));
-		glTextureParameteri(ID, GL_TEXTURE_MAG_FILTER, (GLint) settings.Filter);
-		glTextureParameteri(ID, GL_TEXTURE_WRAP_S, (GLint) settings.WrapMode);
-		glTextureParameteri(ID, GL_TEXTURE_WRAP_T, (GLint) settings.WrapMode);
-
-		// if(settings.WrapMode == WrapMode::Border)
-		//	glTextureParameterfv(ID, GL_TEXTURE_BORDER_COLOR, WhiteBorderColor);
-
-		if(target == GL_TEXTURE_CUBE_MAP || target == GL_TEXTURE_3D)
-			glTextureParameteri(ID, GL_TEXTURE_WRAP_R, (GLint) settings.WrapMode);
-		else if (target == GL_TEXTURE_2D)
-			glTextureParameteri(ID, GL_TEXTURE_MAX_ANISOTROPY, GE_ANISOTROPY_COUNT);
-	}
-
-	TextureCube::TextureCube(gE::Window* window, const TextureSettings<TextureDimension::D1D>& settings, const TextureData& data)
+	TextureCube::TextureCube(gE::Window* window, const TextureSettings<TextureDimension::D1D>& settings, TextureData&& data)
 		: Texture(window, GL_TEXTURE_CUBE_MAP, settings), _size(settings.Size)
 	{
-		if(!Mips) Mips = ::GL::GetMipCount<TextureDimension::D1D>(_size);
-		glTextureStorage2D(ID, Mips, settings.Format, _size, _size);
+		if(!Settings.MipCount) Settings.MipCount = ::GL::GetMipCount<TextureDimension::D1D>(_size);
+		glTextureStorage2D(ID, Settings.MipCount, settings.Format, _size, _size);
 
 		if(!data.Data) return;
 
 		u32 size = _size;
-		u8* dataPtr = (u8*) data.Data;
+		u8* dataPtr = (u8*) data.Data.Data(); // sobbing rn
 
-		for(u8 i = 0; i < Mips; i++, size >>= 1)
+		for(u8 i = 0; i < data.MipCount; i++, size >>= 1)
 		{
 			size = glm::max(size, 1u);
 			u64 dataSize = data.Scheme.Size<TextureDimension::D3D>(TextureSize3D(size, size, 6));
 
 			if(data.Scheme.IsCompressed())
-				glCompressedTextureSubImage3D(ID, i, 0, 0, 0, size, size, 6, Format, dataSize, dataPtr);
+				glCompressedTextureSubImage3D(ID, i, 0, 0, 0, size, size, 6, settings.Format, dataSize, dataPtr);
 			else
 				glTextureSubImage3D(ID, i, 0, 0, 0, size, size, 6, data.PixelFormat, data.PixelType, dataPtr);
 
 			dataPtr += dataSize;
 		}
-	}
 
-	TextureCube::TextureCube(const TextureCube& tex, const ITextureSettings& settings)
-		: Texture(tex, GL_TEXTURE_CUBE_MAP, settings), _size(tex.GetSize(settings.MipBias))
-	{
+		if(Settings.MipCount > 1 && !data.MipCount) glGenerateTextureMipmap(ID);
 	}
 
 	u8 TextureSlotManager::Increment(const GL::Texture* t)
@@ -184,5 +149,36 @@ namespace GL
 
 		GE_ASSERT(_index < GL_MAX_TEXTURE_SLOT, "TEXTURE SLOT OVERFLOW!");
 		return _index - 1;
+	}
+
+	void Texture::ISerialize(std::istream& in, gE::Window* s)
+	{
+		Settings = Read<ITextureSettings>(in);
+	}
+
+	void Texture::IDeserialize(std::ostream& out) const
+	{
+		Write(out, Settings);
+	}
+
+	void TextureData::ISerialize(std::istream& in)
+	{
+		PixelFormat = Read<GLenum>(in);
+		PixelType = Read<GLenum>(in);
+		Scheme = Read<CompressionScheme>(in);
+		Read<u64, u8>(in, Data);
+	}
+
+	void TextureData::IDeserialize(std::ostream& out) const
+	{
+		Write(out, PixelFormat);
+		Write(out, PixelType);
+		Write(out, Scheme);
+		WriteArray<u64>(out, Data);
+	}
+
+	TextureData::TextureData(GLenum format, GLenum type, CompressionScheme scheme, u8 mip, Array<u8>&& arr) :
+		PixelFormat(format), PixelType(type), Scheme(scheme), MipCount(mip), Data(arr)
+	{
 	}
 }

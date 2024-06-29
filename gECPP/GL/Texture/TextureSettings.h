@@ -6,7 +6,7 @@
 
 #include <GL/Math.h>
 #include <GLAD/glad.h>
-#include <GL/Binary/Binary.h>
+#include <Engine/Binary/Binary.h>
 #include <gETF/Serializable.h>
 
 namespace PVR
@@ -100,9 +100,10 @@ namespace GL
 	struct CompressionScheme
 	{
 		CompressionScheme(u8 bls, u8 bs) : BlockSize(bls), ByteSize(bs) { }
+		CompressionScheme() = default;
 
-		u8 BlockSize;
-		u8 ByteSize;
+		u8 BlockSize = 1;
+		u8 ByteSize = 1;
 
 		template<TextureDimension DIMENSION>
 		NODISCARD ALWAYS_INLINE u64 Size(const TextureSize<DIMENSION>& size) const
@@ -138,14 +139,18 @@ namespace GL
 	typedef TextureSettings<TextureDimension::D2D> TextureSettings2D;
 	typedef TextureSettings<TextureDimension::D3D> TextureSettings3D;
 
-	struct TextureData
+	struct TextureData : public Serializable<void>
 	{
+		SERIALIZABLE_PROTO(TextureData, Serializable);
+		TextureData(GLenum, GLenum, CompressionScheme, u8, Array<u8>&&);
+		TextureData() = default;
+
 		GLenum PixelFormat = GL_RGB;
 		GLenum PixelType = GL_UNSIGNED_BYTE;
 		CompressionScheme Scheme = { 1, 1 };
+		u8 MipCount = 0;
 
-		void* Data = nullptr;
-		bool SentAllMips = false;
+		Array<u8> Data;
 	};
 
 	bool FormatIsCompressed(GLenum f);

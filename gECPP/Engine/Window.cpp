@@ -44,12 +44,10 @@ Window::Window(glm::u16vec2 size, const char* name) :
 	glfwMakeContextCurrent(_window);
 
 	PVR::Header iconHeader;
-	u8* iconData = PVR::Read("Resource/gE.PVR", iconHeader);
+	Array<u8> iconData = PVR::Read("Resource/gE.PVR", iconHeader);
 
-	GLFWimage image{ (int) iconHeader.Size.x, (int) iconHeader.Size.y, iconData };
+	GLFWimage image{ (int) iconHeader.Size.x, (int) iconHeader.Size.y, iconData.Data() };
 	glfwSetWindowIcon(_window, 1, &image);
-
-	delete[] iconData;
 
 	if(!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) GE_FAIL("Failed to initialize GLAD.");
 }

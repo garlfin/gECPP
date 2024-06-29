@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <GL/Binary/Binary.h>
+#include <Engine/Binary/Binary.h>
 
 namespace gE
 {
@@ -13,8 +13,6 @@ namespace gE
 	 public:
 		constexpr CameraTiming(u8 offset, u8 skip) : TickOffset(offset), TickSkip(skip) { };
 		constexpr CameraTiming() = default;
-
-		OPERATOR_EQUALS(CameraTiming);
 
 		GET_CONST(u64, Frame, _frame);
 		GET_CONST(bool, IsFirst, !_frame);

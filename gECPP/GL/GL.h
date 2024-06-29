@@ -1,7 +1,8 @@
 #pragma once
 
 #include "Math.h"
-#include "GL/Binary/Binary.h"
+#include "Engine/Binary/Binary.h"
+#include <gETF/Serializable.h>
 
 namespace gE
 {
@@ -16,27 +17,35 @@ namespace GL
 		u8 Minor;
 	};
 
-	struct Asset
+ 	struct Asset : public Serializable<gE::Window*>
 	{
+		SERIALIZABLE_PROTO_T(Asset, Serializable<gE::Window*>);
+
 	 public:
-		Asset(Asset&&) = delete;
+		Asset(gE::Window* window) : _window(window) { };
 		Asset(Asset&) = delete;
 
 		Asset& operator=(const Asset&) = delete;
-		Asset& operator=(Asset&&) = delete;
+
+		OPERATOR_EQUALS_XVAL(Asset, o, ID = o.ID; o.ID = 0);
 
 		virtual void Bind() const = 0;
+
+		// Releases any CPU-side data.
+		virtual void Free() {};
 
 		GET_CONST(u32, , ID);
 		GET_CONST(gE::Window&, Window, *_window);
 
-		virtual ~Asset() = default;
+		~Asset() override = default;
 
 	 protected:
-		Asset(gE::Window* window) : _window(window) { };
 		uint32_t ID;
 
 	 private:
 		gE::Window* _window;
 	};
+
+	inline void Asset::ISerialize(std::istream& in, gE::Window* s) { _window = s; }
+	inline void Asset::IDeserialize(std::ostream& out) const { }
 }

@@ -7,12 +7,12 @@
 
 namespace PVR
 {
-	u8* Read(const char* file, PVR::Header& header)
+	Array<u8> Read(const char* file, PVR::Header& header)
 	{
 		std::ifstream src;
 		src.open(file, std::ios::in | std::ios::binary);
 
-		if(!file) return nullptr;
+		if(!file) return {};
 
 		src.seekg(0, std::ios::end);
 		size_t copySize = src.tellg();
@@ -21,8 +21,8 @@ namespace PVR
 		header.Serialize(src);
 
 		copySize -= src.tellg();
-		u8* data = new u8[copySize];
-		src.read((char*) data, copySize);
+		Array<u8> data(copySize);
+		src.read((char*) data.Data(), copySize);
 
 		return data;
 	}
@@ -30,7 +30,7 @@ namespace PVR
 	GL::Texture* Read(gE::Window* window, const char* path, GL::WrapMode wrapMode, GL::FilterMode filterMode)
 	{
 		Header header;
-		u8* imageData = Read(path, header);
+		Array<u8> imageData = Read(path, header);
 		if(!imageData) return nullptr;
 
 		GL::Texture* tex = nullptr;
@@ -52,11 +52,11 @@ namespace PVR
 				GL_NONE,
 				GL_NONE,
 				GL::CompressionScheme(4, 16), // 16 bytes per 4x4 block
-				imageData,
-				true
+				(u8) header.MipCount,
+				std::move(imageData)
 			};
 
-			tex = new GL::Texture2D(window, settings, data);
+			tex = new GL::Texture2D(window, settings, std::move(data));
 		}
 		else if(header.Faces == 6)
 		{
@@ -77,15 +77,14 @@ namespace PVR
 				GL_RGB,
 				GL_HALF_FLOAT,
 				GL::CompressionScheme(1, 6), // 6 bytes per pixel
-				imageData,
-				true
+				(u8) header.MipCount,
+				std::move(imageData)
 			};
 
-			tex = new GL::TextureCube(window, settings, data);
+			tex = new GL::TextureCube(window, settings, std::move(data));
 		}
 		else LOG("Unsupported texture format!");
 
-		delete[] imageData;
 		return tex;
 	}
 

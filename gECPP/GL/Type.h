@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "GL/Binary/Binary.h"
+#include "Engine/Binary/Binary.h"
 
 #define GL_TYPE_(TYPE, ENUM) template<> CONSTEXPR_GLOBAL GLenum GLType<TYPE> = ENUM;
 

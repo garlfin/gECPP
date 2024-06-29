@@ -7,7 +7,7 @@
 #include <Prototype.h>
 #include <GL/Math.h>
 #include <Engine/Array.h>
-#include <GL/Binary/Binary.h>
+#include <Engine/Binary/Binary.h>
 #include <fstream>
 
 // Defines SERIALIZABLE_PROTO_T
@@ -64,7 +64,8 @@ template<> void Write(std::ostream& out, u32 count, const std::string* t);
     	void Deserialize(ostream& out) const override { SUPER::Deserialize(out); TYPE::IDeserialize(out); } \
 	private: \
 		void ISerialize(istream& in); \
-		void IDeserialize(ostream& out) const;
+		void IDeserialize(ostream& out) const; \
+	public:
 
 template<class T>
 struct Serializable

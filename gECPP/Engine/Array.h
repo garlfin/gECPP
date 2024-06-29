@@ -5,7 +5,7 @@
 #pragma once
 
 #include "GL/Math.h"
-#include <GL/Binary/Macro.h>
+#include <Engine/Binary/Macro.h>
 
 template<typename T>
 class Array
@@ -20,12 +20,24 @@ class Array
 			for(int i = 0; i < count; i++) _t[i] = T(std::forward<ARGS>(args)...);
 	}
 
-	Array(const Array& o) : _size(o.Count()), _t(new T[_size]) { memcpy(_t, o.Data(), o.Count() * sizeof(T)); };
-	Array(Array&& o) noexcept : _size(o.Count()), _t(o._t) { o._t = nullptr; };
+	OPERATOR_EQUALS(Array, o,
+	{
+		LOG("POSSIBLE LARGE REALLOCATION!");
+		_size = o._size;
+		_t = new T[_size];
 
-	OPERATOR_EQUALS_BOTH(Array<T>);
+		for(int i = 0; i < _size; i++) _t[i] = o._t[i];
+	})
+
+	OPERATOR_EQUALS_XVAL(Array, o,
+	{
+		_size = o._size;
+		_t = o._t;
+		o._t = nullptr;
+	})
 
 	size_t CopyToCArray(T* arr, size_t arrSize) const;
+
 	template<size_t COUNT>
 	ALWAYS_INLINE size_t CopyToCArray(T(& arr)[COUNT]) const { return CopyToCArray(arr, COUNT); }
 
@@ -38,6 +50,8 @@ class Array
 
 	NODISCARD ALWAYS_INLINE bool IsFree() const { return _t; }
 	ALWAYS_INLINE void Free() { delete[] _t; _t = nullptr; _size = 0; }
+
+	ALWAYS_INLINE operator bool() const { return IsFree(); }
 
 	~Array() { Free(); }
 

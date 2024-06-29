@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "GL/Binary/Binary.h"
+#include "Engine/Binary/Binary.h"
 
 struct Vertex
 {
