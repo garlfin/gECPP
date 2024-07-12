@@ -9,7 +9,7 @@
 #include "Engine/Window.h"
 #include "GLFW/glfw3.h"
 
-namespace VoxelDemo
+namespace gE::VoxelDemo
 {
 	class Movement : public gE::Behavior
 	{

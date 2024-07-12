@@ -8,7 +8,7 @@
 #include "Engine/Component/MeshRenderer.h"
 #include "Engine/Component/MaterialHolder.h"
 
-namespace VoxelDemo
+namespace gE::VoxelDemo
 {
  	class StaticMeshEntity : public gE::Entity
 	{

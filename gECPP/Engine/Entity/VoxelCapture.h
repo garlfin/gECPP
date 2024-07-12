@@ -5,7 +5,7 @@
 #pragma once
 
 #include "Engine/Component/Camera/Camera.h"
-#include <Engine/Renderer/VoxelPipeline.h>
+#include "Engine/Renderer/VoxelPipeline.h"
 
 namespace gE
 {

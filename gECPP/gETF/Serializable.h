@@ -47,25 +47,27 @@ template<class T> void ReadSerializable(std::istream& in, Serializable<T>& t, ty
 template<> void Read(std::istream& in, u32 count, std::string* t);
 template<> void Write(std::ostream& out, u32 count, const std::string* t);
 
+
+#define VIRTUAL_H(FUNC_RETURN, FUNC) \
+	inline FUNC_RETURN FUNC override {};
+
+#define VIRTUAL_H_PROTO(TYPE, SUPER, FUNC_RETURN, FUNC_NAME, FUNC_ARG, FUNC_CALL) \
+		inline FUNC_RETURN FUNC_NAME FUNC_ARG override { SUPER::FUNC_NAME FUNC_CALL; TYPE::I##FUNC_NAME FUNC_CALL; } \
+ 	private: \
+		FUNC_RETURN I##FUNC_NAME FUNC_ARG;
+
 // Implementation
 #define SERIALIZABLE_PROTO_T(TYPE, SUPER) \
 	public: \
 		explicit TYPE(istream& in, SETTINGS_T s) : SUPER(in, s) { TYPE::Serialize(in, s); } \
-		void Serialize(istream& in, SETTINGS_T s) override { SUPER::Serialize(in, s); TYPE::ISerialize(in, s); } \
-    	void Deserialize(ostream& out) const override { SUPER::Deserialize(out); TYPE::IDeserialize(out); } \
-	private: \
-		void ISerialize(istream& in, SETTINGS_T s); \
-		void IDeserialize(ostream& out) const;
+	public: VIRTUAL_H_PROTO(TYPE, SUPER, void, Serialize, (istream& in, SETTINGS_T s), (in, s)) \
+	public: VIRTUAL_H_PROTO(TYPE, SUPER, void, Deserialize, (ostream& out) const, (out));
 
 #define SERIALIZABLE_PROTO(TYPE, SUPER) \
 	public: \
 		explicit TYPE(istream& in) : SUPER(in) { TYPE::Serialize(in); } \
-		void Serialize(istream& in) override { SUPER::Serialize(in); TYPE::ISerialize(in); } \
-    	void Deserialize(ostream& out) const override { SUPER::Deserialize(out); TYPE::IDeserialize(out); } \
-	private: \
-		void ISerialize(istream& in); \
-		void IDeserialize(ostream& out) const; \
-	public:
+	public: VIRTUAL_H_PROTO(TYPE, SUPER, void, Serialize, (istream& in), (in)) \
+	public: VIRTUAL_H_PROTO(TYPE, SUPER, void, Deserialize, (ostream& out) const, (out));
 
 template<class T>
 struct Serializable

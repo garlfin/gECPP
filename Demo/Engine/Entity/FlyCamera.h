@@ -9,7 +9,7 @@
 #include "Engine/Window.h"
 #include "Demo/Engine/Component/Movement.h"
 
-namespace VoxelDemo
+namespace gE::VoxelDemo
 {
 	gE::ICameraSettings FlyCameraSettings
 	{

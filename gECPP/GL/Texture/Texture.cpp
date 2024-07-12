@@ -51,7 +51,7 @@ namespace GL
 			dataPtr += dataSize;
 		}
 
-		if(Settings.MipCount > 1 && !data.MipCount) glGenerateTextureMipmap(ID);
+		if(Settings.MipCount != 1 && data.MipCount == 1) glGenerateTextureMipmap(ID);
 	}
 
 	void Texture2D::CopyFrom(const Texture& o)
@@ -65,7 +65,7 @@ namespace GL
 		if(!Settings.MipCount) Settings.MipCount = ::GL::GetMipCount<TextureDimension::D3D>(_size);
 		glTextureStorage3D(ID, Settings.MipCount, Settings.Format, _size.x, _size.y, _size.z);
 
-		if(!data.Data) return;
+		if(!data) return;
 
 		glm::u32vec3 size = _size;
 		u8* dataPtr = data.Data.Data();
@@ -83,7 +83,7 @@ namespace GL
 			dataPtr += dataSize;
 		}
 
-		if(Settings.MipCount > 1 && !data.MipCount) glGenerateTextureMipmap(ID);
+		if(Settings.MipCount != 1 && data.MipCount == 1) glGenerateTextureMipmap(ID);
 	}
 
 	void Texture3D::CopyFrom(const Texture& o)
@@ -132,7 +132,7 @@ namespace GL
 			dataPtr += dataSize;
 		}
 
-		if(Settings.MipCount > 1 && !data.MipCount) glGenerateTextureMipmap(ID);
+		if(Settings.MipCount != 1 && data.MipCount == 1) glGenerateTextureMipmap(ID);
 	}
 
 	u8 TextureSlotManager::Increment(const GL::Texture* t)
@@ -154,11 +154,15 @@ namespace GL
 	void Texture::ISerialize(std::istream& in, gE::Window* s)
 	{
 		Settings = Read<ITextureSettings>(in);
+		Data = Read<TextureData>(in);
 	}
 
 	void Texture::IDeserialize(std::ostream& out) const
 	{
 		Write(out, Settings);
+
+		if(Data.IsFree()) LOG("WARNING: WRITING TEXTURE TO FILE WITH NO DATA");
+		Write(out, Data);
 	}
 
 	void TextureData::ISerialize(std::istream& in)

@@ -124,7 +124,6 @@ namespace GL
 		WrapMode WrapMode = WrapMode::Repeat;
 		FilterMode Filter = FilterMode::Linear;
 		u8 MipCount = 1;
-		u8 MipBias = 0;
 
 		constexpr operator bool() const { return (bool) Format; } // NOLINT
 	};
@@ -142,6 +141,8 @@ namespace GL
 	struct TextureData : public Serializable<void>
 	{
 		SERIALIZABLE_PROTO(TextureData, Serializable);
+
+	 public:
 		TextureData(GLenum, GLenum, CompressionScheme, u8, Array<u8>&&);
 		TextureData() = default;
 
@@ -151,6 +152,10 @@ namespace GL
 		u8 MipCount = 0;
 
 		Array<u8> Data;
+
+		NODISCARD ALWAYS_INLINE bool IsFree() const { return Data.IsFree(); }
+		ALWAYS_INLINE void Free() { Data.Free(); }
+		ALWAYS_INLINE operator bool() const { return Data.Data(); }
 	};
 
 	bool FormatIsCompressed(GLenum f);

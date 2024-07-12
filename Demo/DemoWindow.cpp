@@ -11,7 +11,7 @@
 #include "Demo/Engine/Entity/StaticMeshEntity.h"
 #include "Engine/Renderer/PBRMaterial.h"
 
-using namespace VoxelDemo;
+using namespace gE::VoxelDemo;
 
 void DemoWindow::OnInit()
 {

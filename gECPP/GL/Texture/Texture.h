@@ -49,11 +49,15 @@ namespace GL
 		inline void Bind() const override { glBindTexture(Target, ID); }
 
 		ALWAYS_INLINE int32_t Use(int32_t slot) const { glBindTextureUnit(slot, ID); return slot; } // NOLINT
+
 		inline u32 Bind(u32 unit, GLenum access, u8 mip = 0, GLenum format = 0) const
 		{
 			glBindImageTexture(unit, ID, mip, Target == GL_TEXTURE_3D, 0, access, format ?: Settings.Format);
 			return unit;
 		}
+
+		inline void Free() override { Data.Free(); }
+		inline bool IsFree() override { return Data.IsFree(); }
 
 		handle GetHandle();
 		virtual void CopyFrom(const GL::Texture&) = 0;
@@ -68,6 +72,7 @@ namespace GL
 
 	 protected:
 		ITextureSettings Settings;
+		TextureData Data;
 		GLenum Target;
 
 	 private:
@@ -83,7 +88,7 @@ namespace GL
 		void CopyFrom(const GL::Texture&) override;
 
 	 private:
-		const GL::TextureSize2D _size = {};
+		const GL::TextureSize2D _size;
 	};
 
 	class Texture3D final : public Texture
@@ -95,7 +100,7 @@ namespace GL
 		void CopyFrom(const GL::Texture&) override;
 
 	 private:
-		const GL::TextureSize3D _size = {};
+		const GL::TextureSize3D _size;
 	};
 
 	class TextureCube final : public Texture
@@ -107,7 +112,7 @@ namespace GL
 		void CopyFrom(const GL::Texture&) override {};
 
 	 private:
-		const GL::TextureSize1D _size = {};
+		const GL::TextureSize1D _size;
 	};
 }
 

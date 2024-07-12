@@ -33,6 +33,7 @@ namespace GL
 
 		// Releases any CPU-side data.
 		virtual void Free() {};
+		NODISCARD virtual bool IsFree() { return true; }
 
 		GET_CONST(u32, , ID);
 		GET_CONST(gE::Window&, Window, *_window);
