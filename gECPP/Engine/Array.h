@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "GL/Math.h"
+#include "Engine/Math/Math.h"
 #include <Engine/Binary/Macro.h>
 
 template<typename T>
@@ -22,11 +22,12 @@ class Array
 
 	OPERATOR_EQUALS(Array, o,
 	{
-		LOG("POSSIBLE LARGE REALLOCATION!");
+		LOG("WARNING: REALLOCATION! \n\tSIZE: " << o._size * sizeof(T) << " bytes\n\tFUNCTION: " << __PRETTY_FUNCTION__);
+
 		_size = o._size;
 		_t = new T[_size];
 
-		for(int i = 0; i < _size; i++) _t[i] = o._t[i];
+		for (int i = 0; i < _size; i++) _t[i] = o._t[i];
 	})
 
 	OPERATOR_EQUALS_XVAL(Array, o,

@@ -30,12 +30,14 @@ void gE::RendererManager::OnRender(float d, gE::Camera* camera)
 {
 	ComponentManager::OnRender(d, camera);
 
-	for(Component* c : *this)
+	for(Managed<Component>* m = List.GetFirst(); m; m = m->GetNext())
 	{
-		gE::Window& window = c->GetWindow();
+		MeshRenderer& c = *(MeshRenderer*) &m->Get();
+
+		gE::Window& window = c.GetWindow();
 		DefaultPipeline::Buffers& buffers = window.GetPipelineBuffers();
 
-		const MeshRenderer& info = *(MeshRenderer*) c;
+		const MeshRenderer& info = *(MeshRenderer*) &c;
 
 		buffers.Scene.InstanceCount = 1;
 		buffers.Scene.State = window.State;

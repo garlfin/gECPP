@@ -78,7 +78,7 @@ namespace GL
 			return path;
 		}
 
-		std::cout << "Invalid delimiter: " << *include << '\n';
+		LOG("WARNING: INVALID DELIMITER\n\tDELIMITER: " << *include);
 		return nullptr;
 	}
 

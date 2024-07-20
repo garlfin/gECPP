@@ -5,7 +5,7 @@
 #pragma once
 
 #include <Prototype.h>
-#include <GL/Math.h>
+#include "Engine/Math/Math.h"
 #include <Engine/Array.h>
 #include <Engine/Binary/Binary.h>
 #include <fstream>

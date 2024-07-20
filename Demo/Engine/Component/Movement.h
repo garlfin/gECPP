@@ -30,7 +30,7 @@ namespace gE::VoxelDemo
 			_rot.x += mouseDelta.y * 0.1f;
 			_rot.x = std::clamp(_rot.x, -89.9f, 89.9f);
 
-			_transform.SetRotation(glm::radians(_rot));
+			_transform.SetRotation() = glm::radians(_rot);
 
 			glm::vec3 dir(0.f);
 			if(glfwGetKey(_window, GLFW_KEY_W)) dir.z -= 1;
@@ -39,7 +39,8 @@ namespace gE::VoxelDemo
 			if(glfwGetKey(_window, GLFW_KEY_A)) dir.x -= 1;
 
 			dir = glm::normalize(dir);
-			if(!glm::isnan(dir.x)) _transform.Position += _transform.Rotation * dir * d;
+			if(!glm::isnan(dir.x))
+				_transform.SetPosition() += _transform->Rotation * dir * d;
 		}
 
 	 private:

@@ -1,13 +1,20 @@
-#define ENABLE_SS_TRACE
+#define ENABLE_VOXEL_TRACE
 // #define DIRECTIONAL_CONTACT_SHADOW
 #define SOFT_SHADOW_AVERAGE
 #define RAY_MAX_MIP 6
 
 #include "Include/Camera.glsl"
 #include "Include/Scene.glsl"
-#include "Include/Voxel.glsl"
 #include "Include/PBR.glsl"
 #include "Include/Effect.glsl"
+
+#ifdef ENABLE_VOXEL_TRACE
+#include "Include/Voxel.glsl"
+#endif
+
+#ifdef ENABLE_SDF_TRACE
+#include "Include/SDF.glsl"
+#endif
 
 uniform sampler2D AlbedoTex;
 uniform sampler2D ARMDTex;

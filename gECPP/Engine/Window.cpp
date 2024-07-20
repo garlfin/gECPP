@@ -159,7 +159,7 @@ void Window::OnInit()
 
 	{
 		GL::ComputeShader brdfShader(this, "Resource/Shader/Compute/brdf.comp");
-		GL::TextureSettings<GL::TextureDimension::D2D> brdfSettings
+		GL::TextureSettings2D brdfSettings
 		{
 			{ GL_RG16F, GL::WrapMode::Clamp, GL::FilterMode::Linear, 1 },
 			GL::TextureSize2D(BRDF_SIZE)
@@ -196,14 +196,20 @@ void Window::Blit(const GL::Texture& texture)
 
 void Window::OnUpdate(float delta)
 {
+	Transforms.OnUpdate(delta);
+
+	Cameras.OnUpdate(delta);
+	Renderers.OnUpdate(delta);
+	Lights.OnUpdate(delta);
+	Cubemaps.OnUpdate(delta);
+	CullingManager.OnUpdate(delta);
 
 	Behaviors.OnUpdate(delta);
 }
 
 void Window::OnRender(float delta)
 {
-	Transforms.OnUpdate(delta);
-	Behaviors.OnRender(delta);
+	Behaviors.OnRender(delta, nullptr);
 
 	Lights.OnRender(delta, nullptr);
 	Cubemaps.OnRender(delta, nullptr);
@@ -214,6 +220,15 @@ void Window::OnRender(float delta)
 
 	GL::FrameBuffer::Reset();
 	Blit(Cameras.CurrentCamera->GetColor());
+
+	Transforms.OnRender(delta, nullptr);
+}
+
+Camera3D* Window::GetReflectionSystem() const
+{
+	if(VoxelSceneCapture.Get()) return &VoxelSceneCapture->GetCamera();
+	if(SDFSceneCapture.Get()) return &SDFSceneCapture->GetCamera();
+	return nullptr;
 }
 
 Monitor::Monitor(const GLFWvidmode* mode) :

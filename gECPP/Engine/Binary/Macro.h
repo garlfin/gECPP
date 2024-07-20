@@ -92,4 +92,10 @@
 	ALWAYS_INLINE operator TYPE() { return FIELD; } \
 	OPERATOR_CAST_CONST(const TYPE, FIELD);
 
+#define DELETE_COPY_CONSTRUCTOR(TYPE) \
+	TYPE(TYPE&&) noexcept = delete; \
+	TYPE(const TYPE&) = delete; \
+	TYPE& operator=(TYPE&&) noexcept = delete; \
+	TYPE& operator=(const TYPE&) = delete;
+
 // Yapping about newline >: (

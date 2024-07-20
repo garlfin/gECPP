@@ -20,8 +20,8 @@ namespace gE::VoxelPipeline
 
 	Target3D::Target3D(VoxelCapture& capture, Camera3D& camera) :
 		RenderTarget<Camera3D>(capture, camera),
-		_colorBack(&camera.GetWindow(), { VoxelPipeline::ColorBackFormat, camera.GetSize() }),
-		_color(&camera.GetWindow(), { VoxelPipeline::ColorFormat, camera.GetSize()})
+		_colorBack(&camera.GetWindow(), { ColorBackFormat, camera.GetSize() }),
+		_color(&camera.GetWindow(), { ColorFormat, camera.GetSize()})
 	{
 		GetFrameBuffer().SetDefaultSize(camera.GetSize());
 	}
@@ -53,9 +53,9 @@ namespace gE::VoxelPipeline
 
 		float cellSize = GetScale() * 2.f / GetSize().x;
 
-		glm::ivec3 pos = glm::floor(cameraTransform.Position / cellSize);
-		_velocity = pos - glm::ivec3(transform.Position / cellSize);
-		transform.Position = glm::vec3(pos) * cellSize;
+		glm::ivec3 pos = glm::floor(cameraTransform->Position / cellSize);
+		_velocity = pos - glm::ivec3(transform->Position / cellSize);
+		transform.SetPosition() = glm::vec3(pos) * cellSize;
 		transform.OnUpdate(0.f); // Force update on model matrix since it passed its tick.
 
 		GetOwner().GetGLVoxelScene(buffers.Scene);

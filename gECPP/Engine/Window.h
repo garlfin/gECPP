@@ -1,6 +1,6 @@
 #pragma once
 
-#include <GL/Math.h>
+#include "Engine/Math/Math.h"
 #include <GL/Buffer/VAO.h>
 #include <GL/Shader/Shader.h>
 #include <GL/Texture/TextureSlotManager.h>
@@ -8,14 +8,20 @@
 #include "WindowState.h"
 #include <Engine/Manager.h>
 #include <Engine/AssetManager.h>
+
 #include <Engine/Component/Behavior.h>
 #include <Engine/Component/Transform.h>
-#include <Engine/Component/Camera/Camera.h>
-#include <Engine/Renderer/VoxelPipeline.h>
-#include <Engine/Entity/VoxelCapture.h>
 #include <Engine/Component/MeshRenderer.h>
-#include <Engine/Entity/Light.h>
+#include <Engine/Component/Camera/Camera.h>
+#include <Engine/Component/Cullable.h>
+
+#include <Engine/Entity/VoxelCapture.h>
+#include <Engine/Entity/SDFCapture.h>
 #include <Engine/Entity/CubemapCapture.h>
+#include <Engine/Entity/Light.h>
+
+#include <Engine/Renderer/VoxelPipeline.h>
+#include <Engine/Renderer/SDFPipeline.h>
 #include <Engine/Renderer/PostProcess/Bloom.h>
 #include <Engine/Renderer/PostProcess/Tonemap.h>
 
@@ -49,7 +55,11 @@ namespace gE
 		void Blit(const GL::Texture& texture);
 
 		// Entities & Data
-		GET(VoxelCapture*, VoxelCapture, VoxelSceneCapture);
+		Camera3D* GetReflectionSystem() const;
+
+		GET(gE::VoxelCapture*, VoxelCapture, VoxelSceneCapture.Get());
+		GET(gE::SDFCapture*, SDFCapture, SDFSceneCapture.Get());
+
 		GET(gE::Material&, DefaultMaterial, DefaultMaterial);
 		GET(GL::Texture2D&, BRDFLookupTexture, BRDFLookup);
 
@@ -67,6 +77,7 @@ namespace gE
 		GET(RendererManager&, Renderers, Renderers);
 		GET(LightManager&, Lights, Lights);
 		GET(CubemapManager&, Cubemaps, Cubemaps);
+		GET(CullingManager&, CullingManager, CullingManager);
 		GET(GL::TextureSlotManager&, SlotManager, SlotManager);
 
 		// Engine States
@@ -91,13 +102,15 @@ namespace gE
 		SmartPointer<DefaultPipeline::Buffers> PipelineBuffers;
 		SmartPointer<VoxelPipeline::Buffers> VoxelBuffers;
 
-		VoxelCapture* VoxelSceneCapture;
+		SmartPointer<VoxelCapture> VoxelSceneCapture;
+		SmartPointer<SDFCapture> SDFSceneCapture;
 
 		CameraManager Cameras;
 		TransformManager Transforms;
 		LightManager Lights;
 		CubemapManager Cubemaps;
 		RendererManager Renderers;
+		CullingManager CullingManager;
 
 		ComponentManager<Behavior> Behaviors;
 

@@ -122,7 +122,7 @@ namespace gE
 
 	void Camera3D::UpdateProjection()
 	{
-		glm::vec3& scale = GetOwner()->GetTransform().Scale;
+		glm::vec3 scale = GetOwner()->GetTransform()->Scale;
 		Projection = glm::ortho(-scale.x, scale.x, -scale.z, scale.z, 0.01f, scale.y * 2.f);
 	}
 
@@ -130,7 +130,7 @@ namespace gE
 	{
 		Camera::GetGLCamera(cam);
 
-		glm::vec3 scale = GetOwner()->GetTransform().Scale;
+		glm::vec3 scale = GetOwner()->GetTransform()->Scale;
 
 		for(u8 i = 0; i < 3; i++)
 			cam.View[i] = glm::lookAt(cam.Position - scale * ForwardDirs[i * 2], cam.Position, UpDirs[i * 2]);

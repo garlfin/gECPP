@@ -22,12 +22,13 @@ namespace gE
 		_camera(this, _target, CreateDirectionalSettings(size, scale)),
 		_target(*this, _camera)
 	{
-		GetTransform().Rotation = rot;
+		GetTransform().SetRotation() = rot;
 	}
 
 	void LightManager::OnRender(float delta, Camera* camera)
 	{
-		for(Light* l : *this) l->GetCamera().OnRender(delta, camera);
+		for(Managed<Light>* l = List.GetFirst(); l; l = l->GetNext())
+			(*l)->GetCamera().OnRender(delta, camera);
 	}
 
 	CONSTEXPR_GLOBAL GL::ITextureSettings ShadowMapFormat { GL_DEPTH_COMPONENT16, GL::WrapMode::Clamp, GL::FilterMode::Linear };
@@ -70,12 +71,12 @@ namespace gE
 		Transform& cameraTransform = callingCamera->GetOwner()->GetTransform();
 
 		glm::vec2 planes = GetCamera().GetClipPlanes();
-		glm::vec3 offset = -transform.Forward();
+		glm::vec3 offset = -transform->Forward();
 		offset *= (planes.y - planes.x) * 0.5 + planes.x;
 		//		  (far - near) / 2 + near
 		//		  places the middle on the camera
 
-		transform.Position = glm::floor(cameraTransform.Position) + offset;
+		transform.SetPosition() = glm::floor(cameraTransform->Position) + offset;
 		transform.OnUpdate(0.f); // Force update on model matrix since it passed its tick.
 
 		return true;
@@ -87,7 +88,7 @@ namespace gE
 		OrthographicCamera& camera = GetCamera();
 
 		light.ViewProjection = camera.GetProjection() * glm::inverse(transform.Model());
-		light.Position = -transform.Forward();
+		light.Position = -transform->Forward();
 		light.Type = GL::LightType::Directional;
 		light.Color = glm::vec3(1);
 		light.PackedSettings = u32(camera.GetScale().y * 2);
@@ -109,7 +110,7 @@ namespace gE
 	Light::Light(Window* w, Camera& c, IDepthTarget& d) :
 		Entity(w, Flags(false, UINT8_MAX)),
 		IDepthTarget(d),
-		Managed<Light>(*this, GetWindow().GetLights()),
+		Managed<Light>(*this, &GetWindow().GetLights()),
 		_camera(c)
 	{
 	}

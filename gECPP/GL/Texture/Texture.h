@@ -27,13 +27,13 @@ namespace GL
 
 	CONSTEXPR_GLOBAL handle NullHandle = handle();
 
-	template<TextureDimension T>
-	u8 GetMipCount(const TextureSize<T>& size)
+	template<Dimension T>
+	u8 GetMipCount(const Size<T>& size)
 	{
 		u32 largest;
 
-		if constexpr(T == TextureDimension::D1D) largest = size;
-		else if constexpr(T == TextureDimension::D2D) largest = glm::max(size.x, size.y);
+		if constexpr(T == Dimension::D1D) largest = size;
+		else if constexpr(T == Dimension::D2D) largest = glm::max(size.x, size.y);
 		else largest = glm::max(size.x, glm::max(size.y, size.z));
 
 		return 32 - __builtin_clz(largest);

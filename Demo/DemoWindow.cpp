@@ -38,7 +38,7 @@ void DemoWindow::OnInit()
 
 	auto* mesh = new VoxelDemo::StaticMeshEntity(this, cube);
 
-	mesh->GetTransform().Scale = glm::vec3(0.5);
+	mesh->GetTransform().SetScale() = glm::vec3(0.5);
 	mesh->GetMaterials().SetMaterial(0, cobbleMaterial);
 	mesh->GetMaterials().SetMaterial(1, tileMaterial);
 
@@ -50,10 +50,10 @@ void DemoWindow::OnInit()
 	Cameras.CurrentCamera = &camera->GetTarget();
 
 	auto* cubemapCap = new gE::CubemapCapture(this, 512);
-	cubemapCap->GetTransform().Position.y = 2.1f;
-	cubemapCap->GetTransform().Scale = glm::vec3(2.1f);
+	cubemapCap->GetTransform().SetPosition().y = 2.1f;
+	cubemapCap->GetTransform().SetScale() = glm::vec3(2.1f);
 
 	Cubemaps.Skybox = gE::ref_cast((GL::TextureCube*) PVR::Read(this, "Resource/Texture/sky.pvr", GL::WrapMode::Clamp));
 
-	VoxelSceneCapture = new gE::VoxelCapture(this, 128, 4.2f);
+	VoxelSceneCapture = gE::ptr_create<gE::VoxelCapture>(this, 128, 4.2f);
 }

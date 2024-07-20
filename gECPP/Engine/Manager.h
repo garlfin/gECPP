@@ -13,46 +13,154 @@
 namespace gE
 {
 	template<class T>
-	class Manager : protected std::vector<T*>
+	class ManagedList
 	{
 	 public:
-		typedef std::vector<T*> VEC_T;
+		ManagedList() = default;
 
+		DELETE_COPY_CONSTRUCTOR(ManagedList);
+
+		void Add(Managed<T>& t);
+		void Insert(Managed<T>& t, Managed<T>& at);
+		void Remove(Managed<T>& t);
+		void MoveFrom(ManagedList<T>& l);
+
+		GET_CONST(Managed<T>*, First, _first);
+		GET_CONST(Managed<T>*, Last, _last);
+		GET_CONST(u32, Size, _size);
+
+	 private:
+		Managed<T>* _first = nullptr;
+		Managed<T>* _last = nullptr;
+		u32 _size = 0;
+	};
+
+	template<class T>
+	class Manager
+	{
+	 public:
 		Manager() = default;
 
-		Manager(const Manager&) = delete;
-		Manager(Manager&&) noexcept = delete;
-		Manager<T>& operator=(const Manager&) = delete;
-		Manager<T>& operator=(Manager&&) noexcept = delete;
+		DELETE_COPY_CONSTRUCTOR(Manager);
 
 		virtual void OnUpdate(float d) = 0;
 		virtual void OnRender(float d, Camera* camera) = 0;
 
-		NODISCARD ALWAYS_INLINE size_t Size() const { return VEC_T::size(); }
-
-		using std::vector<T*>::operator[];
-
 		friend class Managed<T>;
 
 	 protected:
-		inline void Register(T* t) { VEC_T::push_back(t); }
-		inline void Remove(T* t) { RemoveFirstFromVec(*this, t); }
+		virtual void Register(T& t)
+		{
+			List.Add(t);
+		}
 
-	 protected:
-		inline bool Contains(T* v) { return std::find(VEC_T::begin(), VEC_T::end(), v) != VEC_T::end(); }
+		virtual void Remove(T& t)
+		{
+			List.Remove(t);
+		}
+
+		ManagedList<T> List;
 	};
 
 	template<class T>
 	class Managed
 	{
 	 public:
-		explicit inline Managed(T& t, Manager<T>* m = nullptr) : _t(t), _manager(m) { if(_manager) _manager->Register(&t); }
-		inline Managed(T& t, Manager<T>& m) : Managed(t, &m) {};
+		explicit inline Managed(T& t, Manager<T>* m = nullptr) : _t(t), _manager(m)
+		{
+			if(m) m->Register(t);
+		}
 
-		inline ~Managed() { if(_manager) _manager->Remove(&_t); }
+		DELETE_COPY_CONSTRUCTOR(Managed);
+
+		GET_CONST(Managed<T>*, Previous, _previous);
+		GET_CONST(Managed<T>*, Next, _next);
+		GET_CONST(ManagedList<T>*, List, _list);
+		GET_CONST(Manager<T>*, Manager, _manager);
+		GET_CONST(T&,, _t);
+
+		NODISCARD ALWAYS_INLINE T* operator->() { return &_t; }
+		NODISCARD ALWAYS_INLINE const T* operator->() const { return &_t; }
+
+		inline ~Managed() { if(_manager) _manager->Remove(_t); }
 
 	 private:
-		T& _t;
+		ManagedList<T>* _list = nullptr;
 		Manager<T>* _manager;
+
+		Managed<T>* _previous = nullptr;
+		T& _t;
+		Managed<T>* _next = nullptr;
+
+		friend class ManagedList<T>;
 	};
+
+	template<class T>
+	void ManagedList<T>::Add(Managed<T>& t)
+	{
+		if(t._list || t._previous || t._next) return;
+
+		if(!_size++)
+		{
+			_first = _last = &t;
+			t._previous = t._next = nullptr;
+			return;
+		}
+
+		t->_previous = _last;
+		t->_list = this;
+		_last = _last->_next = &t;
+	}
+
+	template<class T>
+	void ManagedList<T>::Remove(Managed<T>& t)
+	{
+		if(t._list != this) return;
+
+		if(!--_size) _first = _last = nullptr;
+
+		if(t._previous) t._previous->_next = t._next;
+		if(t._next) t._next->_previous = t._previous;
+
+		if(_first == &t) _first = t._next;
+		else if(_last == &t) _last = t._previous;
+
+		t._previous = t._next = nullptr;
+		t._list = nullptr;
+	}
+
+	template<class T>
+	void ManagedList<T>::Insert(Managed<T>& t, Managed<T>& at)
+	{
+		if(at._list != this) return;
+		if(t._list || t._previous || t._next) return;
+
+		t._previous = &at;
+		t._next = at._next;
+		at._next = &t;
+
+		if(_last == &at) _last = &t;
+	}
+
+	template<class T>
+	void ManagedList<T>::MoveFrom(ManagedList<T>& list)
+	{
+		if(!list._size) return;
+
+		for(Managed<T>* m = list._first; m; m = m->_next)
+			m->_list = this;
+
+		if (_size)
+		{
+			list._first->_previous = _first;
+			_last->_next = list._first;
+		}
+		else _first = list._first;
+
+		_size += list._size;
+		_last = list._last;
+
+		list._first = list._last = nullptr;
+		list._size = 0;
+	}
 }

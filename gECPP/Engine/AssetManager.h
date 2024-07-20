@@ -19,6 +19,7 @@ namespace gE
 
 		OPERATOR_EQUALS(Reference, o,
 		{
+			LOG("INFO: COPIED REFERENCE\n\tCOUNT: " << *o._counter << "\n\tFUNCTION: " << __PRETTY_FUNCTION__);
 			_t = o._t;
 			_counter = o._counter;
 			if(_counter) (*_counter)++;
@@ -56,6 +57,7 @@ namespace gE
 		{
 			if(!_t || --(*_counter)) return;
 
+			LOG("INFO: DELETED REFERENCE\n\tFunction: " << __PRETTY_FUNCTION__);
 			delete _t;
 			delete _counter;
 		}

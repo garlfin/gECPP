@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <GL/Math.h>
+#include "Engine/Math/Math.h"
 #include <GLAD/glad.h>
 #include <Engine/Binary/Binary.h>
 #include <gETF/Serializable.h>
@@ -86,17 +86,6 @@ namespace GL
 		Border = GL_CLAMP_TO_BORDER
 	};
 
-	enum class TextureDimension : u8
-	{
-		D1D,
-		D2D,
-		D3D
-	};
-
-	template<TextureDimension DIMENSION>
-	using TextureSize = std::conditional_t<DIMENSION == TextureDimension::D1D, u32,
-		std::conditional_t<DIMENSION == TextureDimension::D2D, glm::u32vec2, glm::u32vec3>>;
-
 	struct CompressionScheme
 	{
 		CompressionScheme(u8 bls, u8 bs) : BlockSize(bls), ByteSize(bs) { }
@@ -105,12 +94,12 @@ namespace GL
 		u8 BlockSize = 1;
 		u8 ByteSize = 1;
 
-		template<TextureDimension DIMENSION>
-		NODISCARD ALWAYS_INLINE u64 Size(const TextureSize<DIMENSION>& size) const
+		template<Dimension DIMENSION>
+		NODISCARD ALWAYS_INLINE u64 Size(const Size<DIMENSION>& size) const
 		{
-			TextureSize<DIMENSION> blocks = DIV_CEIL_T(size, BlockSize, TextureSize<DIMENSION>);
-			if constexpr(DIMENSION == TextureDimension::D1D) return blocks * ByteSize;
-			else if constexpr(DIMENSION == TextureDimension::D2D) return blocks.x * blocks.y * ByteSize;
+			::Size<DIMENSION> blocks = DIV_CEIL_T(size, BlockSize, ::Size<DIMENSION>);
+			if constexpr(DIMENSION == Dimension::D1D) return blocks * ByteSize;
+			else if constexpr(DIMENSION == Dimension::D2D) return blocks.x * blocks.y * ByteSize;
 			else return blocks.x * blocks.y * blocks.z * ByteSize;
 		}
 
@@ -128,15 +117,15 @@ namespace GL
 		constexpr operator bool() const { return (bool) Format; } // NOLINT
 	};
 
-	template<TextureDimension DIMENSION>
+	template<Dimension DIMENSION>
 	struct TextureSettings : public ITextureSettings
 	{
-		TextureSize<DIMENSION> Size = TextureSize<DIMENSION>(1);
+		Size<DIMENSION> Size = Size<DIMENSION>(1);
 	};
 
-	typedef TextureSettings<TextureDimension::D1D> TextureSettings1D;
-	typedef TextureSettings<TextureDimension::D2D> TextureSettings2D;
-	typedef TextureSettings<TextureDimension::D3D> TextureSettings3D;
+	typedef TextureSettings<Dimension::D1D> TextureSettings1D;
+	typedef TextureSettings<Dimension::D2D> TextureSettings2D;
+	typedef TextureSettings<Dimension::D3D> TextureSettings3D;
 
 	struct TextureData : public Serializable<void>
 	{

@@ -17,8 +17,9 @@ namespace gE
 		GET_CONST(Entity*, Owner, _owner);
 		GET_CONST(Window&, Window, _window);
 
-		virtual void OnUpdate(float d) { }
-		virtual void OnRender(float d, Camera* camera) { }
+		virtual void OnInit() { };
+		virtual void OnUpdate(float d) { };
+		virtual void OnRender(float d, Camera* camera) { };
 		virtual void OnDestroy() { };
 
 		virtual ~Component() = default;
@@ -49,8 +50,31 @@ namespace gE
 		static_assert(std::is_base_of<Component, T>::value);
 		using Manager<Component>::Manager;
 
-		void OnUpdate(float d) override { for(Component* c : *this) c->OnUpdate(d); }
-		void OnRender(float d, Camera* camera) override { for(Component* c : *this) c->OnRender(d, camera); }
+		void OnUpdate(float d) override
+		{
+			for(Managed<Component>* c = List.GetFirst(); c; c = c->GetNext())
+				(*c)->OnInit();
+
+			List.MoveFrom(InitializationList);
+
+			for(Managed<Component>* c = List.GetFirst(); c; c = c->GetNext())
+				(*c)->OnUpdate(d);
+		}
+
+		void OnRender(float d, Camera* camera) override
+		{
+			for(Managed<Component>* c = List.GetFirst(); c; c = c->GetNext())
+				(*c)->OnRender(d, camera);
+		}
+
 		ALWAYS_INLINE void OnRender(float d) { OnRender(d, nullptr); }
+
+	 protected:
+		ManagedList<Component> InitializationList;
+
+		void Register(Component& t) override
+		{
+			InitializationList.Add(t);
+		}
 	};
 }

@@ -16,7 +16,7 @@ namespace gE
 
 		void GetGLVoxelScene(GL::VoxelScene&);
 
-		GET(Camera3D, Camera, _camera);
+		GET(Camera3D&, Camera, _camera);
 		GET(VoxelPipeline::Target3D&, Target, _target);
 		GET(GL::Texture3D&, Color, _target.GetColor());
 

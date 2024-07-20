@@ -124,7 +124,7 @@ namespace gE
 
 		GET(TARGET_TYPE&, Target, (TARGET_TYPE&) Camera::GetTarget());
 		GET_CONST(SIZE_TYPE, Size, SIZE_TYPE(GetViewportSize(), _sizeZ));
-		GET_CONST(float, Scale, GetOwner()->GetTransform().Scale.x);
+		GET_CONST(float, Scale, GetOwner()->GetTransform()->Scale.x);
 
 		void GetGLCamera(GL::Camera&) override;
 

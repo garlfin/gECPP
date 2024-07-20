@@ -4,12 +4,21 @@
 
 #pragma once
 
-#include <GL/Math.h>
+#include "Engine/Math/Math.h"
 #include <Engine/Manager.h>
 #include "Component.h"
 
 namespace gE
 {
+	class TransformManager;
+
+	struct TransformFlags
+	{
+		bool Invalidated : 1 = false;
+		bool PreviousInvalidated : 1 = false;
+		bool Initialized : 1 = false;
+	};
+
 	struct TransformData
 	{
 		union
@@ -26,7 +35,7 @@ namespace gE
 		GET_CONST(glm::mat3, RotationMatrix, glm::toMat3(Rotation));
 	};
 
-	class Transform : public Component, public TransformData
+	class Transform : public Component
 	{
 	 public:
 		Transform(Entity* o, const TransformData& d);
@@ -35,24 +44,31 @@ namespace gE
 
 		glm::mat4 GetParentTransform();
 
-		ALWAYS_INLINE void SetRotation(const glm::vec3& r) { Rotation = glm::quaternion(r); }
+		ALWAYS_INLINE glm::vec3& SetPosition() { return SetLocation(); }
+		inline glm::vec3& SetLocation() { _flags.Invalidated = true; return _transform.Location; }
+		inline glm::quat& SetRotation() { _flags.Invalidated = true; return _transform.Rotation; }
+		inline glm::vec3& SetScale() { _flags.Invalidated = true; return _transform.Scale; }
 
-		void Set(const TransformData& d);
-		void Set(const Transform& d);
+		inline void Set(const TransformData& d) { _flags.Invalidated = true; _transform = d; };
+		inline void Set(const Transform& d) { _flags.Invalidated = true; _transform = d._transform; };
 
 		void OnUpdate(float) override;
-		void OnRender(float, Camera*) override {};
+		void OnRender(float, Camera*) override;
 
 		ALWAYS_INLINE operator const glm::mat4&() const { return _model; }
 		NODISCARD ALWAYS_INLINE const glm::mat4& Model() const { return _model; }
 		NODISCARD ALWAYS_INLINE const glm::mat4& PreviousModel() const { return _previousModel; }
 
+		NODISCARD ALWAYS_INLINE const TransformData* operator->() const { return &_transform; }
+
 		GET_CONST(const TransformData&, GlobalTransform, _globalTransform);
 
+		friend class TransformManager;
+
 	 private:
-		glm::mat4 _model;
-		glm::mat4 _previousModel = glm::mat4(1.0);
-		TransformData _globalTransform;
+		TransformData _transform, _globalTransform;
+		glm::mat4 _model, _previousModel = glm::mat4(1.0);
+		TransformFlags _flags;
 	};
 
 	class TransformManager : public ComponentManager<Transform>
@@ -60,6 +76,6 @@ namespace gE
 	 public:
 		using ComponentManager<Transform>::ComponentManager;
 
-		void OnUpdate(float delta) override;
+		void OnUpdate(float d) override;
 	};
 }

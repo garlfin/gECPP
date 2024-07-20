@@ -4,19 +4,55 @@
 
 #pragma once
 
-#include "GL/Math.h"
+#include "Engine/Math/Math.h"
 #include "GL/Texture/Texture.h"
 #include "GL/Buffer/Buffer.h"
 #include "Engine/Renderer/DefaultPipeline.h"
 #include "Engine/Component/Camera/Camera.h"
 
+#define SDF_MAX_TEXTURE 2
+#define SDF_MAX_MESH 64
+#define SDF_MAX_INSTANCE 128
+#define SDF_MAX_DYNAMIC_INSTANCE 32
+
 namespace GL
 {
+	struct SDFReference
+	{
+		glm::u16vec3 UV;
+		u8 Flags; // TextureID: 6, IsDynamic, ---
+		glm::u8vec3 Size;
+	};
+
+	struct SDFInstance
+	{
+		glm::mat4 Transform;
+		SDFReference Color;
+		u16 Mesh;
+	};
+
+	struct SDFNode
+	{
+		u8 Level; // Traversal aid
+		u8 Flags; // HasParent, IsLeafChildA, IsLeafChildB
+
+		u16 Parent;
+		u16 ChildA;
+		u16 ChildB;
+
+		float Scale;
+		glm::i16vec3 Position;
+		glm::i16vec3 Bounds;
+	};
+
 	struct SDFScene
 	{
-		glm::vec3 Center;
-		float Scale;
-		GL_ALIGN handle Color;
+		handle DistanceTexture[SDF_MAX_TEXTURE];
+		handle ColorTexture[SDF_MAX_TEXTURE];
+
+		SDFReference Meshes[SDF_MAX_MESH];
+		SDFInstance Instances[SDF_MAX_INSTANCE];
+		SDFNode Nodes[SDF_MAX_INSTANCE - 1];
 	};
 }
 
@@ -27,11 +63,6 @@ namespace gE
 
 namespace gE::SDFPipeline
 {
-	struct TargetSettings
-	{
-
-	};
-
 	struct Buffers
 	{
 	 public:
@@ -39,17 +70,17 @@ namespace gE::SDFPipeline
 
 		ALWAYS_INLINE void UpdateScene(u64 size = sizeof(GL::SDFScene), u64 offset = 0) const
 		{
-			_voxelBuffer.ReplaceData((u8*) &Scene + offset, size, offset);
+			_sdfBuffer.ReplaceData((u8*) &Scene + offset, size, offset);
 		}
 
 		GL::SDFScene Scene;
 
 	 private:
-		GL::Buffer<GL::SDFScene> _voxelBuffer;
+		GL::Buffer<GL::SDFScene> _sdfBuffer;
 	};
 
 	CONSTEXPR_GLOBAL GL::ITextureSettings ColorFormat { GL_RGB10_A2, GL::WrapMode::Clamp, GL::FilterMode::Linear, 1 };
-	CONSTEXPR_GLOBAL GL::ITextureSettings SDFFormat { GL_RG16F, GL::WrapMode::Clamp, GL::FilterMode::Nearest, 1 };
+	CONSTEXPR_GLOBAL GL::ITextureSettings SDFFormat { GL_R32F, GL::WrapMode::Clamp, GL::FilterMode::Nearest, 1 };
 
 	class Target3D : public RenderTarget<Camera3D>
 	{

@@ -13,15 +13,15 @@ namespace gE
 		_camera(this, _target, CreateVoxelSettings(r, s)),
 		_target(*this, _camera)
 	{
-		GetTransform().Scale = glm::vec3(s);
+		GetTransform().SetScale() = glm::vec3(s);
 	}
 
 	void VoxelCapture::GetGLVoxelScene(GL::VoxelScene& scene)
 	{
 		Transform& transform = GetTransform();
 
-		scene.Center = transform.Position;
-		scene.Scale = transform.Scale.x;
+		scene.Center = transform->Position;
+		scene.Scale = transform->Scale.x;
 		scene.Color = (handle) GetTarget().GetColor();
 	}
 

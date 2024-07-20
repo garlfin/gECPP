@@ -4,8 +4,6 @@
 #include "Engine/Binary/Binary.h"
 #include "TextureSlotManager.h"
 
-CONSTEXPR_GLOBAL float WhiteBorderColor[4] { 1.f, 1.f, 1.f, 0.f };
-
 namespace GL
 {
 	Texture::Texture(gE::Window* window, GLenum target, const ITextureSettings& settings) :
@@ -27,10 +25,10 @@ namespace GL
 	}
 
 
-	Texture2D::Texture2D(gE::Window* window, const TextureSettings<TextureDimension::D2D>& settings, TextureData&& data)
+	Texture2D::Texture2D(gE::Window* window, const TextureSettings<Dimension::D2D>& settings, TextureData&& data)
 		: Texture(window, GL_TEXTURE_2D, settings), _size(settings.Size)
 	{
-		if(!Settings.MipCount) Settings.MipCount = ::GL::GetMipCount<TextureDimension::D2D>(_size);
+		if(!Settings.MipCount) Settings.MipCount = ::GL::GetMipCount<Dimension::D2D>(_size);
 		glTextureStorage2D(ID, Settings.MipCount, Settings.Format, _size.x, _size.y);
 
 		if(!data.Data) return;
@@ -38,10 +36,10 @@ namespace GL
 		glm::u32vec2 size = _size;
 		u8* dataPtr = data.Data.Data();
 
-		for(u8 i = 0; i < data.MipCount; i++, size >>= decltype(size)(1)) // lazy guy
+		for(u8 i = 0; i < data.MipCount; i++, size >>= TextureSize2D(1))
 		{
-			size = glm::max(size, decltype(size)(1)); // double lazy guy
-			u64 dataSize = data.Scheme.Size<TextureDimension::D2D>(size);
+			size = glm::max(size, TextureSize2D(1));
+			u64 dataSize = data.Scheme.Size<Dimension::D2D>(size);
 
 			if(data.Scheme.IsCompressed())
 				glCompressedTextureSubImage2D(ID, i, 0, 0, size.x, size.y, Settings.Format, dataSize, dataPtr);
@@ -59,10 +57,10 @@ namespace GL
 		glCopyImageSubData(o.Get(), GL_TEXTURE_2D, 0, 0, 0, 0, ID, GL_TEXTURE_2D, 0, 0, 0, 0, GetSize().x, GetSize().y, 1);
 	}
 
-	Texture3D::Texture3D(gE::Window* window, const TextureSettings<TextureDimension::D3D>& settings, TextureData&& data)
+	Texture3D::Texture3D(gE::Window* window, const TextureSettings<Dimension::D3D>& settings, TextureData&& data)
 		: Texture(window, GL_TEXTURE_3D, settings), _size(settings.Size)
 	{
-		if(!Settings.MipCount) Settings.MipCount = ::GL::GetMipCount<TextureDimension::D3D>(_size);
+		if(!Settings.MipCount) Settings.MipCount = ::GL::GetMipCount<Dimension::D3D>(_size);
 		glTextureStorage3D(ID, Settings.MipCount, Settings.Format, _size.x, _size.y, _size.z);
 
 		if(!data) return;
@@ -70,10 +68,10 @@ namespace GL
 		glm::u32vec3 size = _size;
 		u8* dataPtr = data.Data.Data();
 
-		for(u8 i = 0; i < data.MipCount; i++, size >>= decltype(size)(1)) // lazy guy
+		for(u8 i = 0; i < data.MipCount; i++, size >>= TextureSize3D(1))
 		{
-			size = glm::max(size, decltype(size)(1)); // double lazy guy
-			u64 dataSize = data.Scheme.Size<TextureDimension::D3D>(size);
+			size = glm::max(size, TextureSize3D(1));
+			u64 dataSize = data.Scheme.Size<Dimension::D3D>(size);
 
 			if(data.Scheme.IsCompressed())
 				glCompressedTextureSubImage3D(ID, i, 0, 0, 0, size.x, size.y, size.z, Settings.Format, dataSize, dataPtr);
@@ -108,10 +106,10 @@ namespace GL
 		return _handle;
 	}
 
-	TextureCube::TextureCube(gE::Window* window, const TextureSettings<TextureDimension::D1D>& settings, TextureData&& data)
+	TextureCube::TextureCube(gE::Window* window, const TextureSettings<Dimension::D1D>& settings, TextureData&& data)
 		: Texture(window, GL_TEXTURE_CUBE_MAP, settings), _size(settings.Size)
 	{
-		if(!Settings.MipCount) Settings.MipCount = ::GL::GetMipCount<TextureDimension::D1D>(_size);
+		if(!Settings.MipCount) Settings.MipCount = ::GL::GetMipCount<Dimension::D1D>(_size);
 		glTextureStorage2D(ID, Settings.MipCount, settings.Format, _size, _size);
 
 		if(!data.Data) return;
@@ -122,7 +120,7 @@ namespace GL
 		for(u8 i = 0; i < data.MipCount; i++, size >>= 1)
 		{
 			size = glm::max(size, 1u);
-			u64 dataSize = data.Scheme.Size<TextureDimension::D3D>(TextureSize3D(size, size, 6));
+			u64 dataSize = data.Scheme.Size<Dimension::D3D>(TextureSize3D(size, size, 6));
 
 			if(data.Scheme.IsCompressed())
 				glCompressedTextureSubImage3D(ID, i, 0, 0, 0, size, size, 6, settings.Format, dataSize, dataPtr);
@@ -182,7 +180,7 @@ namespace GL
 	}
 
 	TextureData::TextureData(GLenum format, GLenum type, CompressionScheme scheme, u8 mip, Array<u8>&& arr) :
-		PixelFormat(format), PixelType(type), Scheme(scheme), MipCount(mip), Data(arr)
+		PixelFormat(format), PixelType(type), Scheme(scheme), MipCount(mip), Data(std::move(arr))
 	{
 	}
 }

@@ -15,7 +15,7 @@ namespace gE
 
 	CubemapCapture::CubemapCapture(gE::Window* w, u16 size) :
 		Entity(w, Flags(true, UINT8_MAX)),
-		Managed<CubemapCapture>(*this, GetWindow().GetCubemaps()),
+		Managed<CubemapCapture>(*this, &GetWindow().GetCubemaps()),
 		_camera(this, _target, { CubemapCameraSettings, size }),
 		_target(_camera)
 	{}
@@ -38,12 +38,13 @@ namespace gE
 
 		lighting.Skybox = Skybox->GetHandle();
 		lighting.CubemapCount = 1;
-		((CubemapCapture*) at(0))->GetGLCubemap(lighting.Cubemaps[0]);
+		(*List.GetFirst())->GetGLCubemap(lighting.Cubemaps[0]);
 
 		buffers.UpdateLighting(sizeof(handle), offsetof(GL::Lighting, Skybox));
 		buffers.UpdateLighting(sizeof(GL::Cubemap), offsetof(GL::Lighting, Cubemaps[0]));
 
-		for(CubemapCapture* c : *this) c->GetCamera().OnRender(delta, camera);
+		for(Managed<CubemapCapture>* c = List.GetFirst(); c; c = c->GetNext())
+			(*c)->GetCamera().OnRender(delta, camera);
 	}
 
 	void CubemapManager::DrawSkybox()

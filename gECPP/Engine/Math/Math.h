@@ -35,6 +35,19 @@ typedef int32_t i32;
 typedef uint64_t u64;
 typedef int64_t i64;
 
+enum class Dimension : u8
+{
+	D1D = 1,
+	D2D = 2,
+	D3D = 3
+};
+
+template<Dimension DIMENSION, typename INT_T = float>
+using Position = std::conditional_t<DIMENSION == Dimension::D1D, INT_T, glm::vec<(u8) DIMENSION, INT_T, glm::defaultp>>;
+
+template<Dimension DIMENSION, typename INT_T = u32>
+using Size = Position<DIMENSION, INT_T>;
+
 // World's dumbest optimization
 constexpr u8 GLSizeOf(u32 t)
 {
@@ -50,9 +63,9 @@ namespace glm
 
 namespace GL
 {
-	typedef glm::u32vec2 TextureSize2D;
-	typedef glm::u32vec3 TextureSize3D;
-	typedef u32 TextureSize1D;
+	typedef Size<Dimension::D1D> TextureSize1D;
+	typedef Size<Dimension::D2D> TextureSize2D;
+	typedef Size<Dimension::D3D> TextureSize3D;
 }
 
 enum class FOVType : u8
@@ -79,4 +92,31 @@ float constexpr fov_cast(float in, const GL::TextureSize2D& size)
 
 	if constexpr(UNIT == AngleType::Degree) return val * TO_DEG;
 	else return val;
+}
+
+inline void Decompose(const glm::mat4& m, glm::vec3& p, glm::quat& r, glm::vec3& s)
+{
+	p = m[3];
+
+	s = glm::vec3
+	{
+		glm::length((glm::vec3) m[0]),
+		glm::length((glm::vec3) m[1]),
+		glm::length((glm::vec3) m[3])
+	};
+
+	glm::mat3 temp
+	{
+		m[0] / s.x,
+		m[1] / s.y,
+		m[2] / s.z
+	};
+
+	float root;
+
+	r.w = glm::sqrt(m[0][0] + m[1][1] + m[2][2] + 1.0) * 0.5f;
+	root = r.w * 4.0;
+	r.x = (m[1][2] - m[2][1]) * root;
+	r.y = (m[2][0] - m[0][2]) * root;
+	r.z = (m[0][1] - m[1][0]) * root;
 }

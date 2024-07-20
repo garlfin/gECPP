@@ -4,7 +4,7 @@
 
 #pragma once
 #include <gETF/Prototype.h>
-#include <GL/Math.h>
+#include "Engine/Math/Math.h"
 
 namespace gE
 {
@@ -29,10 +29,12 @@ namespace gE
 		u8 Layer : 4 = 0;
 	};
 
+
+	template<class T> class ComponentManager;
+	template<class T> class ManagedList;
 	template<class T> class Manager;
-	template<class T> class ComponentManager;
-	template<class T> class ComponentManager;
 	template<class T> class Managed;
+
 }
 
 template<class T> class Serializable;

@@ -37,7 +37,7 @@ namespace PVR
 
 		if(header.Faces == 1)
 		{
-			GL::TextureSettings<GL::TextureDimension::D2D> settings
+			GL::TextureSettings2D settings
 			{
 				PVRToInternalFormat(header.Format),
 				wrapMode,
@@ -61,7 +61,7 @@ namespace PVR
 		{
 			GE_ASSERT(header.Size.x == header.Size.y, "Cubemap not square!");
 
-			GL::TextureSettings<GL::TextureDimension::D1D> settings
+			GL::TextureSettings1D settings
 			{
 				PVRToInternalFormat(header.Format),
 				wrapMode,

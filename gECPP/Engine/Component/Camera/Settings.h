@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "GL/Math.h"
+#include "Engine/Math/Math.h"
 #include "Engine/Array.h"
 #include "Timing.h"
 
@@ -25,19 +25,19 @@ namespace gE
 		CameraTiming Timing = DefaultCameraTiming;
 	};
 
-	template<GL::TextureDimension DIMENSION>
+	template<Dimension DIMENSION>
 	struct CameraSettings : public ICameraSettings
 	{
-		CameraSettings(const ICameraSettings& settings, const GL::TextureSize<DIMENSION>& size) :
+		CameraSettings(const ICameraSettings& settings, const Size<DIMENSION>& size) :
 			ICameraSettings(settings), Size(size)
 		{ };
 
-		GL::TextureSize<DIMENSION> Size{ 0 };
+		Size<DIMENSION> Size{ 0 };
 	};
 
-	typedef CameraSettings<GL::TextureDimension::D1D> CameraSettings1D;
-	typedef CameraSettings<GL::TextureDimension::D2D> CameraSettings2D;
-	typedef CameraSettings<GL::TextureDimension::D3D> CameraSettings3D;
+	typedef CameraSettings<Dimension::D1D> CameraSettings1D;
+	typedef CameraSettings<Dimension::D2D> CameraSettings2D;
+	typedef CameraSettings<Dimension::D3D> CameraSettings3D;
 
 	struct PerspectiveCameraSettings : public CameraSettings2D
 	{

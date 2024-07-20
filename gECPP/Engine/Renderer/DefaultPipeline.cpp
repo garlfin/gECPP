@@ -122,7 +122,10 @@ namespace gE
 
 	void DefaultPipeline::Target2D::RenderDependencies(float delta)
 	{
-		GetWindow().GetVoxelCapture()->GetCamera().OnRender(delta, &GetCamera());
-		GetWindow().GetLights().Sun->GetCamera().OnRender(delta, &GetCamera());
+		Camera3D* reflectionSystem = GetWindow().GetReflectionSystem();
+		LightManager& lightManager = GetWindow().GetLights();
+
+		if(reflectionSystem) reflectionSystem->OnRender(delta, &GetCamera());
+		lightManager.Sun->GetCamera().OnRender(delta, &GetCamera());
 	}
 }

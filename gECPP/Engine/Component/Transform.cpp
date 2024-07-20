@@ -6,51 +6,31 @@
 #include <Engine/Entity/Entity.h>
 #include <Engine/Window.h>
 
-void gE::Transform::Set(const gE::TransformData& d)
-{
-	Location = d.Location;
-	Scale = d.Scale;
-	Rotation = d.Rotation;
-}
-
 glm::mat4 gE::Transform::GetParentTransform()
 {
 	gE::Entity* parent = GetOwner()->GetParent();
 	return parent ? parent->GetTransform()._model : glm::mat4(1.f);
 }
 
-void gE::Transform::Set(const gE::Transform& d)
-{
-	Location = d.Location;
-	Scale = d.Scale;
-	Rotation = d.Rotation;
-}
-
 void gE::Transform::OnUpdate(float)
 {
-	_previousModel = _model;
+	Entity* parent = GetOwner()->GetParent();
+
+	_flags.Invalidated |= parent && parent->GetTransform()._flags.Invalidated;
+	_flags.PreviousInvalidated = _flags.Invalidated;
+	if(!_flags.Invalidated) return;
 
 	_model = GetParentTransform();
-	_model = glm::translate(_model, Location);
-	_model *= glm::toMat4(Rotation);
-	_model = glm::scale(_model, Scale);
+	_model = glm::translate(_model, _transform.Location);
+	_model *= glm::toMat4(_transform.Rotation);
+	_model = glm::scale(_model, _transform.Scale);
 
-	_globalTransform.Position = _model[3];
-	_globalTransform.Scale = glm::vec3
-	{
-		glm::length(_model[0]),
-		glm::length(_model[1]),
-		glm::length(_model[2])
-	};
+	Decompose(_model, _globalTransform.Location, _globalTransform.Rotation, _globalTransform.Scale);
+}
 
-	glm::mat3 rotation =
-	{
-		glm::vec3(_model[0]) / Scale.x,
-		glm::vec3(_model[1]) / Scale.y,
-		glm::vec3(_model[2]) / Scale.z,
-	};
-
-	_globalTransform.Rotation = glm::quat(rotation);
+void gE::Transform::OnRender(float, Camera*)
+{
+	_previousModel = _model;
 }
 
 gE::Transform::Transform(gE::Entity* o) : Component(o, &o->GetWindow().GetTransforms()),
@@ -63,21 +43,22 @@ gE::Transform::Transform(gE::Entity* o, const gE::TransformData& d) : Component(
 	Set(d);
 }
 
-void gE::TransformManager::OnUpdate(float delta)
+
+void gE::TransformManager::OnUpdate(float d)
 {
-	std::vector<Entity*> stack;
-	for(Component* t : *this)
+	for(Managed<Component>* c = List.GetFirst(); c; c = c->GetNext())
+		(*c)->OnInit();
+
+	for(Managed<Component>* c = InitializationList.GetFirst(); c; c = c->GetNext())
 	{
-		stack.push_back(((Component*) t)->GetOwner());
+		InitializationList.Remove(*c);
 
-		while(!stack.empty())
-		{
-			Entity* back = stack.back();
-			back->GetTransform().OnUpdate(delta);
-			stack.pop_back();
-
-			for(Entity* child: back->GetChildren())
-				stack.push_back(child);
-		}
+		Entity* parent = (*c)->GetOwner()->GetParent();
+		if(parent)
+			List.Insert(*c, parent->GetTransform());
+		else List.Add(*c);
 	}
+
+	for(Managed<Component>* c = List.GetFirst(); c; c = c->GetNext())
+		(*c)->OnUpdate(d);
 }

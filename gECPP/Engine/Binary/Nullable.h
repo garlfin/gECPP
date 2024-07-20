@@ -5,7 +5,7 @@
 #pragma once
 
 #include <cstring>
-#include "GL/Math.h"
+#include "Engine/Math/Math.h"
 #include "Macro.h"
 
 template<class T>
