@@ -49,14 +49,18 @@ void gE::TransformManager::OnUpdate(float d)
 	for(Managed<Component>* c = List.GetFirst(); c; c = c->GetNext())
 		(*c)->OnInit();
 
-	for(Managed<Component>* c = InitializationList.GetFirst(); c; c = c->GetNext())
+	for(Managed<Component>* c = InitializationList.GetFirst(); c;)
 	{
+		Managed<Component>* next = c->GetNext();
+
 		InitializationList.Remove(*c);
 
 		Entity* parent = (*c)->GetOwner()->GetParent();
 		if(parent)
 			List.Insert(*c, parent->GetTransform());
 		else List.Add(*c);
+
+		c = next;
 	}
 
 	for(Managed<Component>* c = List.GetFirst(); c; c = c->GetNext())

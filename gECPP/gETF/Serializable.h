@@ -9,6 +9,7 @@
 #include <Engine/Array.h>
 #include <Engine/Binary/Binary.h>
 #include <fstream>
+#include <unordered_map>
 
 // Defines SERIALIZABLE_PROTO_T
 // Defines SERIALIZABLE_PROTO

@@ -37,7 +37,6 @@ void DemoWindow::OnInit()
 	auto* cube = ReadSerializableFromFile<gETF::Mesh>(this, "Resource/Model/Plane.001.gEMesh");
 
 	auto* mesh = new VoxelDemo::StaticMeshEntity(this, cube);
-
 	mesh->GetTransform().SetScale() = glm::vec3(0.5);
 	mesh->GetMaterials().SetMaterial(0, cobbleMaterial);
 	mesh->GetMaterials().SetMaterial(1, tileMaterial);
