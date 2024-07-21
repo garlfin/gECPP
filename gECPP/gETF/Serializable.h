@@ -13,10 +13,31 @@
 // Defines SERIALIZABLE_PROTO_T
 // Defines SERIALIZABLE_PROTO
 
-template<class T, class S> CONSTEXPR_GLOBAL bool is_serializable = std::is_base_of_v<Serializable<S>, T>;
+template<class T>
+struct TypeSystem
+{
+	using TypeID = u64;
+	using FactoryFunction = std::conditional_t<std::is_same_v<T, void>,
+		Serializable<T>*(*)(std::istream&),
+		Serializable<T>*(*)(std::istream&, T)>;
 
-struct TypeID;
-struct IFileContainer;
+	struct Type
+	{
+		Type(const char* n, FactoryFunction f) : Name(n), ID(0), Factory(f)
+		{
+			TypeSystem<T>::Types[ID];
+		};
+
+		const char* Name;
+		TypeID ID;
+
+		FactoryFunction Factory;
+	};
+
+	static GLOBAL std::unordered_map<TypeID, Type> Types;
+};
+
+template<class T, class S> CONSTEXPR_GLOBAL bool is_serializable = std::is_base_of_v<Serializable<S>, T>;
 
 template<class T = void> struct Serializable;
 template<class T> requires is_serializable<T, gE::Window*> struct FileContainer;
@@ -47,7 +68,6 @@ template<class T> void ReadSerializable(std::istream& in, Serializable<T>& t, ty
 template<> void Read(std::istream& in, u32 count, std::string* t);
 template<> void Write(std::ostream& out, u32 count, const std::string* t);
 
-
 #define VIRTUAL_H(FUNC_RETURN, FUNC) \
 	inline FUNC_RETURN FUNC override {};
 
@@ -68,6 +88,11 @@ template<> void Write(std::ostream& out, u32 count, const std::string* t);
 		explicit TYPE(istream& in) : SUPER(in) { TYPE::Serialize(in); } \
 	public: VIRTUAL_H_PROTO(TYPE, SUPER, void, Serialize, (istream& in), (in)) \
 	public: VIRTUAL_H_PROTO(TYPE, SUPER, void, Deserialize, (ostream& out) const, (out));
+
+#define SERIALIZABLE_REFLECTABLE(TYPE) \
+ 	public: \
+		static TYPE* TYPE##FACTORY(std::istream& in, SETTINGS_T t) { return new TYPE(in, t); } \
+		static GLOBAL TypeSystem<SETTINGS_T>::Type Type{ #TYPE, (TypeSystem<SETTINGS_T>::FactoryFunction) TYPE##FACTORY };
 
 template<class T>
 struct Serializable
@@ -95,22 +120,6 @@ struct Serializable<void>
 	virtual ~Serializable() = default;
 };
 
-struct TypeID
-{
-	template<class T>
-	constexpr explicit TypeID(const char* name) : Type(0), Size(sizeof(T))
-	{
-		u32 len = strlen(name);
-		for(u32 i = 0; i < len; i++)
-			Type ^= name[i] >> i % 8;
-	}
-
-	TypeID() = default;
-
-	u64 Type = 0;
-	u64 Size = 0;
-};
-
 struct IFileContainer : public Serializable<gE::Window*>
 {
 	SERIALIZABLE_PROTO_T(IFileContainer, Serializable<gE::Window*>);
@@ -135,12 +144,12 @@ struct IFileContainer : public Serializable<gE::Window*>
 	T& Cast() { T* t = Cast<T>(); assert(t); return *t; }
 
 	GET_CONST(const std::string&, Name, _name);
-	GET_CONST(TypeID, Type, _type);
+	GET_CONST(const TypeSystem<gE::Window*>::TypeID&, Type, _type);
 	GET(Serializable<gE::Window*>&,, *_t);
 
  private:
 	std::string _name;
-	TypeID _type;
+	TypeSystem<gE::Window*>::TypeID _type;
 	Serializable<gE::Window*>* _t;
 };
 

@@ -56,7 +56,7 @@ void IFileContainer::IDeserialize(std::ostream& buf) const
 
 void IFileContainer::ISerialize(std::istream& ptr, gE::Window* settings)
 {
-	_type = Read<TypeID>(ptr);
+	_type = Read<TypeSystem<gE::Window*>::TypeID>(ptr);
 	_name = Read<std::string>(ptr);
 	_t->Serialize(ptr, settings);
 }
