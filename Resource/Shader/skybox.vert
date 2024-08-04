@@ -5,14 +5,23 @@ layout(location = 0) in vec3 Position;
 #include "Include/Camera.glsl"
 #include "Include/Scene.glsl"
 
-out vec3 FragPos;
+struct VertexOut
+{
+    vec3 FragPos;
+    vec4 CurrentNDC;
+    vec4 PreviousNDC;
+};
+
+out VertexOut VertexIn;
 
 void main()
 {
-    mat4 ViewProjection = Camera.Projection * mat4(mat3(Camera.View[ViewIndex]));
+    mat4 viewProjection = Camera.Projection * Camera.View[ViewIndex];
 
-    FragPos = (Scene.Model[ModelIndex] * vec4(Position, 1)).xyz;
-
-    gl_Position = (ViewProjection * Scene.Model[ModelIndex] * vec4(FragPos, 1)).xyww;
+    gl_Position = (viewProjection * vec4(Position, 0.f)).xyww;
     gl_Layer = gl_InstanceID;
+
+    VertexIn.FragPos = Position;
+    VertexIn.CurrentNDC = gl_Position;
+    VertexIn.PreviousNDC = (Camera.PreviousViewProjection * vec4(Position, 0.f)).xyww;
 }

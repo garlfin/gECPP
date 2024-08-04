@@ -66,7 +66,7 @@ void DebugMessage(GLenum source, GLenum type, GLuint id, GLenum severity, GLsize
 }
 #endif
 
-void Window::Run()
+bool Window::Run()
 {
 #ifdef DEBUG
 	glEnable(GL_DEBUG_OUTPUT);
@@ -143,6 +143,8 @@ void Window::Run()
 
 		frameDelta = 0;
 	}
+
+	return false;
 }
 
 void Window::OnInit()

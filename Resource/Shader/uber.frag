@@ -1,7 +1,10 @@
 #define ENABLE_VOXEL_TRACE
-// #define DIRECTIONAL_CONTACT_SHADOW
+#define DIRECTIONAL_CONTACT_SHADOW
 #define SOFT_SHADOW_AVERAGE
 #define RAY_MAX_MIP 6
+
+#define POM_MIN_LAYER 8
+#define POM_MAX_LAYER 32
 
 #include "Include/Camera.glsl"
 #include "Include/Scene.glsl"
@@ -24,8 +27,8 @@ struct VertexOut
 {
     vec3 FragPos;
     vec2 UV;
-    vec4 PreviousUV;
-    vec4 CurrentUV;
+    vec4 CurrentNDC;
+    vec4 PreviousNDC;
     vec4 FragPosLightSpace[MAX_LIGHTS];
     mat3 TBN;
 };
@@ -49,7 +52,10 @@ void main()
         VertexIn.UV * 10
     );
 
-	ParallaxEffectSettings parallaxSettings = ParallaxEffectSettings(0.5f, 16, 32, 0.0, 0.5);
+    int maxSample = int((POM_MAX_LAYER - POM_MIN_LAYER) * IGNSample) + POM_MIN_LAYER;
+
+	ParallaxEffectSettings parallaxSettings = ParallaxEffectSettings(0.5f, POM_MIN_LAYER, maxSample, 0.0, 0.5);
+
     vec3 viewDir = normalize(Camera.Position - VertexIn.FragPos);
     vec2 uv = ParallaxMapping(viewDir, ARMDTex, vert, parallaxSettings);
 
@@ -106,7 +112,7 @@ void main()
 
     FragColor.a = 1.0;
 
-	Velocity = ((VertexIn.CurrentUV.xy / VertexIn.CurrentUV.w) - (VertexIn.PreviousUV.xy / VertexIn.PreviousUV.w)) * 0.5;
+	Velocity = ((VertexIn.CurrentNDC.xy / VertexIn.CurrentNDC.w) - (VertexIn.PreviousNDC.xy / VertexIn.PreviousNDC.w)) * 0.5;
 
     if(!bool(Scene.State & ENABLE_VOXEL_WRITE)) return;
 

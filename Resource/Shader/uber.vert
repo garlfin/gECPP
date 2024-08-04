@@ -14,8 +14,8 @@ struct VertexOut
 {
     vec3 FragPos;
     vec2 UV;
-	vec4 PreviousUV;
-    vec4 CurrentUV;
+    vec4 CurrentNDC;
+	vec4 PreviousNDC;
     vec4 FragPosLightSpace[MAX_LIGHTS];
     mat3 TBN;
 };
@@ -31,7 +31,7 @@ void main()
 
     gl_Position = viewProjection * vec4(VertexIn.FragPos, 1);
     gl_Layer = gl_InstanceID / int(Scene.InstanceCount);
-    VertexIn.CurrentUV = gl_Position;
+    VertexIn.CurrentNDC = gl_Position;
 
     if(bool(Scene.State & ENABLE_JITTER))
     {
@@ -41,8 +41,8 @@ void main()
 
     if(!bool(Scene.State & ENABLE_COLOR)) return;
 
-    VertexIn.PreviousUV = Scene.PreviousModel[ModelIndex] * vec4(Position, 1);
-    VertexIn.PreviousUV = Camera.PreviousViewProjection * vec4(VertexIn.PreviousUV.xyz, 1);
+    VertexIn.PreviousNDC = Scene.PreviousModel[ModelIndex] * vec4(Position, 1);
+    VertexIn.PreviousNDC = Camera.PreviousViewProjection * vec4(VertexIn.PreviousNDC.xyz, 1);
 
     vec3 nor, tan, bitan;
     nor = normalize(Scene.Normal[ModelIndex] * Normal);

@@ -40,7 +40,7 @@ namespace gE::VoxelDemo
 
 			dir = glm::normalize(dir);
 			if(!glm::isnan(dir.x))
-				_transform.SetPosition() += _transform->Rotation * dir * d * 2.f;
+				_transform.SetPosition() += _transform->Rotation * dir * d;
 		}
 
 	 private:

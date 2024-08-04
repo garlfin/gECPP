@@ -51,7 +51,7 @@ namespace gE
 	 public:
 		explicit Window(glm::u16vec2 size, const char* name = "gE");
 
-		void Run();
+		bool Run();
 		void Blit(const GL::Texture& texture);
 
 		// Entities & Data

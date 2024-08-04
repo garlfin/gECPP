@@ -9,8 +9,8 @@ struct VertexOut
 {
    vec3 FragPos;
    vec2 UV;
-   vec4 PreviousUV;
-   vec4 CurrentUV;
+   vec4 CurrentNDC;
+   vec4 PreviousNDC;
    vec4 FragPosLightSpace[MAX_LIGHTS];
    mat3 TBN;
 };
