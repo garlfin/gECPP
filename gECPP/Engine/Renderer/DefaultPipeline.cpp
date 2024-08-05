@@ -13,7 +13,7 @@
 namespace gE
 {
 	gE::DefaultPipeline::Buffers::Buffers(Window* window) :
-		_sceneBuffer(window), _cameraBuffer(window), _lightBuffer(window)
+		_cameraBuffer(window), _sceneBuffer(window), _lightBuffer(window)
 	{
 		_sceneBuffer.Bind(GL::BufferTarget::Uniform, 0);
 		_cameraBuffer.Bind(GL::BufferTarget::Uniform, 1);
@@ -25,8 +25,8 @@ namespace gE
 		_depth(GetFrameBuffer(), GL::TextureSettings2D(DefaultPipeline::DepthFormat, camera.GetSize())),
 		_color(GetFrameBuffer(), GL::TextureSettings2D(DefaultPipeline::ColorFormat, camera.GetSize())),
 		_velocity(GetFrameBuffer(), GL::TextureSettings2D(DefaultPipeline::VelocityFormat, camera.GetSize())),
-		_depthBack(&GetWindow(), GL::TextureSettings2D(DefaultPipeline::HiZFormat, camera.GetSize())),
 		_colorBack(&GetWindow(), GL::TextureSettings2D(DefaultPipeline::ColorFormat, camera.GetSize())),
+		_depthBack(&GetWindow(), GL::TextureSettings2D(DefaultPipeline::HiZFormat, camera.GetSize())),
 		_postProcessBack(&GetWindow(), GL::TextureSettings2D(DefaultPipeline::ColorFormat, camera.GetSize())),
 		_effects(effects)
 	{

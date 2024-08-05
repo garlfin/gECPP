@@ -5,7 +5,7 @@
 #pragma once
 
 #include <vector>
-#include "GL/GL.h"
+#include "Graphics/GL.h"
 #include "Engine/Binary/Binary.h"
 
 namespace gE

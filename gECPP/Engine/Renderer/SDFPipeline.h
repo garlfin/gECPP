@@ -5,8 +5,8 @@
 #pragma once
 
 #include "Engine/Math/Math.h"
-#include "GL/Texture/Texture.h"
-#include "GL/Buffer/Buffer.h"
+#include "Graphics/Texture/Texture.h"
+#include "Graphics/Buffer/Buffer.h"
 #include "Engine/Renderer/DefaultPipeline.h"
 #include "Engine/Component/Camera/Camera.h"
 

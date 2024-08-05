@@ -1,7 +1,7 @@
 //
 // Created by scion on 9/20/2023.
 //
-#include "FrameBuffer.h"
+#include "Framebuffer.h"
 
 namespace GL
 {

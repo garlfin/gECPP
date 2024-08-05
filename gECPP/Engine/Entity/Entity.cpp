@@ -42,7 +42,7 @@ namespace gE
 	}
 
 	Component::Component(Entity* o, Manager<Component>* m) : Managed<Component>(*this, m),
-		 _owner(o), _window(o->GetWindow())
+		 _window(o->GetWindow()), _owner(o)
 	{}
 
 	Behavior::Behavior(Entity* o) : Component(o, &o->GetWindow().GetBehaviors())

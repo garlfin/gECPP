@@ -66,7 +66,7 @@ namespace gE
 	class Managed
 	{
 	 public:
-		explicit inline Managed(T& t, Manager<T>* m = nullptr) : _t(t), _manager(m)
+		explicit inline Managed(T& t, Manager<T>* m = nullptr) : _manager(m), _t(t)
 		{
 			if(m) m->Register(t);
 		}

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "GLAD/glad.h"
-#include "GL/gl.h"
+#include "Graphics/"
 #include <type_traits>
 #include <iostream>
 #include "VAOSettings.h"

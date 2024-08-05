@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Engine/Math/Math.h"
-#include <GL/Buffer/VAO.h>
-#include <GL/Shader/Shader.h>
-#include <GL/Texture/TextureSlotManager.h>
+#include <Graphics/Buffer/VAO.h>
+#include <Graphics/Shader/Shader.h>
+#include <Graphics/Texture/TextureSlotManager.h>
 
 #include "WindowState.h"
 #include <Engine/Manager.h>

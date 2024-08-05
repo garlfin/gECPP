@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GL/GL.h"
+#include "Graphics/GL.h"
 #include "Buffer.h"
 #include "VAOSettings.h"
 #include "Engine/Array.h"

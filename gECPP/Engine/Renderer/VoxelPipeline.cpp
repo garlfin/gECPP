@@ -20,8 +20,8 @@ namespace gE::VoxelPipeline
 
 	Target3D::Target3D(VoxelCapture& capture, Camera3D& camera) :
 		RenderTarget<Camera3D>(capture, camera),
-		_colorBack(&camera.GetWindow(), { ColorBackFormat, camera.GetSize() }),
-		_color(&camera.GetWindow(), { ColorFormat, camera.GetSize()})
+		_color(&camera.GetWindow(), { ColorFormat, camera.GetSize()}),
+		_colorBack(&camera.GetWindow(), { ColorBackFormat, camera.GetSize() })
 	{
 		GetFrameBuffer().SetDefaultSize(camera.GetSize());
 	}

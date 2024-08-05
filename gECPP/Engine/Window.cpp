@@ -21,7 +21,7 @@ using namespace gE;
 #define US_TO_MS 1000000.f
 
 Window::Window(glm::u16vec2 size, const char* name) :
-	_size(size), _name(strdup(name)), Lights(this), Cubemaps(this)
+	Lights(this), Cubemaps(this), _size(size), _name(strdup(name))
 {
 	if(!glfwInit()) GE_FAIL("Failed to initialize GLFW.");
 
@@ -50,6 +50,9 @@ Window::Window(glm::u16vec2 size, const char* name) :
 	glfwSetWindowIcon(_window, 1, &image);
 
 	if(!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) GE_FAIL("Failed to initialize GLAD.");
+
+	LOG("Vendor: " << glGetString(GL_VENDOR));
+	LOG("Renderer: " << glGetString(GL_RENDERER));
 }
 
 Window::~Window()
@@ -92,8 +95,7 @@ bool Window::Run()
 
 	_time = glfwGetTime();
 
-	double currentTime;
-	double delta, frameDelta = 0.0;
+	double frameDelta = 0.0;
 
 	GLuint timer;
 	u64 timerResult;
@@ -104,8 +106,8 @@ bool Window::Run()
 	{
 		glfwPollEvents();
 
-		currentTime = glfwGetTime();
-		delta = currentTime - _time;
+		double currentTime = glfwGetTime();
+		double delta = currentTime - _time;
 		_time = currentTime;
 
 		OnUpdate((float) delta);

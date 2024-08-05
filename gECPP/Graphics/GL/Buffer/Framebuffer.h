@@ -1,7 +1,7 @@
 #pragma once
 
-#include <GL/GL.h>
-#include <GL/Texture/Texture.h>
+#include <Graphics/GL.h>
+#include <Graphics/Texture/Texture.h>
 #include <Engine/AssetManager.h>
 
 #define GL_MAX_ATTACHMENTS 4

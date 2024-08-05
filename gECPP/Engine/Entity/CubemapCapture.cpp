@@ -91,8 +91,8 @@ namespace gE
 
 	CubemapTarget::CubemapTarget(CameraCubemap& camera) :
 		RenderTarget<CameraCubemap>(*camera.GetOwner(), camera), IDepthTarget(_depth.Get()),
-		_color(GetFrameBuffer(), GL::TextureSettings1D{ CubemapColorFormat, camera.GetSize() }),
-		_depth(GetFrameBuffer(), GL::TextureSettings1D{ DefaultPipeline::DepthFormat, camera.GetSize() })
+		_depth(GetFrameBuffer(), GL::TextureSettings1D{ DefaultPipeline::DepthFormat, camera.GetSize() }),
+		_color(GetFrameBuffer(), GL::TextureSettings1D{ CubemapColorFormat, camera.GetSize() })
 	{
 	}
 

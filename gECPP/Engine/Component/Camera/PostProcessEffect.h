@@ -6,7 +6,7 @@
 
 #include "Prototype.h"
 #include "RenderTarget.h"
-#include <GL/Texture/Texture.h>
+#include <Graphics/Texture/Texture.h>
 
 namespace gE
 {

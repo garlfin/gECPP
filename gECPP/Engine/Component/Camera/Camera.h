@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include <GL/Texture/Texture.h>
-#include <GL/Buffer/FrameBuffer.h>
+#include <Graphics/Texture/Texture.h>
+#include <Graphics/Buffer/FrameBuffer.h>
 
 #include "Engine/Entity/Entity.h"
 #include "Engine/Array.h"

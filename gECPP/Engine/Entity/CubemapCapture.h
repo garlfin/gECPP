@@ -9,7 +9,7 @@
 #include <Engine/Component/Camera/RenderTarget.h>
 #include <Engine/Renderer/DefaultPipeline.h>
 #include <gETF/File.h>
-#include <GL/Shader/Shader.h>
+#include <Graphics/Shader/Shader.h>
 
 namespace gE
 {

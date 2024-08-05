@@ -4,17 +4,17 @@
 
 #pragma once
 
-#include "GL/Buffer/VAO.h"
+#include "Engine/Graphics/Buffer/VAO.h"
 #include "Engine/Component/Camera/Camera.h"
 #include "Engine/Window.h"
 #include "Demo/Engine/Component/Movement.h"
 
 namespace gE::VoxelDemo
 {
-	gE::ICameraSettings FlyCameraSettings
+	ICameraSettings FlyCameraSettings
 	{
-		gE::ClipPlanes(0.1, 100),
-		gE::DefaultCameraTiming,
+		ClipPlanes(0.1, 100),
+		DefaultCameraTiming,
 	};
 
 	class FlyCamera : public gE::Entity

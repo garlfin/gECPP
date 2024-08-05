@@ -6,9 +6,9 @@
 
 #include <Prototype.h>
 #include <gETF/Serializable.h>
-#include <GL/Buffer/VAOSettings.h>
+#include <Graphics/Buffer/VAOSettings.h>
 #include <Engine/AssetManager.h>
-#include <GL/Buffer/VAO.h>
+#include <Graphics/Buffer/VAO.h>
 
 #define GETF_MESH_MAGIC "GMSH"
 #define GETF_MESH_VERSION 1

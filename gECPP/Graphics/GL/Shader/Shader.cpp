@@ -4,7 +4,7 @@
 
 #include "Shader.h"
 #include "Uniform.h"
-#include <GL/Texture/Texture.h>
+#include <Graphics/Texture/Texture.h>
 #include <iostream>
 #include <Engine/Window.h>
 

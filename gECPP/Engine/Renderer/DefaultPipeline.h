@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include <GL/Buffer/Buffer.h>
-#include <GL/Texture/TextureSettings.h>
-#include <GL/Texture/Texture.h>
+#include <Graphics/Buffer/Buffer.h>
+#include <Graphics/Texture/TextureSettings.h>
+#include <Graphics/Texture/Texture.h>
 #include <Engine/Component/Camera/Camera.h>
 #include <Engine/Component/Camera/RenderTarget.h>
 #include <Engine/Component/Camera/Settings.h>

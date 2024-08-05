@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <GL/Buffer/FrameBuffer.h>
+#include <Graphics/Buffer/FrameBuffer.h>
 #include "Engine/Manager.h"
 
 namespace gE

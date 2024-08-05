@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include <GL/Shader/Shader.h>
-#include <GL/Texture/Texture.h>
+#include <Graphics/Shader/Shader.h>
+#include <Graphics/Texture/Texture.h>
 #include "Engine/Renderer/Material.h"
 #include "Engine/AssetManager.h"
 
