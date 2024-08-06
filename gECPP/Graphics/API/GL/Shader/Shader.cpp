@@ -135,6 +135,17 @@ namespace GL
 		SetUniform(loc, tex.Use(slot));
 	}
 
+	void Shader::SetUniform(u8 loc, const Texture& tex) const
+	{
+		SetUniform(loc, tex.Use(GetWindow().GetSlotManager().Increment()));
+	}
+
+	template<>
+	void DynamicUniform::Set<GL::Texture>(const Texture& t) const
+	{
+		if(_location != -1) _shader->SetUniform(_location, t, _location);
+	}
+
 	DynamicUniform::DynamicUniform(Shader* s, u32 l) : _shader(s), _location(l) { }
 	DynamicUniform::DynamicUniform(Shader* s, const char* n) : _shader(s), _location(GetUniformLocation(n)) { }
 }

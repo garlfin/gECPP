@@ -22,15 +22,15 @@ namespace GL
 	{
 	 public:
 		explicit Buffer(gE::Window* window, u32 count = 1, const T* data = nullptr) :
-			GPU::Buffer<T>(count, data) , GLObject(window)
+			GPU::Buffer<T>(count, data), GLObject(window)
 		{ Construct(); }
 
 		explicit Buffer(gE::Window* window, const Array<T>& arr) :
-			GPU::Buffer<T>(arr) , GLObject(window)
+			GPU::Buffer<T>(arr), GLObject(window)
 		{ Construct(); }
 
 		explicit Buffer(gE::Window* window, Array<T>&& arr) :
-			GPU::Buffer<T>(std::move(arr)) , GLObject(window)
+			GPU::Buffer<T>(std::move(arr)), GLObject(window)
 		{ Construct(); }
 
 		template<typename I>

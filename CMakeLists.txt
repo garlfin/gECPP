@@ -26,7 +26,8 @@ add_library(ASSIMP STATIC IMPORTED
         gECPP/Graphics/Buffer/VAO.h
         gECPP/Graphics/Texture/Texture.h
         gECPP/Graphics/Shader/Shader.h
-        gECPP/Graphics/Shader/Uniform.h)
+        gECPP/Graphics/Shader/Uniform.h
+        gECPP/Graphics/Texture/TextureSlotManager.h)
 set_property(TARGET ASSIMP PROPERTY IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ASSIMP/libassimp-5.dll")
 FILE(COPY "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ASSIMP/libassimp-5.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 

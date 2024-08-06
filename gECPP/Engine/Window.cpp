@@ -163,9 +163,9 @@ void Window::OnInit()
 
 	{
 		API::ComputeShader brdfShader(this, "Resource/Shader/Compute/brdf.comp");
-		API::TextureSettings2D brdfSettings
+		GPU::TextureSettings2D brdfSettings
 		{
-			{ GL_RG16F, API::WrapMode::Clamp, API::FilterMode::Linear, 1 },
+			{ GL_RG16F, GPU::WrapMode::Clamp, GPU::FilterMode::Linear, 1 },
 			TextureSize2D(BRDF_SIZE)
 		};
 

@@ -24,6 +24,8 @@
 #include <Engine/Renderer/PostProcess/Bloom.h>
 #include <Engine/Renderer/PostProcess/Tonemap.h>
 
+#include <Graphics/Texture/TextureSlotManager.h>
+
 struct GLFWwindow;
 struct GLFWvidmode;
 
@@ -77,6 +79,7 @@ namespace gE
 		GET(LightManager&, Lights, Lights);
 		GET(CubemapManager&, Cubemaps, Cubemaps);
 		GET(CullingManager&, CullingManager, CullingManager);
+		GET(API::TextureSlotManager&, SlotManager, SlotManager);
 
 		// Engine States
 		RenderFlags State;
@@ -120,6 +123,8 @@ namespace gE
 		SmartPointer<API::ComputeShader> BloomShader;
 		SmartPointer<API::ComputeShader> VoxelTAAShader;
 		SmartPointer<API::ComputeShader> HiZShader;
+
+		API::TextureSlotManager SlotManager;
 
 	 private:
 		TextureSize2D _size;

@@ -3,7 +3,7 @@
 //
 
 #include <fstream>
-#include "Texture.h"
+#include "Graphics/API/GL/Texture/Texture.h"
 
 namespace PVR
 {

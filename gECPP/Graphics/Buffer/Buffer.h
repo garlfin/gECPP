@@ -16,7 +16,13 @@ namespace GPU
 	 public:
 		static_assert(!std::is_pointer_v<T>, "Buffer data shouldn't be a pointer!");
 
-		explicit Buffer(u32 count = 1, const T* data = nullptr) : _array(count, data) {}
+		explicit Buffer(u32 count = 1, const T* data = nullptr) : _array(count)
+		{
+			if(!data) return;
+
+			if constexpr(!Array<T>::IS_VOID)
+				for(u32 i = 0; i < count; i++) _array[i] = data[i];
+		}
 		explicit Buffer(const Array<T>& arr) : _array(arr) {}
 		explicit Buffer(Array<T>&& arr) : _array(arr) {}
 
