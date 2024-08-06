@@ -4,7 +4,6 @@
 
 #include "GUI.h"
 #include <gETF/File.h>
-#include <Engine/Entity/Entity.h>
 #include <Demo/Engine/Entity/FlyCamera.h>
 
 namespace gETF::UI

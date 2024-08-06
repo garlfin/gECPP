@@ -166,7 +166,7 @@ void Window::OnInit()
 		API::TextureSettings2D brdfSettings
 		{
 			{ GL_RG16F, API::WrapMode::Clamp, API::FilterMode::Linear, 1 },
-			API::TextureSize2D(BRDF_SIZE)
+			TextureSize2D(BRDF_SIZE)
 		};
 
 		glm::uvec2 brdfGroupSize = DIV_CEIL_T(BRDF_SIZE, BRDF_GROUP_SIZE, glm::uvec2);
@@ -178,7 +178,7 @@ void Window::OnInit()
 	}
 
 	auto defaultShader = ref_create<API::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/missing.frag");
-	DefaultMaterial = ptr_create<gE::Material>(this, defaultShader);
+	DefaultMaterial = ptr_create<Material>(this, defaultShader);
 }
 
 void Window::Blit(const API::Texture& texture)

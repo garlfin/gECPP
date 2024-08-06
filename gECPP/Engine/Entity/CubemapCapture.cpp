@@ -13,14 +13,14 @@ namespace gE
 		DefaultCameraTiming
 	};
 
-	CubemapCapture::CubemapCapture(gE::Window* w, u16 size) :
+	CubemapCapture::CubemapCapture(Window* w, u16 size) :
 		Entity(w, Flags(true, UINT8_MAX)),
 		Managed<CubemapCapture>(*this, &GetWindow().GetCubemaps()),
 		_camera(this, _target, { CubemapCameraSettings, size }),
 		_target(_camera)
 	{}
 
-	void CubemapCapture::GetGLCubemap(API::Cubemap& cubemap)
+	void CubemapCapture::GetGPUCubemap(API::Cubemap& cubemap)
 	{
 		Transform& transform = GetTransform();
 
@@ -38,7 +38,7 @@ namespace gE
 
 		lighting.Skybox = Skybox->GetHandle();
 		lighting.CubemapCount = 1;
-		(*List.GetFirst())->GetGLCubemap(lighting.Cubemaps[0]);
+		(*List.GetFirst())->GetGPUCubemap(lighting.Cubemaps[0]);
 
 		buffers.UpdateLighting(sizeof(handle), offsetof(API::Lighting, Skybox));
 		buffers.UpdateLighting(sizeof(API::Cubemap), offsetof(API::Lighting, Cubemaps[0]));

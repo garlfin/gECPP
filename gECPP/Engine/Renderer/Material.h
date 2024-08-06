@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include <Graphics/Shader/Shader.h>
 #include <Graphics/Shader/Uniform.h>
 #include <Graphics/Texture/Texture.h>
 #include <Engine/AssetManager.h>
@@ -34,7 +33,7 @@ namespace gE
 		Blend
 	};
 
-	struct Material : public API::Asset
+	struct Material : public API::APIObject
 	{
 	 public:
 		Material(Window* window, const Reference<API::Shader>& shader, DepthFunction depthFunc = DepthFunction::Less, CullMode cullMode = CullMode::Back);
@@ -83,8 +82,8 @@ namespace gE
 	};
 
 	template<class T>
-	using ReferenceUniform = ValueUniform<gE::Reference<T>>;
+	using ReferenceUniform = ValueUniform<Reference<T>>;
 
 	template<class T>
-	using SmartPointerUniform = ValueUniform<gE::SmartPointer<T>>;
+	using SmartPointerUniform = ValueUniform<SmartPointer<T>>;
 }

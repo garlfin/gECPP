@@ -43,11 +43,11 @@ namespace gE
 	{
 		Window& window = callingCamera->GetWindow();
 		OrthographicCamera& camera = GetCamera();
-		API::TextureSize2D size = camera.GetSize();
+		TextureSize2D size = camera.GetSize();
 
 		DefaultPipeline::Buffers& buffers = window.GetPipelineBuffers();
 
-		GetOwner().GetGLLight(buffers.Lighting.Lights[0]);
+		GetOwner().GetGPULight(buffers.Lighting.Lights[0]);
 		buffers.UpdateLighting(offsetof(API::Lighting, Lights[1]));
 
 		window.State = State::Shadow;
@@ -65,7 +65,7 @@ namespace gE
 		if(!callingCamera) return false;
 
 		OrthographicCamera& camera = GetCamera();
-		API::TextureSize2D size = camera.GetSize();
+		TextureSize2D size = camera.GetSize();
 
 		Transform& transform = GetOwner().GetTransform();
 		Transform& cameraTransform = callingCamera->GetOwner()->GetTransform();
@@ -76,18 +76,18 @@ namespace gE
 		//		  (far - near) / 2 + near
 		//		  places the middle on the camera
 
-		transform.SetPosition() = glm::floor(cameraTransform->Position) + offset;
+		transform.SetPosition() = floor(cameraTransform->Position) + offset;
 		transform.OnUpdate(0.f); // Force update on model matrix since it passed its tick.
 
 		return true;
 	}
 
-	void DirectionalLight::GetGLLight(API::Light& light)
+	void DirectionalLight::GetGPULight(API::Light& light)
 	{
 		Transform& transform = GetCamera().GetOwner()->GetTransform();
 		OrthographicCamera& camera = GetCamera();
 
-		light.ViewProjection = camera.GetProjection() * glm::inverse(transform.Model());
+		light.ViewProjection = camera.GetProjection() * inverse(transform.Model());
 		light.Position = -transform->Forward();
 		light.Type = API::LightType::Directional;
 		light.Color = glm::vec3(1);

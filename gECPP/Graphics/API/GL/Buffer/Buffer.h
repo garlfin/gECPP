@@ -4,7 +4,6 @@
 #include "Graphics/API/GL/GL.h"
 #include <type_traits>
 #include <iostream>
-#include "VAOSettings.h"
 #include "Graphics/Buffer/Buffer.h"
 
 namespace GL
@@ -19,19 +18,19 @@ namespace GL
 	};
 
 	template<typename T = u8, bool DYNAMIC = false>
- 	class Buffer : public gE::Graphics::Buffer<T>, public GLObject
+ 	class Buffer : public gE::GPU::Buffer<T>, public GLObject
 	{
 	 public:
 		explicit Buffer(gE::Window* window, u32 count = 1, const T* data = nullptr) :
-			gE::Graphics::Buffer<T>(count, data) , GLObject(window)
+			gE::GPU::Buffer<T>(count, data) , GLObject(window)
 		{ Construct(); }
 
 		explicit Buffer(gE::Window* window, const Array<T>& arr) :
-			gE::Graphics::Buffer<T>(arr) , GLObject(window)
+			gE::GPU::Buffer<T>(arr) , GLObject(window)
 		{ Construct(); }
 
 		explicit Buffer(gE::Window* window, Array<T>&& arr) :
-			gE::Graphics::Buffer<T>(std::move(arr)) , GLObject(window)
+			gE::GPU::Buffer<T>(std::move(arr)) , GLObject(window)
 		{ Construct(); }
 
 		template<typename I>
@@ -58,7 +57,7 @@ namespace GL
 		}
 
 		template<typename I>
-		void Realloc(uint32_t count, I* data = nullptr) const
+		void Realloc(uint32_t count, I* data = nullptr)
 		{
 			static constexpr size_t SIZE_T = sizeof(std::conditional_t<std::is_same_v<I, void>, uint8_t, I>);
 			if constexpr(DYNAMIC) glNamedBufferData(ID, SIZE_T * count, data, GL_DYNAMIC_DRAW);
@@ -79,7 +78,7 @@ namespace GL
 	 private:
 		void Construct()
 		{
-			typedef gE::Graphics::Buffer<T> S;
+			typedef gE::GPU::Buffer<T> S;
 			static constexpr size_t SIZE_T = sizeof(std::conditional_t<std::is_same_v<T, void>, uint8_t, T>);
 
 			glCreateBuffers(1, &ID);

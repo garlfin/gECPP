@@ -21,7 +21,7 @@ namespace gE
 
 		RemoveFirstFromVec(_parent->_children, this);
 
-		std::vector<Entity*> stack{ this };
+		std::vector stack{ this };
 
 		if(flagChildren)
 			while(!stack.empty())

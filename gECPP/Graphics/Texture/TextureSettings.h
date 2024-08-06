@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <Graphics/Graphics.h>
-
 //
 // Created by scion on 9/13/2023.
 //
@@ -63,31 +61,31 @@ namespace PVR
 		uint32_t MipCount;
 	};
 
-	constexpr GLenum PVRToInternalFormat(PVR::PixelFormat f)
+	constexpr GLenum PVRToInternalFormat(PixelFormat f)
 	{
 		switch(f)
 		{
-			case PVR::PixelFormat::DXT1: return GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
-			case PVR::PixelFormat::DXT3: return GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
-			case PVR::PixelFormat::DXT5: return GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
-			case PVR::PixelFormat::BC5: return GL_COMPRESSED_RG_RGTC2;
-			case PVR::PixelFormat::Depth: return GL_DEPTH_COMPONENT16;
-			case PVR::PixelFormat::RGB32F: return GL_RGB32F;
-			case PVR::PixelFormat::RGB16F: return GL_RGB16F;
+			case PixelFormat::DXT1: return GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+			case PixelFormat::DXT3: return GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+			case PixelFormat::DXT5: return GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+			case PixelFormat::BC5: return GL_COMPRESSED_RG_RGTC2;
+			case PixelFormat::Depth: return GL_DEPTH_COMPONENT16;
+			case PixelFormat::RGB32F: return GL_RGB32F;
+			case PixelFormat::RGB16F: return GL_RGB16F;
 			default: return GL_RGB8;
 		}
 	}
 }
 
-namespace gE::Graphics
+namespace gE::GPU
 {
-	enum class FilterMode : u8
+	enum class FilterMode : GLenum
 	{
 		Nearest = GL_NEAREST,
 		Linear = GL_LINEAR
 	};
 
-	enum class WrapMode : u8
+	enum class WrapMode : GLenum
 	{
 		Clamp = GL_CLAMP_TO_EDGE,
 		Repeat = GL_REPEAT,
@@ -135,9 +133,9 @@ namespace gE::Graphics
 	typedef TextureSettings<Dimension::D2D> TextureSettings2D;
 	typedef TextureSettings<Dimension::D3D> TextureSettings3D;
 
-	struct TextureData : public Serializable<void>
+	struct TextureData : public Serializable<>
 	{
-	 SERIALIZABLE_PROTO(TextureData, Serializable);
+		SERIALIZABLE_PROTO(TextureData, Serializable);
 
 	 public:
 		TextureData(GLenum, GLenum, CompressionScheme, u8, Array<u8>&&);

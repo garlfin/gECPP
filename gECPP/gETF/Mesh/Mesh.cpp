@@ -6,87 +6,87 @@
 
 using namespace gETF;
 
-void VertexBuffer::IDeserialize(ostream& buf) const
+void VertexBuffer::IDeserialize(ostream& out) const
 {
-	Write<u8>(buf, Stride);
-	Write<u32>(buf, Count);
-	Write(buf, Stride * Count, Data.Data());
+	Write<u8>(out, Stride);
+	Write<u32>(out, Count);
+	Write(out, Stride * Count, Data.Data());
 }
 
-void VertexBuffer::ISerialize(istream& ptr, Mesh&)
+void VertexBuffer::ISerialize(istream& in, Mesh&)
 {
-	Stride = ::Read<u8>(ptr);
-	Count = ::Read<u32>(ptr);
+	Stride = ::Read<u8>(in);
+	Count = ::Read<u32>(in);
 
 	size_t byteSize = Stride * Count;
 	Data = Array<u8>(byteSize);
-	Read(ptr, byteSize, Data.Data());
+	Read(in, byteSize, Data.Data());
 }
 
-void VertexField::IDeserialize(ostream& buf) const
+void VertexField::IDeserialize(ostream& out) const
 {
-	Write(buf, Name);
-	Write(buf, Index);
-	Write(buf, BufferIndex);
-	Write(buf, ElementCount);
-	Write(buf, Offset);
-	Write(buf, ElementType);
-	Write(buf, Normalized);
+	Write(out, Name);
+	Write(out, Index);
+	Write(out, BufferIndex);
+	Write(out, ElementCount);
+	Write(out, Offset);
+	Write(out, ElementType);
+	Write(out, Normalized);
 }
 
-void VertexField::ISerialize(istream& ptr, Mesh&)
+void VertexField::ISerialize(istream& in, Mesh&)
 {
-	Read<char>(ptr, 4, Name);
+	Read<char>(in, 4, Name);
 
-	Index = ::Read<u8>(ptr);
-	BufferIndex = ::Read<u8>(ptr);
-	ElementCount = ::Read<u8>(ptr);
-	Offset = ::Read<u8>(ptr);
-	ElementType = ::Read<GLenum>(ptr);
-	Normalized = ::Read<bool>(ptr);
+	Index = ::Read<u8>(in);
+	BufferIndex = ::Read<u8>(in);
+	ElementCount = ::Read<u8>(in);
+	Offset = ::Read<u8>(in);
+	ElementType = ::Read<GLenum>(in);
+	Normalized = ::Read<bool>(in);
 }
 
-void MaterialSlot::IDeserialize(ostream& buf) const
+void MaterialSlot::IDeserialize(ostream& out) const
 {
-	Write(buf, Offset);
-	Write(buf, Count);
+	Write(out, Offset);
+	Write(out, Count);
 }
 
-void MaterialSlot::ISerialize(istream& ptr, Mesh& s)
+void MaterialSlot::ISerialize(istream& in, Mesh& s)
 {
-	Offset = ::Read<u32>(ptr);
-	Count = ::Read<u32>(ptr);
+	Offset = ::Read<u32>(in);
+	Count = ::Read<u32>(in);
 }
 
-void Mesh::IDeserialize(ostream& buf) const
+void Mesh::IDeserialize(ostream& out) const
 {
-	Write(buf, 4, GETF_MESH_MAGIC);
-	Write(buf, Version);
+	Write(out, 4, GETF_MESH_MAGIC);
+	Write(out, Version);
 
-	WriteArray<u8>(buf, Buffers);
-	WriteArray<u8>(buf, Fields);
+	WriteArray<u8>(out, Buffers);
+	WriteArray<u8>(out, Fields);
 
-	Write(buf, (u8)TriMode);
-	if (TriMode != TriangleMode::None) Triangles.Deserialize(buf);
+	Write(out, (u8)TriMode);
+	if (TriMode != TriangleMode::None) Triangles.Deserialize(out);
 
-	WriteArray<u8>(buf, Materials);
+	WriteArray<u8>(out, Materials);
 }
 
-void Mesh::ISerialize(istream& ptr, gE::Window* s)
+void Mesh::ISerialize(istream& in, gE::Window* s)
 {
 	char magic[4];
-	Read<char>(ptr, 4, magic);
-	Version = Read<u8>(ptr);
+	Read<char>(in, 4, magic);
+	Version = Read<u8>(in);
 
 	if(!strcmpb(magic, GETF_MESH_MAGIC, 4)) std::cout << "Invalid File!\n";
 
-	ReadArraySerializable<u8, VertexBuffer>(ptr, Buffers, *this);
-	ReadArraySerializable<u8, VertexField>(ptr, Fields, *this);
+	ReadArraySerializable<u8, VertexBuffer>(in, Buffers, *this);
+	ReadArraySerializable<u8, VertexField>(in, Fields, *this);
 
-	TriMode = ::Read<TriangleMode>(ptr);
-	if (TriMode != TriangleMode::None) Triangles.Serialize(ptr, *this);
+	TriMode = ::Read<TriangleMode>(in);
+	if (TriMode != TriangleMode::None) Triangles.Serialize(in, *this);
 
-	ReadArraySerializable<u8, MaterialSlot>(ptr, Materials, *this);
+	ReadArraySerializable<u8, MaterialSlot>(in, Materials, *this);
 
 	CreateVAO(s);
 }

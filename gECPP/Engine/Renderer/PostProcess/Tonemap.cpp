@@ -20,6 +20,6 @@ namespace gE::DefaultPipeline
 		out.Bind(1, GL_WRITE_ONLY);
 
 		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-		shader.Dispatch(DIV_CEIL_T(GetTarget().GetSize(), TONEMAP_GROUP_SIZE, API::TextureSize2D));
+		shader.Dispatch(DIV_CEIL_T(GetTarget().GetSize(), TONEMAP_GROUP_SIZE, TextureSize2D));
 	}
 }

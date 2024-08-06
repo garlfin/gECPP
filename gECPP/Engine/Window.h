@@ -39,7 +39,7 @@ namespace gE
 		Monitor() = default;
 
 		const char* Name = nullptr;
-		API::TextureSize2D Size = API::TextureSize2D(0);
+		TextureSize2D Size = TextureSize2D(0);
 		u16 RefreshRate = 0;
 
 		~Monitor() { delete[] Name; }
@@ -81,7 +81,7 @@ namespace gE
 		// Engine States
 		RenderFlags State;
 
-		GET_CONST(API::TextureSize2D, Size, _size);
+		GET_CONST(TextureSize2D, Size, _size);
 		GET_CONST(const Monitor&, Monitor, _monitor);
 		GET_CONST(VoxelPipeline::Buffers&, VoxelBuffers, VoxelBuffers);
 		GET_CONST(DefaultPipeline::Buffers&, PipelineBuffers, PipelineBuffers);
@@ -112,7 +112,7 @@ namespace gE
 
 		ComponentManager<Behavior> Behaviors;
 
-		SmartPointer<gE::Material> DefaultMaterial;
+		SmartPointer<Material> DefaultMaterial;
 		SmartPointer<API::Shader> BlitShader;
 		SmartPointer<API::Texture2D> BRDFLookup;
 		SmartPointer<API::ComputeShader> TAAShader;
@@ -122,7 +122,7 @@ namespace gE
 		SmartPointer<API::ComputeShader> HiZShader;
 
 	 private:
-		API::TextureSize2D _size;
+		TextureSize2D _size;
 		const char* _name;
 		GLFWwindow* _window;
 		Monitor _monitor;

@@ -9,7 +9,6 @@
 #include <Graphics/Texture/Texture.h>
 #include <Engine/Component/Camera/Camera.h>
 #include <Engine/Component/Camera/RenderTarget.h>
-#include <Engine/Component/Camera/Settings.h>
 #include <Engine/Component/Camera/PostProcessEffect.h>
 #include <Engine/WindowState.h>
 
@@ -17,7 +16,7 @@
 #define GE_MAX_LIGHT 4
 #define GE_MAX_CUBEMAP 4
 
-namespace gE::Graphics
+namespace gE::GPU
 {
 	struct Camera
 	{
@@ -74,7 +73,7 @@ namespace gE::Graphics
 	struct Scene
 	{
 		u32 InstanceCount;
-		gE::RenderFlags State;
+		RenderFlags State;
 		API_ALIGN glm::mat4 Model[GE_MAX_INSTANCE];
 		glm::mat4 PreviousModel[GE_MAX_INSTANCE];
 		glm::mat3x4 Normal[GE_MAX_INSTANCE]; // for alignment purposes.
@@ -129,29 +128,29 @@ namespace gE::DefaultPipeline
 	{
 		explicit Buffers(Window*);
 
-		ALWAYS_INLINE void UpdateCamera(u64 size = sizeof(Graphics::Camera), u64 offset = 0) const
+		ALWAYS_INLINE void UpdateCamera(u64 size = sizeof(GPU::Camera), u64 offset = 0) const
 		{
 			_cameraBuffer.ReplaceData((u8*) &Camera + offset, size, offset);
 		}
 
-		ALWAYS_INLINE void UpdateScene(u64 size = sizeof(Graphics::Scene), u64 offset = 0) const
+		ALWAYS_INLINE void UpdateScene(u64 size = sizeof(GPU::Scene), u64 offset = 0) const
 		{
 			_sceneBuffer.ReplaceData((u8*) &Scene + offset, size, offset);
 		}
 
-		ALWAYS_INLINE void UpdateLighting(u64 size = sizeof(Graphics::Lighting), u64 offset = 0) const
+		ALWAYS_INLINE void UpdateLighting(u64 size = sizeof(GPU::Lighting), u64 offset = 0) const
 		{
 			_lightBuffer.ReplaceData((u8*) &Lighting + offset, size, offset);
 		}
 
-		Graphics::Camera Camera;
-		Graphics::Scene Scene;
-		Graphics::Lighting Lighting;
+		GPU::Camera Camera;
+		GPU::Scene Scene;
+		GPU::Lighting Lighting;
 
 	 private:
-		API::Buffer<Graphics::Camera> _cameraBuffer;
-		API::Buffer<Graphics::Scene> _sceneBuffer;
-		API::Buffer<Graphics::Lighting> _lightBuffer;
+		API::Buffer<GPU::Camera> _cameraBuffer;
+		API::Buffer<GPU::Scene> _sceneBuffer;
+		API::Buffer<GPU::Lighting> _lightBuffer;
 	};
 }
 

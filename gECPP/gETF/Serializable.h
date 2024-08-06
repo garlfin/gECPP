@@ -28,7 +28,7 @@ struct TypeSystem
 	{
 		Type(const char* n, FactoryFunction f) : Name(n), ID(0), Factory(f)
 		{
-			TypeSystem<T>::Types[ID];
+			Types[ID];
 		};
 
 		const char* Name;
@@ -251,6 +251,8 @@ Array<T> ReadArray(std::istream& in)
 	UINT_T length = Read<UINT_T>(in);
 	Array<T> arr = Array<T>(length);
 	in.read((char*) arr.Data(), length * sizeof(T));
+
+	return arr;
 }
 
 template<>

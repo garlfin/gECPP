@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include "Engine/Binary/Binary.h"
-
 #define GE_MAX_VAO_BUFFER 5
 #define GE_MAX_VAO_MATERIAL 5
 #define GE_MAX_VAO_FIELD 5

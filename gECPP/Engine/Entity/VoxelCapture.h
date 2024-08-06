@@ -14,7 +14,7 @@ namespace gE
 	 public:
 		VoxelCapture(Window* w, u16 resolution, float size);
 
-		void GetGLVoxelScene(API::VoxelScene&);
+		void GetGPUVoxelScene(API::VoxelScene&);
 
 		GET(Camera3D&, Camera, _camera);
 		GET(VoxelPipeline::Target3D&, Target, _target);

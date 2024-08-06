@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include "Engine/Graphics/Buffer/VAO.h"
 #include "Engine/Component/Camera/Camera.h"
 #include "Engine/Window.h"
 #include "Demo/Engine/Component/Movement.h"

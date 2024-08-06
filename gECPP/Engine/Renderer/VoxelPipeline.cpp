@@ -13,7 +13,7 @@
 
 namespace gE::VoxelPipeline
 {
-	Buffers::Buffers(gE::Window* window) : _voxelBuffer(window)
+	Buffers::Buffers(Window* window) : _voxelBuffer(window)
 	{
 		_voxelBuffer.Bind(API::BufferTarget::Uniform, 4);
 	}
@@ -29,9 +29,9 @@ namespace gE::VoxelPipeline
 	void Target3D::RenderPass(float d, Camera* camera)
 	{
 		Window& window = GetWindow();
-		API::TextureSize2D size = GetSize();
+		TextureSize2D size = GetSize();
 
-		window.State = gE::State::Voxel;
+		window.State = State::Voxel;
 
 		glDepthMask(0);
 		glColorMask(1, 1, 1, 1);
@@ -46,7 +46,7 @@ namespace gE::VoxelPipeline
 	{
 		if(!camera) return false;
 
-		VoxelPipeline::Buffers& buffers = GetWindow().GetVoxelBuffers();
+		Buffers& buffers = GetWindow().GetVoxelBuffers();
 		API::ComputeShader& voxelShader = GetWindow().GetVoxelTAAShader();
 		Transform& transform = GetOwner().GetTransform();
 		Transform& cameraTransform = camera->GetOwner()->GetTransform();
@@ -58,7 +58,7 @@ namespace gE::VoxelPipeline
 		transform.SetPosition() = glm::vec3(pos) * cellSize;
 		transform.OnUpdate(0.f); // Force update on model matrix since it passed its tick.
 
-		GetOwner().GetGLVoxelScene(buffers.Scene);
+		GetOwner().GetGPUVoxelScene(buffers.Scene);
 		buffers.UpdateScene();
 
 		glm::u16vec3 dispatchSize = DIV_CEIL_T(_colorBack.GetSize(), VOXEL_TAA_GROUP_SIZE, glm::u16vec3);

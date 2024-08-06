@@ -9,15 +9,15 @@
 
 namespace gE
 {
-	gE::Material::Material(Window* window, const Reference<API::Shader>& shader, DepthFunction depthFunc, CullMode cullMode) :
+	Material::Material(Window* window, const Reference<API::Shader>& shader, DepthFunction depthFunc, CullMode cullMode) :
 		API::Asset(window),
 		_shader(shader), _depthFunc(depthFunc), _cullMode(cullMode)
 	{
 	}
 
-	void gE::Material::Bind() const
+	void Material::Bind() const
 	{
-		gE::RenderFlags state = GetWindow().State;
+		RenderFlags state = GetWindow().State;
 
 		if((bool) _depthFunc && state.EnableDepthTest)
 		{
@@ -59,7 +59,7 @@ namespace gE
 	{
 	}
 
-	void gE::PBRMaterial::Bind() const
+	void PBRMaterial::Bind() const
 	{
 		GetWindow().GetSlotManager().Reset();
 

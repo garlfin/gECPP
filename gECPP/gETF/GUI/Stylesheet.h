@@ -6,7 +6,6 @@
 
 #include "Engine/Math/Math.h"
 #include <gETF/Serializable.h>
-#include <gECPP/Prototype.h>
 #include <Engine/AssetManager.h>
 
 namespace gETF::UI

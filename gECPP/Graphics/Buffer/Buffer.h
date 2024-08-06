@@ -6,7 +6,7 @@
 
 #include "Graphics/Graphics.h"
 
-namespace gE::Graphics
+namespace gE::GPU
 {
 	template<typename T = u8>
 	class Buffer : public Serializable<Window*>, public Asset
@@ -31,7 +31,7 @@ namespace gE::Graphics
 	};
 
 	template<class T>
-	void Buffer<T>::ISerialize(std::istream& in, gE::Window* s)
+	void Buffer<T>::ISerialize(std::istream& in, Window* s)
 	{
 		_array = ReadArray<u32, T>(in);
 	}

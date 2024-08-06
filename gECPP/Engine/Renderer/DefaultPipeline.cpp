@@ -12,7 +12,7 @@
 
 namespace gE
 {
-	gE::DefaultPipeline::Buffers::Buffers(Window* window) :
+	DefaultPipeline::Buffers::Buffers(Window* window) :
 		_cameraBuffer(window), _sceneBuffer(window), _lightBuffer(window)
 	{
 		_sceneBuffer.Bind(API::BufferTarget::Uniform, 0);
@@ -22,12 +22,12 @@ namespace gE
 
 	DefaultPipeline::Target2D::Target2D(Entity& owner, Camera2D& camera, const std::vector<PostProcessEffect<Target2D>*>& effects) :
 		RenderTarget<Camera2D>(owner, camera), IDepthTarget(*_depth), IColorTarget(*_color),
-		_depth(GetFrameBuffer(), API::TextureSettings2D(DefaultPipeline::DepthFormat, camera.GetSize())),
-		_color(GetFrameBuffer(), API::TextureSettings2D(DefaultPipeline::ColorFormat, camera.GetSize())),
-		_velocity(GetFrameBuffer(), API::TextureSettings2D(DefaultPipeline::VelocityFormat, camera.GetSize())),
-		_colorBack(&GetWindow(), API::TextureSettings2D(DefaultPipeline::ColorFormat, camera.GetSize())),
-		_depthBack(&GetWindow(), API::TextureSettings2D(DefaultPipeline::HiZFormat, camera.GetSize())),
-		_postProcessBack(&GetWindow(), API::TextureSettings2D(DefaultPipeline::ColorFormat, camera.GetSize())),
+		_depth(GetFrameBuffer(), API::TextureSettings2D(DepthFormat, camera.GetSize())),
+		_color(GetFrameBuffer(), API::TextureSettings2D(ColorFormat, camera.GetSize())),
+		_velocity(GetFrameBuffer(), API::TextureSettings2D(VelocityFormat, camera.GetSize())),
+		_colorBack(&GetWindow(), API::TextureSettings2D(ColorFormat, camera.GetSize())),
+		_depthBack(&GetWindow(), API::TextureSettings2D(HiZFormat, camera.GetSize())),
+		_postProcessBack(&GetWindow(), API::TextureSettings2D(ColorFormat, camera.GetSize())),
 		_effects(effects)
 	{
 	}
@@ -63,7 +63,7 @@ namespace gE
 
 		for(u8 i = 1; i < _depthBack.GetMipCount(); i++)
 		{
-			API::TextureSize2D mipSize = _depthBack.GetSize(i);
+			TextureSize2D mipSize = _depthBack.GetSize(i);
 
 			hiZShader.SetUniform(0, glm::vec4(HIZ_MODE_DOWNSAMPLE, i - 1, 0, 0));
 			_depthBack.Bind(0, GL_WRITE_ONLY, i);
@@ -74,7 +74,7 @@ namespace gE
 
 		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
-		DefaultPipeline::Buffers& buf = GetWindow().GetPipelineBuffers();
+		Buffers& buf = GetWindow().GetPipelineBuffers();
 
 		buf.Camera.ColorTexture = (handle) _colorBack;
 		buf.Camera.DepthTexture = (handle) _depthBack;

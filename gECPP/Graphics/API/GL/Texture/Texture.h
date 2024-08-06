@@ -1,9 +1,10 @@
 #pragma once
 
 #include <Graphics/API/GL/GL.h>
-#include "Engine/Binary/Binary.h"
-#include "GLAD/glad.h"
-#include "TextureSettings.h"
+#include <Graphics/Texture/Texture.h>
+#include <Graphics/Texture/TextureSettings.h>
+#include <Engine/Binary/Binary.h>
+#include <GLAD/glad.h>
 
 #define GE_ANISOTROPY_COUNT 8
 
@@ -23,23 +24,13 @@ struct handle
 
 namespace GL
 {
+	using namespace gE::GPU;
+
 	struct FrameBuffer;
 
 	CONSTEXPR_GLOBAL handle NullHandle = handle();
 
-	template<Dimension T>
-	u8 GetMipCount(const Size<T>& size)
-	{
-		u32 largest;
-
-		if constexpr(T == Dimension::D1D) largest = size;
-		else if constexpr(T == Dimension::D2D) largest = glm::max(size.x, size.y);
-		else largest = glm::max(size.x, glm::max(size.y, size.z));
-
-		return 32 - __builtin_clz(largest);
-	}
-
- 	class Texture : gE::Graphics::Texture, public GLObject
+ 	class Texture : public GLObject
 	{
 	 public:
 		Texture(gE::Window* window, GLenum target, const ITextureSettings& settings);
@@ -54,68 +45,46 @@ namespace GL
 			return unit;
 		}
 
-		inline void Free() override { Data.Free(); }
-		inline bool IsFree() override { return Data.IsFree(); }
+ 		virtual void CopyFrom(const Texture&) = 0;
+
+ 		GET_CONST(const ITextureSettings&, Settings, Settings);
+ 		GET_CONST(const TextureData&, Data, Data);
 
 		handle GetHandle();
-		virtual void CopyFrom(const GL::Texture&) = 0;
-
-		explicit ALWAYS_INLINE operator handle() { return GetHandle(); }
-
-		GET_CONST(GLenum, Format, Settings.Format);
-		GET_CONST(GLenum, Target, Target);
-		GET_CONST(u8, MipCount, Settings.MipCount);
+		explicit ALWAYS_INLINE operator handle() const { return _handle; }
 
 		~Texture() override;
 
 	 protected:
-		ITextureSettings Settings;
-		TextureData Data;
+ 		const ITextureSettings& Settings;
+ 		const TextureData& Data;
 		GLenum Target;
 
 	 private:
 		handle _handle = NullHandle;
 	};
 
-	class Texture2D final : public Texture
+	class Texture2D final : public gE::GPU::Texture2D, public Texture
 	{
 	 public:
 		Texture2D(gE::Window* window, const TextureSettings2D& settings, TextureData&& = {});
 
-		NODISCARD ALWAYS_INLINE GL::TextureSize2D GetSize(u8 mip = 0) const { return glm::max(_size >> glm::u32vec2(mip), glm::u32vec2(1)); }
 		void CopyFrom(const GL::Texture&) override;
-
-	 private:
-		const GL::TextureSize2D _size;
 	};
 
-	class Texture3D final : public Texture
+	class Texture3D final : public gE::GPU::Texture3D, public Texture
 	{
 	 public:
 		Texture3D(gE::Window* window, const TextureSettings3D& settings, TextureData&& = {});
 
-		NODISCARD ALWAYS_INLINE GL::TextureSize3D GetSize(u8 mip = 0) const { return glm::max(_size >> glm::u32vec3(mip), glm::u32vec3(1)); }
 		void CopyFrom(const GL::Texture&) override;
-
-	 private:
-		const GL::TextureSize3D _size;
 	};
 
-	class TextureCube final : public Texture
+	class TextureCube final : public gE::GPU::TextureCube, public Texture
 	{
 	 public:
 		TextureCube(gE::Window* window, const TextureSettings1D& settings, TextureData&& = {});
 
-		NODISCARD ALWAYS_INLINE GL::TextureSize1D GetSize(u8 mip = 0) const { return MAX(_size >> mip, 1); }
 		void CopyFrom(const GL::Texture&) override {};
-
-	 private:
-		const GL::TextureSize1D _size;
 	};
-}
-
-namespace PVR
-{
-	NODISCARD GL::Texture* Read(gE::Window* window, const char* path, GL::WrapMode = GL::WrapMode::Repeat, GL::FilterMode = GL::FilterMode::Linear);
-	NODISCARD Array<u8> Read(const char* path, PVR::Header& header);
 }

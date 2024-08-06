@@ -5,12 +5,11 @@
 #pragma once
 
 #include <Graphics/Buffer/FrameBuffer.h>
+#include <Engine/Component/Camera/Camera.h>
 #include "Engine/Manager.h"
 
 namespace gE
 {
-	class Camera;
-
 	template<class T, GLenum TARGET>
 	class Attachment
 	{
@@ -44,7 +43,7 @@ namespace gE
 		T _texture;
 	};
 
- 	class IRenderTarget : public API::Asset
+ 	class IRenderTarget : API::APIObject
 	{
 	 public:
 		explicit IRenderTarget(Entity&, Camera&);

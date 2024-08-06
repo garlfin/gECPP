@@ -6,7 +6,6 @@
 
 #include <Engine/Renderer/DefaultPipeline.h>
 #include <Engine/Component/Camera/PostProcessEffect.h>
-#include <Graphics/Shader/Shader.h>
 
 #define BLOOM_GROUP_SIZE 8
 

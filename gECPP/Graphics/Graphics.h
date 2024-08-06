@@ -7,7 +7,7 @@
 #include <Prototype.h>
 #include <gETF/Serializable.h>
 
-namespace gE::Graphics
+namespace gE::GPU
 {
 	struct Version
 	{
@@ -19,12 +19,12 @@ namespace gE::Graphics
 	class APIObject
 	{
 	 public:
-		APIObject(gE::Window* window) : _window(window) { };
+		APIObject(Window* window) : _window(window) { };
 		APIObject(APIObject&) = delete;
 
 		APIObject& operator=(const APIObject&) = delete;
 
-		OPERATOR_EQUALS_XVAL(APIObject, o, ID = o.ID; o.ID = 0);
+		OPERATOR_EQUALS_XVAL(APIObject, o, _window = o._window; ID = o.ID; o.ID = 0);
 
 		virtual void Bind() const = 0;
 
@@ -37,7 +37,7 @@ namespace gE::Graphics
 		T ID;
 
 	 private:
-		gE::Window* _window;
+		Window* _window;
 	};
 
 	struct Asset

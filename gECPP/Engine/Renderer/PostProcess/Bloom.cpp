@@ -38,7 +38,7 @@ namespace gE::DefaultPipeline
 			in.Bind(1, GL_WRITE_ONLY, i);
 
 			glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-			shader.Dispatch(DIV_CEIL_T(out.GetSize(i), BLOOM_GROUP_SIZE, API::TextureSize2D));
+			shader.Dispatch(DIV_CEIL_T(out.GetSize(i), BLOOM_GROUP_SIZE, TextureSize2D));
 		}
 
 		for(u8 i = 1; i < mipCount; i++)
@@ -53,7 +53,7 @@ namespace gE::DefaultPipeline
 			shader.SetUniform(1, settings);
 
 			glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-			shader.Dispatch(DIV_CEIL_T(out.GetSize(mip), BLOOM_GROUP_SIZE, API::TextureSize2D));
+			shader.Dispatch(DIV_CEIL_T(out.GetSize(mip), BLOOM_GROUP_SIZE, TextureSize2D));
 		}
 	}
 }

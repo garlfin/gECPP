@@ -14,7 +14,7 @@ namespace gE
 	 public:
 		SDFCapture(Window* w, u16 resolution);
 
-		void GetGLSDFScene(API::SDFScene& scene);
+		void GetGPUSDFScene(API::SDFScene& scene);
 
 		GET(Camera3D&, Camera, _camera);
 		GET(SDFPipeline::Target3D&, Target, _target);

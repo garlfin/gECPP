@@ -40,7 +40,7 @@ namespace GL
 
 	const char* ShaderStageDefine(ShaderStageType type);
 
-	class Shader : public Asset
+	class Shader : public GLObject
 	{
 	 protected:
 		Shader(gE::Window*, const char*, const Array<PreprocessorPair>*);
@@ -84,15 +84,15 @@ namespace GL
 		ALWAYS_INLINE void Dispatch(glm::u16vec2 s) const { Dispatch(s.x, s.y); }
 	};
 
-	class ShaderStage final : public Asset
+	class ShaderStage final : public GLObject
 	{
 	 public:
 		ShaderStage(gE::Window*, ShaderStageType, const char*, const Array<PreprocessorPair>*);
 
 		inline void Bind() const override { }
 
-		ALWAYS_INLINE void Attach(Shader* s) const { glAttachShader(s->Get(), ID); }
+		ALWAYS_INLINE void Attach(const Shader* s) const { glAttachShader(s->Get(), ID); }
 
-		~ShaderStage() final { glDeleteShader(ID); }
+		~ShaderStage() override { glDeleteShader(ID); }
 	};
 }
