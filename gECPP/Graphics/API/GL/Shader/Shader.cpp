@@ -73,7 +73,7 @@ namespace GL
 #endif
 	}
 
-	Shader::Shader(gE::Window* window, const char* src, const Array<PreprocessorPair>* p) : Asset(window)
+	Shader::Shader(gE::Window* window, const char* src, const Array<PreprocessorPair>* p) : API::APIObject(window)
 	{
 		ID = glCreateProgram();
 
@@ -135,18 +135,7 @@ namespace GL
 		SetUniform(loc, tex.Use(slot));
 	}
 
-	void Shader::SetUniform(u8 loc, const Texture& tex) const
-	{
-		SetUniform(loc, GetWindow().GetSlotManager().Increment(&tex));
-	}
-
 	DynamicUniform::DynamicUniform(Shader* s, u32 l) : _shader(s), _location(l) { }
 	DynamicUniform::DynamicUniform(Shader* s, const char* n) : _shader(s), _location(GetUniformLocation(n)) { }
-
-	template<>
-	void DynamicUniform::Set(const Texture& t) const
-	{
-		_shader->SetUniform(_location, t, _shader->GetWindow().GetSlotManager().Increment(&t));
-	}
 }
 

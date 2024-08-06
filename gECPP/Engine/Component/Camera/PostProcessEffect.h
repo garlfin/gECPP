@@ -4,10 +4,6 @@
 
 #pragma once
 
-#include "Prototype.h"
-#include "RenderTarget.h"
-#include <Graphics/Texture/Texture.h>
-
 namespace gE
 {
 	// Currently, post process effects don't support per-camera settings.

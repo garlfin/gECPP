@@ -20,28 +20,28 @@ namespace gE
 		_target(_camera)
 	{}
 
-	void CubemapCapture::GetGPUCubemap(API::Cubemap& cubemap)
+	void CubemapCapture::GetGPUCubemap(GPU::Cubemap& cubemap)
 	{
 		Transform& transform = GetTransform();
 
 		cubemap.Position = transform.GetGlobalTransform().Position;
 		cubemap.Scale = transform.GetGlobalTransform().Scale;
 		cubemap.BlendRadius = 0.f;
-		cubemap.Type = API::CubemapType::AABB;
+		cubemap.Type = GPU::CubemapType::AABB;
 		cubemap.Color = (handle) GetColor();
 	}
 
 	void CubemapManager::OnRender(float delta, Camera* camera)
 	{
 		DefaultPipeline::Buffers& buffers = _window->GetPipelineBuffers();
-		API::Lighting& lighting = buffers.Lighting;
+		GPU::Lighting& lighting = buffers.Lighting;
 
 		lighting.Skybox = Skybox->GetHandle();
 		lighting.CubemapCount = 1;
 		(*List.GetFirst())->GetGPUCubemap(lighting.Cubemaps[0]);
 
-		buffers.UpdateLighting(sizeof(handle), offsetof(API::Lighting, Skybox));
-		buffers.UpdateLighting(sizeof(API::Cubemap), offsetof(API::Lighting, Cubemaps[0]));
+		buffers.UpdateLighting(sizeof(handle), offsetof(GPU::Lighting, Skybox));
+		buffers.UpdateLighting(sizeof(GPU::Cubemap), offsetof(GPU::Lighting, Cubemaps[0]));
 
 		for(Managed<CubemapCapture>* c = List.GetFirst(); c; c = c->GetNext())
 			(*c)->GetCamera().OnRender(delta, camera);
@@ -82,17 +82,17 @@ namespace gE
 		window.GetCubemaps().DrawSkybox();
 	}
 
-	CONSTEXPR_GLOBAL API::ITextureSettings CubemapColorFormat
+	CONSTEXPR_GLOBAL GPU::ITextureSettings CubemapColorFormat
 	{
 		GL_R11F_G11F_B10F,
-		API::WrapMode::Clamp,
-		API::FilterMode::Linear
+		GPU::WrapMode::Clamp,
+		GPU::FilterMode::Linear
 	};
 
 	CubemapTarget::CubemapTarget(CameraCubemap& camera) :
 		RenderTarget<CameraCubemap>(*camera.GetOwner(), camera), IDepthTarget(_depth.Get()),
-		_depth(GetFrameBuffer(), API::TextureSettings1D{ DefaultPipeline::DepthFormat, camera.GetSize() }),
-		_color(GetFrameBuffer(), API::TextureSettings1D{ CubemapColorFormat, camera.GetSize() })
+		_depth(GetFrameBuffer(), GPU::TextureSettings1D{ DefaultPipeline::DepthFormat, camera.GetSize() }),
+		_color(GetFrameBuffer(), GPU::TextureSettings1D{ CubemapColorFormat, camera.GetSize() })
 	{
 	}
 

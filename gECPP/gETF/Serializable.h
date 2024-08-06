@@ -178,7 +178,7 @@ struct FileContainer : public IFileContainer
 	template<typename ... ARGS>
 	explicit FileContainer(std::string& path, ARGS&&... args) :
 		IFileContainer(Object, path),
-		Object(std::forward(args)...)
+		Object(std::forward<ARGS>(args)...)
 	{};
 
 	explicit FileContainer(std::string& path) : IFileContainer(Object, path) {};

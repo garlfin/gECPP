@@ -16,7 +16,7 @@
 #define GE_MAX_LIGHT 4
 #define GE_MAX_CUBEMAP 4
 
-namespace gE::GPU
+namespace GPU
 {
 	struct Camera
 	{
@@ -73,7 +73,7 @@ namespace gE::GPU
 	struct Scene
 	{
 		u32 InstanceCount;
-		RenderFlags State;
+		gE::RenderFlags State;
 		API_ALIGN glm::mat4 Model[GE_MAX_INSTANCE];
 		glm::mat4 PreviousModel[GE_MAX_INSTANCE];
 		glm::mat3x4 Normal[GE_MAX_INSTANCE]; // for alignment purposes.
@@ -93,10 +93,10 @@ namespace gE::GPU
 
 namespace gE::DefaultPipeline
 {
-	CONSTEXPR_GLOBAL API::ITextureSettings DepthFormat { GL_DEPTH_COMPONENT32, API::WrapMode::Clamp, API::FilterMode::Nearest, 1 };
-	CONSTEXPR_GLOBAL API::ITextureSettings HiZFormat { GL_R32F, API::WrapMode::Clamp, API::FilterMode::Nearest, 0 };
-	CONSTEXPR_GLOBAL API::ITextureSettings ColorFormat { GL_RGBA16F, API::WrapMode::Clamp, API::FilterMode::Linear, 0 };
-	CONSTEXPR_GLOBAL API::ITextureSettings VelocityFormat { GL_RG32F, API::WrapMode::Clamp  };
+	CONSTEXPR_GLOBAL GPU::ITextureSettings DepthFormat { GL_DEPTH_COMPONENT32, GPU::WrapMode::Clamp, GPU::FilterMode::Nearest, 1 };
+	CONSTEXPR_GLOBAL GPU::ITextureSettings HiZFormat { GL_R32F, GPU::WrapMode::Clamp, GPU::FilterMode::Nearest, 0 };
+	CONSTEXPR_GLOBAL GPU::ITextureSettings ColorFormat { GL_RGBA16F, GPU::WrapMode::Clamp, GPU::FilterMode::Linear, 0 };
+	CONSTEXPR_GLOBAL GPU::ITextureSettings VelocityFormat { GL_RG32F, GPU::WrapMode::Clamp };
 
  	class Target2D : public RenderTarget<Camera2D>, public IDepthTarget, public IColorTarget
 	{

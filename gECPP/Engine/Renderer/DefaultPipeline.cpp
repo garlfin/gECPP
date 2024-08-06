@@ -21,13 +21,13 @@ namespace gE
 	}
 
 	DefaultPipeline::Target2D::Target2D(Entity& owner, Camera2D& camera, const std::vector<PostProcessEffect<Target2D>*>& effects) :
-		RenderTarget<Camera2D>(owner, camera), IDepthTarget(*_depth), IColorTarget(*_color),
-		_depth(GetFrameBuffer(), API::TextureSettings2D(DepthFormat, camera.GetSize())),
-		_color(GetFrameBuffer(), API::TextureSettings2D(ColorFormat, camera.GetSize())),
-		_velocity(GetFrameBuffer(), API::TextureSettings2D(VelocityFormat, camera.GetSize())),
-		_colorBack(&GetWindow(), API::TextureSettings2D(ColorFormat, camera.GetSize())),
-		_depthBack(&GetWindow(), API::TextureSettings2D(HiZFormat, camera.GetSize())),
-		_postProcessBack(&GetWindow(), API::TextureSettings2D(ColorFormat, camera.GetSize())),
+		RenderTarget(owner, camera), IDepthTarget(*_depth), IColorTarget(*_color),
+		_depth(GetFrameBuffer(), GPU::TextureSettings2D(DepthFormat, camera.GetSize())),
+		_color(GetFrameBuffer(), GPU::TextureSettings2D(ColorFormat, camera.GetSize())),
+		_velocity(GetFrameBuffer(), GPU::TextureSettings2D(VelocityFormat, camera.GetSize())),
+		_colorBack(&GetWindow(), GPU::TextureSettings2D(ColorFormat, camera.GetSize())),
+		_depthBack(&GetWindow(), GPU::TextureSettings2D(HiZFormat, camera.GetSize())),
+		_postProcessBack(&GetWindow(), GPU::TextureSettings2D(ColorFormat, camera.GetSize())),
 		_effects(effects)
 	{
 	}
@@ -78,7 +78,7 @@ namespace gE
 
 		buf.Camera.ColorTexture = (handle) _colorBack;
 		buf.Camera.DepthTexture = (handle) _depthBack;
-		buf.UpdateCamera(sizeof(handle) * 2, offsetof(API::Camera, ColorTexture));
+		buf.UpdateCamera(sizeof(handle) * 2, offsetof(GPU::Camera, ColorTexture));
 
 		// COLOR
 		window.State = State::Color;

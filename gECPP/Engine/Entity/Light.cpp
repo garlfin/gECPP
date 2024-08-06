@@ -31,11 +31,11 @@ namespace gE
 			(*l)->GetCamera().OnRender(delta, camera);
 	}
 
-	CONSTEXPR_GLOBAL API::ITextureSettings ShadowMapFormat { GL_DEPTH_COMPONENT16, API::WrapMode::Clamp, API::FilterMode::Linear };
+	CONSTEXPR_GLOBAL GPU::ITextureSettings ShadowMapFormat { GL_DEPTH_COMPONENT16, GPU::WrapMode::Clamp, GPU::FilterMode::Linear };
 
 	DirectionalLightTarget::DirectionalLightTarget(Light& l, OrthographicCamera& c) :
-		RenderTarget<Camera2D>(l, c), IDepthTarget((API::Texture&) _depth),
-		_depth(GetFrameBuffer(), API::TextureSettings2D{ ShadowMapFormat, c.GetSize() })
+		RenderTarget(l, c), IDepthTarget((API::Texture&) _depth),
+		_depth(GetFrameBuffer(), GPU::TextureSettings2D{ ShadowMapFormat, c.GetSize() })
 	{
 	}
 
@@ -48,7 +48,7 @@ namespace gE
 		DefaultPipeline::Buffers& buffers = window.GetPipelineBuffers();
 
 		GetOwner().GetGPULight(buffers.Lighting.Lights[0]);
-		buffers.UpdateLighting(offsetof(API::Lighting, Lights[1]));
+		buffers.UpdateLighting(offsetof(GPU::Lighting, Lights[1]));
 
 		window.State = State::Shadow;
 
@@ -82,14 +82,14 @@ namespace gE
 		return true;
 	}
 
-	void DirectionalLight::GetGPULight(API::Light& light)
+	void DirectionalLight::GetGPULight(GPU::Light& light)
 	{
 		Transform& transform = GetCamera().GetOwner()->GetTransform();
 		OrthographicCamera& camera = GetCamera();
 
 		light.ViewProjection = camera.GetProjection() * inverse(transform.Model());
 		light.Position = -transform->Forward();
-		light.Type = API::LightType::Directional;
+		light.Type = GPU::LightType::Directional;
 		light.Color = glm::vec3(1);
 		light.PackedSettings = u32(camera.GetScale().y * 2);
 		light.Planes = DirectionalSettings.ClipPlanes;

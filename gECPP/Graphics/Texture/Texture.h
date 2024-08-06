@@ -7,7 +7,12 @@
 #include <Graphics/Graphics.h>
 #include "TextureSettings.h"
 
-namespace gE::GPU
+namespace GL
+{
+	class Texture;
+}
+
+namespace GPU
 {
 	template<Dimension T>
 	u8 GetMipCount(const Size<T>& size)
@@ -21,12 +26,12 @@ namespace gE::GPU
 		return 32 - __builtin_clz(largest);
 	}
 
-	class Texture : public Serializable<Window*>
+	class Texture : public Serializable<gE::Window*>
 	{
-		SERIALIZABLE_PROTO_T(Texture, Serializable<Window*>);
+		SERIALIZABLE_PROTO_T(Texture, Serializable<gE::Window*>);
 
 	 public:
-		Texture(Window*, ITextureSettings, TextureData);
+		Texture(gE::Window*, ITextureSettings, TextureData);
 
 	 private:
 		ITextureSettings _settings;
@@ -78,12 +83,10 @@ namespace gE::GPU
 	};
 }
 
+#include <Graphics/API/GL/Texture/Texture.h>
+
 namespace PVR
 {
-	using namespace gE::GPU;
-
-	NODISCARD Texture* Read(gE::Window* window, const char* path, WrapMode = WrapMode::Repeat, FilterMode = FilterMode::Linear);
+	NODISCARD API::Texture* Read(gE::Window* window, const char* path, GPU::WrapMode = GPU::WrapMode::Repeat, GPU::FilterMode = GPU::FilterMode::Linear);
 	NODISCARD Array<u8> Read(const char* path, Header& header);
 }
-
-#include <Graphics/API/GL/Texture/Texture.h>

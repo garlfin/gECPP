@@ -77,7 +77,7 @@ namespace PVR
 	}
 }
 
-namespace gE::GPU
+namespace GPU
 {
 	enum class FilterMode : GLenum
 	{

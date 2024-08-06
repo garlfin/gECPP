@@ -78,8 +78,8 @@ namespace gE::SDFPipeline
 		API::Buffer<API::SDFScene> _sdfBuffer;
 	};
 
-	CONSTEXPR_GLOBAL API::ITextureSettings ColorFormat { GL_RGB10_A2, API::WrapMode::Clamp, API::FilterMode::Linear, 1 };
-	CONSTEXPR_GLOBAL API::ITextureSettings SDFFormat { GL_R32F, API::WrapMode::Clamp, API::FilterMode::Nearest, 1 };
+	CONSTEXPR_GLOBAL GPU::ITextureSettings ColorFormat { GL_RGB10_A2, GPU::WrapMode::Clamp, GPU::FilterMode::Linear, 1 };
+	CONSTEXPR_GLOBAL GPU::ITextureSettings SDFFormat { GL_R32F, GPU::WrapMode::Clamp, GPU::FilterMode::Nearest, 1 };
 
 	class Target3D : public RenderTarget<Camera3D>
 	{

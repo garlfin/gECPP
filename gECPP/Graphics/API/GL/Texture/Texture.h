@@ -24,8 +24,6 @@ struct handle
 
 namespace GL
 {
-	using namespace gE::GPU;
-
 	struct FrameBuffer;
 
 	CONSTEXPR_GLOBAL handle NullHandle = handle();
@@ -33,7 +31,7 @@ namespace GL
  	class Texture : public GLObject
 	{
 	 public:
-		Texture(gE::Window* window, GLenum target, const ITextureSettings& settings);
+		Texture(gE::Window* window, GLenum target, const GPU::ITextureSettings& settings);
 
 		inline void Bind() const override { glBindTexture(Target, ID); }
 
@@ -41,14 +39,16 @@ namespace GL
 
 		inline u32 Bind(u32 unit, GLenum access, u8 mip = 0, GLenum format = 0) const
 		{
-			glBindImageTexture(unit, ID, mip, Target == GL_TEXTURE_3D, 0, access, format ?: Settings.Format);
+			glBindImageTexture(unit, ID, mip, Target == GL_TEXTURE_3D, 0, access, format ? format : Settings.Format);
 			return unit;
 		}
 
  		virtual void CopyFrom(const Texture&) = 0;
 
- 		GET_CONST(const ITextureSettings&, Settings, Settings);
- 		GET_CONST(const TextureData&, Data, Data);
+ 		GET_CONST(const GPU::ITextureSettings&, Settings, Settings);
+ 		GET_CONST(const GPU::TextureData&, Data, Data);
+
+ 		GET_CONST(u32, MipCount, Settings.MipCount);
 
 		handle GetHandle();
 		explicit ALWAYS_INLINE operator handle() const { return _handle; }
@@ -56,34 +56,34 @@ namespace GL
 		~Texture() override;
 
 	 protected:
- 		const ITextureSettings& Settings;
- 		const TextureData& Data;
+ 		const GPU::ITextureSettings& Settings;
+ 		const GPU::TextureData& Data;
 		GLenum Target;
 
 	 private:
 		handle _handle = NullHandle;
 	};
 
-	class Texture2D final : public gE::GPU::Texture2D, public Texture
+	class Texture2D final : public GPU::Texture2D, public Texture
 	{
 	 public:
-		Texture2D(gE::Window* window, const TextureSettings2D& settings, TextureData&& = {});
+		Texture2D(gE::Window* window, const GPU::TextureSettings2D& settings, GPU::TextureData&& = {});
 
 		void CopyFrom(const GL::Texture&) override;
 	};
 
-	class Texture3D final : public gE::GPU::Texture3D, public Texture
+	class Texture3D final : public GPU::Texture3D, public Texture
 	{
 	 public:
-		Texture3D(gE::Window* window, const TextureSettings3D& settings, TextureData&& = {});
+		Texture3D(gE::Window* window, const GPU::TextureSettings3D& settings, GPU::TextureData&& = {});
 
 		void CopyFrom(const GL::Texture&) override;
 	};
 
-	class TextureCube final : public gE::GPU::TextureCube, public Texture
+	class TextureCube final : public GPU::TextureCube, public Texture
 	{
 	 public:
-		TextureCube(gE::Window* window, const TextureSettings1D& settings, TextureData&& = {});
+		TextureCube(gE::Window* window, const GPU::TextureSettings1D& settings, GPU::TextureData&& = {});
 
 		void CopyFrom(const GL::Texture&) override {};
 	};

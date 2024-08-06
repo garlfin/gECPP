@@ -64,7 +64,6 @@ namespace GL
 		ALWAYS_INLINE void SetUniform(u8 loc, const glm::uvec4& val) const { glProgramUniform4ui(ID, loc, val.x, val.y, val.z, val.w); }
 
 		void SetUniform(u8 loc, const Texture&, u8 slot) const;
-		void SetUniform(u8 loc, const Texture&) const;
 
 		~Shader() override { glDeleteProgram(ID); }
 	};

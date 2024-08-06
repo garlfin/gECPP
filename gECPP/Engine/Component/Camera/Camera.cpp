@@ -38,7 +38,7 @@ namespace gE
 	{
 	}
 
-	void Camera::GetGPUCamera(API::Camera& cam)
+	void Camera::GetGPUCamera(GPU::Camera& cam)
 	{
 		Transform& transform = GetOwner()->GetTransform();
 
@@ -93,7 +93,8 @@ namespace gE
 	{
 		SetFOV(s.FOV);
 	}
-	void PerspectiveCamera::GetGPUCamera(API::Camera& camera)
+
+	void PerspectiveCamera::GetGPUCamera(GPU::Camera& camera)
 	{
 		Camera2D::GetGPUCamera(camera);
 		camera.Parameters.x = GetFOV<AngleType::Radian>();
@@ -109,7 +110,7 @@ namespace gE
 		Projection = glm::ortho(_orthographicScale.x, _orthographicScale.y, _orthographicScale.z, _orthographicScale.w, GetClipPlanes().x, GetClipPlanes().y);
 	}
 
-	void Camera2D::GetGPUCamera(API::Camera& camera)
+	void Camera2D::GetGPUCamera(GPU::Camera& camera)
 	{
 		Camera::GetGPUCamera(camera);
 		camera.View[0] = inverse(GetOwner()->GetTransform().Model());
@@ -126,7 +127,7 @@ namespace gE
 		Projection = glm::ortho(-scale.x, scale.x, -scale.z, scale.z, 0.01f, scale.y * 2.f);
 	}
 
-	void Camera3D::GetGPUCamera(API::Camera& cam)
+	void Camera3D::GetGPUCamera(GPU::Camera& cam)
 	{
 		Camera::GetGPUCamera(cam);
 
@@ -146,7 +147,7 @@ namespace gE
 		Projection = glm::perspectiveFov(glm::radians(90.f), 1.f, 1.f, GetClipPlanes().x, GetClipPlanes().y);
 	}
 
-	void CameraCubemap::GetGPUCamera(API::Camera& cam)
+	void CameraCubemap::GetGPUCamera(GPU::Camera& cam)
 	{
 		Camera::GetGPUCamera(cam);
 

@@ -29,9 +29,6 @@ namespace GL
 		u32 _location;
 	};
 
-	template<>
-	void DynamicUniform::Set(const Texture& t) const;
-
 	template<class T>
 	class Uniform : private DynamicUniform
 	{

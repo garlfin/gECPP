@@ -18,19 +18,19 @@ namespace GL
 	};
 
 	template<typename T = u8, bool DYNAMIC = false>
- 	class Buffer : public gE::GPU::Buffer<T>, public GLObject
+ 	class Buffer : public GPU::Buffer<T>, public GLObject
 	{
 	 public:
 		explicit Buffer(gE::Window* window, u32 count = 1, const T* data = nullptr) :
-			gE::GPU::Buffer<T>(count, data) , GLObject(window)
+			GPU::Buffer<T>(count, data) , GLObject(window)
 		{ Construct(); }
 
 		explicit Buffer(gE::Window* window, const Array<T>& arr) :
-			gE::GPU::Buffer<T>(arr) , GLObject(window)
+			GPU::Buffer<T>(arr) , GLObject(window)
 		{ Construct(); }
 
 		explicit Buffer(gE::Window* window, Array<T>&& arr) :
-			gE::GPU::Buffer<T>(std::move(arr)) , GLObject(window)
+			GPU::Buffer<T>(std::move(arr)) , GLObject(window)
 		{ Construct(); }
 
 		template<typename I>
@@ -78,7 +78,7 @@ namespace GL
 	 private:
 		void Construct()
 		{
-			typedef gE::GPU::Buffer<T> S;
+			typedef GPU::Buffer<T> S;
 			static constexpr size_t SIZE_T = sizeof(std::conditional_t<std::is_same_v<T, void>, uint8_t, T>);
 
 			glCreateBuffers(1, &ID);

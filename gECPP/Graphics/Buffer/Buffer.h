@@ -6,12 +6,12 @@
 
 #include "Graphics/Graphics.h"
 
-namespace gE::GPU
+namespace GPU
 {
 	template<typename T = u8>
-	class Buffer : public Serializable<Window*>, public Asset
+	class Buffer : public Serializable<gE::Window*>, public Asset
 	{
-		SERIALIZABLE_PROTO_T(Buffer, Serializable<Window*>);
+		SERIALIZABLE_PROTO_T(Buffer, Serializable<gE::Window*>);
 
 	 public:
 		static_assert(!std::is_pointer_v<T>, "Buffer data shouldn't be a pointer!");
@@ -31,7 +31,7 @@ namespace gE::GPU
 	};
 
 	template<class T>
-	void Buffer<T>::ISerialize(std::istream& in, Window* s)
+	void Buffer<T>::ISerialize(std::istream& in, gE::Window* s)
 	{
 		_array = ReadArray<u32, T>(in);
 	}

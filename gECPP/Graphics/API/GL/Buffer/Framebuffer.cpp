@@ -26,7 +26,7 @@ namespace GL
 		glNamedFramebufferDrawBuffers(ID, GL_MAX_ATTACHMENTS, _attachmentsEnum);
 	}
 
-	FrameBuffer::FrameBuffer(gE::Window* win) : Asset(win)
+	FrameBuffer::FrameBuffer(gE::Window* win) : APIObject(win)
 	{
 		glCreateFramebuffers(1, &ID);
 	}

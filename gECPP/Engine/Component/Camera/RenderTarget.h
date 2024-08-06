@@ -43,7 +43,7 @@ namespace gE
 		T _texture;
 	};
 
- 	class IRenderTarget : API::APIObject
+ 	class IRenderTarget : public API::APIObject
 	{
 	 public:
 		explicit IRenderTarget(Entity&, Camera&);

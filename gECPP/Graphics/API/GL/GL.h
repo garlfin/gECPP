@@ -15,9 +15,10 @@ GL_TYPE_(i8, GL_BYTE);
 
 namespace GL
 {
-	class APIObject : public gE::GPU::APIObject<u32>
+	class APIObject : public GPU::APIObject<u32>
 	{
-		using gE::GPU::APIObject<u32>::APIObject;
+	public:
+		using GPU::APIObject<u32>::APIObject;
 	};
 
 	typedef APIObject GLObject;

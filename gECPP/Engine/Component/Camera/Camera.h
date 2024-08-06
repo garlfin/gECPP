@@ -10,11 +10,14 @@
 #include "Engine/Manager.h"
 #include "Settings.h"
 #include "Timing.h"
-#include "RenderTarget.h"
-#include "Engine/Renderer/DefaultPipeline.h"
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "HidingNonVirtualFunction"
+
+namespace GPU
+{
+	struct Camera;
+}
 
 namespace gE
 {
@@ -60,7 +63,7 @@ namespace gE
 		GET_CONST(SIZE_TYPE, Size, GetViewportSize());
 		GET_CONST(float, Aspect, (float) GetSize().x / GetSize().y);
 
-		void GetGPUCamera(API::Camera& camera) override;
+		void GetGPUCamera(GPU::Camera& camera) override;
 	};
 
 	class PerspectiveCamera : public Camera2D
@@ -85,7 +88,7 @@ namespace gE
 				_fov = glm::radians(fov);
 		}
 
-		void GetGPUCamera(API::Camera& camera) override;
+		void GetGPUCamera(GPU::Camera& camera) override;
 
 	 protected:
 		void UpdateProjection() override;
@@ -120,7 +123,7 @@ namespace gE
 		GET_CONST(SIZE_TYPE, Size, SIZE_TYPE(GetViewportSize(), _sizeZ));
 		GET_CONST(float, Scale, GetOwner()->GetTransform()->Scale.x);
 
-		void GetGPUCamera(API::Camera&) override;
+		void GetGPUCamera(GPU::Camera&) override;
 
 	 protected:
 		void UpdateProjection() override;
@@ -140,7 +143,7 @@ namespace gE
 		GET(TARGET_TYPE&, Target, (TARGET_TYPE&) Camera::GetTarget());
 		GET_CONST(SIZE_TYPE, Size, GetViewportSize().x);
 
-		void GetGPUCamera(API::Camera& camera) override;
+		void GetGPUCamera(GPU::Camera& camera) override;
 
 	 protected:
 		void UpdateProjection() override;

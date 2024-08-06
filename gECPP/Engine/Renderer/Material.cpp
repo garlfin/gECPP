@@ -10,7 +10,7 @@
 namespace gE
 {
 	Material::Material(Window* window, const Reference<API::Shader>& shader, DepthFunction depthFunc, CullMode cullMode) :
-		API::Asset(window),
+		API::APIObject(window),
 		_shader(shader), _depthFunc(depthFunc), _cullMode(cullMode)
 	{
 	}
@@ -61,8 +61,6 @@ namespace gE
 
 	void PBRMaterial::Bind() const
 	{
-		GetWindow().GetSlotManager().Reset();
-
 		_albedo.Set();
 		_amr.Set();
 		_normal.Set();

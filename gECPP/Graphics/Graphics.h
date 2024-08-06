@@ -7,7 +7,7 @@
 #include <Prototype.h>
 #include <gETF/Serializable.h>
 
-namespace gE::GPU
+namespace GPU
 {
 	struct Version
 	{
@@ -19,7 +19,7 @@ namespace gE::GPU
 	class APIObject
 	{
 	 public:
-		APIObject(Window* window) : _window(window) { };
+		explicit APIObject(gE::Window* window) : _window(window) { };
 		APIObject(APIObject&) = delete;
 
 		APIObject& operator=(const APIObject&) = delete;
@@ -37,7 +37,7 @@ namespace gE::GPU
 		T ID;
 
 	 private:
-		Window* _window;
+		gE::Window* _window;
 	};
 
 	struct Asset
