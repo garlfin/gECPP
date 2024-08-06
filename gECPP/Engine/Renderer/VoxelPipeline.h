@@ -17,7 +17,7 @@ namespace GL
 	{
 		glm::vec3 Center;
 		float Scale;
-		GL_ALIGN handle Color;
+		API_ALIGN handle Color;
 	};
 }
 
@@ -33,26 +33,26 @@ namespace gE::VoxelPipeline
 	 public:
 		explicit Buffers(Window* window);
 
-		ALWAYS_INLINE void UpdateScene(u64 size = sizeof(GL::VoxelScene), u64 offset = 0) const
+		ALWAYS_INLINE void UpdateScene(u64 size = sizeof(API::VoxelScene), u64 offset = 0) const
 		{
 			_voxelBuffer.ReplaceData((u8*) &Scene + offset, size, offset);
 		}
 
-		GL::VoxelScene Scene;
+		API::VoxelScene Scene;
 
 	private:
-		GL::Buffer<GL::VoxelScene> _voxelBuffer;
+		API::Buffer<API::VoxelScene> _voxelBuffer;
 	};
 
-	CONSTEXPR_GLOBAL GL::ITextureSettings ColorFormat { GL_RGB10_A2, GL::WrapMode::Clamp, GL::FilterMode::Linear, 0 };
-	CONSTEXPR_GLOBAL GL::ITextureSettings ColorBackFormat { GL_RGB10_A2, GL::WrapMode::Clamp, GL::FilterMode::Nearest, 1 };
+	CONSTEXPR_GLOBAL API::ITextureSettings ColorFormat { GL_RGB10_A2, API::WrapMode::Clamp, API::FilterMode::Linear, 0 };
+	CONSTEXPR_GLOBAL API::ITextureSettings ColorBackFormat { GL_RGB10_A2, API::WrapMode::Clamp, API::FilterMode::Nearest, 1 };
 
 	class Target3D : public RenderTarget<Camera3D>
 	{
 	 public:
 		explicit Target3D(VoxelCapture&, Camera3D&);
 
-		GET(GL::Texture3D&, Color, _color);
+		GET(API::Texture3D&, Color, _color);
 		GET(float, Scale, GetCamera().GetScale());
 		GET(VoxelCapture&, Owner, (VoxelCapture&) RenderTarget<Camera3D>::GetOwner());
 
@@ -62,6 +62,6 @@ namespace gE::VoxelPipeline
 
 	 private:
 		glm::ivec3 _velocity;
-		GL::Texture3D _color, _colorBack;
+		API::Texture3D _color, _colorBack;
 	};
 }

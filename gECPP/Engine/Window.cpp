@@ -154,34 +154,34 @@ void Window::OnInit()
 	PipelineBuffers = ptr_create<DefaultPipeline::Buffers>(this);
 	VoxelBuffers = ptr_create<VoxelPipeline::Buffers>(this);
 
-	BlitShader = ptr_create<GL::Shader>(this, "Resource/Shader/blit.vert", "Resource/Shader/blit.frag");
-	TAAShader = ptr_create<GL::ComputeShader>(this, "Resource/Shader/PostProcess/taa.comp");
-	TonemapShader = ptr_create<GL::ComputeShader>(this, "Resource/Shader/PostProcess/tonemap.comp");
-	BloomShader = ptr_create<GL::ComputeShader>(this, "Resource/Shader/PostProcess/bloom.comp");
-	VoxelTAAShader = ptr_create<GL::ComputeShader>(this, "Resource/Shader/Compute/voxel.comp");
-	HiZShader = ptr_create<GL::ComputeShader>(this, "Resource/Shader/Compute/hiz.comp");
+	BlitShader = ptr_create<API::Shader>(this, "Resource/Shader/blit.vert", "Resource/Shader/blit.frag");
+	TAAShader = ptr_create<API::ComputeShader>(this, "Resource/Shader/PostProcess/taa.comp");
+	TonemapShader = ptr_create<API::ComputeShader>(this, "Resource/Shader/PostProcess/tonemap.comp");
+	BloomShader = ptr_create<API::ComputeShader>(this, "Resource/Shader/PostProcess/bloom.comp");
+	VoxelTAAShader = ptr_create<API::ComputeShader>(this, "Resource/Shader/Compute/voxel.comp");
+	HiZShader = ptr_create<API::ComputeShader>(this, "Resource/Shader/Compute/hiz.comp");
 
 	{
-		GL::ComputeShader brdfShader(this, "Resource/Shader/Compute/brdf.comp");
-		GL::TextureSettings2D brdfSettings
+		API::ComputeShader brdfShader(this, "Resource/Shader/Compute/brdf.comp");
+		API::TextureSettings2D brdfSettings
 		{
-			{ GL_RG16F, GL::WrapMode::Clamp, GL::FilterMode::Linear, 1 },
-			GL::TextureSize2D(BRDF_SIZE)
+			{ GL_RG16F, API::WrapMode::Clamp, API::FilterMode::Linear, 1 },
+			API::TextureSize2D(BRDF_SIZE)
 		};
 
 		glm::uvec2 brdfGroupSize = DIV_CEIL_T(BRDF_SIZE, BRDF_GROUP_SIZE, glm::uvec2);
 
-		BRDFLookup = ptr_create<GL::Texture2D>(this, brdfSettings);
+		BRDFLookup = ptr_create<API::Texture2D>(this, brdfSettings);
 		BRDFLookup->Bind(0, GL_WRITE_ONLY);
 		brdfShader.Bind();
 		brdfShader.Dispatch(brdfGroupSize);
 	}
 
-	auto defaultShader = ref_create<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/missing.frag");
+	auto defaultShader = ref_create<API::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/missing.frag");
 	DefaultMaterial = ptr_create<gE::Material>(this, defaultShader);
 }
 
-void Window::Blit(const GL::Texture& texture)
+void Window::Blit(const API::Texture& texture)
 {
 	// This function is really sketchy, vertices are all in the shader.
 	// It needs a VAO to be previously bound to work.
@@ -222,7 +222,7 @@ void Window::OnRender(float delta)
 
 	GE_ASSERT(Cameras.CurrentCamera, "CAMERA SHOULD NOT BE NULL!");
 
-	GL::FrameBuffer::Reset();
+	API::FrameBuffer::Reset();
 	Blit(Cameras.CurrentCamera->GetColor());
 
 	Transforms.OnRender(delta, nullptr);

@@ -9,8 +9,8 @@
 
 namespace gE
 {
-	gE::Material::Material(Window* window, const Reference<GL::Shader>& shader, DepthFunction depthFunc, CullMode cullMode) :
-		GL::Asset(window),
+	gE::Material::Material(Window* window, const Reference<API::Shader>& shader, DepthFunction depthFunc, CullMode cullMode) :
+		API::Asset(window),
 		_shader(shader), _depthFunc(depthFunc), _cullMode(cullMode)
 	{
 	}
@@ -50,7 +50,7 @@ namespace gE
 		_shader->Bind();
 	}
 
-	PBRMaterial::PBRMaterial(Window* w, const Reference<GL::Shader>& s, const PBRMaterialSettings& settings) :
+	PBRMaterial::PBRMaterial(Window* w, const Reference<API::Shader>& s, const PBRMaterialSettings& settings) :
 		Material(w, s),
 		_albedo(this, "AlbedoTex", settings.Albedo),
 		_amr(this, "ARMDTex", settings.AMR),

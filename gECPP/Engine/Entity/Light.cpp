@@ -31,11 +31,11 @@ namespace gE
 			(*l)->GetCamera().OnRender(delta, camera);
 	}
 
-	CONSTEXPR_GLOBAL GL::ITextureSettings ShadowMapFormat { GL_DEPTH_COMPONENT16, GL::WrapMode::Clamp, GL::FilterMode::Linear };
+	CONSTEXPR_GLOBAL API::ITextureSettings ShadowMapFormat { GL_DEPTH_COMPONENT16, API::WrapMode::Clamp, API::FilterMode::Linear };
 
 	DirectionalLightTarget::DirectionalLightTarget(Light& l, OrthographicCamera& c) :
-		RenderTarget<Camera2D>(l, c), IDepthTarget((GL::Texture&) _depth),
-		_depth(GetFrameBuffer(), GL::TextureSettings2D{ ShadowMapFormat, c.GetSize() })
+		RenderTarget<Camera2D>(l, c), IDepthTarget((API::Texture&) _depth),
+		_depth(GetFrameBuffer(), API::TextureSettings2D{ ShadowMapFormat, c.GetSize() })
 	{
 	}
 
@@ -43,12 +43,12 @@ namespace gE
 	{
 		Window& window = callingCamera->GetWindow();
 		OrthographicCamera& camera = GetCamera();
-		GL::TextureSize2D size = camera.GetSize();
+		API::TextureSize2D size = camera.GetSize();
 
 		DefaultPipeline::Buffers& buffers = window.GetPipelineBuffers();
 
 		GetOwner().GetGLLight(buffers.Lighting.Lights[0]);
-		buffers.UpdateLighting(offsetof(GL::Lighting, Lights[1]));
+		buffers.UpdateLighting(offsetof(API::Lighting, Lights[1]));
 
 		window.State = State::Shadow;
 
@@ -65,7 +65,7 @@ namespace gE
 		if(!callingCamera) return false;
 
 		OrthographicCamera& camera = GetCamera();
-		GL::TextureSize2D size = camera.GetSize();
+		API::TextureSize2D size = camera.GetSize();
 
 		Transform& transform = GetOwner().GetTransform();
 		Transform& cameraTransform = callingCamera->GetOwner()->GetTransform();
@@ -82,14 +82,14 @@ namespace gE
 		return true;
 	}
 
-	void DirectionalLight::GetGLLight(GL::Light& light)
+	void DirectionalLight::GetGLLight(API::Light& light)
 	{
 		Transform& transform = GetCamera().GetOwner()->GetTransform();
 		OrthographicCamera& camera = GetCamera();
 
 		light.ViewProjection = camera.GetProjection() * glm::inverse(transform.Model());
 		light.Position = -transform->Forward();
-		light.Type = GL::LightType::Directional;
+		light.Type = API::LightType::Directional;
 		light.Color = glm::vec3(1);
 		light.PackedSettings = u32(camera.GetScale().y * 2);
 		light.Planes = DirectionalSettings.ClipPlanes;

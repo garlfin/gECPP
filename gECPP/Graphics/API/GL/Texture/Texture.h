@@ -1,8 +1,8 @@
 #pragma once
 
-#include <Graphics/GL.h>
+#include <Graphics/API/GL/GL.h>
 #include "Engine/Binary/Binary.h"
-#include <GLAD/glad.h>
+#include "GLAD/glad.h"
 #include "TextureSettings.h"
 
 #define GE_ANISOTROPY_COUNT 8
@@ -39,10 +39,8 @@ namespace GL
 		return 32 - __builtin_clz(largest);
 	}
 
-	class Texture : public Asset
+ 	class Texture : gE::Graphics::Texture, public GLObject
 	{
-		SERIALIZABLE_PROTO_T(Texture, Asset);
-
 	 public:
 		Texture(gE::Window* window, GLenum target, const ITextureSettings& settings);
 

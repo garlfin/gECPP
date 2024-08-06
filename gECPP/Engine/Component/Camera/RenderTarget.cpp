@@ -7,7 +7,7 @@
 
 namespace gE
 {
-	IRenderTarget::IRenderTarget(Entity& owner, Camera& camera) : GL::Asset(&camera.GetWindow()),
+	IRenderTarget::IRenderTarget(Entity& owner, Camera& camera) : API::Asset(&camera.GetWindow()),
 		_camera(camera),
 		_owner(owner),
 		_frameBuffer(&camera.GetWindow())

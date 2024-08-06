@@ -3,3 +3,7 @@
 //
 
 #pragma once
+
+#include <Graphics/Graphics.h>
+
+#include <Graphics/API/GL/Buffer/VAO.h>

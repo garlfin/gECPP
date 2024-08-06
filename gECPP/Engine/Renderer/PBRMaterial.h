@@ -13,22 +13,22 @@ namespace gE
 {
 	struct PBRMaterialSettings
 	{
-		gE::Reference<GL::Texture2D> Albedo;
-		gE::Reference<GL::Texture2D> AMR;
-		gE::Reference<GL::Texture2D> Normal;
+		gE::Reference<API::Texture2D> Albedo;
+		gE::Reference<API::Texture2D> AMR;
+		gE::Reference<API::Texture2D> Normal;
 	};
 
 	struct PBRMaterial : public Material
 	{
 	 public:
-		PBRMaterial(Window* w, const Reference<GL::Shader>& s, const PBRMaterialSettings& settings);
+		PBRMaterial(Window* w, const Reference<API::Shader>& s, const PBRMaterialSettings& settings);
 
 		void Bind() const override;
 
 	 private:
-		const gE::ReferenceUniform<GL::Texture2D> _albedo;
-		const gE::ReferenceUniform<GL::Texture2D> _amr;
-		const gE::ReferenceUniform<GL::Texture2D> _normal;
-		const GL::DynamicUniform _brdfLUT;
+		const gE::ReferenceUniform<API::Texture2D> _albedo;
+		const gE::ReferenceUniform<API::Texture2D> _amr;
+		const gE::ReferenceUniform<API::Texture2D> _normal;
+		const API::DynamicUniform _brdfLUT;
 	};
 }

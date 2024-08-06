@@ -1,6 +1,6 @@
 #include "Texture.h"
 #include <iostream>
-#include <GLAD/glad.h>
+#include "GLAD/glad.h"
 #include "Engine/Binary/Binary.h"
 #include "TextureSlotManager.h"
 

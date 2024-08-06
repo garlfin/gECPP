@@ -16,6 +16,6 @@ namespace gE::DefaultPipeline
 	{
 	 public:
 		explicit Tonemap(Target2D&);
-		void RenderPass(GL::Texture2D& in, GL::Texture2D& out) override;
+		void RenderPass(API::Texture2D& in, API::Texture2D& out) override;
 	};
 }

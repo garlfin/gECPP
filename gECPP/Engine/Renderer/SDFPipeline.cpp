@@ -15,7 +15,7 @@ namespace gE::SDFPipeline
 {
 	Buffers::Buffers(gE::Window* window) : _sdfBuffer(window)
 	{
-		_sdfBuffer.Bind(GL::BufferTarget::Uniform, 4);
+		_sdfBuffer.Bind(API::BufferTarget::Uniform, 4);
 	}
 
 	Target3D::Target3D(SDFCapture& capture, Camera3D& camera) :

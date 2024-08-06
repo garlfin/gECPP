@@ -1,5 +1,5 @@
 #pragma once
-#include <Graphics/GL.h>
+#include <Graphics/API/GL/GL.h>
 #include <utility>
 #include "GLAD/glad.h"
 #include "Engine/Array.h"

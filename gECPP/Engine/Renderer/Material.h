@@ -34,29 +34,29 @@ namespace gE
 		Blend
 	};
 
-	struct Material : public GL::Asset
+	struct Material : public API::Asset
 	{
 	 public:
-		Material(Window* window, const Reference<GL::Shader>& shader, DepthFunction depthFunc = DepthFunction::Less, CullMode cullMode = CullMode::Back);
+		Material(Window* window, const Reference<API::Shader>& shader, DepthFunction depthFunc = DepthFunction::Less, CullMode cullMode = CullMode::Back);
 
 		void Bind() const override;
 
-		GET_CONST(GL::Shader &, Shader, _shader);
+		GET_CONST(API::Shader &, Shader, _shader);
 
 	 private:
-		const Reference<GL::Shader> _shader;
+		const Reference<API::Shader> _shader;
 		const DepthFunction _depthFunc;
 		const CullMode _cullMode;
 	};
 
 	template<class T>
-	class ValueUniform : private GL::Uniform<T>
+	class ValueUniform : private API::Uniform<T>
 	{
 	 public:
-		ValueUniform(const Material* mat, const char* n, const T& t) : GL::Uniform<T>(&mat->GetShader(), n), _t(t) { };
-		ValueUniform(const Material* mat, const char* n, T&& t) : GL::Uniform<T>(&mat->GetShader(), n), _t(t) { };
-		ValueUniform(const Material* mat, u32 l, const T& t) : GL::Uniform<T>(&mat->GetShader(), l), _t(t) { };
-		ValueUniform(const Material* mat, u32 l, T&& t) : GL::Uniform<T>(&mat->GetShader(), l), _t(t) { };
+		ValueUniform(const Material* mat, const char* n, const T& t) : API::Uniform<T>(&mat->GetShader(), n), _t(t) { };
+		ValueUniform(const Material* mat, const char* n, T&& t) : API::Uniform<T>(&mat->GetShader(), n), _t(t) { };
+		ValueUniform(const Material* mat, u32 l, const T& t) : API::Uniform<T>(&mat->GetShader(), l), _t(t) { };
+		ValueUniform(const Material* mat, u32 l, T&& t) : API::Uniform<T>(&mat->GetShader(), l), _t(t) { };
 
 		ValueUniform(const ValueUniform&) = default;
 		ValueUniform(ValueUniform&&) = default;
@@ -72,7 +72,7 @@ namespace gE
 		ALWAYS_INLINE operator T*() const { return _t; } // NOLINT
 		ALWAYS_INLINE operator T&() const { return *_t; } // NOLINT
 
-		ALWAYS_INLINE void Set() const { GL::Uniform<T>::Set(_t); }
+		ALWAYS_INLINE void Set() const { API::Uniform<T>::Set(_t); }
 
 		// I just prefer the semantics of it being encapsulated
 		GET_SET(T&, , _t);

@@ -33,7 +33,7 @@ namespace gE
 	 public:
 		Light(Window*, Camera&, IDepthTarget&);
 
-		virtual void GetGLLight(GL::Light& light) = 0;
+		virtual void GetGLLight(API::Light& light) = 0;
 
 		GET(Camera&, Camera, _camera);
 
@@ -46,7 +46,7 @@ namespace gE
 	 public:
 		explicit DirectionalLightTarget(Light&, OrthographicCamera&);
 
-		GET(GL::Texture2D&, Depth, *_depth);
+		GET(API::Texture2D&, Depth, *_depth);
 		GET(Light&, Owner, (Light&) IRenderTarget::GetOwner());
 		GET(OrthographicCamera&, Camera, (OrthographicCamera&) RenderTarget<Camera2D>::GetCamera())
 
@@ -54,7 +54,7 @@ namespace gE
 		void RenderPass(float, Camera*) override;
 
 	 private:
-		Attachment<GL::Texture2D, GL_DEPTH_ATTACHMENT> _depth;
+		Attachment<API::Texture2D, GL_DEPTH_ATTACHMENT> _depth;
 	};
 
 	class DirectionalLight : public Light
@@ -62,11 +62,11 @@ namespace gE
 	 public:
 		DirectionalLight(Window*, u16 size, float scale, const glm::quat& = glm::identity<glm::quat>());
 
-		void GetGLLight(GL::Light&) override;
+		void GetGLLight(API::Light&) override;
 
 		GET(OrthographicCamera&, Camera, _camera);
 		GET(DirectionalLightTarget&, Target, _target);
-		GET(GL::Texture2D&, Depth, _target.GetDepth());
+		GET(API::Texture2D&, Depth, _target.GetDepth());
 
 		GET_CONST(float, Scale, _camera.GetScale().y);
 

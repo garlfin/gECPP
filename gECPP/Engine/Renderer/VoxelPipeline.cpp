@@ -15,7 +15,7 @@ namespace gE::VoxelPipeline
 {
 	Buffers::Buffers(gE::Window* window) : _voxelBuffer(window)
 	{
-		_voxelBuffer.Bind(GL::BufferTarget::Uniform, 4);
+		_voxelBuffer.Bind(API::BufferTarget::Uniform, 4);
 	}
 
 	Target3D::Target3D(VoxelCapture& capture, Camera3D& camera) :
@@ -29,7 +29,7 @@ namespace gE::VoxelPipeline
 	void Target3D::RenderPass(float d, Camera* camera)
 	{
 		Window& window = GetWindow();
-		GL::TextureSize2D size = GetSize();
+		API::TextureSize2D size = GetSize();
 
 		window.State = gE::State::Voxel;
 
@@ -47,7 +47,7 @@ namespace gE::VoxelPipeline
 		if(!camera) return false;
 
 		VoxelPipeline::Buffers& buffers = GetWindow().GetVoxelBuffers();
-		GL::ComputeShader& voxelShader = GetWindow().GetVoxelTAAShader();
+		API::ComputeShader& voxelShader = GetWindow().GetVoxelTAAShader();
 		Transform& transform = GetOwner().GetTransform();
 		Transform& cameraTransform = camera->GetOwner()->GetTransform();
 
@@ -84,7 +84,7 @@ namespace gE::VoxelPipeline
 
 	void Target3D::PostProcessPass(float d)
 	{
-		GL::ComputeShader& voxelShader = GetWindow().GetVoxelTAAShader();
+		API::ComputeShader& voxelShader = GetWindow().GetVoxelTAAShader();
 
 		voxelShader.Bind();
 
