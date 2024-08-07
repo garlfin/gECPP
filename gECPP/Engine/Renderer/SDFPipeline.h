@@ -5,9 +5,8 @@
 #pragma once
 
 #include "Engine/Math/Math.h"
-#include "GL/Texture/Texture.h"
-#include "GL/Buffer/Buffer.h"
-#include "Engine/Renderer/DefaultPipeline.h"
+#include "Graphics/Texture/Texture.h"
+#include "Graphics/Buffer/Buffer.h"
 #include "Engine/Component/Camera/Camera.h"
 
 #define SDF_MAX_TEXTURE 2
@@ -68,28 +67,28 @@ namespace gE::SDFPipeline
 	 public:
 		explicit Buffers(Window* window);
 
-		ALWAYS_INLINE void UpdateScene(u64 size = sizeof(GL::SDFScene), u64 offset = 0) const
+		ALWAYS_INLINE void UpdateScene(u64 size = sizeof(API::SDFScene), u64 offset = 0) const
 		{
 			_sdfBuffer.ReplaceData((u8*) &Scene + offset, size, offset);
 		}
 
-		GL::SDFScene Scene;
+		API::SDFScene Scene;
 
 	 private:
-		GL::Buffer<GL::SDFScene> _sdfBuffer;
+		API::Buffer<API::SDFScene> _sdfBuffer;
 	};
 
-	CONSTEXPR_GLOBAL GL::ITextureSettings ColorFormat { GL_RGB10_A2, GL::WrapMode::Clamp, GL::FilterMode::Linear, 1 };
-	CONSTEXPR_GLOBAL GL::ITextureSettings SDFFormat { GL_R32F, GL::WrapMode::Clamp, GL::FilterMode::Nearest, 1 };
+	CONSTEXPR_GLOBAL GPU::ITextureSettings ColorFormat { GL_RGB10_A2, GPU::WrapMode::Clamp, GPU::FilterMode::Linear, 1 };
+	CONSTEXPR_GLOBAL GPU::ITextureSettings SDFFormat { GL_R32F, GPU::WrapMode::Clamp, GPU::FilterMode::Nearest, 1 };
 
 	class Target3D : public RenderTarget<Camera3D>
 	{
 	 public:
 		explicit Target3D(SDFCapture&, Camera3D&);
 
-		GET(GL::Texture3D&, Color, _color);
-		GET(GL::Texture3D&, SDF, _sdf);
-		GET(GL::Texture3D&, SDFBack, _sdfBack);
+		GET(API::Texture3D&, Color, _color);
+		GET(API::Texture3D&, SDF, _sdf);
+		GET(API::Texture3D&, SDFBack, _sdfBack);
 
 		GET(float, Scale, GetCamera().GetScale());
 		GET(SDFCapture&, Owner, (SDFCapture&) RenderTarget<Camera3D>::GetOwner());
@@ -99,7 +98,7 @@ namespace gE::SDFPipeline
 		void PostProcessPass(float d) override;
 
 	 private:
-		GL::Texture3D _color;
-		GL::Texture3D _sdf, _sdfBack;
+		API::Texture3D _color;
+		API::Texture3D _sdf, _sdfBack;
 	};
 }

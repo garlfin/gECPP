@@ -6,7 +6,6 @@
 
 #include <Engine/Renderer/DefaultPipeline.h>
 #include <Engine/Component/Camera/PostProcessEffect.h>
-#include <GL/Shader/Shader.h>
 
 #define TONEMAP_GROUP_SIZE 8
 
@@ -16,6 +15,6 @@ namespace gE::DefaultPipeline
 	{
 	 public:
 		explicit Tonemap(Target2D&);
-		void RenderPass(GL::Texture2D& in, GL::Texture2D& out) override;
+		void RenderPass(API::Texture2D& in, API::Texture2D& out) override;
 	};
 }

@@ -9,7 +9,6 @@
 #include "GLM/vec4.hpp"
 #include "GLM/gtx/quaternion.hpp"
 #include "GLM/mat3x3.hpp"
-#include "GLM/mat4x4.hpp"
 #include "GLAD/types.h"
 
 #include <cstdint>
@@ -21,7 +20,7 @@
 #define GL_INT 0x1404
 #define GL_UNSIGNED_INT 0x1405
 #define GL_FLOAT 0x1406
-#define GL_ALIGN alignas(16)
+#define API_ALIGN alignas(16)
 
 #define TO_RAD 0.01745329251f
 #define TO_DEG 57.2957795131f
@@ -61,12 +60,9 @@ namespace glm
 	typedef quat quaternion;
 }
 
-namespace GL
-{
-	typedef Size<Dimension::D1D> TextureSize1D;
-	typedef Size<Dimension::D2D> TextureSize2D;
-	typedef Size<Dimension::D3D> TextureSize3D;
-}
+typedef Size<Dimension::D1D> TextureSize1D;
+typedef Size<Dimension::D2D> TextureSize2D;
+typedef Size<Dimension::D3D> TextureSize3D;
 
 enum class FOVType : u8
 {
@@ -81,7 +77,7 @@ enum class AngleType : u8
 };
 
 template<FOVType TO, AngleType UNIT = AngleType::Radian>
-float constexpr fov_cast(float in, const GL::TextureSize2D& size)
+float constexpr fov_cast(float in, const TextureSize2D& size)
 {
 	float aspect;
 	if constexpr(TO == FOVType::Horizontal) aspect = (float) size.x / size.y;
@@ -100,9 +96,9 @@ inline void Decompose(const glm::mat4& m, glm::vec3& p, glm::quat& r, glm::vec3&
 
 	s = glm::vec3
 	{
-		glm::length((glm::vec3) m[0]),
-		glm::length((glm::vec3) m[1]),
-		glm::length((glm::vec3) m[3])
+		length((glm::vec3) m[0]),
+		length((glm::vec3) m[1]),
+		length((glm::vec3) m[3])
 	};
 
 	glm::mat3 temp

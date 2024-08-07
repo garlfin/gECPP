@@ -5,7 +5,7 @@
 #include "MeshRenderer.h"
 #include <Engine/Window.h>
 
-gE::MeshRenderer::MeshRenderer(gE::Entity* o, gETF::Mesh* mesh, const gE::MaterialHolder& mat) :
+gE::MeshRenderer::MeshRenderer(Entity* o, gETF::Mesh* mesh, const MaterialHolder& mat) :
 	Component(o, &o->GetWindow().GetRenderers()),
 	_mesh(mesh), _materialHolder(mat)
 {
@@ -26,7 +26,7 @@ gE::Material& gE::MaterialHolder::GetMaterial(u8 i) const
 	return _materials[i] || GetWindow().GetDefaultMaterial();
 }
 
-void gE::RendererManager::OnRender(float d, gE::Camera* camera)
+void gE::RendererManager::OnRender(float d, Camera* camera)
 {
 	ComponentManager::OnRender(d, camera);
 
@@ -34,7 +34,7 @@ void gE::RendererManager::OnRender(float d, gE::Camera* camera)
 	{
 		MeshRenderer& c = *(MeshRenderer*) &m->Get();
 
-		gE::Window& window = c.GetWindow();
+		Window& window = c.GetWindow();
 		DefaultPipeline::Buffers& buffers = window.GetPipelineBuffers();
 
 		const MeshRenderer& info = *(MeshRenderer*) &c;

@@ -3,11 +3,13 @@
 //
 
 #include <fstream>
-#include "Texture.h"
+#include "Graphics/API/GL/Texture/Texture.h"
+#include "TextureSettings.h"
+
 
 namespace PVR
 {
-	Array<u8> Read(const char* file, PVR::Header& header)
+	Array<u8> Read(const char* file, Header& header)
 	{
 		std::ifstream src;
 		src.open(file, std::ios::in | std::ios::binary);
@@ -27,17 +29,17 @@ namespace PVR
 		return data;
 	}
 
-	GL::Texture* Read(gE::Window* window, const char* path, GL::WrapMode wrapMode, GL::FilterMode filterMode)
+	API::Texture* Read(gE::Window* window, const char* path, GPU::WrapMode wrapMode, GPU::FilterMode filterMode)
 	{
 		Header header;
 		Array<u8> imageData = Read(path, header);
 		if(!imageData) return nullptr;
 
-		GL::Texture* tex = nullptr;
+		API::Texture* tex = nullptr;
 
 		if(header.Faces == 1)
 		{
-			GL::TextureSettings2D settings
+			GPU::TextureSettings2D settings
 			{
 				PVRToInternalFormat(header.Format),
 				wrapMode,
@@ -46,22 +48,22 @@ namespace PVR
 				header.Size,
 			};
 
-			GL::TextureData data
+			GPU::TextureData data
 			{
 				GL_NONE,
 				GL_NONE,
-				GL::CompressionScheme(4, 16), // 16 bytes per 4x4 block
+				GPU::CompressionScheme(4, 16), // 16 bytes per 4x4 block
 				(u8) header.MipCount,
 				std::move(imageData)
 			};
 
-			tex = new GL::Texture2D(window, settings, std::move(data));
+			tex = new API::Texture2D(window, settings, std::move(data));
 		}
 		else if(header.Faces == 6)
 		{
 			GE_ASSERT(header.Size.x == header.Size.y, "Cubemap not square!");
 
-			GL::TextureSettings1D settings
+			GPU::TextureSettings1D settings
 			{
 				PVRToInternalFormat(header.Format),
 				wrapMode,
@@ -70,16 +72,16 @@ namespace PVR
 				header.Size.x,
 			};
 
-			GL::TextureData data
+			GPU::TextureData data
 			{
 				GL_RGB,
 				GL_HALF_FLOAT,
-				GL::CompressionScheme(1, 6), // 6 bytes per pixel
+				GPU::CompressionScheme(1, 6), // 6 bytes per pixel
 				(u8) header.MipCount,
 				std::move(imageData)
 			};
 
-			tex = new GL::TextureCube(window, settings, std::move(data));
+			tex = new API::TextureCube(window, settings, std::move(data));
 		}
 		else LOG("Unsupported texture format!");
 
@@ -90,7 +92,7 @@ namespace PVR
 	{
 		Version = ::Read<u32>(src);
 		Flags = ::Read<PVR::Flags>(src);
-		Format = ::Read<PVR::PixelFormat>(src);
+		Format = ::Read<PixelFormat>(src);
 		ColorSpace=::Read<PVR::ColorSpace>(src);
 		::Read<uint32_t>(src); // This was like bpc or something; unimportant w/ compression
 		Size = ::Read<glm::u32vec2>(src);

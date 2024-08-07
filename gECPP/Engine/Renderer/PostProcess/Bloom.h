@@ -6,7 +6,6 @@
 
 #include <Engine/Renderer/DefaultPipeline.h>
 #include <Engine/Component/Camera/PostProcessEffect.h>
-#include <GL/Shader/Shader.h>
 
 #define BLOOM_GROUP_SIZE 8
 
@@ -24,6 +23,6 @@ namespace gE::DefaultPipeline
 
 		u8 Iterations = 7;
 
-		void RenderPass(GL::Texture2D& in, GL::Texture2D& out) override;
+		void RenderPass(API::Texture2D& in, API::Texture2D& out) override;
 	};
 }
