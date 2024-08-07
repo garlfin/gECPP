@@ -13,6 +13,9 @@ namespace gE
 	class Component;
 	class Behavior;
 	class Camera;
+	class IRenderTarget;
+	class IColorTarget;
+	template<class T> class RenderTarget;
 
 	template<class T> class TypedComponent;
 	template<class T> class TypedBehavior;

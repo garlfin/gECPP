@@ -5,7 +5,6 @@
 #pragma once
 
 #include "Component.h"
-#include <Engine/Manager.h>
 
 namespace gE
 {

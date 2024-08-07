@@ -13,9 +13,9 @@ namespace gE
 	class MaterialHolder : public Component
 	{
 	 public:
-		explicit MaterialHolder(gE::Entity* o) : Component(o) { };
+		explicit MaterialHolder(Entity* o) : Component(o) { };
 
-		explicit MaterialHolder(gE::Entity* o, const Array<Reference<Material>>& materials = {})
+		explicit MaterialHolder(Entity* o, const Array<Reference<Material>>& materials = {})
 			: Component(o)
 		{
 			if(materials.Count()) materials.CopyToCArray(_materials);

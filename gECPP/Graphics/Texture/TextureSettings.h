@@ -1,13 +1,19 @@
 //
+// Created by scion on 8/5/2024.
+//
+
+#pragma once
+
+//
 // Created by scion on 9/13/2023.
 //
 
 #pragma once
 
 #include "Engine/Math/Math.h"
-#include <GLAD/glad.h>
-#include <Engine/Binary/Binary.h>
-#include <gETF/Serializable.h>
+#include "GLAD/glad.h"
+#include "Engine/Binary/Binary.h"
+#include "gETF/Serializable.h"
 
 namespace PVR
 {
@@ -39,7 +45,7 @@ namespace PVR
 
 	struct Header : Serializable<void>
 	{
-		SERIALIZABLE_PROTO(Header, Serializable<void>);
+	 SERIALIZABLE_PROTO(Header, Serializable<void>);
 
 	 public:
 		Header() = default;
@@ -55,23 +61,23 @@ namespace PVR
 		uint32_t MipCount;
 	};
 
-	constexpr GLenum PVRToInternalFormat(PVR::PixelFormat f)
+	constexpr GLenum PVRToInternalFormat(PixelFormat f)
 	{
 		switch(f)
 		{
-		case PVR::PixelFormat::DXT1: return GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
-		case PVR::PixelFormat::DXT3: return GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
-		case PVR::PixelFormat::DXT5: return GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
-		case PVR::PixelFormat::BC5: return GL_COMPRESSED_RG_RGTC2;
-		case PVR::PixelFormat::Depth: return GL_DEPTH_COMPONENT16;
-		case PVR::PixelFormat::RGB32F: return GL_RGB32F;
-		case PVR::PixelFormat::RGB16F: return GL_RGB16F;
-		default: return GL_RGB8;
+			case PixelFormat::DXT1: return GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+			case PixelFormat::DXT3: return GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+			case PixelFormat::DXT5: return GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+			case PixelFormat::BC5: return GL_COMPRESSED_RG_RGTC2;
+			case PixelFormat::Depth: return GL_DEPTH_COMPONENT16;
+			case PixelFormat::RGB32F: return GL_RGB32F;
+			case PixelFormat::RGB16F: return GL_RGB16F;
+			default: return GL_RGB8;
 		}
 	}
 }
 
-namespace GL
+namespace GPU
 {
 	enum class FilterMode : GLenum
 	{
@@ -127,7 +133,7 @@ namespace GL
 	typedef TextureSettings<Dimension::D2D> TextureSettings2D;
 	typedef TextureSettings<Dimension::D3D> TextureSettings3D;
 
-	struct TextureData : public Serializable<void>
+	struct TextureData : public Serializable<>
 	{
 		SERIALIZABLE_PROTO(TextureData, Serializable);
 
@@ -147,5 +153,25 @@ namespace GL
 		ALWAYS_INLINE operator bool() const { return Data.Data(); }
 	};
 
-	bool FormatIsCompressed(GLenum f);
+	inline void TextureData::ISerialize(istream& in)
+	{
+		PixelFormat = ::Read<GLenum>(in);
+		PixelType = ::Read<GLenum>(in);
+		Scheme = ::Read<CompressionScheme>(in);
+		MipCount = ::Read<u8>(in);
+		Data = ReadArray<u32, u8>(in);
+	}
+
+	inline void TextureData::IDeserialize(ostream& out) const
+	{
+		Write(out, PixelFormat);
+		Write(out, PixelType);
+		Write(out, Scheme);
+		Write(out, MipCount);
+		WriteArray<u32>(out, Data);
+	}
+
+	inline TextureData::TextureData(GLenum f, GLenum t, CompressionScheme s, u8 m, Array<u8>&& d) :
+		PixelFormat(f), PixelType(t), Scheme(s), MipCount(m), Data(std::move(d))
+	{ }
 }

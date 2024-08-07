@@ -1,8 +1,9 @@
 #pragma once
 
-#include <GL/GL.h>
-#include <GL/Texture/Texture.h>
+#include <Graphics/Texture/Texture.h>
 #include <Engine/AssetManager.h>
+#include <GLAD/glad.h>
+#include <Graphics/API/GL/GL.h>
 
 #define GL_MAX_ATTACHMENTS 4
 
@@ -20,7 +21,7 @@ namespace GL
 		return FrameBufferTarget((GLenum) a + b);
 	}
 
-	class FrameBuffer : public Asset
+	class FrameBuffer : public GLObject
 	{
 	 public:
 		explicit FrameBuffer(gE::Window* win);

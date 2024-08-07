@@ -13,35 +13,35 @@ namespace gE
 		DefaultCameraTiming
 	};
 
-	CubemapCapture::CubemapCapture(gE::Window* w, u16 size) :
+	CubemapCapture::CubemapCapture(Window* w, u16 size) :
 		Entity(w, Flags(true, UINT8_MAX)),
 		Managed<CubemapCapture>(*this, &GetWindow().GetCubemaps()),
 		_camera(this, _target, { CubemapCameraSettings, size }),
 		_target(_camera)
 	{}
 
-	void CubemapCapture::GetGLCubemap(GL::Cubemap& cubemap)
+	void CubemapCapture::GetGPUCubemap(GPU::Cubemap& cubemap)
 	{
 		Transform& transform = GetTransform();
 
 		cubemap.Position = transform.GetGlobalTransform().Position;
 		cubemap.Scale = transform.GetGlobalTransform().Scale;
 		cubemap.BlendRadius = 0.f;
-		cubemap.Type = GL::CubemapType::AABB;
+		cubemap.Type = GPU::CubemapType::AABB;
 		cubemap.Color = (handle) GetColor();
 	}
 
 	void CubemapManager::OnRender(float delta, Camera* camera)
 	{
 		DefaultPipeline::Buffers& buffers = _window->GetPipelineBuffers();
-		GL::Lighting& lighting = buffers.Lighting;
+		GPU::Lighting& lighting = buffers.Lighting;
 
 		lighting.Skybox = Skybox->GetHandle();
 		lighting.CubemapCount = 1;
-		(*List.GetFirst())->GetGLCubemap(lighting.Cubemaps[0]);
+		(*List.GetFirst())->GetGPUCubemap(lighting.Cubemaps[0]);
 
-		buffers.UpdateLighting(sizeof(handle), offsetof(GL::Lighting, Skybox));
-		buffers.UpdateLighting(sizeof(GL::Cubemap), offsetof(GL::Lighting, Cubemaps[0]));
+		buffers.UpdateLighting(sizeof(handle), offsetof(GPU::Lighting, Skybox));
+		buffers.UpdateLighting(sizeof(GPU::Cubemap), offsetof(GPU::Lighting, Cubemaps[0]));
 
 		for(Managed<CubemapCapture>* c = List.GetFirst(); c; c = c->GetNext())
 			(*c)->GetCamera().OnRender(delta, camera);
@@ -55,7 +55,7 @@ namespace gE
 			ReadSerializableFromFile(_window, "Resource/Model/skybox.gEMesh", skybox);
 
 			_skyboxVAO = std::move(skybox.VAO);
-			_skyboxShader = ptr_create<GL::Shader>(_window, "Resource/Shader/skybox.vert", "Resource/Shader/skybox.frag");
+			_skyboxShader = ptr_create<API::Shader>(_window, "Resource/Shader/skybox.vert", "Resource/Shader/skybox.frag");
 		}
 		_skyboxShader->Bind();
 
@@ -82,17 +82,17 @@ namespace gE
 		window.GetCubemaps().DrawSkybox();
 	}
 
-	CONSTEXPR_GLOBAL GL::ITextureSettings CubemapColorFormat
+	CONSTEXPR_GLOBAL GPU::ITextureSettings CubemapColorFormat
 	{
 		GL_R11F_G11F_B10F,
-		GL::WrapMode::Clamp,
-		GL::FilterMode::Linear
+		GPU::WrapMode::Clamp,
+		GPU::FilterMode::Linear
 	};
 
 	CubemapTarget::CubemapTarget(CameraCubemap& camera) :
 		RenderTarget<CameraCubemap>(*camera.GetOwner(), camera), IDepthTarget(_depth.Get()),
-		_color(GetFrameBuffer(), GL::TextureSettings1D{ CubemapColorFormat, camera.GetSize() }),
-		_depth(GetFrameBuffer(), GL::TextureSettings1D{ DefaultPipeline::DepthFormat, camera.GetSize() })
+		_depth(GetFrameBuffer(), GPU::TextureSettings1D{ DefaultPipeline::DepthFormat, camera.GetSize() }),
+		_color(GetFrameBuffer(), GPU::TextureSettings1D{ CubemapColorFormat, camera.GetSize() })
 	{
 	}
 
