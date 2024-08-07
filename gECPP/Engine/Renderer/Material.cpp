@@ -55,7 +55,7 @@ namespace gE
 		_albedo(this, "AlbedoTex", settings.Albedo),
 		_amr(this, "ARMDTex", settings.AMR),
 		_normal(this, "NormalTex", settings.Normal),
-		_brdfLUT(&this->GetShader(), "BRDFLutTex")
+		_brdfLUT(this, "BRDFLutTex", GetWindow().GetBRDFLookupTexture())
 	{
 	}
 
@@ -66,7 +66,7 @@ namespace gE
 		_albedo.Set();
 		_amr.Set();
 		_normal.Set();
-		_brdfLUT.Set(GetWindow().GetBRDFLookupTexture());
+		_brdfLUT.Set();
 
 		Material::Bind();
 	}

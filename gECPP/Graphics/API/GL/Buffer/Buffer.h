@@ -20,7 +20,9 @@ namespace GL
 	template<typename T = u8, bool DYNAMIC = false>
  	class Buffer : public GPU::Buffer<T>, public GLObject
 	{
+		SERIALIZABLE_PROTO_T_BODY(Buffer, GPU::Buffer<T>);
 	 public:
+		Buffer(gE::Window* window, std::istream& in) : GPU::Buffer<T>(in, window), GLObject(window) {};
 		explicit Buffer(gE::Window* window, u32 count = 1, const T* data = nullptr) :
 			GPU::Buffer<T>(count, data), GLObject(window)
 		{ Construct(); }
@@ -79,15 +81,17 @@ namespace GL
 		void Construct()
 		{
 			typedef GPU::Buffer<T> S;
-			static constexpr size_t SIZE_T = sizeof(std::conditional_t<std::is_same_v<T, void>, uint8_t, T>);
+			static constexpr size_t SIZEOF_T = sizeof(typename Array<T>::I);
 
 			glCreateBuffers(1, &ID);
 
-			if constexpr(DYNAMIC) glNamedBufferData(ID, SIZE_T * S::GetCount(), S::GetData(), GL_DYNAMIC_DRAW);
-			else glNamedBufferStorage(ID, SIZE_T * S::GetCount(), S::GetData(), GL_DYNAMIC_STORAGE_BIT);
+			if constexpr(DYNAMIC) glNamedBufferData(ID, SIZEOF_T * S::GetCount(), S::GetData(), GL_DYNAMIC_DRAW);
+			else glNamedBufferStorage(ID, SIZEOF_T * S::GetCount(), S::GetData(), GL_DYNAMIC_STORAGE_BIT);
 		}
 	};
 
 	template<class T>
 	using DynamicBuffer = Buffer<T, true>;
 }
+
+#include "Buffer.inl"

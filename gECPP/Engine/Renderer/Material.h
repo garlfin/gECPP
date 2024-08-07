@@ -49,33 +49,35 @@ namespace gE
 	};
 
 	template<class T>
-	class ValueUniform : private API::Uniform<T>
+	class ValueUniform : private API::Uniform<std::remove_const_t<std::remove_reference_t<T>>>
 	{
 	 public:
-		ValueUniform(const Material* mat, const char* n, const T& t) : API::Uniform<T>(&mat->GetShader(), n), _t(t) { };
-		ValueUniform(const Material* mat, const char* n, T&& t) : API::Uniform<T>(&mat->GetShader(), n), _t(t) { };
-		ValueUniform(const Material* mat, u32 l, const T& t) : API::Uniform<T>(&mat->GetShader(), l), _t(t) { };
-		ValueUniform(const Material* mat, u32 l, T&& t) : API::Uniform<T>(&mat->GetShader(), l), _t(t) { };
+		typedef std::remove_const_t<std::remove_reference_t<T>> I;
+
+		ValueUniform(const Material* mat, const char* n, const I& t) : API::Uniform<I>(&mat->GetShader(), n), _t(t) { };
+		ValueUniform(const Material* mat, const char* n, I&& t) : API::Uniform<I>(&mat->GetShader(), n), _t(t) { };
+		ValueUniform(const Material* mat, u32 l, const I& t) : API::Uniform<I>(&mat->GetShader(), l), _t(t) { };
+		ValueUniform(const Material* mat, u32 l, I&& t) : API::Uniform<I>(&mat->GetShader(), l), _t(t) { };
 
 		ValueUniform(const ValueUniform&) = default;
 		ValueUniform(ValueUniform&&) = default;
 
-		ALWAYS_INLINE ValueUniform& operator=(const T& t){ _t = t; return *this; }
-		ALWAYS_INLINE ValueUniform& operator=(T&& t) noexcept { _t = t; return *this; }
+		ALWAYS_INLINE ValueUniform& operator=(const I& t){ _t = t; return *this; }
+		ALWAYS_INLINE ValueUniform& operator=(I&& t) noexcept { _t = t; return *this; }
 
 		ALWAYS_INLINE ValueUniform& operator=(ValueUniform&&) noexcept = default;
 		ALWAYS_INLINE ValueUniform& operator=(const ValueUniform&) = default;
-		ALWAYS_INLINE T* operator->() const { return _t; }
-		ALWAYS_INLINE T& operator*() const { return *_t; }
+		ALWAYS_INLINE I* operator->() const { return _t; }
+		ALWAYS_INLINE I& operator*() const { return *_t; }
 		ALWAYS_INLINE operator bool() const { return (bool) _t; } // NOLINT
-		ALWAYS_INLINE operator T*() const { return _t; } // NOLINT
-		ALWAYS_INLINE operator T&() const { return *_t; } // NOLINT
+		ALWAYS_INLINE operator I*() const { return _t; } // NOLINT
+		ALWAYS_INLINE operator I&() const { return *_t; } // NOLINT
 
-		ALWAYS_INLINE void Set() const { API::Uniform<T>::Set(_t); }
+		ALWAYS_INLINE void Set() const { API::Uniform<I>::Set(_t); }
 
 		// I just prefer the semantics of it being encapsulated
-		GET_SET(T&, , _t);
-		SET_XVAL(T, , _t);
+		GET_SET(I&, , _t);
+		SET_XVAL(I, , _t);
 
 	 private:
 		T _t;

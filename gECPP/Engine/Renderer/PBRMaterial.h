@@ -29,6 +29,6 @@ namespace gE
 		const gE::ReferenceUniform<API::Texture2D> _albedo;
 		const gE::ReferenceUniform<API::Texture2D> _amr;
 		const gE::ReferenceUniform<API::Texture2D> _normal;
-		const API::DynamicUniform _brdfLUT;
+		const ValueUniform<const API::Texture2D&> _brdfLUT;
 	};
 }

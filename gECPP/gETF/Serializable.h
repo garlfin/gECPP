@@ -81,6 +81,7 @@ template<> void Write(std::ostream& out, u32 count, const std::string* t);
 
 #define SERIALIZABLE_PROTO_T_BODY(TYPE, SUPER) \
 	public: \
+		typedef SUPER::SETTINGS_T SETTINGS_T; \
 		inline void Serialize(istream& in, SETTINGS_T s) override { SUPER::Serialize(in, s); TYPE::ISerialize(in, s); TYPE::Construct(); } \
 		inline void Deserialize(ostream& out) const override { SUPER::Deserialize(out); TYPE::IDeserialize(out); } \
 	private: \
