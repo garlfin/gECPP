@@ -5,7 +5,7 @@
 #pragma once
 
 #include "Stylesheet.h"
-#include <Graphics/Texture/Texture.h>
+#include <GL/Texture/Texture.h>
 #include <Engine/AssetManager.h>
 
 namespace gETF::UI
@@ -34,7 +34,7 @@ namespace gETF::UI
 
 	 public:
 		Element(gE::Window* w, IElement* p, Transform& t, const T& r, T& s) :
-			IElement(w, p, t), _referenceStyle(r), _style(s)
+			IElement(w, p, t), _style(s), _referenceStyle(r)
 		{}
 
 		GET(T&, Style, _style);

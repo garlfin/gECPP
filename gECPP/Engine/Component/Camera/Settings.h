@@ -4,8 +4,11 @@
 
 #pragma once
 
-#include "Timing.h"
 #include "Engine/Math/Math.h"
+#include "Engine/Array.h"
+#include "Timing.h"
+
+namespace GL { struct Texture; }
 
 namespace gE
 {
@@ -38,7 +41,7 @@ namespace gE
 
 	struct PerspectiveCameraSettings : public CameraSettings2D
 	{
-		explicit PerspectiveCameraSettings(const CameraSettings2D& s, float f = 80.f, AngleType t = AngleType::Degree) :
+		PerspectiveCameraSettings(const CameraSettings2D& s, float f = 80.f, AngleType t = AngleType::Degree) :
 			CameraSettings2D(s),
 			FOV(f), Type(t)
 		{

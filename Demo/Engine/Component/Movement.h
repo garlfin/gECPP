@@ -11,10 +11,10 @@
 
 namespace gE::VoxelDemo
 {
-	class Movement : public Behavior
+	class Movement : public gE::Behavior
 	{
 	 public:
-		explicit Movement(Entity* o) : Behavior(o),
+		explicit Movement(gE::Entity* o) : gE::Behavior(o),
 			_transform(o->GetTransform()), _window(o->GetWindow().GLFWWindow())
 		{
 		}
@@ -30,7 +30,7 @@ namespace gE::VoxelDemo
 			_rot.x += mouseDelta.y * 0.1f;
 			_rot.x = std::clamp(_rot.x, -89.9f, 89.9f);
 
-			_transform.SetRotation() = radians(_rot);
+			_transform.SetRotation() = glm::radians(_rot);
 
 			glm::vec3 dir(0.f);
 			if(glfwGetKey(_window, GLFW_KEY_W)) dir.z -= 1;
@@ -38,13 +38,13 @@ namespace gE::VoxelDemo
 			if(glfwGetKey(_window, GLFW_KEY_D)) dir.x += 1;
 			if(glfwGetKey(_window, GLFW_KEY_A)) dir.x -= 1;
 
-			dir = normalize(dir);
+			dir = glm::normalize(dir);
 			if(!glm::isnan(dir.x))
 				_transform.SetPosition() += _transform->Rotation * dir * d;
 		}
 
 	 private:
-		Transform& _transform;
+		gE::Transform& _transform;
 		GLFWwindow* const _window;
 		glm::dvec2 _prevCursorPos {};
 		glm::vec3 _rot {};

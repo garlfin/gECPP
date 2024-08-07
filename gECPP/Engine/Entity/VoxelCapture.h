@@ -14,11 +14,11 @@ namespace gE
 	 public:
 		VoxelCapture(Window* w, u16 resolution, float size);
 
-		void GetGPUVoxelScene(API::VoxelScene&);
+		void GetGLVoxelScene(GL::VoxelScene&);
 
 		GET(Camera3D&, Camera, _camera);
 		GET(VoxelPipeline::Target3D&, Target, _target);
-		GET(API::Texture3D&, Color, _target.GetColor());
+		GET(GL::Texture3D&, Color, _target.GetColor());
 
 	 private:
 		Camera3D _camera;

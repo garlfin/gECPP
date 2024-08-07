@@ -13,15 +13,15 @@
 
 namespace gE::VoxelPipeline
 {
-	Buffers::Buffers(Window* window) : _voxelBuffer(window)
+	Buffers::Buffers(gE::Window* window) : _voxelBuffer(window)
 	{
-		_voxelBuffer.Bind(API::BufferTarget::Uniform, 4);
+		_voxelBuffer.Bind(GL::BufferTarget::Uniform, 4);
 	}
 
 	Target3D::Target3D(VoxelCapture& capture, Camera3D& camera) :
 		RenderTarget<Camera3D>(capture, camera),
-		_color(&camera.GetWindow(), { ColorFormat, camera.GetSize()}),
-		_colorBack(&camera.GetWindow(), { ColorBackFormat, camera.GetSize() })
+		_colorBack(&camera.GetWindow(), { ColorBackFormat, camera.GetSize() }),
+		_color(&camera.GetWindow(), { ColorFormat, camera.GetSize()})
 	{
 		GetFrameBuffer().SetDefaultSize(camera.GetSize());
 	}
@@ -29,9 +29,9 @@ namespace gE::VoxelPipeline
 	void Target3D::RenderPass(float d, Camera* camera)
 	{
 		Window& window = GetWindow();
-		TextureSize2D size = GetSize();
+		GL::TextureSize2D size = GetSize();
 
-		window.State = State::Voxel;
+		window.State = gE::State::Voxel;
 
 		glDepthMask(0);
 		glColorMask(1, 1, 1, 1);
@@ -46,8 +46,8 @@ namespace gE::VoxelPipeline
 	{
 		if(!camera) return false;
 
-		Buffers& buffers = GetWindow().GetVoxelBuffers();
-		API::ComputeShader& voxelShader = GetWindow().GetVoxelTAAShader();
+		VoxelPipeline::Buffers& buffers = GetWindow().GetVoxelBuffers();
+		GL::ComputeShader& voxelShader = GetWindow().GetVoxelTAAShader();
 		Transform& transform = GetOwner().GetTransform();
 		Transform& cameraTransform = camera->GetOwner()->GetTransform();
 
@@ -58,7 +58,7 @@ namespace gE::VoxelPipeline
 		transform.SetPosition() = glm::vec3(pos) * cellSize;
 		transform.OnUpdate(0.f); // Force update on model matrix since it passed its tick.
 
-		GetOwner().GetGPUVoxelScene(buffers.Scene);
+		GetOwner().GetGLVoxelScene(buffers.Scene);
 		buffers.UpdateScene();
 
 		glm::u16vec3 dispatchSize = DIV_CEIL_T(_colorBack.GetSize(), VOXEL_TAA_GROUP_SIZE, glm::u16vec3);
@@ -84,7 +84,7 @@ namespace gE::VoxelPipeline
 
 	void Target3D::PostProcessPass(float d)
 	{
-		API::ComputeShader& voxelShader = GetWindow().GetVoxelTAAShader();
+		GL::ComputeShader& voxelShader = GetWindow().GetVoxelTAAShader();
 
 		voxelShader.Bind();
 

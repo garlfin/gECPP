@@ -4,7 +4,7 @@
 
 #include "Shader.h"
 #include <iostream>
-#include "Graphics/Texture/Texture.h"
+#include <GL/Texture/Texture.h>
 
 #define INCLUDE_DIRECTIVE "#include "
 #define EXTENSION_DIRECTIVE "#extension "

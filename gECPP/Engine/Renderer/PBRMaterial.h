@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include <Graphics/Shader/Shader.h>
-#include <Graphics/Texture/Texture.h>
+#include <GL/Shader/Shader.h>
+#include <GL/Texture/Texture.h>
 #include "Engine/Renderer/Material.h"
 #include "Engine/AssetManager.h"
 
@@ -13,22 +13,22 @@ namespace gE
 {
 	struct PBRMaterialSettings
 	{
-		gE::Reference<API::Texture2D> Albedo;
-		gE::Reference<API::Texture2D> AMR;
-		gE::Reference<API::Texture2D> Normal;
+		gE::Reference<GL::Texture2D> Albedo;
+		gE::Reference<GL::Texture2D> AMR;
+		gE::Reference<GL::Texture2D> Normal;
 	};
 
 	struct PBRMaterial : public Material
 	{
 	 public:
-		PBRMaterial(Window* w, const Reference<API::Shader>& s, const PBRMaterialSettings& settings);
+		PBRMaterial(Window* w, const Reference<GL::Shader>& s, const PBRMaterialSettings& settings);
 
 		void Bind() const override;
 
 	 private:
-		const gE::ReferenceUniform<API::Texture2D> _albedo;
-		const gE::ReferenceUniform<API::Texture2D> _amr;
-		const gE::ReferenceUniform<API::Texture2D> _normal;
-		const ValueUniform<const API::Texture2D&> _brdfLUT;
+		const gE::ReferenceUniform<GL::Texture2D> _albedo;
+		const gE::ReferenceUniform<GL::Texture2D> _amr;
+		const gE::ReferenceUniform<GL::Texture2D> _normal;
+		const GL::DynamicUniform _brdfLUT;
 	};
 }

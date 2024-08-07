@@ -5,6 +5,7 @@
 #pragma once
 
 #include <vector>
+#include "GL/GL.h"
 #include "Engine/Binary/Binary.h"
 
 namespace gE
@@ -70,7 +71,7 @@ namespace gE
 		template<class I> friend class Reference;
 	};
 
-	template<class T, typename... ARGS>
+	template<class T, typename... ARGS> requires requires(ARGS&&... a) { T(std::forward<ARGS>(a)...); }
 	ALWAYS_INLINE Reference<T> ref_create(ARGS&& ... args)
 	{
 		return Reference<T>(new T(std::forward<ARGS>(args)...));
@@ -126,7 +127,7 @@ namespace gE
 		template<class I> friend class SmartPointer;
 	};
 
-	template<typename T, typename... ARGS>
+	template<typename T, typename... ARGS> requires requires(ARGS&&... a) { T(std::forward<ARGS>(a)...); }
 	ALWAYS_INLINE SmartPointer<T> ptr_create(ARGS&&... args)
 	{
 		return SmartPointer<T>(new T(std::forward<ARGS>(args)...));

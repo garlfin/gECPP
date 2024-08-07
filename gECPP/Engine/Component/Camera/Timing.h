@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <Engine/Binary/Binary.h>
+
 namespace gE
 {
 	struct CameraTiming

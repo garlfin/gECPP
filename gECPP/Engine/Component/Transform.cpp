@@ -8,7 +8,7 @@
 
 glm::mat4 gE::Transform::GetParentTransform()
 {
-	Entity* parent = GetOwner()->GetParent();
+	gE::Entity* parent = GetOwner()->GetParent();
 	return parent ? parent->GetTransform()._model : glm::mat4(1.f);
 }
 
@@ -21,9 +21,9 @@ void gE::Transform::OnUpdate(float)
 	if(!_flags.Invalidated) return;
 
 	_model = GetParentTransform();
-	_model = translate(_model, _transform.Location);
-	_model *= toMat4(_transform.Rotation);
-	_model = scale(_model, _transform.Scale);
+	_model = glm::translate(_model, _transform.Location);
+	_model *= glm::toMat4(_transform.Rotation);
+	_model = glm::scale(_model, _transform.Scale);
 
 	Decompose(_model, _globalTransform.Location, _globalTransform.Rotation, _globalTransform.Scale);
 }
@@ -33,11 +33,11 @@ void gE::Transform::OnRender(float, Camera*)
 	_previousModel = _model;
 }
 
-gE::Transform::Transform(Entity* o) : Component(o, &o->GetWindow().GetTransforms()),
+gE::Transform::Transform(gE::Entity* o) : Component(o, &o->GetWindow().GetTransforms()),
 	_model(1.0)
 {}
 
-gE::Transform::Transform(Entity* o, const TransformData& d) : Component(o, &GetWindow().GetTransforms()),
+gE::Transform::Transform(gE::Entity* o, const gE::TransformData& d) : Component(o, &GetWindow().GetTransforms()),
 	_model(1.0)
 {
 	Set(d);

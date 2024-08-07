@@ -12,22 +12,22 @@
 
 namespace gE
 {
-	DefaultPipeline::Buffers::Buffers(Window* window) :
-		_cameraBuffer(window), _sceneBuffer(window), _lightBuffer(window)
+	gE::DefaultPipeline::Buffers::Buffers(Window* window) :
+		_sceneBuffer(window), _cameraBuffer(window), _lightBuffer(window)
 	{
-		_sceneBuffer.Bind(API::BufferTarget::Uniform, 0);
-		_cameraBuffer.Bind(API::BufferTarget::Uniform, 1);
-		_lightBuffer.Bind(API::BufferTarget::Uniform, 2);
+		_sceneBuffer.Bind(GL::BufferTarget::Uniform, 0);
+		_cameraBuffer.Bind(GL::BufferTarget::Uniform, 1);
+		_lightBuffer.Bind(GL::BufferTarget::Uniform, 2);
 	}
 
 	DefaultPipeline::Target2D::Target2D(Entity& owner, Camera2D& camera, const std::vector<PostProcessEffect<Target2D>*>& effects) :
-		RenderTarget(owner, camera), IDepthTarget(*_depth), IColorTarget(*_color),
-		_depth(GetFrameBuffer(), GPU::TextureSettings2D(DepthFormat, camera.GetSize())),
-		_color(GetFrameBuffer(), GPU::TextureSettings2D(ColorFormat, camera.GetSize())),
-		_velocity(GetFrameBuffer(), GPU::TextureSettings2D(VelocityFormat, camera.GetSize())),
-		_colorBack(&GetWindow(), GPU::TextureSettings2D(ColorFormat, camera.GetSize())),
-		_depthBack(&GetWindow(), GPU::TextureSettings2D(HiZFormat, camera.GetSize())),
-		_postProcessBack(&GetWindow(), GPU::TextureSettings2D(ColorFormat, camera.GetSize())),
+		RenderTarget<Camera2D>(owner, camera), IDepthTarget(*_depth), IColorTarget(*_color),
+		_depth(GetFrameBuffer(), GL::TextureSettings2D(DefaultPipeline::DepthFormat, camera.GetSize())),
+		_color(GetFrameBuffer(), GL::TextureSettings2D(DefaultPipeline::ColorFormat, camera.GetSize())),
+		_velocity(GetFrameBuffer(), GL::TextureSettings2D(DefaultPipeline::VelocityFormat, camera.GetSize())),
+		_depthBack(&GetWindow(), GL::TextureSettings2D(DefaultPipeline::HiZFormat, camera.GetSize())),
+		_colorBack(&GetWindow(), GL::TextureSettings2D(DefaultPipeline::ColorFormat, camera.GetSize())),
+		_postProcessBack(&GetWindow(), GL::TextureSettings2D(DefaultPipeline::ColorFormat, camera.GetSize())),
 		_effects(effects)
 	{
 	}
@@ -48,7 +48,7 @@ namespace gE
 
 		window.GetRenderers().OnRender(0.f, &camera);
 
-		API::ComputeShader& hiZShader = window.GetHiZShader();
+		GL::ComputeShader& hiZShader = window.GetHiZShader();
 
 		hiZShader.Bind();
 
@@ -63,7 +63,7 @@ namespace gE
 
 		for(u8 i = 1; i < _depthBack.GetMipCount(); i++)
 		{
-			TextureSize2D mipSize = _depthBack.GetSize(i);
+			GL::TextureSize2D mipSize = _depthBack.GetSize(i);
 
 			hiZShader.SetUniform(0, glm::vec4(HIZ_MODE_DOWNSAMPLE, i - 1, 0, 0));
 			_depthBack.Bind(0, GL_WRITE_ONLY, i);
@@ -74,11 +74,11 @@ namespace gE
 
 		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
-		Buffers& buf = GetWindow().GetPipelineBuffers();
+		DefaultPipeline::Buffers& buf = GetWindow().GetPipelineBuffers();
 
 		buf.Camera.ColorTexture = (handle) _colorBack;
 		buf.Camera.DepthTexture = (handle) _depthBack;
-		buf.UpdateCamera(sizeof(handle) * 2, offsetof(GPU::Camera, ColorTexture));
+		buf.UpdateCamera(sizeof(handle) * 2, offsetof(GL::Camera, ColorTexture));
 
 		// COLOR
 		window.State = State::Color;
@@ -92,7 +92,7 @@ namespace gE
 
 	void DefaultPipeline::Target2D::PostProcessPass(float)
 	{
-		API::ComputeShader& taaShader = GetWindow().GetTAAShader();
+		GL::ComputeShader& taaShader = GetWindow().GetTAAShader();
 
 		taaShader.Bind();
 
@@ -108,7 +108,7 @@ namespace gE
 		_colorBack.CopyFrom(_postProcessBack);
 
 		// Post process loop
-		API::Texture2D* front = &*_color, *back = &_postProcessBack;
+		GL::Texture2D* front = &*_color, *back = &_postProcessBack;
 		for(PostProcessEffect<Target2D>* effect : _effects)
 		{
 			std::swap(front, back);

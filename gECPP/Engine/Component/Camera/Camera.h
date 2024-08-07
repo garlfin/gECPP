@@ -4,32 +4,35 @@
 
 #pragma once
 
-#include <Graphics/Texture/Texture.h>
+#include <GL/Texture/Texture.h>
+#include <GL/Buffer/FrameBuffer.h>
 
 #include "Engine/Entity/Entity.h"
+#include "Engine/Array.h"
 #include "Engine/Manager.h"
 #include "Settings.h"
 #include "Timing.h"
+#include "RenderTarget.h"
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "HidingNonVirtualFunction"
-
-namespace GPU
+namespace GL
 {
 	struct Camera;
 }
+
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "HidingNonVirtualFunction"
 
 namespace gE
 {
 	class Camera : public Component
 	{
 	 public:
-		Camera(Entity*, TextureSize2D, IRenderTarget&, const ICameraSettings&, ComponentManager<Camera>* = nullptr);
+		Camera(Entity*, GL::TextureSize2D, IRenderTarget&, const ICameraSettings&, ComponentManager<Camera>* = nullptr);
 
 		inline void OnUpdate(float delta) override { }
 		void OnRender(float delta, Camera* camera) override;
 
-		virtual void GetGPUCamera(GPU::Camera&);
+		virtual void GetGLCamera(GL::Camera&);
 
 		GET(IRenderTarget&, Target, _target);
 
@@ -37,7 +40,7 @@ namespace gE
 		GET_CONST(gE::ClipPlanes, ClipPlanes, _settings.ClipPlanes);
 		GET_CONST(const ICameraSettings&, Settings, _settings);
 		GET_CONST(const glm::mat4&, Projection, Projection);
-		GET_CONST(TextureSize2D, ViewportSize, _viewportSize);
+		GET_CONST(GL::TextureSize2D, ViewportSize, _viewportSize);
 
 	 protected:
 		virtual void UpdateProjection() = 0;
@@ -48,14 +51,14 @@ namespace gE
 	 private:
 		ICameraSettings _settings;
 		IRenderTarget& _target;
-		TextureSize2D _viewportSize;
+		GL::TextureSize2D _viewportSize;
 	};
 
 	class Camera2D : public Camera
 	{
 	 public:
 		typedef RenderTarget<Camera2D> TARGET_TYPE;
-		typedef TextureSize2D SIZE_TYPE;
+		typedef GL::TextureSize2D SIZE_TYPE;
 
 		Camera2D(Entity*, TARGET_TYPE&, const CameraSettings2D&, ComponentManager<Camera>* = nullptr);
 
@@ -63,7 +66,7 @@ namespace gE
 		GET_CONST(SIZE_TYPE, Size, GetViewportSize());
 		GET_CONST(float, Aspect, (float) GetSize().x / GetSize().y);
 
-		void GetGPUCamera(GPU::Camera& camera) override;
+		void GetGLCamera(GL::Camera& camera) override;
 	};
 
 	class PerspectiveCamera : public Camera2D
@@ -88,7 +91,7 @@ namespace gE
 				_fov = glm::radians(fov);
 		}
 
-		void GetGPUCamera(GPU::Camera& camera) override;
+		void GetGLCamera(GL::Camera& camera) override;
 
 	 protected:
 		void UpdateProjection() override;
@@ -115,7 +118,7 @@ namespace gE
 	{
 	 public:
 		typedef RenderTarget<Camera3D> TARGET_TYPE;
-		typedef TextureSize3D SIZE_TYPE;
+		typedef GL::TextureSize3D SIZE_TYPE;
 
 		Camera3D(Entity*, TARGET_TYPE&, const CameraSettings3D&, ComponentManager<Camera>* = nullptr);
 
@@ -123,36 +126,36 @@ namespace gE
 		GET_CONST(SIZE_TYPE, Size, SIZE_TYPE(GetViewportSize(), _sizeZ));
 		GET_CONST(float, Scale, GetOwner()->GetTransform()->Scale.x);
 
-		void GetGPUCamera(GPU::Camera&) override;
+		void GetGLCamera(GL::Camera&) override;
 
 	 protected:
 		void UpdateProjection() override;
 
 	 private:
-		const TextureSize1D _sizeZ;
+		const GL::TextureSize1D _sizeZ;
 	};
 
-	class CameraCubemap final : public Camera
+	class CameraCubemap : public Camera
 	{
 	 public:
 		typedef RenderTarget<CameraCubemap> TARGET_TYPE;
-		typedef TextureSize1D SIZE_TYPE;
+		typedef GL::TextureSize1D SIZE_TYPE;
 
 		CameraCubemap(Entity*, TARGET_TYPE&, const CameraSettings1D&, ComponentManager<Camera>* = nullptr);
 
 		GET(TARGET_TYPE&, Target, (TARGET_TYPE&) Camera::GetTarget());
 		GET_CONST(SIZE_TYPE, Size, GetViewportSize().x);
 
-		void GetGPUCamera(GPU::Camera& camera) override;
+		void GetGLCamera(GL::Camera& camera) override;
 
 	 protected:
 		void UpdateProjection() override;
 	};
 
-	class CameraManager final : public ComponentManager<Camera>
+	class CameraManager : public ComponentManager<Camera>
 	{
 	 public:
-		using ComponentManager::ComponentManager;
+		using ComponentManager<Camera>::ComponentManager;
 
 		IColorTarget* CurrentCamera = nullptr;
 	};

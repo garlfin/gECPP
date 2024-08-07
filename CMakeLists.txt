@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 project(VoxelField)
 
-add_compile_definitions(API=GL)
 set(CMAKE_CXX_STANDARD 23)
 
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -static -s")
@@ -19,15 +18,7 @@ set_property(TARGET GLFW PROPERTY IMPORTED_IMPLIB "${CMAKE_CURRENT_SOURCE_DIR}/V
 FILE(COPY "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/GLFW/glfw3.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 # ASSIMP
-add_library(ASSIMP STATIC IMPORTED
-        gECPP/Graphics/Buffer/Buffer.h
-        gECPP/Graphics/Buffer/Buffer.h
-        gECPP/Graphics/Buffer/Framebuffer.h
-        gECPP/Graphics/Buffer/VAO.h
-        gECPP/Graphics/Texture/Texture.h
-        gECPP/Graphics/Shader/Shader.h
-        gECPP/Graphics/Shader/Uniform.h
-        gECPP/Graphics/Texture/TextureSlotManager.h)
+add_library(ASSIMP STATIC IMPORTED)
 set_property(TARGET ASSIMP PROPERTY IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ASSIMP/libassimp-5.dll")
 FILE(COPY "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ASSIMP/libassimp-5.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
@@ -35,7 +26,7 @@ FILE(COPY "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ASSIMP/libassimp-5.dll" DESTINATIO
 add_library(GLAD STATIC Vendor/GLAD/glad.c Vendor/GLAD/glad.h)
 
 # GETF
-add_library(GETF STATIC gECPP/gETF/File.h gECPP/gETF/File.cpp gECPP/gETF/Mesh/Mesh.h gECPP/gETF/Mesh/Mesh.cpp gECPP/Engine/Binary/Binary.h gECPP/gETF/File.h gECPP/gETF/Serializable.h gECPP/Engine/Binary/Binary.cpp gECPP/Graphics/API/GL/Buffer/VAO.cpp gECPP/gETF/GUI/Stylesheet.h)
+add_library(GETF STATIC gECPP/gETF/File.h gECPP/gETF/File.cpp gECPP/gETF/Mesh/Mesh.h gECPP/gETF/Mesh/Mesh.cpp gECPP/Engine/Binary/Binary.h gECPP/gETF/File.h gECPP/gETF/Serializable.h gECPP/Engine/Binary/Binary.cpp gECPP/GL/Buffer/VAO.cpp gECPP/gETF/GUI/Stylesheet.h)
 
 # PUGIXML
 add_library(PUGIXML STATIC Vendor/PUGIXML/pugixml.cpp Vendor/PUGIXML/pugixml.hpp Vendor/PUGIXML/pugiconfig.hpp)

@@ -1206,10 +1206,10 @@ PUGI_IMPL_NS_BEGIN
 
 	inline void destroy_attribute(xml_attribute_struct* a, xml_allocator& alloc)
 	{
-		if (a->header & xml_memory_page_name_allocated_mask)
+		if (a->header & impl::xml_memory_page_name_allocated_mask)
 			alloc.deallocate_string(a->name);
 
-		if (a->header & xml_memory_page_value_allocated_mask)
+		if (a->header & impl::xml_memory_page_value_allocated_mask)
 			alloc.deallocate_string(a->value);
 
 		alloc.deallocate_memory(a, sizeof(xml_attribute_struct), PUGI_IMPL_GETPAGE(a));
@@ -1217,10 +1217,10 @@ PUGI_IMPL_NS_BEGIN
 
 	inline void destroy_node(xml_node_struct* n, xml_allocator& alloc)
 	{
-		if (n->header & xml_memory_page_name_allocated_mask)
+		if (n->header & impl::xml_memory_page_name_allocated_mask)
 			alloc.deallocate_string(n->name);
 
-		if (n->header & xml_memory_page_value_allocated_mask)
+		if (n->header & impl::xml_memory_page_value_allocated_mask)
 			alloc.deallocate_string(n->value);
 
 		for (xml_attribute_struct* attr = n->first_attribute; attr; )
@@ -4752,23 +4752,23 @@ PUGI_IMPL_NS_BEGIN
 		if (!contents && size) return make_parse_result(status_io_error);
 
 		// get actual encoding
-		xml_encoding buffer_encoding = get_buffer_encoding(encoding, contents, size);
+		xml_encoding buffer_encoding = impl::get_buffer_encoding(encoding, contents, size);
 
 		// if convert_buffer below throws bad_alloc, we still need to deallocate contents if we own it
-		auto_deleter contents_guard(own ? contents : 0, xml_memory::deallocate);
+		auto_deleter<void> contents_guard(own ? contents : 0, xml_memory::deallocate);
 
 		// get private buffer
 		char_t* buffer = 0;
 		size_t length = 0;
 
 		// coverity[var_deref_model]
-		if (!convert_buffer(buffer, length, buffer_encoding, contents, size, is_mutable)) return make_parse_result(status_out_of_memory);
+		if (!impl::convert_buffer(buffer, length, buffer_encoding, contents, size, is_mutable)) return impl::make_parse_result(status_out_of_memory);
 
 		// after this we either deallocate contents (below) or hold on to it via doc->buffer, so we don't need to guard it
 		contents_guard.release();
 
 		// delete original buffer if we performed a conversion
-		if (own && buffer != contents && contents) xml_memory::deallocate(contents);
+		if (own && buffer != contents && contents) impl::xml_memory::deallocate(contents);
 
 		// grab onto buffer if it's our buffer, user is responsible for deallocating contents himself
 		if (own || buffer != contents) *out_buffer = buffer;
@@ -4777,7 +4777,7 @@ PUGI_IMPL_NS_BEGIN
 		doc->buffer = buffer;
 
 		// parse
-		xml_parse_result res = xml_parser::parse(buffer, length, doc, root, options);
+		xml_parse_result res = impl::xml_parser::parse(buffer, length, doc, root, options);
 
 		// remember encoding
 		res.encoding = buffer_encoding;
@@ -5000,7 +5000,7 @@ PUGI_IMPL_NS_BEGIN
 		size_t max_suffix_size = sizeof(char_t);
 
 		// read stream data into memory (guard against stream exceptions with buffer holder)
-		auto_deleter buffer(xml_memory::allocate(read_length * sizeof(T) + max_suffix_size), xml_memory::deallocate);
+		auto_deleter<void> buffer(xml_memory::allocate(read_length * sizeof(T) + max_suffix_size), xml_memory::deallocate);
 		if (!buffer.data) return status_out_of_memory;
 
 		stream.read(static_cast<T*>(buffer.data), static_cast<std::streamsize>(read_length));
@@ -5575,17 +5575,17 @@ namespace pugi
 
 	PUGI_IMPL_FN xml_object_range<xml_node_iterator> xml_node::children() const
 	{
-		return xml_object_range(begin(), end());
+		return xml_object_range<xml_node_iterator>(begin(), end());
 	}
 
 	PUGI_IMPL_FN xml_object_range<xml_named_node_iterator> xml_node::children(const char_t* name_) const
 	{
-		return xml_object_range(xml_named_node_iterator(child(name_)._root, _root, name_), xml_named_node_iterator(0, _root, name_));
+		return xml_object_range<xml_named_node_iterator>(xml_named_node_iterator(child(name_)._root, _root, name_), xml_named_node_iterator(0, _root, name_));
 	}
 
 	PUGI_IMPL_FN xml_object_range<xml_attribute_iterator> xml_node::attributes() const
 	{
-		return xml_object_range(attributes_begin(), attributes_end());
+		return xml_object_range<xml_attribute_iterator>(attributes_begin(), attributes_end());
 	}
 
 	PUGI_IMPL_FN bool xml_node::operator==(const xml_node& r) const
@@ -5860,7 +5860,7 @@ namespace pugi
 		impl::xml_allocator& alloc = impl::get_allocator(_root);
 		if (!alloc.reserve()) return xml_attribute();
 
-		xml_attribute a(allocate_attribute(alloc));
+		xml_attribute a(impl::allocate_attribute(alloc));
 		if (!a) return xml_attribute();
 
 		impl::append_attribute(a._attr, _root);
@@ -5877,7 +5877,7 @@ namespace pugi
 		impl::xml_allocator& alloc = impl::get_allocator(_root);
 		if (!alloc.reserve()) return xml_attribute();
 
-		xml_attribute a(allocate_attribute(alloc));
+		xml_attribute a(impl::allocate_attribute(alloc));
 		if (!a) return xml_attribute();
 
 		impl::prepend_attribute(a._attr, _root);
@@ -5895,7 +5895,7 @@ namespace pugi
 		impl::xml_allocator& alloc = impl::get_allocator(_root);
 		if (!alloc.reserve()) return xml_attribute();
 
-		xml_attribute a(allocate_attribute(alloc));
+		xml_attribute a(impl::allocate_attribute(alloc));
 		if (!a) return xml_attribute();
 
 		impl::insert_attribute_after(a._attr, attr._attr, _root);
@@ -5913,7 +5913,7 @@ namespace pugi
 		impl::xml_allocator& alloc = impl::get_allocator(_root);
 		if (!alloc.reserve()) return xml_attribute();
 
-		xml_attribute a(allocate_attribute(alloc));
+		xml_attribute a(impl::allocate_attribute(alloc));
 		if (!a) return xml_attribute();
 
 		impl::insert_attribute_before(a._attr, attr._attr, _root);
@@ -5931,7 +5931,7 @@ namespace pugi
 		impl::xml_allocator& alloc = impl::get_allocator(_root);
 		if (!alloc.reserve()) return xml_attribute();
 
-		xml_attribute a(allocate_attribute(alloc));
+		xml_attribute a(impl::allocate_attribute(alloc));
 		if (!a) return xml_attribute();
 
 		impl::append_attribute(a._attr, _root);
@@ -5948,7 +5948,7 @@ namespace pugi
 		impl::xml_allocator& alloc = impl::get_allocator(_root);
 		if (!alloc.reserve()) return xml_attribute();
 
-		xml_attribute a(allocate_attribute(alloc));
+		xml_attribute a(impl::allocate_attribute(alloc));
 		if (!a) return xml_attribute();
 
 		impl::prepend_attribute(a._attr, _root);
@@ -5966,7 +5966,7 @@ namespace pugi
 		impl::xml_allocator& alloc = impl::get_allocator(_root);
 		if (!alloc.reserve()) return xml_attribute();
 
-		xml_attribute a(allocate_attribute(alloc));
+		xml_attribute a(impl::allocate_attribute(alloc));
 		if (!a) return xml_attribute();
 
 		impl::insert_attribute_after(a._attr, attr._attr, _root);
@@ -5984,7 +5984,7 @@ namespace pugi
 		impl::xml_allocator& alloc = impl::get_allocator(_root);
 		if (!alloc.reserve()) return xml_attribute();
 
-		xml_attribute a(allocate_attribute(alloc));
+		xml_attribute a(impl::allocate_attribute(alloc));
 		if (!a) return xml_attribute();
 
 		impl::insert_attribute_before(a._attr, attr._attr, _root);
@@ -6000,7 +6000,7 @@ namespace pugi
 		impl::xml_allocator& alloc = impl::get_allocator(_root);
 		if (!alloc.reserve()) return xml_node();
 
-		xml_node n(allocate_node(alloc, type_));
+		xml_node n(impl::allocate_node(alloc, type_));
 		if (!n) return xml_node();
 
 		impl::append_node(n._root, _root);
@@ -6017,7 +6017,7 @@ namespace pugi
 		impl::xml_allocator& alloc = impl::get_allocator(_root);
 		if (!alloc.reserve()) return xml_node();
 
-		xml_node n(allocate_node(alloc, type_));
+		xml_node n(impl::allocate_node(alloc, type_));
 		if (!n) return xml_node();
 
 		impl::prepend_node(n._root, _root);
@@ -6035,7 +6035,7 @@ namespace pugi
 		impl::xml_allocator& alloc = impl::get_allocator(_root);
 		if (!alloc.reserve()) return xml_node();
 
-		xml_node n(allocate_node(alloc, type_));
+		xml_node n(impl::allocate_node(alloc, type_));
 		if (!n) return xml_node();
 
 		impl::insert_node_before(n._root, node._root);
@@ -6053,7 +6053,7 @@ namespace pugi
 		impl::xml_allocator& alloc = impl::get_allocator(_root);
 		if (!alloc.reserve()) return xml_node();
 
-		xml_node n(allocate_node(alloc, type_));
+		xml_node n(impl::allocate_node(alloc, type_));
 		if (!n) return xml_node();
 
 		impl::insert_node_after(n._root, node._root);
@@ -6107,7 +6107,7 @@ namespace pugi
 		impl::xml_allocator& alloc = impl::get_allocator(_root);
 		if (!alloc.reserve()) return xml_node();
 
-		xml_node n(allocate_node(alloc, type_));
+		xml_node n(impl::allocate_node(alloc, type_));
 		if (!n) return xml_node();
 
 		impl::append_node(n._root, _root);
@@ -6124,7 +6124,7 @@ namespace pugi
 		impl::xml_allocator& alloc = impl::get_allocator(_root);
 		if (!alloc.reserve()) return xml_node();
 
-		xml_node n(allocate_node(alloc, type_));
+		xml_node n(impl::allocate_node(alloc, type_));
 		if (!n) return xml_node();
 
 		impl::prepend_node(n._root, _root);
@@ -6142,7 +6142,7 @@ namespace pugi
 		impl::xml_allocator& alloc = impl::get_allocator(_root);
 		if (!alloc.reserve()) return xml_node();
 
-		xml_node n(allocate_node(alloc, type_));
+		xml_node n(impl::allocate_node(alloc, type_));
 		if (!n) return xml_node();
 
 		impl::insert_node_after(n._root, node._root);
@@ -6160,7 +6160,7 @@ namespace pugi
 		impl::xml_allocator& alloc = impl::get_allocator(_root);
 		if (!alloc.reserve()) return xml_node();
 
-		xml_node n(allocate_node(alloc, type_));
+		xml_node n(impl::allocate_node(alloc, type_));
 		if (!n) return xml_node();
 
 		impl::insert_node_before(n._root, node._root);
@@ -6251,7 +6251,7 @@ namespace pugi
 		if (!alloc.reserve()) return false;
 
 		impl::remove_attribute(a._attr, _root);
-		destroy_attribute(a._attr, alloc);
+		impl::destroy_attribute(a._attr, alloc);
 
 		return true;
 	}
@@ -6267,7 +6267,7 @@ namespace pugi
 		{
 			xml_attribute_struct* next = attr->next_attribute;
 
-			destroy_attribute(attr, alloc);
+			impl::destroy_attribute(attr, alloc);
 
 			attr = next;
 		}
@@ -6290,7 +6290,7 @@ namespace pugi
 		if (!alloc.reserve()) return false;
 
 		impl::remove_node(n._root);
-		destroy_node(n._root, alloc);
+		impl::destroy_node(n._root, alloc);
 
 		return true;
 	}
@@ -6306,7 +6306,7 @@ namespace pugi
 		{
 			xml_node_struct* next = cur->next_sibling;
 
-			destroy_node(cur, alloc);
+			impl::destroy_node(cur, alloc);
 
 			cur = next;
 		}
@@ -6351,7 +6351,7 @@ namespace pugi
 		// name of the root has to be NULL before parsing - otherwise closing node mismatches will not be detected at the top level
 		impl::name_null_sentry sentry(_root);
 
-		return load_buffer_impl(doc, _root, const_cast<void*>(contents), size, options, encoding, false, false, &extra->buffer);
+		return impl::load_buffer_impl(doc, _root, const_cast<void*>(contents), size, options, encoding, false, false, &extra->buffer);
 	}
 
 	PUGI_IMPL_FN xml_node xml_node::find_child_by_attribute(const char_t* name_, const char_t* attr_name, const char_t* attr_value) const
@@ -6540,7 +6540,7 @@ namespace pugi
 
 		impl::xml_buffered_writer buffered_writer(writer, encoding);
 
-		node_output(buffered_writer, _root, indent, flags, depth);
+		impl::node_output(buffered_writer, _root, indent, flags, depth);
 
 		buffered_writer.flush();
 	}
@@ -7372,14 +7372,14 @@ namespace pugi
 	{
 		reset();
 
-		return load_stream_impl(static_cast<impl::xml_document_struct*>(_root), stream, options, encoding, &_buffer);
+		return impl::load_stream_impl(static_cast<impl::xml_document_struct*>(_root), stream, options, encoding, &_buffer);
 	}
 
 	PUGI_IMPL_FN xml_parse_result xml_document::load(std::basic_istream<wchar_t, std::char_traits<wchar_t> >& stream, unsigned int options)
 	{
 		reset();
 
-		return load_stream_impl(static_cast<impl::xml_document_struct*>(_root), stream, options, encoding_wchar, &_buffer);
+		return impl::load_stream_impl(static_cast<impl::xml_document_struct*>(_root), stream, options, encoding_wchar, &_buffer);
 	}
 #endif
 
@@ -7405,9 +7405,9 @@ namespace pugi
 		reset();
 
 		using impl::auto_deleter; // MSVC7 workaround
-		auto_deleter file(impl::open_file(path_, "rb"), impl::close_file);
+		auto_deleter<FILE> file(impl::open_file(path_, "rb"), impl::close_file);
 
-		return load_file_impl(static_cast<impl::xml_document_struct*>(_root), file.data, options, encoding, &_buffer);
+		return impl::load_file_impl(static_cast<impl::xml_document_struct*>(_root), file.data, options, encoding, &_buffer);
 	}
 
 	PUGI_IMPL_FN xml_parse_result xml_document::load_file(const wchar_t* path_, unsigned int options, xml_encoding encoding)
@@ -7415,30 +7415,30 @@ namespace pugi
 		reset();
 
 		using impl::auto_deleter; // MSVC7 workaround
-		auto_deleter file(impl::open_file_wide(path_, L"rb"), impl::close_file);
+		auto_deleter<FILE> file(impl::open_file_wide(path_, L"rb"), impl::close_file);
 
-		return load_file_impl(static_cast<impl::xml_document_struct*>(_root), file.data, options, encoding, &_buffer);
+		return impl::load_file_impl(static_cast<impl::xml_document_struct*>(_root), file.data, options, encoding, &_buffer);
 	}
 
 	PUGI_IMPL_FN xml_parse_result xml_document::load_buffer(const void* contents, size_t size, unsigned int options, xml_encoding encoding)
 	{
 		reset();
 
-		return load_buffer_impl(static_cast<impl::xml_document_struct*>(_root), _root, const_cast<void*>(contents), size, options, encoding, false, false, &_buffer);
+		return impl::load_buffer_impl(static_cast<impl::xml_document_struct*>(_root), _root, const_cast<void*>(contents), size, options, encoding, false, false, &_buffer);
 	}
 
 	PUGI_IMPL_FN xml_parse_result xml_document::load_buffer_inplace(void* contents, size_t size, unsigned int options, xml_encoding encoding)
 	{
 		reset();
 
-		return load_buffer_impl(static_cast<impl::xml_document_struct*>(_root), _root, contents, size, options, encoding, true, false, &_buffer);
+		return impl::load_buffer_impl(static_cast<impl::xml_document_struct*>(_root), _root, contents, size, options, encoding, true, false, &_buffer);
 	}
 
 	PUGI_IMPL_FN xml_parse_result xml_document::load_buffer_inplace_own(void* contents, size_t size, unsigned int options, xml_encoding encoding)
 	{
 		reset();
 
-		return load_buffer_impl(static_cast<impl::xml_document_struct*>(_root), _root, contents, size, options, encoding, true, true, &_buffer);
+		return impl::load_buffer_impl(static_cast<impl::xml_document_struct*>(_root), _root, contents, size, options, encoding, true, true, &_buffer);
 	}
 
 	PUGI_IMPL_FN void xml_document::save(xml_writer& writer, const char_t* indent, unsigned int flags, xml_encoding encoding) const
@@ -7464,7 +7464,7 @@ namespace pugi
 			if (!(flags & format_raw)) buffered_writer.write('\n');
 		}
 
-		node_output(buffered_writer, _root, indent, flags, 0);
+		impl::node_output(buffered_writer, _root, indent, flags, 0);
 
 		buffered_writer.flush();
 	}
@@ -7488,7 +7488,7 @@ namespace pugi
 	PUGI_IMPL_FN bool xml_document::save_file(const char* path_, const char_t* indent, unsigned int flags, xml_encoding encoding) const
 	{
 		using impl::auto_deleter; // MSVC7 workaround
-		auto_deleter file(impl::open_file(path_, (flags & format_save_file_text) ? "w" : "wb"), impl::close_file);
+		auto_deleter<FILE> file(impl::open_file(path_, (flags & format_save_file_text) ? "w" : "wb"), impl::close_file);
 
 		return impl::save_file_impl(*this, file.data, indent, flags, encoding) && fclose(file.release()) == 0;
 	}
@@ -7496,7 +7496,7 @@ namespace pugi
 	PUGI_IMPL_FN bool xml_document::save_file(const wchar_t* path_, const char_t* indent, unsigned int flags, xml_encoding encoding) const
 	{
 		using impl::auto_deleter; // MSVC7 workaround
-		auto_deleter file(impl::open_file_wide(path_, (flags & format_save_file_text) ? L"w" : L"wb"), impl::close_file);
+		auto_deleter<FILE> file(impl::open_file_wide(path_, (flags & format_save_file_text) ? L"w" : L"wb"), impl::close_file);
 
 		return impl::save_file_impl(*this, file.data, indent, flags, encoding) && fclose(file.release()) == 0;
 	}
@@ -8318,8 +8318,8 @@ PUGI_IMPL_NS_BEGIN
 		{
 			if ((get_document(node).header & xml_memory_page_contents_shared_mask) == 0)
 			{
-				if (node->name && (node->header & xml_memory_page_name_allocated_or_shared_mask) == 0) return node->name;
-				if (node->value && (node->header & xml_memory_page_value_allocated_or_shared_mask) == 0) return node->value;
+				if (node->name && (node->header & impl::xml_memory_page_name_allocated_or_shared_mask) == 0) return node->name;
+				if (node->value && (node->header & impl::xml_memory_page_value_allocated_or_shared_mask) == 0) return node->value;
 			}
 
 			return 0;
@@ -8331,8 +8331,8 @@ PUGI_IMPL_NS_BEGIN
 		{
 			if ((get_document(attr).header & xml_memory_page_contents_shared_mask) == 0)
 			{
-				if ((attr->header & xml_memory_page_name_allocated_or_shared_mask) == 0) return attr->name;
-				if ((attr->header & xml_memory_page_value_allocated_or_shared_mask) == 0) return attr->value;
+				if ((attr->header & impl::xml_memory_page_name_allocated_or_shared_mask) == 0) return attr->name;
+				if ((attr->header & impl::xml_memory_page_value_allocated_or_shared_mask) == 0) return attr->value;
 			}
 
 			return 0;
@@ -12348,7 +12348,7 @@ PUGI_IMPL_NS_BEGIN
 		bool oom;
 	};
 
-	PUGI_IMPL_FN xpath_ast_node* evaluate_node_set_prepare(xpath_query_impl* impl)
+	PUGI_IMPL_FN impl::xpath_ast_node* evaluate_node_set_prepare(xpath_query_impl* impl)
 	{
 		if (!impl) return 0;
 
@@ -12894,7 +12894,7 @@ namespace pugi
 		else
 		{
 			using impl::auto_deleter; // MSVC7 workaround
-			auto_deleter impl(qimpl, impl::xpath_query_impl::destroy);
+			auto_deleter<impl::xpath_query_impl> impl(qimpl, impl::xpath_query_impl::destroy);
 
 			qimpl->root = impl::xpath_parser::parse(query, variables, &qimpl->alloc, &_result);
 
@@ -13056,7 +13056,7 @@ namespace pugi
 
 	PUGI_IMPL_FN xpath_node_set xpath_query::evaluate_node_set(const xpath_node& n) const
 	{
-		impl::xpath_ast_node* root = evaluate_node_set_prepare(static_cast<impl::xpath_query_impl*>(_impl));
+		impl::xpath_ast_node* root = impl::evaluate_node_set_prepare(static_cast<impl::xpath_query_impl*>(_impl));
 		if (!root) return xpath_node_set();
 
 		impl::xpath_context c(n, 1, 1);
@@ -13078,7 +13078,7 @@ namespace pugi
 
 	PUGI_IMPL_FN xpath_node xpath_query::evaluate_node(const xpath_node& n) const
 	{
-		impl::xpath_ast_node* root = evaluate_node_set_prepare(static_cast<impl::xpath_query_impl*>(_impl));
+		impl::xpath_ast_node* root = impl::evaluate_node_set_prepare(static_cast<impl::xpath_query_impl*>(_impl));
 		if (!root) return xpath_node();
 
 		impl::xpath_context c(n, 1, 1);

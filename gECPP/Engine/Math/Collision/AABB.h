@@ -5,6 +5,7 @@
 #pragma once
 
 #include <Engine/Math/Math.h>
+#include <Engine/Binary/Macro.h>
 
 inline float bit_sign(u8 b) { return b ? 1 : -1; }
 

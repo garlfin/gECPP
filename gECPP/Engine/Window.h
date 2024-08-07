@@ -1,8 +1,9 @@
 #pragma once
 
 #include "Engine/Math/Math.h"
-#include <Graphics/Buffer/VAO.h>
-#include <Graphics/Shader/Shader.h>
+#include <GL/Buffer/VAO.h>
+#include <GL/Shader/Shader.h>
+#include <GL/Texture/TextureSlotManager.h>
 
 #include "WindowState.h"
 #include <Engine/Manager.h>
@@ -24,8 +25,6 @@
 #include <Engine/Renderer/PostProcess/Bloom.h>
 #include <Engine/Renderer/PostProcess/Tonemap.h>
 
-#include <Graphics/Texture/TextureSlotManager.h>
-
 struct GLFWwindow;
 struct GLFWvidmode;
 
@@ -41,7 +40,7 @@ namespace gE
 		Monitor() = default;
 
 		const char* Name = nullptr;
-		TextureSize2D Size = TextureSize2D(0);
+		GL::TextureSize2D Size = GL::TextureSize2D(0);
 		u16 RefreshRate = 0;
 
 		~Monitor() { delete[] Name; }
@@ -53,7 +52,7 @@ namespace gE
 		explicit Window(glm::u16vec2 size, const char* name = "gE");
 
 		bool Run();
-		void Blit(const API::Texture& texture);
+		void Blit(const GL::Texture& texture);
 
 		// Entities & Data
 		Camera3D* GetReflectionSystem() const;
@@ -62,14 +61,14 @@ namespace gE
 		GET(gE::SDFCapture*, SDFCapture, SDFSceneCapture.Get());
 
 		GET(gE::Material&, DefaultMaterial, DefaultMaterial);
-		GET(API::Texture2D&, BRDFLookupTexture, BRDFLookup);
+		GET(GL::Texture2D&, BRDFLookupTexture, BRDFLookup);
 
 		// Post Process Data
-		GET(API::ComputeShader&, TAAShader, TAAShader);
-		GET(API::ComputeShader&, TonemapShader, TonemapShader);
-		GET(API::ComputeShader&, BloomShader, BloomShader);
-		GET(API::ComputeShader&, VoxelTAAShader, VoxelTAAShader);
-		GET(API::ComputeShader&, HiZShader, HiZShader);
+		GET(GL::ComputeShader&, TAAShader, TAAShader);
+		GET(GL::ComputeShader&, TonemapShader, TonemapShader);
+		GET(GL::ComputeShader&, BloomShader, BloomShader);
+		GET(GL::ComputeShader&, VoxelTAAShader, VoxelTAAShader);
+		GET(GL::ComputeShader&, HiZShader, HiZShader);
 
 		// Managers
 		GET(CameraManager&, Cameras, Cameras);
@@ -79,12 +78,12 @@ namespace gE
 		GET(LightManager&, Lights, Lights);
 		GET(CubemapManager&, Cubemaps, Cubemaps);
 		GET(CullingManager&, CullingManager, CullingManager);
-		GET(API::TextureSlotManager&, SlotManager, SlotManager);
+		GET(GL::TextureSlotManager&, SlotManager, SlotManager);
 
 		// Engine States
 		RenderFlags State;
 
-		GET_CONST(TextureSize2D, Size, _size);
+		GET_CONST(GL::TextureSize2D, Size, _size);
 		GET_CONST(const Monitor&, Monitor, _monitor);
 		GET_CONST(VoxelPipeline::Buffers&, VoxelBuffers, VoxelBuffers);
 		GET_CONST(DefaultPipeline::Buffers&, PipelineBuffers, PipelineBuffers);
@@ -115,19 +114,19 @@ namespace gE
 
 		ComponentManager<Behavior> Behaviors;
 
-		SmartPointer<Material> DefaultMaterial;
-		SmartPointer<API::Shader> BlitShader;
-		SmartPointer<API::Texture2D> BRDFLookup;
-		SmartPointer<API::ComputeShader> TAAShader;
-		SmartPointer<API::ComputeShader> TonemapShader;
-		SmartPointer<API::ComputeShader> BloomShader;
-		SmartPointer<API::ComputeShader> VoxelTAAShader;
-		SmartPointer<API::ComputeShader> HiZShader;
+		GL::TextureSlotManager SlotManager;
 
-		API::TextureSlotManager SlotManager;
+		SmartPointer<gE::Material> DefaultMaterial;
+		SmartPointer<GL::Shader> BlitShader;
+		SmartPointer<GL::Texture2D> BRDFLookup;
+		SmartPointer<GL::ComputeShader> TAAShader;
+		SmartPointer<GL::ComputeShader> TonemapShader;
+		SmartPointer<GL::ComputeShader> BloomShader;
+		SmartPointer<GL::ComputeShader> VoxelTAAShader;
+		SmartPointer<GL::ComputeShader> HiZShader;
 
 	 private:
-		TextureSize2D _size;
+		GL::TextureSize2D _size;
 		const char* _name;
 		GLFWwindow* _window;
 		Monitor _monitor;

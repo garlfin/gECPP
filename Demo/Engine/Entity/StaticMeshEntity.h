@@ -10,11 +10,11 @@
 
 namespace gE::VoxelDemo
 {
- 	class StaticMeshEntity : public Entity
+ 	class StaticMeshEntity : public gE::Entity
 	{
 	 public:
-		StaticMeshEntity(Window* window, gETF::Mesh* mesh, const Array<Reference<Material>>& mat = {}) :
-			Entity(window),
+		StaticMeshEntity(gE::Window* window, gETF::Mesh* mesh, const Array<gE::Reference<gE::Material>>& mat = {}) :
+			gE::Entity(window),
 			_renderer(this, mesh, _materialHolder),
 			_materialHolder(this, mat)
 		{ };
@@ -23,7 +23,7 @@ namespace gE::VoxelDemo
 		GET(gE::MaterialHolder&, Materials, _materialHolder);
 
 	 private:
-		MeshRenderer _renderer;
-		MaterialHolder _materialHolder;
+		gE::MeshRenderer _renderer;
+		gE::MaterialHolder _materialHolder;
 	};
 }

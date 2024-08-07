@@ -4,8 +4,9 @@
 
 #pragma once
 
-#include <Graphics/Shader/Uniform.h>
-#include <Graphics/Texture/Texture.h>
+#include <GL/Shader/Shader.h>
+#include <GL/Shader/Uniform.h>
+#include <GL/Texture/Texture.h>
 #include <Engine/AssetManager.h>
 
 namespace gE
@@ -33,59 +34,57 @@ namespace gE
 		Blend
 	};
 
-	struct Material : public API::APIObject
+	struct Material : public GL::Asset
 	{
 	 public:
-		Material(Window* window, const Reference<API::Shader>& shader, DepthFunction depthFunc = DepthFunction::Less, CullMode cullMode = CullMode::Back);
+		Material(Window* window, const Reference<GL::Shader>& shader, DepthFunction depthFunc = DepthFunction::Less, CullMode cullMode = CullMode::Back);
 
 		void Bind() const override;
 
-		GET_CONST(API::Shader &, Shader, _shader);
+		GET_CONST(GL::Shader &, Shader, _shader);
 
 	 private:
-		const Reference<API::Shader> _shader;
+		const Reference<GL::Shader> _shader;
 		const DepthFunction _depthFunc;
 		const CullMode _cullMode;
 	};
 
 	template<class T>
-	class ValueUniform : private API::Uniform<std::remove_const_t<std::remove_reference_t<T>>>
+	class ValueUniform : private GL::Uniform<T>
 	{
 	 public:
-		typedef std::remove_const_t<std::remove_reference_t<T>> I;
-
-		ValueUniform(const Material* mat, const char* n, const I& t) : API::Uniform<I>(&mat->GetShader(), n), _t(t) { };
-		ValueUniform(const Material* mat, const char* n, I&& t) : API::Uniform<I>(&mat->GetShader(), n), _t(t) { };
-		ValueUniform(const Material* mat, u32 l, const I& t) : API::Uniform<I>(&mat->GetShader(), l), _t(t) { };
-		ValueUniform(const Material* mat, u32 l, I&& t) : API::Uniform<I>(&mat->GetShader(), l), _t(t) { };
+		ValueUniform(const Material* mat, const char* n, const T& t) : GL::Uniform<T>(&mat->GetShader(), n), _t(t) { };
+		ValueUniform(const Material* mat, const char* n, T&& t) : GL::Uniform<T>(&mat->GetShader(), n), _t(t) { };
+		ValueUniform(const Material* mat, u32 l, const T& t) : GL::Uniform<T>(&mat->GetShader(), l), _t(t) { };
+		ValueUniform(const Material* mat, u32 l, T&& t) : GL::Uniform<T>(&mat->GetShader(), l), _t(t) { };
 
 		ValueUniform(const ValueUniform&) = default;
 		ValueUniform(ValueUniform&&) = default;
 
-		ALWAYS_INLINE ValueUniform& operator=(const I& t){ _t = t; return *this; }
-		ALWAYS_INLINE ValueUniform& operator=(I&& t) noexcept { _t = t; return *this; }
+		ALWAYS_INLINE ValueUniform& operator=(const T& t){ _t = t; return *this; }
+		ALWAYS_INLINE ValueUniform& operator=(T&& t) noexcept { _t = t; return *this; }
 
 		ALWAYS_INLINE ValueUniform& operator=(ValueUniform&&) noexcept = default;
 		ALWAYS_INLINE ValueUniform& operator=(const ValueUniform&) = default;
-		ALWAYS_INLINE I* operator->() const { return _t; }
-		ALWAYS_INLINE I& operator*() const { return *_t; }
+		ALWAYS_INLINE T* operator->() const { return _t; }
+		ALWAYS_INLINE T& operator*() const { return *_t; }
 		ALWAYS_INLINE operator bool() const { return (bool) _t; } // NOLINT
-		ALWAYS_INLINE operator I*() const { return _t; } // NOLINT
-		ALWAYS_INLINE operator I&() const { return *_t; } // NOLINT
+		ALWAYS_INLINE operator T*() const { return _t; } // NOLINT
+		ALWAYS_INLINE operator T&() const { return *_t; } // NOLINT
 
-		ALWAYS_INLINE void Set() const { API::Uniform<I>::Set(_t); }
+		ALWAYS_INLINE void Set() const { GL::Uniform<T>::Set(_t); }
 
 		// I just prefer the semantics of it being encapsulated
-		GET_SET(I&, , _t);
-		SET_XVAL(I, , _t);
+		GET_SET(T&, , _t);
+		SET_XVAL(T, , _t);
 
 	 private:
 		T _t;
 	};
 
 	template<class T>
-	using ReferenceUniform = ValueUniform<Reference<T>>;
+	using ReferenceUniform = ValueUniform<gE::Reference<T>>;
 
 	template<class T>
-	using SmartPointerUniform = ValueUniform<SmartPointer<T>>;
+	using SmartPointerUniform = ValueUniform<gE::SmartPointer<T>>;
 }

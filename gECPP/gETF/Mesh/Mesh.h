@@ -6,9 +6,9 @@
 
 #include <Prototype.h>
 #include <gETF/Serializable.h>
-#include <Graphics/API/GL/Buffer/VAOSettings.h>
+#include <GL/Buffer/VAOSettings.h>
 #include <Engine/AssetManager.h>
-#include <Graphics/Buffer/VAO.h>
+#include <GL/Buffer/VAO.h>
 
 #define GETF_MESH_MAGIC "GMSH"
 #define GETF_MESH_VERSION 1
@@ -30,9 +30,9 @@ namespace gETF
 		NODISCARD ALWAYS_INLINE bool IsFree() const { return Data.IsFree(); }
 		NODISCARD ALWAYS_INLINE u64 Size() const { return Count * Stride; }
 
-		NODISCARD explicit operator API::VertexBuffer() const
+		NODISCARD explicit operator GL::VertexBuffer() const
 		{
-			return API::VertexBuffer(Stride, Count, Data.Data());
+			return GL::VertexBuffer(Stride, Count, Data.Data());
 		}
 
 		~VertexBuffer() override { Free(); }
@@ -53,9 +53,9 @@ namespace gETF
 		u8 Offset;
 		char Name[4];
 
-		NODISCARD explicit operator API::VertexField() const
+		NODISCARD explicit operator GL::VertexField() const
 		{
-			return *(API::VertexField*) &ElementType;
+			return *(GL::VertexField*) &ElementType;
 		}
 	};
 
@@ -69,10 +69,10 @@ namespace gETF
 		u32 Offset = 0;
 		u32 Count = 0;
 
-		NODISCARD ALWAYS_INLINE explicit operator API::MaterialSlot() const
+		NODISCARD ALWAYS_INLINE explicit operator GL::MaterialSlot() const
 		{
 			// This will cause chaos one day
-			return *(API::MaterialSlot*) &Offset;
+			return *(GL::MaterialSlot*) &Offset;
 		}
 	};
 
@@ -100,13 +100,13 @@ namespace gETF
 		Array<VertexField> Fields;
 		Array<MaterialSlot> Materials;
 
-		gE::SmartPointer<API::VAO> VAO;
+		gE::SmartPointer<GL::VAO> VAO;
 
 		void Free() { for(u8 i = 0; i < Buffers.Count(); i++) Buffers[i].Free(); }
 		void CreateVAO(gE::Window*);
 
 	 private:
-		void GetVAOSettings(API::VAOSettings&) const;
-		void GetVAOSettings(API::IndexedVAOSettings&) const;
+		void GetVAOSettings(GL::VAOSettings&) const;
+		void GetVAOSettings(GL::IndexedVAOSettings&) const;
 	};
 }

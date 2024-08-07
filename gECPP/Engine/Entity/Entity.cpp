@@ -21,7 +21,7 @@ namespace gE
 
 		RemoveFirstFromVec(_parent->_children, this);
 
-		std::vector stack{ this };
+		std::vector<Entity*> stack{ this };
 
 		if(flagChildren)
 			while(!stack.empty())
@@ -42,7 +42,7 @@ namespace gE
 	}
 
 	Component::Component(Entity* o, Manager<Component>* m) : Managed<Component>(*this, m),
-		 _window(o->GetWindow()), _owner(o)
+		 _owner(o), _window(o->GetWindow())
 	{}
 
 	Behavior::Behavior(Entity* o) : Component(o, &o->GetWindow().GetBehaviors())

@@ -21,7 +21,7 @@ using namespace gE;
 #define US_TO_MS 1000000.f
 
 Window::Window(glm::u16vec2 size, const char* name) :
-	Lights(this), Cubemaps(this), _size(size), _name(strdup(name))
+	_size(size), _name(strdup(name)), Lights(this), Cubemaps(this)
 {
 	if(!glfwInit()) GE_FAIL("Failed to initialize GLFW.");
 
@@ -50,9 +50,6 @@ Window::Window(glm::u16vec2 size, const char* name) :
 	glfwSetWindowIcon(_window, 1, &image);
 
 	if(!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) GE_FAIL("Failed to initialize GLAD.");
-
-	LOG("Vendor: " << glGetString(GL_VENDOR));
-	LOG("Renderer: " << glGetString(GL_RENDERER));
 }
 
 Window::~Window()
@@ -65,7 +62,6 @@ Window::~Window()
 #ifdef DEBUG
 void DebugMessage(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
 {
-	if(severity == GL_DEBUG_SEVERITY_NOTIFICATION) return;
 	std::cout << message << std::endl;
 }
 #endif
@@ -96,7 +92,8 @@ bool Window::Run()
 
 	_time = glfwGetTime();
 
-	double frameDelta = 0.0;
+	double currentTime;
+	double delta, frameDelta = 0.0;
 
 	GLuint timer;
 	u64 timerResult;
@@ -107,8 +104,8 @@ bool Window::Run()
 	{
 		glfwPollEvents();
 
-		double currentTime = glfwGetTime();
-		double delta = currentTime - _time;
+		currentTime = glfwGetTime();
+		delta = currentTime - _time;
 		_time = currentTime;
 
 		OnUpdate((float) delta);
@@ -155,34 +152,34 @@ void Window::OnInit()
 	PipelineBuffers = ptr_create<DefaultPipeline::Buffers>(this);
 	VoxelBuffers = ptr_create<VoxelPipeline::Buffers>(this);
 
-	BlitShader = ptr_create<API::Shader>(this, "Resource/Shader/blit.vert", "Resource/Shader/blit.frag");
-	TAAShader = ptr_create<API::ComputeShader>(this, "Resource/Shader/PostProcess/taa.comp");
-	TonemapShader = ptr_create<API::ComputeShader>(this, "Resource/Shader/PostProcess/tonemap.comp");
-	BloomShader = ptr_create<API::ComputeShader>(this, "Resource/Shader/PostProcess/bloom.comp");
-	VoxelTAAShader = ptr_create<API::ComputeShader>(this, "Resource/Shader/Compute/voxel.comp");
-	HiZShader = ptr_create<API::ComputeShader>(this, "Resource/Shader/Compute/hiz.comp");
+	BlitShader = ptr_create<GL::Shader>(this, "Resource/Shader/blit.vert", "Resource/Shader/blit.frag");
+	TAAShader = ptr_create<GL::ComputeShader>(this, "Resource/Shader/PostProcess/taa.comp");
+	TonemapShader = ptr_create<GL::ComputeShader>(this, "Resource/Shader/PostProcess/tonemap.comp");
+	BloomShader = ptr_create<GL::ComputeShader>(this, "Resource/Shader/PostProcess/bloom.comp");
+	VoxelTAAShader = ptr_create<GL::ComputeShader>(this, "Resource/Shader/Compute/voxel.comp");
+	HiZShader = ptr_create<GL::ComputeShader>(this, "Resource/Shader/Compute/hiz.comp");
 
 	{
-		API::ComputeShader brdfShader(this, "Resource/Shader/Compute/brdf.comp");
-		GPU::TextureSettings2D brdfSettings
+		GL::ComputeShader brdfShader(this, "Resource/Shader/Compute/brdf.comp");
+		GL::TextureSettings2D brdfSettings
 		{
-			{ GL_RG16F, GPU::WrapMode::Clamp, GPU::FilterMode::Linear, 1 },
-			TextureSize2D(BRDF_SIZE)
+			{ GL_RG16F, GL::WrapMode::Clamp, GL::FilterMode::Linear, 1 },
+			GL::TextureSize2D(BRDF_SIZE)
 		};
 
 		glm::uvec2 brdfGroupSize = DIV_CEIL_T(BRDF_SIZE, BRDF_GROUP_SIZE, glm::uvec2);
 
-		BRDFLookup = ptr_create<API::Texture2D>(this, brdfSettings);
+		BRDFLookup = ptr_create<GL::Texture2D>(this, brdfSettings);
 		BRDFLookup->Bind(0, GL_WRITE_ONLY);
 		brdfShader.Bind();
 		brdfShader.Dispatch(brdfGroupSize);
 	}
 
-	auto defaultShader = ref_create<API::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/missing.frag");
-	DefaultMaterial = ptr_create<Material>(this, defaultShader);
+	auto defaultShader = ref_create<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/missing.frag");
+	DefaultMaterial = ptr_create<gE::Material>(this, defaultShader);
 }
 
-void Window::Blit(const API::Texture& texture)
+void Window::Blit(const GL::Texture& texture)
 {
 	// This function is really sketchy, vertices are all in the shader.
 	// It needs a VAO to be previously bound to work.
@@ -223,7 +220,7 @@ void Window::OnRender(float delta)
 
 	GE_ASSERT(Cameras.CurrentCamera, "CAMERA SHOULD NOT BE NULL!");
 
-	API::FrameBuffer::Reset();
+	GL::FrameBuffer::Reset();
 	Blit(Cameras.CurrentCamera->GetColor());
 
 	Transforms.OnRender(delta, nullptr);
