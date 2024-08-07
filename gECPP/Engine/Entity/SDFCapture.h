@@ -14,11 +14,11 @@ namespace gE
 	 public:
 		SDFCapture(Window* w, u16 resolution);
 
-		void GetGLSDFScene(GL::SDFScene& scene);
+		void GetGPUSDFScene(API::SDFScene& scene);
 
 		GET(Camera3D&, Camera, _camera);
 		GET(SDFPipeline::Target3D&, Target, _target);
-		GET(GL::Texture3D&, Color, _target.GetColor());
+		GET(API::Texture3D&, Color, _target.GetColor());
 
 	 private:
 		Camera3D _camera;

@@ -4,9 +4,9 @@
 
 #include "Shader.h"
 #include "Uniform.h"
-#include <GL/Texture/Texture.h>
+#include "Graphics/Texture/Texture.h"
 #include <iostream>
-#include <Engine/Window.h>
+#include "Engine/Window.h"
 
 #define VERSION_DIRECTIVE "#version 460 core\n"
 #define EXT_BINDLESS "#define EXT_BINDLESS\n"
@@ -23,7 +23,7 @@ namespace GL
 	template<typename T>
 	bool GetShaderStatus(const T& shader, const char* name = nullptr, const char* source = nullptr);
 
-	Shader::Shader(gE::Window* window, const char* v, const char* f, const Array<PreprocessorPair>* p) : Asset(window)
+	Shader::Shader(gE::Window* window, const char* v, const char* f, const Array<PreprocessorPair>* p) : APIObject(window)
 	{
 		ID = glCreateProgram();
 
@@ -37,7 +37,7 @@ namespace GL
 	}
 
 	ShaderStage::ShaderStage(gE::Window* window, ShaderStageType type, const char* file, const Array<PreprocessorPair>* pairs)
-		: Asset(window)
+		: APIObject(window)
 	{
 		ID = glCreateShader(type);
 
@@ -59,7 +59,7 @@ namespace GL
 		GetShaderStatus(*this, file, src);
 	}
 
-	Shader::Shader(gE::Window* window, const ShaderStage& v, const ShaderStage& f) : Asset(window)
+	Shader::Shader(gE::Window* window, const ShaderStage& v, const ShaderStage& f) : APIObject(window)
 	{
 		ID = glCreateProgram();
 
@@ -73,7 +73,7 @@ namespace GL
 #endif
 	}
 
-	Shader::Shader(gE::Window* window, const char* src, const Array<PreprocessorPair>* p) : Asset(window)
+	Shader::Shader(gE::Window* window, const char* src, const Array<PreprocessorPair>* p) : APIObject(window)
 	{
 		ID = glCreateProgram();
 
@@ -137,16 +137,16 @@ namespace GL
 
 	void Shader::SetUniform(u8 loc, const Texture& tex) const
 	{
-		SetUniform(loc, GetWindow().GetSlotManager().Increment(&tex));
+		SetUniform(loc, GetWindow().GetSlotManager().Increment(tex));
+	}
+
+	template<>
+	void DynamicUniform::Set<GL::Texture>(const Texture& t) const
+	{
+		if(_location != -1) _shader->SetUniform(_location, t, _location);
 	}
 
 	DynamicUniform::DynamicUniform(Shader* s, u32 l) : _shader(s), _location(l) { }
 	DynamicUniform::DynamicUniform(Shader* s, const char* n) : _shader(s), _location(GetUniformLocation(n)) { }
-
-	template<>
-	void DynamicUniform::Set(const Texture& t) const
-	{
-		_shader->SetUniform(_location, t, _shader->GetWindow().GetSlotManager().Increment(&t));
-	}
 }
 

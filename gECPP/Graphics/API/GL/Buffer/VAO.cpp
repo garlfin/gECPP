@@ -6,24 +6,24 @@
 
 namespace GL
 {
-	VAO::VAO(gE::Window* window, const VAOSettings& settings) : Asset(window),
-		_settings(settings),
-		_buffers(settings.BufferCount)
+	VAO::VAO(gE::Window* window, const VAOSettings& settings) : GLObject(window),
+																_buffers(settings.BufferCount),
+																_settings(settings)
 	{
 		glCreateVertexArrays(1, &ID);
 
 		for(u8 i = 0; i < settings.BufferCount; i++)
 		{
-			const GL::VertexBuffer& bufferSettings = settings.Buffers[i];
+			const VertexBuffer& bufferSettings = settings.Buffers[i];
 			const size_t size = bufferSettings.Stride * bufferSettings.Count;
-			const auto* buf = _buffers[i] = new Buffer<void>(window, size, bufferSettings.Data);
+			const auto* buf = _buffers[i] = new Buffer(window, size, bufferSettings.Data);
 
 			glVertexArrayVertexBuffer(ID, i, buf->Get(), 0, bufferSettings.Stride);
 		}
 
 		for(u8 i = 0; i < settings.FieldCount; i++)
 		{
-			const GL::VertexField& field = settings.Fields[i];
+			const VertexField& field = settings.Fields[i];
 
 			glEnableVertexArrayAttrib(ID, field.Index);
 			glVertexArrayAttribBinding(ID, field.Index, field.BufferIndex);
@@ -35,7 +35,7 @@ namespace GL
 	{
 		if(!instanceCount) return;
 		Bind();
-		const GL::MaterialSlot& mesh = _settings.Materials[index];
+		const MaterialSlot& mesh = _settings.Materials[index];
 		glDrawArraysInstanced(GL_TRIANGLES, mesh.Offset * 3, mesh.Count * 3, instanceCount);
 	}
 
@@ -43,7 +43,7 @@ namespace GL
 	{
 		if(!instanceCount) return;
 		Bind();
-		const GL::MaterialSlot& mesh = _settings.Materials[index];
+		const MaterialSlot& mesh = _settings.Materials[index];
 		glDrawElementsInstanced(GL_TRIANGLES, mesh.Count * 3, _triangles.ElementType, (void*) (sizeof(u32) * mesh.Offset * 3), instanceCount);
 	}
 
@@ -60,7 +60,7 @@ namespace GL
 		for(u8 i = 0; i < _settings.FieldCount; i++) delete _buffers[i];
 	}
 
-	IndexedVAO::IndexedVAO(gE::Window* window, const GL::IndexedVAOSettings& settings)
+	IndexedVAO::IndexedVAO(gE::Window* window, const IndexedVAOSettings& settings)
 		: VAO(window, settings), _triangles(settings.Triangles)
 	{
 		glVertexArrayElementBuffer(ID, _buffers[settings.Triangles.BufferIndex]->Get());

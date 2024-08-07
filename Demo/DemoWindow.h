@@ -6,8 +6,6 @@
 
 #include "Engine/Window.h"
 #include "Engine/MemoryPool.h"
-#include "GL/Buffer/VAO.h"
-#include "GL/Shader/Shader.h"
 #include "Engine/Component/MeshRenderer.h"
 #include <Engine/Entity/Entity.h>
 

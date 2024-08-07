@@ -8,16 +8,16 @@
 
 namespace GL
 {
-	class DynamicUniform
-	{
+	class DynamicUniform {
 	 public:
 		DynamicUniform(Shader*, u32);
+
 		DynamicUniform(Shader*, const char*);
 
 		GET_CONST(u32, , _location);
 
 		template<class T>
-		ALWAYS_INLINE void Set(const T& t) const { if(_location != -1) _shader->SetUniform(_location, t); }
+		ALWAYS_INLINE void Set(const T& t) const { if (_location != -1) _shader->SetUniform(_location, t); }
 
 	 private:
 		ALWAYS_INLINE u32 GetUniformLocation(const char* name) const
@@ -29,12 +29,8 @@ namespace GL
 		u32 _location;
 	};
 
-	template<>
-	void DynamicUniform::Set(const Texture& t) const;
-
 	template<class T>
-	class Uniform : private DynamicUniform
-	{
+	class Uniform : private DynamicUniform {
 	 public:
 		using DynamicUniform::DynamicUniform;
 

@@ -4,19 +4,18 @@
 
 #pragma once
 
-#include <GL/Buffer/FrameBuffer.h>
+#include <Graphics/Buffer/FrameBuffer.h>
+#include <Engine/Component/Camera/Camera.h>
 #include "Engine/Manager.h"
 
 namespace gE
 {
-	class Camera;
-
 	template<class T, GLenum TARGET>
 	class Attachment
 	{
 	 public:
 		template<typename... ARGS>
-		Attachment(GL::FrameBuffer& f, ARGS&&... args) : _texture(&f.GetWindow(), std::forward<ARGS>(args)...)
+		Attachment(API::FrameBuffer& f, ARGS&&... args) : _texture(&f.GetWindow(), std::forward<ARGS>(args)...)
 		{
 			if constexpr(TARGET == GL_DEPTH_ATTACHMENT || TARGET == GL_DEPTH_STENCIL_ATTACHMENT)
 				f.SetDepthAttachment(_texture);
@@ -44,14 +43,14 @@ namespace gE
 		T _texture;
 	};
 
- 	class IRenderTarget : public GL::Asset
+ 	class IRenderTarget : public API::APIObject
 	{
 	 public:
 		explicit IRenderTarget(Entity&, Camera&);
 
 		GET(Camera&, Camera, _camera);
 		GET(Entity&, Owner, _owner);
-		GET(GL::FrameBuffer&, FrameBuffer, _frameBuffer);
+		GET(API::FrameBuffer&, FrameBuffer, _frameBuffer);
 
 		virtual bool Setup(float, Camera*) { return true; }
 		virtual void RenderDependencies(float) {};
@@ -63,7 +62,7 @@ namespace gE
 	 private:
 		Camera& _camera;
 		Entity& _owner;
-		GL::FrameBuffer _frameBuffer;
+		API::FrameBuffer _frameBuffer;
 	};
 
 	template<class T>
@@ -81,21 +80,21 @@ namespace gE
 	class IDepthTarget
 	{
 	 public:
-		explicit IDepthTarget(GL::Texture& d) : _depth(d) {};
+		explicit IDepthTarget(API::Texture& d) : _depth(d) {};
 
-		GET(GL::Texture&, Depth, _depth);
+		GET(API::Texture&, Depth, _depth);
 
 	 private:
-		GL::Texture& _depth;
+		API::Texture& _depth;
 	};
 
 	class IColorTarget
 	{
 	 public:
-		explicit IColorTarget(GL::Texture& col) : _color(col) {};
+		explicit IColorTarget(API::Texture& col) : _color(col) {};
 
-		GET(GL::Texture&, Color, _color);
+		GET(API::Texture&, Color, _color);
 	 private:
-		GL::Texture& _color;
+		API::Texture& _color;
 	};
 }

@@ -14,6 +14,8 @@
 // Defines SERIALIZABLE_PROTO_T
 // Defines SERIALIZABLE_PROTO
 
+// TODO: REDO THIS AGAIN
+
 template<class T>
 struct TypeSystem
 {
@@ -26,7 +28,7 @@ struct TypeSystem
 	{
 		Type(const char* n, FactoryFunction f) : Name(n), ID(0), Factory(f)
 		{
-			TypeSystem<T>::Types[ID];
+			Types[ID];
 		};
 
 		const char* Name;
@@ -73,22 +75,43 @@ template<> void Write(std::ostream& out, u32 count, const std::string* t);
 	inline FUNC_RETURN FUNC override {};
 
 #define VIRTUAL_H_PROTO(TYPE, SUPER, FUNC_RETURN, FUNC_NAME, FUNC_ARG, FUNC_CALL) \
-		inline FUNC_RETURN FUNC_NAME FUNC_ARG override { SUPER::FUNC_NAME FUNC_CALL; TYPE::I##FUNC_NAME FUNC_CALL; } \
+		inline FUNC_RETURN FUNC_NAME FUNC_ARG override { SUPER::FUNC_NAME FUNC_CALL; TYPE::I##FUNC_NAME FUNC_CALL; TYPE::Construct(); } \
  	private: \
 		FUNC_RETURN I##FUNC_NAME FUNC_ARG;
 
-// Implementation
-#define SERIALIZABLE_PROTO_T(TYPE, SUPER) \
+#define SERIALIZABLE_PROTO_T_BODY(TYPE, SUPER) \
 	public: \
-		explicit TYPE(istream& in, SETTINGS_T s) : SUPER(in, s) { TYPE::Serialize(in, s); } \
-	public: VIRTUAL_H_PROTO(TYPE, SUPER, void, Serialize, (istream& in, SETTINGS_T s), (in, s)) \
-	public: VIRTUAL_H_PROTO(TYPE, SUPER, void, Deserialize, (ostream& out) const, (out));
+		typedef SUPER::SETTINGS_T SETTINGS_T; \
+		inline void Serialize(istream& in, SETTINGS_T s) override { SUPER::Serialize(in, s); TYPE::ISerialize(in, s); TYPE::Construct(); } \
+		inline void Deserialize(ostream& out) const override { SUPER::Deserialize(out); TYPE::IDeserialize(out); } \
+	private: \
+		void ISerialize(istream& in, SETTINGS_T s); \
+		void IDeserialize(ostream& out) const;
+
+#define SERIALIZABLE_PROTO_T_CONSTRUCTABLE(TYPE, SUPER) \
+	public: explicit TYPE(istream& in, SETTINGS_T s) : SUPER(in, s) { ISerialize(in, s); TYPE::Construct(); } \
+    SERIALIZABLE_PROTO_T_BODY(TYPE, SUPER)
+
+#define SERIALIZABLE_PROTO_T(TYPE, SUPER) \
+ 	private: ALWAYS_INLINE void Construct() {}; \
+	SERIALIZABLE_PROTO_T_CONSTRUCTABLE(TYPE, SUPER);
+
+#define SERIALIZABLE_PROTO_BODY(TYPE, SUPER) \
+	public: \
+		inline void Serialize(istream& in) override { SUPER::Serialize(in); TYPE::ISerialize(in); TYPE::Construct(); } \
+		inline void Deserialize(ostream& out) const override { SUPER::Deserialize(out); TYPE::IDeserialize(out); } \
+	private: \
+		void ISerialize(istream& in); \
+		void IDeserialize(ostream& out) const;
+
+#define SERIALIZABLE_PROTO_CONSTRUCTABLE(TYPE, SUPER) \
+	public: \
+		explicit TYPE(istream& in) : SUPER(in) { ISerialize(in); TYPE::Construct(); } \
+    SERIALIZABLE_PROTO_BODY(TYPE, SUPER)
 
 #define SERIALIZABLE_PROTO(TYPE, SUPER) \
-	public: \
-		explicit TYPE(istream& in) : SUPER(in) { TYPE::Serialize(in); } \
-	public: VIRTUAL_H_PROTO(TYPE, SUPER, void, Serialize, (istream& in), (in)) \
-	public: VIRTUAL_H_PROTO(TYPE, SUPER, void, Deserialize, (ostream& out) const, (out));
+	private: ALWAYS_INLINE void Construct() {}; \
+	SERIALIZABLE_PROTO_CONSTRUCTABLE(TYPE, SUPER);
 
 #define SERIALIZABLE_REFLECTABLE(TYPE) \
  	public: \
@@ -160,7 +183,7 @@ struct FileContainer : public IFileContainer
 	template<typename ... ARGS>
 	explicit FileContainer(std::string& path, ARGS&&... args) :
 		IFileContainer(Object, path),
-		Object(std::forward(args)...)
+		Object(std::forward<ARGS>(args)...)
 	{};
 
 	explicit FileContainer(std::string& path) : IFileContainer(Object, path) {};
@@ -225,6 +248,16 @@ void WriteArray(std::ostream& out, u32 count, const Array<T>* t)
 		Write(out, length);
 		Write(out, length, arr.Data());
 	}
+}
+
+template<typename UINT_T, class T>
+Array<T> ReadArray(std::istream& in)
+{
+	UINT_T length = Read<UINT_T>(in);
+	Array<T> arr = Array<T>(length);
+	in.read((char*) arr.Data(), length * sizeof(typename Array<T>::I));
+
+	return arr;
 }
 
 template<>
