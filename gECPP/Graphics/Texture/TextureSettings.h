@@ -153,5 +153,25 @@ namespace GPU
 		ALWAYS_INLINE operator bool() const { return Data.Data(); }
 	};
 
-	bool FormatIsCompressed(GLenum f);
+	inline void TextureData::ISerialize(istream& in)
+	{
+		PixelFormat = ::Read<GLenum>(in);
+		PixelType = ::Read<GLenum>(in);
+		Scheme = ::Read<CompressionScheme>(in);
+		MipCount = ::Read<u8>(in);
+		Data = ReadArray<u32, u8>(in);
+	}
+
+	inline void TextureData::IDeserialize(ostream& out) const
+	{
+		Write(out, PixelFormat);
+		Write(out, PixelType);
+		Write(out, Scheme);
+		Write(out, MipCount);
+		WriteArray<u32>(out, Data);
+	}
+
+	inline TextureData::TextureData(GLenum f, GLenum t, CompressionScheme s, u8 m, Array<u8>&& d) :
+		PixelFormat(f), PixelType(t), Scheme(s), MipCount(m), Data(std::move(d))
+	{ }
 }

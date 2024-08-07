@@ -10,6 +10,10 @@
 
 namespace GPU
 {
+    inline Texture::Texture(const ITextureSettings& settings, TextureData&& data) :
+        Settings(settings), _data(std::move(data))
+    {}
+
     inline void Texture::ISerialize(istream& in, SETTINGS_T s)
     {
         Read(in, Settings);

@@ -61,6 +61,8 @@ namespace gE
 
 	void PBRMaterial::Bind() const
 	{
+		GetWindow().GetSlotManager().Reset();
+
 		_albedo.Set();
 		_amr.Set();
 		_normal.Set();

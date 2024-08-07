@@ -254,7 +254,7 @@ Array<T> ReadArray(std::istream& in)
 {
 	UINT_T length = Read<UINT_T>(in);
 	Array<T> arr = Array<T>(length);
-	in.read((char*) arr.Data(), length * sizeof(T));
+	in.read((char*) arr.Data(), length * sizeof(typename Array<T>::I));
 
 	return arr;
 }

@@ -64,8 +64,8 @@ namespace GL
 	{
 		SERIALIZABLE_PROTO_T_BODY(Texture2D, GPU::Texture2D);
 	 public:
-		Texture2D(gE::Window* window, const GPU::TextureSettings2D& settings, GPU::TextureData&& = {});
-		Texture2D(gE::Window* window, const GPU::TextureSettings2D& settings, const GPU::TextureData&);
+		Texture2D(gE::Window* window, const GPU::TextureSettings2D& settings, GPU::TextureData&& d = {}) :
+			GPU::Texture2D(settings, std::move(d)), GL::Texture(window, GL_TEXTURE_2D, Settings) { Construct(); }
 
 		void CopyFrom(const GL::Texture&) override;
 
@@ -77,8 +77,8 @@ namespace GL
 	{
 		SERIALIZABLE_PROTO_T_BODY(Texture3D, GPU::Texture3D);
 	 public:
-		Texture3D(gE::Window* window, const GPU::TextureSettings3D& settings, GPU::TextureData&& = {});
-		Texture3D(gE::Window* window, const GPU::TextureSettings3D& settings, const GPU::TextureData&);
+		Texture3D(gE::Window* window, const GPU::TextureSettings3D& settings, GPU::TextureData&& d = {}) :
+			GPU::Texture3D(settings, std::move(d)), GL::Texture(window, GL_TEXTURE_3D, Settings) { Construct(); }
 
 		void CopyFrom(const GL::Texture&) override;
 
@@ -90,8 +90,8 @@ namespace GL
 	{
 		SERIALIZABLE_PROTO_T_BODY(TextureCube, GPU::TextureCube);
 	 public:
-		TextureCube(gE::Window* window, const GPU::TextureSettings1D& settings, GPU::TextureData&& = {});
-		TextureCube(gE::Window* window, const GPU::TextureSettings1D& settings, const GPU::TextureData&);
+		TextureCube(gE::Window* window, const GPU::TextureSettings1D& settings, GPU::TextureData&& d = {}) :
+			GPU::TextureCube(settings, std::move(d)), GL::Texture(window, GL_TEXTURE_CUBE_MAP, Settings) { Construct(); }
 
 		void CopyFrom(const GL::Texture&) override;
 
@@ -99,3 +99,5 @@ namespace GL
 		void Construct();
 	};
 }
+
+#include "Texture.inl"

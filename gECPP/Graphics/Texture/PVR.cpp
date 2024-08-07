@@ -4,6 +4,8 @@
 
 #include <fstream>
 #include "Graphics/API/GL/Texture/Texture.h"
+#include "TextureSettings.h"
+
 
 namespace PVR
 {
