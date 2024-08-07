@@ -79,30 +79,34 @@ template<> void Write(std::ostream& out, u32 count, const std::string* t);
  	private: \
 		FUNC_RETURN I##FUNC_NAME FUNC_ARG;
 
-// Implementation
-#define SERIALIZABLE_PROTO_T_CONSTRUCTABLE(TYPE, SUPER) \
+#define SERIALIZABLE_PROTO_T_BODY(TYPE, SUPER) \
 	public: \
-		explicit TYPE(istream& in, SETTINGS_T s) : SUPER(in, s) { ISerialize(in, s); TYPE::Construct(); } \
-    public:                                             \
 		inline void Serialize(istream& in, SETTINGS_T s) override { SUPER::Serialize(in, s); TYPE::ISerialize(in, s); TYPE::Construct(); } \
 		inline void Deserialize(ostream& out) const override { SUPER::Deserialize(out); TYPE::IDeserialize(out); } \
 	private: \
 		void ISerialize(istream& in, SETTINGS_T s); \
 		void IDeserialize(ostream& out) const;
 
+#define SERIALIZABLE_PROTO_T_CONSTRUCTABLE(TYPE, SUPER) \
+	public: explicit TYPE(istream& in, SETTINGS_T s) : SUPER(in, s) { ISerialize(in, s); TYPE::Construct(); } \
+    SERIALIZABLE_PROTO_T_BODY(TYPE, SUPER)
+
 #define SERIALIZABLE_PROTO_T(TYPE, SUPER) \
  	private: ALWAYS_INLINE void Construct() {}; \
 	SERIALIZABLE_PROTO_T_CONSTRUCTABLE(TYPE, SUPER);
 
-#define SERIALIZABLE_PROTO_CONSTRUCTABLE(TYPE, SUPER) \
+#define SERIALIZABLE_PROTO_BODY(TYPE, SUPER) \
 	public: \
-		explicit TYPE(istream& in) : SUPER(in) { ISerialize(in); TYPE::Construct(); } \
-    public:                                             \
 		inline void Serialize(istream& in) override { SUPER::Serialize(in); TYPE::ISerialize(in); TYPE::Construct(); } \
 		inline void Deserialize(ostream& out) const override { SUPER::Deserialize(out); TYPE::IDeserialize(out); } \
 	private: \
 		void ISerialize(istream& in); \
 		void IDeserialize(ostream& out) const;
+
+#define SERIALIZABLE_PROTO_CONSTRUCTABLE(TYPE, SUPER) \
+	public: \
+		explicit TYPE(istream& in) : SUPER(in) { ISerialize(in); TYPE::Construct(); } \
+    SERIALIZABLE_PROTO_BODY(TYPE, SUPER)
 
 #define SERIALIZABLE_PROTO(TYPE, SUPER) \
 	private: ALWAYS_INLINE void Construct() {}; \

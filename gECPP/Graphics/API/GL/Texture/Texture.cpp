@@ -1,91 +1,24 @@
 #include "Texture.h"
-#include <iostream>
 #include <GLAD/glad.h>
 #include <Engine/Binary/Binary.h>
+
+#include "TextureSlotManager.h"
 
 namespace GL
 {
 	Texture::Texture(gE::Window* window, GLenum target, const GPU::ITextureSettings& settings) :
-		API::APIObject(window), Settings(settings), Target(target)
+		API::APIObject(window), _settings(settings), _target(target)
 	{
 		glCreateTextures(target, 1, &ID);
-		glTextureParameteri(ID, GL_TEXTURE_MIN_FILTER, (GLint) settings.Filter + (Settings.MipCount == 1 ? 0 : 0x102));
+		glTextureParameteri(ID, GL_TEXTURE_MIN_FILTER, (GLint) settings.Filter + (_settings.MipCount == 1 ? 0 : 0x102));
 		glTextureParameteri(ID, GL_TEXTURE_MAG_FILTER, (GLint) settings.Filter);
 		glTextureParameteri(ID, GL_TEXTURE_WRAP_S, (GLint) settings.WrapMode);
 		glTextureParameteri(ID, GL_TEXTURE_WRAP_T, (GLint) settings.WrapMode);
-
-		// if(settings.WrapMode == WrapMode::Border)
-		//	glTextureParameterfv(ID, GL_TEXTURE_BORDER_COLOR, WhiteBorderColor);
 
 		if(target == GL_TEXTURE_CUBE_MAP || target == GL_TEXTURE_3D)
 			glTextureParameteri(ID, GL_TEXTURE_WRAP_R, (GLint) settings.WrapMode);
 		else if (target == GL_TEXTURE_2D)
 			glTextureParameteri(ID, GL_TEXTURE_MAX_ANISOTROPY, GE_ANISOTROPY_COUNT);
-	}
-
-
-	Texture2D::Texture2D(gE::Window* window, const GPU::TextureSettings<Dimension::D2D>& settings, GPU::TextureData&& data)
-		: Texture(window, GL_TEXTURE_2D, settings), _size(settings.Size)
-	{
-		if(!Settings.MipCount) Settings.MipCount = GPU::GetMipCount<Dimension::D2D>(GetSize());
-		glTextureStorage2D(ID, Settings.MipCount, Settings.Format, _size.x, _size.y);
-
-		if(!data.Data) return;
-
-		glm::u32vec2 size = _size;
-		u8* dataPtr = data.Data.Data();
-
-		for(u8 i = 0; i < data.MipCount; i++, size >>= TextureSize2D(1))
-		{
-			size = glm::max(size, TextureSize2D(1));
-			u64 dataSize = data.Scheme.Size<Dimension::D2D>(size);
-
-			if(data.Scheme.IsCompressed())
-				glCompressedTextureSubImage2D(ID, i, 0, 0, size.x, size.y, Settings.Format, dataSize, dataPtr);
-			else
-				glTextureSubImage2D(ID, i, 0, 0, size.x, size.y, data.PixelFormat, data.PixelType, dataPtr);
-
-			dataPtr += dataSize;
-		}
-
-		if(Settings.MipCount != 1 && data.MipCount == 1) glGenerateTextureMipmap(ID);
-	}
-
-	void Texture2D::CopyFrom(const Texture& o)
-	{
-		glCopyImageSubData(o.Get(), GL_TEXTURE_2D, 0, 0, 0, 0, ID, GL_TEXTURE_2D, 0, 0, 0, 0, GetSize().x, GetSize().y, 1);
-	}
-
-	Texture3D::Texture3D(gE::Window* window, const GPU::TextureSettings<Dimension::D3D>& settings, GPU::TextureData&& data)
-		: Texture(window, GL_TEXTURE_3D, settings), _size(settings.Size)
-	{
-		if(!Settings.MipCount) Settings.MipCount = ::GL::GetMipCount<Dimension::D3D>(_size);
-		glTextureStorage3D(ID, Settings.MipCount, Settings.Format, _size.x, _size.y, _size.z);
-
-		if(!data) return;
-
-		glm::u32vec3 size = _size;
-		u8* dataPtr = data.Data.Data();
-
-		for(u8 i = 0; i < data.MipCount; i++, size >>= TextureSize3D(1))
-		{
-			size = glm::max(size, TextureSize3D(1));
-			u64 dataSize = data.Scheme.Size<Dimension::D3D>(size);
-
-			if(data.Scheme.IsCompressed())
-				glCompressedTextureSubImage3D(ID, i, 0, 0, 0, size.x, size.y, size.z, Settings.Format, dataSize, dataPtr);
-			else
-				glTextureSubImage3D(ID, i, 0, 0, 0, size.x, size.y, size.z, data.PixelFormat, data.PixelType, dataPtr);
-
-			dataPtr += dataSize;
-		}
-
-		if(Settings.MipCount != 1 && data.MipCount == 1) glGenerateTextureMipmap(ID);
-	}
-
-	void Texture3D::CopyFrom(const Texture& o)
-	{
-		glCopyImageSubData(o.Get(), GL_TEXTURE_3D, 0, 0, 0, 0, ID, GL_TEXTURE_3D, 0, 0, 0, 0, GetSize().x, GetSize().y, GetSize().z);
 	}
 
 	Texture::~Texture()
@@ -105,65 +38,105 @@ namespace GL
 		return _handle;
 	}
 
-	TextureCube::TextureCube(gE::Window* window, const GPU::TextureSettings<Dimension::D1D>& settings, GPU::TextureData&& data)
-		: Texture(window, GL_TEXTURE_CUBE_MAP, settings), _size(settings.Size)
+	void Texture2D::Construct()
 	{
-		if(!Settings.MipCount) Settings.MipCount = GPU::GetMipCount<Dimension::D1D>(_size);
-		glTextureStorage2D(ID, Settings.MipCount, settings.Format, _size, _size);
+		const GPU::TextureData& data = GetData();
+		const u8* imageData = data.Data.Data();
+		TextureSize2D size = GetSize();
+
+		glTextureStorage2D(ID, Settings.MipCount, Settings.Format, size.x, size.y);
+
+		if(!imageData) return;
+		for(u8 i = 0; i < data.MipCount; i++, size >>= TextureSize2D(1))
+		{
+			size = max(size, TextureSize2D(1));
+			u64 dataSize = data.Scheme.Size<Dimension::D2D>(size);
+
+			if(data.Scheme.IsCompressed())
+				glCompressedTextureSubImage2D(ID, i, 0, 0, size.x, size.y, Settings.Format, dataSize, imageData);
+			else
+				glTextureSubImage2D(ID, i, 0, 0, size.x, size.y, data.PixelFormat, data.PixelType, imageData);
+
+			imageData += dataSize;
+		}
+
+		if(Settings.MipCount != 1 && data.MipCount == 1) glGenerateTextureMipmap(ID);
+
+		Free();
+	}
+
+	void Texture2D::CopyFrom(const GL::Texture& o)
+	{
+		glCopyImageSubData(o.Get(), GL_TEXTURE_2D, 0, 0, 0, 0, ID, GL_TEXTURE_2D, 0, 0, 0, 0, GetSize().x, GetSize().y, 1);
+	}
+
+	void Texture3D::Construct()
+	{
+		const GPU::TextureData& data = GetData();
+		const u8* imageData = data.Data.Data();
+		TextureSize3D size = GetSize();
+
+		glTextureStorage3D(ID, Settings.MipCount, Settings.Format, size.x, size.y, size.z);
+
+		if(!imageData) return;
+		for(u8 i = 0; i < data.MipCount; i++, size >>= TextureSize3D(1))
+		{
+			size = max(size, TextureSize3D(1));
+			u64 dataSize = data.Scheme.Size<Dimension::D3D>(size);
+
+			if(data.Scheme.IsCompressed())
+				glCompressedTextureSubImage3D(ID, i, 0, 0, 0, size.x, size.y, size.z, Settings.Format, dataSize, imageData);
+			else
+				glTextureSubImage3D(ID, i, 0, 0, 0, size.x, size.y, size.z, data.PixelFormat, data.PixelType, imageData);
+
+			imageData += dataSize;
+		}
+
+		if(Settings.MipCount != 1 && data.MipCount == 1) glGenerateTextureMipmap(ID);
+
+		Free();
+	}
+
+	void Texture3D::CopyFrom(const GL::Texture& o)
+	{
+		glCopyImageSubData(o.Get(), o.GetTarget(), 0, 0, 0, 0, ID, GL_TEXTURE_3D, 0, 0, 0, 0, GetSize().x, GetSize().y, GetSize().z);
+	}
+
+	void TextureCube::Construct()
+	{
+		const GPU::TextureData& data = GetData();
+		const u8* imageData = data.Data.Data();
+		TextureSize1D size = GetSize();
+
+		glTextureStorage2D(ID, Settings.MipCount, Settings.Format, size, size);
 
 		if(!data.Data) return;
-
-		u32 size = _size;
-		u8* dataPtr = (u8*) data.Data.Data(); // sobbing rn
-
 		for(u8 i = 0; i < data.MipCount; i++, size >>= 1)
 		{
 			size = glm::max(size, 1u);
 			u64 dataSize = data.Scheme.Size<Dimension::D3D>(TextureSize3D(size, size, 6));
 
 			if(data.Scheme.IsCompressed())
-				glCompressedTextureSubImage3D(ID, i, 0, 0, 0, size, size, 6, settings.Format, dataSize, dataPtr);
+				glCompressedTextureSubImage3D(ID, i, 0, 0, 0, size, size, 6, Settings.Format, dataSize, imageData);
 			else
-				glTextureSubImage3D(ID, i, 0, 0, 0, size, size, 6, data.PixelFormat, data.PixelType, dataPtr);
+				glTextureSubImage3D(ID, i, 0, 0, 0, size, size, 6, data.PixelFormat, data.PixelType, imageData);
 
-			dataPtr += dataSize;
+			imageData += dataSize;
 		}
 
 		if(Settings.MipCount != 1 && data.MipCount == 1) glGenerateTextureMipmap(ID);
+
+		Free();
 	}
 
-	void Texture::ISerialize(std::istream& in, gE::Window* s)
+	void TextureCube::CopyFrom(const GL::Texture& o)
 	{
-		Settings = Read<GPU::ITextureSettings>(in);
-		Data = Read<GPU::TextureData>(in);
+		glCopyImageSubData(o.Get(), o.GetTarget(), 0, 0, 0, 0, ID, GL_TEXTURE_CUBE_MAP, 0, 0, 0, 0, GetSize(), GetSize(), 6);
 	}
 
-	void Texture::IDeserialize(std::ostream& out) const
+	u8 TextureSlotManager::Increment(const Texture& tex)
 	{
-		Write(out, Settings);
-
-		if(Data.IsFree()) LOG("WARNING: WRITING TEXTURE TO FILE WITH NO DATA");
-		Write(out, Data);
-	}
-
-	void GPU::TextureData::ISerialize(std::istream& in)
-	{
-		PixelFormat = Read<GLenum>(in);
-		PixelType = Read<GLenum>(in);
-		Scheme = Read<GPU::CompressionScheme>(in);
-		Read<u64, u8>(in, Data);
-	}
-
-	void GPU::TextureData::IDeserialize(std::ostream& out) const
-	{
-		Write(out, PixelFormat);
-		Write(out, PixelType);
-		Write(out, Scheme);
-		WriteArray<u64>(out, Data);
-	}
-
-	GPU::TextureData::TextureData(GLenum format, GLenum type, GPU::CompressionScheme scheme, u8 mip, Array<u8>&& arr) :
-		PixelFormat(format), PixelType(type), Scheme(scheme), MipCount(mip), Data(std::move(arr))
-	{
+		tex.Use(_index);
+		return _index++;
 	}
 }

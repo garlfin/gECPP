@@ -7,7 +7,7 @@
 
 namespace gE::DefaultPipeline
 {
-	Tonemap::Tonemap(Target2D& target) : PostProcessEffect<Target2D>(target)
+	Tonemap::Tonemap(Target2D& target) : PostProcessEffect(target)
 	{
 	}
 

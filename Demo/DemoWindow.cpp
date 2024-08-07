@@ -52,7 +52,7 @@ void DemoWindow::OnInit()
 	cubemapCap->GetTransform().SetPosition().y = 2.1f;
 	cubemapCap->GetTransform().SetScale() = glm::vec3(2.1f);
 
-	Cubemaps.Skybox = ref_cast((GL::TextureCube*) PVR::Read(this, "Resource/Texture/sky.pvr", GL::WrapMode::Clamp));
+	Cubemaps.Skybox = ref_cast((GL::TextureCube*) PVR::Read(this, "Resource/Texture/sky.pvr", GPU::WrapMode::Clamp));
 
 	VoxelSceneCapture = gE::ptr_create<VoxelCapture>(this, 128, 4.2f);
 }

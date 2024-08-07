@@ -23,7 +23,7 @@ namespace GL
 	template<typename T>
 	bool GetShaderStatus(const T& shader, const char* name = nullptr, const char* source = nullptr);
 
-	Shader::Shader(gE::Window* window, const char* v, const char* f, const Array<PreprocessorPair>* p) : Asset(window)
+	Shader::Shader(gE::Window* window, const char* v, const char* f, const Array<PreprocessorPair>* p) : APIObject(window)
 	{
 		ID = glCreateProgram();
 
@@ -37,7 +37,7 @@ namespace GL
 	}
 
 	ShaderStage::ShaderStage(gE::Window* window, ShaderStageType type, const char* file, const Array<PreprocessorPair>* pairs)
-		: Asset(window)
+		: APIObject(window)
 	{
 		ID = glCreateShader(type);
 
@@ -59,7 +59,7 @@ namespace GL
 		GetShaderStatus(*this, file, src);
 	}
 
-	Shader::Shader(gE::Window* window, const ShaderStage& v, const ShaderStage& f) : Asset(window)
+	Shader::Shader(gE::Window* window, const ShaderStage& v, const ShaderStage& f) : APIObject(window)
 	{
 		ID = glCreateProgram();
 
@@ -73,7 +73,7 @@ namespace GL
 #endif
 	}
 
-	Shader::Shader(gE::Window* window, const char* src, const Array<PreprocessorPair>* p) : API::APIObject(window)
+	Shader::Shader(gE::Window* window, const char* src, const Array<PreprocessorPair>* p) : APIObject(window)
 	{
 		ID = glCreateProgram();
 
@@ -137,7 +137,7 @@ namespace GL
 
 	void Shader::SetUniform(u8 loc, const Texture& tex) const
 	{
-		SetUniform(loc, tex.Use(GetWindow().GetSlotManager().Increment()));
+		SetUniform(loc, GetWindow().GetSlotManager().Increment(tex));
 	}
 
 	template<>

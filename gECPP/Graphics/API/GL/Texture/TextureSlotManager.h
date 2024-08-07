@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include "Engine/Binary/Binary.h"
-
 #define GL_MAX_TEXTURE_SLOT 32
 
 namespace GL
@@ -17,7 +15,7 @@ namespace GL
 	 public:
 		TextureSlotManager() = default;
 
-		NODISCARD u8 Increment(const Texture* t);
+		NODISCARD u8 Increment(const Texture& t);
 
 		ALWAYS_INLINE void Reset() { _index = 0; }
 
