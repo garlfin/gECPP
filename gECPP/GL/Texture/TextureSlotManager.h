@@ -1,28 +1,32 @@
 //
-// Created by scion on 10/25/2023.
+// Created by scion on 9/5/2024.
 //
 
 #pragma once
 
+#include "Texture.h"
 #include "Engine/Binary/Binary.h"
 
-#define GL_MAX_TEXTURE_SLOT 32
+#define GE_MAX_TEXTURE_SLOT 32
 
-namespace GL
+namespace API
 {
 	class Texture;
+}
 
+namespace GPU
+{
 	class TextureSlotManager
 	{
-	 public:
+	public:
 		TextureSlotManager() = default;
 
-		NODISCARD u8 Increment(const Texture* t);
+		NODISCARD u8 Increment(const API::Texture* t);
 
 		ALWAYS_INLINE void Reset() { _index = 0; }
 
-	 private:
-		const Texture* _textures[GL_MAX_TEXTURE_SLOT]{};
+	private:
+		const API::Texture* _textures[GE_MAX_TEXTURE_SLOT]{};
 		u8 _index = 0;
 	};
 }

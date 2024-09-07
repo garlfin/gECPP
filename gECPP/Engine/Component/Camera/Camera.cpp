@@ -32,13 +32,13 @@ CONSTEXPR_GLOBAL glm::vec3 UpDirs[]
 
 namespace gE
 {
-	Camera::Camera(Entity* p, GL::TextureSize2D size, IRenderTarget& t, const ICameraSettings& s, ComponentManager<Camera>* m) :
+	Camera::Camera(Entity* p, TextureSize2D size, IRenderTarget& t, const ICameraSettings& s, ComponentManager<Camera>* m) :
 		Component(p, m),
 		_settings(s), _target(t), _viewportSize(size)
 	{
 	}
 
-	void Camera::GetGLCamera(GL::Camera& cam)
+	void Camera::GetGLCamera(GPU::Camera& cam)
 	{
 		Transform& transform = GetOwner()->GetTransform();
 
@@ -93,7 +93,7 @@ namespace gE
 	{
 		SetFOV(s.FOV);
 	}
-	void PerspectiveCamera::GetGLCamera(GL::Camera& camera)
+	void PerspectiveCamera::GetGLCamera(GPU::Camera& camera)
 	{
 		Camera2D::GetGLCamera(camera);
 		camera.Parameters.x = GetFOV<AngleType::Radian>();
@@ -109,7 +109,7 @@ namespace gE
 		Projection = glm::ortho(_orthographicScale.x, _orthographicScale.y, _orthographicScale.z, _orthographicScale.w, GetClipPlanes().x, GetClipPlanes().y);
 	}
 
-	void Camera2D::GetGLCamera(GL::Camera& camera)
+	void Camera2D::GetGLCamera(GPU::Camera& camera)
 	{
 		Camera::GetGLCamera(camera);
 		camera.View[0] = glm::inverse(GetOwner()->GetTransform().Model());
@@ -126,7 +126,7 @@ namespace gE
 		Projection = glm::ortho(-scale.x, scale.x, -scale.z, scale.z, 0.01f, scale.y * 2.f);
 	}
 
-	void Camera3D::GetGLCamera(GL::Camera& cam)
+	void Camera3D::GetGLCamera(GPU::Camera& cam)
 	{
 		Camera::GetGLCamera(cam);
 
@@ -137,7 +137,7 @@ namespace gE
 	}
 
 	CameraCubemap::CameraCubemap(Entity* p, TARGET_TYPE& t, const CameraSettings1D& s, ComponentManager<Camera>* m) :
-		Camera(p, GL::TextureSize2D(s.Size), t, s, m)
+		Camera(p, TextureSize2D(s.Size), t, s, m)
 	{
 	}
 
@@ -146,11 +146,11 @@ namespace gE
 		Projection = glm::perspectiveFov(glm::radians(90.f), 1.f, 1.f, GetClipPlanes().x, GetClipPlanes().y);
 	}
 
-	void CameraCubemap::GetGLCamera(GL::Camera& cam)
+	void CameraCubemap::GetGLCamera(GPU::Camera& cam)
 	{
 		Camera::GetGLCamera(cam);
 
 		for(u8 i = 0; i < 6; i++)
-			cam.View[i] = glm::lookAt(cam.Position, cam.Position + ForwardDirs[i], UpDirs[i]);
+			cam.View[i] = lookAt(cam.Position, cam.Position + ForwardDirs[i], UpDirs[i]);
 	}
 }

@@ -22,11 +22,11 @@ namespace GL
 		glNamedFramebufferParameteri(ID, GL_FRAMEBUFFER_DEFAULT_LAYERS, 1);
 		glNamedFramebufferParameteri(ID, GL_FRAMEBUFFER_DEFAULT_SAMPLES, 1);
 
-		memset((void*) _attachmentsEnum, GL_NONE, sizeof(_attachmentsEnum));
+		memset(_attachmentsEnum, GL_NONE, sizeof(_attachmentsEnum));
 		glNamedFramebufferDrawBuffers(ID, GL_MAX_ATTACHMENTS, _attachmentsEnum);
 	}
 
-	FrameBuffer::FrameBuffer(gE::Window* win) : Asset(win)
+	FrameBuffer::FrameBuffer(gE::Window* win) : APIObject(win)
 	{
 		glCreateFramebuffers(1, &ID);
 	}

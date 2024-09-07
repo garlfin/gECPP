@@ -3,7 +3,6 @@
 //
 
 #include "VoxelPipeline.h"
-#include "Engine/Entity/VoxelCapture.h"
 #include "Engine/Window.h"
 
 #define MODE_TAA_COMBINE 0
@@ -13,7 +12,7 @@
 
 namespace gE::SDFPipeline
 {
-	Buffers::Buffers(gE::Window* window) : _sdfBuffer(window)
+	Buffers::Buffers(Window* window) : _sdfBuffer(window)
 	{
 		_sdfBuffer.Bind(GL::BufferTarget::Uniform, 4);
 	}

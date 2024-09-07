@@ -1,9 +1,9 @@
 #pragma once
 
-#include <GL/GL.h>
+#include <Graphics/API/GL/GL.h>
 #include "Engine/Binary/Binary.h"
-#include <GLAD/glad.h>
-#include "TextureSettings.h"
+#include "GLAD/glad.h"
+#include "Graphics/Texture/TextureSettings.h"
 
 #define GE_ANISOTROPY_COUNT 8
 
@@ -27,24 +27,10 @@ namespace GL
 
 	CONSTEXPR_GLOBAL handle NullHandle = handle();
 
-	template<Dimension T>
-	u8 GetMipCount(const Size<T>& size)
+ 	class Texture : public GLObject
 	{
-		u32 largest;
-
-		if constexpr(T == Dimension::D1D) largest = size;
-		else if constexpr(T == Dimension::D2D) largest = glm::max(size.x, size.y);
-		else largest = glm::max(size.x, glm::max(size.y, size.z));
-
-		return 32 - __builtin_clz(largest);
-	}
-
-	class Texture : public Asset
-	{
-		SERIALIZABLE_PROTO_T(Texture, Asset);
-
 	 public:
-		Texture(gE::Window* window, GLenum target, const ITextureSettings& settings);
+		Texture(gE::Window* window, GLenum target, const GPU::ITextureSettings& settings);
 
 		inline void Bind() const override { glBindTexture(Target, ID); }
 
@@ -56,11 +42,8 @@ namespace GL
 			return unit;
 		}
 
-		inline void Free() override { Data.Free(); }
-		inline bool IsFree() override { return Data.IsFree(); }
-
 		handle GetHandle();
-		virtual void CopyFrom(const GL::Texture&) = 0;
+		virtual void CopyFrom(const Texture&) = 0;
 
 		explicit ALWAYS_INLINE operator handle() { return GetHandle(); }
 
@@ -71,8 +54,8 @@ namespace GL
 		~Texture() override;
 
 	 protected:
-		ITextureSettings Settings;
-		TextureData Data;
+		GPU::ITextureSettings Settings;
+		GPU::TextureData Data;
 		GLenum Target;
 
 	 private:
@@ -82,42 +65,42 @@ namespace GL
 	class Texture2D final : public Texture
 	{
 	 public:
-		Texture2D(gE::Window* window, const TextureSettings2D& settings, TextureData&& = {});
+		Texture2D(gE::Window* window, const GPU::TextureSettings2D& settings, GPU::TextureData&& = {});
 
-		NODISCARD ALWAYS_INLINE GL::TextureSize2D GetSize(u8 mip = 0) const { return glm::max(_size >> glm::u32vec2(mip), glm::u32vec2(1)); }
-		void CopyFrom(const GL::Texture&) override;
+		NODISCARD ALWAYS_INLINE TextureSize2D GetSize(u8 mip = 0) const { return glm::max(_size >> glm::u32vec2(mip), glm::u32vec2(1)); }
+		void CopyFrom(const Texture&) override;
 
 	 private:
-		const GL::TextureSize2D _size;
+		const TextureSize2D _size;
 	};
 
 	class Texture3D final : public Texture
 	{
 	 public:
-		Texture3D(gE::Window* window, const TextureSettings3D& settings, TextureData&& = {});
+		Texture3D(gE::Window* window, const GPU::TextureSettings3D& settings, GPU::TextureData&& = {});
 
-		NODISCARD ALWAYS_INLINE GL::TextureSize3D GetSize(u8 mip = 0) const { return glm::max(_size >> glm::u32vec3(mip), glm::u32vec3(1)); }
-		void CopyFrom(const GL::Texture&) override;
+		NODISCARD ALWAYS_INLINE TextureSize3D GetSize(u8 mip = 0) const { return glm::max(_size >> glm::u32vec3(mip), glm::u32vec3(1)); }
+		void CopyFrom(const Texture&) override;
 
 	 private:
-		const GL::TextureSize3D _size;
+		const TextureSize3D _size;
 	};
 
 	class TextureCube final : public Texture
 	{
 	 public:
-		TextureCube(gE::Window* window, const TextureSettings1D& settings, TextureData&& = {});
+		TextureCube(gE::Window* window, const GPU::TextureSettings1D& settings, GPU::TextureData&& = {});
 
-		NODISCARD ALWAYS_INLINE GL::TextureSize1D GetSize(u8 mip = 0) const { return MAX(_size >> mip, 1); }
-		void CopyFrom(const GL::Texture&) override {};
+		NODISCARD ALWAYS_INLINE TextureSize1D GetSize(u8 mip = 0) const { return MAX(_size >> mip, 1); }
+		void CopyFrom(const Texture&) override {};
 
 	 private:
-		const GL::TextureSize1D _size;
+		const TextureSize1D _size;
 	};
 }
 
 namespace PVR
 {
-	NODISCARD GL::Texture* Read(gE::Window* window, const char* path, GL::WrapMode = GL::WrapMode::Repeat, GL::FilterMode = GL::FilterMode::Linear);
-	NODISCARD Array<u8> Read(const char* path, PVR::Header& header);
+	NODISCARD GL::Texture* Read(gE::Window* window, const char* path, GPU::WrapMode = GPU::WrapMode::Repeat, GPU::FilterMode = GPU::FilterMode::Linear);
+	NODISCARD Array<u8> Read(const char* path, Header& header);
 }

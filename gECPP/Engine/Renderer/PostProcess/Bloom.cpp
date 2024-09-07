@@ -20,9 +20,9 @@ namespace gE::DefaultPipeline
 		Knee = k;
 	}
 
-	void Bloom::RenderPass(GL::Texture2D& in, GL::Texture2D& out)
+	void Bloom::RenderPass(API::Texture2D& in, API::Texture2D& out)
 	{
-		GL::ComputeShader& shader = GetTarget().GetWindow().GetBloomShader();
+		API::ComputeShader& shader = GetTarget().GetWindow().GetBloomShader();
 		u8 mipCount = glm::min<u8>(in.GetMipCount(), Iterations);
 		glm::vec4 settings { Threshold, Knee, Intensity, 0.f }; // Mode/MIP
 
@@ -38,7 +38,7 @@ namespace gE::DefaultPipeline
 			in.Bind(1, GL_WRITE_ONLY, i);
 
 			glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-			shader.Dispatch(DIV_CEIL_T(out.GetSize(i), BLOOM_GROUP_SIZE, GL::TextureSize2D));
+			shader.Dispatch(DIV_CEIL_T(out.GetSize(i), BLOOM_GROUP_SIZE, TextureSize2D));
 		}
 
 		for(u8 i = 1; i < mipCount; i++)
@@ -53,7 +53,7 @@ namespace gE::DefaultPipeline
 			shader.SetUniform(1, settings);
 
 			glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-			shader.Dispatch(DIV_CEIL_T(out.GetSize(mip), BLOOM_GROUP_SIZE, GL::TextureSize2D));
+			shader.Dispatch(DIV_CEIL_T(out.GetSize(mip), BLOOM_GROUP_SIZE, TextureSize2D));
 		}
 	}
 }

@@ -9,7 +9,7 @@
 #include <Engine/Component/Camera/RenderTarget.h>
 #include <Engine/Renderer/DefaultPipeline.h>
 #include <gETF/File.h>
-#include <GL/Shader/Shader.h>
+#include <Graphics/Shader/Shader.h>
 
 namespace gE
 {
@@ -20,16 +20,16 @@ namespace gE
 	 public:
 		explicit CubemapTarget(CameraCubemap&);
 
-		GET(GL::TextureCube&, Color, _color.Get());
-		GET(GL::TextureCube&, Depth, _depth.Get());
+		GET(API::TextureCube&, Color, _color.Get());
+		GET(API::TextureCube&, Depth, _depth.Get());
 		GET(CubemapCapture&, Owner, (CubemapCapture&) IRenderTarget::GetOwner());
 
 		void RenderDependencies(float d) override;
 		void RenderPass(float, Camera*) override;
 
 	 private:
-		Attachment<GL::TextureCube, GL_DEPTH_ATTACHMENT> _depth;
-		Attachment<GL::TextureCube, GL_COLOR_ATTACHMENT0> _color;
+		Attachment<API::TextureCube, GL_DEPTH_ATTACHMENT> _depth;
+		Attachment<API::TextureCube, GL_COLOR_ATTACHMENT0> _color;
 	};
 
 	class CubemapCapture final : public Entity, public Managed<CubemapCapture>
@@ -37,10 +37,10 @@ namespace gE
 	 public:
 		CubemapCapture(Window*, u16 size);
 
-		GET(GL::TextureCube&, Color, _target.GetColor());
+		GET(API::TextureCube&, Color, _target.GetColor());
 		GET(CameraCubemap&, Camera, _camera);
 
-		void GetGLCubemap(GL::Cubemap&);
+		void GetGLCubemap(GPU::Cubemap&);
 
 	 private:
 		CameraCubemap _camera;
@@ -50,9 +50,9 @@ namespace gE
 	class CubemapManager final : public Manager<CubemapCapture>
 	{
 	 public:
-		explicit CubemapManager(Window* window) : Manager<CubemapCapture>(), _window(window) {};
+		explicit CubemapManager(Window* window) : Manager(), _window(window) {};
 
-		Reference<GL::TextureCube> Skybox{};
+		Reference<API::TextureCube> Skybox{};
 
 		void DrawSkybox();
 
@@ -62,7 +62,7 @@ namespace gE
 	 private:
 		Window* _window;
 
-		SmartPointer<GL::VAO> _skyboxVAO;
-		SmartPointer<GL::Shader> _skyboxShader;
+		SmartPointer<API::VAO> _skyboxVAO;
+		SmartPointer<API::Shader> _skyboxShader;
 	};
 }

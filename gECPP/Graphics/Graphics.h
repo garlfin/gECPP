@@ -1,0 +1,51 @@
+//
+// Created by scion on 8/5/2024.
+//
+
+#pragma once
+
+#include <Prototype.h>
+#include <gETF/Serializable.h>
+
+namespace GPU
+{
+	struct Version
+	{
+		u8 Major;
+		u8 Minor;
+	};
+
+	template<class T>
+	class APIObject
+	{
+	 public:
+		explicit APIObject(gE::Window* window) : _window(window) { };
+		explicit APIObject(APIObject&) = delete;
+
+		APIObject& operator=(const APIObject&) = delete;
+
+		OPERATOR_EQUALS_XVAL(APIObject, o, ID = o.ID; o.ID = 0);
+
+		virtual void Bind() const = 0;
+
+		GET_CONST(T,, ID);
+		GET_CONST(gE::Window&, Window, *_window);
+
+		virtual ~APIObject() = default;
+
+	 protected:
+		T ID;
+
+	 private:
+		gE::Window* _window;
+	};
+
+	struct Asset
+	{
+	 public:
+		Asset() = default;
+
+		virtual void Free() = 0;
+		NODISCARD virtual bool IsFree() const = 0;
+	};
+}

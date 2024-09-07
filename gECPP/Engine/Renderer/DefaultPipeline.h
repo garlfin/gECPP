@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include <GL/Buffer/Buffer.h>
-#include <GL/Texture/TextureSettings.h>
-#include <GL/Texture/Texture.h>
+#include <Graphics/Buffer/Buffer.h>
+#include <Graphics/Texture/TextureSettings.h>
+#include <Graphics/Texture/Texture.h>
 #include <Engine/Component/Camera/Camera.h>
 #include <Engine/Component/Camera/RenderTarget.h>
 #include <Engine/Component/Camera/Settings.h>
@@ -17,7 +17,7 @@
 #define GE_MAX_LIGHT 4
 #define GE_MAX_CUBEMAP 4
 
-namespace GL
+namespace GPU
 {
 	struct Camera
 	{
@@ -68,14 +68,14 @@ namespace GL
 		float BlendRadius;
 		glm::vec3 Scale;
 		CubemapType Type;
-		GL_ALIGN handle Color;
+		API_ALIGN handle Color;
 	};
 
 	struct Scene
 	{
 		u32 InstanceCount;
 		gE::RenderFlags State;
-		GL_ALIGN glm::mat4 Model[GE_MAX_INSTANCE];
+		API_ALIGN glm::mat4 Model[GE_MAX_INSTANCE];
 		glm::mat4 PreviousModel[GE_MAX_INSTANCE];
 		glm::mat3x4 Normal[GE_MAX_INSTANCE]; // for alignment purposes.
 	};
@@ -87,40 +87,40 @@ namespace GL
 
 		handle Skybox;
 
-		GL_ALIGN Light Lights[GE_MAX_LIGHT];
-		GL_ALIGN Cubemap Cubemaps[GE_MAX_CUBEMAP];
+		API_ALIGN Light Lights[GE_MAX_LIGHT];
+		API_ALIGN Cubemap Cubemaps[GE_MAX_CUBEMAP];
 	};
 }
 
 namespace gE::DefaultPipeline
 {
-	CONSTEXPR_GLOBAL GL::ITextureSettings DepthFormat { GL_DEPTH_COMPONENT32, GL::WrapMode::Clamp, GL::FilterMode::Nearest, 1 };
-	CONSTEXPR_GLOBAL GL::ITextureSettings HiZFormat { GL_R32F, GL::WrapMode::Clamp, GL::FilterMode::Nearest, 0 };
-	CONSTEXPR_GLOBAL GL::ITextureSettings ColorFormat { GL_RGBA16F, GL::WrapMode::Clamp, GL::FilterMode::Linear, 0 };
-	CONSTEXPR_GLOBAL GL::ITextureSettings VelocityFormat { GL_RG32F, GL::WrapMode::Clamp  };
+	CONSTEXPR_GLOBAL GPU::ITextureSettings DepthFormat { GL_DEPTH_COMPONENT32, GPU::WrapMode::Clamp, GPU::FilterMode::Nearest, 1 };
+	CONSTEXPR_GLOBAL GPU::ITextureSettings HiZFormat { GL_R32F, GPU::WrapMode::Clamp, GPU::FilterMode::Nearest, 0 };
+	CONSTEXPR_GLOBAL GPU::ITextureSettings ColorFormat { GL_RGBA16F, GPU::WrapMode::Clamp, GPU::FilterMode::Linear, 0 };
+	CONSTEXPR_GLOBAL GPU::ITextureSettings VelocityFormat { GL_RG32F, GPU::WrapMode::Clamp };
 
  	class Target2D : public RenderTarget<Camera2D>, public IDepthTarget, public IColorTarget
 	{
 	 public:
-		typedef GL::Texture2D TEX_T;
+		typedef API::Texture2D TEX_T;
 		explicit Target2D(Entity&, Camera2D& camera, const std::vector<PostProcessEffect<Target2D>*>&);
 
-		GET(GL::Texture2D&, Depth, _depth.Get());
-		GET(GL::Texture2D&, Color, _color.Get());
-		GET(GL::Texture2D&, Velocity, _velocity.Get());
+		GET(API::Texture2D&, Depth, _depth.Get());
+		GET(API::Texture2D&, Color, _color.Get());
+		GET(API::Texture2D&, Velocity, _velocity.Get());
 
 		void RenderDependencies(float) override;
 		void RenderPass(float, Camera*) override;
 		void PostProcessPass(float) override;
 
 	 private:
-		Attachment<GL::Texture2D, GL_DEPTH_ATTACHMENT> _depth;
-		Attachment<GL::Texture2D, GL_COLOR_ATTACHMENT0> _color;
-		Attachment<GL::Texture2D, GL_COLOR_ATTACHMENT1> _velocity;
+		Attachment<API::Texture2D, GL_DEPTH_ATTACHMENT> _depth;
+		Attachment<API::Texture2D, GL_COLOR_ATTACHMENT0> _color;
+		Attachment<API::Texture2D, GL_COLOR_ATTACHMENT1> _velocity;
 
-		GL::Texture2D _colorBack;
-		GL::Texture2D _depthBack;
-		GL::Texture2D _postProcessBack;
+		API::Texture2D _colorBack;
+		API::Texture2D _depthBack;
+		API::Texture2D _postProcessBack;
 
 		std::vector<PostProcessEffect<Target2D>*> _effects;
 	};
@@ -129,29 +129,29 @@ namespace gE::DefaultPipeline
 	{
 		explicit Buffers(Window*);
 
-		ALWAYS_INLINE void UpdateCamera(u64 size = sizeof(GL::Camera), u64 offset = 0) const
+		ALWAYS_INLINE void UpdateCamera(u64 size = sizeof(GPU::Camera), u64 offset = 0) const
 		{
 			_cameraBuffer.ReplaceData((u8*) &Camera + offset, size, offset);
 		}
 
-		ALWAYS_INLINE void UpdateScene(u64 size = sizeof(GL::Scene), u64 offset = 0) const
+		ALWAYS_INLINE void UpdateScene(u64 size = sizeof(GPU::Scene), u64 offset = 0) const
 		{
 			_sceneBuffer.ReplaceData((u8*) &Scene + offset, size, offset);
 		}
 
-		ALWAYS_INLINE void UpdateLighting(u64 size = sizeof(GL::Lighting), u64 offset = 0) const
+		ALWAYS_INLINE void UpdateLighting(u64 size = sizeof(GPU::Lighting), u64 offset = 0) const
 		{
 			_lightBuffer.ReplaceData((u8*) &Lighting + offset, size, offset);
 		}
 
-		GL::Camera Camera;
-		GL::Scene Scene;
-		GL::Lighting Lighting;
+		GPU::Camera Camera;
+		GPU::Scene Scene;
+		GPU::Lighting Lighting;
 
 	 private:
-		GL::Buffer<GL::Camera> _cameraBuffer;
-		GL::Buffer<GL::Scene> _sceneBuffer;
-		GL::Buffer<GL::Lighting> _lightBuffer;
+		API::Buffer<GPU::Camera> _cameraBuffer;
+		API::Buffer<GPU::Scene> _sceneBuffer;
+		API::Buffer<GPU::Lighting> _lightBuffer;
 	};
 }
 

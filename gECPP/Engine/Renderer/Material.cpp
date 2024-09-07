@@ -9,15 +9,14 @@
 
 namespace gE
 {
-	gE::Material::Material(Window* window, const Reference<GL::Shader>& shader, DepthFunction depthFunc, CullMode cullMode) :
-		GL::Asset(window),
-		_shader(shader), _depthFunc(depthFunc), _cullMode(cullMode)
+	Material::Material(Window* window, const Reference<API::Shader>& shader, DepthFunction depthFunc, CullMode cullMode) :
+		_window(window), _shader(shader), _depthFunc(depthFunc), _cullMode(cullMode)
 	{
 	}
 
-	void gE::Material::Bind() const
+	void Material::Bind() const
 	{
-		gE::RenderFlags state = GetWindow().State;
+		RenderFlags state = GetWindow().State;
 
 		if((bool) _depthFunc && state.EnableDepthTest)
 		{
@@ -50,7 +49,7 @@ namespace gE
 		_shader->Bind();
 	}
 
-	PBRMaterial::PBRMaterial(Window* w, const Reference<GL::Shader>& s, const PBRMaterialSettings& settings) :
+	PBRMaterial::PBRMaterial(Window* w, const Reference<API::Shader>& s, const PBRMaterialSettings& settings) :
 		Material(w, s),
 		_albedo(this, "AlbedoTex", settings.Albedo),
 		_amr(this, "ARMDTex", settings.AMR),
@@ -59,7 +58,7 @@ namespace gE
 	{
 	}
 
-	void gE::PBRMaterial::Bind() const
+	void PBRMaterial::Bind() const
 	{
 		GetWindow().GetSlotManager().Reset();
 
