@@ -5,7 +5,7 @@
 #pragma once
 
 #include <Engine/Entity/Entity.h>
-#include <GL/Buffer/VAO.h>
+#include <Graphics/Buffer/VAO.h>
 #include <Engine/Renderer/Material.h>
 #include <gETF/Mesh/Mesh.h>
 #include "MaterialHolder.h"

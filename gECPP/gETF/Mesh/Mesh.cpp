@@ -97,39 +97,39 @@ void Mesh::CreateVAO(gE::Window* w)
 
 	if (TriMode == TriangleMode::None)
 	{
-		GL::VAOSettings settings;
+		API::VAOSettings settings;
 		GetVAOSettings(settings);
 
-		VAO = gE::ptr_create<GL::VAO>(w, settings);
+		VAO = gE::ptr_create<API::VAO>(w, settings);
 	}
 	else
 	{
-		GL::IndexedVAOSettings settings;
+		API::IndexedVAOSettings settings;
 		GetVAOSettings(settings);
 
-		VAO = gE::ptr_create<GL::IndexedVAO>(w, settings).Move<GL::VAO>();
+		VAO = gE::ptr_create<API::IndexedVAO>(w, settings).Move<API::VAO>();
 	}
 }
 
-void Mesh::GetVAOSettings(GL::VAOSettings& settings) const
+void Mesh::GetVAOSettings(API::VAOSettings& settings) const
 {
 	GE_ASSERT(Buffers.Count() <= GE_MAX_VAO_BUFFER, "TOO MANY BUFFERS!");
 	settings.BufferCount = Buffers.Count();
-	for(u8 i = 0; i < settings.BufferCount; i++) settings.Buffers[i] = (GL::VertexBuffer) Buffers[i];
+	for(u8 i = 0; i < settings.BufferCount; i++) settings.Buffers[i] = (API::VertexBuffer) Buffers[i];
 
 	GE_ASSERT(Fields.Count() <= GE_MAX_VAO_FIELD, "TOO MANY FIELDS!");
 	settings.FieldCount = Fields.Count();
-	for(u8 i = 0; i < settings.FieldCount; i++) settings.Fields[i] = (GL::VertexField) Fields[i];
+	for(u8 i = 0; i < settings.FieldCount; i++) settings.Fields[i] = (API::VertexField) Fields[i];
 
 	GE_ASSERT(Materials.Count() <= GE_MAX_VAO_MATERIAL, "TOO MANY MATERIALS!");
 	settings.MaterialCount = Materials.Count();
-	for(u8 i = 0; i < settings.MaterialCount; i++) settings.Materials[i] = (GL::MaterialSlot) Materials[i];
+	for(u8 i = 0; i < settings.MaterialCount; i++) settings.Materials[i] = (API::MaterialSlot) Materials[i];
 }
 
-void Mesh::GetVAOSettings(GL::IndexedVAOSettings& settings) const
+void Mesh::GetVAOSettings(API::IndexedVAOSettings& settings) const
 {
 	GE_ASSERT(TriMode != TriangleMode::None, "CANNOT GET TRIANGLES!");
 
-	GetVAOSettings((GL::VAOSettings&) settings);
-	settings.Triangles = (GL::VertexField) Triangles;
+	GetVAOSettings((API::VAOSettings&) settings);
+	settings.Triangles = (API::VertexField) Triangles;
 }

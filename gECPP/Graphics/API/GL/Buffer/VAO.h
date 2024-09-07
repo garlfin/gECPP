@@ -1,13 +1,12 @@
 #pragma once
 
-#include "GL/GL.h"
 #include "Buffer.h"
 #include "VAOSettings.h"
 #include "Engine/Array.h"
 
 namespace GL
 {
-	class VAO : public Asset
+	class VAO : public GLObject
 	{
 	 public:
 		VAO(gE::Window* window, const GL::VAOSettings& settings);

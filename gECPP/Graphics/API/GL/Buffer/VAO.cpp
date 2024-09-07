@@ -6,9 +6,9 @@
 
 namespace GL
 {
-	VAO::VAO(gE::Window* window, const VAOSettings& settings) : Asset(window),
-		_settings(settings),
-		_buffers(settings.BufferCount)
+	VAO::VAO(gE::Window* window, const VAOSettings& settings) : GLObject(window),
+																_buffers(settings.BufferCount),
+																_settings(settings)
 	{
 		glCreateVertexArrays(1, &ID);
 

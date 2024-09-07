@@ -4,9 +4,9 @@
 
 #include "Shader.h"
 #include "Uniform.h"
-#include <GL/Texture/Texture.h>
+#include "Graphics/Texture/Texture.h"
 #include <iostream>
-#include <Engine/Window.h>
+#include "Engine/Window.h"
 
 #define VERSION_DIRECTIVE "#version 460 core\n"
 #define EXT_BINDLESS "#define EXT_BINDLESS\n"
