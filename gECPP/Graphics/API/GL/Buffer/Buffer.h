@@ -4,7 +4,7 @@
 #include "Graphics/API/GL/GL.h"
 #include <type_traits>
 #include <iostream>
-#include "VAOSettings.h"
+#include "Graphics/Macro.h"
 #include "Graphics/Buffer/Buffer.h"
 
 namespace GL
@@ -19,20 +19,13 @@ namespace GL
 	};
 
 	template<typename T = u8, bool DYNAMIC = false>
- 	class Buffer : public GPU::Buffer<T>, public GLObject
+ 	class Buffer : protected GPU::Buffer<T>, public GLObject
 	{
+		API_SERIALIZABLE(Buffer, GPU::Buffer<T>);
+
 	 public:
-		explicit Buffer(gE::Window* window, u32 count = 1, const T* data = nullptr) :
-			GPU::Buffer<T>(count, data), GLObject(window)
-		{ Construct(); }
-
-		explicit Buffer(gE::Window* window, const Array<T>& arr) :
-			GPU::Buffer<T>(arr), GLObject(window)
-		{ Construct(); }
-
-		explicit Buffer(gE::Window* window, Array<T>&& arr) :
-			GPU::Buffer<T>(std::move(arr)), GLObject(window)
-		{ Construct(); }
+		explicit Buffer(gE::Window* window, u32 count = 1, const T* data = nullptr);
+		explicit Buffer(gE::Window* window, const Array<T>& arr);
 
 		template<typename I>
 		ALWAYS_INLINE void ReplaceData(const I* data, uint32_t count = 1, uint32_t offset = 0) const
@@ -75,20 +68,10 @@ namespace GL
 		{
 			glDeleteBuffers(1, &ID);
 		}
-
-	 private:
-		void Construct()
-		{
-			typedef GPU::Buffer<T> S;
-			static constexpr size_t SIZE_T = sizeof(std::conditional_t<std::is_same_v<T, void>, uint8_t, T>);
-
-			glCreateBuffers(1, &ID);
-
-			if constexpr(DYNAMIC) glNamedBufferData(ID, SIZE_T * S::GetCount(), S::GetData(), GL_DYNAMIC_DRAW);
-			else glNamedBufferStorage(ID, SIZE_T * S::GetCount(), S::GetData(), GL_DYNAMIC_STORAGE_BIT);
-		}
 	};
 
 	template<class T>
 	using DynamicBuffer = Buffer<T, true>;
 }
+
+#include "Buffer.inl"

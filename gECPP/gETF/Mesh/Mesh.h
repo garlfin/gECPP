@@ -19,9 +19,7 @@ namespace gETF
 	{
 		SERIALIZABLE_PROTO_T(VertexBuffer, Serializable<Mesh&>);
 
-	 public:
-		VertexBuffer() = default;
-
+	public:
 		u8 Stride = 0;
 		u32 Count = 0;
 		Array<u8> Data;
@@ -42,9 +40,7 @@ namespace gETF
 	{
 		SERIALIZABLE_PROTO_T(VertexField, Serializable<Mesh&>);
 
-	 public:
-		VertexField() = default;
-
+	public:
 		GLenum ElementType;
 		bool Normalized : 1;
 		u8 BufferIndex : 7;
@@ -63,9 +59,7 @@ namespace gETF
 	{
 		SERIALIZABLE_PROTO_T(MaterialSlot, Serializable<Mesh&>);
 
-	 public:
-		MaterialSlot() = default;
-
+	public:
 		u32 Offset = 0;
 		u32 Count = 0;
 
@@ -87,9 +81,7 @@ namespace gETF
 	{
 		SERIALIZABLE_PROTO_T(Mesh, Serializable<gE::Window*>);
 
-	 public:
-		Mesh() = default;
-
+	public:
 		gE::Window* Window;
 		u8 Version = GETF_MESH_VERSION;
 

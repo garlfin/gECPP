@@ -37,4 +37,4 @@ namespace gE
 
 }
 
-template<class T> class Serializable;
+template<class T> struct Serializable;

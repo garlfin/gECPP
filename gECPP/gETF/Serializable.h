@@ -28,7 +28,7 @@ struct TypeSystem
 	{
 		Type(const char* n, FactoryFunction f) : Name(n), ID(0), Factory(f)
 		{
-			TypeSystem<T>::Types[ID];
+			Types[ID];
 		};
 
 		const char* Name;
@@ -83,6 +83,8 @@ template<> void Write(std::ostream& out, u32 count, const std::string* t);
 #define SERIALIZABLE_PROTO_T(TYPE, SUPER) \
 	public: \
 		explicit TYPE(istream& in, SETTINGS_T s) : SUPER(in, s) { ISerialize(in, s); } \
+		TYPE() = default; \
+		typedef SUPER::SETTINGS_T SETTINGS_T;\
 		inline void Serialize(istream& in, SETTINGS_T s) override { SUPER::Serialize(in, s); TYPE::ISerialize(in, s); } \
 		inline void Deserialize(ostream& out) const override { SUPER::Deserialize(out); TYPE::IDeserialize(out); } \
 	private: \
@@ -92,6 +94,8 @@ template<> void Write(std::ostream& out, u32 count, const std::string* t);
 #define SERIALIZABLE_PROTO(TYPE, SUPER) \
 	public: \
 		explicit TYPE(istream& in) : SUPER(in) { ISerialize(in); } \
+		TYPE() = default; \
+		typedef SUPER::SETTINGS_T SETTINGS_T;\
 		inline void Serialize(istream& in) override { SUPER::Serialize(in); TYPE::ISerialize(in); } \
 		inline void Deserialize(ostream& out) const override { SUPER::Deserialize(out); TYPE::IDeserialize(out); } \
 	private: \
@@ -122,6 +126,8 @@ struct Serializable<void>
 {
 	Serializable() = default;
 	explicit Serializable(istream& ptr) { }
+
+	typedef void SETTINGS_T;
 
 	virtual void Deserialize(ostream& ptr) const {};
 	virtual void Serialize(istream& ptr) {};

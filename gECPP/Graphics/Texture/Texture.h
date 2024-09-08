@@ -13,58 +13,57 @@ namespace GPU
 	template<Dimension T>
 	u8 GetMipCount(const Size<T>& size);
 
-	class Texture : public Serializable<gE::Window*>
+	class Texture : public Serializable<gE::Window*>, public Asset
 	{
+		SERIALIZABLE_PROTO_T(Texture, Serializable);
+
 	public:
 		Texture(gE::Window*, const ITextureSettings&, TextureData&&);
-		API_SERIALIZABLE(Texture, Serializable);
 
-		GET_CONST(gE::Window*, Window, _window);
 		GET_CONST(const ITextureSettings&, Settings, Settings);
 		GET_CONST(const TextureData&, Data, Data);
 
-	protected:
+		ALWAYS_INLINE void Free() override { Data.Free(); }
+		NODISCARD ALWAYS_INLINE bool IsFree() const override { return Data.IsFree(); }
+
 		ITextureSettings Settings;
 		TextureData Data;
-
-	private:
-		gE::Window* _window;
 	};
 
  	class Texture2D : public Texture
 	{
+ 		SERIALIZABLE_PROTO_T(Texture2D, Texture);
+
  	public:
  		Texture2D(gE::Window*, const TextureSettings2D&, TextureData&&);
- 		API_SERIALIZABLE(Texture2D, Texture);
 
- 		GET_CONST(TextureSize2D, Size, _size);
+ 		GET_CONST(TextureSize2D, Size, Size);
 
-	private:
-		TextureSize2D _size;
+		TextureSize2D Size;
 	};
 
 	class Texture3D : public Texture
 	{
+		SERIALIZABLE_PROTO_T(Texture3D, Texture);
+
 	public:
 		Texture3D(gE::Window*, const TextureSettings3D&, TextureData&&);
-		API_SERIALIZABLE(Texture3D, Texture);
 
-		GET_CONST(TextureSize3D, Size, _size);
+		GET_CONST(TextureSize3D, Size, Size);
 
-	private:
-		TextureSize3D _size;
+		TextureSize3D Size;
 	};
 
 	class TextureCube : public Texture
 	{
+		SERIALIZABLE_PROTO_T(TextureCube, Texture);
+
 	public:
 		TextureCube(gE::Window*, const TextureSettings1D&, TextureData&&);
-		API_SERIALIZABLE(TextureCube, Texture);
 
-		GET_CONST(TextureSize1D, Size, _size);
+		GET_CONST(TextureSize1D, Size, Size);
 
-	private:
-		TextureSize1D _size;
+		TextureSize1D Size;
 	};
 }
 

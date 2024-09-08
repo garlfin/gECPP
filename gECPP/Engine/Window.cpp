@@ -178,7 +178,7 @@ void Window::OnInit()
 	}
 
 	auto defaultShader = ref_create<API::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/missing.frag");
-	DefaultMaterial = ptr_create<gE::Material>(this, defaultShader);
+	DefaultMaterial = ptr_create<Material>(this, defaultShader);
 }
 
 void Window::Blit(const API::Texture& texture)

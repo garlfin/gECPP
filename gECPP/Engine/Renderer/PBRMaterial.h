@@ -18,7 +18,7 @@ namespace gE
 		gE::Reference<API::Texture2D> Normal;
 	};
 
-	struct PBRMaterial : public Material
+	class PBRMaterial : public Material
 	{
 	 public:
 		PBRMaterial(Window* w, const Reference<API::Shader>& s, const PBRMaterialSettings& settings);

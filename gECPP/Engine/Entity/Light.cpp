@@ -76,7 +76,7 @@ namespace gE
 		//		  (far - near) / 2 + near
 		//		  places the middle on the camera
 
-		transform.SetPosition() = glm::floor(cameraTransform->Position) + offset;
+		transform.SetPosition() = floor(cameraTransform->Position) + offset;
 		transform.OnUpdate(0.f); // Force update on model matrix since it passed its tick.
 
 		return true;
@@ -87,7 +87,7 @@ namespace gE
 		Transform& transform = GetCamera().GetOwner()->GetTransform();
 		OrthographicCamera& camera = GetCamera();
 
-		light.ViewProjection = camera.GetProjection() * glm::inverse(transform.Model());
+		light.ViewProjection = camera.GetProjection() * inverse(transform.Model());
 		light.Position = -transform->Forward();
 		light.Type = GPU::LightType::Directional;
 		light.Color = glm::vec3(1);

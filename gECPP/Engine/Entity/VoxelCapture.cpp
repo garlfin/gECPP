@@ -9,7 +9,7 @@ namespace gE
 {
 	CameraSettings3D CreateVoxelSettings(u16, float);
 
-	VoxelCapture::VoxelCapture(gE::Window* w, u16 r, float s) : Entity(w, Flags(true, UINT8_MAX)),
+	VoxelCapture::VoxelCapture(Window* w, u16 r, float s) : Entity(w, Flags(true, UINT8_MAX)),
 		_camera(this, _target, CreateVoxelSettings(r, s)),
 		_target(*this, _camera)
 	{

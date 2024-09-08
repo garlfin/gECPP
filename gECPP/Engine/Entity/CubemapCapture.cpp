@@ -13,7 +13,7 @@ namespace gE
 		DefaultCameraTiming
 	};
 
-	CubemapCapture::CubemapCapture(gE::Window* w, u16 size) :
+	CubemapCapture::CubemapCapture(Window* w, u16 size) :
 		Entity(w, Flags(true, UINT8_MAX)),
 		Managed<CubemapCapture>(*this, &GetWindow().GetCubemaps()),
 		_camera(this, _target, { CubemapCameraSettings, size }),

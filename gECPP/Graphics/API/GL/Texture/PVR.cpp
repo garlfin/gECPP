@@ -7,7 +7,7 @@
 
 namespace PVR
 {
-	Array<u8> Read(const char* file, PVR::Header& header)
+	Array<u8> Read(const char* file, Header& header)
 	{
 		std::ifstream src;
 		src.open(file, std::ios::in | std::ios::binary);
@@ -90,7 +90,7 @@ namespace PVR
 	{
 		Version = ::Read<u32>(src);
 		Flags = ::Read<PVR::Flags>(src);
-		Format = ::Read<PVR::PixelFormat>(src);
+		Format = ::Read<PixelFormat>(src);
 		ColorSpace=::Read<PVR::ColorSpace>(src);
 		::Read<uint32_t>(src); // This was like bpc or something; unimportant w/ compression
 		Size = ::Read<glm::u32vec2>(src);

@@ -7,6 +7,19 @@
 #include <Prototype.h>
 #include <gETF/Serializable.h>
 
+#define API_NONE 0
+#define API_GL 1
+
+#if API_ID == API_GL
+	#define API GL
+#endif
+
+#if API_ID != API_NONE
+	#define ASSET_CHECK_FREE() if(!IsFree()) LOG("WARNING: ASSET NOT FREED BEFORE DELETION!")
+#else
+	#define ASSET_CHECK_FREE()
+#endif
+
 namespace GPU
 {
 	struct Version
@@ -40,9 +53,9 @@ namespace GPU
 		gE::Window* _window;
 	};
 
-	struct Asset
+	class Asset
 	{
-	 public:
+	public:
 		Asset() = default;
 
 		virtual void Free() = 0;

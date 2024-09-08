@@ -37,7 +37,7 @@ namespace GL
 
 		for(u8 i = 0; i < data.MipCount; i++, size >>= TextureSize2D(1))
 		{
-			size = glm::max(size, TextureSize2D(1));
+			size = max(size, TextureSize2D(1));
 			u64 dataSize = data.Scheme.Size<Dimension::D2D>(size);
 
 			if(data.Scheme.IsCompressed())
@@ -69,7 +69,7 @@ namespace GL
 
 		for(u8 i = 0; i < data.MipCount; i++, size >>= TextureSize3D(1))
 		{
-			size = glm::max(size, TextureSize3D(1));
+			size = max(size, TextureSize3D(1));
 			u64 dataSize = data.Scheme.Size<Dimension::D3D>(size);
 
 			if(data.Scheme.IsCompressed())

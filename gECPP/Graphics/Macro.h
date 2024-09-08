@@ -4,12 +4,16 @@
 
 #pragma once
 
-#define API_SERIALIZABLE(TYPE, SUPER) \
+#define API_SERIALIZABLE(TYPE, SPR) \
 	public: \
-		ALWAYS_INLINE void Serialize(istream& in, SETTINGS_T s) override { TYPE(in, s); } \
-		inline void Deserialize(ostream& out) const override { SUPER::Deserialize(out); TYPE::IDeserialize(out); } \
-	private: \
-		void ISerialize(istream& in, SETTINGS_T s); \
-		void IDeserialize(ostream& out) const; \
-	public: \
-		explicit TYPE(istream& in, SETTINGS_T s)
+		typedef SPR::SETTINGS_T SETTINGS_T; \
+		typedef SPR SUPER; \
+		ALWAYS_INLINE void Serialize(istream& in, gE::Window* window) override { TYPE(in, window); } \
+		TYPE(istream& in, gE::Window* window) : API::APIObject(window) \
+		{ \
+			this->~TYPE(); \
+			SUPER::Serialize(in, window); \
+			TYPE(window, std::move(*this)); \
+			SUPER::Free(); \
+		} \
+		TYPE(gE::Window* window, const SUPER& settings)

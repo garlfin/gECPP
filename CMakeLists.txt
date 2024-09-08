@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 project(VoxelField)
 
-add_compile_definitions(API=GL)
+add_compile_definitions(API_ID=API_GL)
 set(CMAKE_CXX_STANDARD 23)
 
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -static -s")

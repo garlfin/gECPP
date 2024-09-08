@@ -34,7 +34,7 @@ namespace gE
 		Blend
 	};
 
-	struct Material
+	class Material
 	{
 	 public:
 		Material(Window* window, const Reference<API::Shader>& shader, DepthFunction depthFunc = DepthFunction::Less, CullMode cullMode = CullMode::Back);
@@ -43,6 +43,8 @@ namespace gE
 
 		GET_CONST(API::Shader &, Shader, _shader);
 		GET_CONST(Window&, Window, *_window);
+
+		virtual ~Material() = default;
 
 	 private:
 		const Reference<API::Shader> _shader;

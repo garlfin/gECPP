@@ -47,11 +47,9 @@ namespace PVR
 
 	struct Header : Serializable<void>
 	{
-	 SERIALIZABLE_PROTO(Header, Serializable<void>);
+		SERIALIZABLE_PROTO(Header, Serializable<void>);
 
-	 public:
-		Header() = default;
-
+	public:
 		uint32_t Version;
 		Flags Flags;
 		PixelFormat Format;
@@ -63,17 +61,17 @@ namespace PVR
 		uint32_t MipCount;
 	};
 
-	constexpr GLenum PVRToInternalFormat(PVR::PixelFormat f)
+	constexpr GLenum PVRToInternalFormat(PixelFormat f)
 	{
 		switch(f)
 		{
-			case PVR::PixelFormat::DXT1: return GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
-			case PVR::PixelFormat::DXT3: return GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
-			case PVR::PixelFormat::DXT5: return GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
-			case PVR::PixelFormat::BC5: return GL_COMPRESSED_RG_RGTC2;
-			case PVR::PixelFormat::Depth: return GL_DEPTH_COMPONENT16;
-			case PVR::PixelFormat::RGB32F: return GL_RGB32F;
-			case PVR::PixelFormat::RGB16F: return GL_RGB16F;
+			case PixelFormat::DXT1: return GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+			case PixelFormat::DXT3: return GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+			case PixelFormat::DXT5: return GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+			case PixelFormat::BC5: return GL_COMPRESSED_RG_RGTC2;
+			case PixelFormat::Depth: return GL_DEPTH_COMPONENT16;
+			case PixelFormat::RGB32F: return GL_RGB32F;
+			case PixelFormat::RGB16F: return GL_RGB16F;
 			default: return GL_RGB8;
 		}
 	}
@@ -137,11 +135,10 @@ namespace GPU
 
 	struct TextureData : public Serializable<>
 	{
-	 SERIALIZABLE_PROTO(TextureData, Serializable);
+		SERIALIZABLE_PROTO(TextureData, Serializable);
 
-	 public:
+	public:
 		TextureData(GLenum, GLenum, CompressionScheme, u8, Array<u8>&&);
-		TextureData() = default;
 
 		GLenum PixelFormat = GL_RGB;
 		GLenum PixelType = GL_UNSIGNED_BYTE;

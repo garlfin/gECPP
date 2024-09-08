@@ -18,7 +18,7 @@ namespace GL
 
 	NODISCARD ALWAYS_INLINE FrameBufferTarget operator+(FrameBufferTarget a, GLenum b)
 	{
-		return FrameBufferTarget((GLenum) a + b);
+		return (FrameBufferTarget) ((GLenum) a + b);
 	}
 
 	class FrameBuffer : public GLObject

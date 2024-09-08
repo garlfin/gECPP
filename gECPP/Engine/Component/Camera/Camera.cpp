@@ -47,7 +47,7 @@ namespace gE
 		cam.ClipPlanes = GetClipPlanes();
 		cam.Size = _viewportSize;
 		cam.Projection = Projection;
-		cam.PreviousViewProjection = Projection * glm::inverse(transform.PreviousModel());
+		cam.PreviousViewProjection = Projection * inverse(transform.PreviousModel());
 
 		cam.DepthTexture = (handle) 0u;
 		cam.ColorTexture = (handle) 0u;
@@ -112,7 +112,7 @@ namespace gE
 	void Camera2D::GetGLCamera(GPU::Camera& camera)
 	{
 		Camera::GetGLCamera(camera);
-		camera.View[0] = glm::inverse(GetOwner()->GetTransform().Model());
+		camera.View[0] = inverse(GetOwner()->GetTransform().Model());
 	}
 
 	Camera3D::Camera3D(Entity* p, TARGET_TYPE& t, const CameraSettings3D& s, ComponentManager<Camera>* m) :
@@ -133,7 +133,7 @@ namespace gE
 		glm::vec3 scale = GetOwner()->GetTransform()->Scale;
 
 		for(u8 i = 0; i < 3; i++)
-			cam.View[i] = glm::lookAt(cam.Position - scale * ForwardDirs[i * 2], cam.Position, UpDirs[i * 2]);
+			cam.View[i] = lookAt(cam.Position - scale * ForwardDirs[i * 2], cam.Position, UpDirs[i * 2]);
 	}
 
 	CameraCubemap::CameraCubemap(Entity* p, TARGET_TYPE& t, const CameraSettings1D& s, ComponentManager<Camera>* m) :

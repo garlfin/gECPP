@@ -13,7 +13,7 @@
 
 namespace gE::VoxelPipeline
 {
-	Buffers::Buffers(gE::Window* window) : _voxelBuffer(window)
+	Buffers::Buffers(Window* window) : _voxelBuffer(window)
 	{
 		_voxelBuffer.Bind(API::BufferTarget::Uniform, 4);
 	}
@@ -31,7 +31,7 @@ namespace gE::VoxelPipeline
 		Window& window = GetWindow();
 		TextureSize2D size = GetSize();
 
-		window.State = gE::State::Voxel;
+		window.State = State::Voxel;
 
 		glDepthMask(0);
 		glColorMask(1, 1, 1, 1);
@@ -46,14 +46,14 @@ namespace gE::VoxelPipeline
 	{
 		if(!camera) return false;
 
-		VoxelPipeline::Buffers& buffers = GetWindow().GetVoxelBuffers();
+		Buffers& buffers = GetWindow().GetVoxelBuffers();
 		API::ComputeShader& voxelShader = GetWindow().GetVoxelTAAShader();
 		Transform& transform = GetOwner().GetTransform();
 		Transform& cameraTransform = camera->GetOwner()->GetTransform();
 
 		float cellSize = GetScale() * 2.f / GetSize().x;
 
-		glm::ivec3 pos = glm::floor(cameraTransform->Position / cellSize);
+		glm::ivec3 pos = floor(cameraTransform->Position / cellSize);
 		_velocity = pos - glm::ivec3(transform->Position / cellSize);
 		transform.SetPosition() = glm::vec3(pos) * cellSize;
 		transform.OnUpdate(0.f); // Force update on model matrix since it passed its tick.
