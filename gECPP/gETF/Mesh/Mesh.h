@@ -6,7 +6,6 @@
 
 #include <Prototype.h>
 #include <gETF/Serializable.h>
-#include <Graphics/API/GL/Buffer/VAOSettings.h>
 #include <Engine/AssetManager.h>
 #include <Graphics/Buffer/VAO.h>
 

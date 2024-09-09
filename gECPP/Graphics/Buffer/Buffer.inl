@@ -11,12 +11,14 @@ namespace GPU
 	template<class T>
 	void Buffer<T>::ISerialize(std::istream& in, gE::Window* s)
 	{
-		_array = ReadArray<u32, T>(in);
+		Stride = Read<u8>(in);
+		Data = ReadArray<u32, T>(in);
 	}
 
 	template<class T>
 	void Buffer<T>::IDeserialize(std::ostream& out) const
 	{
-		WriteArray<u32>(out, _array);
+		Write(out, Stride);
+		WriteArray<u32>(out, Data);
 	}
 }

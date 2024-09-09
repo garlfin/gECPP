@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Buffer.h"
-#include "VAOSettings.h"
+#include "../../../Buffer/VAOSettings.h"
 #include "Engine/Array.h"
 
 namespace GL

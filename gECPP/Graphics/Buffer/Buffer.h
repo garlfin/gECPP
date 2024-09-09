@@ -8,7 +8,7 @@
 
 namespace GPU
 {
-	template<typename T = u8>
+	template<typename T = void>
 	class Buffer : public Serializable<gE::Window*>, public Asset
 	{
 		SERIALIZABLE_PROTO_T(Buffer, Serializable<gE::Window*>);
@@ -16,19 +16,20 @@ namespace GPU
 	 public:
 		static_assert(!std::is_pointer_v<T>, "Buffer data shouldn't be a pointer!");
 
-		explicit Buffer(u32 count, const T* data = nullptr) : _array(count, data) {}
-		explicit Buffer(const Array<T>& arr) : _array(arr) {}
-		explicit Buffer(Array<T>&& arr) : _array(arr) {}
+		explicit Buffer(u32 count, const T* data = nullptr) : Stride(sizeof(typename Array<T>::I)), Data(count, data) {}
+		explicit Buffer(const Array<T>& arr) : Stride(sizeof(typename Array<T>::I)), Data(arr) {}
+		explicit Buffer(Array<T>&& arr) : Stride(sizeof(typename Array<T>::I)), Data(arr) {}
 
-		ALWAYS_INLINE void Free() override { _array.Free(); }
-		ALWAYS_INLINE bool IsFree() const override { return _array.IsFree(); }
+		ALWAYS_INLINE void Free() override { Data.Free(); }
+		ALWAYS_INLINE bool IsFree() const override { return Data.IsFree(); }
 
-		GET_CONST(const Array<T>&, Array, _array);
-		GET_CONST(u32, Count, _array.Count());
-		GET_CONST(const T*, Data, _array.Data())
+		GET_CONST(u8, Stride, Stride);
+		GET_CONST(const Array<T>&, Array, Data);
+		GET_CONST(u32, Count, Data.Count());
+		GET_CONST(const T*, Data, Data.Data())
 
-	 private:
-		Array<T> _array;
+		uint8_t Stride;
+		Array<T> Data;
 	};
 }
 
