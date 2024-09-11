@@ -32,6 +32,7 @@ namespace GPU
 	class APIObject
 	{
 	 public:
+		APIObject() = default;
 		explicit APIObject(gE::Window* window) : _window(window) { };
 		explicit APIObject(APIObject&) = delete;
 

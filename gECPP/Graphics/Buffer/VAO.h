@@ -16,15 +16,6 @@ namespace GPU
 		SERIALIZABLE_PROTO_T(VAO, Serializable);
 
 	public:
-
-		GET_CONST(u8, MaterialCount, MaterialCount);
-		GET_CONST(u8, BufferCount, BufferCount);
-		GET_CONST(u8, FieldCount, FieldCount);
-
-		GET_CONST(const MaterialSlot*, Materials, Materials);
-		GET_CONST(const Buffer<u8>*, Buffers, Buffers);
-		GET_CONST(const VertexField*, Fields, Fields);
-
 		u8 MaterialCount : 4;
 		u8 BufferCount : 4;
 		u8 FieldCount : 4;
@@ -49,9 +40,8 @@ namespace GPU
 		SERIALIZABLE_PROTO_T(IndexedVAO, VAO);
 
 	public:
-
 		ALWAYS_INLINE void Free() override { VAO::Free(); TriangleBuffer.Free(); }
-		ALWAYS_INLINE NODISCARD bool IsFree() const override { return VAO::IsFree() && TriangleBuffer.IsFree(); }
+		NODISCARD ALWAYS_INLINE bool IsFree() const override { return VAO::IsFree() && TriangleBuffer.IsFree(); }
 
 		GLenum TriangleMode;
 		Buffer<u8> TriangleBuffer;

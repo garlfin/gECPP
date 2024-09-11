@@ -2,8 +2,6 @@
 
 #include <Prototype.h>
 #include <gETF/Serializable.h>
-#include <Engine/AssetManager.h>
-#include "Mesh/Mesh.h"
 
 #define GETF_VERSION 1
 

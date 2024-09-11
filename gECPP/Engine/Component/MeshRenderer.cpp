@@ -5,19 +5,15 @@
 #include "MeshRenderer.h"
 #include <Engine/Window.h>
 
-gE::MeshRenderer::MeshRenderer(Entity* o, gETF::Mesh* mesh, const MaterialHolder& mat) :
+gE::MeshRenderer::MeshRenderer(Entity* o, API::IVAO* mesh, const MaterialHolder& mat) :
 	Component(o, &o->GetWindow().GetRenderers()),
 	_mesh(mesh), _materialHolder(mat)
 {
-	if(_mesh->VAO) return;
-
-	_mesh->CreateVAO(&GetWindow());
-	_mesh->Free();
 }
 
 void gE::MeshRenderer::OnRender(float delta, Camera*)
 {
-	DefaultPipeline::Buffers& buffers = GetWindow().GetPipelineBuffers();
+	// DefaultPipeline::Buffers& buffers = GetWindow().GetPipelineBuffers();
 }
 
 gE::Material& gE::MaterialHolder::GetMaterial(u8 i) const

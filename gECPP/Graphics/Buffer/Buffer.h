@@ -20,13 +20,15 @@ namespace GPU
 		explicit Buffer(const Array<T>& arr) : Stride(sizeof(typename Array<T>::I)), Data(arr) {}
 		explicit Buffer(Array<T>&& arr) : Stride(sizeof(typename Array<T>::I)), Data(arr) {}
 
-		ALWAYS_INLINE void Free() override { Data.Free(); }
-		ALWAYS_INLINE bool IsFree() const override { return Data.IsFree(); }
-
 		GET_CONST(u8, Stride, Stride);
 		GET_CONST(const Array<T>&, Array, Data);
-		GET_CONST(u32, Count, Data.Count());
 		GET_CONST(const T*, Data, Data.Data())
+		GET_CONST(u32, ElementCount, Data.Count() / Stride);
+		GET_CONST(u32, Count, Data.Count());
+		GET_CONST(u32, ByteCount, sizeof(typename Array<T>::I) * Data.Count());
+
+		ALWAYS_INLINE void Free() override { Data.Free(); }
+		ALWAYS_INLINE bool IsFree() const override { return Data.IsFree(); }
 
 		uint8_t Stride;
 		Array<T> Data;

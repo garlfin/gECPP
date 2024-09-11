@@ -8,9 +8,6 @@ namespace gETF
 {
 	struct IFileContainer;
 	struct Header;
-	struct Mesh;
-	struct VertexBuffer;
-	struct MaterialSlot;
 }
 
 namespace gETF::UI
