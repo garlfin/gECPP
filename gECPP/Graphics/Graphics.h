@@ -34,7 +34,7 @@ namespace GPU
 	 public:
 		APIObject() = default;
 		explicit APIObject(gE::Window* window) : _window(window) { };
-		explicit APIObject(APIObject&) = delete;
+		APIObject(const APIObject&) = delete;
 
 		APIObject& operator=(const APIObject&) = delete;
 

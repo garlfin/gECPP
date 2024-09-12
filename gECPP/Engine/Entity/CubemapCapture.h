@@ -10,6 +10,7 @@
 #include <Engine/Renderer/DefaultPipeline.h>
 #include <gETF/File.h>
 #include <Graphics/Shader/Shader.h>
+#include <Graphics/Buffer/VAO.h>
 
 namespace gE
 {
@@ -62,7 +63,7 @@ namespace gE
 	 private:
 		Window* _window;
 
-		SmartPointer<API::VAO> _skyboxVAO;
-		SmartPointer<API::Shader> _skyboxShader;
+		API::VAO _skyboxVAO;
+		API::Shader _skyboxShader;
 	};
 }

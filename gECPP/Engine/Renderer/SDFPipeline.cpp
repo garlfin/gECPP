@@ -12,7 +12,7 @@
 
 namespace gE::SDFPipeline
 {
-	Buffers::Buffers(Window* window) : _sdfBuffer(window)
+	Buffers::Buffers(Window* window) : _sdfBuffer(window, 1)
 	{
 		_sdfBuffer.Bind(API::BufferTarget::Uniform, 4);
 	}

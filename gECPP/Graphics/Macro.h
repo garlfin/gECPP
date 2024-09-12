@@ -16,7 +16,8 @@
 		TYPE(window, std::move(*this)); \
 		SUPER::Free(); \
 	} \
-	TYPE(gE::Window* window, const SUPER& settings)
+	TYPE(gE::Window* window, const SUPER& settings) : TYPE(window, COPY_MOVE(settings)) {} \
+	TYPE(gE::Window* window, SUPER&& settings)
 
 #define API_SERIALIZABLE(TYPE, SUPER_T) \
 	API_SERIALIZABLE_INIT(TYPE, SUPER_T, API::APIObject(window))

@@ -13,13 +13,13 @@
 
 namespace gE::VoxelPipeline
 {
-	Buffers::Buffers(Window* window) : _voxelBuffer(window)
+	Buffers::Buffers(Window* window) : _voxelBuffer(window, 1)
 	{
 		_voxelBuffer.Bind(API::BufferTarget::Uniform, 4);
 	}
 
 	Target3D::Target3D(VoxelCapture& capture, Camera3D& camera) :
-		RenderTarget<Camera3D>(capture, camera),
+		RenderTarget(capture, camera),
 		_color(&camera.GetWindow(), { ColorFormat, camera.GetSize()}),
 		_colorBack(&camera.GetWindow(), { ColorBackFormat, camera.GetSize() })
 	{

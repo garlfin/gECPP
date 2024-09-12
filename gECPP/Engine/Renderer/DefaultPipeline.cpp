@@ -13,7 +13,7 @@
 namespace gE
 {
 	DefaultPipeline::Buffers::Buffers(Window* window) :
-		_cameraBuffer(window), _sceneBuffer(window), _lightBuffer(window)
+		_cameraBuffer(window, 1), _sceneBuffer(window, 1), _lightBuffer(window, 1)
 	{
 		_sceneBuffer.Bind(API::BufferTarget::Uniform, 0);
 		_cameraBuffer.Bind(API::BufferTarget::Uniform, 1);

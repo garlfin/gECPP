@@ -66,7 +66,7 @@ template<typename UINT_T, class T> void ReadArraySerializable(std::istream& in, 
 template<typename UINT_T, class T> void ReadArraySerializable(std::istream& in, Array<T>& t, typename T::SETTINGS_T s) { ReadArraySerializable<UINT_T>(in, 1, &t, s); }
 
 template<class T> void ReadSerializable(std::istream& in, u32 count, T* t, typename T::SETTINGS_T s);
-template<class T> void ReadSerializable(std::istream& in, Serializable<T>& t, typename T::SETTINGS_T s) { ReadSerializable(in, 1, &t, s); }
+template<class T> void ReadSerializable(std::istream& in, Serializable<T>& t, typename T::SETTINGS_T s) { ReadSerializable<T>(in, 1, &t, s); }
 
 template<> void Read(std::istream& in, u32 count, std::string* t);
 template<> void Write(std::ostream& out, u32 count, const std::string* t);

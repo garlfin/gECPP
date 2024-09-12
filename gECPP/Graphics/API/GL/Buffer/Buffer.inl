@@ -9,8 +9,8 @@
 namespace GL
 {
 	template<typename T, bool DYNAMIC>
-	Buffer<T, DYNAMIC>::Buffer(gE::Window* window, const GPU::Buffer<T>& settings) :
-		APIObject(window)
+	Buffer<T, DYNAMIC>::Buffer(gE::Window* window, GPU::Buffer<T>&& settings) :
+		SUPER(MOVE(settings)), APIObject(window)
 	{
 		glCreateBuffers(1, &ID);
 

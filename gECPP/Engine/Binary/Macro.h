@@ -4,6 +4,9 @@
 
 #pragma once
 
+#define MOVE(x) std::move(x)
+#define COPY_MOVE(x) MOVE(std::remove_cv_t<decltype(x)>(x))
+
 #define NODISCARD [[nodiscard]]
 #ifdef DEBUG
 #define ALWAYS_INLINE inline

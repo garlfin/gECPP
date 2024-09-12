@@ -51,19 +51,16 @@ namespace gE
 	{
 		if(!_skyboxVAO)
 		{
-			gETF::Mesh skybox;
-			ReadSerializableFromFile(_window, "Resource/Model/skybox.gEMesh", skybox);
-
-			_skyboxVAO = std::move(skybox.VAO);
-			_skyboxShader = ptr_create<API::Shader>(_window, "Resource/Shader/skybox.vert", "Resource/Shader/skybox.frag");
+			ReadSerializableFromFile(_window, "Resource/Model/skybox.gEMesh", _skyboxVAO);
+			_skyboxShader = API::Shader(_window, "Resource/Shader/skybox.vert", "Resource/Shader/skybox.frag");
 		}
-		_skyboxShader->Bind();
+		_skyboxShader.Bind();
 
 		glEnable(GL_DEPTH_TEST);
 		glDisable(GL_CULL_FACE);
 		glDepthFunc(GL_LEQUAL);
 
-		_skyboxVAO->Draw(0, _window->State.InstanceMultiplier);
+		_skyboxVAO.Draw(0, _window->State.InstanceMultiplier);
 	}
 
 	void CubemapTarget::RenderPass(float, Camera*)

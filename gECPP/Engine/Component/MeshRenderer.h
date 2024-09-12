@@ -19,7 +19,7 @@ namespace gE
 		void OnUpdate(float delta) override {};
 		void OnRender(float delta, Camera*) override;
 
-		GET_CONST(API::IVAO*, Mesh, _mesh);
+		GET_CONST(API::IVAO&, Mesh, *_mesh);
 		GET_CONST(const MaterialHolder&, Materials, _materialHolder);
 
 	 private:

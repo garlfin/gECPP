@@ -11,18 +11,22 @@
 
 namespace GPU
 {
+	struct VAOFieldCounts
+	{
+		u8 MaterialCount : 4;
+		u8 BufferCount : 4;
+		u8 FieldCount : 4;
+	};
+
 	class VAO : public Serializable<gE::Window*>, public Asset
 	{
 		SERIALIZABLE_PROTO_T(VAO, Serializable);
 
 	public:
-		u8 MaterialCount : 4;
-		u8 BufferCount : 4;
-		u8 FieldCount : 4;
-
+		VAOFieldCounts Counts;
 		MaterialSlot Materials[GE_MAX_VAO_MATERIAL];
-		Buffer<u8> Buffers[GE_MAX_VAO_BUFFER];
 		VertexField Fields[GE_MAX_VAO_FIELD];
+		Buffer<u8> Buffers[GE_MAX_VAO_BUFFER];
 
 		void Free() override { for(Buffer<u8>& buffer : Buffers) buffer.Free(); };
 
@@ -43,7 +47,7 @@ namespace GPU
 		ALWAYS_INLINE void Free() override { VAO::Free(); TriangleBuffer.Free(); }
 		NODISCARD ALWAYS_INLINE bool IsFree() const override { return VAO::IsFree() && TriangleBuffer.IsFree(); }
 
-		GLenum TriangleMode;
+		GLenum TriangleFormat;
 		Buffer<u8> TriangleBuffer;
 	};
 }

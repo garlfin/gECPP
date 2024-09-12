@@ -28,26 +28,27 @@ void gE::RendererManager::OnRender(float d, Camera* camera)
 
 	for(Managed<Component>* m = List.GetFirst(); m; m = m->GetNext())
 	{
-		MeshRenderer& c = *(MeshRenderer*) &m->Get();
-
-		Window& window = c.GetWindow();
+		MeshRenderer& renderer = *(MeshRenderer*) &m->Get();
+		Window& window = renderer.GetWindow();
 		DefaultPipeline::Buffers& buffers = window.GetPipelineBuffers();
 
-		const MeshRenderer& info = *(MeshRenderer*) &c;
+		const API::IVAO& vao = renderer.GetMesh();
+		const GPU::VAO& vaoData = vao.GetData();
+		const Transform& transform = renderer.GetOwner()->GetTransform();
 
 		buffers.Scene.InstanceCount = 1;
 		buffers.Scene.State = window.State;
-		buffers.Scene.Model[0] = info.GetOwner()->GetTransform().Model();
-		buffers.Scene.PreviousModel[0] = info.GetOwner()->GetTransform().PreviousModel();
+		buffers.Scene.Model[0] = transform.Model();
+		buffers.Scene.PreviousModel[0] = transform.PreviousModel();
 		buffers.Scene.Normal[0] = glm::mat3(1);
 
 		buffers.UpdateScene();
 
-		uint8_t meshCount = info.GetMesh()->Materials.Count();
+		uint8_t meshCount = vaoData.Counts.MaterialCount;
 		for(uint8_t i = 0; i < meshCount; i++)
 		{
-			info.GetMaterials().GetMaterial(i).Bind();
-			info.GetMesh()->VAO->Draw(i, window.State.InstanceMultiplier);
+			renderer.GetMaterials().GetMaterial(i).Bind();
+			vao.Draw(i, window.State.InstanceMultiplier);
 		}
 	}
 }
