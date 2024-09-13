@@ -13,9 +13,9 @@ namespace GL
 		for(u8 i = 0; i < settings.Counts.BufferCount; i++)
 		{
 			const GPU::Buffer<u8>& bufSettings = settings.Buffers[i];
-			Buffer<u8>& buffer = Buffers[i];
+			Buffer<u8>& buffer = _buffers[i];
 
-			Buffers[i] = Buffers(window, MOVE(bufSettings));
+			buffer = Buffer(window, MOVE(bufSettings));
 			glVertexArrayVertexBuffer(ID, i, buffer.Get(), 0, bufSettings.Stride);
 		}
 
@@ -53,7 +53,7 @@ namespace GL
 		if(!instanceCount) return;
 		Bind();
 		const GPU::MaterialSlot& material = Materials[index];
-		glDrawElementsInstanced(GL_TRIANGLES, material.Count * 3, TriangleFormat, (void*) (sizeof(u32) * mesh.Offset * 3), instanceCount);
+		glDrawElementsInstanced(GL_TRIANGLES, material.Count * 3, TriangleFormat, (void*) (sizeof(u32) * material.Offset * 3), instanceCount);
 	}
 
 }

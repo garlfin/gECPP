@@ -18,7 +18,10 @@ namespace GL
 	class APIObject : public GPU::APIObject<u32>
 	{
 	public:
-		using GPU::APIObject<u32>::APIObject;
+		typedef GPU::APIObject<u32> SUPER;
+
+		using SUPER::APIObject;
+		using SUPER::operator=;
 	};
 
 	typedef APIObject GLObject;

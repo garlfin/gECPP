@@ -21,9 +21,9 @@ namespace GL
  	class Buffer : protected GPU::Buffer<T>, public GLObject
 	{
 		API_SERIALIZABLE(Buffer, GPU::Buffer<T>);
+		API_DEFAULT_CM_CONSTRUCTOR(Buffer);
 
 	 public:
-		Buffer() = default;
 		Buffer(gE::Window* window, u32 count, const T* data = nullptr);
 
 		using SUPER::GetStride;

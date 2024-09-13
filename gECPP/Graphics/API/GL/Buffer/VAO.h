@@ -9,6 +9,7 @@ namespace GL
 	class IVAO : public GLObject
 	{
 	public:
+		IVAO() = default;
 		explicit IVAO(gE::Window* window, GPU::VAO& vao) : GLObject(window),
 			_vao(&vao) {}
 
@@ -24,17 +25,12 @@ namespace GL
 	class VAO : protected GPU::VAO, public IVAO
 	{
 		API_SERIALIZABLE_INIT(VAO, GPU::VAO, IVAO(window, *this));
+		API_DEFAULT_CM_CONSTRUCTOR(VAO);
 
 	 public:
 		GET_CONST(const GPU::VAO&, Data, *this);
 
-		GET_CONST(u8, MaterialCount, Counts.MaterialCount);
-		GET_CONST(u8, BufferCount, Counts.BufferCount);
-		GET_CONST(u8, FieldCount, Counts.FieldCount);
-
-		GET_CONST(const GPU::MaterialSlot*, Materials, Materials);
-		GET_CONST(const GPU::Buffer<u8>*, Buffers, Buffers);
-		GET_CONST(const GPU::VertexField*, Fields, Fields);
+		NODISCARD ALWAYS_INLINE const Buffer<u8>& GetBuffer(u8 i) { return _buffers[i]; }
 
 		using SUPER::Free;
 		using SUPER::IsFree;
@@ -50,6 +46,7 @@ namespace GL
 	class IndexedVAO final : protected GPU::IndexedVAO, public IVAO
 	{
 		API_SERIALIZABLE_INIT(IndexedVAO, GPU::IndexedVAO, IVAO(window, *this));
+		API_DEFAULT_CM_CONSTRUCTOR(IndexedVAO);
 
 	 public:
 		GET_CONST(u8, MaterialCount, Counts.MaterialCount);
