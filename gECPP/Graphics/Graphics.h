@@ -48,7 +48,7 @@ namespace GPU
 		virtual ~APIObject() = default;
 
 	 protected:
-		T ID;
+		T ID {};
 
 	 private:
 		gE::Window* _window;

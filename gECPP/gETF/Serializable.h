@@ -11,6 +11,9 @@
 #include <fstream>
 #include <unordered_map>
 
+#include "Serializable.h"
+#include "Serializable.h"
+
 // Defines SERIALIZABLE_PROTO_T
 // Defines SERIALIZABLE_PROTO
 
@@ -40,14 +43,27 @@ struct TypeSystem
 	static GLOBAL std::unordered_map<TypeID, Type> Types;
 };
 
-template<class T, class S> CONSTEXPR_GLOBAL bool is_serializable = std::is_base_of_v<Serializable<S>, T>;
+template<class T, class S>
+concept is_serializable_in = requires(T t, S s, std::istream& i)
+{
+	t.Serialize(i, s);
+};
+
+template<class T>
+concept is_serializable_out = requires(T t, std::ostream& o)
+{
+	t.Deserialize(o);
+};
+
+template<class T, class S>
+concept is_serializable = is_serializable_in<S, T> and is_serializable_out<T>;
 
 template<class T = void> struct Serializable;
-template<class T> requires is_serializable<T, gE::Window*> struct FileContainer;
+template<is_serializable<gE::Window*> T> struct FileContainer;
 
-template<class T> requires is_serializable<T, gE::Window*> void ReadSerializableFromFile(gE::Window*, const char*, T&);
-template<class T> requires is_serializable<T, gE::Window*> T* ReadSerializableFromFile(gE::Window*, const char*);
-template<class T> requires is_serializable<T, gE::Window*> void WriteSerializableToFile(const char*, const T&);
+template<is_serializable_in<gE::Window*> T> void ReadSerializableFromFile(gE::Window*, const char*, T&);
+template<is_serializable_in<gE::Window*> T> T* ReadSerializableFromFile(gE::Window*, const char*);
+template<is_serializable_out T> void WriteSerializableToFile(const char*, const T&);
 
 template<class T> void Read(std::istream& in, u32 count, T* t);
 template<class T> void Read(std::istream& in, T& t) { Read(in, 1, &t); }
@@ -168,9 +184,10 @@ struct IFileContainer : public Serializable<gE::Window*>
 	Serializable<gE::Window*>* _t;
 };
 
-template<class T> requires is_serializable<T, gE::Window*>
+template<is_serializable<gE::Window*> T>
 struct FileContainer : public IFileContainer
 {
+public:
 	template<typename ... ARGS>
 	explicit FileContainer(std::string& path, ARGS&&... args) :
 		IFileContainer(Object, path),
@@ -182,7 +199,7 @@ struct FileContainer : public IFileContainer
 	T Object;
 };
 
-template<class T> requires is_serializable<T, gE::Window*>
+template<is_serializable_in<gE::Window*> T>
 void ReadSerializableFromFile(gE::Window* w, const char* path, T& t)
 {
 	std::ifstream file;
@@ -194,7 +211,7 @@ void ReadSerializableFromFile(gE::Window* w, const char* path, T& t)
 	file.close();
 }
 
-template<class T> requires is_serializable<T, gE::Window*>
+template<is_serializable_in<gE::Window*> T>
 T* ReadSerializableFromFile(gE::Window* w, const char* path)
 {
 	T* t = new T();
@@ -202,7 +219,7 @@ T* ReadSerializableFromFile(gE::Window* w, const char* path)
 	return t;
 }
 
-template<class T> requires is_serializable<T, gE::Window*>
+template<is_serializable_out T>
 void WriteSerializableToFile(const char* path, const T& t)
 {
 	std::ofstream file;

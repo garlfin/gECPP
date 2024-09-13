@@ -25,7 +25,7 @@ namespace GPU
 	void IndexedVAO::ISerialize(istream& in, SETTINGS_T s)
 	{
 		TriangleFormat = Read<GLenum>(in);
-		ReadSerializable(in, TriangleBuffer, s);
+		ReadSerializable(in, 1, &TriangleBuffer, s);
 	}
 
 	void IndexedVAO::IDeserialize(ostream& out) const

@@ -44,7 +44,7 @@ namespace GL
 
 	IndexedVAO::IndexedVAO(gE::Window* window, SUPER&& settings) : SUPER(MOVE(settings)), IVAO(window, *this)
 	{
-		_triangleBuffer = Buffer<u8>(window, MOVE(settings.TriangleBuffer));
+		_triangleBuffer = Buffer(window, MOVE(settings.TriangleBuffer));
 		glVertexArrayElementBuffer(ID, _triangleBuffer.Get());
 	}
 

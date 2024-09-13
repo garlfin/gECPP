@@ -14,7 +14,7 @@ namespace gE
 	class MeshRenderer : public Component
 	{
 	 public:
-		MeshRenderer(Entity* o, API::IVAO* mesh, const MaterialHolder& mat);
+		MeshRenderer(Entity* o, const Reference<API::IVAO>& mesh, const MaterialHolder& mat);
 
 		void OnUpdate(float delta) override {};
 		void OnRender(float delta, Camera*) override;
@@ -23,7 +23,7 @@ namespace gE
 		GET_CONST(const MaterialHolder&, Materials, _materialHolder);
 
 	 private:
-		API::IVAO* _mesh;
+		Reference<API::IVAO> _mesh;
 		const MaterialHolder& _materialHolder;
 	};
 

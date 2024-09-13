@@ -49,12 +49,12 @@ namespace gE
 
 	void CubemapManager::DrawSkybox()
 	{
-		if(!_skyboxVAO)
+		if(!_skyboxShader)
 		{
 			ReadSerializableFromFile(_window, "Resource/Model/skybox.gEMesh", _skyboxVAO);
-			_skyboxShader = API::Shader(_window, "Resource/Shader/skybox.vert", "Resource/Shader/skybox.frag");
+			_skyboxShader = ptr_create<API::Shader>(_window, "Resource/Shader/skybox.vert", "Resource/Shader/skybox.frag");
 		}
-		_skyboxShader.Bind();
+		_skyboxShader->Bind();
 
 		glEnable(GL_DEPTH_TEST);
 		glDisable(GL_CULL_FACE);
