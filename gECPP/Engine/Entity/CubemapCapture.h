@@ -62,6 +62,7 @@ namespace gE
 
 	 private:
 		Window* _window;
+		bool _isInitialized = false;
 
 		API::VAO _skyboxVAO;
 		API::Shader _skyboxShader;

@@ -24,8 +24,9 @@
 	API_SERIALIZABLE_INIT(TYPE, SUPER_T, API::APIObject(window))
 
 #define API_DEFAULT_CM_CONSTRUCTOR(TYPE) \
-	TYPE(TYPE&&) noexcept = default; \
+	public: \
+	TYPE(TYPE&&) = default; \
+	TYPE& operator=(TYPE&&) = default; \
 	TYPE(const TYPE&) = delete; \
-	TYPE& operator=(TYPE&&) noexcept = default; \
 	TYPE& operator=(const TYPE&) = delete
 

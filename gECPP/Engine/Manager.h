@@ -18,7 +18,7 @@ namespace gE
 	 public:
 		ManagedList() = default;
 
-		DELETE_COPY_CONSTRUCTOR(ManagedList);
+		DELETE_CM_CONSTRUCTOR(ManagedList);
 
 		void Add(Managed<T>& t);
 		void Insert(Managed<T>& t, Managed<T>& at);
@@ -41,7 +41,7 @@ namespace gE
 	 public:
 		Manager() = default;
 
-		DELETE_COPY_CONSTRUCTOR(Manager);
+		DELETE_CM_CONSTRUCTOR(Manager);
 
 		virtual void OnUpdate(float d) = 0;
 		virtual void OnRender(float d, Camera* camera) = 0;
@@ -71,7 +71,7 @@ namespace gE
 			if(m) m->Register(t);
 		}
 
-		DELETE_COPY_CONSTRUCTOR(Managed);
+		DELETE_CM_CONSTRUCTOR(Managed);
 
 		GET_CONST(Managed<T>*, Previous, _previous);
 		GET_CONST(Managed<T>*, Next, _next);

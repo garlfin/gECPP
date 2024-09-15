@@ -4,15 +4,15 @@
 
 #pragma once
 
+#include <fstream>
 #include <Prototype.h>
-#include "Engine/Math/Math.h"
+#include <unordered_map>
 #include <Engine/Array.h>
 #include <Engine/Binary/Binary.h>
-#include <fstream>
-#include <unordered_map>
+#include "Engine/Math/Math.h"
 
 #include "Serializable.h"
-#include "Serializable.h"
+#include "Graphics/Macro.h"
 
 // Defines SERIALIZABLE_PROTO_T
 // Defines SERIALIZABLE_PROTO
@@ -128,6 +128,7 @@ struct Serializable
 {
 	Serializable() = default;
 	Serializable(istream&, T) { }
+	DEFAULT_CM_CONSTRUCTOR(Serializable);
 
 	typedef T SETTINGS_T;
 

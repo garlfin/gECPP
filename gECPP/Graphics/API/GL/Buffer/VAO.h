@@ -8,6 +8,8 @@ namespace GL
 {
 	class IVAO : public GLObject
 	{
+		DEFAULT_CM_CONSTRUCTOR(IVAO);
+
 	public:
 		IVAO() = default;
 		explicit IVAO(gE::Window* window, GPU::VAO& vao) : GLObject(window),

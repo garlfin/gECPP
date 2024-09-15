@@ -33,7 +33,7 @@ class Array
 				_t[i] = t[i];
 	}
 
-	OPERATOR_EQUALS(Array, o,
+	OPERATOR_COPY(Array, o,
 	{
 		LOG("WARNING: REALLOCATION! \n\tSIZE: " << o._size * sizeof(I) << " bytes\n\tFUNCTION: " << __PRETTY_FUNCTION__);
 
@@ -43,7 +43,7 @@ class Array
 		for (size_t i = 0; i < _size; i++) _t[i] = o._t[i];
 	})
 
-	OPERATOR_EQUALS_XVAL(Array, o,
+	OPERATOR_MOVE(Array, o,
 	{
 		_size = o._size;
 		_t = o._t;

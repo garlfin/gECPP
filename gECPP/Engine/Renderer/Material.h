@@ -54,21 +54,21 @@ namespace gE
 	};
 
 	template<class T>
-	class ValueUniform : private API::Uniform<T>
+	class ValueUniform : private GPU::Uniform<T>
 	{
 	 public:
-		ValueUniform(const Material* mat, const char* n, const T& t) : API::Uniform<T>(&mat->GetShader(), n), _t(t) { };
-		ValueUniform(const Material* mat, const char* n, T&& t) : API::Uniform<T>(&mat->GetShader(), n), _t(t) { };
-		ValueUniform(const Material* mat, u32 l, const T& t) : API::Uniform<T>(&mat->GetShader(), l), _t(t) { };
-		ValueUniform(const Material* mat, u32 l, T&& t) : API::Uniform<T>(&mat->GetShader(), l), _t(t) { };
+		ValueUniform(const Material* mat, const char* n, const T& t) : GPU::Uniform<T>(&mat->GetShader(), n), _t(t) { };
+		ValueUniform(const Material* mat, const char* n, T&& t) : GPU::Uniform<T>(&mat->GetShader(), n), _t(t) { };
+		ValueUniform(const Material* mat, u32 l, const T& t) : GPU::Uniform<T>(&mat->GetShader(), l), _t(t) { };
+		ValueUniform(const Material* mat, u32 l, T&& t) : GPU::Uniform<T>(&mat->GetShader(), l), _t(t) { };
 
 		ValueUniform(const ValueUniform&) = default;
 		ValueUniform(ValueUniform&&) = default;
 
-		ALWAYS_INLINE ValueUniform& operator=(const T& t){ _t = t; return *this; }
-		ALWAYS_INLINE ValueUniform& operator=(T&& t) noexcept { _t = t; return *this; }
+		ALWAYS_INLINE ValueUniform& operator=(const T& t) { _t = t; return *this; }
+		ALWAYS_INLINE ValueUniform& operator=(T&& t) { _t = t; return *this; }
 
-		ALWAYS_INLINE ValueUniform& operator=(ValueUniform&&) noexcept = default;
+		ALWAYS_INLINE ValueUniform& operator=(ValueUniform&&) = default;
 		ALWAYS_INLINE ValueUniform& operator=(const ValueUniform&) = default;
 		ALWAYS_INLINE T* operator->() const { return _t; }
 		ALWAYS_INLINE T& operator*() const { return *_t; }
@@ -76,7 +76,7 @@ namespace gE
 		ALWAYS_INLINE operator T*() const { return _t; } // NOLINT
 		ALWAYS_INLINE operator T&() const { return *_t; } // NOLINT
 
-		ALWAYS_INLINE void Set() const { API::Uniform<T>::Set(_t); }
+		ALWAYS_INLINE void Set() const { GPU::Uniform<T>::Set(_t); }
 
 		GET_SET(T&, , _t);
 		SET_XVAL(T, , _t);

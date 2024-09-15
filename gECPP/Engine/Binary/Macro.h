@@ -61,16 +61,16 @@
 	GET_CONST(TYPE, ACCESSOR, FIELD)    \
 	SET(TYPE, ACCESSOR, FIELD)
 
-#define OPERATOR_EQUALS_XVAL_PROTO(TYPE) \
-    TYPE(TYPE&&) noexcept; \
-	TYPE& operator=(TYPE&&) noexcept;
+#define OPERATOR_MOVE_PROTO(TYPE) \
+    TYPE(TYPE&&); \
+	TYPE& operator=(TYPE&&);
 
-#define OPERATOR_EQUALS_PROTO(TYPE) \
+#define OPERATOR_COPY_PROTO(TYPE) \
 	TYPE(const TYPE&); \
 	TYPE& operator=(const TYPE& ACCESSOR);
 
-#define OPERATOR_EQUALS_XVAL_NAMESPACE(NAMESPACE, TYPE, ACCESSOR, CODE) \
-    NAMESPACE##TYPE(TYPE&& ACCESSOR) noexcept { CODE; } \
+#define OPERATOR_MOVE_NAMESPACE(NAMESPACE, TYPE, ACCESSOR, CODE) \
+    NAMESPACE##TYPE(TYPE&& ACCESSOR) noexcept { if(&ACCESSOR == this) return; CODE; } \
 	NAMESPACE##TYPE& NAMESPACE##operator=(TYPE&& ACCESSOR) noexcept \
 	{ \
 		if(&ACCESSOR == this) return *this; \
@@ -78,7 +78,7 @@
 		return* this; \
 	}
 
-#define OPERATOR_EQUALS_NAMESPACE(NAMESPACE, TYPE, ACCESSOR, CODE) \
+#define OPERATOR_COPY_NAMESPACE(NAMESPACE, TYPE, ACCESSOR, CODE) \
 	NAMESPACE##TYPE(const TYPE& ACCESSOR) { CODE; } \
 	NAMESPACE##TYPE& NAMESPACE##operator=(const TYPE& ACCESSOR) \
 	{ \
@@ -87,8 +87,8 @@
 		return *this; \
 	}
 
-#define OPERATOR_EQUALS_XVAL(TYPE, ACCESSOR, CODE) OPERATOR_EQUALS_XVAL_NAMESPACE(, TYPE, ACCESSOR, CODE)
-#define OPERATOR_EQUALS(TYPE, ACCESSOR, CODE) OPERATOR_EQUALS_NAMESPACE(, TYPE, ACCESSOR, CODE)
+#define OPERATOR_MOVE(TYPE, ACCESSOR, CODE) OPERATOR_MOVE_NAMESPACE(, TYPE, ACCESSOR, CODE)
+#define OPERATOR_COPY(TYPE, ACCESSOR, CODE) OPERATOR_COPY_NAMESPACE(, TYPE, ACCESSOR, CODE)
 
 #define OPERATOR_CAST_CONST(TYPE, FIELD) ALWAYS_INLINE operator TYPE() const { return FIELD; }
 #define OPERATOR_CAST(TYPE, FIELD) \
@@ -96,9 +96,31 @@
 	OPERATOR_CAST_CONST(const TYPE, FIELD);
 
 #define DELETE_COPY_CONSTRUCTOR(TYPE) \
-	TYPE(TYPE&&) noexcept = delete; \
+	public: \
 	TYPE(const TYPE&) = delete; \
-	TYPE& operator=(TYPE&&) noexcept = delete; \
-	TYPE& operator=(const TYPE&) = delete;
+	TYPE& operator=(const TYPE&) = delete
+
+#define DELETE_MOVE_CONSTRUCTOR(TYPE) \
+	public: \
+	TYPE(TYPE&&) = delete; \
+	TYPE& operator=(TYPE&&) = delete
+
+#define DELETE_CM_CONSTRUCTOR(TYPE) \
+	DELETE_COPY_CONSTRUCTOR(TYPE); \
+	DELETE_MOVE_CONSTRUCTOR(TYPE)
+
+#define DEFAULT_COPY_CONSTRUCTOR(TYPE) \
+	public: \
+	TYPE(const TYPE&) = default; \
+	TYPE& operator=(const TYPE&) = default
+
+#define DEFAULT_MOVE_CONSTRUCTOR(TYPE) \
+	public: \
+	TYPE(TYPE&&) = default; \
+	TYPE& operator=(TYPE&&) = default
+
+#define DEFAULT_CM_CONSTRUCTOR(TYPE) \
+	DEFAULT_COPY_CONSTRUCTOR(TYPE); \
+	DEFAULT_MOVE_CONSTRUCTOR(TYPE)
 
 // Yapping about newline >: (

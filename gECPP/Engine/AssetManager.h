@@ -16,7 +16,7 @@ namespace gE
 		explicit inline Reference(T* t) : _t(t) { if(t) _counter = new u32(1); }
 		inline Reference() = default;
 
-		OPERATOR_EQUALS(Reference, o,
+		OPERATOR_COPY(Reference, o,
 		{
 			LOG("INFO: COPIED REFERENCE\n\tCOUNT: " << *o._counter << "\n\tFUNCTION: " << __PRETTY_FUNCTION__);
 			_t = o._t;
@@ -24,7 +24,7 @@ namespace gE
 			if(_counter) (*_counter)++;
 		})
 
-		OPERATOR_EQUALS_XVAL(Reference, o,
+		OPERATOR_MOVE(Reference, o,
 		{
 			_t = o._t;
 			_counter = o._counter;
@@ -92,7 +92,7 @@ namespace gE
 
 		SmartPointer(const SmartPointer&) = delete;
 
-		OPERATOR_EQUALS_XVAL(SmartPointer, o, _t = o.Release())
+		OPERATOR_MOVE(SmartPointer, o, _t = o.Release())
 
 		SmartPointer& operator=(const SmartPointer&) = delete;
 

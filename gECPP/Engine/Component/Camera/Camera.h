@@ -5,14 +5,12 @@
 #pragma once
 
 #include <Graphics/Texture/Texture.h>
-#include <Graphics/Buffer/FrameBuffer.h>
 
-#include "Engine/Entity/Entity.h"
-#include "Engine/Array.h"
-#include "Engine/Manager.h"
+#include "RenderTarget.h"
 #include "Settings.h"
 #include "Timing.h"
-#include "RenderTarget.h"
+#include "Engine/Manager.h"
+#include "Engine/Entity/Entity.h"
 
 namespace GPU
 {

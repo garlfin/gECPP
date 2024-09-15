@@ -7,6 +7,8 @@
 #include <Prototype.h>
 #include <gETF/Serializable.h>
 
+#include "Macro.h"
+
 #define API_NONE 0
 #define API_GL 1
 
@@ -34,11 +36,9 @@ namespace GPU
 	 public:
 		APIObject() = default;
 		explicit APIObject(gE::Window* window) : _window(window) { };
-		APIObject(const APIObject&) = delete;
 
-		APIObject& operator=(const APIObject&) = delete;
-
-		OPERATOR_EQUALS_XVAL(APIObject, o, ID = o.ID; o.ID = 0);
+		DELETE_COPY_CONSTRUCTOR(APIObject);
+		OPERATOR_MOVE(APIObject, o, ID = o.ID; o.ID = 0);
 
 		virtual void Bind() const = 0;
 
@@ -56,10 +56,14 @@ namespace GPU
 
 	class Asset
 	{
+		DEFAULT_CM_CONSTRUCTOR(Asset);
+
 	public:
 		Asset() = default;
 
 		virtual void Free() = 0;
 		NODISCARD virtual bool IsFree() const = 0;
+
+		virtual ~Asset() = default;
 	};
 }

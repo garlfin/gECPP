@@ -21,6 +21,7 @@ namespace GPU
 	class VAO : public Serializable<gE::Window*>, public Asset
 	{
 		SERIALIZABLE_PROTO_T(VAO, Serializable);
+		DEFAULT_CM_CONSTRUCTOR(VAO);
 
 	public:
 		VAOFieldCounts Counts;
@@ -42,6 +43,7 @@ namespace GPU
 	class IndexedVAO : public VAO
 	{
 		SERIALIZABLE_PROTO_T(IndexedVAO, VAO);
+		DEFAULT_CM_CONSTRUCTOR(IndexedVAO);
 
 	public:
 		ALWAYS_INLINE void Free() override { VAO::Free(); TriangleBuffer.Free(); }

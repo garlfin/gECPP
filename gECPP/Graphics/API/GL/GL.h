@@ -17,6 +17,8 @@ namespace GL
 {
 	class APIObject : public GPU::APIObject<u32>
 	{
+		API_DEFAULT_CM_CONSTRUCTOR(APIObject);
+
 	public:
 		typedef GPU::APIObject<u32> SUPER;
 

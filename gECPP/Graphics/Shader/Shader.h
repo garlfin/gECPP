@@ -5,26 +5,28 @@
 #pragma once
 
 #include <Graphics/Graphics.h>
+#include "ShaderStageType.h"
+#include "Preprocessor.h"
 
 namespace GPU
 {
-	class ShaderSource;
-
-	class ShaderStage : public Serializable<gE::Window*>, public Asset
+	struct ShaderStage : public Serializable<gE::Window*>, public Asset
 	{
 		SERIALIZABLE_PROTO_T(ShaderStage, Serializable);
+		DEFAULT_CM_CONSTRUCTOR(ShaderStage);
 
 	public:
-		GLenum Type;
+		ShaderStageType Type;
 		std::string Source;
 
 		ALWAYS_INLINE void Free() override { Source.clear(); Source.shrink_to_fit(); };
 		NODISCARD ALWAYS_INLINE bool IsFree() const override { return Source.data(); }
 	};
 
-	class Shader : public Serializable<gE::Window*>, public Asset
+	struct Shader : public Serializable<gE::Window*>, public Asset
 	{
 		SERIALIZABLE_PROTO_T(Shader, Serializable);
+		DEFAULT_CM_CONSTRUCTOR(Shader);
 
 	public:
 		ShaderStage VertexStage;
@@ -34,9 +36,10 @@ namespace GPU
 		NODISCARD ALWAYS_INLINE bool IsFree() const override { return VertexStage.IsFree() && FragmentStage.IsFree(); }
 	};
 
-	class ComputeShader : public Serializable<gE::Window*>, public Asset
+	struct ComputeShader : public Serializable<gE::Window*>, public Asset
 	{
 		SERIALIZABLE_PROTO_T(ComputeShader, Serializable);
+		DEFAULT_CM_CONSTRUCTOR(ComputeShader);
 
 	public:
 		ShaderStage ComputeStage;

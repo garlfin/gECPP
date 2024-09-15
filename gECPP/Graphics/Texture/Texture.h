@@ -6,7 +6,6 @@
 
 #include <Graphics/Graphics.h>
 #include "TextureSettings.h"
-#include "Graphics/Macro.h"
 
 namespace GPU
 {

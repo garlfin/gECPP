@@ -5,9 +5,9 @@
 #include "Binary.h"
 #include "iostream"
 
-u8* ReadFile(const char* name, u32& length, bool binary)
+u8* ReadFileBinary(const std::string& name, u32& length)
 {
-	FILE* file = fopen(name, "rb");
+	FILE* file = fopen(name.c_str(), "rb");
 	if(!file)
 	{
 		LOG("Could not find file: " << name);
@@ -17,8 +17,7 @@ u8* ReadFile(const char* name, u32& length, bool binary)
 	fseek(file, 0, SEEK_END);
 	length = ftell(file);
 
-	u8* bin = new u8[length + !binary];
-	if(!binary) bin[length] = 0;
+	u8* bin = new u8[length];
 
 	fseek(file, 0, SEEK_SET);
 	fread(bin, length, 1, file);
@@ -31,7 +30,7 @@ u8* ReadFile(const char* name, u32& length, bool binary)
 size_t strlenc(const char* str, char d)
 {
 	u64 i = 0;
-	for(; str[i] && str[i] != d; i++);
+	for(; str[i] && str[i] != d; i++) {}
 	return i;
 }
 

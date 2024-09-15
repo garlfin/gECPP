@@ -42,7 +42,7 @@ namespace gE
 
 		explicit Transform(Entity* o);
 
-		glm::mat4 GetParentTransform();
+		NODISCARD glm::mat4 GetParentTransform() const;
 
 		ALWAYS_INLINE glm::vec3& SetPosition() { return SetLocation(); }
 		inline glm::vec3& SetLocation() { _flags.Invalidated = true; return _transform.Location; }

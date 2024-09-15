@@ -3,44 +3,101 @@
 //
 
 #include "Shader.h"
-#include "Uniform.h"
-#include "Graphics/Texture/Texture.h"
 #include <iostream>
 #include "Engine/Window.h"
+#include "Graphics/Texture/Texture.h"
 
-#define VERSION_DIRECTIVE "#version 460 core\n"
-#define EXT_BINDLESS "#define EXT_BINDLESS\n"
-// Weird AMD driver bug doesn't define GL_ARB_bindless_texture
-
-#define GL_GET(FUNC_STAGE, FUNC_SHADER, ARGS...) if constexpr (std::is_same_v<T, ShaderStage>) FUNC_STAGE(ARGS); else FUNC_SHADER(ARGS);
+#define GL_GET(FUNC_STAGE, FUNC_SHADER, ...) if constexpr (std::is_same_v<T, ShaderStage>) FUNC_STAGE(__VA_ARGS__); else FUNC_SHADER(__VA_ARGS__);
 
 namespace GL
 {
-	void CompileDirectives(const Array<PreprocessorPair>& src, std::string& dst);
-	void CompileIncludes(const char* file, std::string& dst, std::string& directives, std::string& includes);
-	const char* GetIncludePath(const char* origin, const char* include);
-
 	template<typename T>
 	bool GetShaderStatus(const T& shader, const char* name = nullptr, const char* source = nullptr);
 
-	Shader::Shader(gE::Window* window, const char* v, const char* f, const Array<PreprocessorPair>* p) : APIObject(window)
+	IShader::IShader(gE::Window* window) : APIObject(window)
 	{
 		ID = glCreateProgram();
+	}
 
-		ShaderStage frag(window, Fragment, f, p), vert(window, Vertex, v, p);
-		frag.Attach(this);
-		vert.Attach(this);
+	void IShader::SetUniform(u8 loc, const Texture& tex, u8 slot) const
+	{
+		SetUniform(loc, tex.Use(slot));
+	}
+
+	void IShader::SetUniform(u8 loc, const Texture& tex) const
+	{
+		SetUniform(loc, GetWindow().GetSlotManager().Increment(&tex));
+	}
+
+	Shader::Shader(gE::Window* window, const std::string& vertPath, const std::string& fragPath, const Array<GPU::PreprocessorPair*>& pairs) : IShader(window)
+	{
+		const ShaderStage vert(window, GPU::ShaderStageType::Vertex, vertPath, pairs);
+		const ShaderStage frag(window, GPU::ShaderStageType::Fragment, fragPath, pairs);
+
+		frag.Attach(*this);
+		vert.Attach(*this);
 
 		glLinkProgram(ID);
 
 		GetShaderStatus(*this);
 	}
 
-	ShaderStage::ShaderStage(gE::Window* window, ShaderStageType type, const char* file, const Array<PreprocessorPair>* pairs)
-		: APIObject(window)
+	Shader::Shader(gE::Window* window, const ShaderStage& vert, const ShaderStage& frag) : IShader(window)
 	{
-		ID = glCreateShader(type);
+		vert.Attach(*this);
+		frag.Attach(*this);
 
+		glLinkProgram(ID);
+
+		GetShaderStatus(*this);
+	}
+
+	Shader::Shader(gE::Window* window, SUPER&& settings) : SUPER(MOVE(settings)), IShader(window)
+	{
+		const ShaderStage frag(window, MOVE(settings.FragmentStage));
+		const ShaderStage vert(window, MOVE(settings.VertexStage));
+
+		frag.Attach(*this);
+		vert.Attach(*this);
+
+		glLinkProgram(ID);
+
+		GetShaderStatus(*this);
+	}
+
+	ComputeShader::ComputeShader(gE::Window* window, const std::string& compPath, const Array<GPU::PreprocessorPair*>& pairs)
+	{
+		const ShaderStage comp(window, GPU::ShaderStageType::Compute, compPath, pairs);
+
+		comp.Attach(*this);
+
+		glLinkProgram(ID);
+
+		GetShaderStatus(*this);
+	}
+
+	ComputeShader::ComputeShader(gE::Window* window, const ShaderStage& comp) : IShader(window)
+	{
+		comp.Attach(*this);
+
+		glLinkProgram(ID);
+
+		GetShaderStatus(*this);
+	}
+
+	ComputeShader::ComputeShader(gE::Window* window, SUPER&& settings) : SUPER(MOVE(settings)), IShader(window)
+	{
+		const ShaderStage comp(window, MOVE(settings.ComputeStage));
+
+		comp.Attach(*this);
+
+		glLinkProgram(ID);
+
+		GetShaderStatus(*this);
+	}
+
+	ShaderStage::ShaderStage(gE::Window*, GPU::ShaderStageType, std::string& path, const Array<GPU::PreprocessorPair*>&) : APIObject(window)
+	{
 		std::string source, directives, includes;
 
 		directives += VERSION_DIRECTIVE;
@@ -48,7 +105,7 @@ namespace GL
 		CompileIncludes(file, source, directives, includes);
 		if(pairs) CompileDirectives(*pairs, directives);
 		if(GLAD_GL_ARB_bindless_texture) directives += EXT_BINDLESS;
-		directives += ShaderStageDefine(type);
+		directives += ShaderStageDefine(std::__cmp_cat::type);
 		directives += source;
 
 		const char* src = directives.data();
@@ -59,31 +116,15 @@ namespace GL
 		GetShaderStatus(*this, file, src);
 	}
 
-	Shader::Shader(gE::Window* window, const ShaderStage& v, const ShaderStage& f) : APIObject(window)
+	ShaderStage::ShaderStage(gE::Window* window, SUPER&& settings) : SUPER(MOVE(settings)), APIObject(window)
 	{
-		ID = glCreateProgram();
 
-		v.Attach(this);
-		f.Attach(this);
-
-		glLinkProgram(ID);
-
-#ifdef DEBUG
-		GetShaderStatus(*this);
-#endif
 	}
 
-	Shader::Shader(gE::Window* window, const char* src, const Array<PreprocessorPair>* p) : APIObject(window)
+	ShaderStage::ShaderStage(gE::Window* window, GPU::ShaderStageType, const std::string& path, const Array<GPU::PreprocessorPair*>&) :
+		APIObject(window)
 	{
-		ID = glCreateProgram();
 
-		ShaderStage c(window, Compute, src, p);
-		c.Attach(this);
-
-		glLinkProgram(ID);
-#ifdef DEBUG
-		GetShaderStatus(*this);
-#endif
 	}
 
 	template<typename T>
@@ -105,7 +146,7 @@ namespace GL
 
 		GL_GET(glGetShaderInfoLog, glGetProgramInfoLog, id, shaderStatus - 1, nullptr, infoLog);
 
-		#ifdef DEBUG
+	#ifdef DEBUG
 		if(source)
 		{
 			std::cout << "FILE: " << name << '\n';
@@ -124,29 +165,9 @@ namespace GL
 			std::cout << debugBuffer;
 		}
 		std::cout << "SHADER COMPILE FAILURE:\n" << infoLog << '\n';
-		#endif
+	#endif
 
 		delete[] infoLog;
 		return false;
 	}
-
-	void Shader::SetUniform(u8 loc, const Texture& tex, u8 slot) const
-	{
-		SetUniform(loc, tex.Use(slot));
-	}
-
-	void Shader::SetUniform(u8 loc, const Texture& tex) const
-	{
-		SetUniform(loc, GetWindow().GetSlotManager().Increment(&tex));
-	}
-
-	DynamicUniform::DynamicUniform(Shader* s, u32 l) : _shader(s), _location(l) { }
-	DynamicUniform::DynamicUniform(Shader* s, const char* n) : _shader(s), _location(GetUniformLocation(n)) { }
-
-	template<>
-	void DynamicUniform::Set(const Texture& t) const
-	{
-		_shader->SetUniform(_location, t, _shader->GetWindow().GetSlotManager().Increment(&t));
-	}
 }
-

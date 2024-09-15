@@ -1,55 +1,28 @@
 #pragma once
+
+#include <GLAD/glad.h>
+#include <Graphics/Macro.h>
 #include <Graphics/API/GL/GL.h>
-#include <utility>
-#include "GLAD/glad.h"
-#include "Engine/Array.h"
+#include <Graphics/Shader/Preprocessor.h>
+#include <Graphics/Shader/Shader.h>
 
 namespace GL
 {
-	struct ShaderStage;
-	struct Texture;
+	class Texture;
+	class Shader;
+	class ShaderStage;
 
-	struct PreprocessorPair
+	class IShader : public APIObject
 	{
-		explicit PreprocessorPair(const char* n, const char* v = nullptr);
+		API_DEFAULT_CM_CONSTRUCTOR(IShader);
 
-		PreprocessorPair(PreprocessorPair&& o) noexcept : Name(o.Name), Value(o.Value)
-		{
-			o.Name = nullptr;
-		}
+	public:
+		IShader() = default;
+		explicit IShader(gE::Window*);
 
-		PreprocessorPair(const PreprocessorPair& o);
-		PreprocessorPair() = default;
-
-		OPERATOR_EQUALS_BOTH(PreprocessorPair);
-
-		char* Name = nullptr;
-		char* Value = nullptr;
-
-		void Write(std::string&) const;
-
-		~PreprocessorPair() { delete[] Name; }
-	};
-
-	enum ShaderStageType : GLenum
-	{
-		Vertex = GL_VERTEX_SHADER,
-		Fragment = GL_FRAGMENT_SHADER,
-		Compute = GL_COMPUTE_SHADER
-	};
-
-	const char* ShaderStageDefine(ShaderStageType type);
-
-	class Shader : public APIObject
-	{
-	 protected:
-		Shader(gE::Window*, const char*, const Array<PreprocessorPair>*);
-	 public:
-		Shader(gE::Window*, const char* v, const char* f, const Array<PreprocessorPair>* = nullptr);
-		Shader(gE::Window*, const ShaderStage& v, const ShaderStage& f);
 
 		ALWAYS_INLINE void Bind() const override { glUseProgram(ID); }
-		ALWAYS_INLINE void GetUniform(const char* name) const { glGetUniformLocation(ID, name); }
+		ALWAYS_INLINE u32 GetUniformLocation(const std::string& name) const { return glGetUniformLocation(ID, name.c_str()); }
 		ALWAYS_INLINE void SetUniform(u8 loc, u32 val) const { glProgramUniform1ui(ID, loc, val); }
 		ALWAYS_INLINE void SetUniform(u8 loc, i32 val) const { glProgramUniform1i(ID, loc, val); }
 		ALWAYS_INLINE void SetUniform(u8 loc, float val) const { glProgramUniform1f(ID, loc, val); }
@@ -66,34 +39,47 @@ namespace GL
 		void SetUniform(u8 loc, const Texture&, u8 slot) const;
 		void SetUniform(u8 loc, const Texture&) const;
 
-		~Shader() override { glDeleteProgram(ID); }
+		inline ~IShader() override { glDeleteProgram(ID); }
 	};
 
-	class ComputeShader final : public Shader
+	class Shader : protected GPU::Shader, public IShader
 	{
+		API_SERIALIZABLE_INIT(Shader, GPU::Shader, IShader(window));
+		API_DEFAULT_CM_CONSTRUCTOR(Shader);
+
 	 public:
-		ComputeShader(gE::Window* window, const char* src, const Array<PreprocessorPair>* pair = nullptr)
-			: Shader(window, src, pair)
-		{ };
-
-		ALWAYS_INLINE void Dispatch(u16 x, u16 y, u16 z) const { glDispatchCompute(x, y, z); }
-		ALWAYS_INLINE void Dispatch(u16 x, u16 y) const { glDispatchCompute(x, y, 1); }
-		ALWAYS_INLINE void Dispatch(u16 x) const { glDispatchCompute(x, 1, 1); }
-
-		ALWAYS_INLINE void Dispatch(glm::u16vec3 s) const { Dispatch(s.x, s.y, s.z); }
-		ALWAYS_INLINE void Dispatch(glm::u16vec2 s) const { Dispatch(s.x, s.y); }
+		Shader(gE::Window*, const std::string& vertPath, const std::string& fragPath, const Array<GPU::PreprocessorPair*>& = {});
+		Shader(gE::Window*, const ShaderStage& vert, const ShaderStage& frag);
 	};
 
-	class ShaderStage final : public APIObject
+	class ComputeShader final : protected GPU::ComputeShader, public IShader
 	{
+		API_SERIALIZABLE_INIT(ComputeShader, GPU::ComputeShader, IShader(window));
+		API_DEFAULT_CM_CONSTRUCTOR(ComputeShader);
+
 	 public:
-		ShaderStage(gE::Window*, ShaderStageType, const char*, const Array<PreprocessorPair>*);
+		ComputeShader(gE::Window*, const std::string& compPath, const Array<GPU::PreprocessorPair*>& = {});
+		ComputeShader(gE::Window*, const ShaderStage& comp);
 
-		inline void Bind() const override { }
+		ALWAYS_INLINE void Dispatch(u16 x, u16 y, u16 z) const { Bind(); glDispatchCompute(x, y, z); }
+		ALWAYS_INLINE void Dispatch(u16 x, u16 y) const { Bind(); glDispatchCompute(x, y, 1); }
+		ALWAYS_INLINE void Dispatch(u16 x) const { Bind(); glDispatchCompute(x, 1, 1); }
 
-		ALWAYS_INLINE void Attach(Shader* s) const { glAttachShader(s->Get(), ID); }
+		ALWAYS_INLINE void Dispatch(glm::u16vec3 size) const { Dispatch(size.x, size.y, size.z); }
+		ALWAYS_INLINE void Dispatch(glm::u16vec2 size) const { Dispatch(size.x, size.y); }
+	};
 
-		~ShaderStage() override
-		{ glDeleteShader(ID); }
+	class ShaderStage final : protected GPU::ShaderStage, public APIObject
+	{
+		API_SERIALIZABLE(ShaderStage, GPU::ShaderStage);
+		API_DEFAULT_CM_CONSTRUCTOR(ShaderStage);
+
+	 public:
+		ShaderStage(gE::Window*, GPU::ShaderStageType, const std::string& path, const Array<GPU::PreprocessorPair*>& = {});
+
+		ALWAYS_INLINE void Bind() const override { }
+		ALWAYS_INLINE void Attach(const IShader& shader) const { glAttachShader(shader.Get(), ID); }
+
+		inline ~ShaderStage() override { glDeleteShader(ID); }
 	};
 }
