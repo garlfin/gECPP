@@ -63,6 +63,7 @@ namespace gE
 
 		GET(gE::Material&, DefaultMaterial, DefaultMaterial);
 		GET(API::Texture2D&, BRDFLookupTexture, BRDFLookup);
+		GET(Array<GPU::PreprocessorPair>&, ShaderCompilationState, ShaderCompilationState);
 
 		// Post Process Data
 		GET(API::ComputeShader&, TAAShader, TAAShader);
@@ -105,6 +106,8 @@ namespace gE
 
 		SmartPointer<VoxelCapture> VoxelSceneCapture;
 		SmartPointer<SDFCapture> SDFSceneCapture;
+
+		Array<GPU::PreprocessorPair> ShaderCompilationState;
 
 		CameraManager Cameras;
 		TransformManager Transforms;

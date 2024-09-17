@@ -4,15 +4,17 @@
 
 #include "Shader.h"
 #include <iostream>
-#include "Engine/Window.h"
-#include "Graphics/Texture/Texture.h"
+#include <sstream>
+#include <Engine/Window.h>
+#include <Graphics/Shader/Preprocessor.h>
+#include <Graphics/Texture/Texture.h>
 
 #define GL_GET(FUNC_STAGE, FUNC_SHADER, ...) if constexpr (std::is_same_v<T, ShaderStage>) FUNC_STAGE(__VA_ARGS__); else FUNC_SHADER(__VA_ARGS__);
 
 namespace GL
 {
 	template<typename T>
-	bool GetShaderStatus(const T& shader, const char* name = nullptr, const char* source = nullptr);
+	bool GetShaderStatus(const T& shader, const std::string& name = {}, const char* source = nullptr);
 
 	IShader::IShader(gE::Window* window) : APIObject(window)
 	{
@@ -29,10 +31,10 @@ namespace GL
 		SetUniform(loc, GetWindow().GetSlotManager().Increment(&tex));
 	}
 
-	Shader::Shader(gE::Window* window, const std::string& vertPath, const std::string& fragPath, const Array<GPU::PreprocessorPair*>& pairs) : IShader(window)
+	Shader::Shader(gE::Window* window, const std::string& vertPath, const std::string& fragPath) : IShader(window)
 	{
-		const ShaderStage vert(window, GPU::ShaderStageType::Vertex, vertPath, pairs);
-		const ShaderStage frag(window, GPU::ShaderStageType::Fragment, fragPath, pairs);
+		const ShaderStage vert(window, GPU::ShaderStageType::Vertex, vertPath);
+		const ShaderStage frag(window, GPU::ShaderStageType::Fragment, fragPath);
 
 		frag.Attach(*this);
 		vert.Attach(*this);
@@ -65,9 +67,9 @@ namespace GL
 		GetShaderStatus(*this);
 	}
 
-	ComputeShader::ComputeShader(gE::Window* window, const std::string& compPath, const Array<GPU::PreprocessorPair*>& pairs)
+	ComputeShader::ComputeShader(gE::Window* window, const std::string& compPath)
 	{
-		const ShaderStage comp(window, GPU::ShaderStageType::Compute, compPath, pairs);
+		const ShaderStage comp(window, GPU::ShaderStageType::Compute, compPath);
 
 		comp.Attach(*this);
 
@@ -96,39 +98,46 @@ namespace GL
 		GetShaderStatus(*this);
 	}
 
-	ShaderStage::ShaderStage(gE::Window*, GPU::ShaderStageType, std::string& path, const Array<GPU::PreprocessorPair*>&) : APIObject(window)
+	ShaderStage::ShaderStage(gE::Window* window, GPU::ShaderStageType stage, const std::string& path) : APIObject(window)
 	{
-		std::string source, directives, includes;
+		std::string source, extensions;
+		std::ifstream file = std::ifstream(path, std::ios_base::in | std::ios_base::binary);
 
-		directives += VERSION_DIRECTIVE;
+		source += GL_VERSION_DIRECTIVE;
+		CompileShaderType(stage, source);
+		CompileDirectives(window->GetShaderCompilationState(), source);
+		GPU::CompileIncludes(file, extensions, source);
 
-		CompileIncludes(file, source, directives, includes);
-		if(pairs) CompileDirectives(*pairs, directives);
-		if(GLAD_GL_ARB_bindless_texture) directives += EXT_BINDLESS;
-		directives += ShaderStageDefine(std::__cmp_cat::type);
-		directives += source;
+		const char* sourceCString = source.data();
+		const i32 sourceLength = source.length();
 
-		const char* src = directives.data();
-
-		glShaderSource(ID, 1, &src, nullptr);
+		glShaderSource(ID, 1, &sourceCString, &sourceLength);
 		glCompileShader(ID);
 
-		GetShaderStatus(*this, file, src);
+		GetShaderStatus(*this, path, sourceCString);
 	}
 
 	ShaderStage::ShaderStage(gE::Window* window, SUPER&& settings) : SUPER(MOVE(settings)), APIObject(window)
 	{
+		std::string source, extensions;
+		std::istringstream stream = std::istringstream(Source);
 
-	}
+		source += GL_VERSION_DIRECTIVE;
+		CompileShaderType(Type, source);
+		CompileDirectives(window->GetShaderCompilationState(), source);
+		GPU::CompileIncludes(stream, extensions, source);
 
-	ShaderStage::ShaderStage(gE::Window* window, GPU::ShaderStageType, const std::string& path, const Array<GPU::PreprocessorPair*>&) :
-		APIObject(window)
-	{
+		const char* sourceCString = source.data();
+		const i32 sourceLength = source.length();
 
+		glShaderSource(ID, 1, &sourceCString, &sourceLength);
+		glCompileShader(ID);
+
+		GetShaderStatus(*this, "", sourceCString);
 	}
 
 	template<typename T>
-	bool GetShaderStatus(const T& shader, const char* name, const char* source)
+	bool GetShaderStatus(const T& shader, const std::string& name, const char* source)
 	{
 		u32 id = shader.Get();
 

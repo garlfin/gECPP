@@ -6,7 +6,6 @@
 
 #include <Graphics/Graphics.h>
 #include "ShaderStageType.h"
-#include "Preprocessor.h"
 
 namespace GPU
 {

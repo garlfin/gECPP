@@ -48,7 +48,7 @@ namespace GL
 		API_DEFAULT_CM_CONSTRUCTOR(Shader);
 
 	 public:
-		Shader(gE::Window*, const std::string& vertPath, const std::string& fragPath, const Array<GPU::PreprocessorPair*>& = {});
+		Shader(gE::Window*, const std::string& vertPath, const std::string& fragPath);
 		Shader(gE::Window*, const ShaderStage& vert, const ShaderStage& frag);
 	};
 
@@ -58,7 +58,7 @@ namespace GL
 		API_DEFAULT_CM_CONSTRUCTOR(ComputeShader);
 
 	 public:
-		ComputeShader(gE::Window*, const std::string& compPath, const Array<GPU::PreprocessorPair*>& = {});
+		ComputeShader(gE::Window*, const std::string& compPath);
 		ComputeShader(gE::Window*, const ShaderStage& comp);
 
 		ALWAYS_INLINE void Dispatch(u16 x, u16 y, u16 z) const { Bind(); glDispatchCompute(x, y, z); }
@@ -75,7 +75,7 @@ namespace GL
 		API_DEFAULT_CM_CONSTRUCTOR(ShaderStage);
 
 	 public:
-		ShaderStage(gE::Window*, GPU::ShaderStageType, const std::string& path, const Array<GPU::PreprocessorPair*>& = {});
+		ShaderStage(gE::Window*, GPU::ShaderStageType, const std::string& path);
 
 		ALWAYS_INLINE void Bind() const override { }
 		ALWAYS_INLINE void Attach(const IShader& shader) const { glAttachShader(shader.Get(), ID); }
