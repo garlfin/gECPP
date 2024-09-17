@@ -9,10 +9,10 @@
 #include "GLM/vec4.hpp"
 #include "GLM/gtx/quaternion.hpp"
 #include "GLM/mat3x3.hpp"
-#include "GLM/mat4x4.hpp"
 #include "GLAD/types.h"
 
 #include <cstdint>
+#include <filesystem>
 
 #define GL_BYTE 0x1400
 #define GL_UNSIGNED_BYTE 0x1401
@@ -26,6 +26,7 @@
 #define TO_RAD 0.01745329251f
 #define TO_DEG 57.2957795131f
 
+typedef std::filesystem::path Path;
 typedef uint8_t u8;
 typedef int8_t i8;
 typedef uint16_t u16;

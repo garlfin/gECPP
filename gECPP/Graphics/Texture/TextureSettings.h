@@ -45,9 +45,9 @@ namespace PVR
 		SRGB = 1,
 	};
 
-	struct Header : Serializable<void>
+	struct Header : Serializable<>
 	{
-		SERIALIZABLE_PROTO(Header, Serializable<void>);
+		SERIALIZABLE_PROTO(Header, Serializable);
 
 	public:
 		uint32_t Version;

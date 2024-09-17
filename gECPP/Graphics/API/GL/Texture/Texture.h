@@ -101,6 +101,6 @@ namespace GL
 
 namespace PVR
 {
-	NODISCARD GL::Texture* Read(gE::Window* window, const char* path, GPU::WrapMode = GPU::WrapMode::Repeat, GPU::FilterMode = GPU::FilterMode::Linear);
-	NODISCARD Array<u8> Read(const char* path, Header& header);
+	NODISCARD GL::Texture* Read(gE::Window*, const Path&, GPU::WrapMode = GPU::WrapMode::Repeat, GPU::FilterMode = GPU::FilterMode::Linear);
+	NODISCARD Array<u8> Read(const Path& path, Header& header);
 }

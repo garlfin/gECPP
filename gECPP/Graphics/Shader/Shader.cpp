@@ -22,8 +22,8 @@ namespace GPU
 
 	void Shader::ISerialize(istream& in, SETTINGS_T s)
 	{
-		ReadSerializable(in, 1, &VertexStage, s);
-		ReadSerializable(in, 1, &FragmentStage, s);
+		ReadSerializable(in, VertexStage, s);
+		ReadSerializable(in, FragmentStage, s);
 	}
 
 	void Shader::IDeserialize(ostream& out) const
@@ -34,7 +34,7 @@ namespace GPU
 
 	void ComputeShader::ISerialize(istream& in, SETTINGS_T s)
 	{
-		ReadSerializable(in, 1, &ComputeStage, s);
+		ReadSerializable(in, ComputeStage, s);
 	}
 
 	void ComputeShader::IDeserialize(ostream& out) const

@@ -11,7 +11,7 @@ namespace GPU
 	template<typename T = void>
 	class Buffer : public Serializable<gE::Window*>, public Asset
 	{
-		SERIALIZABLE_PROTO_T(Buffer, Serializable<gE::Window*>);
+		SERIALIZABLE_PROTO(Buffer, Serializable<gE::Window*>);
 		DEFAULT_CM_CONSTRUCTOR(Buffer);
 
 	 public:

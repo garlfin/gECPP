@@ -12,7 +12,7 @@ namespace GL
 
 		for(u8 i = 0; i < settings.Counts.BufferCount; i++)
 		{
-			const GPU::Buffer<u8>& bufSettings = settings.Buffers[i];
+			GPU::Buffer<u8>& bufSettings = Buffers[i];
 			Buffer<u8>& buffer = _buffers[i];
 
 			buffer = Buffer(window, MOVE(bufSettings));

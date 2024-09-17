@@ -12,7 +12,7 @@ namespace GPU
 	{
 	}
 
-	void TextureData::ISerialize(std::istream& in)
+	void TextureData::ISerialize(std::istream& in, SETTINGS_T)
 	{
 		PixelFormat = Read<GLenum>(in);
 		PixelType = Read<GLenum>(in);

@@ -35,7 +35,7 @@ namespace GPU
 	inline void Texture::ISerialize(istream& in, SETTINGS_T s)
 	{
 		Read(in, Settings);
-		Read(in, Data);
+		ReadSerializable(in, Data, nullptr);
 	}
 
 	inline void Texture::IDeserialize(ostream& out) const

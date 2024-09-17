@@ -3,13 +3,14 @@
 //
 
 #include "VAO.h"
+#include "VAOSettings.h"
 
 namespace GPU
 {
 	void VAO::ISerialize(istream& in, SETTINGS_T s)
 	{
 		Counts = Read<VAOFieldCounts>(in);
-		Read(in, Counts.MaterialCount, Materials);
+		ReadSerializable(in, Counts.MaterialCount, Materials, nullptr);
 		Read(in, Counts.FieldCount, Fields);
 		ReadSerializable(in, Counts.BufferCount, Buffers, s);
 	}
@@ -25,12 +26,26 @@ namespace GPU
 	void IndexedVAO::ISerialize(istream& in, SETTINGS_T s)
 	{
 		TriangleFormat = Read<GLenum>(in);
-		ReadSerializable(in, 1, &TriangleBuffer, s);
+		ReadSerializable(in, TriangleBuffer, s);
 	}
 
 	void IndexedVAO::IDeserialize(ostream& out) const
 	{
 		Write(out, TriangleFormat);
 		Write(out, TriangleBuffer);
+	}
+
+	void MaterialSlot::ISerialize(istream& in, SETTINGS_T)
+	{
+		Read(in, Name);
+		Offset = Read<u32>(in);
+		Count = Read<u32>(in);
+	}
+
+	void MaterialSlot::IDeserialize(ostream& out) const
+	{
+		Write(out, Name);
+		Write(out, Offset);
+		Write(out, Count);
 	}
 }

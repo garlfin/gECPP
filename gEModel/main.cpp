@@ -2,38 +2,38 @@
 // Created by scion on 8/10/2023.
 //
 
-#include "Vertex.h"
-#include "GL/Type.h"
-#include "ASSIMP/Importer.hpp"
-#include "ASSIMP/scene.h"
-#include "ASSIMP/postprocess.h"
-#include <gETF/File.h>
-#include <fstream>
 #include <filesystem>
+#include <fstream>
+#include "Vertex.h"
+#include "ASSIMP/Importer.hpp"
+#include "ASSIMP/postprocess.h"
+#include "ASSIMP/scene.h"
+
+#include "Graphics/Buffer/VAO.h"
 
 using pp = aiPostProcessSteps;
 
 CONSTEXPR_GLOBAL unsigned POST_PROCESS =
-	pp::aiProcess_Triangulate | pp::aiProcess_FindInvalidData | pp::aiProcess_OptimizeMeshes |
-	pp::aiProcess_ImproveCacheLocality | pp::aiProcess_FindInstances |
-	pp::aiProcess_OptimizeGraph | aiProcess_JoinIdenticalVertices;
+	aiProcess_Triangulate | pp::aiProcess_FindInvalidData | pp::aiProcess_OptimizeMeshes |
+	aiProcess_ImproveCacheLocality | aiProcess_FindInstances |
+	aiProcess_OptimizeGraph | aiProcess_JoinIdenticalVertices;
 
 template<class T, class F>
 using ConversionFunc = void(u32, const F&, T&);
 
 template<class T, class S>
-gETF::VertexField CreateField(T S::* DST, const char[4], u8 i, u8 buf);
+GPU::VertexField CreateField(T S::* DST, const char[4], u8 i, u8 buf);
 
 template<class T, class S, class F>
-void FillBuffer(T S::* DST, F* aiMesh::* SRC, u32 aiMesh::* COUNT, gETF::VertexBuffer& buf,
+void FillBuffer(T S::* DST, F* aiMesh::* SRC, u32 aiMesh::* COUNT, GPU::Buffer<u8>& buf,
 	const std::vector<aiMesh*>& src, ConversionFunc<T, F>* FUNC = nullptr);
 
 template<class T>
-void AllocateBuffer(u32 aiMesh::* COUNT, gETF::VertexBuffer& buf, const std::vector<aiMesh*>& src);
+void AllocateBuffer(u32 aiMesh::* COUNT, GPU::Buffer<u8>& buf, const std::vector<aiMesh*>& src);
 
-void FillUVBuffer(gETF::VertexBuffer& buf, const std::vector<aiMesh*>& src);
+void FillUVBuffer(GPU::Buffer<u8>& buf, const std::vector<aiMesh*>& src);
 
-void TransformMesh(const std::vector<aiMesh*>&, gETF::Mesh&);
+void TransformMesh(const std::vector<aiMesh*>&, GPU::IndexedVAO&);
 void ConvertVec(u32, const aiVector3t<float>&, glm::i8vec3&);
 void ConvertFace(u32, const aiFace&, glm::uvec3&);
 
@@ -64,36 +64,33 @@ int main(int argc, char** argv)
 	{
 		std::string path = basePath + src[0]->mName.data + ".gEMesh";
 
-		gETF::Mesh mesh;
+		GPU::IndexedVAO mesh;
 		TransformMesh(src, mesh);
 
-		WriteSerializableToFile<gETF::Mesh>(path.c_str(), mesh);
+		WriteSerializableToFile(path.c_str(), mesh);
 	}
 
 	return 0;
 }
 
-void TransformMesh(const std::vector<aiMesh*>& src, gETF::Mesh& dst)
+void TransformMesh(const std::vector<aiMesh*>& src, GPU::IndexedVAO& dst)
 {
 	u64 vertexCount = 0;
 
-	dst.Materials = Array<gETF::MaterialSlot>(src.size());
-	for(unsigned i = 0; i < dst.Materials.Count(); i++)
+	dst.Counts.MaterialCount = src.size();
+	for(unsigned i = 0; i < dst.Counts.MaterialCount; i++)
 	{
 		const aiMesh& mesh = *src[i];
-		gETF::MaterialSlot& material = dst.Materials[i];
 
-		material.Count = mesh.mNumFaces;
-		material.Offset = vertexCount;
+		dst.Materials[i] = GPU::MaterialSlot(MOVE(std::string(mesh.mName.C_Str())), mesh.mNumFaces, vertexCount);
 
 		vertexCount += mesh.mNumFaces;
 	}
 
-	dst.Buffers = Array<gETF::VertexBuffer>(2);
-	dst.Fields = Array<gETF::VertexField>(4);
+	dst.Counts.BufferCount = 2;
+	dst.Counts.FieldCount = 4;
 
 	AllocateBuffer<Vertex>(&aiMesh::mNumVertices, dst.Buffers[0], src);
-	AllocateBuffer<Face>(&aiMesh::mNumFaces, dst.Buffers[1], src);
 
 	dst.Fields[0] = CreateField(&Vertex::Position, "POS\0", 0, 0);
 	FillBuffer(&Vertex::Position, &aiMesh::mVertices, &aiMesh::mNumVertices, dst.Buffers[0], src);
@@ -107,17 +104,17 @@ void TransformMesh(const std::vector<aiMesh*>& src, gETF::Mesh& dst)
 	dst.Fields[3] = CreateField(&Vertex::Tangent, "TAN\0", 3, 0);
 	FillBuffer(&Vertex::Tangent, &aiMesh::mTangents, &aiMesh::mNumVertices, dst.Buffers[0], src, ConvertVec);
 
-	dst.TriMode = gETF::TriangleMode::Simple;
-	dst.Triangles = CreateField(&Face::Triangle, "TRI\0", 0, 1);
-	FillBuffer(&Face::Triangle, &aiMesh::mFaces, &aiMesh::mNumFaces, dst.Buffers[1], src, ConvertFace);
+	dst.TriangleFormat = GLType<u32>;
+	AllocateBuffer<Face>(&aiMesh::mNumFaces, dst.TriangleBuffer, src);
+	FillBuffer(&Face::Triangle, &aiMesh::mFaces, &aiMesh::mNumFaces, dst.TriangleBuffer, src, ConvertFace);
 }
 
 template<class T, class S>
-gETF::VertexField CreateField(T S::* DST, const char name[4], u8 index, u8 bufIndex)
+GPU::VertexField CreateField(T S::* DST, const char name[4], u8 index, u8 bufIndex)
 {
-	gETF::VertexField field;
+	GPU::VertexField field;
 
-	memcpy((void*) field.Name, (void*) name, sizeof(field.Name));
+	memcpy(field.Name, name, sizeof(field.Name));
 	field.ElementType = GLType<typename T::value_type>;
 	field.ElementCount = T::length();
 	field.Index = index;
@@ -130,7 +127,7 @@ gETF::VertexField CreateField(T S::* DST, const char name[4], u8 index, u8 bufIn
 }
 
 template<class T, class S, class F>
-void FillBuffer(T S::* DST, F* aiMesh::* SRC, u32 aiMesh::* COUNT, gETF::VertexBuffer& buf,
+void FillBuffer(T S::* DST, F* aiMesh::* SRC, u32 aiMesh::* COUNT, GPU::Buffer<u8>& buf,
 	const std::vector<aiMesh*>& src, ConversionFunc<T, F>* FUNC)
 {
 	S* dst = (S*) buf.Data.Data();
@@ -140,6 +137,8 @@ void FillBuffer(T S::* DST, F* aiMesh::* SRC, u32 aiMesh::* COUNT, gETF::VertexB
 	{
 		u32 count = mesh->*COUNT;
 		F* source = mesh->*SRC;
+
+		GE_ASSERT(source, "MISSING FIELD");
 
 		for(u32 i = 0; i < count; i++)
 		{
@@ -155,7 +154,7 @@ void FillBuffer(T S::* DST, F* aiMesh::* SRC, u32 aiMesh::* COUNT, gETF::VertexB
 void ConvertVec(u32, const aiVector3t<float>& src, glm::i8vec3& dst)
 {
 	glm::vec3 vec = *(glm::vec3*) &src; // Work of an Angel?
-	vec = glm::clamp(vec, glm::vec3(-1), glm::vec3(1.0));
+	vec = clamp(vec, glm::vec3(-1), glm::vec3(1.0));
 	dst = vec * glm::vec3(INT8_MAX);
 }
 
@@ -164,7 +163,7 @@ void ConvertFace(u32 offset, const aiFace& src, glm::uvec3& dst)
 	dst = *(glm::uvec3*)src.mIndices + offset;
 }
 
-void FillUVBuffer(gETF::VertexBuffer& buf, const std::vector<aiMesh*>& src)
+void FillUVBuffer(GPU::Buffer<u8>& buf, const std::vector<aiMesh*>& src)
 {
 	auto* dst = (Vertex*) buf.Data.Data();
 	u32 offset = 0;
@@ -184,12 +183,11 @@ void FillUVBuffer(gETF::VertexBuffer& buf, const std::vector<aiMesh*>& src)
 }
 
 template<class T>
-void AllocateBuffer(u32 aiMesh::* COUNT, gETF::VertexBuffer& buf, const std::vector<aiMesh*>& src)
+void AllocateBuffer(u32 aiMesh::* COUNT, GPU::Buffer<u8>& buf, const std::vector<aiMesh*>& src)
 {
 	u32 finalCount = 0;
 	for(aiMesh* mesh : src) finalCount += mesh->*COUNT;
 
 	buf.Stride = sizeof(T);
-	buf.Count = finalCount;
-	buf.Data = Array<u8>(buf.Stride * buf.Count);
+	buf.Data = Array<u8>(buf.Stride * finalCount);
 }

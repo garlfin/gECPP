@@ -20,14 +20,14 @@ namespace GPU
 
 	class VAO : public Serializable<gE::Window*>, public Asset
 	{
-		SERIALIZABLE_PROTO_T(VAO, Serializable);
+		SERIALIZABLE_PROTO(VAO, Serializable);
 		DEFAULT_CM_CONSTRUCTOR(VAO);
 
 	public:
 		VAOFieldCounts Counts;
-		MaterialSlot Materials[GE_MAX_VAO_MATERIAL];
+		MaterialSlot Materials[GE_MAX_VAO_MATERIAL] = {};
 		VertexField Fields[GE_MAX_VAO_FIELD];
-		Buffer<u8> Buffers[GE_MAX_VAO_BUFFER];
+		Buffer<u8> Buffers[GE_MAX_VAO_BUFFER] = {};
 
 		void Free() override { for(Buffer<u8>& buffer : Buffers) buffer.Free(); };
 
@@ -42,7 +42,7 @@ namespace GPU
 
 	class IndexedVAO : public VAO
 	{
-		SERIALIZABLE_PROTO_T(IndexedVAO, VAO);
+		SERIALIZABLE_PROTO(IndexedVAO, VAO);
 		DEFAULT_CM_CONSTRUCTOR(IndexedVAO);
 
 	public:

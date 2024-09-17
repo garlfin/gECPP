@@ -14,7 +14,7 @@ namespace GPU
 
 	class Texture : public Serializable<gE::Window*>, public Asset
 	{
-		SERIALIZABLE_PROTO_T(Texture, Serializable);
+		SERIALIZABLE_PROTO(Texture, Serializable);
 
 	public:
 		Texture(gE::Window*, const ITextureSettings&, TextureData&&);
@@ -31,7 +31,7 @@ namespace GPU
 
  	class Texture2D : public Texture
 	{
- 		SERIALIZABLE_PROTO_T(Texture2D, Texture);
+ 		SERIALIZABLE_PROTO(Texture2D, Texture);
 
  	public:
  		Texture2D(gE::Window*, const TextureSettings2D&, TextureData&&);
@@ -43,7 +43,7 @@ namespace GPU
 
 	class Texture3D : public Texture
 	{
-		SERIALIZABLE_PROTO_T(Texture3D, Texture);
+		SERIALIZABLE_PROTO(Texture3D, Texture);
 
 	public:
 		Texture3D(gE::Window*, const TextureSettings3D&, TextureData&&);
@@ -55,7 +55,7 @@ namespace GPU
 
 	class TextureCube : public Texture
 	{
-		SERIALIZABLE_PROTO_T(TextureCube, Texture);
+		SERIALIZABLE_PROTO(TextureCube, Texture);
 
 	public:
 		TextureCube(gE::Window*, const TextureSettings1D&, TextureData&&);

@@ -20,7 +20,6 @@ namespace GL
 		IShader() = default;
 		explicit IShader(gE::Window*);
 
-
 		ALWAYS_INLINE void Bind() const override { glUseProgram(ID); }
 		ALWAYS_INLINE u32 GetUniformLocation(const std::string& name) const { return glGetUniformLocation(ID, name.c_str()); }
 		ALWAYS_INLINE void SetUniform(u8 loc, u32 val) const { glProgramUniform1ui(ID, loc, val); }
@@ -48,7 +47,7 @@ namespace GL
 		API_DEFAULT_CM_CONSTRUCTOR(Shader);
 
 	 public:
-		Shader(gE::Window*, const std::string& vertPath, const std::string& fragPath);
+		Shader(gE::Window*, const Path& vertPath, const Path& fragPath);
 		Shader(gE::Window*, const ShaderStage& vert, const ShaderStage& frag);
 	};
 
@@ -58,7 +57,7 @@ namespace GL
 		API_DEFAULT_CM_CONSTRUCTOR(ComputeShader);
 
 	 public:
-		ComputeShader(gE::Window*, const std::string& compPath);
+		ComputeShader(gE::Window*, const Path& compPath);
 		ComputeShader(gE::Window*, const ShaderStage& comp);
 
 		ALWAYS_INLINE void Dispatch(u16 x, u16 y, u16 z) const { Bind(); glDispatchCompute(x, y, z); }
@@ -75,7 +74,7 @@ namespace GL
 		API_DEFAULT_CM_CONSTRUCTOR(ShaderStage);
 
 	 public:
-		ShaderStage(gE::Window*, GPU::ShaderStageType, const std::string& path);
+		ShaderStage(gE::Window*, GPU::ShaderStageType, const Path& path);
 
 		ALWAYS_INLINE void Bind() const override { }
 		ALWAYS_INLINE void Attach(const IShader& shader) const { glAttachShader(shader.Get(), ID); }

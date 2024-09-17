@@ -14,7 +14,7 @@
 namespace GL
 {
 	template<typename T>
-	bool GetShaderStatus(const T& shader, const std::string& name = {}, const char* source = nullptr);
+	bool GetShaderStatus(const T& shader, const Path& name = {}, const char* source = nullptr);
 
 	IShader::IShader(gE::Window* window) : APIObject(window)
 	{
@@ -31,7 +31,7 @@ namespace GL
 		SetUniform(loc, GetWindow().GetSlotManager().Increment(&tex));
 	}
 
-	Shader::Shader(gE::Window* window, const std::string& vertPath, const std::string& fragPath) : IShader(window)
+	Shader::Shader(gE::Window* window, const Path& vertPath, const Path& fragPath) : IShader(window)
 	{
 		const ShaderStage vert(window, GPU::ShaderStageType::Vertex, vertPath);
 		const ShaderStage frag(window, GPU::ShaderStageType::Fragment, fragPath);
@@ -67,7 +67,7 @@ namespace GL
 		GetShaderStatus(*this);
 	}
 
-	ComputeShader::ComputeShader(gE::Window* window, const std::string& compPath)
+	ComputeShader::ComputeShader(gE::Window* window, const Path& compPath) : IShader(window)
 	{
 		const ShaderStage comp(window, GPU::ShaderStageType::Compute, compPath);
 
@@ -98,15 +98,17 @@ namespace GL
 		GetShaderStatus(*this);
 	}
 
-	ShaderStage::ShaderStage(gE::Window* window, GPU::ShaderStageType stage, const std::string& path) : APIObject(window)
+	ShaderStage::ShaderStage(gE::Window* window, GPU::ShaderStageType stage, const Path& path) : APIObject(window)
 	{
+		ID = glCreateShader((GLenum) stage);
+
 		std::string source, extensions;
 		std::ifstream file = std::ifstream(path, std::ios_base::in | std::ios_base::binary);
 
 		source += GL_VERSION_DIRECTIVE;
 		CompileShaderType(stage, source);
 		CompileDirectives(window->GetShaderCompilationState(), source);
-		GPU::CompileIncludes(file, extensions, source);
+		GPU::CompileIncludes(file, extensions, source, path);
 
 		const char* sourceCString = source.data();
 		const i32 sourceLength = source.length();
@@ -119,6 +121,8 @@ namespace GL
 
 	ShaderStage::ShaderStage(gE::Window* window, SUPER&& settings) : SUPER(MOVE(settings)), APIObject(window)
 	{
+		ID = glCreateShader((GLenum) settings.Type);
+
 		std::string source, extensions;
 		std::istringstream stream = std::istringstream(Source);
 
@@ -137,7 +141,7 @@ namespace GL
 	}
 
 	template<typename T>
-	bool GetShaderStatus(const T& shader, const std::string& name, const char* source)
+	bool GetShaderStatus(const T& shader, const Path& name, const char* source)
 	{
 		u32 id = shader.Get();
 

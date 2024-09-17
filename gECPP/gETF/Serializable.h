@@ -14,7 +14,6 @@
 #include "Serializable.h"
 #include "Graphics/Macro.h"
 
-// Defines SERIALIZABLE_PROTO_T
 // Defines SERIALIZABLE_PROTO
 
 // TODO: REDO THIS AGAIN
@@ -58,12 +57,12 @@ concept is_serializable_out = requires(T t, std::ostream& o)
 template<class T, class S>
 concept is_serializable = is_serializable_in<S, T> and is_serializable_out<T>;
 
-template<class T = void> struct Serializable;
+template<class T> struct Serializable;
 template<is_serializable<gE::Window*> T> struct FileContainer;
 
-template<is_serializable_in<gE::Window*> T> void ReadSerializableFromFile(gE::Window*, const char*, T&);
-template<is_serializable_in<gE::Window*> T> T* ReadSerializableFromFile(gE::Window*, const char*);
-template<is_serializable_out T> void WriteSerializableToFile(const char*, const T&);
+template<is_serializable_in<gE::Window*> T> void ReadSerializableFromFile(gE::Window*, const Path&, T&);
+template<is_serializable_in<gE::Window*> T> T* ReadSerializableFromFile(gE::Window*, const Path&);
+template<is_serializable_out T> void WriteSerializableToFile(const Path&, const T&);
 
 template<class T> void Read(std::istream& in, u32 count, T* t);
 template<class T> void Read(std::istream& in, T& t) { Read(in, 1, &t); }
@@ -82,7 +81,7 @@ template<typename UINT_T, class T> void ReadArraySerializable(std::istream& in, 
 template<typename UINT_T, class T> void ReadArraySerializable(std::istream& in, Array<T>& t, typename T::SETTINGS_T s) { ReadArraySerializable<UINT_T>(in, 1, &t, s); }
 
 template<class T> void ReadSerializable(std::istream& in, u32 count, T* t, typename T::SETTINGS_T s);
-template<class T> void ReadSerializable(std::istream& in, Serializable<T>& t, typename T::SETTINGS_T s) { ReadSerializable<T>(in, 1, &t, s); }
+template<class T> void ReadSerializable(std::istream& in, T& t, typename T::SETTINGS_T s) { ReadSerializable<T>(in, 1, &t, s); }
 
 template<> void Read(std::istream& in, u32 count, std::string* t);
 template<> void Write(std::ostream& out, u32 count, const std::string* t);
@@ -96,7 +95,7 @@ template<> void Write(std::ostream& out, u32 count, const std::string* t);
 		FUNC_RETURN I##FUNC_NAME FUNC_ARG;
 
 // Implementation
-#define SERIALIZABLE_PROTO_T(TYPE, SUPER) \
+#define SERIALIZABLE_PROTO(TYPE, SUPER) \
 	public: \
 		explicit TYPE(istream& in, SETTINGS_T s) : SUPER(in, s) { ISerialize(in, s); } \
 		TYPE() = default; \
@@ -105,17 +104,6 @@ template<> void Write(std::ostream& out, u32 count, const std::string* t);
 		inline void Deserialize(ostream& out) const override { SUPER::Deserialize(out); TYPE::IDeserialize(out); } \
 	private: \
 		void ISerialize(istream& in, SETTINGS_T s); \
-		void IDeserialize(ostream& out) const;
-
-#define SERIALIZABLE_PROTO(TYPE, SUPER) \
-	public: \
-		explicit TYPE(istream& in) : SUPER(in) { ISerialize(in); } \
-		TYPE() = default; \
-		typedef SUPER::SETTINGS_T SETTINGS_T;\
-		inline void Serialize(istream& in) override { SUPER::Serialize(in); TYPE::ISerialize(in); } \
-		inline void Deserialize(ostream& out) const override { SUPER::Deserialize(out); TYPE::IDeserialize(out); } \
-	private: \
-		void ISerialize(istream& in); \
 		void IDeserialize(ostream& out) const;
 
 #define SERIALIZABLE_REFLECTABLE(TYPE) \
@@ -138,23 +126,9 @@ struct Serializable
 	virtual ~Serializable() = default;
 };
 
-template<>
-struct Serializable<void>
-{
-	Serializable() = default;
-	explicit Serializable(istream& ptr) { }
-
-	typedef void SETTINGS_T;
-
-	virtual void Deserialize(ostream& ptr) const {};
-	virtual void Serialize(istream& ptr) {};
-
-	virtual ~Serializable() = default;
-};
-
 struct IFileContainer : public Serializable<gE::Window*>
 {
-	SERIALIZABLE_PROTO_T(IFileContainer, Serializable<gE::Window*>);
+	SERIALIZABLE_PROTO(IFileContainer, Serializable<gE::Window*>);
 
  public:
 	template<class T> requires requires { T::Type; }
@@ -201,34 +175,30 @@ public:
 };
 
 template<is_serializable_in<gE::Window*> T>
-void ReadSerializableFromFile(gE::Window* w, const char* path, T& t)
+void ReadSerializableFromFile(gE::Window* window, const Path& path, T& t)
 {
 	std::ifstream file;
 	file.open(path, std::ios::in | std::ios::binary);
 	assert(file.is_open());
 
-	t.Serialize(file, w);
+	t.Serialize(file, window);
 
 	file.close();
 }
 
 template<is_serializable_in<gE::Window*> T>
-T* ReadSerializableFromFile(gE::Window* w, const char* path)
+T* ReadSerializableFromFile(gE::Window* window, const Path& path)
 {
 	T* t = new T();
-	ReadSerializableFromFile(w, path, *t);
+	ReadSerializableFromFile(window, path, *t);
 	return t;
 }
 
 template<is_serializable_out T>
-void WriteSerializableToFile(const char* path, const T& t)
+void WriteSerializableToFile(const Path& path, const T& t)
 {
-	std::ofstream file;
-	file.open(path, std::ios::out | std::ios::binary);
-
+	std::ofstream file(path, std::ios::out | std::ios::binary);
 	t.Deserialize(file);
-
-	file.close();
 }
 
 template<typename UINT_T, class T>
@@ -281,6 +251,7 @@ inline void Read(std::istream& in, u32 count, std::string* t)
 		Read(in, length, str.data());
 	}
 }
+
 template<>
 inline void Write(std::ostream& out, u32 count, const std::string* t)
 {
@@ -299,17 +270,21 @@ template<typename T>
 void Read(istream& src, u32 count, T* ts)
 {
 	if(!count) return;
-	if constexpr(std::is_trivially_copyable_v<T>)
-		src.read((char*) ts, sizeof(T) * count);
-	else
-		for(u32 i = 0; i < count; i++) ts[i].Serialize(src);
+	static_assert(std::is_trivially_copyable_v<T> && !is_serializable_out<T>);
+	src.read((char*) ts, sizeof(T) * count);
+}
+
+template<class T>
+void ReadSerializable(istream& src, u32 count, T* ts)
+{
+	for(u32 i = 0; i < count; i++) ts[i].Serialize(src);
 }
 
 template<typename T>
 void Write(ostream& out, u32 count, const T* ts)
 {
 	if(!count) return;
-	if constexpr(std::is_trivially_copyable_v<T>)
+	if constexpr(std::is_trivially_copyable_v<T> && !is_serializable_out<T>)
 		out.write((char*) ts, sizeof(T) * count);
 	else
 		for(u32 i = 0; i < count; i++) ts[i].Deserialize(out);
@@ -332,5 +307,6 @@ void ReadArraySerializable(std::istream& in, u32 count, Array<T>* ts, typename T
 template<class T> void ReadSerializable(std::istream& in, u32 count, T* t, typename T::SETTINGS_T s)
 {
 	if(!count) return;
-	for(u32 i = 0; i < count; i++) t[i].Serialize(in, s);
+	for(u32 i = 0; i < count; i++)
+		t[i].Serialize(in, s);
 }

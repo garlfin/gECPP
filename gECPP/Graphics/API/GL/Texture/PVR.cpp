@@ -7,18 +7,18 @@
 
 namespace PVR
 {
-	Array<u8> Read(const char* file, Header& header)
+	Array<u8> Read(const Path& path, Header& header)
 	{
 		std::ifstream src;
-		src.open(file, std::ios::in | std::ios::binary);
+		src.open(path, std::ios::in | std::ios::binary);
 
-		if(!file) return {};
+		if(!src.is_open()) return {};
 
 		src.seekg(0, std::ios::end);
 		size_t copySize = src.tellg();
 		src.seekg(0, std::ios::beg);
 
-		header.Serialize(src);
+		header.Serialize(src, nullptr);
 
 		copySize -= src.tellg();
 		Array<u8> data(copySize);
@@ -27,7 +27,7 @@ namespace PVR
 		return data;
 	}
 
-	GL::Texture* Read(gE::Window* window, const char* path, GPU::WrapMode wrapMode, GPU::FilterMode filterMode)
+	GL::Texture* Read(gE::Window* window, const Path& path, GPU::WrapMode wrapMode, GPU::FilterMode filterMode)
 	{
 		Header header;
 		Array<u8> imageData = Read(path, header);
@@ -86,21 +86,21 @@ namespace PVR
 		return tex;
 	}
 
-	void Header::ISerialize(istream& src)
+	void Header::ISerialize(istream& in, SETTINGS_T)
 	{
-		Version = ::Read<u32>(src);
-		Flags = ::Read<PVR::Flags>(src);
-		Format = ::Read<PixelFormat>(src);
-		ColorSpace=::Read<PVR::ColorSpace>(src);
-		::Read<uint32_t>(src); // This was like bpc or something; unimportant w/ compression
-		Size = ::Read<glm::u32vec2>(src);
+		Version = ::Read<u32>(in);
+		Flags = ::Read<PVR::Flags>(in);
+		Format = ::Read<PixelFormat>(in);
+		ColorSpace=::Read<PVR::ColorSpace>(in);
+		::Read<uint32_t>(in); // This was like bpc or something; unimportant w/ compression
+		Size = ::Read<glm::u32vec2>(in);
 		Size = { Size.y, Size.x }; // NOLINT
 		// they store it height, width 🤦‍♂️
-		Depth = ::Read<u32>(src);
-		Surfaces = ::Read<u32>(src);
-		Faces = ::Read<u32>(src);
-		MipCount = ::Read<u32>(src);
-		src.seekg(::Read<u32>(src), std::ios::cur); // I couldn't give two hoots about the metadata
+		Depth = ::Read<u32>(in);
+		Surfaces = ::Read<u32>(in);
+		Faces = ::Read<u32>(in);
+		MipCount = ::Read<u32>(in);
+		in.seekg(::Read<u32>(in), std::ios::cur); // I couldn't give two hoots about the metadata
 	}
 
 	void Header::IDeserialize(ostream&) const { }

@@ -12,7 +12,7 @@ namespace gETF::UI
 {
 	class IElement : public Serializable<const Header&>
 	{
-	 	SERIALIZABLE_PROTO_T(IElement, Serializable<const Header&>);
+	 	SERIALIZABLE_PROTO(IElement, Serializable<const Header&>);
 
 	 public:
 		IElement(gE::Window* w, IElement* p, Transform& t) : _window(w), _parent(p), _transform(&t) {};
@@ -30,7 +30,7 @@ namespace gETF::UI
 	template<class T>
 	class Element : public IElement
 	{
-		SERIALIZABLE_PROTO_T(Element, IElement);
+		SERIALIZABLE_PROTO(Element, IElement);
 
 	 public:
 		Element(gE::Window* w, IElement* p, Transform& t, const T& r, T& s) :
@@ -49,12 +49,12 @@ namespace gETF::UI
 
 	class Frame : public Element<FrameStyle>
 	{
-		SERIALIZABLE_PROTO_T(Frame, Element<FrameStyle>);
+		SERIALIZABLE_PROTO(Frame, Element<FrameStyle>);
 	};
 
 	class Scene : public Serializable<const Header&>
 	{
-		SERIALIZABLE_PROTO_T(Scene, Serializable<const Header&>);
+		SERIALIZABLE_PROTO(Scene, Serializable<const Header&>);
 
 	 public:
 		std::string Name;
@@ -63,7 +63,7 @@ namespace gETF::UI
 
  	struct UI : public Serializable<const Header&>
 	{
-		SERIALIZABLE_PROTO_T(UI, Serializable<const Header&>);
+		SERIALIZABLE_PROTO(UI, Serializable<const Header&>);
 
 	 public:
 		Array<Frame::STYLE_T> FrameStyles;

@@ -32,11 +32,6 @@ add_library(GETF STATIC gECPP/gETF/File.h gECPP/gETF/File.cpp gECPP/Engine/Binar
 # PUGIXML
 add_library(PUGIXML STATIC Vendor/PUGIXML/pugixml.cpp Vendor/PUGIXML/pugixml.hpp Vendor/PUGIXML/pugiconfig.hpp)
 
-# GEMODEL
-add_executable(gEModel gEModel/main.cpp gEModel/Vertex.h)
-target_link_libraries(gEModel PRIVATE ASSIMP GETF GLAD)
-# gotta link glad or it yaps about linking
-
 # GEUI
 add_executable(gEUI gEUI/main.cpp)
 target_link_libraries(gEUI PRIVATE PUGIXML GETF GLAD)
@@ -50,3 +45,7 @@ target_link_libraries(gECPP GLAD GLFW GETF)
 file(GLOB_RECURSE VOXELDEMO_SRC "Demo/*.cpp" "Demo/*.h" "gECPP/*.inl")
 add_executable(VoxelDemo ${VOXELDEMO_SRC})
 target_link_libraries(VoxelDemo gECPP)
+
+# GEMODEL
+add_executable(gEModel gEModel/main.cpp gEModel/Vertex.h)
+target_link_libraries(gEModel PRIVATE GLAD gECPP ASSIMP)
