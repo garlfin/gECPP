@@ -65,7 +65,7 @@ namespace GL
 	class Texture2D final : public Texture
 	{
 	 public:
-		Texture2D(gE::Window* window, const GPU::TextureSettings2D& settings, GPU::TextureData&& = {});
+		Texture2D(gE::Window* window, const GPU::TextureSettings2D& settings, GPU::TextureData&& = DEFAULT);
 
 		NODISCARD ALWAYS_INLINE TextureSize2D GetSize(u8 mip = 0) const { return max(_size >> glm::u32vec2(mip), glm::u32vec2(1)); }
 		void CopyFrom(const Texture&) override;
@@ -77,7 +77,7 @@ namespace GL
 	class Texture3D final : public Texture
 	{
 	 public:
-		Texture3D(gE::Window* window, const GPU::TextureSettings3D& settings, GPU::TextureData&& = {});
+		Texture3D(gE::Window* window, const GPU::TextureSettings3D& settings, GPU::TextureData&& = DEFAULT);
 
 		NODISCARD ALWAYS_INLINE TextureSize3D GetSize(u8 mip = 0) const { return max(_size >> glm::u32vec3(mip), glm::u32vec3(1)); }
 		void CopyFrom(const Texture&) override;
@@ -89,7 +89,7 @@ namespace GL
 	class TextureCube final : public Texture
 	{
 	 public:
-		TextureCube(gE::Window* window, const GPU::TextureSettings1D& settings, GPU::TextureData&& = {});
+		TextureCube(gE::Window* window, const GPU::TextureSettings1D& settings, GPU::TextureData&& = DEFAULT);
 
 		NODISCARD ALWAYS_INLINE TextureSize1D GetSize(u8 mip = 0) const { return MAX(_size >> mip, 1); }
 		void CopyFrom(const Texture&) override {};

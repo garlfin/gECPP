@@ -13,7 +13,7 @@ namespace gE::VoxelDemo
  	class StaticMeshEntity : public Entity
 	{
 	 public:
-		StaticMeshEntity(Window* window, Reference<API::IVAO> mesh, const Array<Reference<Material>>& mat = {}) :
+		StaticMeshEntity(Window* window, Reference<API::IVAO> mesh, const Array<Reference<Material>>& mat = DEFAULT) :
 			Entity(window),
 			_renderer(this, mesh, _materialHolder),
 			_materialHolder(this, mat)

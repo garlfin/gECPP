@@ -12,16 +12,18 @@ namespace GL
 
 	public:
 		IVAO() = default;
-		explicit IVAO(gE::Window* window, GPU::VAO& vao) : GLObject(window),
-			_vao(&vao) {}
+		IVAO(gE::Window* window, GPU::VAO& vao);
 
-		GET_CONST(const GPU::VAO&, Data, *_vao);
+		GET_CONST(const GPU::VAO&, Data, *_settings);
 
 		ALWAYS_INLINE void Bind() const final { glBindVertexArray(ID); }
 		virtual void Draw(u8 index, u16 instanceCount = 1) const = 0;
 
+		NODISCARD ALWAYS_INLINE const Buffer<u8>& GetBuffer(u8 i) { return _buffers[i]; }
+
 	private:
-		GPU::VAO* _vao;
+		GPU::VAO* _settings;
+		Array<Buffer<u8>> _buffers;
 	};
 
 	class VAO : protected GPU::VAO, public IVAO
@@ -32,7 +34,7 @@ namespace GL
 	 public:
 		GET_CONST(const GPU::VAO&, Data, *this);
 
-		NODISCARD ALWAYS_INLINE const Buffer<u8>& GetBuffer(u8 i) { return _buffers[i]; }
+
 
 		using SUPER::Free;
 		using SUPER::IsFree;
@@ -40,9 +42,6 @@ namespace GL
 		void Draw(u8 index, u16 instanceCount = 1) const override;
 
 		~VAO() override;
-
-	 private:
-		Array<Buffer<u8>> _buffers;
 	};
 
 	class IndexedVAO final : protected GPU::IndexedVAO, public IVAO

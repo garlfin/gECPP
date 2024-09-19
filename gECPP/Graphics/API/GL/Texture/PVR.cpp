@@ -12,7 +12,7 @@ namespace PVR
 		std::ifstream src;
 		src.open(path, std::ios::in | std::ios::binary);
 
-		if(!src.is_open()) return {};
+		if(!src.is_open()) LOG("ERROR: COULD NOT OPEN FILE " << path);
 
 		src.seekg(0, std::ios::end);
 		size_t copySize = src.tellg();
@@ -81,7 +81,8 @@ namespace PVR
 
 			tex = new GL::TextureCube(window, settings, std::move(data));
 		}
-		else LOG("Unsupported texture format!");
+		else
+			LOG("Unsupported texture format!");
 
 		return tex;
 	}
@@ -91,7 +92,7 @@ namespace PVR
 		Version = ::Read<u32>(in);
 		Flags = ::Read<PVR::Flags>(in);
 		Format = ::Read<PixelFormat>(in);
-		ColorSpace=::Read<PVR::ColorSpace>(in);
+		ColorSpace = ::Read<PVR::ColorSpace>(in);
 		::Read<uint32_t>(in); // This was like bpc or something; unimportant w/ compression
 		Size = ::Read<glm::u32vec2>(in);
 		Size = { Size.y, Size.x }; // NOLINT

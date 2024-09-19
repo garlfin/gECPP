@@ -45,6 +45,8 @@
 #define CONSTEXPR_GLOBAL inline constexpr const
 #endif
 
+#define DEFAULT {}
+
 #define GET_CONST(TYPE, ACCESSOR, FIELD) NODISCARD ALWAYS_INLINE TYPE Get##ACCESSOR() const { return FIELD; }
 #define GET(TYPE, ACCESSOR, FIELD) \
 	NODISCARD ALWAYS_INLINE TYPE Get##ACCESSOR() { return FIELD; } \

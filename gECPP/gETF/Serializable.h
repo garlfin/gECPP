@@ -100,7 +100,7 @@ template<> void Write(std::ostream& out, u32 count, const std::string* t);
 		explicit TYPE(istream& in, SETTINGS_T s) : SUPER(in, s) { ISerialize(in, s); } \
 		TYPE() = default; \
 		typedef SUPER::SETTINGS_T SETTINGS_T;\
-		inline void Serialize(istream& in, SETTINGS_T s) override { SUPER::Serialize(in, s); TYPE::ISerialize(in, s); } \
+		inline void Serialize(istream& in, SETTINGS_T s) { *this = MOVE(TYPE(in, s)); } \
 		inline void Deserialize(ostream& out) const override { SUPER::Deserialize(out); TYPE::IDeserialize(out); } \
 	private: \
 		void ISerialize(istream& in, SETTINGS_T s); \
@@ -121,7 +121,6 @@ struct Serializable
 	typedef T SETTINGS_T;
 
 	virtual void Deserialize(ostream& ptr) const {};
-	virtual void Serialize(istream& ptr, T s) {};
 
 	virtual ~Serializable() = default;
 };

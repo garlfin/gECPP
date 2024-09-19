@@ -12,7 +12,10 @@ namespace GPU
 	class Buffer : public Serializable<gE::Window*>, public Asset
 	{
 		SERIALIZABLE_PROTO(Buffer, Serializable<gE::Window*>);
-		DEFAULT_CM_CONSTRUCTOR(Buffer);
+		public: Buffer(const Buffer&) = default;
+		Buffer& operator=(const Buffer&) = default;
+		public: Buffer(Buffer&&) = default;
+		Buffer& operator=(Buffer&&) = default;
 
 	 public:
 		static_assert(!std::is_pointer_v<T>, "Buffer data shouldn't be a pointer!");

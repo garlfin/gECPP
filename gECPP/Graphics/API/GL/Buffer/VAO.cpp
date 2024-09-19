@@ -6,27 +6,31 @@
 
 namespace GL
 {
-	VAO::VAO(gE::Window* window, SUPER&& settings) : SUPER(MOVE(settings)), IVAO(window, *this)
+	IVAO::IVAO(gE::Window* window, GPU::VAO& vao): GLObject(window), _settings(&vao), _buffers(_settings->Counts.BufferCount)
 	{
 		glCreateVertexArrays(1, &ID);
 
-		for(u8 i = 0; i < settings.Counts.BufferCount; i++)
+		for(u8 i = 0; i < _settings->Counts.BufferCount; i++)
 		{
-			GPU::Buffer<u8>& bufSettings = Buffers[i];
+			GPU::Buffer<u8>& bufSettings = _settings->Buffers[i];
 			Buffer<u8>& buffer = _buffers[i];
 
 			buffer = Buffer(window, MOVE(bufSettings));
 			glVertexArrayVertexBuffer(ID, i, buffer.Get(), 0, bufSettings.Stride);
 		}
 
-		for(u8 i = 0; i < settings.Counts.FieldCount; i++)
+		for(u8 i = 0; i < _settings->Counts.FieldCount; i++)
 		{
-			const GPU::VertexField& field = settings.Fields[i];
+			const GPU::VertexField& field = _settings->Fields[i];
 
 			glEnableVertexArrayAttrib(ID, field.Index);
 			glVertexArrayAttribBinding(ID, field.Index, field.BufferIndex);
 			glVertexArrayAttribFormat(ID, field.Index, field.ElementCount, field.ElementType, field.Normalized, field.Offset);
 		}
+	}
+
+	VAO::VAO(gE::Window* window, SUPER&& settings) : SUPER(MOVE(settings)), IVAO(window, *this)
+	{
 	}
 
 	void VAO::Draw(u8 index, u16 instanceCount) const

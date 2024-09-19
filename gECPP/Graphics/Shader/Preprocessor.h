@@ -28,8 +28,8 @@ namespace GPU
 	};
 
 	void CompileDirectives(const Array<PreprocessorPair>& pairs, std::string& out);
-	void CompileIncludes(std::istream& source, std::string& extensions, std::string& out, const Path& path = {});
+	void CompileIncludes(std::istream& source, std::string& extensions, std::string& out, const Path& path = DEFAULT);
 	void CompileShaderType(ShaderStageType stage, std::string& out);
-	Path GetIncludePath(const std::string&, const Path& path = {});
+	Path GetIncludePath(const std::string&, const Path& path = DEFAULT);
 }
 

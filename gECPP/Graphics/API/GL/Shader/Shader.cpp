@@ -14,7 +14,7 @@
 namespace GL
 {
 	template<typename T>
-	bool GetShaderStatus(const T& shader, const Path& name = {}, const char* source = nullptr);
+	bool GetShaderStatus(const T& shader, const Path& name = DEFAULT, const char* source = DEFAULT);
 
 	IShader::IShader(gE::Window* window) : APIObject(window)
 	{

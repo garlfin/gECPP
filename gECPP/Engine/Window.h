@@ -40,7 +40,7 @@ namespace gE
 		explicit Monitor(const GLFWvidmode*);
 		Monitor() = default;
 
-		const char* Name = nullptr;
+		const char* Name = DEFAULT;
 		TextureSize2D Size = TextureSize2D(0);
 		u16 RefreshRate = 0;
 

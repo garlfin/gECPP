@@ -15,7 +15,7 @@ namespace gE
 	 public:
 		explicit MaterialHolder(Entity* o) : Component(o) { };
 
-		explicit MaterialHolder(Entity* o, const Array<Reference<Material>>& materials = {})
+		explicit MaterialHolder(Entity* o, const Array<Reference<Material>>& materials = DEFAULT)
 			: Component(o)
 		{
 			if(materials.Count()) materials.CopyToCArray(_materials);
@@ -47,7 +47,7 @@ namespace gE
 		~MaterialHolder() override = default;
 
 	 private:
-		Reference<Material> _materials[GE_MAX_MATERIAL]{};
+		Reference<Material> _materials[GE_MAX_MATERIAL] = DEFAULT;
 	};
 }
 

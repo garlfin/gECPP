@@ -25,9 +25,9 @@ namespace GPU
 
 	public:
 		VAOFieldCounts Counts;
-		MaterialSlot Materials[GE_MAX_VAO_MATERIAL] = {};
+		MaterialSlot Materials[GE_MAX_VAO_MATERIAL] = DEFAULT;;
 		VertexField Fields[GE_MAX_VAO_FIELD];
-		Buffer<u8> Buffers[GE_MAX_VAO_BUFFER] = {};
+		Buffer<u8> Buffers[GE_MAX_VAO_BUFFER] = DEFAULT;;
 
 		void Free() override { for(Buffer<u8>& buffer : Buffers) buffer.Free(); };
 
