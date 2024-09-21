@@ -4,15 +4,13 @@
 
 #pragma once
 
-#include "GLM/vec2.hpp"
-#include "GLM/vec3.hpp"
-#include "GLM/vec4.hpp"
-#include "GLM/gtx/quaternion.hpp"
-#include "GLM/mat3x3.hpp"
-#include "GLAD/types.h"
-
 #include <cstdint>
 #include <filesystem>
+
+#include "GLM/mat3x3.hpp"
+#include "GLM/vec2.hpp"
+#include "GLM/vec3.hpp"
+#include "GLM/gtx/quaternion.hpp"
 
 #define GL_BYTE 0x1400
 #define GL_UNSIGNED_BYTE 0x1401
@@ -103,17 +101,8 @@ inline void Decompose(const glm::mat4& m, glm::vec3& p, glm::quat& r, glm::vec3&
 		length((glm::vec3) m[3])
 	};
 
-	glm::mat3 temp
-	{
-		m[0] / s.x,
-		m[1] / s.y,
-		m[2] / s.z
-	};
-
-	float root;
-
 	r.w = glm::sqrt(m[0][0] + m[1][1] + m[2][2] + 1.0) * 0.5f;
-	root = r.w * 4.0;
+	float root = r.w * 4.0;
 	r.x = (m[1][2] - m[2][1]) * root;
 	r.y = (m[2][0] - m[0][2]) * root;
 	r.z = (m[0][1] - m[1][0]) * root;

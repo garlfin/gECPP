@@ -3,8 +3,9 @@
 //
 
 #include "VoxelPipeline.h"
-#include "Engine/Entity/VoxelCapture.h"
-#include "Engine/Window.h"
+
+#include <Engine/Window.h>
+#include <Engine/Entity/VoxelCapture.h>
 
 #define MODE_TAA_COMBINE 0
 #define MODE_TAA_DOWNSAMPLE 1

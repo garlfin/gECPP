@@ -9,11 +9,11 @@ namespace gE
 {
 	CameraSettings3D CreateVoxelSettings(u16, float);
 
-	VoxelCapture::VoxelCapture(Window* w, u16 r, float s) : Entity(w, Flags(true, UINT8_MAX)),
-		_camera(this, _target, CreateVoxelSettings(r, s)),
+	VoxelCapture::VoxelCapture(Window* w, u16 resolution, float size) : Entity(w, Flags(true, UINT8_MAX)),
+		_camera(this, _target, CreateVoxelSettings(resolution, size)),
 		_target(*this, _camera)
 	{
-		GetTransform().SetScale() = glm::vec3(s);
+		GetTransform().SetScale() = glm::vec3(size);
 	}
 
 	void VoxelCapture::GetGLVoxelScene(API::VoxelScene& scene)

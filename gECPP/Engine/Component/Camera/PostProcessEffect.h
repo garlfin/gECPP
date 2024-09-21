@@ -4,9 +4,7 @@
 
 #pragma once
 
-#include "Prototype.h"
-#include "RenderTarget.h"
-#include <Graphics/Texture/Texture.h>
+#include <gECPP/Engine/Binary/Macro.h>
 
 namespace gE
 {
@@ -19,9 +17,11 @@ namespace gE
 	 public:
 		explicit PostProcessEffect(T& target) : _target(target) {};
 
-		virtual void RenderPass(T::TEX_T&, T::TEX_T&) = 0;
+		virtual void RenderPass(typename T::TEX_T&, typename T::TEX_T&) = 0;
 
 		GET(T&, Target, _target);
+
+		virtual ~PostProcessEffect() = default;
 
 	 private:
 		T& _target;

@@ -4,10 +4,10 @@
 
 #pragma once
 
+#include <Engine/AssetManager.h>
+#include <Engine/Renderer/Material.h>
 #include <Graphics/Shader/Shader.h>
 #include <Graphics/Texture/Texture.h>
-#include "Engine/Renderer/Material.h"
-#include "Engine/AssetManager.h"
 
 namespace gE
 {

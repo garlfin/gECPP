@@ -16,19 +16,19 @@
 
 #include "pugixml.hpp"
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 #include <assert.h>
 #include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #ifdef PUGIXML_WCHAR_MODE
 #	include <wchar.h>
 #endif
 
 #ifndef PUGIXML_NO_XPATH
-#	include <math.h>
 #	include <float.h>
+#	include <math.h>
 #endif
 
 #ifndef PUGIXML_NO_STL
@@ -4755,7 +4755,7 @@ PUGI_IMPL_NS_BEGIN
 		xml_encoding buffer_encoding = get_buffer_encoding(encoding, contents, size);
 
 		// if convert_buffer below throws bad_alloc, we still need to deallocate contents if we own it
-		auto_deleter<void> contents_guard(own ? contents : 0, xml_memory::deallocate);
+		auto_deleter contents_guard(own ? contents : 0, xml_memory::deallocate);
 
 		// get private buffer
 		char_t* buffer = 0;
@@ -5000,7 +5000,7 @@ PUGI_IMPL_NS_BEGIN
 		size_t max_suffix_size = sizeof(char_t);
 
 		// read stream data into memory (guard against stream exceptions with buffer holder)
-		auto_deleter<void> buffer(xml_memory::allocate(read_length * sizeof(T) + max_suffix_size), xml_memory::deallocate);
+		auto_deleter buffer(xml_memory::allocate(read_length * sizeof(T) + max_suffix_size), xml_memory::deallocate);
 		if (!buffer.data) return status_out_of_memory;
 
 		stream.read(static_cast<T*>(buffer.data), static_cast<std::streamsize>(read_length));
@@ -5575,17 +5575,17 @@ namespace pugi
 
 	PUGI_IMPL_FN xml_object_range<xml_node_iterator> xml_node::children() const
 	{
-		return xml_object_range<xml_node_iterator>(begin(), end());
+		return xml_object_range(begin(), end());
 	}
 
 	PUGI_IMPL_FN xml_object_range<xml_named_node_iterator> xml_node::children(const char_t* name_) const
 	{
-		return xml_object_range<xml_named_node_iterator>(xml_named_node_iterator(child(name_)._root, _root, name_), xml_named_node_iterator(0, _root, name_));
+		return xml_object_range(xml_named_node_iterator(child(name_)._root, _root, name_), xml_named_node_iterator(0, _root, name_));
 	}
 
 	PUGI_IMPL_FN xml_object_range<xml_attribute_iterator> xml_node::attributes() const
 	{
-		return xml_object_range<xml_attribute_iterator>(attributes_begin(), attributes_end());
+		return xml_object_range(attributes_begin(), attributes_end());
 	}
 
 	PUGI_IMPL_FN bool xml_node::operator==(const xml_node& r) const
@@ -7405,7 +7405,7 @@ namespace pugi
 		reset();
 
 		using impl::auto_deleter; // MSVC7 workaround
-		auto_deleter<FILE> file(impl::open_file(path_, "rb"), impl::close_file);
+		auto_deleter file(impl::open_file(path_, "rb"), impl::close_file);
 
 		return load_file_impl(static_cast<impl::xml_document_struct*>(_root), file.data, options, encoding, &_buffer);
 	}
@@ -7415,7 +7415,7 @@ namespace pugi
 		reset();
 
 		using impl::auto_deleter; // MSVC7 workaround
-		auto_deleter<FILE> file(impl::open_file_wide(path_, L"rb"), impl::close_file);
+		auto_deleter file(impl::open_file_wide(path_, L"rb"), impl::close_file);
 
 		return load_file_impl(static_cast<impl::xml_document_struct*>(_root), file.data, options, encoding, &_buffer);
 	}
@@ -7488,7 +7488,7 @@ namespace pugi
 	PUGI_IMPL_FN bool xml_document::save_file(const char* path_, const char_t* indent, unsigned int flags, xml_encoding encoding) const
 	{
 		using impl::auto_deleter; // MSVC7 workaround
-		auto_deleter<FILE> file(impl::open_file(path_, (flags & format_save_file_text) ? "w" : "wb"), impl::close_file);
+		auto_deleter file(impl::open_file(path_, (flags & format_save_file_text) ? "w" : "wb"), impl::close_file);
 
 		return impl::save_file_impl(*this, file.data, indent, flags, encoding) && fclose(file.release()) == 0;
 	}
@@ -7496,7 +7496,7 @@ namespace pugi
 	PUGI_IMPL_FN bool xml_document::save_file(const wchar_t* path_, const char_t* indent, unsigned int flags, xml_encoding encoding) const
 	{
 		using impl::auto_deleter; // MSVC7 workaround
-		auto_deleter<FILE> file(impl::open_file_wide(path_, (flags & format_save_file_text) ? L"w" : L"wb"), impl::close_file);
+		auto_deleter file(impl::open_file_wide(path_, (flags & format_save_file_text) ? L"w" : L"wb"), impl::close_file);
 
 		return impl::save_file_impl(*this, file.data, indent, flags, encoding) && fclose(file.release()) == 0;
 	}
@@ -12894,7 +12894,7 @@ namespace pugi
 		else
 		{
 			using impl::auto_deleter; // MSVC7 workaround
-			auto_deleter<impl::xpath_query_impl> impl(qimpl, impl::xpath_query_impl::destroy);
+			auto_deleter impl(qimpl, impl::xpath_query_impl::destroy);
 
 			qimpl->root = impl::xpath_parser::parse(query, variables, &qimpl->alloc, &_result);
 

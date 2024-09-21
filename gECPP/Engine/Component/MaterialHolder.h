@@ -1,11 +1,11 @@
 #pragma once
 
+#include <Engine/Renderer/Material.h>
 #include <gECPP/Engine/Component/Component.h>
-#include "Engine/Renderer/Material.h"
 #include "Engine/Binary/Nullable.h"
 
 #ifndef GE_MAX_MATERIAL
-#define GE_MAX_MATERIAL 4
+#define GE_MAX_MATERIAL GE_MAX_VAO_MATERIAL
 #endif
 
 namespace gE

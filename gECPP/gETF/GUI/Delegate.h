@@ -1,6 +1,3 @@
-//
-// Created by scion on 3/6/2024.
-//
 
 #pragma once
 
@@ -25,6 +22,8 @@ namespace gETF::UI
 
 		virtual void OnCall(IElement*) = 0;
 
+		virtual ~IDelegate() = default;
+
 	 protected:
 		gE::Entity* Entity;
 	};
@@ -36,5 +35,7 @@ namespace gETF::UI
 		explicit Delegate(T* t) : IDelegate(t) {};
 
 		GET_CONST(T*, Entity, (T*) Entity);
+
+		virtual ~Delegate() = default;
 	};
 }

@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <cstring>
-#include "Engine/Math/Math.h"
 #include "Macro.h"
 
 template<class T>

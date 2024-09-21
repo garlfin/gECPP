@@ -4,12 +4,12 @@
 
 #pragma once
 
-#include "Engine/Math/Math.h"
-#include "Graphics/Texture/Texture.h"
-#include "Graphics/Buffer/Buffer.h"
-#include "Engine/Renderer/DefaultPipeline.h"
-#include "Engine/Component/Camera/Camera.h"
-#include "Graphics/Shader/Shader.h"
+#include <Engine/Component/Camera/Camera.h>
+#include <Engine/Math/Math.h>
+#include <Engine/Renderer/DefaultPipeline.h>
+#include <Graphics/Buffer/Buffer.h>
+#include <Graphics/Shader/Shader.h>
+#include <Graphics/Texture/Texture.h>
 
 namespace GL
 {
@@ -61,7 +61,7 @@ namespace gE::VoxelPipeline
 		void PostProcessPass(float d) override;
 
 	 private:
-		glm::ivec3 _velocity;
+		glm::ivec3 _velocity = DEFAULT;
 		API::Texture3D _color, _colorBack;
 	};
 }

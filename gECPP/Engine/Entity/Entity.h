@@ -4,16 +4,19 @@
 
 #pragma once
 
-#include "Engine/Binary/Binary.h"
-#include "Prototype.h"
-#include "Engine/Component/Transform.h"
 #include <vector>
+#include <Engine/Binary/Binary.h>
+#include <Engine/Component/Transform.h>
+
+#include "Prototype.h"
 
 namespace gE
 {
  	class Entity
 	{
 	 public:
+		virtual ~Entity() = default;
+
 		explicit Entity(Window*, Flags = Flags(), Entity* = nullptr);
 
 		void Destroy(bool flagChildren = true);

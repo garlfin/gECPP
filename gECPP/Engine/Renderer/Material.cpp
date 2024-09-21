@@ -10,7 +10,7 @@
 namespace gE
 {
 	Material::Material(Window* window, const Reference<API::Shader>& shader, DepthFunction depthFunc, CullMode cullMode) :
-		_window(window), _shader(shader), _depthFunc(depthFunc), _cullMode(cullMode)
+		_shader(shader), _depthFunc(depthFunc), _cullMode(cullMode), _window(window)
 	{
 	}
 

@@ -34,7 +34,7 @@ void DemoWindow::OnInit()
 	auto cobbleMaterial = gE::ref_create<PBRMaterial>(this, rasterShader, cobbleSettings);
 	auto tileMaterial = gE::ref_create<PBRMaterial>(this, rasterShader, tileSettings);
 
-	Reference<API::VAO> cube = ref_create<API::VAO>();
+	Reference<API::IndexedVAO> cube = ref_create<API::IndexedVAO>();
 	ReadSerializableFromFile(this, "Resource/Model/Plane.001.gEMesh", *cube);
 
 	auto* mesh = new StaticMeshEntity(this, cube);

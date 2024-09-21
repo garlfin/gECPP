@@ -4,8 +4,9 @@
 
 #pragma once
 
-#include "Engine/Math/Math.h"
 #include <Engine/Manager.h>
+#include <Engine/Math/Math.h>
+
 #include "Component.h"
 
 namespace gE

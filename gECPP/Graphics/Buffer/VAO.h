@@ -24,10 +24,10 @@ namespace GPU
 		DEFAULT_CM_CONSTRUCTOR(VAO);
 
 	public:
-		VAOFieldCounts Counts;
-		MaterialSlot Materials[GE_MAX_VAO_MATERIAL] = DEFAULT;;
+		VAOFieldCounts Counts{};
+		MaterialSlot Materials[GE_MAX_VAO_MATERIAL];
 		VertexField Fields[GE_MAX_VAO_FIELD];
-		Buffer<u8> Buffers[GE_MAX_VAO_BUFFER] = DEFAULT;;
+		Buffer<u8> Buffers[GE_MAX_VAO_BUFFER];
 
 		void Free() override { for(Buffer<u8>& buffer : Buffers) buffer.Free(); };
 
@@ -49,7 +49,7 @@ namespace GPU
 		ALWAYS_INLINE void Free() override { VAO::Free(); TriangleBuffer.Free(); }
 		NODISCARD ALWAYS_INLINE bool IsFree() const override { return VAO::IsFree() && TriangleBuffer.IsFree(); }
 
-		GLenum TriangleFormat;
+		GLenum TriangleFormat = DEFAULT;
 		Buffer<u8> TriangleBuffer;
 	};
 }

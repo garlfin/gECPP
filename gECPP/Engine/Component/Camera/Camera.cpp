@@ -3,8 +3,8 @@
 //
 
 #include "Camera.h"
-#include "Engine/Component/Transform.h"
-#include "Engine/Window.h"
+#include <Engine/Window.h>
+#include <Engine/Component/Transform.h>
 #include <glm/gtx/string_cast.hpp>
 
 #define NOT(EXPR) (!(EXPR))
@@ -32,9 +32,12 @@ CONSTEXPR_GLOBAL glm::vec3 UpDirs[]
 
 namespace gE
 {
-	Camera::Camera(Entity* p, TextureSize2D size, IRenderTarget& t, const ICameraSettings& s, ComponentManager<Camera>* m) :
-		Component(p, m),
-		_settings(s), _target(t), _viewportSize(size)
+	Camera::Camera(Entity* p, TextureSize2D size, IRenderTarget& t, const ICameraSettings& s, ComponentManager<Camera>* m) : Component(
+			p, m),
+		Projection(),
+		_settings(s),
+		_target(t),
+		_viewportSize(size)
 	{
 	}
 

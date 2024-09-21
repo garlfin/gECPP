@@ -3,7 +3,10 @@
 //
 
 #pragma once
+#include <cassert>
 #include <iostream>
+
+#include "Binary/Macro.h"
 
 template<class T, u64 PAGE_T_SIZE = 64>
 struct MemoryPool

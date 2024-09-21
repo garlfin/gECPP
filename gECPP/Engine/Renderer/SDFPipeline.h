@@ -4,11 +4,10 @@
 
 #pragma once
 
-#include "Engine/Math/Math.h"
-#include "Graphics/Texture/Texture.h"
-#include "Graphics/Buffer/Buffer.h"
-#include "Engine/Renderer/DefaultPipeline.h"
-#include "Engine/Component/Camera/Camera.h"
+#include <Engine/Component/Camera/Camera.h>
+#include <Engine/Math/Math.h>
+#include <Graphics/Buffer/Buffer.h>
+#include <Graphics/Texture/Texture.h>
 
 #define SDF_MAX_TEXTURE 2
 #define SDF_MAX_MESH 64

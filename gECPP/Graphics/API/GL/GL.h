@@ -1,7 +1,8 @@
 #pragma once
 
-#include <Graphics/Graphics.h>
 #include <Engine/Binary/Binary.h>
+#include <GLAD/glad.h>
+#include <Graphics/Graphics.h>
 
 #define GL_TYPE_(TYPE, ENUM) template<> CONSTEXPR_GLOBAL GLenum GLType<TYPE> = ENUM;
 

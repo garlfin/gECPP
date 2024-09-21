@@ -12,7 +12,6 @@
 #include "Engine/Math/Math.h"
 
 #include "Serializable.h"
-#include "Graphics/Macro.h"
 
 // Defines SERIALIZABLE_PROTO
 
@@ -100,7 +99,7 @@ template<> void Write(std::ostream& out, u32 count, const std::string* t);
 		explicit TYPE(istream& in, SETTINGS_T s) : SUPER(in, s) { ISerialize(in, s); } \
 		TYPE() = default; \
 		typedef SUPER::SETTINGS_T SETTINGS_T;\
-		inline void Serialize(istream& in, SETTINGS_T s) { *this = MOVE(TYPE(in, s)); } \
+		inline void Serialize(istream& in, SETTINGS_T s) override { *this = MOVE(TYPE(in, s)); } \
 		inline void Deserialize(ostream& out) const override { SUPER::Deserialize(out); TYPE::IDeserialize(out); } \
 	private: \
 		void ISerialize(istream& in, SETTINGS_T s); \
@@ -120,7 +119,8 @@ struct Serializable
 
 	typedef T SETTINGS_T;
 
-	virtual void Deserialize(ostream& ptr) const {};
+	virtual void Serialize(istream& in, SETTINGS_T settings) {};
+	virtual void Deserialize(ostream& out) const {};
 
 	virtual ~Serializable() = default;
 };
@@ -266,35 +266,29 @@ inline void Write(std::ostream& out, u32 count, const std::string* t)
 }
 
 template<typename T>
-void Read(istream& src, u32 count, T* ts)
+void Read(istream& in, u32 count, T* t)
 {
 	if(!count) return;
 	static_assert(std::is_trivially_copyable_v<T> && !is_serializable_out<T>);
-	src.read((char*) ts, sizeof(T) * count);
-}
-
-template<class T>
-void ReadSerializable(istream& src, u32 count, T* ts)
-{
-	for(u32 i = 0; i < count; i++) ts[i].Serialize(src);
+	in.read((char*) t, sizeof(T) * count);
 }
 
 template<typename T>
-void Write(ostream& out, u32 count, const T* ts)
+void Write(ostream& out, u32 count, const T* t)
 {
 	if(!count) return;
 	if constexpr(std::is_trivially_copyable_v<T> && !is_serializable_out<T>)
-		out.write((char*) ts, sizeof(T) * count);
+		out.write((char*) t, sizeof(T) * count);
 	else
-		for(u32 i = 0; i < count; i++) ts[i].Deserialize(out);
+		for(u32 i = 0; i < count; i++) t[i].Deserialize(out);
 }
 
 template<typename UINT_T, class T>
-void ReadArraySerializable(std::istream& in, u32 count, Array<T>* ts, typename T::SETTINGS_T s)
+void ReadArraySerializable(std::istream& in, u32 count, Array<T>* t, typename T::SETTINGS_T s)
 {
 	for(u32 i = 0; i < count; i++)
 	{
-		Array<T>& t = ts[i];
+		Array<T>& t = t[i];
 
 		UINT_T length = Read<UINT_T>(in);
 
@@ -303,9 +297,9 @@ void ReadArraySerializable(std::istream& in, u32 count, Array<T>* ts, typename T
 	}
 }
 
-template<class T> void ReadSerializable(std::istream& in, u32 count, T* t, typename T::SETTINGS_T s)
+template<class T>
+void ReadSerializable(std::istream& in, u32 count, T* t, typename T::SETTINGS_T s)
 {
 	if(!count) return;
-	for(u32 i = 0; i < count; i++)
-		t[i].Serialize(in, s);
+	for(u32 i = 0; i < count; i++) t[i] = T(in, s);
 }

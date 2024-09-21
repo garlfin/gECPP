@@ -4,14 +4,13 @@
 
 #pragma once
 
-#include <Graphics/Buffer/Buffer.h>
-#include <Graphics/Texture/TextureSettings.h>
-#include <Graphics/Texture/Texture.h>
-#include <Engine/Component/Camera/Camera.h>
-#include <Engine/Component/Camera/RenderTarget.h>
-#include <Engine/Component/Camera/Settings.h>
-#include <Engine/Component/Camera/PostProcessEffect.h>
 #include <Engine/WindowState.h>
+#include <Engine/Component/Camera/Camera.h>
+#include <Engine/Component/Camera/PostProcessEffect.h>
+#include <Engine/Component/Camera/RenderTarget.h>
+#include <Graphics/Buffer/Buffer.h>
+#include <Graphics/Texture/Texture.h>
+#include <Graphics/Texture/TextureSettings.h>
 
 #define GE_MAX_INSTANCE 64
 #define GE_MAX_LIGHT 4
@@ -113,6 +112,8 @@ namespace gE::DefaultPipeline
 		void RenderPass(float, Camera*) override;
 		void PostProcessPass(float) override;
 
+ 		virtual ~Target2D() = default;
+
 	 private:
 		Attachment<API::Texture2D, GL_DEPTH_ATTACHMENT> _depth;
 		Attachment<API::Texture2D, GL_COLOR_ATTACHMENT0> _color;
@@ -144,9 +145,9 @@ namespace gE::DefaultPipeline
 			_lightBuffer.ReplaceData((u8*) &Lighting + offset, size, offset);
 		}
 
-		GPU::Camera Camera;
-		GPU::Scene Scene;
-		GPU::Lighting Lighting;
+		GPU::Camera Camera = DEFAULT;
+		GPU::Scene Scene = DEFAULT;
+		GPU::Lighting Lighting = DEFAULT;
 
 	 private:
 		API::Buffer<GPU::Camera> _cameraBuffer;

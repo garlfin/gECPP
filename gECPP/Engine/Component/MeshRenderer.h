@@ -5,8 +5,9 @@
 #pragma once
 
 #include <Engine/Entity/Entity.h>
-#include <Graphics/Buffer/VAO.h>
 #include <Engine/Renderer/Material.h>
+#include <Graphics/Buffer/VAO.h>
+
 #include "MaterialHolder.h"
 
 namespace gE

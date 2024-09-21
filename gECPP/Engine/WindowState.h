@@ -4,6 +4,9 @@
 
 #pragma once
 
+#include <gECPP/Engine/Binary/Macro.h>
+#include <gECPP/Engine/Math/Math.h>
+
 namespace gE
 {
 	enum class WriteMode : u8

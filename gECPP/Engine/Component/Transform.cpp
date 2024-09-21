@@ -3,8 +3,9 @@
 //
 
 #include "Transform.h"
-#include <Engine/Entity/Entity.h>
+
 #include <Engine/Window.h>
+#include <Engine/Entity/Entity.h>
 
 namespace gE
 {

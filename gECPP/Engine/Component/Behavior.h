@@ -4,8 +4,7 @@
 
 #pragma once
 
-#include "Component.h"
-#include <Engine/Manager.h>
+#include <Engine/Component/Component.h>
 
 namespace gE
 {

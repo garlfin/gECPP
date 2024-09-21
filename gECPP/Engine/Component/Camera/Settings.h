@@ -4,11 +4,10 @@
 
 #pragma once
 
-#include "Engine/Math/Math.h"
-#include "Engine/Array.h"
+#include <Engine/Math/Math.h>
 #include "Timing.h"
 
-namespace GL { struct Texture; }
+namespace GL { class Texture; }
 
 namespace gE
 {

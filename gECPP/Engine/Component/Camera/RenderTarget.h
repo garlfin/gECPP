@@ -5,7 +5,6 @@
 #pragma once
 
 #include <Graphics/Buffer/FrameBuffer.h>
-#include <Engine/Manager.h>
 
 namespace gE
 {
@@ -47,7 +46,9 @@ namespace gE
  	class IRenderTarget
 	{
 	 public:
- 		explicit IRenderTarget(Entity& owner, Camera& camera);
+		virtual ~IRenderTarget() = default;
+
+		explicit IRenderTarget(Entity& owner, Camera& camera);
 
 		GET(Camera&, Camera, _camera);
 		GET(Entity&, Owner, _owner);
@@ -75,7 +76,7 @@ namespace gE
 		using IRenderTarget::IRenderTarget;
 
 		GET(T&, Camera, (T&) IRenderTarget::GetCamera());
-		GET_CONST(T::SIZE_TYPE, Size, GetCamera().GetSize());
+		GET_CONST(typename T::SIZE_TYPE, Size, GetCamera().GetSize());
 
 		typedef T CAMERA_TYPE;
 	};

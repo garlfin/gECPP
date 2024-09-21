@@ -1,7 +1,6 @@
 #pragma once
 
 #include <Graphics/API/GL/GL.h>
-#include "Engine/Binary/Binary.h"
 #include "GLAD/glad.h"
 #include "Graphics/Texture/TextureSettings.h"
 
@@ -11,8 +10,8 @@
 // Opaque type to prevent accidental pointer-to-handle conversions
 struct handle
 {
-	inline explicit handle() = default;
-	inline explicit handle(u64 i) : ID(i) {};
+	handle() = default;
+	ALWAYS_INLINE explicit handle(u64 i) : ID(i) {};
 
 	ALWAYS_INLINE handle& operator=(u64 o) { ID = o; return *this; }
 
@@ -23,7 +22,7 @@ struct handle
 
 namespace GL
 {
-	struct FrameBuffer;
+	class FrameBuffer;
 
 	CONSTEXPR_GLOBAL handle NullHandle = handle();
 

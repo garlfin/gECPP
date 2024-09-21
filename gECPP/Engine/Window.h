@@ -1,30 +1,23 @@
 #pragma once
 
-#include "Engine/Math/Math.h"
-#include <Graphics/Buffer/VAO.h>
-#include <Graphics/Shader/Shader.h>
-
-#include "WindowState.h"
-#include <Engine/Manager.h>
 #include <Engine/AssetManager.h>
-
+#include <Engine/Manager.h>
 #include <Engine/Component/Behavior.h>
-#include <Engine/Component/Transform.h>
-#include <Engine/Component/MeshRenderer.h>
-#include <Engine/Component/Camera/Camera.h>
 #include <Engine/Component/Cullable.h>
-
-#include <Engine/Entity/VoxelCapture.h>
-#include <Engine/Entity/SDFCapture.h>
+#include <Engine/Component/MeshRenderer.h>
+#include <Engine/Component/Transform.h>
+#include <Engine/Component/Camera/Camera.h>
 #include <Engine/Entity/CubemapCapture.h>
 #include <Engine/Entity/Light.h>
-
+#include <Engine/Entity/SDFCapture.h>
+#include <Engine/Entity/VoxelCapture.h>
+#include <Engine/Math/Math.h>
 #include <Engine/Renderer/VoxelPipeline.h>
-#include <Engine/Renderer/SDFPipeline.h>
-#include <Engine/Renderer/PostProcess/Bloom.h>
-#include <Engine/Renderer/PostProcess/Tonemap.h>
-
+#include <Graphics/Buffer/VAO.h>
+#include <Graphics/Shader/Shader.h>
 #include <Graphics/Texture/TextureSlotManager.h>
+
+#include "WindowState.h"
 
 struct GLFWwindow;
 struct GLFWvidmode;
@@ -83,7 +76,7 @@ namespace gE
 		GET(GPU::TextureSlotManager&, SlotManager, SlotManager);
 
 		// Engine States
-		RenderFlags State;
+		RenderFlags State = DEFAULT;
 
 		GET_CONST(TextureSize2D, Size, _size);
 		GET_CONST(const Monitor&, Monitor, _monitor);
@@ -93,7 +86,7 @@ namespace gE
 
 		NODISCARD ALWAYS_INLINE GLFWwindow* GLFWWindow() const { return _window; }
 
-		~Window();
+		virtual ~Window();
 
 	 protected:
 		virtual void OnInit();
@@ -133,7 +126,7 @@ namespace gE
 		const char* _name;
 		GLFWwindow* _window;
 		Monitor _monitor;
-		double _time;
+		double _time = DEFAULT;
 	};
 }
 

@@ -4,9 +4,10 @@
 
 #pragma once
 
-#include "Stylesheet.h"
-#include <Graphics/Texture/Texture.h>
 #include <Engine/AssetManager.h>
+#include <Graphics/Texture/Texture.h>
+
+#include "Stylesheet.h"
 
 namespace gETF::UI
 {
@@ -72,11 +73,11 @@ namespace gETF::UI
 }
 
 template<class T>
-void gETF::UI::Element<T>::ISerialize(istream& ptr, const Header& settings)
+void gETF::UI::Element<T>::ISerialize(istream& in, const Header&)
 {
 }
 
 template<class T>
-void gETF::UI::Element<T>::IDeserialize(ostream& buf) const
+void gETF::UI::Element<T>::IDeserialize(ostream& out) const
 {
 }

@@ -4,13 +4,15 @@
 
 #pragma once
 
-#include "Engine/Component/Camera/Camera.h"
-#include "Engine/Window.h"
-#include "Demo/Engine/Component/Movement.h"
+#include <Demo/Engine/Component/Movement.h>
+#include <Engine/Window.h>
+#include <Engine/Component/Camera/Camera.h>
+#include <Engine/Renderer/PostProcess/Bloom.h>
+#include <Engine/Renderer/PostProcess/Tonemap.h>
 
 namespace gE::VoxelDemo
 {
-	ICameraSettings FlyCameraSettings
+	inline ICameraSettings FlyCameraSettings
 	{
 		ClipPlanes(0.1, 100),
 		DefaultCameraTiming,

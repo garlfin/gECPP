@@ -65,7 +65,6 @@ namespace gE
 		if(!callingCamera) return false;
 
 		OrthographicCamera& camera = GetCamera();
-		TextureSize2D size = camera.GetSize();
 
 		Transform& transform = GetOwner().GetTransform();
 		Transform& cameraTransform = callingCamera->GetOwner()->GetTransform();

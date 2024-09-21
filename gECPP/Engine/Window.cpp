@@ -1,10 +1,11 @@
 #include "Window.h"
-#include "GLAD/glad.h"
-#include "GLFW/glfw3.h"
-#include "Engine/Renderer/DefaultPipeline.h"
 
 #include <iostream>
-#include "Engine/Component/Camera/Camera.h"
+#include <Engine/Component/Camera/Camera.h>
+#include <Engine/Renderer/DefaultPipeline.h>
+
+#include <GLAD/glad.h>
+#include <GLFW/glfw3.h>
 
 #define ENABLE_STATISTICS
 #define CLAMP_FPS
@@ -65,7 +66,8 @@ Window::~Window()
 #ifdef DEBUG
 void DebugMessage(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
 {
-	std::cout << message << std::endl;
+	if(severity != GL_DEBUG_SEVERITY_NOTIFICATION)
+		std::cout << message << std::endl;
 }
 #endif
 

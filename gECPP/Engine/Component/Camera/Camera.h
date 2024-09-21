@@ -28,7 +28,7 @@ namespace gE
 		Camera(Entity*, TextureSize2D, IRenderTarget&, const ICameraSettings&, ComponentManager<Camera>* = nullptr);
 
 		inline void OnUpdate(float delta) override { }
-		void OnRender(float delta, Camera* camera) override;
+		void OnRender(float delta, Camera* callingCamera) override;
 
 		virtual void GetGLCamera(GPU::Camera&);
 
@@ -156,6 +156,8 @@ namespace gE
 		using ComponentManager::ComponentManager;
 
 		IColorTarget* CurrentCamera = nullptr;
+
+		~CameraManager() override = default;
 	};
 }
 

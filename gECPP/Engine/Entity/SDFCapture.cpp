@@ -2,7 +2,6 @@
 // Created by scion on 7/14/2024.
 //
 
-#include "VoxelCapture.h"
 #include <Engine/Window.h>
 
 namespace gE

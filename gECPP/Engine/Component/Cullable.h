@@ -4,8 +4,9 @@
 
 #pragma once
 
-#include "Component.h"
 #include <Engine/Math/Collision/AABB.h>
+
+#include "Component.h"
 
 namespace gE
 {
@@ -29,9 +30,11 @@ namespace gE
 		GET_CONST(const AABB_T&, GlobalBounds, _transformedBounds);
 		GET_CONST(CullFlags, Flags, _flags);
 
+		virtual ~Cullable() = default;
+
 	 private:
 		AABB_T _meshBounds;
-		AABB_T _transformedBounds;
+		AABB_T _transformedBounds = DEFAULT;
 		CullFlags _flags;
 	};
 

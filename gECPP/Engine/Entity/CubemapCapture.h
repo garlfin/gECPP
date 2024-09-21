@@ -4,13 +4,14 @@
 
 #pragma once
 
-#include "Entity.h"
 #include <Engine/Component/Camera/Camera.h>
 #include <Engine/Component/Camera/RenderTarget.h>
 #include <Engine/Renderer/DefaultPipeline.h>
 #include <gETF/File.h>
-#include <Graphics/Shader/Shader.h>
 #include <Graphics/Buffer/VAO.h>
+#include <Graphics/Shader/Shader.h>
+
+#include "Entity.h"
 
 namespace gE
 {
@@ -53,18 +54,20 @@ namespace gE
 	 public:
 		explicit CubemapManager(Window* window) : Manager(), _window(window) {};
 
-		Reference<API::TextureCube> Skybox{};
+		Reference<API::TextureCube> Skybox = DEFAULT;
 
 		void DrawSkybox();
 
 		void OnUpdate(float delta) override {};
 		void OnRender(float delta, Camera*) override;
 
+		virtual ~CubemapManager() = default;
+
 	 private:
-		Window* _window;
+		Window* _window = nullptr;
 		bool _isInitialized = false;
 
-		API::VAO _skyboxVAO;
-		API::Shader _skyboxShader;
+		API::VAO _skyboxVAO = DEFAULT;
+		API::Shader _skyboxShader = DEFAULT;
 	};
 }

@@ -7,8 +7,6 @@
 #include <Prototype.h>
 #include <gETF/Serializable.h>
 
-#include "Macro.h"
-
 #define API_NONE 0
 #define API_GL 1
 

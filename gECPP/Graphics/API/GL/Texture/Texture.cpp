@@ -1,6 +1,7 @@
 #include "Texture.h"
-#include <GLAD/glad.h>
+
 #include <Engine/Binary/Binary.h>
+#include <GLAD/glad.h>
 #include <Graphics/Texture/Texture.h>
 
 namespace GL

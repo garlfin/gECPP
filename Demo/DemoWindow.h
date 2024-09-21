@@ -4,15 +4,14 @@
 
 #pragma once
 
-#include "Engine/Window.h"
-#include <Engine/Entity/Entity.h>
+#include <Engine/Window.h>
 
 namespace gE::VoxelDemo
 {
 	class DemoWindow final : public Window
 	{
 	 public:
-		DemoWindow(glm::u16vec2 size, const char* name = "VoxelDemo") : Window(size, name) {};
+		explicit DemoWindow(glm::u16vec2 size, const char* name = "VoxelDemo") : Window(size, name) {};
 
 	 private:
 		void OnInit() override;

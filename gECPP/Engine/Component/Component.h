@@ -4,8 +4,9 @@
 
 #pragma once
 
-#include "Prototype.h"
 #include <Engine/Manager.h>
+
+#include "Prototype.h"
 
 namespace gE
 {
@@ -22,7 +23,7 @@ namespace gE
 		virtual void OnRender(float d, Camera* camera) { };
 		virtual void OnDestroy() { };
 
-		virtual ~Component() = default;
+		~Component() override = default;
 
 	 private:
 		Window& _window;
@@ -68,6 +69,8 @@ namespace gE
 		}
 
 		ALWAYS_INLINE void OnRender(float d) { OnRender(d, nullptr); }
+
+		~ComponentManager() override = default;
 
 	 protected:
 		ManagedList<Component> InitializationList;

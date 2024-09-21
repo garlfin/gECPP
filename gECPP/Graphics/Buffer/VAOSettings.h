@@ -19,19 +19,19 @@ namespace GPU
 		MaterialSlot(std::string&& name, u32 offset, u32 count) : Name(MOVE(name)), Offset(offset), Count(count) {}
 		MaterialSlot(const std::string& name, u32 offset, u32 count) : Name(name), Offset(offset), Count(count) {}
 
-		std::string Name;
+		std::string Name = DEFAULT;
 		u32 Offset = 0;
 		u32 Count = 0;
 	};
 
 	struct VertexField
 	{
-		char Name[4];
-		GLenum ElementType;
-		bool Normalized : 1;
-		u8 BufferIndex : 7;
-		u8 Index;
-		u8 ElementCount;
-		u8 Offset;
+		char Name[4] = DEFAULT;
+		GLenum ElementType = DEFAULT;
+		bool Normalized : 1 = DEFAULT;
+		u8 BufferIndex : 7 = DEFAULT;
+		u8 Index = DEFAULT;
+		u8 ElementCount = DEFAULT;
+		u8 Offset = DEFAULT;
 	};
 }

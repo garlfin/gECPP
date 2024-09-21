@@ -22,7 +22,7 @@ template<class T, class F>
 using ConversionFunc = void(u32, const F&, T&);
 
 template<class T, class S>
-GPU::VertexField CreateField(T S::* DST, const char[4], u8 i, u8 buf);
+GPU::VertexField CreateField(T S::* DST, const char[4], u8 index, u8 bufIndex);
 
 template<class T, class S, class F>
 void FillBuffer(T S::* DST, F* aiMesh::* SRC, u32 aiMesh::* COUNT, GPU::Buffer<u8>& buf,
@@ -87,7 +87,7 @@ void TransformMesh(const std::vector<aiMesh*>& src, GPU::IndexedVAO& dst)
 		vertexCount += mesh.mNumFaces;
 	}
 
-	dst.Counts.BufferCount = 2;
+	dst.Counts.BufferCount = 1;
 	dst.Counts.FieldCount = 4;
 
 	AllocateBuffer<Vertex>(&aiMesh::mNumVertices, dst.Buffers[0], src);

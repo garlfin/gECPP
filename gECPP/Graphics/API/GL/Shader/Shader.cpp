@@ -102,16 +102,21 @@ namespace GL
 	{
 		ID = glCreateShader((GLenum) stage);
 
-		std::string source, extensions;
-		std::ifstream file = std::ifstream(path, std::ios_base::in | std::ios_base::binary);
+		std::string finalSource, source, extensions;
+		std::string& includes = finalSource; // temp alias
+		auto file = std::ifstream(path, std::ios_base::in | std::ios_base::binary);
 
-		source += GL_VERSION_DIRECTIVE;
-		CompileShaderType(stage, source);
-		CompileDirectives(window->GetShaderCompilationState(), source);
-		GPU::CompileIncludes(file, extensions, source, path);
+		GPU::CompileIncludes(file, extensions, source, includes, path);
 
-		const char* sourceCString = source.data();
-		const i32 sourceLength = source.length();
+		finalSource.clear();
+		finalSource += GL_VERSION_DIRECTIVE;
+		CompileShaderType(stage, finalSource);
+		CompileDirectives(window->GetShaderCompilationState(), finalSource);
+		finalSource += extensions;
+		finalSource += source;
+
+		const char* sourceCString = finalSource.data();
+		const i32 sourceLength = finalSource.length();
 
 		glShaderSource(ID, 1, &sourceCString, &sourceLength);
 		glCompileShader(ID);
@@ -123,16 +128,21 @@ namespace GL
 	{
 		ID = glCreateShader((GLenum) settings.Type);
 
-		std::string source, extensions;
-		std::istringstream stream = std::istringstream(Source);
+		std::string finalSource, source, extensions;
+		std::string& includes = finalSource; // temp alias
+		auto stream = std::istringstream(Source);
 
-		source += GL_VERSION_DIRECTIVE;
-		CompileShaderType(Type, source);
-		CompileDirectives(window->GetShaderCompilationState(), source);
-		GPU::CompileIncludes(stream, extensions, source);
+		GPU::CompileIncludes(stream, extensions, source, includes);
 
-		const char* sourceCString = source.data();
-		const i32 sourceLength = source.length();
+		finalSource.clear();
+		finalSource += GL_VERSION_DIRECTIVE;
+		CompileShaderType(Type, finalSource);
+		CompileDirectives(window->GetShaderCompilationState(), finalSource);
+		finalSource += extensions;
+		finalSource += source;
+
+		const char* sourceCString = finalSource.data();
+		const i32 sourceLength = finalSource.length();
 
 		glShaderSource(ID, 1, &sourceCString, &sourceLength);
 		glCompileShader(ID);
@@ -155,7 +165,7 @@ namespace GL
 
 		GL_GET(glGetShaderiv, glGetProgramiv, id, GL_INFO_LOG_LENGTH, &shaderStatus);
 
-		char* infoLog = new char[shaderStatus]{};
+		auto* infoLog = new char[shaderStatus]{};
 
 		GL_GET(glGetShaderInfoLog, glGetProgramInfoLog, id, shaderStatus - 1, nullptr, infoLog);
 

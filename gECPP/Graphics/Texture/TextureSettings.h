@@ -4,18 +4,16 @@
 
 #pragma once
 
-#include <Graphics/Graphics.h>
-
 //
 // Created by scion on 9/13/2023.
 //
 
 #pragma once
 
-#include "Engine/Math/Math.h"
-#include "GLAD/glad.h"
-#include "Engine/Binary/Binary.h"
-#include "gETF/Serializable.h"
+#include <Engine/Binary/Binary.h>
+#include <Engine/Math/Math.h>
+#include <gETF/Serializable.h>
+#include <GLAD/glad.h>
 
 namespace PVR
 {

@@ -4,10 +4,11 @@
 
 #pragma once
 
-#include "Entity.h"
-#include <Engine/Renderer/DefaultPipeline.h>
 #include <Engine/Component/Camera/Camera.h>
 #include <Engine/Component/Camera/RenderTarget.h>
+#include <Engine/Renderer/DefaultPipeline.h>
+
+#include "Entity.h"
 
 namespace gE
 {
@@ -21,7 +22,7 @@ namespace gE
 
 		DirectionalLight* Sun = nullptr;
 
-		void OnUpdate(float) {};
+		void OnUpdate(float) override {};
 		void OnRender(float delta, Camera*) override;
 
 	 private:

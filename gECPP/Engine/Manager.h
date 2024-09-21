@@ -5,10 +5,7 @@
 #pragma once
 
 #include <Prototype.h>
-#include <vector>
-#include <algorithm>
 #include <Engine/Binary/Macro.h>
-#include <Engine/Binary/Binary.h>
 
 namespace gE
 {
@@ -23,7 +20,7 @@ namespace gE
 		void Add(Managed<T>& t);
 		void Insert(Managed<T>& t, Managed<T>& at);
 		void Remove(Managed<T>& t);
-		void MoveFrom(ManagedList<T>& l);
+		void MoveFrom(ManagedList& list);
 
 		GET_CONST(Managed<T>*, First, _first);
 		GET_CONST(Managed<T>*, Last, _last);
@@ -39,6 +36,8 @@ namespace gE
 	class Manager
 	{
 	 public:
+		virtual ~Manager() = default;
+
 		Manager() = default;
 
 		DELETE_CM_CONSTRUCTOR(Manager);
@@ -82,7 +81,7 @@ namespace gE
 		NODISCARD ALWAYS_INLINE T* operator->() { return &_t; }
 		NODISCARD ALWAYS_INLINE const T* operator->() const { return &_t; }
 
-		inline ~Managed() { if(_manager) _manager->Remove(_t); }
+		virtual inline ~Managed() { if(_manager) _manager->Remove(_t); }
 
 	 private:
 		ManagedList<T>* _list = nullptr;

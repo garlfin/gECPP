@@ -4,15 +4,14 @@
 
 #pragma once
 
-#include "Engine/Math/Math.h"
-#include <cstring>
 #include <algorithm>
-#include <vector>
-#include "Engine/Array.h"
-#include "Macro.h"
-
-#include <ostream>
+#include <cstring>
 #include <istream>
+#include <ostream>
+#include <vector>
+
+#include "Macro.h"
+#include "Engine/Math/Math.h"
 
 #define DIV_CEIL(X, Y) (((X) + decltype(X)(Y) - decltype(X)(1)) / decltype(X)(Y))
 #define DIV_CEIL_T(X, Y, T) (((T)(X) + (T)(Y) - (T)(1)) / (T)(Y))
@@ -30,7 +29,7 @@ template<u32 LENGTH>
 bool strcmpb(const char* a, const char(& b)[LENGTH]);
 
 // Various helper functions
-const char* IncrementLine(const char* s, char d = '\n');
+const char* IncrementLine(const char* str, char d = '\n');
 template<class T> void RemoveFirstFromVec(std::vector<T>& vec, const T& t);
 
 // Binary helper functions

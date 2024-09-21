@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "Engine/Math/Math.h"
 #include <Engine/Binary/Macro.h>
+#include "Engine/Math/Math.h"
 
 template<typename T>
 class Array
@@ -17,14 +17,16 @@ class Array
 	Array() = default;
 
 	template<typename... ARGS>
-	explicit Array(size_t count, ARGS&&... args) : _size(count), _t(new I[count])
+	explicit Array(size_t count, ARGS&&... args) : _size(count), _t(nullptr)
 	{
+		if(_size) _t = new I[count];
 		if constexpr (sizeof...(ARGS) && !IS_VOID)
 			for(size_t i = 0; i < count; i++) _t[i] = I(std::forward<ARGS>(args)...);
 	}
 
-	Array(size_t count, const T* t) : _size(count), _t(new I[count])
+	Array(size_t count, const T* t) : _size(count), _t(nullptr)
 	{
+		if(_size) _t = new I[count];
 		if(!t) return;
 		if constexpr(std::is_trivially_copyable_v<I>)
 			memcpy(_t, t, count * sizeof(I));

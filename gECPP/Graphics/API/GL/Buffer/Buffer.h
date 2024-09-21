@@ -1,10 +1,10 @@
 #pragma once
 
-#include "GLAD/glad.h"
-#include "Graphics/API/GL/GL.h"
 #include <type_traits>
-#include "Graphics/Macro.h"
-#include "Graphics/Buffer/Buffer.h"
+#include <GLAD/glad.h>
+#include <Graphics/Macro.h>
+#include <Graphics/API/GL/GL.h>
+#include <Graphics/Buffer/Buffer.h>
 
 namespace GL
 {

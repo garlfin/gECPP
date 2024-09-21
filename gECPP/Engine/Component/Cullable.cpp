@@ -3,8 +3,9 @@
 //
 
 #include "Cullable.h"
-#include <Engine/Entity/Entity.h>
+
 #include <Engine/Window.h>
+#include <Engine/Entity/Entity.h>
 
 gE::Cullable::Cullable(Entity* owner, const AABB_T& bounds)
 	: Component(owner, &owner->GetWindow().GetCullingManager()), _meshBounds(bounds)

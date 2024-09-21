@@ -3,8 +3,10 @@
 //
 
 #include "Entity.h"
-#include <Engine/Component/Component.h>
+
 #include <Engine/Component/Behavior.h>
+#include <Engine/Component/Component.h>
+
 #include "Engine/Window.h"
 
 namespace gE
@@ -21,7 +23,7 @@ namespace gE
 
 		RemoveFirstFromVec(_parent->_children, this);
 
-		std::vector<Entity*> stack{ this };
+		std::vector stack{ this };
 
 		if(flagChildren)
 			while(!stack.empty())

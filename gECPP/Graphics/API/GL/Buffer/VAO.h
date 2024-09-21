@@ -34,8 +34,6 @@ namespace GL
 	 public:
 		GET_CONST(const GPU::VAO&, Data, *this);
 
-
-
 		using SUPER::Free;
 		using SUPER::IsFree;
 

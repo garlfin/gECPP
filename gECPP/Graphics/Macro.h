@@ -8,7 +8,7 @@
 	public: \
 	typedef SUPER_T::SETTINGS_T SETTINGS_T; \
 	typedef SUPER_T SUPER; \
-	inline void Serialize(istream& in, gE::Window* window) { *this = MOVE(TYPE(in, window)); } \
+	inline void Serialize(istream& in, gE::Window* window) override { *this = MOVE(TYPE(in, window)); } \
 	TYPE() = default; \
 	TYPE(istream& in, gE::Window* window) : SUPER(in, window), __VA_ARGS__ \
 	{ \
