@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Engine/AssetManager.h>
+#include <Engine/Utility/AssetManager.h>
 #include <GLAD/glad.h>
 #include <Graphics/API/GL/GL.h>
 #include <Graphics/Texture/Texture.h>

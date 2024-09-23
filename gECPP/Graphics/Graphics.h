@@ -31,8 +31,8 @@ namespace GPU
 	template<class T>
 	class APIObject
 	{
-	 public:
-		APIObject() = default;
+	public:
+		explicit APIObject() = default;
 		explicit APIObject(gE::Window* window) : _window(window) { };
 
 		DELETE_COPY_CONSTRUCTOR(APIObject);

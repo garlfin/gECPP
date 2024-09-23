@@ -5,7 +5,7 @@
 #pragma once
 
 #include <vector>
-#include <Engine/Binary/Binary.h>
+#include <Engine/Utility/Binary.h>
 #include <Engine/Component/Transform.h>
 
 #include "Prototype.h"

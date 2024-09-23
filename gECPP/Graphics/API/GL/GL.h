@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Engine/Binary/Binary.h>
+#include <Engine/Utility/Binary.h>
 #include <GLAD/glad.h>
 #include <Graphics/Graphics.h>
 

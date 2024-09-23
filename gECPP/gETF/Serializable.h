@@ -7,8 +7,8 @@
 #include <fstream>
 #include <Prototype.h>
 #include <unordered_map>
-#include <Engine/Array.h>
-#include <Engine/Binary/Binary.h>
+#include <Engine/Utility/Array.h>
+#include <Engine/Utility/Binary.h>
 #include "Engine/Math/Math.h"
 
 #include "Serializable.h"
@@ -85,6 +85,8 @@ template<class T> void ReadSerializable(std::istream& in, T& t, typename T::SETT
 template<> void Read(std::istream& in, u32 count, std::string* t);
 template<> void Write(std::ostream& out, u32 count, const std::string* t);
 
+#define SERIALIZABLE_MAGIC_LENGTH 4
+
 #define VIRTUAL_H(FUNC_RETURN, FUNC) \
 	inline FUNC_RETURN FUNC override {};
 
@@ -93,14 +95,21 @@ template<> void Write(std::ostream& out, u32 count, const std::string* t);
  	private: \
 		FUNC_RETURN I##FUNC_NAME FUNC_ARG;
 
+#define SERIALIZABLE_CHECK_HEADER() \
+	char magic[SERIALIZABLE_MAGIC_LENGTH]; \
+	Read<char>(in, SERIALIZABLE_MAGIC_LENGTH, magic); \
+	GE_ASSERT(strcmpb(magic, MAGIC, SERIALIZABLE_MAGIC_LENGTH), "UNEXPECTED MAGIC!"); \
+	u8 version = Read<u8>(in);
+
 // Implementation
-#define SERIALIZABLE_PROTO(TYPE, SUPER) \
+#define SERIALIZABLE_PROTO(MAGIC_VAL, VERSION_VAL, TYPE, SUPER) \
 	public: \
-		explicit TYPE(istream& in, SETTINGS_T s) : SUPER(in, s) { ISerialize(in, s); } \
+		explicit TYPE(istream& in, SETTINGS_T s) : SUPER(in, s) { SERIALIZABLE_CHECK_HEADER(); ISerialize(in, s); } \
 		TYPE() = default; \
+		static const constexpr char MAGIC[SERIALIZABLE_MAGIC_LENGTH + 1] = #MAGIC_VAL; \
 		typedef SUPER::SETTINGS_T SETTINGS_T;\
 		inline void Serialize(istream& in, SETTINGS_T s) override { *this = MOVE(TYPE(in, s)); } \
-		inline void Deserialize(ostream& out) const override { SUPER::Deserialize(out); TYPE::IDeserialize(out); } \
+		inline void Deserialize(ostream& out) const override { SUPER::Deserialize(out); Write(out, SERIALIZABLE_MAGIC_LENGTH, MAGIC); Write<u8>(out, VERSION_VAL); IDeserialize(out); } \
 	private: \
 		void ISerialize(istream& in, SETTINGS_T s); \
 		void IDeserialize(ostream& out) const;
@@ -127,7 +136,7 @@ struct Serializable
 
 struct IFileContainer : public Serializable<gE::Window*>
 {
-	SERIALIZABLE_PROTO(IFileContainer, Serializable<gE::Window*>);
+	SERIALIZABLE_PROTO(FILE, 1, IFileContainer, Serializable<gE::Window*>);
 
  public:
 	template<class T> requires requires { T::Type; }
@@ -146,7 +155,7 @@ struct IFileContainer : public Serializable<gE::Window*>
 	}
 
 	template<class T>
-	T& Cast() { T* t = Cast<T>(); assert(t); return *t; }
+	T& Cast() { T* t = Cast<T>(); GE_ASSERT(t, "NO T!"); return *t; }
 
 	GET_CONST(const std::string&, Name, _name);
 	GET_CONST(const TypeSystem<gE::Window*>::TypeID&, Type, _type);
@@ -155,7 +164,7 @@ struct IFileContainer : public Serializable<gE::Window*>
  private:
 	std::string _name;
 	TypeSystem<gE::Window*>::TypeID _type;
-	Serializable<gE::Window*>* _t;
+	Serializable* _t;
 };
 
 template<is_serializable<gE::Window*> T>
@@ -178,7 +187,7 @@ void ReadSerializableFromFile(gE::Window* window, const Path& path, T& t)
 {
 	std::ifstream file;
 	file.open(path, std::ios::in | std::ios::binary);
-	assert(file.is_open());
+	GE_ASSERT(file.is_open(), "COULD NOT OPEN FILE!");
 
 	t.Serialize(file, window);
 

@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include <Engine/Binary/Macro.h>
-#include "Engine/Math/Math.h"
+#include <Engine/Math/Math.h>
+#include <Engine/Utility/Macro.h>
 
 template<typename T>
 class Array

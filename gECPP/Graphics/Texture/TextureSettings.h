@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include <Engine/Binary/Binary.h>
+#include <Engine/Utility/Binary.h>
 #include <Engine/Math/Math.h>
 #include <gETF/Serializable.h>
 #include <GLAD/glad.h>
@@ -45,9 +45,12 @@ namespace PVR
 
 	struct Header : Serializable<>
 	{
-		SERIALIZABLE_PROTO(Header, Serializable);
-
 	public:
+		explicit Header(istream& in, SETTINGS_T s) : Serializable(in, s) { ISerialize(in, s); }
+		Header() = default;
+		inline void Serialize(istream& in, SETTINGS_T s) override { *this = MOVE(Header(in, s)); }
+		inline void Deserialize(ostream& out) const override { IDeserialize(out); }
+
 		uint32_t Version;
 		Flags Flags;
 		PixelFormat Format;
@@ -57,6 +60,10 @@ namespace PVR
 		uint32_t Surfaces;
 		uint32_t Faces;
 		uint32_t MipCount;
+
+	private:
+		void ISerialize(istream& in, SETTINGS_T s);
+		void IDeserialize(ostream& out) const;
 	};
 
 	constexpr GLenum PVRToInternalFormat(PixelFormat f)
@@ -133,7 +140,7 @@ namespace GPU
 
 	struct TextureData : public Serializable<>
 	{
-		SERIALIZABLE_PROTO(TextureData, Serializable);
+		SERIALIZABLE_PROTO(TEXD, 1, TextureData, Serializable);
 
 	public:
 		TextureData(GLenum, GLenum, CompressionScheme, u8, Array<u8>&&);

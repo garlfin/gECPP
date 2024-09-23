@@ -14,7 +14,7 @@
 using pp = aiPostProcessSteps;
 
 CONSTEXPR_GLOBAL unsigned POST_PROCESS =
-	aiProcess_Triangulate | pp::aiProcess_FindInvalidData | pp::aiProcess_OptimizeMeshes |
+	aiProcess_Triangulate | aiProcess_FindInvalidData | aiProcess_OptimizeMeshes |
 	aiProcess_ImproveCacheLocality | aiProcess_FindInstances |
 	aiProcess_OptimizeGraph | aiProcess_JoinIdenticalVertices;
 
@@ -58,16 +58,18 @@ int main(int argc, char** argv)
 		previousMesh = mesh;
 	}
 
-	std::string basePath(argv[2]);
+	Path basePath(argv[2]);
 
 	for(const auto& src : meshes)
 	{
-		std::string path = basePath + src[0]->mName.data + ".gEMesh";
+		Path path = basePath / (std::string(src[0]->mName.data) + ".gEMesh");
 
 		GPU::IndexedVAO mesh;
 		TransformMesh(src, mesh);
 
-		WriteSerializableToFile(path.c_str(), mesh);
+		WriteSerializableToFile(path, mesh);
+
+		std::cout << "Wrote to " << path << std::endl;
 	}
 
 	return 0;

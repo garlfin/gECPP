@@ -5,7 +5,7 @@
 #pragma once
 
 #include <vector>
-#include "Engine/Binary/Binary.h"
+#include "Binary.h"
 
 namespace gE
 {

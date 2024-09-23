@@ -9,7 +9,7 @@
 #include "RenderTarget.h"
 #include "Settings.h"
 #include "Timing.h"
-#include "Engine/Manager.h"
+#include "../../Utility/Manager.h"
 #include "Engine/Entity/Entity.h"
 
 namespace GPU

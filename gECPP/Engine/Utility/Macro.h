@@ -1,7 +1,6 @@
 //
 // Created by scion on 11/3/2023.
 //
-
 #pragma once
 
 #define MOVE(x) std::move(x)
@@ -17,6 +16,7 @@
 #ifdef DEBUG
 #include <iostream>
 #include <vector>
+#include <signal.h>
 #endif // #ifdef DEBUG
 
 #ifdef DEBUG
@@ -29,7 +29,12 @@
 
 #define assertm(exp, msg) assert(((void) msg, exp))
 #define GE_FAIL(ERR) assertm(false, ERR);
-#define GE_ASSERT(COND, ERR) assertm(COND, ERR)
+
+#ifdef DEBUG
+	#define GE_ASSERT(COND, ERR) { bool cond = COND; if(!cond) __builtin_trap(); assertm(cond, ERR); }
+#else
+	#define GE_ASSERT(COND, ERR) assertm(cond, ERR)
+#endif
 
 #define BIT_FIELD(FIELD, INDEX) (((FIELD) >> (INDEX)) & 1)
 #ifndef MIN

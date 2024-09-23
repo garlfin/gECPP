@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <gECPP/Engine/Binary/Macro.h>
+#include <gECPP/Engine/Utility/Macro.h>
 
 namespace gE
 {

@@ -1,7 +1,8 @@
 #pragma once
 
 #include "Buffer.h"
-#include "Engine/Array.h"
+#include "../../../../Engine/Utility/Array.h"
+#include "Engine/Utility/RelativePointer.h"
 #include "Graphics/Buffer/VAO.h"
 
 namespace GL
@@ -22,13 +23,13 @@ namespace GL
 		NODISCARD ALWAYS_INLINE const Buffer<u8>& GetBuffer(u8 i) { return _buffers[i]; }
 
 	private:
-		GPU::VAO* _settings;
+		RelativePointer<GPU::VAO> _settings;
 		Array<Buffer<u8>> _buffers;
 	};
 
 	class VAO : protected GPU::VAO, public IVAO
 	{
-		API_SERIALIZABLE_INIT(VAO, GPU::VAO, IVAO(window, *this));
+		API_SERIALIZABLE(VAO, GPU::VAO);
 		API_DEFAULT_CM_CONSTRUCTOR(VAO);
 
 	 public:
@@ -44,7 +45,7 @@ namespace GL
 
 	class IndexedVAO final : protected GPU::IndexedVAO, public IVAO
 	{
-		API_SERIALIZABLE_INIT(IndexedVAO, GPU::IndexedVAO, IVAO(window, *this));
+		API_SERIALIZABLE(IndexedVAO, GPU::IndexedVAO);
 		API_DEFAULT_CM_CONSTRUCTOR(IndexedVAO);
 
 	 public:

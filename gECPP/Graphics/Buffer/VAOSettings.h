@@ -12,7 +12,7 @@ namespace GPU
 {
 	struct MaterialSlot : public Serializable<>
 	{
-		SERIALIZABLE_PROTO(MaterialSlot, Serializable);
+		SERIALIZABLE_PROTO(MAT, 1, MaterialSlot, Serializable);
 		DEFAULT_CM_CONSTRUCTOR(MaterialSlot);
 
 	public:

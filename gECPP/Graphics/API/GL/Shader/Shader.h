@@ -43,7 +43,7 @@ namespace GL
 
 	class Shader : protected GPU::Shader, public IShader
 	{
-		API_SERIALIZABLE_INIT(Shader, GPU::Shader, IShader(window));
+		API_SERIALIZABLE(Shader, GPU::Shader);
 		API_DEFAULT_CM_CONSTRUCTOR(Shader);
 
 	 public:
@@ -53,7 +53,7 @@ namespace GL
 
 	class ComputeShader final : protected GPU::ComputeShader, public IShader
 	{
-		API_SERIALIZABLE_INIT(ComputeShader, GPU::ComputeShader, IShader(window));
+		API_SERIALIZABLE(ComputeShader, GPU::ComputeShader);
 		API_DEFAULT_CM_CONSTRUCTOR(ComputeShader);
 
 	 public:

@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <Engine/AssetManager.h>
+#include <Engine/Utility/AssetManager.h>
 #include <Graphics/Texture/Texture.h>
 
 #include "Stylesheet.h"
@@ -13,7 +13,7 @@ namespace gETF::UI
 {
 	class IElement : public Serializable<const Header&>
 	{
-	 	SERIALIZABLE_PROTO(IElement, Serializable<const Header&>);
+	 	SERIALIZABLE_PROTO(IELM, 1, IElement, Serializable<const Header&>);
 
 	 public:
 		IElement(gE::Window* w, IElement* p, Transform& t) : _window(w), _parent(p), _transform(&t) {};
@@ -31,7 +31,7 @@ namespace gETF::UI
 	template<class T>
 	class Element : public IElement
 	{
-		SERIALIZABLE_PROTO(Element, IElement);
+		SERIALIZABLE_PROTO(EMNT, 1, Element, IElement);
 
 	 public:
 		Element(gE::Window* w, IElement* p, Transform& t, const T& r, T& s) :
@@ -50,12 +50,12 @@ namespace gETF::UI
 
 	class Frame : public Element<FrameStyle>
 	{
-		SERIALIZABLE_PROTO(Frame, Element<FrameStyle>);
+		SERIALIZABLE_PROTO(FRM, 1, Frame, Element<FrameStyle>);
 	};
 
 	class Scene : public Serializable<const Header&>
 	{
-		SERIALIZABLE_PROTO(Scene, Serializable<const Header&>);
+		SERIALIZABLE_PROTO(SCN, 1, Scene, Serializable<const Header&>);
 
 	 public:
 		std::string Name;
@@ -64,7 +64,7 @@ namespace gETF::UI
 
  	struct UI : public Serializable<const Header&>
 	{
-		SERIALIZABLE_PROTO(UI, Serializable<const Header&>);
+		SERIALIZABLE_PROTO(UI, 1, UI, Serializable<const Header&>);
 
 	 public:
 		Array<Frame::STYLE_T> FrameStyles;

@@ -11,7 +11,7 @@ namespace GPU
 {
 	struct ShaderStage : public Serializable<gE::Window*>, public Asset
 	{
-		SERIALIZABLE_PROTO(ShaderStage, Serializable);
+		SERIALIZABLE_PROTO(STGE, 1, ShaderStage, Serializable);
 		DEFAULT_CM_CONSTRUCTOR(ShaderStage);
 
 	public:
@@ -24,7 +24,7 @@ namespace GPU
 
 	struct Shader : public Serializable<gE::Window*>, public Asset
 	{
-		SERIALIZABLE_PROTO(Shader, Serializable);
+		SERIALIZABLE_PROTO(SHDR, 1, Shader, Serializable);
 		DEFAULT_CM_CONSTRUCTOR(Shader);
 
 	public:
@@ -37,7 +37,7 @@ namespace GPU
 
 	struct ComputeShader : public Serializable<gE::Window*>, public Asset
 	{
-		SERIALIZABLE_PROTO(ComputeShader, Serializable);
+		SERIALIZABLE_PROTO(COMP, 1, ComputeShader, Serializable);
 		DEFAULT_CM_CONSTRUCTOR(ComputeShader);
 
 	public:

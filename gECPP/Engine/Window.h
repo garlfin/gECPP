@@ -1,7 +1,5 @@
 #pragma once
 
-#include <Engine/AssetManager.h>
-#include <Engine/Manager.h>
 #include <Engine/Component/Behavior.h>
 #include <Engine/Component/Cullable.h>
 #include <Engine/Component/MeshRenderer.h>
@@ -13,6 +11,8 @@
 #include <Engine/Entity/VoxelCapture.h>
 #include <Engine/Math/Math.h>
 #include <Engine/Renderer/VoxelPipeline.h>
+#include <Engine/Utility/AssetManager.h>
+#include <Engine/Utility/Manager.h>
 #include <Graphics/Buffer/VAO.h>
 #include <Graphics/Shader/Shader.h>
 #include <Graphics/Texture/TextureSlotManager.h>

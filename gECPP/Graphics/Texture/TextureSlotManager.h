@@ -5,7 +5,7 @@
 #pragma once
 
 #include "Texture.h"
-#include "Engine/Binary/Binary.h"
+#include "Engine/Utility/Binary.h"
 
 #define GE_MAX_TEXTURE_SLOT 32
 

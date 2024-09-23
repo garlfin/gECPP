@@ -20,7 +20,7 @@ namespace GPU
 
 	class VAO : public Serializable<gE::Window*>, public Asset
 	{
-		SERIALIZABLE_PROTO(VAO, Serializable);
+		SERIALIZABLE_PROTO(VAO, 1, VAO, Serializable);
 		DEFAULT_CM_CONSTRUCTOR(VAO);
 
 	public:
@@ -42,7 +42,7 @@ namespace GPU
 
 	class IndexedVAO : public VAO
 	{
-		SERIALIZABLE_PROTO(IndexedVAO, VAO);
+		SERIALIZABLE_PROTO(IVAO, 1, IndexedVAO, VAO);
 		DEFAULT_CM_CONSTRUCTOR(IndexedVAO);
 
 	public:

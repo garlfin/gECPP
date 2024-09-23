@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include <Engine/Manager.h>
 #include <Engine/Math/Math.h>
+#include <Engine/Utility/Manager.h>
 
 #include "Component.h"
 

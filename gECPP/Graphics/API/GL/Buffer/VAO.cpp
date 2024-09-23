@@ -29,7 +29,7 @@ namespace GL
 		}
 	}
 
-	VAO::VAO(gE::Window* window, SUPER&& settings) : SUPER(MOVE(settings)), IVAO(window, *this)
+	VAO::VAO(gE::Window* window, SUPER&& settings) : SUPER(settings), IVAO(window, *this)
 	{
 	}
 

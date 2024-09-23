@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include <Prototype.h>
-#include <Engine/Binary/Macro.h>
+#include <gECPP/Prototype.h>
+#include <gECPP/Engine/Utility/Macro.h>
 
 namespace gE
 {

@@ -10,7 +10,7 @@ namespace gETF
 	struct Header : public Serializable<const Header&>
 	{
 	 public:
-		SERIALIZABLE_PROTO(Header, Serializable<const Header&>);
+		SERIALIZABLE_PROTO(HDR, 1, Header, Serializable<const Header&>);
 
 		gE::Window* Window;
 		u8 Version = GETF_VERSION;

@@ -1,6 +1,6 @@
 #include "Texture.h"
 
-#include <Engine/Binary/Binary.h>
+#include <Engine/Utility/Binary.h>
 #include <GLAD/glad.h>
 #include <Graphics/Texture/Texture.h>
 
