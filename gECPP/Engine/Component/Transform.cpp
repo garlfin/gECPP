@@ -11,13 +11,13 @@ namespace gE
 {
 	glm::mat4 Transform::GetParentTransform() const
 	{
-		Entity* parent = GetOwner()->GetParent();
+		Entity* parent = GetOwner().GetParent();
 		return parent ? parent->GetTransform()._model : glm::mat4(1.f);
 	}
 
 	void Transform::OnUpdate(float)
 	{
-		Entity* parent = GetOwner()->GetParent();
+		Entity* parent = GetOwner().GetParent();
 
 		_flags.Invalidated |= parent && parent->GetTransform()._flags.Invalidated;
 		_flags.PreviousInvalidated = _flags.Invalidated;
@@ -58,7 +58,7 @@ namespace gE
 
 			InitializationList.Remove(*c);
 
-			Entity* parent = (*c)->GetOwner()->GetParent();
+			Entity* parent = (*c)->GetOwner().GetParent();
 			if(parent)
 				List.Insert(*c, parent->GetTransform());
 			else List.Add(*c);

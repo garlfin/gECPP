@@ -11,6 +11,7 @@
 #include "Timing.h"
 #include "../../Utility/Manager.h"
 #include "Engine/Entity/Entity.h"
+#include "Engine/Utility/RelativePointer.h"
 
 namespace GPU
 {
@@ -32,7 +33,7 @@ namespace gE
 
 		virtual void GetGLCamera(GPU::Camera&);
 
-		GET(IRenderTarget&, Target, _target);
+		GET(IRenderTarget&, Target, *_target);
 
 		GET_CONST(CameraTiming, Timing, _settings.Timing);
 		GET_CONST(gE::ClipPlanes, ClipPlanes, _settings.ClipPlanes);
@@ -48,7 +49,7 @@ namespace gE
 
 	 private:
 		ICameraSettings _settings;
-		IRenderTarget& _target;
+		RelativePointer<IRenderTarget> _target;
 		TextureSize2D _viewportSize;
 	};
 
@@ -122,7 +123,7 @@ namespace gE
 
 		GET(TARGET_TYPE&, Target, (TARGET_TYPE&) Camera::GetTarget());
 		GET_CONST(SIZE_TYPE, Size, SIZE_TYPE(GetViewportSize(), _sizeZ));
-		GET_CONST(float, Scale, GetOwner()->GetTransform()->Scale.x);
+		GET_CONST(float, Scale, GetOwner().GetTransform()->Scale.x);
 
 		void GetGLCamera(GPU::Camera&) override;
 

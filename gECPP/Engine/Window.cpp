@@ -163,6 +163,9 @@ void Window::OnInit()
 	VoxelTAAShader = ptr_create<API::ComputeShader>(this, "Resource/Shader/Compute/voxel.comp");
 	HiZShader = ptr_create<API::ComputeShader>(this, "Resource/Shader/Compute/hiz.comp");
 
+	if(GLAD_GL_ARB_bindless_texture)
+		ShaderCompilationState.emplace_back("EXT_BINDLESS");
+
 	{
 		API::ComputeShader brdfShader(this, "Resource/Shader/Compute/brdf.comp");
 		GPU::TextureSettings2D brdfSettings

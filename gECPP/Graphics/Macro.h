@@ -10,12 +10,14 @@
 	typedef SUPER_T SUPER; \
 	inline void Serialize(istream& in, gE::Window* window) override { *this = MOVE(TYPE(in, window)); } \
 	TYPE() = default; \
-	TYPE(istream& in, gE::Window* window) : TYPE(window, MOVE(SUPER(in, window))) \
+	TYPE(istream& in, gE::Window* window) \
 	{ \
+		SUPER::Serialize(in, window); \
+		*this = TYPE(window, MOVE(*this)); \
 		SUPER::Free(); \
 	} \
 	TYPE(gE::Window* window, const SUPER& settings) : TYPE(window, (SUPER&&) SUPER(settings)) {} \
-	TYPE(gE::Window* window, SUPER&& settings)
+	TYPE(gE::Window* window, SUPER&& INTERNAL_SETTINGS)
 
 
 #define API_DEFAULT_CM_CONSTRUCTOR(TYPE) \

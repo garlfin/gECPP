@@ -84,7 +84,7 @@ void TransformMesh(const std::vector<aiMesh*>& src, GPU::IndexedVAO& dst)
 	{
 		const aiMesh& mesh = *src[i];
 
-		dst.Materials[i] = GPU::MaterialSlot(MOVE(std::string(mesh.mName.C_Str())), mesh.mNumFaces, vertexCount);
+		dst.Materials[i] = GPU::MaterialSlot(MOVE(std::string(mesh.mName.C_Str())), vertexCount, mesh.mNumFaces);
 
 		vertexCount += mesh.mNumFaces;
 	}

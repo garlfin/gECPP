@@ -6,6 +6,8 @@
 
 #include <Graphics/Buffer/FrameBuffer.h>
 
+#include "Engine/Utility/RelativePointer.h"
+
 namespace gE
 {
 	class Camera;
@@ -50,8 +52,8 @@ namespace gE
 
 		explicit IRenderTarget(Entity& owner, Camera& camera);
 
-		GET(Camera&, Camera, _camera);
-		GET(Entity&, Owner, _owner);
+		GET(Camera&, Camera, *_camera);
+		GET(Entity&, Owner, *_owner);
 		GET(API::FrameBuffer&, FrameBuffer, _frameBuffer);
  		GET(Window&, Window, *_window);
 
@@ -63,8 +65,8 @@ namespace gE
 		inline void Bind() const { _frameBuffer.Bind(); }
 
 	 private:
-		Camera& _camera;
-		Entity& _owner;
+		RelativePointer<Camera> _camera;
+		RelativePointer<Entity> _owner;
 		API::FrameBuffer _frameBuffer;
  		Window* _window;
 	};
@@ -86,10 +88,10 @@ namespace gE
 	 public:
 		explicit IDepthTarget(API::Texture& d) : _depth(d) {};
 
-		GET(API::Texture&, Depth, _depth);
+		GET(API::Texture&, Depth, *_depth);
 
 	 private:
-		API::Texture& _depth;
+		RelativePointer<API::Texture> _depth;
 	};
 
 	class IColorTarget
@@ -97,8 +99,8 @@ namespace gE
 	 public:
 		explicit IColorTarget(API::Texture& col) : _color(col) {};
 
-		GET(API::Texture&, Color, _color);
+		GET(API::Texture&, Color, *_color);
 	 private:
-		API::Texture& _color;
+		RelativePointer<API::Texture> _color;
 	};
 }

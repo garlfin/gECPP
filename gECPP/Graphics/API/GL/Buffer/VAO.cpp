@@ -6,7 +6,7 @@
 
 namespace GL
 {
-	IVAO::IVAO(gE::Window* window, GPU::VAO& vao): GLObject(window), _settings(&vao), _buffers(_settings->Counts.BufferCount)
+	IVAO::IVAO(gE::Window* window, GPU::VAO& vao): GLObject(window), _settings(vao), _buffers(_settings->Counts.BufferCount)
 	{
 		glCreateVertexArrays(1, &ID);
 
@@ -15,7 +15,8 @@ namespace GL
 			GPU::Buffer<u8>& bufSettings = _settings->Buffers[i];
 			Buffer<u8>& buffer = _buffers[i];
 
-			buffer = Buffer(window, MOVE(bufSettings));
+			buffer = MOVE(Buffer(window, MOVE(bufSettings)));
+			buffer.Free();
 			glVertexArrayVertexBuffer(ID, i, buffer.Get(), 0, bufSettings.Stride);
 		}
 
@@ -29,7 +30,7 @@ namespace GL
 		}
 	}
 
-	VAO::VAO(gE::Window* window, SUPER&& settings) : SUPER(settings), IVAO(window, *this)
+	VAO::VAO(gE::Window* window, SUPER&& INTERNAL_SETTINGS) : SUPER(MOVE(INTERNAL_SETTINGS)), IVAO(window, *this)
 	{
 	}
 
@@ -46,9 +47,10 @@ namespace GL
 		glDeleteVertexArrays(1, &ID);
 	}
 
-	IndexedVAO::IndexedVAO(gE::Window* window, SUPER&& settings) : SUPER(MOVE(settings)), IVAO(window, *this)
+	IndexedVAO::IndexedVAO(gE::Window* window, SUPER&& INTERNAL_SETTINGS) : SUPER(MOVE(INTERNAL_SETTINGS)), IVAO(window, *this)
 	{
-		_triangleBuffer = Buffer(window, MOVE(settings.TriangleBuffer));
+		_triangleBuffer = Buffer(window, MOVE(TriangleBuffer));
+		_triangleBuffer.Free();
 		glVertexArrayElementBuffer(ID, _triangleBuffer.Get());
 	}
 

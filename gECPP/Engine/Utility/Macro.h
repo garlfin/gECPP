@@ -20,11 +20,11 @@
 #endif // #ifdef DEBUG
 
 #ifdef DEBUG
-#define LOG(MSG) std::cout << MSG << '\n'
-#define ERR(MSG) std::cerr << MSG << '\n'
+#define LOG(MSG) std::cout << MSG << '\n';
+#define ERR(MSG) std::cerr << MSG << std::endl;
 #else
 #define LOG(MSG)
-#define ERR(MSG)
+#define ERR(MSG) std::cerr << MSG << std::endl;
 #endif
 
 #define assertm(exp, msg) assert(((void) msg, exp))

@@ -14,7 +14,6 @@
 #define API_DEFINE_DIRECTIVE_LENGTH 10
 
 #define GL_VERSION_DIRECTIVE "#version 460 core\n"
-#define GL_BINDLESS_DIRECTIVE "#define EXT_BINDLESS\n"
 #define GL_EXTENSION_DIRECTIVE "#extension "
 
 namespace GPU
@@ -27,7 +26,7 @@ namespace GPU
 		std::string Value;
 	};
 
-	void CompileDirectives(const Array<PreprocessorPair>& pairs, std::string& out);
+	void CompileDirectives(const std::vector<PreprocessorPair>& pairs, std::string& out);
 	void CompileIncludes(std::istream& source, std::string& extensions, std::string& out, std::string& includes, const Path& path = DEFAULT);
 	void CompileShaderType(ShaderStageType stage, std::string& out);
 	Path GetIncludePath(const std::string&, const Path& path = DEFAULT);

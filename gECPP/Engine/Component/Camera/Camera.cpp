@@ -43,7 +43,7 @@ namespace gE
 
 	void Camera::GetGLCamera(GPU::Camera& cam)
 	{
-		Transform& transform = GetOwner()->GetTransform();
+		Transform& transform = GetOwner().GetTransform();
 
 		cam.Position = transform.GetGlobalTransform().Position;
 		cam.Frame = Frame;
@@ -65,18 +65,18 @@ namespace gE
 		bool isFirst = _settings.Timing.GetIsFirst();
 		bool shouldTick = _settings.Timing.Tick(delta);
 
-		if(!isFirst && (!shouldTick || GetOwner()->GetFlags().Static)) return;
+		if(!isFirst && (!shouldTick || GetOwner().GetFlags().Static)) return;
 
 		// Limits "recursion"
-		if(!_target.Setup(delta, callingCamera)) return;
-		_target.RenderDependencies(delta);
+		if(!_target->Setup(delta, callingCamera)) return;
+		_target->RenderDependencies(delta);
 
 		GetGLCamera(buffers.Camera);
 		buffers.UpdateCamera();
 
-		_target.Bind();
-		_target.RenderPass(delta, callingCamera);
-		_target.PostProcessPass(delta);
+		_target->Bind();
+		_target->RenderPass(delta, callingCamera);
+		_target->PostProcessPass(delta);
 
 		Frame++;
 	}
@@ -115,7 +115,7 @@ namespace gE
 	void Camera2D::GetGLCamera(GPU::Camera& camera)
 	{
 		Camera::GetGLCamera(camera);
-		camera.View[0] = inverse(GetOwner()->GetTransform().Model());
+		camera.View[0] = inverse(GetOwner().GetTransform().Model());
 	}
 
 	Camera3D::Camera3D(Entity* p, TARGET_TYPE& t, const CameraSettings3D& s, ComponentManager<Camera>* m) :
@@ -125,7 +125,7 @@ namespace gE
 
 	void Camera3D::UpdateProjection()
 	{
-		glm::vec3 scale = GetOwner()->GetTransform()->Scale;
+		glm::vec3 scale = GetOwner().GetTransform()->Scale;
 		Projection = glm::ortho(-scale.x, scale.x, -scale.z, scale.z, 0.01f, scale.y * 2.f);
 	}
 
@@ -133,7 +133,7 @@ namespace gE
 	{
 		Camera::GetGLCamera(cam);
 
-		glm::vec3 scale = GetOwner()->GetTransform()->Scale;
+		glm::vec3 scale = GetOwner().GetTransform()->Scale;
 
 		for(u8 i = 0; i < 3; i++)
 			cam.View[i] = lookAt(cam.Position - scale * ForwardDirs[i * 2], cam.Position, UpDirs[i * 2]);

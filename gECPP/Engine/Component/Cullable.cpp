@@ -15,7 +15,7 @@ gE::Cullable::Cullable(Entity* owner, const AABB_T& bounds)
 
 void gE::Cullable::OnUpdate(float d)
 {
-	Transform& transform = GetOwner()->GetTransform();
+	Transform& transform = GetOwner().GetTransform();
 
 	_transformedBounds = _meshBounds * transform.Model();
 }

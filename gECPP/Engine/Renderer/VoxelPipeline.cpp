@@ -50,7 +50,7 @@ namespace gE::VoxelPipeline
 		Buffers& buffers = GetWindow().GetVoxelBuffers();
 		API::ComputeShader& voxelShader = GetWindow().GetVoxelTAAShader();
 		Transform& transform = GetOwner().GetTransform();
-		Transform& cameraTransform = camera->GetOwner()->GetTransform();
+		Transform& cameraTransform = camera->GetOwner().GetTransform();
 
 		float cellSize = GetScale() * 2.f / GetSize().x;
 

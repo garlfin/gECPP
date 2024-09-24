@@ -12,7 +12,6 @@
 #include <Engine/Math/Math.h>
 #include <Engine/Renderer/VoxelPipeline.h>
 #include <Engine/Utility/AssetManager.h>
-#include <Engine/Utility/Manager.h>
 #include <Graphics/Buffer/VAO.h>
 #include <Graphics/Shader/Shader.h>
 #include <Graphics/Texture/TextureSlotManager.h>
@@ -56,7 +55,7 @@ namespace gE
 
 		GET(gE::Material&, DefaultMaterial, DefaultMaterial);
 		GET(API::Texture2D&, BRDFLookupTexture, BRDFLookup);
-		GET(Array<GPU::PreprocessorPair>&, ShaderCompilationState, ShaderCompilationState);
+		GET(std::vector<GPU::PreprocessorPair>&, ShaderCompilationState, ShaderCompilationState);
 
 		// Post Process Data
 		GET(API::ComputeShader&, TAAShader, TAAShader);
@@ -100,7 +99,7 @@ namespace gE
 		SmartPointer<VoxelCapture> VoxelSceneCapture;
 		SmartPointer<SDFCapture> SDFSceneCapture;
 
-		Array<GPU::PreprocessorPair> ShaderCompilationState;
+		std::vector<GPU::PreprocessorPair> ShaderCompilationState;
 
 		CameraManager Cameras;
 		TransformManager Transforms;

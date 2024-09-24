@@ -4,7 +4,8 @@
 
 #pragma once
 
-#include <gECPP/Engine/Utility/Macro.h>
+#include <Engine/Utility/Macro.h>
+#include <Engine/Utility/RelativePointer.h>
 
 namespace gE
 {
@@ -19,11 +20,11 @@ namespace gE
 
 		virtual void RenderPass(typename T::TEX_T&, typename T::TEX_T&) = 0;
 
-		GET(T&, Target, _target);
+		GET(T&, Target, *_target);
 
 		virtual ~PostProcessEffect() = default;
 
 	 private:
-		T& _target;
+		RelativePointer<T> _target;
 	};
 }

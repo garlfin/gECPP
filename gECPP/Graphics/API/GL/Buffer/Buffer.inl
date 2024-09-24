@@ -15,9 +15,9 @@ namespace GL
 		glCreateBuffers(1, &ID);
 
 		if constexpr(DYNAMIC)
-			glNamedBufferData(ID, settings.GetByteCount(), settings.GetData(), GL_DYNAMIC_DRAW);
+			glNamedBufferData(ID, GetByteCount(), GetData(), GL_DYNAMIC_DRAW);
 		else
-			glNamedBufferStorage(ID, settings.GetByteCount(), settings.GetData(), GL_DYNAMIC_STORAGE_BIT);
+			glNamedBufferStorage(ID, GetByteCount(), GetData(), GL_DYNAMIC_STORAGE_BIT);
 	}
 
 	template<typename T, bool DYNAMIC>

@@ -17,9 +17,9 @@ namespace GPU
 		out += '\n';
 	}
 
-	void CompileDirectives(const Array<PreprocessorPair>& pairs, std::string& out)
+	void CompileDirectives(const std::vector<PreprocessorPair>& pairs, std::string& out)
 	{
-		for(u64 i = 0; i < pairs.Count(); i++) pairs[i].Write(out);
+		for(const PreprocessorPair& pair : pairs) pair.Write(out);
 	}
 
 	void CompileIncludes(std::istream& source, std::string& extensions, std::string& out, std::string& includes, const Path& path)
@@ -35,12 +35,12 @@ namespace GPU
 
 				if(!file.is_open()) LOG("COULD NOT FIND FILE: " << includePath);
 
+				if(includes.find(includePath.string()) != std::string::npos)
+					continue;
+
 			#ifdef DEBUG
 				out += "// BEGIN " + includePath.string() + '\n';
 			#endif
-
-				if(includes.find(includePath.string()) != std::string::npos)
-					continue;
 
 				includes += includePath.string();
 				CompileIncludes(file, extensions, out, includes, includePath);

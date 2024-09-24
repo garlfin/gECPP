@@ -7,6 +7,7 @@
 #include <Engine/Utility/Manager.h>
 
 #include "Prototype.h"
+#include "Engine/Utility/RelativePointer.h"
 
 namespace gE
 {
@@ -15,7 +16,7 @@ namespace gE
 	 public:
 		explicit Component(Entity* o, Manager<Component>* = nullptr);
 
-		GET_CONST(Entity*, Owner, _owner);
+		GET_CONST(Entity&, Owner, *_owner);
 		GET_CONST(Window&, Window, _window);
 
 		virtual void OnInit() { };
@@ -27,7 +28,7 @@ namespace gE
 
 	 private:
 		Window& _window;
-		Entity* _owner;
+		RelativePointer<Entity> _owner;
 	};
 
 #pragma clang diagnostic push

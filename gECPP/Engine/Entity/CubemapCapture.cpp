@@ -15,7 +15,7 @@ namespace gE
 
 	CubemapCapture::CubemapCapture(Window* w, u16 size) :
 		Entity(w, Flags(true, UINT8_MAX)),
-		Managed<CubemapCapture>(*this, &GetWindow().GetCubemaps()),
+		Managed(*this, &GetWindow().GetCubemaps()),
 		_camera(this, _target, { CubemapCameraSettings, size }),
 		_target(_camera)
 	{}
@@ -52,7 +52,7 @@ namespace gE
 		if(!_isInitialized)
 		{
 			ReadSerializableFromFile(_window, "Resource/Model/Plane.001.gEMesh", _skyboxVAO);
-			_skyboxShader = MOVE(API::Shader(_window, "Resource/Shader/skybox.vert", "Resource/Shader/skybox.frag"));
+			_skyboxShader = API::Shader(_window, "Resource/Shader/skybox.vert", "Resource/Shader/skybox.frag");
 			_isInitialized = true;
 		}
 		_skyboxShader.Bind();
@@ -88,7 +88,7 @@ namespace gE
 	};
 
 	CubemapTarget::CubemapTarget(CameraCubemap& camera) :
-		RenderTarget(*camera.GetOwner(), camera), IDepthTarget(_depth.Get()),
+		RenderTarget(camera.GetOwner(), camera), IDepthTarget(_depth.Get()),
 		_depth(GetFrameBuffer(), GPU::TextureSettings1D{ DefaultPipeline::DepthFormat, camera.GetSize() }),
 		_color(GetFrameBuffer(), GPU::TextureSettings1D{ CubemapColorFormat, camera.GetSize() })
 	{

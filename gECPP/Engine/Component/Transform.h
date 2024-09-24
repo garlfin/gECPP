@@ -75,7 +75,7 @@ namespace gE
 	class TransformManager : public ComponentManager<Transform>
 	{
 	 public:
-		using ComponentManager<Transform>::ComponentManager;
+		using ComponentManager::ComponentManager;
 
 		void OnUpdate(float d) override;
 	};

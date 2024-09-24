@@ -67,7 +67,7 @@ namespace gE
 		OrthographicCamera& camera = GetCamera();
 
 		Transform& transform = GetOwner().GetTransform();
-		Transform& cameraTransform = callingCamera->GetOwner()->GetTransform();
+		Transform& cameraTransform = callingCamera->GetOwner().GetTransform();
 
 		glm::vec2 planes = GetCamera().GetClipPlanes();
 		glm::vec3 offset = -transform->Forward();
@@ -83,7 +83,7 @@ namespace gE
 
 	void DirectionalLight::GetGLLight(GPU::Light& light)
 	{
-		Transform& transform = GetCamera().GetOwner()->GetTransform();
+		Transform& transform = GetCamera().GetOwner().GetTransform();
 		OrthographicCamera& camera = GetCamera();
 
 		light.ViewProjection = camera.GetProjection() * inverse(transform.Model());
