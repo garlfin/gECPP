@@ -51,7 +51,7 @@ namespace gE
 	{
 		if(!_isInitialized)
 		{
-			ReadSerializableFromFile(_window, "Resource/Model/Plane.001.gEMesh", _skyboxVAO);
+			ReadSerializableFromFile(_window, "Resource/Model/skybox.gEMesh", _skyboxVAO);
 			_skyboxShader = API::Shader(_window, "Resource/Shader/skybox.vert", "Resource/Shader/skybox.frag");
 			_isInitialized = true;
 		}
