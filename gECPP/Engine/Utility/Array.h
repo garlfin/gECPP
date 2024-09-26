@@ -61,13 +61,13 @@ class Array
 	NODISCARD ALWAYS_INLINE I* Data() { return _t; }
 	NODISCARD ALWAYS_INLINE const I* Data() const { return _t; }
 
-	NODISCARD ALWAYS_INLINE I& operator[](u64 i) { GE_ASSERT(_t, "ARRAY NOT INITIALIZED"); return _t[i]; }
-	NODISCARD ALWAYS_INLINE const I& operator[](u64 i) const { GE_ASSERT(_t, "ARRAY NOT INITIALIZED"); return _t[i]; }
+	NODISCARD ALWAYS_INLINE I& operator[](u64 i) { GE_ASSERT(_t, "ERROR: ARRAY NOT INITIALIZED"); return _t[i]; }
+	NODISCARD ALWAYS_INLINE const I& operator[](u64 i) const { GE_ASSERT(_t, "ERROR: ARRAY NOT INITIALIZED"); return _t[i]; }
 
-	NODISCARD ALWAYS_INLINE bool IsFree() const { return _t; }
+	NODISCARD ALWAYS_INLINE bool IsFree() const { return !_t; }
 	ALWAYS_INLINE void Free() { delete[] _t; _t = nullptr; _size = 0; }
 
-	ALWAYS_INLINE operator bool() const { return IsFree(); }
+	ALWAYS_INLINE operator bool() const { return _t; }
 
 	~Array() { Free(); }
 

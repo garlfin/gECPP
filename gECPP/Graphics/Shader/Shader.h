@@ -12,22 +12,26 @@ namespace GPU
 	struct ShaderStage : public Serializable<gE::Window*>, public Asset
 	{
 		SERIALIZABLE_PROTO(STGE, 1, ShaderStage, Serializable);
-		DEFAULT_CM_CONSTRUCTOR(ShaderStage);
 
 	public:
+		DEFAULT_CM_CONSTRUCTOR(ShaderStage);
+
 		ShaderStageType Type;
 		std::string Source;
 
 		ALWAYS_INLINE void Free() override { Source.clear(); Source.shrink_to_fit(); };
 		NODISCARD ALWAYS_INLINE bool IsFree() const override { return Source.data(); }
+
+		~ShaderStage() override { ASSET_CHECK_FREE(ShaderStage); }
 	};
 
 	struct Shader : public Serializable<gE::Window*>, public Asset
 	{
 		SERIALIZABLE_PROTO(SHDR, 1, Shader, Serializable);
-		DEFAULT_CM_CONSTRUCTOR(Shader);
 
 	public:
+		DEFAULT_CM_CONSTRUCTOR(Shader);
+
 		ShaderStage VertexStage;
 		ShaderStage FragmentStage;
 
@@ -38,9 +42,10 @@ namespace GPU
 	struct ComputeShader : public Serializable<gE::Window*>, public Asset
 	{
 		SERIALIZABLE_PROTO(COMP, 1, ComputeShader, Serializable);
-		DEFAULT_CM_CONSTRUCTOR(ComputeShader);
 
 	public:
+		DEFAULT_CM_CONSTRUCTOR(ComputeShader);
+
 		ShaderStage ComputeStage;
 
 		ALWAYS_INLINE void Free() override { return ComputeStage.Free(); }

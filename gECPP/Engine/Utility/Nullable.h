@@ -22,13 +22,13 @@ class Nullable
 
 	ALWAYS_INLINE const T* operator->() const
 	{
-		LOG("WARNING! NULL USAGE IN " << __PRETTY_FUNCTION__ << ".\n");
+		GE_ASSERT(_t, "NULL USAGE!");
 		return _t;
 	}
 
 	ALWAYS_INLINE T* operator->()
 	{
-		LOG("WARNING! NULL USAGE IN " << __PRETTY_FUNCTION__ << ".\n");
+		GE_ASSERT(_t, "NULL USAGE!");
 		return _t;
 	}
 

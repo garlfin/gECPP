@@ -60,7 +60,7 @@ void main()
     vec2 uv = ParallaxMapping(viewDir, ARMDTex, vert, parallaxSettings);
 
     vec3 albedo = texture(AlbedoTex, uv).rgb;
-    vec3 amr = texture(ARMDTex, uv * vec2(1, -1)).rgb;
+    vec3 arm = texture(ARMDTex, uv * vec2(1, -1)).rgb;
     vec3 normal = texture(NormalTex, uv).rgb;
 
 	normal = normal * 2.0 - 1.0;
@@ -69,9 +69,9 @@ void main()
     PBRFragment frag = PBRFragment
     (
         normal,
-        amr.y,
+        arm.y, // roughness
         albedo,
-        amr.z,
+        arm.z,
         vec3(0.04),
         bool(Scene.State & ENABLE_SPECULAR) ? 1.0 : 0.0
     );
@@ -84,8 +84,21 @@ void main()
 #ifdef EXT_BINDLESS
     if(bool(Scene.State & ENABLE_SPECULAR))
     {
-        vec3 cubemapDir = CubemapParallax(vert.Position, pbrSample.Specular, Lighting.Cubemaps[0]);
-        vec3 specular = textureLod(Lighting.Cubemaps[0].Color, cubemapDir, 0.f).rgb;
+        vec3 specular = texture(Lighting.Skybox, pbrSample.Specular).rgb;
+        vec3 cubemapSpecular;
+
+        float cubemapWeight, maxCubemapWeight;
+        for(uint i = 0; i < Lighting.CubemapCount; i++)
+        {
+            float weight;
+            vec3 cubemapDir = CubemapParallax(vert.Position, pbrSample.Specular, Lighting.Cubemaps[i], weight);
+
+            cubemapSpecular += textureLod(Lighting.Cubemaps[0].Color, cubemapDir, 0.f).rgb * 2.0; // it looks more right??
+            cubemapWeight += weight;
+            maxCubemapWeight = max(maxCubemapWeight, weight);
+        }
+
+        specular = mix(specular, cubemapSpecular / max(cubemapWeight, EPSILON), maxCubemapWeight);
 
     #if defined(ENABLE_SS_TRACE) || defined(ENABLE_VOXEL_TRACE)
         Ray ray = Ray(vert.Position, 10.f, pbrSample.Specular);
@@ -99,7 +112,7 @@ void main()
                 ray.Position = vert.Position + ray.Direction * result.Distance;
                 result = Voxel_TraceOffset(ray, vert.Normal);
                 raySpecular = textureLod(VoxelGrid.Color, Voxel_WorldToUV(result.Position), 0.0).rgb;
-                raySpecular = UnpackColor(raySpecular);
+                raySpecular = UnpackColor(raySpecular) * 2.0;
             }
         #endif
 

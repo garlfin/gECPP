@@ -56,7 +56,7 @@ float GSchlick(float cosTheta, float roughness); // AKA 'k'
 float GSchlick(float nDotL, float nDotH, float roughness);
 float GSchlickAnalytical(float nDotL, float nDotH, float roughness); // Read more: Section 3, "Specular G"
 vec3 FresnelSchlick(vec3 f0, float nDotV);
-vec3 CubemapParallax(vec3, vec3, Cubemap);
+vec3 CubemapParallax(vec3 pos, vec3 dir, Cubemap cubemap, out float weight);
 #ifdef FRAGMENT_SHADER
 vec3 FilterSpecular(const Vertex vert, const PBRFragment frag, const PBRSample pbrSample, vec3 color);
 #endif
@@ -188,7 +188,7 @@ vec2 Hammersley(uint i, uint sampleCount)
 }
 
 // https://seblagarde.wordpress.com/2012/09/29/image-based-lighting-approaches-and-parallax-corrected-cubemap/
-vec3 CubemapParallax(vec3 pos, vec3 dir, Cubemap cubemap)
+vec3 CubemapParallax(vec3 pos, vec3 dir, Cubemap cubemap, out float weight)
 {
     switch(cubemap.Type)
     {
@@ -203,7 +203,9 @@ vec3 CubemapParallax(vec3 pos, vec3 dir, Cubemap cubemap)
             first = max(first, second);
             float dist = min(first.x, min(first.y, first.z));
 
-            if(any(greaterThan(abs(pos - cubemap.Position), cubemap.Scale))) return dir;
+            weight = 1.0 - float(any(greaterThan(abs(pos - cubemap.Position), cubemap.Scale)));
+
+            if(weight == 0.0) return dir;
             return (pos + dir * dist) - cubemap.Position;
 
         default:

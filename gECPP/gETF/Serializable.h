@@ -122,6 +122,7 @@ template<> void Write(std::ostream& out, u32 count, const std::string* t);
 template<class T>
 struct Serializable
 {
+public:
 	Serializable() = default;
 	Serializable(istream&, T) { }
 	DEFAULT_CM_CONSTRUCTOR(Serializable);

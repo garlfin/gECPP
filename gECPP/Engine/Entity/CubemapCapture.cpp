@@ -36,6 +36,8 @@ namespace gE
 		DefaultPipeline::Buffers& buffers = _window->GetPipelineBuffers();
 		GPU::Lighting& lighting = buffers.Lighting;
 
+		GE_ASSERT(Skybox.Get(), "ERROR: NO SKYBOX TEXTURE");
+
 		lighting.Skybox = Skybox->GetHandle();
 		lighting.CubemapCount = 1;
 		(*List.GetFirst())->GetGLCubemap(lighting.Cubemaps[0]);

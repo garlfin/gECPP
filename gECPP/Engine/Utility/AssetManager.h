@@ -17,20 +17,21 @@ namespace gE
 		inline Reference() = default;
 
 		OPERATOR_COPY(Reference, o,
-		{
-			LOG("INFO: COPIED REFERENCE\n\tCOUNT: " << *o._counter << "\n\tFUNCTION: " << __PRETTY_FUNCTION__);
 			_t = o._t;
 			_counter = o._counter;
-			if(_counter) (*_counter)++;
-		})
+			if(_counter)
+			{
+				LOG("INFO: COPIED REFERENCE\n\tCOUNT: " << *_counter << "\n\tFUNCTION: " << __PRETTY_FUNCTION__);
+				(*_counter)++;
+			}
+		);
 
 		OPERATOR_MOVE(Reference, o,
-		{
 			_t = o._t;
 			_counter = o._counter;
 			o._t = nullptr;
 			o._counter = nullptr;
-		})
+		);
 
 		ALWAYS_INLINE T* Get() const { return _t; }
 		ALWAYS_INLINE T* operator->() const { return _t; }

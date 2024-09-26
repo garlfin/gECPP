@@ -27,6 +27,8 @@ namespace GPU
 
 		ITextureSettings Settings;
 		TextureData Data;
+
+		~Texture() override { ASSET_CHECK_FREE(Texture); }
 	};
 
  	class Texture2D : public Texture

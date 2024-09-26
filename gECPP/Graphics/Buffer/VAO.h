@@ -21,9 +21,10 @@ namespace GPU
 	class VAO : public Serializable<gE::Window*>, public Asset
 	{
 		SERIALIZABLE_PROTO(VAO, 1, VAO, Serializable);
-		DEFAULT_CM_CONSTRUCTOR(VAO);
 
 	public:
+		DEFAULT_CM_CONSTRUCTOR(VAO);
+
 		VAOFieldCounts Counts{};
 		MaterialSlot Materials[GE_MAX_VAO_MATERIAL];
 		VertexField Fields[GE_MAX_VAO_FIELD];
@@ -38,19 +39,24 @@ namespace GPU
 					return false;
 			return true;
 		}
+
+		~VAO() override { ASSET_CHECK_FREE(VAO); }
 	};
 
 	class IndexedVAO : public VAO
 	{
 		SERIALIZABLE_PROTO(IVAO, 1, IndexedVAO, VAO);
-		DEFAULT_CM_CONSTRUCTOR(IndexedVAO);
 
 	public:
+		DEFAULT_CM_CONSTRUCTOR(IndexedVAO);
+
 		ALWAYS_INLINE void Free() override { VAO::Free(); TriangleBuffer.Free(); }
 		NODISCARD ALWAYS_INLINE bool IsFree() const override { return VAO::IsFree() && TriangleBuffer.IsFree(); }
 
 		GLenum TriangleFormat = DEFAULT;
 		Buffer<u8> TriangleBuffer;
+
+		~IndexedVAO() override { ASSET_CHECK_FREE(IndexedVAO); }
 	};
 }
 

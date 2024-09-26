@@ -14,10 +14,10 @@
 	#define API GL
 #endif
 
-#if API_ID != API_NONE
-	#define ASSET_CHECK_FREE() if(!IsFree()) LOG("WARNING: ASSET NOT FREED BEFORE DELETION!")
+#ifdef DEBUG
+	#define ASSET_CHECK_FREE(TYPE) if(!TYPE::IsFree()) LOG("WARNING: ASSET NOT DELETED\n\tAsset: " << this);
 #else
-	#define ASSET_CHECK_FREE()
+	#define ASSET_CHECK_FREE(TYPE)
 #endif
 
 namespace GPU
@@ -54,10 +54,10 @@ namespace GPU
 
 	class Asset
 	{
-		DEFAULT_CM_CONSTRUCTOR(Asset);
-
 	public:
 		Asset() = default;
+
+		DEFAULT_CM_CONSTRUCTOR(Asset);
 
 		virtual void Free() = 0;
 		NODISCARD virtual bool IsFree() const = 0;

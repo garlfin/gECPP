@@ -20,11 +20,11 @@
 #endif // #ifdef DEBUG
 
 #ifdef DEBUG
-#define LOG(MSG) std::cout << MSG << '\n';
-#define ERR(MSG) std::cerr << MSG << std::endl;
+#define LOG(MSG) std::cout << MSG << '\n'
+#define ERR(MSG) { __builtin_trap(); std::cerr << MSG << std::endl; }
 #else
 #define LOG(MSG)
-#define ERR(MSG) std::cerr << MSG << std::endl;
+#define ERR(MSG) std::cerr << MSG << std::endl
 #endif
 
 #define assertm(exp, msg) assert(((void) msg, exp))
@@ -105,12 +105,10 @@
 	OPERATOR_CAST_CONST(const TYPE, FIELD);
 
 #define DELETE_COPY_CONSTRUCTOR(TYPE) \
-	public: \
 	TYPE(const TYPE&) = delete; \
 	TYPE& operator=(const TYPE&) = delete
 
 #define DELETE_MOVE_CONSTRUCTOR(TYPE) \
-	public: \
 	TYPE(TYPE&&) = delete; \
 	TYPE& operator=(TYPE&&) = delete
 
@@ -119,12 +117,10 @@
 	DELETE_MOVE_CONSTRUCTOR(TYPE)
 
 #define DEFAULT_COPY_CONSTRUCTOR(TYPE) \
-	public: \
 	TYPE(const TYPE&) = default; \
 	TYPE& operator=(const TYPE&) = default
 
 #define DEFAULT_MOVE_CONSTRUCTOR(TYPE) \
-	public: \
 	TYPE(TYPE&&) = default; \
 	TYPE& operator=(TYPE&&) = default
 

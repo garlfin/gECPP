@@ -13,11 +13,12 @@ namespace GPU
 	struct MaterialSlot : public Serializable<>
 	{
 		SERIALIZABLE_PROTO(MAT, 1, MaterialSlot, Serializable);
-		DEFAULT_CM_CONSTRUCTOR(MaterialSlot);
 
 	public:
 		MaterialSlot(std::string&& name, u32 offset, u32 count) : Name(MOVE(name)), Offset(offset), Count(count) {}
 		MaterialSlot(const std::string& name, u32 offset, u32 count) : Name(name), Offset(offset), Count(count) {}
+
+		DEFAULT_CM_CONSTRUCTOR(MaterialSlot);
 
 		std::string Name = DEFAULT;
 		u32 Offset = 0;

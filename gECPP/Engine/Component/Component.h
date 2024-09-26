@@ -57,7 +57,7 @@ namespace gE
 			for(Managed<Component>* c = List.GetFirst(); c; c = c->GetNext())
 				(*c)->OnInit();
 
-			List.MoveFrom(InitializationList);
+			List.MergeList(InitializationList);
 
 			for(Managed<Component>* c = List.GetFirst(); c; c = c->GetNext())
 				(*c)->OnUpdate(d);

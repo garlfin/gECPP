@@ -12,7 +12,6 @@ namespace GPU
 	class Buffer : public Serializable<gE::Window*>, public Asset
 	{
 		SERIALIZABLE_PROTO(SBUF, 1, Buffer, Serializable<gE::Window*>);
-		DEFAULT_CM_CONSTRUCTOR(Buffer);
 
 	 public:
 		static_assert(!std::is_pointer_v<T>, "Buffer data shouldn't be a pointer!");
@@ -20,6 +19,8 @@ namespace GPU
 		explicit Buffer(u32 count, const T* data = nullptr) : Stride(sizeof(typename Array<T>::I)), Data(count, data) {}
 		explicit Buffer(const Array<T>& arr) : Stride(sizeof(typename Array<T>::I)), Data(arr) {}
 		explicit Buffer(Array<T>&& arr) : Stride(sizeof(typename Array<T>::I)), Data(arr) {}
+
+		DEFAULT_CM_CONSTRUCTOR(Buffer);
 
 		GET_CONST(u8, Stride, Stride);
 		GET_CONST(const Array<T>&, Array, Data);
@@ -33,6 +34,8 @@ namespace GPU
 
 		uint8_t Stride;
 		Array<T> Data;
+
+		~Buffer() override { ASSET_CHECK_FREE(Buffer); }
 	};
 }
 
