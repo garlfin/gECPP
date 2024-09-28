@@ -4,11 +4,10 @@
 
 #pragma once
 
+#include <Engine/Component/MaterialHolder.h>
 #include <Engine/Entity/Entity.h>
 #include <Engine/Renderer/Material.h>
 #include <Graphics/Buffer/VAO.h>
-
-#include "MaterialHolder.h"
 
 namespace gE
 {
@@ -21,11 +20,17 @@ namespace gE
 		void OnRender(float delta, Camera*) override;
 
 		GET_CONST(API::IVAO&, Mesh, *_mesh);
-		GET_CONST(const MaterialHolder&, Materials, _materialHolder);
+		GET_CONST(const MaterialHolder&, Materials, *_materialHolder);
+
+		static inline bool CompareVAO(const MeshRenderer&, const MeshRenderer&);
+		static inline bool CompareMaterial(const MeshRenderer&, const MeshRenderer&);
+		static inline bool CompareLOD(const MeshRenderer&, const MeshRenderer&);
+
+		friend class RendererManager;
 
 	 private:
 		Reference<API::IVAO> _mesh;
-		const MaterialHolder& _materialHolder;
+		RelativePointer<MaterialHolder> _materialHolder;
 	};
 
 	class RendererManager : public ComponentManager<MeshRenderer>
@@ -34,5 +39,9 @@ namespace gE
 		using ComponentManager::ComponentManager;
 
 		void OnRender(float d, Camera* camera) override;
+
+		void ReRegister(MeshRenderer&);
 	};
 }
+
+#include "MeshRenderer.inl"

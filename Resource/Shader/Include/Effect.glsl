@@ -24,6 +24,8 @@ vec2 ParallaxMapping(vec3 viewDir, sampler2D tex, Vertex vert, ParallaxEffectSet
     vec3 delta = vec3(viewDir.xy / viewDir.z, -1.0) / layerCount;
 
     vec3 uv = vec3(vert.UV, 0.0);
+    uv -= delta * s.Depth * IGNSample;
+
     float depth = 0.0;
     for(int i = 0; i < layerCount; i++)
     {

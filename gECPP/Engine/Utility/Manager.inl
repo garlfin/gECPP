@@ -9,37 +9,15 @@
 namespace gE
 {
 	template<class T>
-void ManagedList<T>::Add(Managed<T>& t)
+	void ManagedList<T>::Add(Managed<T>& t)
 	{
-		if(t._list || t._previous || t._next) return;
-
-		if(!_size++)
-		{
-			_first = _last = &t;
-			t._previous = t._next = nullptr;
-			return;
-		}
-
-		t->_previous = _last;
-		t->_list = this;
-		_last = _last->_next = &t;
+		t = Managed<T>(t.Get(), );
 	}
 
 	template<class T>
 	void ManagedList<T>::Remove(Managed<T>& t)
 	{
-		if(t._list != this) return;
-
-		if(!--_size) _first = _last = nullptr;
-
-		if(t._previous) t._previous->_next = t._next;
-		if(t._next) t._next->_previous = t._previous;
-
-		if(_first == &t) _first = t._next;
-		else if(_last == &t) _last = t._previous;
-
-		t._previous = t._next = nullptr;
-		t._list = nullptr;
+		t = MOVE(Managed<T>(t.Get(), nullptr));
 	}
 
 	template<class T>

@@ -125,7 +125,7 @@ struct Serializable
 public:
 	Serializable() = default;
 	Serializable(istream&, T) { }
-	DEFAULT_CM_CONSTRUCTOR(Serializable);
+	DEFALT_OPERATOR_CM(Serializable);
 
 	typedef T SETTINGS_T;
 

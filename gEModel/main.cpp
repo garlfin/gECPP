@@ -62,7 +62,7 @@ int main(int argc, char** argv)
 
 	for(const auto& src : meshes)
 	{
-		Path path = basePath / (std::string(src[0]->mName.data) + ".gEMesh");
+		Path path = basePath / (std::string(src[0]->mName.data) + ".vao");
 
 		GPU::IndexedVAO mesh;
 		TransformMesh(src, mesh);

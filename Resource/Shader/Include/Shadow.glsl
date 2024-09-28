@@ -126,7 +126,9 @@ float GetShadowDirectional(const Vertex vert, const Light light)
         z = uv.z - z;
 
         float shadowSample = z > bias ? 0.0 : 1.0;
+
         shadowSample = TexcoordOutOfBounds(uv.xy) ? 1.0 : shadowSample;
+        shadowSample = uv.z > light.Planes.y ? 1.0 : shadowSample;
 
         shadow += shadowSample;
     }

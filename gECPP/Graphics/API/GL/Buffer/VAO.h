@@ -13,7 +13,7 @@ namespace GL
 		IVAO() = default;
 		IVAO(gE::Window* window, GPU::VAO& vao);
 
-		DEFAULT_CM_CONSTRUCTOR(IVAO);
+		DEFALT_OPERATOR_CM(IVAO);
 
 		GET_CONST(const GPU::VAO&, Data, *_settings);
 

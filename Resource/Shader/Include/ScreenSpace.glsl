@@ -52,7 +52,7 @@ vec2 SS_AlignUVToCell(vec2, ivec2);
 float SS_CrossCell(inout vec3, vec3, ivec2);
 vec3 SS_DirToView(vec3);
 float LengthSquared(vec3 v) { return dot(v, v); }
-float SS_GetDepthWithBias(float d) { return d + min(RAY_MAX_BIAS, d * 0.02); }
+float SS_GetDepthWithBias(float d, float bias) { return d + min(RAY_MAX_BIAS, d * bias); }
 float SS_Sign(float f) { return f < 0 ? -1 : 1; }
 vec2 SS_Sign(vec2 v) { return vec2(SS_Sign(v.x), SS_Sign(v.y)); }
 
@@ -151,7 +151,7 @@ RayResult SS_Trace(Ray ray, out int m)
         }
 
         float depth = textureLod(Camera.Depth, uv.xy, float(mip)).r;
-        depth = SS_GetDepthWithBias(depth);
+        depth = SS_GetDepthWithBias(depth, 0.01);
 
         if(depth < uv.z)
             if(mip == 0)
@@ -218,7 +218,7 @@ RayResult SS_TraceRough(Ray ray, LinearRaySettings settings)
 
         float depth = textureLod(Camera.Depth, uv.xy, 0.f).r;
 
-        if(SS_GetDepthWithBias(depth) < uv.z)
+        if(SS_GetDepthWithBias(depth, 0.01) < uv.z)
         {
             result.Result = uv.z - depth < RAY_THICKNESS ? RAY_RESULT_HIT : RAY_RESULT_TOO_FAR;
             break;

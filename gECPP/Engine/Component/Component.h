@@ -76,7 +76,7 @@ namespace gE
 	 protected:
 		ManagedList<Component> InitializationList;
 
-		void Register(Component& t) override
+		void OnRegister(Component& t) override
 		{
 			InitializationList.Add(t);
 		}

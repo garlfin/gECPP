@@ -5,7 +5,7 @@
 #pragma once
 
 #include <Engine/Component/MaterialHolder.h>
-#include <Engine/Component/MeshRenderer.h>
+#include <Engine/Component/MeshRenderer/MeshRenderer.h>
 #include <Engine/Entity/Entity.h>
 
 namespace gE::VoxelDemo

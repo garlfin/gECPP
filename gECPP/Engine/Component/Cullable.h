@@ -30,7 +30,7 @@ namespace gE
 		GET_CONST(const AABB_T&, GlobalBounds, _transformedBounds);
 		GET_CONST(CullFlags, Flags, _flags);
 
-		virtual ~Cullable() = default;
+		~Cullable() override = default;
 
 	 private:
 		AABB_T _meshBounds;

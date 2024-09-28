@@ -88,7 +88,8 @@ vec3 GetLightingDirectional(const Vertex vert, const PBRFragment frag, const Lig
     float eDotH = clamp(dot(halfEye, eye), 0.0, 1.0);
 
     // PBR Setup
-    vec3 f = FresnelSchlick(frag.F0, eDotH);
+    vec3 f0 = mix(frag.F0, frag.Albedo, frag.Metallic);
+    vec3 f = FresnelSchlick(f0, eDotH);
     float d = GGXNDF(nDotH, frag.Roughness);
     float g = GSchlickAnalytical(nDotL, nDotV, frag.Roughness);
 
@@ -101,7 +102,7 @@ vec3 GetLightingDirectional(const Vertex vert, const PBRFragment frag, const Lig
     // Falloff of nDotL * nDotL is nicer to me
     float lambert = min(nDotL * nDotL, GetShadowDirectional(vert, light));
 
-    return (diffuseBRDF + specularBRDF * frag.Specular) * lambert * light.Color;
+    return (diffuseBRDF + specularBRDF) * lambert * light.Color;
 }
 
 vec3 FilterSpecular(const Vertex vert, const PBRFragment frag, const PBRSample pbrSample, vec3 color)
@@ -110,7 +111,8 @@ vec3 FilterSpecular(const Vertex vert, const PBRFragment frag, const PBRSample p
     vec3 eye = normalize(Camera.Position - vert.Position);
 
     float nDotV = clamp(dot(frag.Normal, eye), 0.0, 1.0);
-    vec3 f = FresnelSchlick(frag.F0, nDotV);
+    vec3 f0 = mix(frag.F0, frag.Albedo, frag.Metallic);
+    vec3 f = FresnelSchlick(f0, nDotV);
     vec2 brdf = pbrSample.BRDF;
 
     return (brdf.g + f * brdf.r) * color;
@@ -223,7 +225,8 @@ PBRSample ImportanceSample(const Vertex vert, const PBRFragment frag)
     vec3 n = ImportanceSampleGGX(xi, frag.Normal, frag.Roughness);
     vec3 r = -reflect(eye, n);
 
-    vec3 f = FresnelSchlick(frag.F0, nDotV);
+    vec3 f0 = mix(frag.F0, frag.Albedo, frag.Metallic);
+    vec3 f = FresnelSchlick(f0, nDotV);
     vec2 brdf = textureLod(BRDFLutTex, vec2(nDotV, frag.Roughness), 0.0).rg;
 
     return PBRSample(brdf, f, r, vec3(0.0));

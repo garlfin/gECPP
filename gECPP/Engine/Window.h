@@ -2,9 +2,9 @@
 
 #include <Engine/Component/Behavior.h>
 #include <Engine/Component/Cullable.h>
-#include <Engine/Component/MeshRenderer.h>
 #include <Engine/Component/Transform.h>
 #include <Engine/Component/Camera/Camera.h>
+#include <Engine/Component/MeshRenderer/MeshRenderer.h>
 #include <Engine/Entity/CubemapCapture.h>
 #include <Engine/Entity/Light.h>
 #include <Engine/Entity/SDFCapture.h>

@@ -27,6 +27,7 @@ namespace gE
 	{
 		ComponentManager::OnRender(d, camera);
 
+		u32 batchCount = 0;
 		for(Managed<Component>* m = List.GetFirst(); m; m = m->GetNext())
 		{
 			MeshRenderer& renderer = *(MeshRenderer*) &m->Get();
@@ -36,6 +37,8 @@ namespace gE
 			const API::IVAO& vao = renderer.GetMesh();
 			const GPU::VAO& vaoData = vao.GetData();
 			const Transform& transform = renderer.GetOwner().GetTransform();
+
+			if()
 
 			buffers.Scene.InstanceCount = 1;
 			buffers.Scene.State = window.State;
@@ -52,5 +55,10 @@ namespace gE
 				vao.Draw(i, window.State.InstanceMultiplier);
 			}
 		}
+	}
+
+	void RendererManager::ReRegister(MeshRenderer&)
+	{
+
 	}
 }

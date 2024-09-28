@@ -35,7 +35,7 @@ namespace GPU
 		explicit APIObject() = default;
 		explicit APIObject(gE::Window* window) : _window(window) { };
 
-		DELETE_COPY_CONSTRUCTOR(APIObject);
+		DELETE_OPERATOR_COPY(APIObject);
 		OPERATOR_MOVE(APIObject, o, ID = o.ID; o.ID = 0);
 
 		virtual void Bind() const = 0;
@@ -57,7 +57,7 @@ namespace GPU
 	public:
 		Asset() = default;
 
-		DEFAULT_CM_CONSTRUCTOR(Asset);
+		DEFALT_OPERATOR_CM(Asset);
 
 		virtual void Free() = 0;
 		NODISCARD virtual bool IsFree() const = 0;

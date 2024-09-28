@@ -23,7 +23,7 @@ namespace GPU
 		SERIALIZABLE_PROTO(VAO, 1, VAO, Serializable);
 
 	public:
-		DEFAULT_CM_CONSTRUCTOR(VAO);
+		DEFALT_OPERATOR_CM(VAO);
 
 		VAOFieldCounts Counts{};
 		MaterialSlot Materials[GE_MAX_VAO_MATERIAL];
@@ -48,7 +48,7 @@ namespace GPU
 		SERIALIZABLE_PROTO(IVAO, 1, IndexedVAO, VAO);
 
 	public:
-		DEFAULT_CM_CONSTRUCTOR(IndexedVAO);
+		DEFALT_OPERATOR_CM(IndexedVAO);
 
 		ALWAYS_INLINE void Free() override { VAO::Free(); TriangleBuffer.Free(); }
 		NODISCARD ALWAYS_INLINE bool IsFree() const override { return VAO::IsFree() && TriangleBuffer.IsFree(); }

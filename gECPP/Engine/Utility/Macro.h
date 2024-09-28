@@ -83,6 +83,7 @@
 	NAMESPACE##TYPE& NAMESPACE##operator=(TYPE&& ACCESSOR) noexcept \
 	{ \
 		if(&ACCESSOR == this) return *this; \
+		this->~TYPE(); \
 		CODE; \
 		return* this; \
 	}
@@ -92,6 +93,7 @@
 	NAMESPACE##TYPE& NAMESPACE##operator=(const TYPE& ACCESSOR) \
 	{ \
 		if(&ACCESSOR == this) return *this; \
+		this->~TYPE(); \
 		CODE; \
 		return *this; \
 	}
@@ -104,28 +106,28 @@
 	ALWAYS_INLINE operator TYPE() { return FIELD; } \
 	OPERATOR_CAST_CONST(const TYPE, FIELD);
 
-#define DELETE_COPY_CONSTRUCTOR(TYPE) \
+#define DELETE_OPERATOR_COPY(TYPE) \
 	TYPE(const TYPE&) = delete; \
 	TYPE& operator=(const TYPE&) = delete
 
-#define DELETE_MOVE_CONSTRUCTOR(TYPE) \
+#define DELETE_OPERATOR_MOVE(TYPE) \
 	TYPE(TYPE&&) = delete; \
 	TYPE& operator=(TYPE&&) = delete
 
-#define DELETE_CM_CONSTRUCTOR(TYPE) \
-	DELETE_COPY_CONSTRUCTOR(TYPE); \
-	DELETE_MOVE_CONSTRUCTOR(TYPE)
+#define DELETE_OPERATOR_CM(TYPE) \
+	DELETE_OPERATOR_COPY(TYPE); \
+	DELETE_OPERATOR_MOVE(TYPE)
 
-#define DEFAULT_COPY_CONSTRUCTOR(TYPE) \
+#define DEFAULT_OPERATOR_COPY(TYPE) \
 	TYPE(const TYPE&) = default; \
 	TYPE& operator=(const TYPE&) = default
 
-#define DEFAULT_MOVE_CONSTRUCTOR(TYPE) \
+#define DEFAULT_OPERATOR_MOVE(TYPE) \
 	TYPE(TYPE&&) = default; \
 	TYPE& operator=(TYPE&&) = default
 
-#define DEFAULT_CM_CONSTRUCTOR(TYPE) \
-	DEFAULT_COPY_CONSTRUCTOR(TYPE); \
-	DEFAULT_MOVE_CONSTRUCTOR(TYPE)
+#define DEFALT_OPERATOR_CM(TYPE) \
+	DEFAULT_OPERATOR_COPY(TYPE); \
+	DEFAULT_OPERATOR_MOVE(TYPE)
 
 // Yapping about newline >: (

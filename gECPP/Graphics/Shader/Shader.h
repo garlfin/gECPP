@@ -14,7 +14,7 @@ namespace GPU
 		SERIALIZABLE_PROTO(STGE, 1, ShaderStage, Serializable);
 
 	public:
-		DEFAULT_CM_CONSTRUCTOR(ShaderStage);
+		DEFALT_OPERATOR_CM(ShaderStage);
 
 		ShaderStageType Type;
 		std::string Source;
@@ -30,7 +30,7 @@ namespace GPU
 		SERIALIZABLE_PROTO(SHDR, 1, Shader, Serializable);
 
 	public:
-		DEFAULT_CM_CONSTRUCTOR(Shader);
+		DEFALT_OPERATOR_CM(Shader);
 
 		ShaderStage VertexStage;
 		ShaderStage FragmentStage;
@@ -44,7 +44,7 @@ namespace GPU
 		SERIALIZABLE_PROTO(COMP, 1, ComputeShader, Serializable);
 
 	public:
-		DEFAULT_CM_CONSTRUCTOR(ComputeShader);
+		DEFALT_OPERATOR_CM(ComputeShader);
 
 		ShaderStage ComputeStage;
 
