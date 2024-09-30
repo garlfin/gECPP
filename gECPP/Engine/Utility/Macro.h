@@ -79,11 +79,10 @@
 	TYPE& operator=(const TYPE& ACCESSOR);
 
 #define OPERATOR_MOVE_NAMESPACE(NAMESPACE, TYPE, ACCESSOR, CODE) \
-    NAMESPACE##TYPE(TYPE&& ACCESSOR) noexcept { if(&ACCESSOR == this) return; CODE; } \
+    NAMESPACE##  TYPE(TYPE&& ACCESSOR) noexcept { if(&ACCESSOR == this) return; CODE; } \
 	NAMESPACE##TYPE& NAMESPACE##operator=(TYPE&& ACCESSOR) noexcept \
 	{ \
 		if(&ACCESSOR == this) return *this; \
-		this->~TYPE(); \
 		CODE; \
 		return* this; \
 	}
@@ -93,7 +92,6 @@
 	NAMESPACE##TYPE& NAMESPACE##operator=(const TYPE& ACCESSOR) \
 	{ \
 		if(&ACCESSOR == this) return *this; \
-		this->~TYPE(); \
 		CODE; \
 		return *this; \
 	}

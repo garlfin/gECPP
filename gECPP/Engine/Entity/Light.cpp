@@ -27,8 +27,8 @@ namespace gE
 
 	void LightManager::OnRender(float delta, Camera* camera)
 	{
-		for(Managed<Light>* l = List.GetFirst(); l; l = l->GetNext())
-			(*l)->GetCamera().OnRender(delta, camera);
+		for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())
+			(**i)->GetCamera().OnRender(delta, camera);
 	}
 
 	CONSTEXPR_GLOBAL GPU::ITextureSettings ShadowMapFormat { GL_DEPTH_COMPONENT16, GPU::WrapMode::Clamp, GPU::FilterMode::Linear };
@@ -109,7 +109,7 @@ namespace gE
 	Light::Light(Window* w, Camera& c, IDepthTarget& d) :
 		Entity(w, Flags(false, UINT8_MAX)),
 		IDepthTarget(d),
-		Managed<Light>(*this, &GetWindow().GetLights()),
+		Managed(&GetWindow().GetLights(), *this),
 		_camera(c)
 	{
 	}

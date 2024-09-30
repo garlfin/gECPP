@@ -9,7 +9,6 @@
 #include "RenderTarget.h"
 #include "Settings.h"
 #include "Timing.h"
-#include "../../Utility/Manager.h"
 #include "Engine/Entity/Entity.h"
 #include "Engine/Utility/RelativePointer.h"
 

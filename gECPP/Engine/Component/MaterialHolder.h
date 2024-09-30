@@ -1,8 +1,9 @@
 #pragma once
 
+#include <Engine/Component/Component.h>
 #include <Engine/Renderer/Material.h>
-#include <gECPP/Engine/Component/Component.h>
-#include "Engine/Utility/Nullable.h"
+#include <Engine/Utility/Nullable.h>
+#include <Graphics/Buffer/VAOSettings.h>
 
 #ifndef GE_MAX_MATERIAL
 #define GE_MAX_MATERIAL GE_MAX_VAO_MATERIAL

@@ -4,15 +4,16 @@
 
 #pragma once
 
-#include <gECPP/Prototype.h>
-#include <gECPP/Engine/Utility/Macro.h>
+#include <Prototype.h>
+#include <Engine/Utility/Macro.h>
 
 #include "RelativePointer.h"
 
 namespace gE
 {
 	template<class T> class Manager;
-	template<class T> class ManagedList;
+	template<class T> class LinkedList;
+	template<class T> class LinkedIterator;
 
 	template<class T>
 	using CompareFunc = bool(*)(T a, T b);
@@ -24,153 +25,203 @@ namespace gE
 	};
 
 	template<class T>
-	class ManagedList
+	class LinkedList final
 	{
 	 public:
-		ManagedList(Manager<T>* = nullptr);
+		LinkedList() = default;
 
-		DELETE_OPERATOR_CM(ManagedList);
+		DELETE_OPERATOR_CM(LinkedList);
 
-		void Add(Managed<T>& t);
-		void Insert(Managed<T>& t, Managed<T>& at);
-		void Move(Managed<T>& t, Managed<T>& to);
-		void Remove(Managed<T>& t);
-		void MergeList(ManagedList& list);
+		typedef LinkedIterator<T> ITER_T;
 
-		template<CompareFunc<const T&> COMPARE_FUNC>
-		ALWAYS_INLINE Managed<T>* FindSimilar(Managed<T>& similar)
-		{
-			return FindSimilar(similar, _first, SearchDirection::Right);
-		}
+		void Add(LinkedIterator<T>& t);
+		void Insert(LinkedIterator<T>& t, LinkedIterator<T>& at);
+		void Move(LinkedIterator<T>& t, LinkedIterator<T>& to);
+		void Remove(LinkedIterator<T>& t);
+		void MergeList(LinkedList& list);
 
 		template<CompareFunc<const T&> COMPARE_FUNC>
-		Managed<T>* FindSimilar(Managed<T>& similar, Managed<T>& start, SearchDirection direction);
+		LinkedIterator<T>* FindSimilar(const T& similar, LinkedIterator<T>* start = nullptr, SearchDirection direction = SearchDirection::Right);
 
-		GET_CONST(Managed<T>*, First, _first);
-		GET_CONST(Managed<T>*, Last, _last);
+		GET_CONST(LinkedIterator<T>*, First, _first);
+		GET_CONST(LinkedIterator<T>*, Last, _last);
 		GET_CONST(u32, Size, _size);
 
+		friend class LinkedIterator<T>;
+
+		~LinkedList();
+
 	 private:
-		Managed<T>* _first = nullptr;
-		Managed<T>* _last = nullptr;
+		LinkedIterator<T>* _first = nullptr;
+		LinkedIterator<T>* _last = nullptr;
 		u32 _size = 0;
+	};
+
+	template<class T>
+	class LinkedIterator
+	{
+	public:
+		LinkedIterator() = default;
+		explicit LinkedIterator(T& owner) : _owner(owner) {};
+		LinkedIterator(LinkedList<T>& l, T& owner, LinkedIterator* at = nullptr, SearchDirection direction = SearchDirection::Right) :
+			_list(&l), _owner(owner)
+		{
+			if(!_list) return;
+
+			_list->_size++;
+
+			if(!_list->_first)
+			{
+				_next = _previous = nullptr;
+				_list->_first = _list->_last = this;
+				return;
+			}
+
+			if(direction == SearchDirection::Right)
+			{
+				if(!at) at = _list->_last;
+
+				_next = at->_next;
+				_previous = at;
+
+				if(_next) _next->_previous = this;
+				else _list->_last = this;
+
+				at->_next = this;
+			} else
+			{
+				if(!at) at = _list->_first;
+
+				_next = at;
+				_previous = at->_previous;
+
+				if(_previous) _previous->_next = this;
+				else _list->_first = this;
+
+				at->_previous = this;
+			}
+		}
+
+		DELETE_OPERATOR_COPY(LinkedIterator);
+		OPERATOR_MOVE(LinkedIterator, o,
+			if(_list)
+			{
+				_owner = o._owner;
+			   _previous = o._previous;
+			   _next = o._next;
+
+			   if(_previous) _previous->_next = this;
+			   else _list->_first = this;
+
+			   if(_next) _next->_previous = this;
+			   else _list->_last = this;
+
+			   o._previous = nullptr;
+			   o._next = nullptr;
+			}
+		);
+
+		GET_CONST(LinkedIterator*, Previous, _previous);
+		GET_CONST(LinkedIterator*, Next, _next);
+		GET_CONST(T&,, *_owner);
+
+		NODISCARD ALWAYS_INLINE T* operator->() { return (T*) _owner; }
+		NODISCARD ALWAYS_INLINE const T* operator->() const { return (T*) _owner; }
+
+		NODISCARD ALWAYS_INLINE T& operator*() { return *_owner; }
+		NODISCARD ALWAYS_INLINE const T& operator*() const { return *_owner; }
+
+		void Move(LinkedIterator& to, SearchDirection direction = SearchDirection::Right)
+		{
+			*this = MOVE(LinkedIterator(_list, _owner, &to, direction));
+		}
+
+		friend class LinkedList<T>;
+
+		~LinkedIterator()
+		{
+			if(!_list) return;
+
+			if(_previous) _previous->_next = _next;
+			else _list->_first = _next;
+
+			if(_next) _next->_previous = _previous;
+			else _list->_last = _previous;
+
+			_list->_size--;
+
+			_list = nullptr;
+		}
+
+	private:
+		LinkedList<T>* _list = nullptr;
+		LinkedIterator* _previous = nullptr;
+		LinkedIterator* _next = nullptr;
+		RelativePointer<T> _owner;
 	};
 
 	template<class T>
 	class Manager
 	{
-	 public:
-		virtual ~Manager() = default;
-
+	public:
 		Manager() = default;
 
 		DELETE_OPERATOR_CM(Manager);
 
+		typedef LinkedIterator<T> ITER_T;
+
 		virtual void OnUpdate(float d) = 0;
 		virtual void OnRender(float d, Camera* camera) = 0;
 
-		inline void Register(T& t) { List.Remove(t); }
-		inline void Remove(T& t) { List.Add(t); };
+		friend T;
 
-	 protected:
-		virtual void OnRegister(T&) {};
-		virtual void OnRemove(T&) {};
+		virtual ~Manager() = default;
 
-		ManagedList<T> List;
-	};
+	protected:
+		virtual void OnRegister(T& t) { List.Add(t.GetIterator()); };
+		virtual void OnRemove(T& t) { List.Remove(t.GetIterator()); };
 
-	template<class T>
-	struct ManagedIterator
-	{
-	public:
-		ManagedIterator() = default;
-		ManagedIterator(ManagedList<T>& l, Managed<T>& t, ManagedIterator* at, SearchDirection direction = SearchDirection::Right) :
-			_t(t)
-		{
-			if(!at) return;
-
-			if(direction == SearchDirection::Right)
-			{
-				_next = at->_next;
-				_previous = at;
-
-				if(_next) _next->_previous = this;
-				at->_next = this;
-			} else
-			{
-				_previous = at->_previous;
-				_next = at;
-
-				if(_previous) _previous->_next = this;
-				at->_previous = this;
-			}
-		}
-
-		DELETE_OPERATOR_COPY(ManagedIterator);
-		OPERATOR_MOVE(ManagedIterator, o,
-			_t = o._t;
-			_previous = o._previous;
-			_next = o._next;
-
-			if(_previous) _previous->_next = this;
-			if(_next) _next->_previous = this;
-
-			o._previous = nullptr;
-			o._next = nullptr;
-		);
-
-		GET_CONST(ManagedIterator*, Previous, _previous);
-		GET_CONST(ManagedIterator*, Next, _next);
-		GET_CONST(T&,, *_t);
-
-		NODISCARD ALWAYS_INLINE T* operator->() { return (T*) _t; }
-		NODISCARD ALWAYS_INLINE const T* operator->() const { return (T*) _t; }
-
-		~ManagedIterator()
-		{
-			if(_previous) _previous->_next = _next;
-			if(_next) _next->_previous = _previous;
-		}
-
-	private:
-		ManagedList<T>* _list;
-		ManagedIterator* _previous = nullptr;
-		ManagedIterator* _next = nullptr;
-		RelativePointer<Managed<T>> _t;
+		LinkedList<T> List;
 	};
 
 	template<class T>
 	class Managed
 	{
 	 public:
-		explicit inline Managed(T& t, ManagedList<T>* m = nullptr) : _iterator(), _t(&t)
+		explicit inline Managed(Manager<Managed>* m, T& t) : _iterator(t), _t(&t), _manager(m)
 		{
+			if(_manager) _manager->OnRegister(*this);
 		}
 
-		OPERATOR_COPY(Managed, o,
-			_t = o._t;
-			_iterator = o._iterator;
-		);
-
+		DELETE_OPERATOR_COPY(Managed);
 		OPERATOR_MOVE(Managed, o,
 			_t = o._t;
 			_iterator = MOVE(_iterator);
 		);
 
+		typedef LinkedIterator<Managed> ITER_T;
+
+		GET(Manager<Managed>, Manager, _manager);
 		GET_CONST(Managed*, Previous, _iterator._previous);
 		GET_CONST(Managed*, Next, _iterator._next);
-		GET_CONST(ManagedList<T>*, List, _list);
+		GET_CONST(LinkedList<T>*, List, _iterator._list);
+		GET(ITER_T&, Iterator, _iterator);
 		GET_CONST(T&,, *_t);
 
 		NODISCARD ALWAYS_INLINE T* operator->() { return (T*) _t; }
 		NODISCARD ALWAYS_INLINE const T* operator->() const { return (T*) _t; }
 
-		virtual ~Managed() = default;
+		NODISCARD ALWAYS_INLINE T& operator*() { return *_t; }
+		NODISCARD ALWAYS_INLINE const T& operator*() const { return *_t; }
+
+		friend class Manager<T>;
+
+		virtual ~Managed() { _manager->OnRemove(*this); }
 
 	 private:
-		ManagedList<T>* _list = nullptr;
-		ManagedIterator<T> _iterator;
+		LinkedIterator<Managed> _iterator;
 		RelativePointer<T> _t;
+		Manager<Managed>* _manager;
 	};
 }
 

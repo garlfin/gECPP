@@ -14,7 +14,7 @@ namespace gE
 	class Component : public Managed<Component>
 	{
 	 public:
-		explicit Component(Entity* o, Manager<Component>* = nullptr);
+		explicit Component(Entity* o, Manager<Managed>* = nullptr);
 
 		GET_CONST(Entity&, Owner, *_owner);
 		GET_CONST(Window&, Window, _window);
@@ -46,39 +46,39 @@ namespace gE
 #pragma clang diagnostic pop
 
 	template<class T>
-	class ComponentManager : public Manager<Component>
+	class ComponentManager : public Manager<Managed<Component>>
 	{
 	 public:
 		static_assert(std::is_base_of<Component, T>::value);
-		using Manager<Component>::Manager;
+
+		using Manager::Manager;
 
 		void OnUpdate(float d) override
 		{
-			for(Managed<Component>* c = List.GetFirst(); c; c = c->GetNext())
-				(*c)->OnInit();
+			for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())
+				(**i)->OnInit();
 
 			List.MergeList(InitializationList);
 
-			for(Managed<Component>* c = List.GetFirst(); c; c = c->GetNext())
-				(*c)->OnUpdate(d);
+			for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())
+				(**i)->OnUpdate(d);
 		}
 
 		void OnRender(float d, Camera* camera) override
 		{
-			for(Managed<Component>* c = List.GetFirst(); c; c = c->GetNext())
-				(*c)->OnRender(d, camera);
+			for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())
+				(**i)->OnRender(d, camera);
 		}
 
 		ALWAYS_INLINE void OnRender(float d) { OnRender(d, nullptr); }
 
+		friend class Component;
+
 		~ComponentManager() override = default;
 
 	 protected:
-		ManagedList<Component> InitializationList;
+		LinkedList<Managed<Component>> InitializationList;
 
-		void OnRegister(Component& t) override
-		{
-			InitializationList.Add(t);
-		}
+		void OnRegister(Managed<Component>& t) override { InitializationList.Add(t.GetIterator()); };
 	};
 }

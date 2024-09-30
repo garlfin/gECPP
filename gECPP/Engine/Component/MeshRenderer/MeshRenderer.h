@@ -30,7 +30,7 @@ namespace gE
 
 	 private:
 		Reference<API::IVAO> _mesh;
-		RelativePointer<MaterialHolder> _materialHolder;
+		RelativePointer<const MaterialHolder> _materialHolder;
 	};
 
 	class RendererManager : public ComponentManager<MeshRenderer>
@@ -39,8 +39,6 @@ namespace gE
 		using ComponentManager::ComponentManager;
 
 		void OnRender(float d, Camera* camera) override;
-
-		void ReRegister(MeshRenderer&);
 	};
 }
 

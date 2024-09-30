@@ -49,7 +49,7 @@ namespace gE
 		CubemapTarget _target;
 	};
 
-	class CubemapManager final : public Manager<CubemapCapture>
+	class CubemapManager final : public Manager<Managed<CubemapCapture>>
 	{
 	 public:
 		explicit CubemapManager(Window* window) : Manager(), _window(window) {};
@@ -61,12 +61,12 @@ namespace gE
 		void OnUpdate(float delta) override {};
 		void OnRender(float delta, Camera*) override;
 
-		virtual ~CubemapManager() = default;
+		~CubemapManager() override = default;
 
 	 private:
 		Window* _window = nullptr;
-		bool _isInitialized = false;
 
+		bool _isInitialized = false;
 		API::VAO _skyboxVAO = DEFAULT;
 		API::Shader _skyboxShader = DEFAULT;
 	};

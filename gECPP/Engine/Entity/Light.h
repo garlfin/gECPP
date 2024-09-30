@@ -15,7 +15,7 @@ namespace gE
 	class Light;
 	class DirectionalLight;
 
-	class LightManager : public Manager<Light>
+	class LightManager : public Manager<Managed<Light>>
 	{
 	 public:
 		explicit LightManager(Window* window) : _window(window) {};

@@ -40,7 +40,5 @@ namespace gE
 
 	class CullingManager : public ComponentManager<Cullable>
 	{
-	 public:
-	 private:
 	};
 }

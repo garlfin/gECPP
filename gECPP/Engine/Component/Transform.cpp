@@ -49,24 +49,24 @@ namespace gE
 
 	void TransformManager::OnUpdate(float d)
 	{
-		for(Managed<Component>* c = List.GetFirst(); c; c = c->GetNext())
-			(*c)->OnInit();
+		for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())
+			(**i)->OnInit();
 
-		for(Managed<Component>* c = InitializationList.GetFirst(); c;)
+		for(ITER_T* i = InitializationList.GetFirst(); i;)
 		{
-			Managed<Component>* next = c->GetNext();
+			ITER_T* next = i->GetNext();
 
-			InitializationList.Remove(*c);
+			InitializationList.Remove(*i);
 
-			Entity* parent = (*c)->GetOwner().GetParent();
+			Entity* parent = (**i)->GetOwner().GetParent();
 			if(parent)
-				List.Insert(*c, parent->GetTransform());
-			else List.Add(*c);
+				List.Insert(*i, parent->GetTransform().GetIterator());
+			else List.Add(*i);
 
-			c = next;
+			i = next;
 		}
 
-		for(Managed<Component>* c = List.GetFirst(); c; c = c->GetNext())
-			(*c)->OnUpdate(d);
+		for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())
+			(**i)->OnUpdate(d);
 	}
 }

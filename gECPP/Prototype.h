@@ -31,7 +31,7 @@ namespace gE
 
 
 	template<class T> class ComponentManager;
-	template<class T> class ManagedList;
+	template<class T> class LinkedList;
 	template<class T> class Manager;
 	template<class T> class Managed;
 

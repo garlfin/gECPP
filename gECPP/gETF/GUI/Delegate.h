@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include <gECPP/Prototype.h>
+#include <Prototype.h>
 
 #define UI_DELEGATE(NAME, TYPE, FUNC) \
 	class NAME final : public gETF::UI::Delegate<TYPE> \

@@ -9,37 +9,36 @@
 namespace gE
 {
 	template<class T>
-	void ManagedList<T>::Add(Managed<T>& t)
+	void LinkedList<T>::Add(LinkedIterator<T>& t)
 	{
-		t = Managed<T>(t.Get(), );
+		t = MOVE(ITER_T(*this, t.Get()));
 	}
 
 	template<class T>
-	void ManagedList<T>::Remove(Managed<T>& t)
+	void LinkedList<T>::Remove(LinkedIterator<T>& t)
 	{
-		t = MOVE(Managed<T>(t.Get(), nullptr));
+		t = MOVE(ITER_T(*this, t.Get()));
 	}
 
 	template<class T>
-	void ManagedList<T>::Insert(Managed<T>& t, Managed<T>& at)
+	void LinkedList<T>::Move(LinkedIterator<T>& t, LinkedIterator<T>& to)
 	{
-		if(at._list != this) return;
-		if(t._list || t._previous || t._next) return;
-
-		t._previous = &at;
-		t._next = at._next;
-		at._next = &t;
-
-		if(_last == &at) _last = &t;
+		t = MOVE(LinkedIterator<T>(*this, t.Get(), &to));
 	}
 
 	template<class T>
-	void ManagedList<T>::MergeList(ManagedList<T>& list)
+	void LinkedList<T>::Insert(LinkedIterator<T>& t, LinkedIterator<T>& at)
+	{
+		t = MOVE(LinkedIterator<T>(*this, t.Get(), &at));
+	}
+
+	template<class T>
+	void LinkedList<T>::MergeList(LinkedList& list)
 	{
 		if(!list._size) return;
 
-		for(Managed<T>* m = list._first; m; m = m->_next)
-			m->_list = this;
+		for(ITER_T* i = list._first; i; i = i->_next)
+			i->_list = this;
 
 		if (_size)
 		{
@@ -56,29 +55,27 @@ namespace gE
 	}
 
 	template<class T>
-	void ManagedList<T>::Move(Managed<T>& t, Managed<T>& to)
-	{
-		if(t._previous) t._previous->_next = t._next;
-		else _first = t._next;
-
-		if(t._next) t._next->_previous = t._previous;
-		else _last = t._previous;
-
-		t._previous = &to;
-		t._next = to._next;
-
-		to._next = &t;
-	}
-
-	template<class T>
 	template<CompareFunc<const T&> COMPARE_FUNC>
-	Managed<T>* ManagedList<T>::FindSimilar(Managed<T>& similar, Managed<T>& start, SearchDirection direction)
+	LinkedIterator<T>* LinkedList<T>::FindSimilar(const T& similar, gE::LinkedIterator<T>* start, SearchDirection direction)
 	{
+		if(!start)
+			start = direction == SearchDirection::Right ? _first : _last;
+
 		if(start._manager != this) return nullptr;
 
-		for(Managed<T>* c = &start; c; c = direction == SearchDirection::Left ? c->GetPrevious() : c->GetNext())
-			if(COMPARE_FUNC(*similar, *c)) return c;
+		for(LinkedIterator<T>* c = start; c; c = direction == SearchDirection::Left ? c->GetPrevious() : c->GetNext())
+			if(COMPARE_FUNC(similar, *c)) return c;
 
 		return nullptr;
+	}
+
+	template<class OWNER_T>
+	LinkedList<OWNER_T>::~LinkedList()
+	{
+		for(LinkedIterator<OWNER_T>* m = _first; m; m = m->_next)
+			m->_list = nullptr;
+
+		_size = 0;
+		_first = _last = nullptr;
 	}
 }
