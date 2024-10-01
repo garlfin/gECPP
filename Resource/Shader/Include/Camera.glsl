@@ -6,7 +6,8 @@ struct CameraData
     uint Frame;
     vec2 ClipPlanes;
     vec2 Size;
-    vec4 Parameters;
+    vec3 Parameters;
+    float FrameDelta;
 
     BINDLESS_TEXTURE(sampler2D, Color);
     BINDLESS_TEXTURE(sampler2D, Depth);

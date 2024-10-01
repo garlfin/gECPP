@@ -24,7 +24,8 @@ namespace GPU
 		u32 Frame;
 		glm::vec2 ClipPlanes;
 		glm::vec2 Size;
-		glm::vec4 Parameters;
+		glm::vec3 Parameters;
+		float FrameDelta;
 
 		handle ColorTexture;
 		handle DepthTexture;
@@ -119,7 +120,7 @@ namespace gE::DefaultPipeline
 		Attachment<API::Texture2D, GL_COLOR_ATTACHMENT0> _color;
 		Attachment<API::Texture2D, GL_COLOR_ATTACHMENT1> _velocity;
 
-		API::Texture2D _colorBack;
+		API::Texture2D _taaBack;
 		API::Texture2D _depthBack;
 		API::Texture2D _postProcessBack;
 

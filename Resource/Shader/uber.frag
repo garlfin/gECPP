@@ -84,7 +84,7 @@ void main()
 #ifdef EXT_BINDLESS
     if(bool(Scene.State & ENABLE_SPECULAR))
     {
-        vec3 specular = texture(Lighting.Skybox, pbrSample.Specular).rgb;
+        vec3 specular = textureLod(Lighting.Skybox, pbrSample.Specular, 0.0).rgb;
         vec3 cubemapSpecular;
 
         float cubemapWeight, maxCubemapWeight;

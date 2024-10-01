@@ -51,6 +51,7 @@ namespace gE
 		cam.Size = _viewportSize;
 		cam.Projection = Projection;
 		cam.PreviousViewProjection = Projection * inverse(transform.PreviousModel());
+		cam.FrameDelta = GetWindow().GetFrameDelta();
 
 		cam.DepthTexture = (handle) 0u;
 		cam.ColorTexture = (handle) 0u;
@@ -96,6 +97,7 @@ namespace gE
 	{
 		SetFOV(s.FOV);
 	}
+
 	void PerspectiveCamera::GetGLCamera(GPU::Camera& camera)
 	{
 		Camera2D::GetGLCamera(camera);

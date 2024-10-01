@@ -25,7 +25,7 @@ namespace gE
 		_depth(GetFrameBuffer(), GPU::TextureSettings2D(DepthFormat, camera.GetSize())),
 		_color(GetFrameBuffer(), GPU::TextureSettings2D(ColorFormat, camera.GetSize())),
 		_velocity(GetFrameBuffer(), GPU::TextureSettings2D(VelocityFormat, camera.GetSize())),
-		_colorBack(&GetWindow(), GPU::TextureSettings2D(ColorFormat, camera.GetSize())),
+		_taaBack(&GetWindow(), GPU::TextureSettings2D(ColorFormat, camera.GetSize())),
 		_depthBack(&GetWindow(), GPU::TextureSettings2D(HiZFormat, camera.GetSize())),
 		_postProcessBack(&GetWindow(), GPU::TextureSettings2D(ColorFormat, camera.GetSize())),
 		_effects(effects)
@@ -76,7 +76,7 @@ namespace gE
 
 		Buffers& buf = GetWindow().GetPipelineBuffers();
 
-		buf.Camera.ColorTexture = (handle) _colorBack;
+		buf.Camera.ColorTexture = (handle) _taaBack;
 		buf.Camera.DepthTexture = (handle) _depthBack;
 		buf.UpdateCamera(sizeof(handle) * 2, offsetof(GPU::Camera, ColorTexture));
 
@@ -98,14 +98,14 @@ namespace gE
 
 		_postProcessBack.Bind(0, GL_WRITE_ONLY);
 		taaShader.SetUniform(0, _color->Use(0));
-		taaShader.SetUniform(1, _colorBack.Use(1));
+		taaShader.SetUniform(1, _taaBack.Use(1));
 		taaShader.SetUniform(2, _velocity->Use(2));
 
 		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 		taaShader.Dispatch(DIV_CEIL(_color->GetSize(), TAA_GROUP_SIZE));
 
 		// Copy TAA result to taa "backbuffer"
-		_colorBack.CopyFrom(_postProcessBack);
+		_taaBack.CopyFrom(_postProcessBack);
 
 		// Post process loop
 		API::Texture2D* front = &*_color, *back = &_postProcessBack;

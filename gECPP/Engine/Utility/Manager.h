@@ -217,7 +217,7 @@ namespace gE
 
 		friend class Manager<T>;
 
-		virtual ~Managed() { _manager->OnRemove(*this); }
+		virtual ~Managed() { if(_manager) _manager->OnRemove(*this); }
 
 	 private:
 		LinkedIterator<Managed> _iterator;

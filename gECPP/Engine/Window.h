@@ -82,6 +82,8 @@ namespace gE
 		GET_CONST(VoxelPipeline::Buffers&, VoxelBuffers, VoxelBuffers);
 		GET_CONST(DefaultPipeline::Buffers&, PipelineBuffers, PipelineBuffers);
 		GET_CONST(double, Time, _time);
+		GET_CONST(double, FrameDelta, _frameDelta);
+		GET_CONST(double, UpdateDelta, _updateDelta);
 
 		NODISCARD ALWAYS_INLINE GLFWwindow* GLFWWindow() const { return _window; }
 
@@ -126,6 +128,7 @@ namespace gE
 		GLFWwindow* _window;
 		Monitor _monitor;
 		double _time = DEFAULT;
+		double _updateDelta, _frameDelta;
 	};
 }
 

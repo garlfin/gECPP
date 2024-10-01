@@ -42,7 +42,7 @@ namespace PVR
 				PVRToInternalFormat(header.Format),
 				wrapMode,
 				filterMode,
-				(u8) header.MipCount,
+				0,
 				header.Size,
 			};
 
@@ -51,7 +51,7 @@ namespace PVR
 				GL_NONE,
 				GL_NONE,
 				GPU::CompressionScheme(4, 16), // 16 bytes per 4x4 block
-				(u8) header.MipCount,
+				1,
 				std::move(imageData)
 			};
 
@@ -66,7 +66,7 @@ namespace PVR
 				PVRToInternalFormat(header.Format),
 				wrapMode,
 				filterMode,
-				(u8) header.MipCount,
+				0,
 				header.Size.x,
 			};
 
@@ -75,7 +75,7 @@ namespace PVR
 				GL_RGB,
 				GL_HALF_FLOAT,
 				GPU::CompressionScheme(1, 6), // 6 bytes per pixel
-				(u8) header.MipCount,
+				1,
 				std::move(imageData)
 			};
 

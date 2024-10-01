@@ -223,7 +223,7 @@ PBRSample ImportanceSample(const Vertex vert, const PBRFragment frag)
 
     vec2 xi = Hammersley(int(IGNSample * HAMMERSLEY_ROUGHNESS_SAMPLE), HAMMERSLEY_ROUGHNESS_SAMPLE);
     vec3 n = ImportanceSampleGGX(xi, frag.Normal, frag.Roughness);
-    vec3 r = -reflect(eye, n);
+    vec3 r = -normalize(reflect(eye, n));
 
     vec3 f0 = mix(frag.F0, frag.Albedo, frag.Metallic);
     vec3 f = FresnelSchlick(f0, nDotV);

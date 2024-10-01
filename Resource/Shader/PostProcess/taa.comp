@@ -1,4 +1,5 @@
 #include <Resource/Shader/Include/TAA.glsl>
+#include <Resource/Shader/Include/Camera.glsl>
 
 #define TAA_MODE_FULL
 #define TAA_CLIP_AABB
@@ -10,6 +11,8 @@
 #ifndef TAA_CLAMP_MAX
     #define TAA_CLAMP_MAX 10.f
 #endif
+
+#define TAA_WEIGHT (1.0 / 32)
 
 #ifndef TAA_WEIGHT
     #define TAA_WEIGHT (1.0 / TAA_SAMPLE_COUNT)
@@ -66,8 +69,9 @@ void main()
     previousColor.rgb = clamp(previousColor.rgb, boxMin, boxMax);
 #endif
 
-    float previousWeight = (1.0 - TAA_WEIGHT) / (1.0 + Luminance(previousColor.rgb));
-    float currentWeight = TAA_WEIGHT / (1.0 + Luminance(currentColor.rgb));
+    float weight = min(TAA_WEIGHT * Camera.FrameDelta * 100, 1.0);
+    float previousWeight = (1.0 - weight) / (1.0 + Luminance(previousColor.rgb));
+    float currentWeight = weight / (1.0 + Luminance(currentColor.rgb));
 
     vec3 color = (currentColor.rgb * currentWeight + previousColor.rgb * previousWeight);
     color /= max(currentWeight + previousWeight, 0.001);

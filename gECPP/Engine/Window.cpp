@@ -7,13 +7,16 @@
 #include <GLAD/glad.h>
 #include <GLFW/glfw3.h>
 
-#define ENABLE_STATISTICS
-#define CLAMP_FPS
+#ifdef DEBUG
+	#define ENABLE_STATISTICS
+#endif
+
+#define CLAMP_FPS 10
 
 using namespace gE;
 
 #ifdef ENABLE_STATISTICS
-	char WindowTitleBuf[51];
+	char WindowTitleBuf[100];
 #endif
 
 #define BRDF_SIZE 512
@@ -96,8 +99,7 @@ bool Window::Run()
 #endif
 
 	_time = glfwGetTime();
-
-	double frameDelta = 0.0;
+	_frameDelta = 0.0;
 
 	GLuint timer;
 	u64 timerResult;
@@ -109,17 +111,16 @@ bool Window::Run()
 		glfwPollEvents();
 
 		double currentTime = glfwGetTime();
-		double delta = currentTime - _time;
+		_updateDelta = currentTime - _time;
 		_time = currentTime;
 
-		OnUpdate((float) delta);
+		OnUpdate((float) _updateDelta);
 
 		currentTime = glfwGetTime();
-		frameDelta += delta + currentTime - _time;
-		_time = currentTime;
+		_frameDelta += _updateDelta + currentTime - _time;
 
 	#ifdef CLAMP_FPS
-		if(frameDelta < 1.0 / _monitor.RefreshRate) continue;
+		if(_frameDelta < 1.0 / (CLAMP_FPS)) continue;
 	#endif
 
 	#ifdef ENABLE_STATISTICS
@@ -127,7 +128,7 @@ bool Window::Run()
 		if(tickStatistics) glBeginQuery(GL_TIME_ELAPSED, timer);
 	#endif
 
-		OnRender((float) frameDelta);
+		OnRender((float) _frameDelta);
 		glfwSwapBuffers(_window);
 
 	#ifdef ENABLE_STATISTICS
@@ -138,14 +139,19 @@ bool Window::Run()
 
 			float ms = timerResult / US_TO_MS;
 
-			sprintf_s(WindowTitleBuf, "FPS: %u, TICK: %f, RENDER: %f", (unsigned) std::ceil(1.0 / (ms / 1000)),
-				delta * US_TO_MS, ms);
+			sprintf_s(
+				WindowTitleBuf,
+				"FPS: %u / %f, GPU/T:%u / %f, TICK: %f",
+				(unsigned) (1.0 / _frameDelta), _frameDelta,
+				(unsigned) (1.0 / ms * 1000), ms,
+				_updateDelta * US_TO_MS
+			);
 			glfwSetWindowTitle(_window, WindowTitleBuf);
 			pollTick++;
 		}
 	#endif
 
-		frameDelta = 0;
+		_frameDelta = 0.0;
 	}
 
 	return false;
