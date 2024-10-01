@@ -16,8 +16,12 @@ public:
 	explicit RelativePointer(T* t) : _t(t) {};
 
 	OPERATOR_COPY(RelativePointer, o,
+		_t = o._t;
+	);
+
+	OPERATOR_MOVE(RelativePointer, o,
 		if(o._t)
-			_t = (T*) ((u8*) o._t - (u8*) &o + (u8*) this);
+			_t = (T*) ((u8*) o._t - (u8*) &o + (u8*) this); //
 		else
 			_t = nullptr;
 	);

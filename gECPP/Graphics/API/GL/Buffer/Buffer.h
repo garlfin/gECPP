@@ -1,6 +1,5 @@
 #pragma once
 
-#include <type_traits>
 #include <GLAD/glad.h>
 #include <Graphics/Macro.h>
 #include <Graphics/API/GL/GL.h>

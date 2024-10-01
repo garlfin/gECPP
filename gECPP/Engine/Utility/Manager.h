@@ -104,21 +104,22 @@ namespace gE
 
 		DELETE_OPERATOR_COPY(LinkedIterator);
 		OPERATOR_MOVE(LinkedIterator, o,
-			if(_list)
+			this->~LinkedIterator();
+			if(o._list)
 			{
 				_owner = o._owner;
-			   _previous = o._previous;
-			   _next = o._next;
-
-			   if(_previous) _previous->_next = this;
-			   else _list->_first = this;
-
-			   if(_next) _next->_previous = this;
-			   else _list->_last = this;
-
-			   o._previous = nullptr;
-			   o._next = nullptr;
-			}
+				_list = o._list;
+				_previous = o._previous;
+				_next = o._next;
+				if(_previous) _previous->_next = this;
+				else _list->_first = this;
+				if(_next) _next->_previous = this;
+				else _list->_last = this;
+				o._list = nullptr;
+				o._owner = RelativePointer<T>(nullptr);
+				o._previous = nullptr;
+				o._next = nullptr;
+			};
 		);
 
 		GET_CONST(LinkedIterator*, Previous, _previous);
@@ -196,7 +197,7 @@ namespace gE
 		DELETE_OPERATOR_COPY(Managed);
 		OPERATOR_MOVE(Managed, o,
 			_t = o._t;
-			_iterator = MOVE(_iterator);
+			_iterator = MOVE(o._iterator);
 		);
 
 		typedef LinkedIterator<Managed> ITER_T;

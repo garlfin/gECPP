@@ -46,7 +46,6 @@ namespace gE
 		Set(d);
 	}
 
-
 	void TransformManager::OnUpdate(float d)
 	{
 		for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())
@@ -55,8 +54,6 @@ namespace gE
 		for(ITER_T* i = InitializationList.GetFirst(); i;)
 		{
 			ITER_T* next = i->GetNext();
-
-			InitializationList.Remove(*i);
 
 			Entity* parent = (**i)->GetOwner().GetParent();
 			if(parent)
