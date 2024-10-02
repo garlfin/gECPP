@@ -63,7 +63,7 @@ namespace gE
 	public:
 		LinkedIterator() = default;
 		explicit LinkedIterator(T& owner) : _owner(owner) {};
-		LinkedIterator(LinkedList<T>& l, T& owner, LinkedIterator* at = nullptr, SearchDirection direction = SearchDirection::Right) :
+		LinkedIterator(T& owner, LinkedList<T>& l, LinkedIterator* at = nullptr, SearchDirection direction = SearchDirection::Right) :
 			_list(&l), _owner(owner)
 		{
 			if(!_list) return;
@@ -189,7 +189,7 @@ namespace gE
 	class Managed
 	{
 	 public:
-		explicit inline Managed(Manager<Managed>* m, T& t) : _iterator(t), _t(&t), _manager(m)
+		explicit inline Managed(Manager<Managed>* m, T& t) : Iterator(t), _t(&t), _manager(m)
 		{
 			if(_manager) _manager->OnRegister(*this);
 		}
@@ -197,16 +197,16 @@ namespace gE
 		DELETE_OPERATOR_COPY(Managed);
 		OPERATOR_MOVE(Managed, o,
 			_t = o._t;
-			_iterator = MOVE(o._iterator);
+			Iterator = MOVE(o.Iterator);
 		);
 
 		typedef LinkedIterator<Managed> ITER_T;
 
 		GET(Manager<Managed>, Manager, _manager);
-		GET_CONST(Managed*, Previous, _iterator._previous);
-		GET_CONST(Managed*, Next, _iterator._next);
-		GET_CONST(LinkedList<T>*, List, _iterator._list);
-		GET(ITER_T&, Iterator, _iterator);
+		GET_CONST(Managed*, Previous, Iterator._previous);
+		GET_CONST(Managed*, Next, Iterator._next);
+		GET_CONST(LinkedList<T>*, List, Iterator._list);
+		GET(ITER_T&, Iterator, Iterator);
 		GET_CONST(T&,, *_t);
 
 		NODISCARD ALWAYS_INLINE T* operator->() { return (T*) _t; }
@@ -219,8 +219,10 @@ namespace gE
 
 		virtual ~Managed() { if(_manager) _manager->OnRemove(*this); }
 
-	 private:
-		LinkedIterator<Managed> _iterator;
+	protected:
+		LinkedIterator<Managed> Iterator;
+
+	private:
 		RelativePointer<T> _t;
 		Manager<Managed>* _manager;
 	};

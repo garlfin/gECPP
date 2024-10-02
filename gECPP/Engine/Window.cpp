@@ -11,7 +11,7 @@
 	#define ENABLE_STATISTICS
 #endif
 
-#define CLAMP_FPS 10
+#define CLAMP_FPS _monitor.RefreshRate
 
 using namespace gE;
 
@@ -22,7 +22,8 @@ using namespace gE;
 #define BRDF_SIZE 512
 #define BRDF_GROUP_SIZE 8
 #define FPS_POLL_RATE 0.1
-#define US_TO_MS 1000000.f
+#define US_TO_MS (1.0 / 1000000.f)
+#define MS_TO_S (1.0 / 1000.f)
 
 Window::Window(glm::u16vec2 size, const char* name) :
 	Lights(this), Cubemaps(this), _size(size), _name(strdup(name))
@@ -69,8 +70,8 @@ Window::~Window()
 #ifdef DEBUG
 void DebugMessage(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
 {
-	if(severity != GL_DEBUG_SEVERITY_NOTIFICATION)
-		std::cout << message << std::endl;
+	if(severity == GL_DEBUG_SEVERITY_NOTIFICATION) return;
+	std::cout << message << std::endl;
 }
 #endif
 
@@ -129,7 +130,6 @@ bool Window::Run()
 	#endif
 
 		OnRender((float) _frameDelta);
-		glfwSwapBuffers(_window);
 
 	#ifdef ENABLE_STATISTICS
 		if(tickStatistics)
@@ -137,20 +137,23 @@ bool Window::Run()
 			glEndQuery(GL_TIME_ELAPSED);
 			glGetQueryObjectui64v(timer, GL_QUERY_RESULT, &timerResult);
 
-			float ms = timerResult / US_TO_MS;
+			pollTick++;
+			float ms = timerResult * US_TO_MS * MS_TO_S;
 
 			sprintf_s(
 				WindowTitleBuf,
 				"FPS: %u / %f, GPU/T:%u / %f, TICK: %f",
 				(unsigned) (1.0 / _frameDelta), _frameDelta,
-				(unsigned) (1.0 / ms * 1000), ms,
-				_updateDelta * US_TO_MS
+				(unsigned) (1.0 / ms), ms,
+				_updateDelta
 			);
+
 			glfwSetWindowTitle(_window, WindowTitleBuf);
-			pollTick++;
+
 		}
 	#endif
 
+		glfwSwapBuffers(_window);
 		_frameDelta = 0.0;
 	}
 
@@ -247,7 +250,6 @@ Camera3D* Window::GetReflectionSystem() const
 }
 
 Monitor::Monitor(const GLFWvidmode* mode) :
-	Name(nullptr),
 	Size(mode->width, mode->height),
 	RefreshRate(mode->refreshRate)
 {

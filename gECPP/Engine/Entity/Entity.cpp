@@ -43,7 +43,7 @@ namespace gE
 			}
 	}
 
-	Component::Component(Entity* o, Manager<Managed>* m) : Managed(m, *this),
+	Component::Component(Entity* o, IComponentManager* m) : Managed(m, *this),
 		 _window(o->GetWindow()), _owner(o)
 	{}
 

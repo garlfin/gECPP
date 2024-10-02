@@ -29,8 +29,7 @@ namespace gE
 		u8 Layer : 4 = 0;
 	};
 
-
-	template<class T> class ComponentManager;
+	class IComponentManager;
 	template<class T> class LinkedList;
 	template<class T> class Manager;
 	template<class T> class Managed;

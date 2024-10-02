@@ -11,7 +11,7 @@
 
 namespace gE
 {
-	class MaterialHolder : public Component
+	class MaterialHolder final : public Component
 	{
 	 public:
 		explicit MaterialHolder(Entity* o) : Component(o) { };

@@ -14,7 +14,7 @@ namespace gE
 	class Component : public Managed<Component>
 	{
 	 public:
-		explicit Component(Entity* o, Manager<Managed>* = nullptr);
+		explicit Component(Entity* o, IComponentManager* = nullptr);
 
 		GET_CONST(Entity&, Owner, *_owner);
 		GET_CONST(Window&, Window, _window);
@@ -45,12 +45,9 @@ namespace gE
 
 #pragma clang diagnostic pop
 
-	template<class T>
-	class ComponentManager : public Manager<Managed<Component>>
+	class IComponentManager : public Manager<Managed<Component>>
 	{
 	 public:
-		static_assert(std::is_base_of<Component, T>::value);
-
 		using Manager::Manager;
 
 		void OnUpdate(float d) override
@@ -74,11 +71,18 @@ namespace gE
 
 		friend class Component;
 
-		~ComponentManager() override = default;
+		~IComponentManager() override = default;
 
 	 protected:
-		LinkedList<Managed<Component>> InitializationList;
-
 		void OnRegister(Managed<Component>& t) override { InitializationList.Add(t.GetIterator()); };
+
+		LinkedList<Managed<Component>> InitializationList;
+	};
+
+	template<class T>
+	class ComponentManager : public IComponentManager
+	{
+	public:
+		using IComponentManager::IComponentManager;
 	};
 }

@@ -11,12 +11,12 @@
 namespace gE
 {
 	class Material;
-	struct DrawCallManager;
+	class DrawCallManager;
 
 	struct DrawCall final : public Managed<DrawCall>
 	{
 	public:
-		DrawCall(Manager<DrawCall>& manager) : Managed(*this, &manager) {}
+		explicit DrawCall(DrawCallManager& manager);
 
 		API::VAO* VAO = nullptr;
 		Material* Material = nullptr;
@@ -24,15 +24,21 @@ namespace gE
 		u8 LOD = 0;
 
 	private:
-
-		Managed* _previousVAO = nullptr, * _nextVAO = nullptr;
-		Managed* _previousMaterial = nullptr, * _nextMaterial = nullptr;
-		Managed* _previousSubMesh = nullptr, * _nextSubMesh = nullptr;
-		Managed* _previousLOD = nullptr, * _nextLOD = nullptr;
+		LinkedIterator<Managed> _materialIterator;
+		LinkedIterator<Managed> _vaoIterator;
+		LinkedIterator<Managed> _submeshIterator;
 	};
 
-	struct DrawCallManager : public Manager<DrawCall>
+	class DrawCallManager : public Manager<Managed<DrawCall>>
 	{
+	public:
+		using Manager::Manager;
 
+		void OnRender(float d, Camera* camera) override;
+
+	protected:
+		void OnRegister(Managed<DrawCall>& t) override;
 	};
 }
+
+#include "DrawCall.inl"

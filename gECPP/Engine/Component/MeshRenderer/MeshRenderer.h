@@ -9,6 +9,8 @@
 #include <Engine/Renderer/Material.h>
 #include <Graphics/Buffer/VAO.h>
 
+#include "DrawCall.h"
+
 namespace gE
 {
 	class MeshRenderer : public Component
@@ -30,6 +32,7 @@ namespace gE
 
 	 private:
 		Reference<API::IVAO> _mesh;
+		Array<DrawCall> _drawCalls;
 		RelativePointer<const MaterialHolder> _materialHolder;
 	};
 
@@ -39,6 +42,9 @@ namespace gE
 		using ComponentManager::ComponentManager;
 
 		void OnRender(float d, Camera* camera) override;
+
+	private:
+		DrawCallManager _drawCallManager;
 	};
 }
 

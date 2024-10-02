@@ -3,7 +3,7 @@
 //
 #pragma once
 
-#define MOVE(x) std::move(x)
+#define MOVE std::move
 #define COPY_MOVE(x) MOVE(std::remove_cv_t<decltype(x)>(x))
 
 #define NODISCARD [[nodiscard]]
@@ -28,13 +28,14 @@
 #endif
 
 #define assertm(exp, msg) assert(((void) msg, exp))
-#define GE_FAIL(ERR) assertm(false, ERR);
 
 #ifdef DEBUG
 	#define GE_ASSERT(COND, ERR) { bool cond = COND; if(!cond) __builtin_trap(); assertm(cond, ERR); }
 #else
 	#define GE_ASSERT(COND, ERR) assertm(cond, ERR)
 #endif
+
+#define GE_FAIL(ERR) GE_ASSERT(false, ERR);
 
 #define BIT_FIELD(FIELD, INDEX) (((FIELD) >> (INDEX)) & 1)
 #ifndef MIN
