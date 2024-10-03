@@ -48,7 +48,7 @@ namespace PVR
 	public:
 		explicit Header(istream& in, SETTINGS_T s) : Serializable(in, s) { ISerialize(in, s); }
 		Header() = default;
-		inline void Serialize(istream& in, SETTINGS_T s) override { *this = move(Header(in, s)); }
+		inline void Serialize(istream& in, SETTINGS_T s) override { SAFE_CONSTRUCT(*this, Header, in, s); }
 		inline void Deserialize(ostream& out) const override { IDeserialize(out); }
 
 		uint32_t Version;

@@ -15,7 +15,7 @@ namespace GL
 			GPU::Buffer<u8>& bufSettings = _settings->Buffers[i];
 			Buffer<u8>& buffer = _buffers[i];
 
-			buffer = move(Buffer(window, move(bufSettings)));
+			SAFE_CONSTRUCT(buffer, Buffer, window, move(bufSettings));
 			buffer.Free();
 			glVertexArrayVertexBuffer(ID, i, buffer.Get(), 0, bufSettings.Stride);
 		}

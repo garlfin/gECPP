@@ -104,7 +104,6 @@ namespace gE
 
 		DELETE_OPERATOR_COPY(LinkedIterator);
 		OPERATOR_MOVE(LinkedIterator, o,
-			this->~LinkedIterator();
 			if(o._list)
 			{
 				_owner = o._owner;
@@ -134,7 +133,7 @@ namespace gE
 
 		void Move(LinkedIterator& to, SearchDirection direction = SearchDirection::Right)
 		{
-			*this = move(LinkedIterator(_list, _owner, &to, direction));
+			SAFE_CONSTRUCT(*this, LinkedIterator, _list, _owner, &to, direction);
 		}
 
 		friend class LinkedList<T>;

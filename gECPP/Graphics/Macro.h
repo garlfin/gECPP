@@ -4,6 +4,10 @@
 
 #pragma once
 
+// TODO: Find better alternative to creating a copy of the settings.
+// Prevents _settings from being initialied to 0.
+
+
 #define API_SERIALIZABLE(TYPE, SUPER_T)\
 	public: \
 	typedef SUPER_T::SETTINGS_T SETTINGS_T; \
@@ -13,7 +17,8 @@
 	TYPE(istream& in, gE::Window* window) \
 	{ \
 		SUPER::Serialize(in, window); \
-		new(this) TYPE(window, move(*this)); \
+		SUPER tmp = move(*this); \
+		new(this) TYPE(window, move(tmp)); \
 		SUPER::Free(); \
 	} \
 	TYPE(gE::Window* window, const SUPER& settings) : TYPE(window, (SUPER&&) SUPER(settings)) {} \

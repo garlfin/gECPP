@@ -91,6 +91,7 @@ using std::move;
 	NAMESPACE##TYPE& NAMESPACE##operator=(TYPE&& ACCESSOR) noexcept \
 	{ \
 		if(&ACCESSOR == this) return *this; \
+		this->~TYPE(); \
 		CODE; \
 		return* this; \
 	}
@@ -100,6 +101,7 @@ using std::move;
 	NAMESPACE##TYPE& NAMESPACE##operator=(const TYPE& ACCESSOR) \
 	{ \
 		if(&ACCESSOR == this) return *this; \
+		this->~TYPE(); \
 		CODE; \
 		return *this; \
 	}
