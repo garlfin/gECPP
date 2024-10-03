@@ -16,12 +16,18 @@ namespace gE
 	struct DrawCall final : public Managed<DrawCall>
 	{
 	public:
+		DrawCall() = default;
 		explicit DrawCall(DrawCallManager& manager);
+
+		DELETE_OPERATOR_COPY(DrawCall);
+		DEFAULT_OPERATOR_MOVE(DrawCall);
 
 		API::VAO* VAO = nullptr;
 		Material* Material = nullptr;
 		u8 SubMesh = 0;
 		u8 LOD = 0;
+
+		friend class DrawCallManager;
 
 	private:
 		LinkedIterator<Managed> _materialIterator;
@@ -34,10 +40,13 @@ namespace gE
 	public:
 		using Manager::Manager;
 
+		void OnUpdate(float d) override {};
 		void OnRender(float d, Camera* camera) override;
 
+		friend struct DrawCall;
+
 	protected:
-		void OnRegister(Managed<DrawCall>& t) override;
+		void OnRegister(Managed<DrawCall>& t) override {};
 	};
 }
 

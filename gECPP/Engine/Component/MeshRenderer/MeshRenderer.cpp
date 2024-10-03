@@ -29,4 +29,9 @@ namespace gE
 		IComponentManager::OnRender(d, camera);
 		_drawCallManager.OnRender(d, camera);
 	}
+
+	void DrawCallManager::OnRender(float d, Camera* camera)
+	{
+
+	}
 }

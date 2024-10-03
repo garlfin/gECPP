@@ -108,7 +108,7 @@ template<> void Write(std::ostream& out, u32 count, const std::string* t);
 		TYPE() = default; \
 		static const constexpr char MAGIC[SERIALIZABLE_MAGIC_LENGTH + 1] = #MAGIC_VAL; \
 		typedef SUPER::SETTINGS_T SETTINGS_T;\
-		inline void Serialize(istream& in, SETTINGS_T s) override { *this = MOVE(TYPE(in, s)); } \
+		inline void Serialize(istream& in, SETTINGS_T s) override { *this = move(TYPE(in, s)); } \
 		inline void Deserialize(ostream& out) const override { SUPER::Deserialize(out); Write(out, SERIALIZABLE_MAGIC_LENGTH, MAGIC); Write<u8>(out, VERSION_VAL); IDeserialize(out); } \
 	private: \
 		void ISerialize(istream& in, SETTINGS_T s); \

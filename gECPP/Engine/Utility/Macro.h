@@ -3,8 +3,15 @@
 //
 #pragma once
 
-#define MOVE std::move
+#include <utility>
+
+using std::move;
+
 #define COPY_MOVE(x) MOVE(std::remove_cv_t<decltype(x)>(x))
+
+#define SAFE_CONSTRUCT(TO, TYPE, ...) \
+	(TO).~TYPE(); \
+	new(&(TO)) TYPE(__VA_ARGS__); \
 
 #define NODISCARD [[nodiscard]]
 #ifdef DEBUG

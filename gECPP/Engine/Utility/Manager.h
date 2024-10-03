@@ -134,7 +134,7 @@ namespace gE
 
 		void Move(LinkedIterator& to, SearchDirection direction = SearchDirection::Right)
 		{
-			*this = MOVE(LinkedIterator(_list, _owner, &to, direction));
+			*this = move(LinkedIterator(_list, _owner, &to, direction));
 		}
 
 		friend class LinkedList<T>;
@@ -189,7 +189,8 @@ namespace gE
 	class Managed
 	{
 	 public:
-		explicit inline Managed(Manager<Managed>* m, T& t) : Iterator(t), _t(&t), _manager(m)
+		Managed() = default;
+		Managed(Manager<Managed>* m, T& t) : Iterator(t), _t(&t), _manager(m)
 		{
 			if(_manager) _manager->OnRegister(*this);
 		}
@@ -197,7 +198,7 @@ namespace gE
 		DELETE_OPERATOR_COPY(Managed);
 		OPERATOR_MOVE(Managed, o,
 			_t = o._t;
-			Iterator = MOVE(o.Iterator);
+			Iterator = move(o.Iterator);
 		);
 
 		typedef LinkedIterator<Managed> ITER_T;

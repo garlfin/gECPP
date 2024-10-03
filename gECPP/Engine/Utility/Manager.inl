@@ -11,25 +11,25 @@ namespace gE
 	template<class T>
 	void LinkedList<T>::Add(LinkedIterator<T>& t)
 	{
-		t = MOVE(ITER_T(t.Get(), *this));
+		t = move(ITER_T(t.Get(), *this));
 	}
 
 	template<class T>
 	void LinkedList<T>::Remove(LinkedIterator<T>& t)
 	{
-		t = MOVE(ITER_T(t.Get(), *this));
+		t = move(ITER_T(t.Get(), *this));
 	}
 
 	template<class T>
 	void LinkedList<T>::Move(LinkedIterator<T>& t, LinkedIterator<T>& to)
 	{
-		t = MOVE(LinkedIterator<T>(t.Get(), *this, &to));
+		t = move(LinkedIterator<T>(t.Get(), *this, &to));
 	}
 
 	template<class T>
 	void LinkedList<T>::Insert(LinkedIterator<T>& t, LinkedIterator<T>& at)
 	{
-		t = MOVE(LinkedIterator<T>(t.Get(), *this, &at));
+		t = move(LinkedIterator<T>(t.Get(), *this, &at));
 	}
 
 	template<class T>

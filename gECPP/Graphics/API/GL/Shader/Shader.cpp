@@ -54,10 +54,10 @@ namespace GL
 		GetShaderStatus(*this);
 	}
 
-	Shader::Shader(gE::Window* window, SUPER&& INTERNAL_SETTINGS) : SUPER(MOVE(INTERNAL_SETTINGS)), IShader(window)
+	Shader::Shader(gE::Window* window, SUPER&& INTERNAL_SETTINGS) : SUPER(move(INTERNAL_SETTINGS)), IShader(window)
 	{
-		const ShaderStage frag(window, MOVE(FragmentStage));
-		const ShaderStage vert(window, MOVE(VertexStage));
+		const ShaderStage frag(window, move(FragmentStage));
+		const ShaderStage vert(window, move(VertexStage));
 
 		frag.Attach(*this);
 		vert.Attach(*this);
@@ -87,9 +87,9 @@ namespace GL
 		GetShaderStatus(*this);
 	}
 
-	ComputeShader::ComputeShader(gE::Window* window, SUPER&& INTERNAL_SETTINGS) : SUPER(MOVE(INTERNAL_SETTINGS)), IShader(window)
+	ComputeShader::ComputeShader(gE::Window* window, SUPER&& INTERNAL_SETTINGS) : SUPER(move(INTERNAL_SETTINGS)), IShader(window)
 	{
-		const ShaderStage comp(window, MOVE(ComputeStage));
+		const ShaderStage comp(window, move(ComputeStage));
 
 		comp.Attach(*this);
 
@@ -124,7 +124,7 @@ namespace GL
 		GetShaderStatus(*this, path, sourceCString);
 	}
 
-	ShaderStage::ShaderStage(gE::Window* window, SUPER&& INTERNAL_SETTINGS) : SUPER(MOVE(INTERNAL_SETTINGS)), APIObject(window)
+	ShaderStage::ShaderStage(gE::Window* window, SUPER&& INTERNAL_SETTINGS) : SUPER(move(INTERNAL_SETTINGS)), APIObject(window)
 	{
 		ID = glCreateShader((GLenum) Type);
 

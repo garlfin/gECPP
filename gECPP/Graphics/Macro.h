@@ -8,12 +8,12 @@
 	public: \
 	typedef SUPER_T::SETTINGS_T SETTINGS_T; \
 	typedef SUPER_T SUPER; \
-	inline void Serialize(istream& in, gE::Window* window) override { *this = MOVE(TYPE(in, window)); } \
+	inline void Serialize(istream& in, gE::Window* window) override { SAFE_CONSTRUCT(*this, TYPE, in, window); } \
 	TYPE() = default; \
 	TYPE(istream& in, gE::Window* window) \
 	{ \
 		SUPER::Serialize(in, window); \
-		*this = TYPE(window, MOVE(*this)); \
+		new(this) TYPE(window, move(*this)); \
 		SUPER::Free(); \
 	} \
 	TYPE(gE::Window* window, const SUPER& settings) : TYPE(window, (SUPER&&) SUPER(settings)) {} \

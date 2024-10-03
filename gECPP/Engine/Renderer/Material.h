@@ -7,7 +7,6 @@
 #include <Engine/Utility/AssetManager.h>
 #include <Graphics/Shader/Shader.h>
 #include <Graphics/Shader/Uniform.h>
-#include <Graphics/Texture/Texture.h>
 
 namespace gE
 {

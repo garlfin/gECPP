@@ -15,7 +15,7 @@ namespace GPU
 		SERIALIZABLE_PROTO(MAT, 1, MaterialSlot, Serializable);
 
 	public:
-		MaterialSlot(std::string&& name, u32 offset, u32 count) : Name(MOVE(name)), Offset(offset), Count(count) {}
+		MaterialSlot(std::string&& name, u32 offset, u32 count) : Name(move(name)), Offset(offset), Count(count) {}
 		MaterialSlot(const std::string& name, u32 offset, u32 count) : Name(name), Offset(offset), Count(count) {}
 
 		DEFAULT_CM_CONSTRUCTOR(MaterialSlot);
