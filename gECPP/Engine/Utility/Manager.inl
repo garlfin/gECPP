@@ -61,7 +61,7 @@ namespace gE
 		if(!start)
 			start = direction == SearchDirection::Right ? _first : _last;
 
-		if(start._manager != this) return nullptr;
+		if(start->_manager != this) return nullptr;
 
 		for(LinkedIterator<T>* c = start; c; c = direction == SearchDirection::Left ? c->GetPrevious() : c->GetNext())
 			if(COMPARE_FUNC(similar, *c)) return c;

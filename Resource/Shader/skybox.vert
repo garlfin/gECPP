@@ -16,7 +16,7 @@ out VertexOut VertexIn;
 
 void main()
 {
-    mat4 viewProjection = Camera.Projection * Camera.View[ViewIndex];
+    mat4 viewProjection = Camera.Projection * Camera.View[gl_InstanceID];
 
     gl_Position = (viewProjection * vec4(Position, 0.f)).xyww;
     gl_Layer = gl_InstanceID;

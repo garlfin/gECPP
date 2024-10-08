@@ -11,25 +11,29 @@
 namespace gE
 {
 	class Material;
+	class MeshRenderer;
 	class DrawCallManager;
 
 	struct DrawCall final : public Managed<DrawCall>
 	{
 	public:
 		DrawCall() = default;
-		explicit DrawCall(DrawCallManager& manager);
+		DrawCall(DrawCallManager& manager, const MeshRenderer&, Reference<Material>&&, u8);
 
 		DELETE_OPERATOR_COPY(DrawCall);
 		DEFAULT_OPERATOR_MOVE(DrawCall);
 
-		API::VAO* VAO = nullptr;
-		Material* Material = nullptr;
-		u8 SubMesh = 0;
-		u8 LOD = 0;
+		GET_CONST(const MeshRenderer&, Renderer, *_renderer);
+		GET_CONST(Material*, Material, _material.Get());
+		GET_CONST(u8, SubMesh, _subMesh);
 
 		friend class DrawCallManager;
 
 	private:
+		const MeshRenderer* _renderer = nullptr;
+		Reference<Material> _material;
+		u8 _subMesh = 0;
+
 		LinkedIterator<Managed> _materialIterator;
 		LinkedIterator<Managed> _vaoIterator;
 		LinkedIterator<Managed> _submeshIterator;
@@ -43,10 +47,8 @@ namespace gE
 		void OnUpdate(float d) override {};
 		void OnRender(float d, Camera* camera) override;
 
-		friend struct DrawCall;
-
 	protected:
-		void OnRegister(Managed<DrawCall>& t) override {};
+		void OnRegister(Managed<DrawCall>& t) override;
 	};
 }
 

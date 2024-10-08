@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include <Engine/Component/MaterialHolder.h>
 #include <Engine/Component/MeshRenderer/MeshRenderer.h>
 #include <Engine/Entity/Entity.h>
 
@@ -13,17 +12,14 @@ namespace gE::VoxelDemo
  	class StaticMeshEntity : public Entity
 	{
 	 public:
-		StaticMeshEntity(Window* window, const Reference<API::IVAO>& mesh, const Array<Reference<Material>>& mat = DEFAULT) :
+		StaticMeshEntity(Window* window, const Reference<API::IVAO>& mesh) :
 			Entity(window),
-			_renderer(this, mesh, _materialHolder),
-			_materialHolder(this, mat)
+			_renderer(this, mesh)
 		{ };
 
 		GET(gE::MeshRenderer&, Renderer, _renderer);
-		GET(gE::MaterialHolder&, Materials, _materialHolder);
 
 	 private:
 		MeshRenderer _renderer;
-		MaterialHolder _materialHolder;
 	};
 }

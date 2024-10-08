@@ -115,7 +115,6 @@ namespace gE
 				if(_next) _next->_previous = this;
 				else _list->_last = this;
 				o._list = nullptr;
-				o._owner = RelativePointer<T>(nullptr);
 				o._previous = nullptr;
 				o._next = nullptr;
 			};
@@ -224,7 +223,7 @@ namespace gE
 
 	private:
 		RelativePointer<T> _t;
-		Manager<Managed>* _manager;
+		Manager<Managed>* _manager = nullptr;
 	};
 }
 

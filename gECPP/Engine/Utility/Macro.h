@@ -7,7 +7,7 @@
 
 using std::move;
 
-#define COPY_MOVE(x) MOVE(std::remove_cv_t<decltype(x)>(x))
+#define COPY_MOVE(x) std::move(std::remove_cvref_t<decltype(x)>(x))
 
 #define SAFE_CONSTRUCT(TO, TYPE, ...) \
 	(TO).~TYPE(); \
@@ -21,9 +21,9 @@ using std::move;
 #endif // #if DEBUG
 
 #ifdef DEBUG
+#include <csignal>
 #include <iostream>
 #include <vector>
-#include <signal.h>
 #endif // #ifdef DEBUG
 
 #ifdef DEBUG
