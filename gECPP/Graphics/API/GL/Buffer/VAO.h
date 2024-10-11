@@ -1,30 +1,49 @@
 #pragma once
 
+#include <Engine/Utility/Array.h>
+#include <Engine/Utility/Manager.h>
+#include <Engine/Utility/RelativePointer.h>
+#include <Graphics/Buffer/VAO.h>
 #include "Buffer.h"
-#include "../../../../Engine/Utility/Array.h"
-#include "Engine/Utility/RelativePointer.h"
-#include "Graphics/Buffer/VAO.h"
 
 namespace GL
 {
+	struct IndirectDraw
+	{
+		u32 Count;
+		u32 InstanceCount;
+		u32 First;
+		u32 BaseInstance;
+	};
+
+	struct IndirectDrawIndexed
+	{
+		u32 Count;
+		u32 InstanceCount;
+		u32 FirstIndex;
+		u32 BaseVertex;
+		u32 BaseInstance;
+	};
+
 	class IVAO : public GLObject
 	{
 	public:
 		IVAO() = default;
 		IVAO(gE::Window* window, GPU::VAO& vao);
 
-		DEFALT_OPERATOR_CM(IVAO);
+		DEFAULT_OPERATOR_CM(IVAO);
 
 		GET_CONST(const GPU::VAO&, Data, *_settings);
 
 		ALWAYS_INLINE void Bind() const final { glBindVertexArray(ID); }
 		virtual void Draw(u8 index, u16 instanceCount = 1) const = 0;
+		virtual void Draw(u32 count, const GPU::IndirectDraw*) const = 0;
 
 		NODISCARD ALWAYS_INLINE const Buffer<u8>& GetBuffer(u8 i) { return _buffers[i]; }
 
 	private:
-		RelativePointer<GPU::VAO> _settings;
-		Array<Buffer<u8>> _buffers;
+		RelativePointer<GPU::VAO> _settings = DEFAULT;
+		Array<Buffer<u8>> _buffers = DEFAULT;
 	};
 
 	class VAO : protected GPU::VAO, public IVAO
@@ -40,6 +59,7 @@ namespace GL
 		using SUPER::IsFree;
 
 		void Draw(u8 index, u16 instanceCount = 1) const override;
+		void Draw(u32 count, const GPU::IndirectDraw*) const override;
 
 		~VAO() override;
 	};
@@ -66,8 +86,9 @@ namespace GL
 		using SUPER::IsFree;
 
 		void Draw(u8 index, u16 instanceCount = 1) const override;
+		void Draw(u32 count, const GPU::IndirectDraw*) const override;
 
 	 private:
-		Buffer<u8> _triangleBuffer;
+		Buffer<u8> _triangleBuffer = DEFAULT;
 	};
 }

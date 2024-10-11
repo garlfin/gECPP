@@ -56,6 +56,7 @@ using std::move;
 #ifndef CONSTEXPR_GLOBAL
 #define GLOBAL inline const
 #endif
+
 #ifndef CONSTEXPR_GLOBAL
 #define CONSTEXPR_GLOBAL inline constexpr const
 #endif
@@ -134,7 +135,7 @@ using std::move;
 	TYPE(TYPE&&) = default; \
 	TYPE& operator=(TYPE&&) = default
 
-#define DEFALT_OPERATOR_CM(TYPE) \
+#define DEFAULT_OPERATOR_CM(TYPE) \
 	DEFAULT_OPERATOR_COPY(TYPE); \
 	DEFAULT_OPERATOR_MOVE(TYPE)
 

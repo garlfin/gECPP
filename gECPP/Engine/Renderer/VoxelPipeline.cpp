@@ -59,7 +59,7 @@ namespace gE::VoxelPipeline
 		transform.SetPosition() = glm::vec3(pos) * cellSize;
 		transform.OnUpdate(0.f); // Force update on model matrix since it passed its tick.
 
-		GetOwner().GetGLVoxelScene(buffers.Scene);
+		GetOwner().GetGPUVoxelScene(buffers.Scene);
 		buffers.UpdateScene();
 
 		glm::u16vec3 dispatchSize = DIV_CEIL_T(_colorBack.GetSize(), VOXEL_TAA_GROUP_SIZE, glm::u16vec3);

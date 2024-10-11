@@ -20,7 +20,7 @@ namespace gE
 		_target(_camera)
 	{}
 
-	void CubemapCapture::GetGLCubemap(GPU::Cubemap& cubemap)
+	void CubemapCapture::GetGPUCubemap(GPU::Cubemap& cubemap)
 	{
 		Transform& transform = GetTransform();
 
@@ -40,7 +40,7 @@ namespace gE
 
 		lighting.Skybox = Skybox->GetHandle();
 		lighting.CubemapCount = 1;
-		(**List.GetFirst())->GetGLCubemap(lighting.Cubemaps[0]);
+		(**List.GetFirst())->GetGPUCubemap(lighting.Cubemaps[0]);
 
 		buffers.UpdateLighting(sizeof(handle), offsetof(GPU::Lighting, Skybox));
 		buffers.UpdateLighting(sizeof(GPU::Cubemap), offsetof(GPU::Lighting, Cubemaps[0]));
@@ -49,14 +49,14 @@ namespace gE
 			(**i)->GetCamera().OnRender(delta, camera);
 	}
 
-	void CubemapManager::DrawSkybox()
+	CubemapManager::CubemapManager(Window* window): Manager(), _window(window)
 	{
-		if(!_isInitialized)
-		{
-			ReadSerializableFromFile(_window, "Resource/Model/skybox.vao", _skyboxVAO);
-			_skyboxShader = API::Shader(_window, "Resource/Shader/skybox.vert", "Resource/Shader/skybox.frag");
-			_isInitialized = true;
-		}
+		ReadSerializableFromFile(_window, "Resource/Model/skybox.vao", _skyboxVAO);
+		_skyboxShader = API::Shader(_window, "Resource/Shader/skybox.vert", "Resource/Shader/skybox.frag");
+	}
+
+	void CubemapManager::DrawSkybox() const
+	{
 		_skyboxShader.Bind();
 
 		glEnable(GL_DEPTH_TEST);

@@ -105,9 +105,9 @@ namespace gE
 
 		CameraManager Cameras;
 		TransformManager Transforms;
-		LightManager Lights;
-		CubemapManager Cubemaps;
-		RendererManager Renderers;
+		SmartPointer<LightManager> Lights;
+		SmartPointer<CubemapManager> Cubemaps;
+		SmartPointer<RendererManager> Renderers;
 		CullingManager CullingManager;
 		GPU::TextureSlotManager SlotManager;
 

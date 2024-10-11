@@ -7,6 +7,7 @@
 #define GE_MAX_VAO_BUFFER 5
 #define GE_MAX_VAO_MATERIAL 5
 #define GE_MAX_VAO_FIELD 5
+#define GE_MAX_VAO_LOD 8
 
 namespace GPU
 {
@@ -18,7 +19,7 @@ namespace GPU
 		MaterialSlot(std::string&& name, u32 offset, u32 count) : Name(move(name)), Offset(offset), Count(count) {}
 		MaterialSlot(const std::string& name, u32 offset, u32 count) : Name(name), Offset(offset), Count(count) {}
 
-		DEFAULT_CM_CONSTRUCTOR(MaterialSlot);
+		DEFAULT_OPERATOR_CM(MaterialSlot);
 
 		std::string Name = DEFAULT;
 		u32 Offset = 0;

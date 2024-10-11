@@ -4,6 +4,8 @@
 
 #include "VAO.h"
 
+#include "Engine/Window.h"
+
 namespace GL
 {
 	IVAO::IVAO(gE::Window* window, GPU::VAO& vao): GLObject(window), _settings(vao), _buffers(_settings->Counts.BufferCount)
@@ -62,4 +64,58 @@ namespace GL
 		glDrawElementsInstanced(GL_TRIANGLES, material.Count * 3, TriangleFormat, (void*) (sizeof(u32) * material.Offset * 3), instanceCount);
 	}
 
+	void VAO::Draw(u32 count, const GPU::IndirectDraw* calls) const
+	{
+		if(!count) return;
+
+		gE::DrawCallManager& drawManager = GetWindow().GetRenderers().GetDrawCallManager();
+
+		u32 baseInstance = 0;
+		for(u32 i = 0; i < count; i++)
+		{
+			IndirectDraw& to = ((IndirectDraw*) drawManager.IndirectDraws)[i];
+			const GPU::IndirectDraw& call = calls[i];
+			const GPU::MaterialSlot& material = Materials[call.Material];
+
+			to.InstanceCount = call.InstanceCount * GetWindow().State.InstanceMultiplier;
+			to.Count = material.Count * 3;
+			to.BaseInstance = baseInstance;
+			to.First = sizeof(u32) * material.Offset * 3;
+
+			baseInstance += call.InstanceCount;
+		}
+
+		drawManager.UpdateDrawCalls(sizeof(IndirectDrawIndexed) * count);
+
+		Bind();
+		glMultiDrawArraysIndirect(GL_TRIANGLES, nullptr, count, 0);
+	}
+
+	void IndexedVAO::Draw(u32 count, const GPU::IndirectDraw* calls) const
+	{
+		if(!count) return;
+
+		gE::DrawCallManager& drawManager = GetWindow().GetRenderers().GetDrawCallManager();
+
+		u32 baseInstance = 0;
+		for(u32 i = 0; i < count; i++)
+		{
+			IndirectDrawIndexed& to = ((IndirectDrawIndexed*) drawManager.IndirectDraws)[i];
+			const GPU::IndirectDraw& call = calls[i];
+			const GPU::MaterialSlot& material = Materials[call.Material];
+
+			to.InstanceCount = call.InstanceCount * GetWindow().State.InstanceMultiplier;
+			to.Count = material.Count * 3;
+			to.BaseInstance = baseInstance;
+			to.BaseVertex = 0;
+			to.FirstIndex = sizeof(u32) * material.Offset * 3;
+
+			baseInstance += call.InstanceCount;
+		}
+
+		drawManager.UpdateDrawCalls(sizeof(IndirectDrawIndexed) * count);
+
+		Bind();
+		glMultiDrawElementsIndirect(GL_TRIANGLES, TriangleFormat, nullptr, count, 0);
+	}
 }

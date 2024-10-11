@@ -23,13 +23,19 @@ namespace gE
 	template<class T>
 	void LinkedList<T>::Move(LinkedIterator<T>& t, LinkedIterator<T>& to)
 	{
-		SAFE_CONSTRUCT(t, ITER_T, t.Get(), *this, &to);
+		Insert(t, &to);
 	}
 
 	template<class T>
 	void LinkedList<T>::Insert(LinkedIterator<T>& t, LinkedIterator<T>& at)
 	{
-		SAFE_CONSTRUCT(t, ITER_T, t.Get(), *this, &at);
+		Insert(t, &at);
+	}
+
+	template<class T>
+	void LinkedList<T>::Insert(LinkedIterator<T>& t, LinkedIterator<T>* at)
+	{
+		SAFE_CONSTRUCT(t, ITER_T, t.Get(), *this, at);
 	}
 
 	template<class T>
@@ -55,16 +61,19 @@ namespace gE
 	}
 
 	template<class T>
-	template<CompareFunc<const T&> COMPARE_FUNC>
-	LinkedIterator<T>* LinkedList<T>::FindSimilar(const T& similar, gE::LinkedIterator<T>* start, SearchDirection direction)
+	template<class COMP_T, CompareFunc<const COMP_T&, const T&> COMPARE_FUNC>
+	LinkedIterator<T>* LinkedList<T>::FindSimilar(const COMP_T& similar, LinkedIterator<T>* start, SearchDirection dir, LinkedIterator<T>* end)
 	{
+		if(!_first) return nullptr;
+
 		if(!start)
-			start = direction == SearchDirection::Right ? _first : _last;
+			start = dir == SearchDirection::Right ? _first : _last;
 
-		if(start->_manager != this) return nullptr;
+		if(start->_list != this) return nullptr;
+		if(end && end->_list != this) return nullptr;
 
-		for(LinkedIterator<T>* c = start; c; c = direction == SearchDirection::Left ? c->GetPrevious() : c->GetNext())
-			if(COMPARE_FUNC(similar, *c)) return c;
+		for(LinkedIterator<T>* c = start; c && c != end; c = dir == SearchDirection::Left ? c->GetPrevious() : c->GetNext())
+			if(COMPARE_FUNC(similar, **c)) return c;
 
 		return nullptr;
 	}
@@ -77,5 +86,28 @@ namespace gE
 
 		_size = 0;
 		_first = _last = nullptr;
+	}
+
+	template<class T>
+	Managed<T>::~Managed()
+	{
+		if(!_manager) return;
+
+		_manager->OnRemove(*this);
+	#ifdef DEBUG
+		GE_ASSERT(_init, "UNINITIALIZED MANAGED OBJECT!");
+	#endif
+	}
+
+	template<class T>
+	void Managed<T>::Register()
+	{
+		if(!_manager) return;
+
+		_manager->OnRegister(*this);
+	#ifdef DEBUG
+		GE_ASSERT(!_init, "DOUBLE INITIALIZED MANAGED OBJECT!");
+		_init = true;
+	#endif
 	}
 }

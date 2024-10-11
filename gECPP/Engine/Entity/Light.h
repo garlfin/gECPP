@@ -34,7 +34,7 @@ namespace gE
 	 public:
 		Light(Window*, Camera&, IDepthTarget&);
 
-		virtual void GetGLLight(GPU::Light& light) = 0;
+		virtual void GetGPULight(GPU::Light& light) = 0;
 
 		GET(Camera&, Camera, _camera);
 
@@ -63,7 +63,7 @@ namespace gE
 	 public:
 		DirectionalLight(Window*, u16 size, float scale, const glm::quat& = glm::identity<glm::quat>());
 
-		void GetGLLight(GPU::Light&) override;
+		void GetGPULight(GPU::Light&) override;
 
 		GET(OrthographicCamera&, Camera, _camera);
 		GET(DirectionalLightTarget&, Target, _target);

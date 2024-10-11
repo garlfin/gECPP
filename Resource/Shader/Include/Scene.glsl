@@ -41,13 +41,18 @@ struct Cubemap
     BINDLESS_TEXTURE(samplerCube, Color);
 };
 
+struct ObjectInfo
+{
+    mat4 Model;
+    mat4 PreviousModel;
+    mat3 Normal;
+};
+
 struct SceneData
 {
     uint InstanceCount;
     uint State;
-    mat4 Model[MAX_OBJECTS];
-    mat4 PreviousModel[MAX_OBJECTS];
-    mat3 Normal[MAX_OBJECTS];
+    ObjectInfo Objects[MAX_OBJECTS];
 };
 
 struct LightingData
@@ -94,5 +99,5 @@ layout(LIGHT_UNIFORM_LAYOUT, binding = LIGHT_UNIFORM_LOCATION) uniform LightingU
 
 #ifdef VERTEX_SHADER
     uint ViewIndex = gl_InstanceID / Scene.InstanceCount;
-    uint ModelIndex = gl_InstanceID % Scene.InstanceCount;
+    uint ObjectIndex = gl_InstanceID % Scene.InstanceCount;
 #endif

@@ -21,11 +21,7 @@ namespace gE
 
 		GET_CONST(API::IVAO&, Mesh, *_mesh);
 
-		static inline bool CompareVAO(const MeshRenderer&, const MeshRenderer&);
-		static inline bool CompareMaterial(const MeshRenderer&, const MeshRenderer&);
-		static inline bool CompareLOD(const MeshRenderer&, const MeshRenderer&);
-
-		NODISCARD Material& GetMaterial(u8 i) const;
+		NODISCARD ALWAYS_INLINE Material& GetMaterial(u8 i) const { return *_drawCalls[i].GetMaterial(); }
 
 		void SetMaterial(u8 i, const Reference<Material>& mat);
 		void SetMaterial(u8 i, Reference<Material>&& mat);
@@ -41,7 +37,7 @@ namespace gE
 	class RendererManager : public ComponentManager<MeshRenderer>
 	{
 	 public:
-		using ComponentManager::ComponentManager;
+		explicit RendererManager(Window* window) : _drawCallManager(window) {};
 
 		void OnRender(float d, Camera* camera) override;
 

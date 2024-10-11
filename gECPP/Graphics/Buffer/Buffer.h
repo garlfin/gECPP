@@ -20,7 +20,7 @@ namespace GPU
 		explicit Buffer(const Array<T>& arr) : Stride(sizeof(typename Array<T>::I)), Data(arr) {}
 		explicit Buffer(Array<T>&& arr) : Stride(sizeof(typename Array<T>::I)), Data(arr) {}
 
-		DEFALT_OPERATOR_CM(Buffer);
+		DEFAULT_OPERATOR_CM(Buffer);
 
 		GET_CONST(u8, Stride, Stride);
 		GET_CONST(const Array<T>&, Array, Data);

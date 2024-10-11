@@ -26,7 +26,7 @@ using namespace gE;
 #define MS_TO_S (1.0 / 1000.f)
 
 Window::Window(glm::u16vec2 size, const char* name) :
-	Lights(this), Cubemaps(this), _size(size), _name(strdup(name))
+	_size(size), _name(strdup(name))
 {
 	if(!glfwInit()) GE_FAIL("Failed to initialize GLFW.");
 
@@ -165,6 +165,10 @@ void Window::OnInit()
 	PipelineBuffers = ptr_create<DefaultPipeline::Buffers>(this);
 	VoxelBuffers = ptr_create<VoxelPipeline::Buffers>(this);
 
+	Lights = ptr_create<LightManager>(this);
+	Cubemaps = ptr_create<CubemapManager>(this);
+	Renderers = ptr_create<RendererManager>(this);
+
 	BlitShader = ptr_create<API::Shader>(this, "Resource/Shader/blit.vert", "Resource/Shader/blit.frag");
 	TAAShader = ptr_create<API::ComputeShader>(this, "Resource/Shader/PostProcess/taa.comp");
 	TonemapShader = ptr_create<API::ComputeShader>(this, "Resource/Shader/PostProcess/tonemap.comp");
@@ -217,9 +221,9 @@ void Window::OnUpdate(float delta)
 	Transforms.OnUpdate(delta);
 
 	Cameras.OnUpdate(delta);
-	Renderers.OnUpdate(delta);
-	Lights.OnUpdate(delta);
-	Cubemaps.OnUpdate(delta);
+	Renderers->OnUpdate(delta);
+	Lights->OnUpdate(delta);
+	Cubemaps->OnUpdate(delta);
 	CullingManager.OnUpdate(delta);
 
 	Behaviors.OnUpdate(delta);
@@ -229,8 +233,8 @@ void Window::OnRender(float delta)
 {
 	Behaviors.OnRender(delta, nullptr);
 
-	Lights.OnRender(delta, nullptr);
-	Cubemaps.OnRender(delta, nullptr);
+	Lights->OnRender(delta, nullptr);
+	Cubemaps->OnRender(delta, nullptr);
 
 	Cameras.OnRender(delta);
 

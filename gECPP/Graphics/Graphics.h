@@ -57,7 +57,7 @@ namespace GPU
 	public:
 		Asset() = default;
 
-		DEFALT_OPERATOR_CM(Asset);
+		DEFAULT_OPERATOR_CM(Asset);
 
 		virtual void Free() = 0;
 		NODISCARD virtual bool IsFree() const = 0;

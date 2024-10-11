@@ -7,7 +7,6 @@
 // TODO: Find better alternative to creating a copy of the settings.
 // Prevents _settings from being initialied to 0.
 
-
 #define API_SERIALIZABLE(TYPE, SUPER_T)\
 	public: \
 	typedef SUPER_T::SETTINGS_T SETTINGS_T; \

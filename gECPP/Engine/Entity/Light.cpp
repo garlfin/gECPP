@@ -47,7 +47,7 @@ namespace gE
 
 		DefaultPipeline::Buffers& buffers = window.GetPipelineBuffers();
 
-		GetOwner().GetGLLight(buffers.Lighting.Lights[0]);
+		GetOwner().GetGPULight(buffers.Lighting.Lights[0]);
 		buffers.UpdateLighting(offsetof(GPU::Lighting, Lights[1]));
 
 		window.State = State::Shadow;
@@ -81,7 +81,7 @@ namespace gE
 		return true;
 	}
 
-	void DirectionalLight::GetGLLight(GPU::Light& light)
+	void DirectionalLight::GetGPULight(GPU::Light& light)
 	{
 		Transform& transform = GetCamera().GetOwner().GetTransform();
 		OrthographicCamera& camera = GetCamera();

@@ -36,6 +36,6 @@ namespace gETF::UI
 
 		GET_CONST(T*, Entity, (T*) Entity);
 
-		virtual ~Delegate() = default;
+		~Delegate() override = default;
 	};
 }

@@ -42,7 +42,7 @@ namespace gE
 		GET(API::TextureCube&, Color, _target.GetColor());
 		GET(CameraCubemap&, Camera, _camera);
 
-		void GetGLCubemap(GPU::Cubemap&);
+		void GetGPUCubemap(GPU::Cubemap&);
 
 	 private:
 		CameraCubemap _camera;
@@ -52,11 +52,11 @@ namespace gE
 	class CubemapManager final : public Manager<Managed<CubemapCapture>>
 	{
 	 public:
-		explicit CubemapManager(Window* window) : Manager(), _window(window) {};
+		explicit CubemapManager(Window* window);
 
 		Reference<API::TextureCube> Skybox = DEFAULT;
 
-		void DrawSkybox();
+		void DrawSkybox() const;
 
 		void OnUpdate(float delta) override {};
 		void OnRender(float delta, Camera*) override;
@@ -66,7 +66,6 @@ namespace gE
 	 private:
 		Window* _window = nullptr;
 
-		bool _isInitialized = false;
 		API::VAO _skyboxVAO = DEFAULT;
 		API::Shader _skyboxShader = DEFAULT;
 	};

@@ -41,7 +41,7 @@ namespace gE
 	{
 	}
 
-	void Camera::GetGLCamera(GPU::Camera& cam)
+	void Camera::GetGPUCamera(GPU::Camera& cam)
 	{
 		Transform& transform = GetOwner().GetTransform();
 
@@ -72,7 +72,7 @@ namespace gE
 		if(!_target->Setup(delta, callingCamera)) return;
 		_target->RenderDependencies(delta);
 
-		GetGLCamera(buffers.Camera);
+		GetGPUCamera(buffers.Camera);
 		buffers.UpdateCamera();
 
 		_target->Bind();
@@ -98,9 +98,9 @@ namespace gE
 		SetFOV(s.FOV);
 	}
 
-	void PerspectiveCamera::GetGLCamera(GPU::Camera& camera)
+	void PerspectiveCamera::GetGPUCamera(GPU::Camera& camera)
 	{
-		Camera2D::GetGLCamera(camera);
+		Camera2D::GetGPUCamera(camera);
 		camera.Parameters.x = GetFOV<AngleType::Radian>();
 	}
 
@@ -114,9 +114,9 @@ namespace gE
 		Projection = glm::ortho(_orthographicScale.x, _orthographicScale.y, _orthographicScale.z, _orthographicScale.w, GetClipPlanes().x, GetClipPlanes().y);
 	}
 
-	void Camera2D::GetGLCamera(GPU::Camera& camera)
+	void Camera2D::GetGPUCamera(GPU::Camera& camera)
 	{
-		Camera::GetGLCamera(camera);
+		Camera::GetGPUCamera(camera);
 		camera.View[0] = inverse(GetOwner().GetTransform().Model());
 	}
 
@@ -131,9 +131,9 @@ namespace gE
 		Projection = glm::ortho(-scale.x, scale.x, -scale.z, scale.z, 0.01f, scale.y * 2.f);
 	}
 
-	void Camera3D::GetGLCamera(GPU::Camera& cam)
+	void Camera3D::GetGPUCamera(GPU::Camera& cam)
 	{
-		Camera::GetGLCamera(cam);
+		Camera::GetGPUCamera(cam);
 
 		glm::vec3 scale = GetOwner().GetTransform()->Scale;
 
@@ -151,9 +151,9 @@ namespace gE
 		Projection = glm::perspectiveFov(glm::radians(90.f), 1.f, 1.f, GetClipPlanes().x, GetClipPlanes().y);
 	}
 
-	void CameraCubemap::GetGLCamera(GPU::Camera& cam)
+	void CameraCubemap::GetGPUCamera(GPU::Camera& cam)
 	{
-		Camera::GetGLCamera(cam);
+		Camera::GetGPUCamera(cam);
 
 		for(u8 i = 0; i < 6; i++)
 			cam.View[i] = lookAt(cam.Position, cam.Position + ForwardDirs[i], UpDirs[i]);

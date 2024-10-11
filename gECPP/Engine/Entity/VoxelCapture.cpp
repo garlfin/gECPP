@@ -16,7 +16,7 @@ namespace gE
 		GetTransform().SetScale() = glm::vec3(size);
 	}
 
-	void VoxelCapture::GetGLVoxelScene(API::VoxelScene& scene)
+	void VoxelCapture::GetGPUVoxelScene(API::VoxelScene& scene)
 	{
 		Transform& transform = GetTransform();
 

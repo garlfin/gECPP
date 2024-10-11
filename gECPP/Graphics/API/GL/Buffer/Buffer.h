@@ -13,7 +13,8 @@ namespace GL
 		TransformFeedback = GL_TRANSFORM_FEEDBACK_BUFFER,
 		Uniform = GL_UNIFORM_BUFFER,
 		ShaderStorage = GL_SHADER_STORAGE_BUFFER,
-		Buffer = GL_ARRAY_BUFFER
+		Buffer = GL_ARRAY_BUFFER,
+		IndirectDrawBuffer = GL_DRAW_INDIRECT_BUFFER
 	};
 
 	template<typename T = void, bool DYNAMIC = false>

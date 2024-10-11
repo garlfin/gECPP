@@ -15,8 +15,8 @@ namespace gE
 	template<class T> class LinkedList;
 	template<class T> class LinkedIterator;
 
-	template<class T>
-	using CompareFunc = bool(*)(T a, T b);
+	template<class A_T, class B_T>
+	using CompareFunc = bool(*)(A_T a, B_T b);
 
 	enum class SearchDirection : u8
 	{
@@ -30,18 +30,20 @@ namespace gE
 	 public:
 		LinkedList() = default;
 
-		DELETE_OPERATOR_CM(LinkedList);
+		DEFAULT_OPERATOR_MOVE(LinkedList);
+		DELETE_OPERATOR_COPY(LinkedList);
 
 		typedef LinkedIterator<T> ITER_T;
 
 		void Add(LinkedIterator<T>& t);
+		void Insert(LinkedIterator<T>& t, LinkedIterator<T>* at);
 		void Insert(LinkedIterator<T>& t, LinkedIterator<T>& at);
 		void Move(LinkedIterator<T>& t, LinkedIterator<T>& to);
 		void Remove(LinkedIterator<T>& t);
 		void MergeList(LinkedList& list);
 
-		template<CompareFunc<const T&> COMPARE_FUNC>
-		LinkedIterator<T>* FindSimilar(const T& similar, LinkedIterator<T>* start = nullptr, SearchDirection direction = SearchDirection::Right);
+		template<class COMP_T, CompareFunc<const COMP_T&, const T&> COMPARE_FUNC>
+		LinkedIterator<T>* FindSimilar(const COMP_T& similar, LinkedIterator<T>* start = nullptr, SearchDirection dir = SearchDirection::Right, LinkedIterator<T>* end = nullptr);
 
 		GET_CONST(LinkedIterator<T>*, First, _first);
 		GET_CONST(LinkedIterator<T>*, Last, _last);
@@ -66,8 +68,6 @@ namespace gE
 		LinkedIterator(T& owner, LinkedList<T>& l, LinkedIterator* at = nullptr, SearchDirection direction = SearchDirection::Right) :
 			_list(&l), _owner(owner)
 		{
-			if(!_list) return;
-
 			_list->_size++;
 
 			if(!_list->_first)
@@ -84,11 +84,12 @@ namespace gE
 				_next = at->_next;
 				_previous = at;
 
+				_previous->_next = this;
+
 				if(_next) _next->_previous = this;
 				else _list->_last = this;
-
-				at->_next = this;
-			} else
+			}
+			else
 			{
 				if(!at) at = _list->_first;
 
@@ -98,7 +99,7 @@ namespace gE
 				if(_previous) _previous->_next = this;
 				else _list->_first = this;
 
-				at->_previous = this;
+				_next->_previous = this;
 			}
 		}
 
@@ -188,9 +189,9 @@ namespace gE
 	{
 	 public:
 		Managed() = default;
-		Managed(Manager<Managed>* m, T& t) : Iterator(t), _t(&t), _manager(m)
+		Managed(Manager<Managed>* m, T& t, bool overrideRegister = false) : Iterator(t), _t(&t), _manager(m)
 		{
-			if(_manager) _manager->OnRegister(*this);
+			if(!overrideRegister) Register();
 		}
 
 		DELETE_OPERATOR_COPY(Managed);
@@ -216,14 +217,19 @@ namespace gE
 
 		friend class Manager<T>;
 
-		virtual ~Managed() { if(_manager) _manager->OnRemove(*this); }
+		virtual ~Managed();
 
 	protected:
+		ALWAYS_INLINE void Register();
+
 		LinkedIterator<Managed> Iterator;
 
 	private:
 		RelativePointer<T> _t;
 		Manager<Managed>* _manager = nullptr;
+#ifdef DEBUG
+		bool _init = false;
+#endif
 	};
 }
 

@@ -71,13 +71,18 @@ namespace GPU
 		API_ALIGN handle Color;
 	};
 
+	struct ObjectInfo
+	{
+		glm::mat4 Model;
+		glm::mat4 PreviousModel;
+		glm::mat3x4 Normal;
+	};
+
 	struct Scene
 	{
 		u32 InstanceCount;
 		gE::RenderFlags State;
-		API_ALIGN glm::mat4 Model[GE_MAX_INSTANCE];
-		glm::mat4 PreviousModel[GE_MAX_INSTANCE];
-		glm::mat3x4 Normal[GE_MAX_INSTANCE]; // for alignment purposes.
+		API_ALIGN ObjectInfo Objects[GE_MAX_INSTANCE];
 	};
 
 	struct Lighting
@@ -113,7 +118,7 @@ namespace gE::DefaultPipeline
 		void RenderPass(float, Camera*) override;
 		void PostProcessPass(float) override;
 
- 		virtual ~Target2D() = default;
+		~Target2D() override = default;
 
 	 private:
 		Attachment<API::Texture2D, GL_DEPTH_ATTACHMENT> _depth;

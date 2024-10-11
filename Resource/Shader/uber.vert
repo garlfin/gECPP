@@ -26,7 +26,9 @@ void main()
 {
     mat4 viewProjection = Camera.Projection * Camera.View[ViewIndex];
 
-    VertexIn.FragPos = (Scene.Model[ModelIndex] * vec4(Position, 1)).xyz;
+    ObjectInfo objectInfo = Scene.Objects[ObjectIndex];
+
+    VertexIn.FragPos = (objectInfo.Model * vec4(Position, 1)).xyz;
     VertexIn.UV = UV;
 
     gl_Position = viewProjection * vec4(VertexIn.FragPos, 1);
@@ -41,12 +43,12 @@ void main()
 
     if(!bool(Scene.State & ENABLE_COLOR)) return;
 
-    VertexIn.PreviousNDC = Scene.PreviousModel[ModelIndex] * vec4(Position, 1);
+    VertexIn.PreviousNDC = objectInfo.PreviousModel * vec4(Position, 1);
     VertexIn.PreviousNDC = Camera.PreviousViewProjection * vec4(VertexIn.PreviousNDC.xyz, 1);
 
     vec3 nor, tan, bitan;
-    nor = normalize(Scene.Normal[ModelIndex] * Normal);
-    tan = normalize(Scene.Normal[ModelIndex] * Tangent);
+    nor = normalize(objectInfo.Normal * Normal);
+    tan = normalize(objectInfo.Normal * Tangent);
     bitan = normalize(cross(nor, tan));
 
     VertexIn.TBN = mat3(tan, bitan, nor);

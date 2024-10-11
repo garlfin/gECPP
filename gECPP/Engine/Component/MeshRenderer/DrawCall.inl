@@ -8,15 +8,23 @@
 
 namespace gE
 {
-	inline DrawCall::DrawCall(DrawCallManager& manager, const MeshRenderer& r, Reference<Material>&& mat, u8 mesh) :
-		Managed(&manager, *this),
-		_renderer(&r), _material(move(mat)), _subMesh(mesh)
+	inline bool CompareVAO(const Managed<DrawCall>& a, const Managed<DrawCall>& b)
 	{
-
+		return &a->GetVAO() == &b->GetVAO();
 	}
 
-	inline void DrawCallManager::OnRegister(Managed<DrawCall>& t)
+	inline bool CompareMaterial(const Managed<DrawCall>& a, const Managed<DrawCall>& b)
 	{
-		List.Add(t.GetIterator());
+		return a->GetMaterial() == b->GetMaterial();
+	}
+
+	inline bool CompareMaterialIndex(const Managed<DrawCall>& a, const Managed<DrawCall>& b)
+	{
+		return a->GetMaterialIndex() == b->GetMaterialIndex();
+	}
+
+	inline bool CompareLOD(const  Managed<DrawCall>& a, const Managed<DrawCall>& b)
+	{
+		return a->GetLOD() == b->GetLOD();
 	}
 }

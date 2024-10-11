@@ -16,7 +16,7 @@ namespace gE
 
 	}
 
-	void SDFCapture::GetGLSDFScene(API::SDFScene& scene)
+	void SDFCapture::GetGPUSDFScene(API::SDFScene& scene)
 	{
 
 	}

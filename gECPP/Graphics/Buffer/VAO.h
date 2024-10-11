@@ -9,6 +9,8 @@
 #include "Buffer.h"
 #include "VAOSettings.h"
 
+#define API_MAX_MULTI_DRAW (GE_MAX_VAO_MATERIAL * GE_MAX_VAO_LOD / 2)
+
 namespace GPU
 {
 	struct VAOFieldCounts
@@ -18,12 +20,19 @@ namespace GPU
 		u8 FieldCount : 4;
 	};
 
+	struct IndirectDraw
+	{
+		u32 InstanceCount;
+		u8 Material;
+		u8 LOD;
+	};
+
 	class VAO : public Serializable<gE::Window*>, public Asset
 	{
 		SERIALIZABLE_PROTO(VAO, 1, VAO, Serializable);
 
 	public:
-		DEFALT_OPERATOR_CM(VAO);
+		DEFAULT_OPERATOR_CM(VAO);
 
 		VAOFieldCounts Counts{};
 		MaterialSlot Materials[GE_MAX_VAO_MATERIAL];
@@ -48,7 +57,7 @@ namespace GPU
 		SERIALIZABLE_PROTO(IVAO, 1, IndexedVAO, VAO);
 
 	public:
-		DEFALT_OPERATOR_CM(IndexedVAO);
+		DEFAULT_OPERATOR_CM(IndexedVAO);
 
 		ALWAYS_INLINE void Free() override { VAO::Free(); TriangleBuffer.Free(); }
 		NODISCARD ALWAYS_INLINE bool IsFree() const override { return VAO::IsFree() && TriangleBuffer.IsFree(); }
