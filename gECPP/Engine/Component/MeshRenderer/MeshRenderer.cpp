@@ -94,7 +94,7 @@ namespace gE
 		if(similar && (similar = FindSimilarSafe<CompareLOD, &DrawCall::_lodIterator>(t, _lodList, similar, next)))
 			next = DRAWCALL_SUBITER_SAFE(similar, _lodIterator.GetNext(), IPTR_TO_TPTR);
 		else
-			_vaoList.Insert(t->_materialIterator, DRAWCALL_SIMILAR_SAFE(similar, _materialIterator));
+			_lodList.Insert(t->_materialIterator, DRAWCALL_SIMILAR_SAFE(similar, _materialIterator));
 
 		List.Insert(t.GetIterator(), DRAWCALL_SIMILAR_SAFE(similar, Iterator));
 	}
@@ -121,8 +121,6 @@ namespace gE
 			totalInstanceCount++;
 			instanceCount++;
 
-			IndirectDrawArray[batchCount] = GPU::IndirectDraw(instanceCount, call.GetMaterialIndex(), 0);
-
 			bool flush, flushBatch;
 			if(nextCall)
 			{
@@ -135,6 +133,8 @@ namespace gE
 
 			if(flushBatch)
 			{
+				IndirectDrawArray[batchCount] = GPU::IndirectDraw(instanceCount, call.GetMaterialIndex(), 0);
+
 				instanceCount = 0;
 				batchCount++;
 			}
