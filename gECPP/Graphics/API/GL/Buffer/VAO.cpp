@@ -80,7 +80,7 @@ namespace GL
 			to.InstanceCount = call.InstanceCount * GetWindow().State.InstanceMultiplier;
 			to.Count = material.Count * 3;
 			to.BaseInstance = baseInstance;
-			to.First = sizeof(u32) * material.Offset * 3;
+			to.First = material.Offset * 3;
 
 			baseInstance += call.InstanceCount;
 		}
@@ -108,7 +108,7 @@ namespace GL
 			to.Count = material.Count * 3;
 			to.BaseInstance = baseInstance;
 			to.BaseVertex = 0;
-			to.FirstIndex = sizeof(u32) * material.Offset * 3;
+			to.FirstIndex = material.Offset * 3;
 
 			baseInstance += call.InstanceCount;
 		}

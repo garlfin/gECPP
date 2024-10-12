@@ -20,6 +20,8 @@ using std::move;
 #define ALWAYS_INLINE __attribute__((always_inline)) inline
 #endif // #if DEBUG
 
+#define NOINLINE __attribute__((noinline))
+
 #ifdef DEBUG
 #include <csignal>
 #include <iostream>

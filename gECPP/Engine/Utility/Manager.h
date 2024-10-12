@@ -9,6 +9,11 @@
 
 #include "RelativePointer.h"
 
+#define IPTR_TO_MPTR &**
+#define IPTR_TO_TPTR &***
+#define ITR_TO_M *
+#define ITR_TO_T **
+
 namespace gE
 {
 	template<class T> class Manager;
@@ -16,7 +21,7 @@ namespace gE
 	template<class T> class LinkedIterator;
 
 	template<class A_T, class B_T>
-	using CompareFunc = bool(*)(A_T a, B_T b);
+	using CompareFunc = bool(*)(const A_T& a, const B_T& b);
 
 	enum class SearchDirection : u8
 	{
@@ -42,6 +47,9 @@ namespace gE
 		void Remove(LinkedIterator<T>& t);
 		void MergeList(LinkedList& list);
 
+		NODISCARD LinkedIterator<T>* At(u32 index);
+		NODISCARD ALWAYS_INLINE LinkedIterator<T>* operator[](u32 i) { return At(i); }
+
 		template<class COMP_T, CompareFunc<const COMP_T&, const T&> COMPARE_FUNC>
 		LinkedIterator<T>* FindSimilar(const COMP_T& similar, LinkedIterator<T>* start = nullptr, SearchDirection dir = SearchDirection::Right, LinkedIterator<T>* end = nullptr);
 
@@ -65,43 +73,7 @@ namespace gE
 	public:
 		LinkedIterator() = default;
 		explicit LinkedIterator(T& owner) : _owner(owner) {};
-		LinkedIterator(T& owner, LinkedList<T>& l, LinkedIterator* at = nullptr, SearchDirection direction = SearchDirection::Right) :
-			_list(&l), _owner(owner)
-		{
-			_list->_size++;
-
-			if(!_list->_first)
-			{
-				_next = _previous = nullptr;
-				_list->_first = _list->_last = this;
-				return;
-			}
-
-			if(direction == SearchDirection::Right)
-			{
-				if(!at) at = _list->_last;
-
-				_next = at->_next;
-				_previous = at;
-
-				_previous->_next = this;
-
-				if(_next) _next->_previous = this;
-				else _list->_last = this;
-			}
-			else
-			{
-				if(!at) at = _list->_first;
-
-				_next = at;
-				_previous = at->_previous;
-
-				if(_previous) _previous->_next = this;
-				else _list->_first = this;
-
-				_next->_previous = this;
-			}
-		}
+		LinkedIterator(T& owner, LinkedList<T>& l, LinkedIterator* at = nullptr, SearchDirection direction = SearchDirection::Right);
 
 		DELETE_OPERATOR_COPY(LinkedIterator);
 		OPERATOR_MOVE(LinkedIterator, o,
@@ -130,6 +102,8 @@ namespace gE
 
 		NODISCARD ALWAYS_INLINE T& operator*() { return *_owner; }
 		NODISCARD ALWAYS_INLINE const T& operator*() const { return *_owner; }
+
+		NODISCARD ALWAYS_INLINE bool IsValid() { return (_next || _previous) && _list;}
 
 		void Move(LinkedIterator& to, SearchDirection direction = SearchDirection::Right)
 		{

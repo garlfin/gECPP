@@ -42,6 +42,11 @@ void DemoWindow::OnInit()
 	mesh->GetRenderer().SetMaterial(0, cobbleMaterial);
 	mesh->GetRenderer().SetMaterial(1, tileMaterial);
 
+	mesh = new StaticMeshEntity(this, cube);
+	mesh->GetTransform().SetPosition() = glm::vec3(0, -10, 0);
+	mesh->GetRenderer().SetMaterial(0, tileMaterial);
+	mesh->GetRenderer().SetMaterial(1, cobbleMaterial);
+
 	glm::vec3 sunRotation(-31.f, 30.f, 0.f);
 	auto* sun = new DirectionalLight(this, 1024, 10.f, glm::quat(radians(sunRotation)));
 	Lights->Sun = sun;

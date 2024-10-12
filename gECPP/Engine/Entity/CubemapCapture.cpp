@@ -42,8 +42,7 @@ namespace gE
 		lighting.CubemapCount = 1;
 		(**List.GetFirst())->GetGPUCubemap(lighting.Cubemaps[0]);
 
-		buffers.UpdateLighting(sizeof(handle), offsetof(GPU::Lighting, Skybox));
-		buffers.UpdateLighting(sizeof(GPU::Cubemap), offsetof(GPU::Lighting, Cubemaps[0]));
+		buffers.UpdateLighting();
 
 		for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())
 			(**i)->GetCamera().OnRender(delta, camera);

@@ -17,7 +17,7 @@ namespace gE
 
 	inline bool CompareVAO(const Managed<DrawCall>&, const Managed<DrawCall>&);
 	inline bool CompareMaterial(const Managed<DrawCall>&, const Managed<DrawCall>&);
-	inline bool CompareMaterialIndex(const Managed<DrawCall>&, const Managed<DrawCall>&);
+	inline bool CompareSubMesh(const Managed<DrawCall>&, const Managed<DrawCall>&);
 	inline bool CompareLOD(const Managed<DrawCall>&, const Managed<DrawCall>&);
 
 	struct DrawCall final : public Managed<DrawCall>
@@ -75,7 +75,7 @@ namespace gE
 
 		LinkedList<Managed<DrawCall>> _vaoList;
 		LinkedList<Managed<DrawCall>> _materialList;
-		LinkedList<Managed<DrawCall>> _submeshList;
+		LinkedList<Managed<DrawCall>> _subMeshList;
 		LinkedList<Managed<DrawCall>> _lodList;
 	};
 }

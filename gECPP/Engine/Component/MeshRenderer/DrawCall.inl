@@ -18,7 +18,7 @@ namespace gE
 		return a->GetMaterial() == b->GetMaterial();
 	}
 
-	inline bool CompareMaterialIndex(const Managed<DrawCall>& a, const Managed<DrawCall>& b)
+	inline bool CompareSubMesh(const Managed<DrawCall>& a, const Managed<DrawCall>& b)
 	{
 		return a->GetMaterialIndex() == b->GetMaterialIndex();
 	}

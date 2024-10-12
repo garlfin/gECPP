@@ -5,22 +5,25 @@
 #include "MeshRenderer.h"
 #include <Engine/Window.h>
 
-#define DRAWCALL_TREE_INSERT(LIST, ITER_T, NEXT_ITER_T, COMP_FUNC) \
-	if(similar && (similar = LIST.FindSimilar<T, COMP_FUNC>(t, searchFrom, SearchDirection::Right, searchTo))) \
-	{ \
-		searchFrom = &(**similar)->NEXT_ITER_T; \
-		searchTo = similar->GetNext() ? &(**similar->GetNext())->NEXT_ITER_T : nullptr; \
-	} \
-	else \
-	{ \
-		LIST.Add((*t)->ITER_T); \
-		searchFrom = searchTo = nullptr; \
-	}
-
+#define DRAWCALL_SUBITER_SAFE(VAR, ITER, FUNC) (VAR->ITER ? FUNC(VAR->ITER) : nullptr)
+#define DRAWCALL_SIMILAR_SAFE(VAR, ITER) (VAR ? &VAR->ITER : nullptr)
 
 namespace gE
 {
 	inline GPU::IndirectDraw IndirectDrawArray[API_MAX_MULTI_DRAW];
+
+	typedef Managed<DrawCall> MAN_T;
+	typedef LinkedIterator<MAN_T> ITER_T;
+	typedef LinkedList<MAN_T> LIST_T;
+
+	template<CompareFunc<MAN_T, MAN_T> FUNC, ITER_T DrawCall::* MEMBER>
+	inline DrawCall* FindSimilarSafe(MAN_T& t, LIST_T& list, DrawCall* similar, DrawCall* next)
+	{
+		ITER_T* searchFrom = similar ? &(similar->*MEMBER) : nullptr;
+		ITER_T* searchTo = next ? &(next->*MEMBER) : nullptr;
+		ITER_T* found = list.FindSimilar<MAN_T, FUNC>(t, searchFrom, SearchDirection::Right, searchTo);
+		return found ? IPTR_TO_TPTR(found) : nullptr;
+	}
 
 	MeshRenderer::MeshRenderer(Entity* o, const Reference<API::IVAO>& mesh) :
 		Component(o, &o->GetWindow().GetRenderers()), _mesh(mesh),
@@ -70,15 +73,30 @@ namespace gE
 	{
 		using T = Managed<DrawCall>;
 
-		ITER_T* searchFrom = nullptr, *searchTo = nullptr;
-		ITER_T* similar;
+		DrawCall* similar;
+		DrawCall* next = nullptr;
 
-		DRAWCALL_TREE_INSERT(_vaoList, _vaoIterator, _materialIterator, CompareVAO);
-		DRAWCALL_TREE_INSERT(_materialList, _materialIterator, _subMeshIterator, CompareMaterial);
-		DRAWCALL_TREE_INSERT(_submeshList, _subMeshIterator, _lodIterator, CompareMaterialIndex);
-		DRAWCALL_TREE_INSERT(_lodList, _lodIterator, GetIterator(), CompareLOD);
+		if(similar = FindSimilarSafe<CompareVAO, &DrawCall::_vaoIterator>(t, _vaoList, nullptr, nullptr))
+			next = DRAWCALL_SUBITER_SAFE(similar, _vaoIterator.GetNext(), IPTR_TO_TPTR);
+		else
+			_vaoList.Add(t->_vaoIterator);
 
-		List.Insert(t.GetIterator(), searchFrom);
+		if(similar && (similar = FindSimilarSafe<CompareMaterial, &DrawCall::_materialIterator>(t, _materialList, similar, next)))
+			next = DRAWCALL_SUBITER_SAFE(similar, _materialIterator.GetNext(), IPTR_TO_TPTR);
+		else
+			_materialList.Insert(t->_materialIterator, DRAWCALL_SIMILAR_SAFE(similar, _materialIterator));
+
+		if(similar && (similar = FindSimilarSafe<CompareSubMesh, &DrawCall::_subMeshIterator>(t, _subMeshList, similar, next)))
+			next = DRAWCALL_SUBITER_SAFE(similar, _subMeshIterator.GetNext(), IPTR_TO_TPTR);
+		else
+			_subMeshList.Insert(t->_subMeshIterator, DRAWCALL_SIMILAR_SAFE(similar, _subMeshIterator));
+
+		if(similar && (similar = FindSimilarSafe<CompareLOD, &DrawCall::_lodIterator>(t, _lodList, similar, next)))
+			next = DRAWCALL_SUBITER_SAFE(similar, _lodIterator.GetNext(), IPTR_TO_TPTR);
+		else
+			_vaoList.Insert(t->_materialIterator, DRAWCALL_SIMILAR_SAFE(similar, _materialIterator));
+
+		List.Insert(t.GetIterator(), DRAWCALL_SIMILAR_SAFE(similar, Iterator));
 	}
 
 	void DrawCallManager::OnRender(float d, Camera* camera)
@@ -86,27 +104,50 @@ namespace gE
 		Window& window = camera->GetWindow();
 		DefaultPipeline::Buffers& buffers = window.GetPipelineBuffers();
 
-		u32 instanceCount = 0;
-		u32 batchCount = 0;
+		u32 instanceCount = 0, totalInstanceCount = 0, batchCount = 0;
+
+		buffers.Scene.State = window.State;
 
 		for(ITER_T* m = List.GetFirst(); m; m = m->GetNext())
 		{
 			DrawCall& call = ***m; // this is so stupid
+			DrawCall* nextCall = m->GetNext() ? &***m->GetNext() : nullptr;
+			GPU::ObjectInfo& object = buffers.Scene.Objects[totalInstanceCount];
 
-			IndirectDrawArray[instanceCount] = GPU::IndirectDraw(1, call.GetMaterialIndex(), 0);
-
-			GPU::ObjectInfo& object = buffers.Scene.Objects[0];
-
-			buffers.Scene.InstanceCount = 1;
-			buffers.Scene.State = window.State;
 			object.Model = call.GetTransform().Model();
 			object.PreviousModel = call.GetTransform().PreviousModel();
 			object.Normal = inverse(call.GetTransform().Model());
 
-			buffers.UpdateScene(offsetof(GPU::Scene, Objects[2]));
+			totalInstanceCount++;
+			instanceCount++;
 
-			call.GetMaterial()->Bind();
-			call.GetVAO().Draw(1, IndirectDrawArray);
+			IndirectDrawArray[batchCount] = GPU::IndirectDraw(instanceCount, call.GetMaterialIndex(), 0);
+
+			bool flush, flushBatch;
+			if(nextCall)
+			{
+				flush = nextCall->_materialIterator.IsValid() || nextCall->_vaoIterator.IsValid();
+				flushBatch = nextCall->_subMeshIterator.IsValid() || nextCall->_lodIterator.IsValid();
+			}
+			else flush = flushBatch = true;
+
+			flush |= totalInstanceCount == GE_MAX_INSTANCE || batchCount == API_MAX_MULTI_DRAW;
+
+			if(flushBatch)
+			{
+				instanceCount = 0;
+				batchCount++;
+			}
+
+			if(!flush) continue;
+
+			buffers.Scene.InstanceCount = totalInstanceCount;
+			buffers.UpdateScene(offsetof(GPU::Scene, Objects) + sizeof(GPU::ObjectInfo) * totalInstanceCount);
+
+			(call.GetMaterial() ?: &window.GetDefaultMaterial())->Bind();
+			call.GetVAO().Draw(batchCount, IndirectDrawArray);
+
+			batchCount = totalInstanceCount = instanceCount = 0;
 		}
 	}
 

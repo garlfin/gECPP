@@ -61,6 +61,15 @@ namespace gE
 	}
 
 	template<class T>
+	LinkedIterator<T>* LinkedList<T>::At(u32 index)
+	{
+		ITER_T* t = _first;
+		for(u32 i = 0; i < index; i++)
+			t = t->_next;
+		return t;
+	}
+
+	template<class T>
 	template<class COMP_T, CompareFunc<const COMP_T&, const T&> COMPARE_FUNC>
 	LinkedIterator<T>* LinkedList<T>::FindSimilar(const COMP_T& similar, LinkedIterator<T>* start, SearchDirection dir, LinkedIterator<T>* end)
 	{
@@ -86,6 +95,45 @@ namespace gE
 
 		_size = 0;
 		_first = _last = nullptr;
+	}
+
+	template<class T>
+	LinkedIterator<T>::LinkedIterator(T& owner, LinkedList<T>& l, LinkedIterator* at, SearchDirection direction):
+		_list(&l), _owner(owner)
+	{
+		_list->_size++;
+
+		if(!_list->_first)
+		{
+			_next = _previous = nullptr;
+			_list->_first = _list->_last = this;
+			return;
+		}
+
+		if(direction == SearchDirection::Right)
+		{
+			if(!at) at = _list->_last;
+
+			_next = at->_next;
+			_previous = at;
+
+			_previous->_next = this;
+
+			if(_next) _next->_previous = this;
+			else _list->_last = this;
+		}
+		else
+		{
+			if(!at) at = _list->_first;
+
+			_next = at;
+			_previous = at->_previous;
+
+			if(_previous) _previous->_next = this;
+			else _list->_first = this;
+
+			_next->_previous = this;
+		}
 	}
 
 	template<class T>
