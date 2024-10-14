@@ -1,5 +1,7 @@
 #include "Bindless.glsl"
 
+#extension ARB_shader_draw_parameters : require
+
 #define MAX_OBJECTS 64
 #define MAX_LIGHTS 4
 #define MAX_CUBEMAPS 4
@@ -98,6 +100,7 @@ layout(LIGHT_UNIFORM_LAYOUT, binding = LIGHT_UNIFORM_LOCATION) uniform LightingU
 #endif
 
 #ifdef VERTEX_SHADER
-    uint ViewIndex = gl_InstanceID / Scene.InstanceCount;
-    uint ObjectIndex = gl_InstanceID % Scene.InstanceCount;
+    uint InstanceID = gl_BaseInstance + gl_InstanceID;
+    uint ViewIndex = InstanceID / Scene.InstanceCount;
+    uint ObjectIndex = InstanceID % Scene.InstanceCount;
 #endif

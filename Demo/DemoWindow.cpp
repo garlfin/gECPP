@@ -43,7 +43,7 @@ void DemoWindow::OnInit()
 	mesh->GetRenderer().SetMaterial(1, tileMaterial);
 
 	mesh = new StaticMeshEntity(this, cube);
-	mesh->GetTransform().SetPosition() = glm::vec3(0, -10, 0);
+	mesh->GetTransform().SetPosition() = glm::vec3(0, -5, 0);
 	mesh->GetRenderer().SetMaterial(0, tileMaterial);
 	mesh->GetRenderer().SetMaterial(1, cobbleMaterial);
 

@@ -8,6 +8,8 @@
 #define DRAWCALL_SUBITER_SAFE(VAR, ITER, FUNC) (VAR->ITER ? FUNC(VAR->ITER) : nullptr)
 #define DRAWCALL_SIMILAR_SAFE(VAR, ITER) (VAR ? &VAR->ITER : nullptr)
 
+#define GE_ENABLE_BATCHING
+
 namespace gE
 {
 	inline GPU::IndirectDraw IndirectDrawArray[API_MAX_MULTI_DRAW];
@@ -124,7 +126,7 @@ namespace gE
 		{
 			DrawCall& call = ***m; // this is so stupid
 			DrawCall* nextCall = m->GetNext() ? &***m->GetNext() : nullptr;
-			GPU::ObjectInfo& object = buffers.Scene.Objects[0];
+			GPU::ObjectInfo& object = buffers.Scene.Objects[totalInstanceCount];
 
 			object.Model = call.GetTransform().Model();
 			object.PreviousModel = call.GetTransform().PreviousModel();
