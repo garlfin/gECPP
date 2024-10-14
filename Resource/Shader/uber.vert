@@ -32,7 +32,7 @@ void main()
     VertexIn.UV = UV;
 
     gl_Position = viewProjection * vec4(VertexIn.FragPos, 1);
-    gl_Layer = gl_InstanceID / int(Scene.InstanceCount);
+    gl_Layer = int(InstanceID) / int(Scene.InstanceCount);
     VertexIn.CurrentNDC = gl_Position;
 
     if(bool(Scene.State & ENABLE_JITTER))
