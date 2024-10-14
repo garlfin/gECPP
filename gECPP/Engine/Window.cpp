@@ -162,6 +162,9 @@ bool Window::Run()
 
 void Window::OnInit()
 {
+	if(GLAD_GL_ARB_bindless_texture)
+		ShaderCompilationState.emplace_back("EXT_BINDLESS");
+
 	PipelineBuffers = ptr_create<DefaultPipeline::Buffers>(this);
 	VoxelBuffers = ptr_create<VoxelPipeline::Buffers>(this);
 
@@ -175,9 +178,6 @@ void Window::OnInit()
 	BloomShader = ptr_create<API::ComputeShader>(this, "Resource/Shader/PostProcess/bloom.comp");
 	VoxelTAAShader = ptr_create<API::ComputeShader>(this, "Resource/Shader/Compute/voxel.comp");
 	HiZShader = ptr_create<API::ComputeShader>(this, "Resource/Shader/Compute/hiz.comp");
-
-	if(GLAD_GL_ARB_bindless_texture)
-		ShaderCompilationState.emplace_back("EXT_BINDLESS");
 
 	{
 		API::ComputeShader brdfShader(this, "Resource/Shader/Compute/brdf.comp");

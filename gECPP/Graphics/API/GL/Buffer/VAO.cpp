@@ -77,7 +77,7 @@ namespace GL
 			const GPU::IndirectDraw& call = calls[i];
 			const GPU::MaterialSlot& material = Materials[call.Material];
 
-			to.InstanceCount = call.InstanceCount * GetWindow().State.InstanceMultiplier;
+			to.InstanceCount = call.InstanceCount;
 			to.Count = material.Count * 3;
 			to.BaseInstance = baseInstance;
 			to.First = material.Offset * 3;

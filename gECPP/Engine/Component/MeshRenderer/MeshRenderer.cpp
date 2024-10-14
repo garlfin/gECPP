@@ -71,32 +71,44 @@ namespace gE
 
 	void DrawCallManager::OnRegister(Managed<DrawCall>& t)
 	{
-		using T = Managed<DrawCall>;
-
 		DrawCall* similar;
 		DrawCall* next = nullptr;
+		DrawCall* insertLocation = nullptr;
+		t->_lod = List.GetSize();
 
 		if(similar = FindSimilarSafe<CompareVAO, &DrawCall::_vaoIterator>(t, _vaoList, nullptr, nullptr))
+		{
 			next = DRAWCALL_SUBITER_SAFE(similar, _vaoIterator.GetNext(), IPTR_TO_TPTR);
+			insertLocation = similar;
+		}
 		else
 			_vaoList.Add(t->_vaoIterator);
 
 		if(similar && (similar = FindSimilarSafe<CompareMaterial, &DrawCall::_materialIterator>(t, _materialList, similar, next)))
+		{
 			next = DRAWCALL_SUBITER_SAFE(similar, _materialIterator.GetNext(), IPTR_TO_TPTR);
+			insertLocation = similar;
+		}
 		else
-			_materialList.Insert(t->_materialIterator, DRAWCALL_SIMILAR_SAFE(similar, _materialIterator));
+			_materialList.Insert(t->_materialIterator, DRAWCALL_SIMILAR_SAFE(insertLocation, _materialIterator));
 
 		if(similar && (similar = FindSimilarSafe<CompareSubMesh, &DrawCall::_subMeshIterator>(t, _subMeshList, similar, next)))
+		{
 			next = DRAWCALL_SUBITER_SAFE(similar, _subMeshIterator.GetNext(), IPTR_TO_TPTR);
+			insertLocation = similar;
+		}
 		else
-			_subMeshList.Insert(t->_subMeshIterator, DRAWCALL_SIMILAR_SAFE(similar, _subMeshIterator));
+			_subMeshList.Insert(t->_subMeshIterator, DRAWCALL_SIMILAR_SAFE(insertLocation, _subMeshIterator));
 
 		if(similar && (similar = FindSimilarSafe<CompareLOD, &DrawCall::_lodIterator>(t, _lodList, similar, next)))
+		{
 			next = DRAWCALL_SUBITER_SAFE(similar, _lodIterator.GetNext(), IPTR_TO_TPTR);
+			insertLocation = similar;
+		}
 		else
-			_lodList.Insert(t->_materialIterator, DRAWCALL_SIMILAR_SAFE(similar, _materialIterator));
+			_lodList.Insert(t->_lodIterator, DRAWCALL_SIMILAR_SAFE(insertLocation, _lodIterator));
 
-		List.Insert(t.GetIterator(), DRAWCALL_SIMILAR_SAFE(similar, Iterator));
+		List.Insert(t.GetIterator(), DRAWCALL_SIMILAR_SAFE(insertLocation, GetIterator()));
 	}
 
 	void DrawCallManager::OnRender(float d, Camera* camera)
@@ -112,12 +124,12 @@ namespace gE
 		{
 			DrawCall& call = ***m; // this is so stupid
 			DrawCall* nextCall = m->GetNext() ? &***m->GetNext() : nullptr;
-			GPU::ObjectInfo& object = buffers.Scene.Objects[totalInstanceCount];
+			GPU::ObjectInfo& object = buffers.Scene.Objects[0];
 
 			object.Model = call.GetTransform().Model();
 			object.PreviousModel = call.GetTransform().PreviousModel();
 			object.Normal = inverse(call.GetTransform().Model());
-
+		#ifdef GE_ENABLE_BATCHING
 			totalInstanceCount++;
 			instanceCount++;
 
@@ -133,7 +145,7 @@ namespace gE
 
 			if(flushBatch)
 			{
-				IndirectDrawArray[batchCount] = GPU::IndirectDraw(instanceCount, call.GetMaterialIndex(), 0);
+				IndirectDrawArray[batchCount] = GPU::IndirectDraw(instanceCount * window.State.InstanceMultiplier, call.GetMaterialIndex(), 0);
 
 				instanceCount = 0;
 				batchCount++;
@@ -148,6 +160,13 @@ namespace gE
 			call.GetVAO().Draw(batchCount, IndirectDrawArray);
 
 			batchCount = totalInstanceCount = instanceCount = 0;
+		#else
+			buffers.Scene.InstanceCount = 1;
+			buffers.UpdateScene(offsetof(GPU::Scene, Objects[1]));
+
+			(call.GetMaterial() ?: &window.GetDefaultMaterial())->Bind();
+			call.GetVAO().Draw(call._subMesh, window.State.InstanceMultiplier);
+		#endif
 		}
 	}
 
