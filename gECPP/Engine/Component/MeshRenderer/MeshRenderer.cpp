@@ -76,7 +76,6 @@ namespace gE
 		DrawCall* similar;
 		DrawCall* next = nullptr;
 		DrawCall* insertLocation = nullptr;
-		t->_lod = List.GetSize();
 
 		if(similar = FindSimilarSafe<CompareVAO, &DrawCall::_vaoIterator>(t, _vaoList, nullptr, nullptr))
 		{

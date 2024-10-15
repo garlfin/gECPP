@@ -12,8 +12,6 @@
     #define TAA_CLAMP_MAX 10.f
 #endif
 
-#define TAA_WEIGHT (1.0 / 32)
-
 #ifndef TAA_WEIGHT
     #define TAA_WEIGHT (1.0 / TAA_SAMPLE_COUNT)
 #endif
