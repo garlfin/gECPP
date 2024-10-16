@@ -9,9 +9,9 @@
 namespace gE
 {
 	template<class T>
-	void LinkedList<T>::Add(LinkedIterator<T>& t)
+	void LinkedList<T>::Add(LinkedIterator<T>& t, Direction dir)
 	{
-		SAFE_CONSTRUCT(t, ITER_T, t.Get(), *this);
+		SAFE_CONSTRUCT(t, ITER_T, t.Get(), *this, nullptr, dir);
 	}
 
 	template<class T>
@@ -21,22 +21,23 @@ namespace gE
 	}
 
 	template<class T>
-	void LinkedList<T>::Move(LinkedIterator<T>& t, LinkedIterator<T>& to)
+	void LinkedList<T>::Move(LinkedIterator<T>& t, LinkedIterator<T>& to, Direction dir)
 	{
-		Insert(t, &to);
+		Insert(t, &to, dir);
 	}
 
 	template<class T>
-	void LinkedList<T>::Insert(LinkedIterator<T>& t, LinkedIterator<T>& at)
+	void LinkedList<T>::Insert(LinkedIterator<T>& t, LinkedIterator<T>& at, Direction dir)
 	{
-		Insert(t, &at);
+		Insert(t, &at, dir);
 	}
 
 	template<class T>
-	void LinkedList<T>::Insert(LinkedIterator<T>& t, LinkedIterator<T>* at)
+	void LinkedList<T>::Insert(LinkedIterator<T>& t, LinkedIterator<T>* at, Direction dir)
 	{
-		SAFE_CONSTRUCT(t, ITER_T, t.Get(), *this, at);
+		SAFE_CONSTRUCT(t, ITER_T, t.Get(), *this, at, dir);
 	}
+
 
 	template<class T>
 	void LinkedList<T>::MergeList(LinkedList& list)
@@ -71,17 +72,17 @@ namespace gE
 
 	template<class T>
 	template<class COMP_T, CompareFunc<const COMP_T&, const T&> COMPARE_FUNC>
-	LinkedIterator<T>* LinkedList<T>::FindSimilar(const COMP_T& similar, LinkedIterator<T>* start, SearchDirection dir, LinkedIterator<T>* end)
+	LinkedIterator<T>* LinkedList<T>::FindSimilar(const COMP_T& similar, LinkedIterator<T>* start, Direction dir, LinkedIterator<T>* end)
 	{
 		if(!_first) return nullptr;
 
 		if(!start)
-			start = dir == SearchDirection::Right ? _first : _last;
+			start = dir == Direction::Right ? _first : _last;
 
 		if(start->_list != this) return nullptr;
 		if(end && end->_list != this) return nullptr;
 
-		for(LinkedIterator<T>* c = start; c && c != end; c = dir == SearchDirection::Left ? c->GetPrevious() : c->GetNext())
+		for(LinkedIterator<T>* c = start; c && c != end; c = dir == Direction::Left ? c->GetPrevious() : c->GetNext())
 			if(COMPARE_FUNC(similar, **c)) return c;
 
 		return nullptr;
@@ -98,7 +99,7 @@ namespace gE
 	}
 
 	template<class T>
-	LinkedIterator<T>::LinkedIterator(T& owner, LinkedList<T>& l, LinkedIterator* at, SearchDirection direction):
+	LinkedIterator<T>::LinkedIterator(T& owner, LinkedList<T>& l, LinkedIterator* at, Direction direction):
 		_list(&l), _owner(owner)
 	{
 		_list->_size++;
@@ -110,7 +111,7 @@ namespace gE
 			return;
 		}
 
-		if(direction == SearchDirection::Right)
+		if(direction == Direction::Right)
 		{
 			if(!at) at = _list->_last;
 

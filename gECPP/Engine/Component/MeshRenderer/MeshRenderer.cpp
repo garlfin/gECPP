@@ -7,6 +7,7 @@
 
 #define DRAWCALL_SUBITER_SAFE(VAR, ITER, FUNC) (VAR->ITER ? FUNC(VAR->ITER) : nullptr)
 #define DRAWCALL_SIMILAR_SAFE(VAR, ITER) (VAR ? &VAR->ITER : nullptr)
+#define DRAWCALL_DIRECTION (insertLocation ? Direction::Left : Direction::Right)
 
 #define GE_ENABLE_BATCHING
 
@@ -23,7 +24,7 @@ namespace gE
 	{
 		ITER_T* searchFrom = similar ? &(similar->*MEMBER) : nullptr;
 		ITER_T* searchTo = next ? &(next->*MEMBER) : nullptr;
-		ITER_T* found = list.FindSimilar<MAN_T, FUNC>(t, searchFrom, SearchDirection::Right, searchTo);
+		ITER_T* found = list.FindSimilar<MAN_T, FUNC>(t, searchFrom, Direction::Right, searchTo);
 		return found ? IPTR_TO_TPTR(found) : nullptr;
 	}
 
@@ -80,7 +81,7 @@ namespace gE
 		if(similar = FindSimilarSafe<CompareVAO, &DrawCall::_vaoIterator>(t, _vaoList, nullptr, nullptr))
 		{
 			next = DRAWCALL_SUBITER_SAFE(similar, _vaoIterator.GetNext(), IPTR_TO_TPTR);
-			insertLocation = similar;
+			insertLocation = next;
 		}
 		else
 			_vaoList.Add(t->_vaoIterator);
@@ -88,28 +89,28 @@ namespace gE
 		if(similar && (similar = FindSimilarSafe<CompareMaterial, &DrawCall::_materialIterator>(t, _materialList, similar, next)))
 		{
 			next = DRAWCALL_SUBITER_SAFE(similar, _materialIterator.GetNext(), IPTR_TO_TPTR);
-			insertLocation = similar;
+			insertLocation = next;
 		}
 		else
-			_materialList.Insert(t->_materialIterator, DRAWCALL_SIMILAR_SAFE(insertLocation, _materialIterator));
+			_materialList.Insert(t->_materialIterator, DRAWCALL_SIMILAR_SAFE(insertLocation, _materialIterator), DRAWCALL_DIRECTION);
 
 		if(similar && (similar = FindSimilarSafe<CompareSubMesh, &DrawCall::_subMeshIterator>(t, _subMeshList, similar, next)))
 		{
 			next = DRAWCALL_SUBITER_SAFE(similar, _subMeshIterator.GetNext(), IPTR_TO_TPTR);
-			insertLocation = similar;
+			insertLocation = next;
 		}
 		else
-			_subMeshList.Insert(t->_subMeshIterator, DRAWCALL_SIMILAR_SAFE(insertLocation, _subMeshIterator));
+			_subMeshList.Insert(t->_subMeshIterator, DRAWCALL_SIMILAR_SAFE(insertLocation, _subMeshIterator), DRAWCALL_DIRECTION);
 
 		if(similar && (similar = FindSimilarSafe<CompareLOD, &DrawCall::_lodIterator>(t, _lodList, similar, next)))
 		{
 			next = DRAWCALL_SUBITER_SAFE(similar, _lodIterator.GetNext(), IPTR_TO_TPTR);
-			insertLocation = similar;
+			insertLocation = next;
 		}
 		else
-			_lodList.Insert(t->_lodIterator, DRAWCALL_SIMILAR_SAFE(insertLocation, _lodIterator));
+			_lodList.Insert(t->_lodIterator, DRAWCALL_SIMILAR_SAFE(insertLocation, _lodIterator), DRAWCALL_DIRECTION);
 
-		List.Insert(t.GetIterator(), DRAWCALL_SIMILAR_SAFE(insertLocation, GetIterator()));
+		List.Insert(t.GetIterator(), DRAWCALL_SIMILAR_SAFE(insertLocation, GetIterator()), DRAWCALL_DIRECTION);
 	}
 
 	void DrawCallManager::OnRender(float d, Camera* camera)
@@ -139,6 +140,8 @@ namespace gE
 			{
 				flush = nextCall->_materialIterator.IsValid() || nextCall->_vaoIterator.IsValid();
 				flushBatch = nextCall->_subMeshIterator.IsValid() || nextCall->_lodIterator.IsValid();
+				// flush = call._material != nextCall->_material || call._vao != nextCall->_vao;
+				// flushBatch = call._subMesh != nextCall->_subMesh || call._lod != nextCall->_lod;
 			}
 			else flush = flushBatch = true;
 

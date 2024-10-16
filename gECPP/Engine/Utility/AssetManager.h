@@ -43,6 +43,9 @@ namespace gE
 		ALWAYS_INLINE const T* operator||(const T* t) const { return _t ?: t; };
 		ALWAYS_INLINE T* operator||(T* t) const { return _t ?: t; }
 
+		ALWAYS_INLINE bool operator == (const Reference& o) const { return _t == o._t; }
+		ALWAYS_INLINE bool operator != (const Reference& o) const { return _t != o._t; }
+
 		explicit ALWAYS_INLINE operator bool() const { return _t; }
 		explicit ALWAYS_INLINE operator T*() const { return _t; } // NOLINT
 
@@ -106,6 +109,9 @@ namespace gE
 		ALWAYS_INLINE T& operator||(T& t) const { return _t ? *_t : t; }
 		ALWAYS_INLINE const T* operator||(const T* t) const { return _t ?: t; };
 		ALWAYS_INLINE T* operator||(T* t) const { return _t ?: t; }
+
+		ALWAYS_INLINE bool operator == (const SmartPointer& o) const { return _t == o._t; }
+		ALWAYS_INLINE bool operator != (const SmartPointer& o) const { return _t != o._t; }
 
 		explicit ALWAYS_INLINE operator bool() const { return _t; }
 		explicit ALWAYS_INLINE operator T*() const { return _t; } // NOLINT

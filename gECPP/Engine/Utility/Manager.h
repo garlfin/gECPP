@@ -23,7 +23,7 @@ namespace gE
 	template<class A_T, class B_T>
 	using CompareFunc = bool(*)(const A_T& a, const B_T& b);
 
-	enum class SearchDirection : u8
+	enum class Direction : u8
 	{
 		Left,
 		Right
@@ -40,10 +40,10 @@ namespace gE
 
 		typedef LinkedIterator<T> ITER_T;
 
-		void Add(LinkedIterator<T>& t);
-		void Insert(LinkedIterator<T>& t, LinkedIterator<T>* at);
-		void Insert(LinkedIterator<T>& t, LinkedIterator<T>& at);
-		void Move(LinkedIterator<T>& t, LinkedIterator<T>& to);
+		void Add(LinkedIterator<T>& t, Direction = Direction::Right);
+		void Insert(LinkedIterator<T>& t, LinkedIterator<T>* at, Direction = Direction::Right);
+		void Insert(LinkedIterator<T>& t, LinkedIterator<T>& at, Direction = Direction::Right);
+		void Move(LinkedIterator<T>& t, LinkedIterator<T>& to, Direction = Direction::Right);
 		void Remove(LinkedIterator<T>& t);
 		void MergeList(LinkedList& list);
 
@@ -51,7 +51,7 @@ namespace gE
 		NODISCARD ALWAYS_INLINE LinkedIterator<T>* operator[](u32 i) { return At(i); }
 
 		template<class COMP_T, CompareFunc<const COMP_T&, const T&> COMPARE_FUNC>
-		LinkedIterator<T>* FindSimilar(const COMP_T& similar, LinkedIterator<T>* start = nullptr, SearchDirection dir = SearchDirection::Right, LinkedIterator<T>* end = nullptr);
+		LinkedIterator<T>* FindSimilar(const COMP_T& similar, LinkedIterator<T>* start = nullptr, Direction dir = Direction::Right, LinkedIterator<T>* end = nullptr);
 
 		GET_CONST(LinkedIterator<T>*, First, _first);
 		GET_CONST(LinkedIterator<T>*, Last, _last);
@@ -73,7 +73,7 @@ namespace gE
 	public:
 		LinkedIterator() = default;
 		explicit LinkedIterator(T& owner) : _owner(owner) {};
-		LinkedIterator(T& owner, LinkedList<T>& l, LinkedIterator* at = nullptr, SearchDirection direction = SearchDirection::Right);
+		LinkedIterator(T& owner, LinkedList<T>& l, LinkedIterator* at = nullptr, Direction direction = Direction::Right);
 
 		DELETE_OPERATOR_COPY(LinkedIterator);
 		OPERATOR_MOVE(LinkedIterator, o,
@@ -105,7 +105,7 @@ namespace gE
 
 		NODISCARD ALWAYS_INLINE bool IsValid() { return (_next || _previous) && _list;}
 
-		void Move(LinkedIterator& to, SearchDirection direction = SearchDirection::Right)
+		void Move(LinkedIterator& to, Direction direction = Direction::Right)
 		{
 			SAFE_CONSTRUCT(*this, LinkedIterator, _list, _owner, &to, direction);
 		}
