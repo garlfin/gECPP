@@ -133,13 +133,13 @@ namespace gE
 		const TextureSize1D _sizeZ;
 	};
 
-	class CameraCubemap : public Camera
+	class CameraCube : public Camera
 	{
 	 public:
-		typedef RenderTarget<CameraCubemap> TARGET_TYPE;
+		typedef RenderTarget<CameraCube> TARGET_TYPE;
 		typedef TextureSize1D SIZE_TYPE;
 
-		CameraCubemap(Entity*, TARGET_TYPE&, const CameraSettings1D&, ComponentManager<Camera>* = nullptr);
+		CameraCube(Entity*, TARGET_TYPE&, const CameraSettings1D&, ComponentManager<Camera>* = nullptr);
 
 		GET(TARGET_TYPE&, Target, (TARGET_TYPE&) Camera::GetTarget());
 		GET_CONST(SIZE_TYPE, Size, GetViewportSize().x);

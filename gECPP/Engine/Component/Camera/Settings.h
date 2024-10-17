@@ -14,7 +14,7 @@ namespace gE
 	class Camera;
 	class Camera2D;
 	class Camera3D;
-	class CameraCubemap;
+	class CameraCube;
 
 	typedef glm::vec2 ClipPlanes;
 

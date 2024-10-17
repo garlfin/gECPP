@@ -7,9 +7,13 @@
 #include <GLFW/glfw3.h>
 
 #include "DemoWindow.h"
-#include "Demo/Engine/Entity/FlyCamera.h"
-#include "Demo/Engine/Entity/StaticMeshEntity.h"
-#include "Engine/Renderer/PBRMaterial.h"
+
+#include <Demo/Engine/Entity/FlyCamera.h>
+#include <Demo/Engine/Entity/StaticMeshEntity.h>
+#include <Engine/Entity/Light/DirectionalLight.h>
+#include <Engine/Renderer/PBRMaterial.h>
+
+#include "Engine/Entity/Light/PointLight.h"
 
 using namespace gE::VoxelDemo;
 
@@ -50,6 +54,9 @@ void DemoWindow::OnInit()
 	glm::vec3 sunRotation(-31.f, 30.f, 0.f);
 	auto* sun = new DirectionalLight(this, 1024, 10.f, glm::quat(radians(sunRotation)));
 	Lights->Sun = sun;
+
+	auto* pointLight = new PointLight(this, 256);
+	pointLight->GetTransform().SetPosition() = glm::vec3(0.0, 5.0, 0.0);
 
 	auto* camera = new FlyCamera(this);
 	Cameras.CurrentCamera = &camera->GetTarget();

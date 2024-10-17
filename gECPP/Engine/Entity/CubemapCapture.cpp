@@ -4,6 +4,7 @@
 
 #include "CubemapCapture.h"
 #include <Engine/Window.h>
+#include <Engine/Entity/Light/DirectionalLight.h>
 
 namespace gE
 {
@@ -39,13 +40,22 @@ namespace gE
 		GE_ASSERT(Skybox.Get(), "ERROR: NO SKYBOX TEXTURE");
 
 		lighting.Skybox = Skybox->GetHandle();
-		lighting.CubemapCount = 1;
-		(**List.GetFirst())->GetGPUCubemap(lighting.Cubemaps[0]);
-
-		buffers.UpdateLighting();
+		buffers.UpdateLighting(sizeof(handle), offsetof(GPU::Lighting, Skybox));
 
 		for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())
 			(**i)->GetCamera().OnRender(delta, camera);
+	}
+
+	void CubemapManager::UseNearestCubemaps(const glm::vec3& point) const
+	{
+		DefaultPipeline::Buffers& buffers = _window->GetPipelineBuffers();
+		GPU::Lighting& lighting = buffers.Lighting;
+
+		lighting.CubemapCount = 1;
+		(**List.GetFirst())->GetGPUCubemap(lighting.Cubemaps[0]);
+
+		buffers.UpdateLighting(sizeof(u32), offsetof(GPU::Lighting, CubemapCount));
+		buffers.UpdateLighting(sizeof(GPU::Cubemap), offsetof(GPU::Lighting, Cubemaps));
 	}
 
 	CubemapManager::CubemapManager(Window* window): Manager(), _window(window)
@@ -67,8 +77,10 @@ namespace gE
 
 	void CubemapTarget::RenderPass(float, Camera*)
 	{
-		CameraCubemap& camera = GetCamera();
+		CameraCube& camera = GetCamera();
 		Window& window = camera.GetWindow();
+
+		window.GetLights().UseNearestLights(glm::vec3(0.0f));
 
 		window.State = State::Cubemap;
 
@@ -88,7 +100,7 @@ namespace gE
 		GPU::FilterMode::Linear
 	};
 
-	CubemapTarget::CubemapTarget(CameraCubemap& camera) :
+	CubemapTarget::CubemapTarget(CameraCube& camera) :
 		RenderTarget(camera.GetOwner(), camera), IDepthTarget(_depth.Get()),
 		_depth(GetFrameBuffer(), GPU::TextureSettings1D{ DefaultPipeline::DepthFormat, camera.GetSize() }),
 		_color(GetFrameBuffer(), GPU::TextureSettings1D{ CubemapColorFormat, camera.GetSize() })

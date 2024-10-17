@@ -17,10 +17,10 @@ namespace gE
 {
 	class CubemapCapture;
 
-	class CubemapTarget : public RenderTarget<CameraCubemap>, public IDepthTarget
+	class CubemapTarget : public RenderTarget<CameraCube>, public IDepthTarget
 	{
 	 public:
-		explicit CubemapTarget(CameraCubemap&);
+		explicit CubemapTarget(CameraCube&);
 
 		GET(API::TextureCube&, Color, _color.Get());
 		GET(API::TextureCube&, Depth, _depth.Get());
@@ -40,12 +40,12 @@ namespace gE
 		CubemapCapture(Window*, u16 size);
 
 		GET(API::TextureCube&, Color, _target.GetColor());
-		GET(CameraCubemap&, Camera, _camera);
+		GET(CameraCube&, Camera, _camera);
 
 		void GetGPUCubemap(GPU::Cubemap&);
 
 	 private:
-		CameraCubemap _camera;
+		CameraCube _camera;
 		CubemapTarget _target;
 	};
 
@@ -60,6 +60,8 @@ namespace gE
 
 		void OnUpdate(float delta) override {};
 		void OnRender(float delta, Camera*) override;
+
+		void UseNearestCubemaps(const glm::vec3& point) const;
 
 		~CubemapManager() override = default;
 

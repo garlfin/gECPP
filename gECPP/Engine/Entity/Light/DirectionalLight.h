@@ -1,50 +1,16 @@
 //
-// Created by scion on 10/23/2023.
+// Created by scion on 10/17/2024.
 //
 
 #pragma once
 
-#include <Engine/Component/Camera/Camera.h>
-#include <Engine/Component/Camera/RenderTarget.h>
-#include <Engine/Renderer/DefaultPipeline.h>
-
-#include "Entity.h"
+#include "Light.h"
 
 namespace gE
 {
-	class Light;
-	class DirectionalLight;
-
-	class LightManager : public Manager<Managed<Light>>
-	{
-	 public:
-		explicit LightManager(Window* window) : _window(window) {};
-
-		DirectionalLight* Sun = nullptr;
-
-		void OnUpdate(float) override {};
-		void OnRender(float delta, Camera*) override;
-
-	 private:
-		Window* _window;
-	};
-
-	class Light : public Entity, public IDepthTarget, public Managed<Light>
-	{
-	 public:
-		Light(Window*, Camera&, IDepthTarget&);
-
-		virtual void GetGPULight(GPU::Light& light) = 0;
-
-		GET(Camera&, Camera, _camera);
-
-	 private:
-		Camera& _camera;
-	};
-
 	class DirectionalLightTarget : public RenderTarget<Camera2D>, public IDepthTarget
 	{
-	 public:
+	public:
 		explicit DirectionalLightTarget(Light&, OrthographicCamera&);
 
 		GET(API::Texture2D&, Depth, *_depth);
@@ -54,13 +20,13 @@ namespace gE
 		bool Setup(float, Camera*) override;
 		void RenderPass(float, Camera*) override;
 
-	 private:
+	private:
 		Attachment<API::Texture2D, GL_DEPTH_ATTACHMENT> _depth;
 	};
 
 	class DirectionalLight : public Light
 	{
-	 public:
+	public:
 		DirectionalLight(Window*, u16 size, float scale, const glm::quat& = glm::identity<glm::quat>());
 
 		void GetGPULight(GPU::Light&) override;
@@ -71,7 +37,7 @@ namespace gE
 
 		GET_CONST(float, Scale, _camera.GetScale().y);
 
-	 private:
+	private:
 		OrthographicCamera _camera;
 		DirectionalLightTarget _target;
 	};

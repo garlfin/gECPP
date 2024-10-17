@@ -131,6 +131,7 @@ namespace gE
 			object.Model = call.GetTransform().Model();
 			object.PreviousModel = call.GetTransform().PreviousModel();
 			object.Normal = inverse(call.GetTransform().Model());
+
 		#ifdef GE_ENABLE_BATCHING
 			totalInstanceCount++;
 			instanceCount++;
@@ -149,7 +150,7 @@ namespace gE
 
 			if(flushBatch)
 			{
-				IndirectDrawArray[batchCount] = GPU::IndirectDraw(instanceCount * window.State.InstanceMultiplier, call.GetMaterialIndex(), 0);
+				IndirectDrawArray[batchCount] = GPU::IndirectDraw(instanceCount, call.GetMaterialIndex(), 0);
 
 				instanceCount = 0;
 				batchCount++;

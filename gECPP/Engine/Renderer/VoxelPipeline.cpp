@@ -32,6 +32,8 @@ namespace gE::VoxelPipeline
 		Window& window = GetWindow();
 		TextureSize2D size = GetSize();
 
+		window.GetLights().UseNearestLights(glm::vec3(0.0f));
+
 		window.State = State::Voxel;
 
 		glDepthMask(0);

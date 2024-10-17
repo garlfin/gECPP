@@ -141,17 +141,17 @@ namespace gE
 			cam.View[i] = lookAt(cam.Position - scale * ForwardDirs[i * 2], cam.Position, UpDirs[i * 2]);
 	}
 
-	CameraCubemap::CameraCubemap(Entity* p, TARGET_TYPE& t, const CameraSettings1D& s, ComponentManager<Camera>* m) :
+	CameraCube::CameraCube(Entity* p, TARGET_TYPE& t, const CameraSettings1D& s, ComponentManager<Camera>* m) :
 		Camera(p, TextureSize2D(s.Size), t, s, m)
 	{
 	}
 
-	void CameraCubemap::UpdateProjection()
+	void CameraCube::UpdateProjection()
 	{
 		Projection = glm::perspectiveFov(glm::radians(90.f), 1.f, 1.f, GetClipPlanes().x, GetClipPlanes().y);
 	}
 
-	void CameraCubemap::GetGPUCamera(GPU::Camera& cam)
+	void CameraCube::GetGPUCamera(GPU::Camera& cam)
 	{
 		Camera::GetGPUCamera(cam);
 

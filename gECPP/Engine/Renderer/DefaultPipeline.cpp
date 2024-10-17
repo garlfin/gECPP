@@ -3,7 +3,10 @@
 //
 
 #include "DefaultPipeline.h"
+
 #include <Engine/Window.h>
+#include <Engine/Entity/Light/DirectionalLight.h>
+#include <Engine/Entity/Light/Light.h>
 
 #include <utility>
 
@@ -79,6 +82,9 @@ namespace gE
 		buf.Camera.ColorTexture = (handle) _taaBack;
 		buf.Camera.DepthTexture = (handle) _depthBack;
 		buf.UpdateCamera(sizeof(handle) * 2, offsetof(GPU::Camera, ColorTexture));
+
+		window.GetLights().UseNearestLights(glm::vec3(0.0f));
+		window.GetCubemaps().UseNearestCubemaps(glm::vec3(0.0f));
 
 		// COLOR
 		window.State = State::Color;

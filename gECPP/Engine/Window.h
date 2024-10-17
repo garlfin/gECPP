@@ -6,9 +6,9 @@
 #include <Engine/Component/Camera/Camera.h>
 #include <Engine/Component/MeshRenderer/MeshRenderer.h>
 #include <Engine/Entity/CubemapCapture.h>
-#include <Engine/Entity/Light.h>
 #include <Engine/Entity/SDFCapture.h>
 #include <Engine/Entity/VoxelCapture.h>
+#include <Engine/Entity/Light/Light.h>
 #include <Engine/Math/Math.h>
 #include <Engine/Renderer/VoxelPipeline.h>
 #include <Engine/Utility/AssetManager.h>

@@ -17,7 +17,7 @@ namespace gE
 	{
 	 public:
 		template<typename... ARGS>
-		Attachment(API::FrameBuffer& f, ARGS&&... args) : _texture(&f.GetWindow(), std::forward<ARGS>(args)...)
+		explicit Attachment(API::FrameBuffer& f, ARGS&&... args) : _texture(&f.GetWindow(), std::forward<ARGS>(args)...)
 		{
 			if constexpr(TARGET == GL_DEPTH_ATTACHMENT || TARGET == GL_DEPTH_STENCIL_ATTACHMENT)
 				f.SetDepthAttachment(_texture);
