@@ -164,6 +164,7 @@ void Window::OnInit()
 {
 	if(GLAD_GL_ARB_bindless_texture)
 		ShaderCompilationState.emplace_back("EXT_BINDLESS");
+	ShaderCompilationState.emplace_back("ENABLE_TAA");
 
 	PipelineBuffers = ptr_create<DefaultPipeline::Buffers>(this);
 	VoxelBuffers = ptr_create<VoxelPipeline::Buffers>(this);
