@@ -80,7 +80,7 @@ void main()
     FragColor.rgb = albedo * 0.1;// * SS_AO(vert);
 
     for(int i = 0; i < Lighting.LightCount; i++)
-        FragColor.rgb = GetLighting(vert, frag, Lighting.Lights[i], VertexIn.FragPosLightSpace[i]);
+        FragColor.rgb += GetLighting(vert, frag, Lighting.Lights[i], VertexIn.FragPosLightSpace[i]);
 
 #ifdef EXT_BINDLESS
     if(bool(Scene.State & ENABLE_SPECULAR))

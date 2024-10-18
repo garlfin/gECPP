@@ -46,7 +46,7 @@ struct PBRSample
 #ifdef FRAGMENT_SHADER
 vec3 GetLighting(const Vertex, const PBRFragment, const Light, const vec4);
 vec3 GetLightingDirectional(const Vertex, const PBRFragment, const Light, const vec4);
-vec3 GetLightingPoint(const Vertex, const PBRFragment, const Light, const vec4);
+vec3 GetLightingPoint(const Vertex, const PBRFragment, const Light);
 vec3 GetLightingSpecular(const PBRSample, vec3);
 #endif
 
@@ -59,7 +59,7 @@ float GSchlick(float cosTheta, float roughness); // AKA 'k'
 float GSchlick(float nDotL, float nDotH, float roughness);
 float GSchlickAnalytical(float nDotL, float nDotH, float roughness); // Read more: Section 3, "Specular G"
 vec3 FresnelSchlick(vec3 f0, float nDotV);
-float FalloffPoint(float radius, float distance);
+float FalloffPoint(float radius, float distance, float maxDistance);
 vec3 CubemapParallax(vec3 pos, vec3 dir, Cubemap cubemap, out float weight);
 #ifdef FRAGMENT_SHADER
 vec3 FilterSpecular(const Vertex vert, const PBRFragment frag, const PBRSample pbrSample, vec3 color);
@@ -76,7 +76,7 @@ vec3 GetLighting(const Vertex vert, const PBRFragment frag, const Light light, c
     switch(light.Type)
     {
         case LIGHT_DIRECTIONAL: return GetLightingDirectional(vert, frag, light, fragLightSpace);
-        case LIGHT_POINT: return GetLightingPoint(vert, frag, light, fragLightSpace);
+        case LIGHT_POINT: return GetLightingPoint(vert, frag, light);
         default: return vec3(0.0);
     }
 }
@@ -110,12 +110,16 @@ vec3 GetLightingDirectional(const Vertex vert, const PBRFragment frag, const Lig
     return (diffuseBRDF + specularBRDF) * lambert * light.Color;
 }
 
-vec3 GetLightingPoint(const Vertex vert, const PBRFragment frag, const Light light, const vec4 fragLightSpace)
+#define POINT_LIGHT_RADIUS 0.1
+
+vec3 GetLightingPoint(const Vertex vert, const PBRFragment frag, const Light light)
 {
     // Vector Setup
     vec3 lightDir = light.Position - vert.Position;
     float lightDistance = length(lightDir);
     lightDir /= lightDistance;
+
+    lightDistance = max(lightDistance - POINT_LIGHT_RADIUS, 0.0);
 
     vec3 eye = normalize(Camera.Position - vert.Position);
     vec3 halfEye = normalize(lightDir + eye);
@@ -128,7 +132,7 @@ vec3 GetLightingPoint(const Vertex vert, const PBRFragment frag, const Light lig
     // PBR Setup
     vec3 f0 = mix(frag.F0, frag.Albedo, frag.Metallic);
     vec3 f = FresnelSchlick(f0, eDotH);
-    float d = GGXNDFPoint(nDotH, frag.Roughness, 1.0, lightDistance);
+    float d = GGXNDFPoint(nDotH, frag.Roughness, POINT_LIGHT_RADIUS, lightDistance);
     float g = GSchlickAnalytical(nDotL, nDotV, frag.Roughness);
 
     vec3 kD = mix(1.0 - f, vec3(0.0), frag.Metallic);
@@ -138,10 +142,10 @@ vec3 GetLightingPoint(const Vertex vert, const PBRFragment frag, const Light lig
     vec3 diffuseBRDF = frag.Albedo * kD;
 
     // Falloff of nDotL * nDotL is nicer to me
-    float lambert = nDotL * nDotL;
-    float attenuation = FalloffPoint(1.0, lightDistance);
+    float lambert = min(nDotL * nDotL, GetShadowPoint(vert, light));
+    float attenuation = FalloffPoint(POINT_LIGHT_RADIUS, lightDistance, 10.f);
 
-    return (specularBRDF) * attenuation * lambert * light.Color;
+    return (diffuseBRDF + specularBRDF) * attenuation * lambert * light.Color;
 }
 
 vec3 FilterSpecular(const Vertex vert, const PBRFragment frag, const PBRSample pbrSample, vec3 color)
@@ -172,7 +176,7 @@ float GGXNDFPoint(float nDotV, float roughness, float radius, float distance)
     roughness *= roughness;
     roughness = max(roughness, 0.01);
 
-    float alpha = clamp(radius / (2 * distance), 0.0, 1.0);
+    float alpha = clamp(roughness + radius / (2 * distance), 0.0, 1.0);
 
     return GGXNDFAlpha(nDotV, alpha);
 }
@@ -206,13 +210,12 @@ float GSchlickAnalytical(float nDotL, float nDotV, float roughness)
     return GSchlick(nDotL, k) * GSchlick(nDotV, k);
 }
 
-float FalloffPoint(float radius, float distance)
+float FalloffPoint(float radius, float distance, float maxDistance)
 {
-    float distance2 = distance * distance;
-    float numerator = clamp(1.0 - pow(distance / radius, 4.0), 0.0, 1.0);
-    float denominator = distance2 + 1.0;
+    float numerator = -1 / (maxDistance - radius) * (distance - radius) + 1.0;
+    float denominator = 1.0 + distance * distance;
 
-    return numerator * numerator / denominator;
+    return clamp(numerator, 0.0, 1.0) / denominator;
 }
 
 vec3 FresnelSchlick(vec3 f0, float nDotV)

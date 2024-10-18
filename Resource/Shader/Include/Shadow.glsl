@@ -50,6 +50,7 @@
 // Main Functions
 #ifdef FRAGMENT_SHADER
     float GetShadowDirectional(const Vertex frag, const Light light, const vec4 fragLightSpace);
+    float GetShadowPoint(const Vertex frag, const Light light);
 #endif
 
 // Helper Functions
@@ -160,6 +161,12 @@ float GetShadowDirectional(const Vertex vert, const Light light, const vec4 frag
 
     return shadow;
 }
+
+float GetShadowPoint(const Vertex frag, const Light light)
+{
+    return 1.0;
+}
+
 #endif
 
 // Helper Functions
