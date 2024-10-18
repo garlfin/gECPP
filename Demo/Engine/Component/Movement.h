@@ -35,7 +35,7 @@ namespace gE::VoxelDemo
 			_rot.x += mouseDelta.y * SENSITIVITY;
 			_rot.x = std::clamp(_rot.x, -89.9f, 89.9f);
 
-			_transform.SetRotation() = radians(_rot);
+			_transform.SetRotation(radians(_rot));
 
 			glm::vec3 dir(0.f);
 			if(glfwGetKey(_window, GLFW_KEY_W)) dir.z -= SPEED;
@@ -47,7 +47,7 @@ namespace gE::VoxelDemo
 			if(glm::isnan(dir.x)) return;
 
 			if(glfwGetKey(_window, GLFW_KEY_LEFT_SHIFT)) dir *= SPEED_MULTIPLIER;
-			_transform.SetPosition() += _transform->Rotation * dir * d;
+			_transform.SetPosition(_transform->Position + _transform->Rotation * dir * d);
 		}
 
 	 private:

@@ -44,18 +44,22 @@ struct PBRSample
 
 // Main Functions
 #ifdef FRAGMENT_SHADER
-vec3 GetLighting(const Vertex, const PBRFragment, const Light);
-vec3 GetLightingDirectional(const Vertex, const PBRFragment, const Light);
+vec3 GetLighting(const Vertex, const PBRFragment, const Light, const vec4);
+vec3 GetLightingDirectional(const Vertex, const PBRFragment, const Light, const vec4);
+vec3 GetLightingPoint(const Vertex, const PBRFragment, const Light, const vec4);
 vec3 GetLightingSpecular(const PBRSample, vec3);
 #endif
 
 // PBR Functions
 // https://blog.selfshadow.com/publications/s2013-shading-course/karis/s2013_pbs_epic_notes_v2.pdf
 float GGXNDF(float nDotV, float roughness);
+float GGXNDFPoint(float nDotV, float roughness, float radius, float distance);
+float GGXNDFAlpha(float nDotV, float alpha);
 float GSchlick(float cosTheta, float roughness); // AKA 'k'
 float GSchlick(float nDotL, float nDotH, float roughness);
 float GSchlickAnalytical(float nDotL, float nDotH, float roughness); // Read more: Section 3, "Specular G"
 vec3 FresnelSchlick(vec3 f0, float nDotV);
+float FalloffPoint(float radius, float distance);
 vec3 CubemapParallax(vec3 pos, vec3 dir, Cubemap cubemap, out float weight);
 #ifdef FRAGMENT_SHADER
 vec3 FilterSpecular(const Vertex vert, const PBRFragment frag, const PBRSample pbrSample, vec3 color);
@@ -67,16 +71,17 @@ vec2 Hammersley(uint i, uint sampleCount);
 // Implementation
 // Main Functions
 #ifdef FRAGMENT_SHADER
-vec3 GetLighting(const Vertex vert, const PBRFragment frag, const Light light)
+vec3 GetLighting(const Vertex vert, const PBRFragment frag, const Light light, const vec4 fragLightSpace)
 {
     switch(light.Type)
     {
-        case LIGHT_DIRECTIONAL: return GetLightingDirectional(vert, frag, light);
+        case LIGHT_DIRECTIONAL: return GetLightingDirectional(vert, frag, light, fragLightSpace);
+        case LIGHT_POINT: return GetLightingPoint(vert, frag, light, fragLightSpace);
         default: return vec3(0.0);
     }
 }
 
-vec3 GetLightingDirectional(const Vertex vert, const PBRFragment frag, const Light light)
+vec3 GetLightingDirectional(const Vertex vert, const PBRFragment frag, const Light light, const vec4 fragLightSpace)
 {
     // Vector Setup
     vec3 eye = normalize(Camera.Position - vert.Position);
@@ -100,9 +105,43 @@ vec3 GetLightingDirectional(const Vertex vert, const PBRFragment frag, const Lig
     vec3 diffuseBRDF = frag.Albedo * kD;
 
     // Falloff of nDotL * nDotL is nicer to me
-    float lambert = min(nDotL * nDotL, GetShadowDirectional(vert, light));
+    float lambert = min(nDotL * nDotL, GetShadowDirectional(vert, light, fragLightSpace));
 
     return (diffuseBRDF + specularBRDF) * lambert * light.Color;
+}
+
+vec3 GetLightingPoint(const Vertex vert, const PBRFragment frag, const Light light, const vec4 fragLightSpace)
+{
+    // Vector Setup
+    vec3 lightDir = light.Position - vert.Position;
+    float lightDistance = length(lightDir);
+    lightDir /= lightDistance;
+
+    vec3 eye = normalize(Camera.Position - vert.Position);
+    vec3 halfEye = normalize(lightDir + eye);
+
+    float nDotV = max(dot(frag.Normal, eye), 0.0);
+    float nDotL = max(dot(frag.Normal, lightDir), 0.0);
+    float nDotH = max(dot(frag.Normal, halfEye), 0.0);
+    float eDotH = clamp(dot(halfEye, eye), 0.0, 1.0);
+
+    // PBR Setup
+    vec3 f0 = mix(frag.F0, frag.Albedo, frag.Metallic);
+    vec3 f = FresnelSchlick(f0, eDotH);
+    float d = GGXNDFPoint(nDotH, frag.Roughness, 1.0, lightDistance);
+    float g = GSchlickAnalytical(nDotL, nDotV, frag.Roughness);
+
+    vec3 kD = mix(1.0 - f, vec3(0.0), frag.Metallic);
+
+    // Final Calculations
+    vec3 specularBRDF = (f * d * g) / max(4.0 * nDotL * nDotV, EPSILON);
+    vec3 diffuseBRDF = frag.Albedo * kD;
+
+    // Falloff of nDotL * nDotL is nicer to me
+    float lambert = nDotL * nDotL;
+    float attenuation = FalloffPoint(1.0, lightDistance);
+
+    return (specularBRDF) * attenuation * lambert * light.Color;
 }
 
 vec3 FilterSpecular(const Vertex vert, const PBRFragment frag, const PBRSample pbrSample, vec3 color)
@@ -122,10 +161,25 @@ vec3 FilterSpecular(const Vertex vert, const PBRFragment frag, const PBRSample p
 // PBR Functions
 float GGXNDF(float nDotV, float roughness)
 {
+    roughness *= roughness;
     roughness = max(roughness, 0.01);
-    float alpha = roughness * roughness;
-    alpha *= alpha; // Disney reparameterization
 
+    return GGXNDFAlpha(nDotV, roughness);
+}
+
+float GGXNDFPoint(float nDotV, float roughness, float radius, float distance)
+{
+    roughness *= roughness;
+    roughness = max(roughness, 0.01);
+
+    float alpha = clamp(radius / (2 * distance), 0.0, 1.0);
+
+    return GGXNDFAlpha(nDotV, alpha);
+}
+
+float GGXNDFAlpha(float nDotV, float alpha)
+{
+    alpha *= alpha;
     float denom = (nDotV * nDotV) * (alpha - 1.0) + 1.0;
     denom = PI * denom * denom;
 
@@ -150,6 +204,15 @@ float GSchlickAnalytical(float nDotL, float nDotV, float roughness)
     float r = roughness + 1.0;
     float k = (r * r) / 8;
     return GSchlick(nDotL, k) * GSchlick(nDotV, k);
+}
+
+float FalloffPoint(float radius, float distance)
+{
+    float distance2 = distance * distance;
+    float numerator = clamp(1.0 - pow(distance / radius, 4.0), 0.0, 1.0);
+    float denominator = distance2 + 1.0;
+
+    return numerator * numerator / denominator;
 }
 
 vec3 FresnelSchlick(vec3 f0, float nDotV)

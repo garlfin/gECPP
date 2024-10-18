@@ -1,6 +1,6 @@
 #include "Bindless.glsl"
 
-#extension ARB_shader_draw_parameters : require
+#extension GL_ARB_shader_draw_parameters : require
 
 #define MAX_OBJECTS 64
 #define MAX_LIGHTS 4

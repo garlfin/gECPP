@@ -13,7 +13,7 @@ namespace gE
 		_camera(this, _target, CreateVoxelSettings(resolution, size)),
 		_target(*this, _camera)
 	{
-		GetTransform().SetScale() = glm::vec3(size);
+		GetTransform().SetScale((glm::vec3) size);
 	}
 
 	void VoxelCapture::GetGPUVoxelScene(API::VoxelScene& scene)

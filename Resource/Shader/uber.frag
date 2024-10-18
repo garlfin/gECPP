@@ -47,7 +47,6 @@ void main()
     (
         VertexIn.FragPos,
         normalize(VertexIn.TBN[2]),
-        VertexIn.FragPosLightSpace[0],
         VertexIn.TBN,
         VertexIn.UV * 10
     );
@@ -79,7 +78,9 @@ void main()
     PBRSample pbrSample = ImportanceSample(vert, frag);
 
     FragColor.rgb = albedo * 0.1;// * SS_AO(vert);
-    FragColor.rgb += GetLighting(vert, frag, Lighting.Lights[0]);
+
+    for(int i = 0; i < Lighting.LightCount; i++)
+        FragColor.rgb = GetLighting(vert, frag, Lighting.Lights[i], VertexIn.FragPosLightSpace[i]);
 
 #ifdef EXT_BINDLESS
     if(bool(Scene.State & ENABLE_SPECULAR))

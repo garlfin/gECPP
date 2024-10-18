@@ -49,7 +49,7 @@
 
 // Main Functions
 #ifdef FRAGMENT_SHADER
-    float GetShadowDirectional(const Vertex frag, const Light light);
+    float GetShadowDirectional(const Vertex frag, const Light light, const vec4 fragLightSpace);
 #endif
 
 // Helper Functions
@@ -63,11 +63,11 @@ vec3 NDCLight(vec4, vec2);
 // Implementation
 // Main Functions
 #ifdef FRAGMENT_SHADER
-float GetShadowDirectional(const Vertex vert, const Light light)
+float GetShadowDirectional(const Vertex vert, const Light light, const vec4 fragLightSpace)
 {
     float nDotL = max(dot(vert.Normal, light.Position), 0.0);
     float bias = mix(0.1, 1.0, nDotL) * DIRECTIONAL_SHADOW_BIAS;
-	vec3 fragPos = NDCLight(vert.PositionLightSpace, light.Planes);
+	vec3 fragPos = NDCLight(fragLightSpace, light.Planes);
 
     float blocker = 0.0;
 #ifdef SOFT_SHADOW_AVERAGE

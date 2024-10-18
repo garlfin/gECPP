@@ -45,10 +45,10 @@ namespace gE
 
 		NODISCARD glm::mat4 GetParentTransform() const;
 
-		ALWAYS_INLINE glm::vec3& SetPosition() { return SetLocation(); }
-		inline glm::vec3& SetLocation() { _flags.Invalidated = true; return _transform.Location; }
-		inline glm::quat& SetRotation() { _flags.Invalidated = true; return _transform.Rotation; }
-		inline glm::vec3& SetScale() { _flags.Invalidated = true; return _transform.Scale; }
+		inline void SetPosition(const glm::vec3& pos) { _flags.Invalidated = true; _transform.Position = pos; }
+		inline void SetLocation(const glm::vec3& pos) { _flags.Invalidated = true; _transform.Position = pos; }
+		inline void SetRotation(const glm::quat& rot) { _flags.Invalidated = true; _transform.Rotation = rot; }
+		inline void SetScale(const glm::vec3& scale) { _flags.Invalidated = true; _transform.Scale = scale; }
 
 		inline void Set(const TransformData& d) { _flags.Invalidated = true; _transform = d; };
 		inline void Set(const Transform& d) { _flags.Invalidated = true; _transform = d._transform; };

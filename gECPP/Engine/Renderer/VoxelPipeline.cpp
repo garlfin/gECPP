@@ -58,7 +58,7 @@ namespace gE::VoxelPipeline
 
 		glm::ivec3 pos = floor(cameraTransform->Position / cellSize);
 		_velocity = pos - glm::ivec3(transform->Position / cellSize);
-		transform.SetPosition() = glm::vec3(pos) * cellSize;
+		transform.SetPosition(glm::vec3(pos) * cellSize);
 		transform.OnUpdate(0.f); // Force update on model matrix since it passed its tick.
 
 		GetOwner().GetGPUVoxelScene(buffers.Scene);

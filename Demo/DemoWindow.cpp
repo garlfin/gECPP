@@ -42,12 +42,12 @@ void DemoWindow::OnInit()
 	ReadSerializableFromFile(this, "Resource/Model/Plane.001.vao", *cube);
 
 	auto* mesh = new StaticMeshEntity(this, cube);
-	mesh->GetTransform().SetScale() = glm::vec3(0.5);
+	mesh->GetTransform().SetScale(glm::vec3(0.5));
 	mesh->GetRenderer().SetMaterial(0, cobbleMaterial);
 	mesh->GetRenderer().SetMaterial(1, tileMaterial);
 
 	mesh = new StaticMeshEntity(this, cube);
-	mesh->GetTransform().SetPosition() = glm::vec3(0, -5, 0);
+	mesh->GetTransform().SetPosition(glm::vec3(0, -5, 0));
 	mesh->GetRenderer().SetMaterial(0, tileMaterial);
 	mesh->GetRenderer().SetMaterial(1, cobbleMaterial);
 
@@ -56,14 +56,14 @@ void DemoWindow::OnInit()
 	Lights->Sun = sun;
 
 	auto* pointLight = new PointLight(this, 256);
-	pointLight->GetTransform().SetPosition() = glm::vec3(0.0, 5.0, 0.0);
+	pointLight->GetTransform().SetPosition(glm::vec3(0.0, 0.5, 0.0));
 
 	auto* camera = new FlyCamera(this);
 	Cameras.CurrentCamera = &camera->GetTarget();
 
 	auto* cubemapCap = new CubemapCapture(this, 512);
-	cubemapCap->GetTransform().SetPosition().y = 2.1f;
-	cubemapCap->GetTransform().SetScale() = glm::vec3(2.1f);
+	cubemapCap->GetTransform().SetPosition(glm::vec3(0.0, 2.1, 0.0));
+	cubemapCap->GetTransform().SetScale(glm::vec3(2.1f));
 
 	Cubemaps->Skybox = ref_cast((GL::TextureCube*) PVR::Read(this, "Resource/Texture/sky.pvr", GPU::WrapMode::Clamp));
 

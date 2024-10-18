@@ -33,11 +33,12 @@ namespace gE
 		DefaultPipeline::Buffers& buffers = _window->GetPipelineBuffers();
 		GPU::Lighting& lighting = buffers.Lighting;
 
-		lighting.LightCount = 1;
+		lighting.LightCount = 2;
 		(**List.GetFirst())->GetGPULight(lighting.Lights[0]);
+		(**List.GetFirst()->GetNext())->GetGPULight(lighting.Lights[1]);
 
 		buffers.UpdateLighting(sizeof(u32));
-		buffers.UpdateLighting(sizeof(GPU::Light), offsetof(GPU::Lighting, Lights));
+		buffers.UpdateLighting(sizeof(GPU::Light) * 2, offsetof(GPU::Lighting, Lights));
 	}
 
 	DirectionalLight::DirectionalLight(Window* w, u16 size, float scale, const glm::quat& rot) :
@@ -45,7 +46,7 @@ namespace gE
 		_camera(this, _target, CreateDirectionalSettings(size, scale)),
 		_target(*this, _camera)
 	{
-		GetTransform().SetRotation() = rot;
+		GetTransform().SetRotation(rot);
 	}
 
 	DirectionalLightTarget::DirectionalLightTarget(Light& l, OrthographicCamera& c) :
@@ -85,7 +86,7 @@ namespace gE
 		//		  (far - near) / 2 + near
 		//		  places the middle on the camera
 
-		transform.SetPosition() = floor(cameraTransform->Position) + offset;
+		transform.SetPosition((cameraTransform->Position) + offset);
 		transform.OnUpdate(0.f); // Force update on model matrix since it passed its tick.
 
 		return true;
