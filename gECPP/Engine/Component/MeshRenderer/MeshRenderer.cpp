@@ -146,10 +146,11 @@ namespace gE
 			}
 			else flush = flushBatch = true;
 
-			flush |= totalInstanceCount == GE_MAX_INSTANCE || batchCount == API_MAX_MULTI_DRAW;
+			flush |= totalInstanceCount == API_MAX_INSTANCE || batchCount == API_MAX_MULTI_DRAW;
 
 			if(flushBatch)
 			{
+				buffers.Scene.InstanceCount[batchCount] = instanceCount;
 				IndirectDrawArray[batchCount] = GPU::IndirectDraw(instanceCount, call.GetMaterialIndex(), 0);
 
 				instanceCount = 0;
@@ -158,15 +159,15 @@ namespace gE
 
 			if(!flush) continue;
 
-			buffers.Scene.InstanceCount = totalInstanceCount;
-			buffers.UpdateScene(offsetof(GPU::Scene, Objects) + sizeof(GPU::ObjectInfo) * totalInstanceCount);
+			u32 updateTo = offsetof(GPU::Scene, Objects) + sizeof(GPU::ObjectInfo) * totalInstanceCount;
+			buffers.UpdateScene(updateTo);
 
 			(call.GetMaterial() ?: &window.GetDefaultMaterial())->Bind();
 			call.GetVAO().Draw(batchCount, IndirectDrawArray);
 
 			batchCount = totalInstanceCount = instanceCount = 0;
 		#else
-			buffers.Scene.InstanceCount = 1;
+			buffers.Scene.InstanceCount[0] = instanceCount;
 			buffers.UpdateScene(offsetof(GPU::Scene, Objects[1]));
 
 			(call.GetMaterial() ?: &window.GetDefaultMaterial())->Bind();

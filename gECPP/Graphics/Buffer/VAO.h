@@ -9,7 +9,7 @@
 #include "Buffer.h"
 #include "VAOSettings.h"
 
-#define API_MAX_MULTI_DRAW (GE_MAX_VAO_MATERIAL * GE_MAX_VAO_LOD / 2)
+#define API_MAX_MULTI_DRAW 8
 
 namespace GPU
 {

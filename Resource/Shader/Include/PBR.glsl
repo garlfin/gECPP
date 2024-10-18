@@ -143,7 +143,7 @@ vec3 GetLightingPoint(const Vertex vert, const PBRFragment frag, const Light lig
 
     // Falloff of nDotL * nDotL is nicer to me
     float lambert = min(nDotL * nDotL, GetShadowPoint(vert, light));
-    float attenuation = FalloffPoint(POINT_LIGHT_RADIUS, lightDistance, 10.f);
+    float attenuation = FalloffPoint(POINT_LIGHT_RADIUS, lightDistance, POINT_LIGHT_RADIUS + 10.f);
 
     return (diffuseBRDF + specularBRDF) * attenuation * lambert * light.Color;
 }

@@ -162,9 +162,15 @@ float GetShadowDirectional(const Vertex vert, const Light light, const vec4 frag
     return shadow;
 }
 
-float GetShadowPoint(const Vertex frag, const Light light)
+float GetShadowPoint(const Vertex vert, const Light light)
 {
-    return 1.0;
+    vec3 lightDir = vert.Position - light.Position;
+    float lightDistance = max(abs(lightDir.x), max(abs(lightDir.y), abs(lightDir.z)));
+
+    float depth = texture(samplerCube(light.Depth), lightDir).r;
+    depth = LinearizeDepth(depth, light.Planes);
+
+    return depth + 0.1 < lightDistance ? 0.0 : 1.0;
 }
 
 #endif

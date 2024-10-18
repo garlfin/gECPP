@@ -41,7 +41,7 @@ layout(location = 1) out vec2 Velocity;
 layout(early_fragment_tests) in;
 void main()
 {
-    if(!bool(Scene.State & ENABLE_COLOR)) return;
+    if(!ENABLE_COLOR) return;
 
     Vertex vert = Vertex
     (
@@ -72,7 +72,7 @@ void main()
         albedo,
         arm.z,
         vec3(0.04),
-        bool(Scene.State & ENABLE_SPECULAR) ? 1.0 : 0.0
+        ENABLE_SPECULAR ? 1.0 : 0.0
     );
 
     PBRSample pbrSample = ImportanceSample(vert, frag);
@@ -83,7 +83,7 @@ void main()
         FragColor.rgb += GetLighting(vert, frag, Lighting.Lights[i], VertexIn.FragPosLightSpace[i]);
 
 #ifdef EXT_BINDLESS
-    if(bool(Scene.State & ENABLE_SPECULAR))
+    if(ENABLE_SPECULAR)
     {
         vec3 specular = textureLod(Lighting.Skybox, pbrSample.Specular, 0.0).rgb;
         vec3 cubemapSpecular;
@@ -128,7 +128,7 @@ void main()
 
 	Velocity = ((VertexIn.CurrentNDC.xy / VertexIn.CurrentNDC.w) - (VertexIn.PreviousNDC.xy / VertexIn.PreviousNDC.w)) * 0.5;
 
-    if(!bool(Scene.State & ENABLE_VOXEL_WRITE)) return;
+    if(!ENABLE_VOXEL_WRITE) return;
 
     ivec3 texel = Voxel_WorldToTexel(vert.Position, imageSize(VoxelColorOut).x);
     imageStore(VoxelColorOut, texel, PackColor(FragColor));

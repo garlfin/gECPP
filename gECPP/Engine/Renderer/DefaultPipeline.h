@@ -9,12 +9,13 @@
 #include <Engine/Component/Camera/PostProcessEffect.h>
 #include <Engine/Component/Camera/RenderTarget.h>
 #include <Graphics/Buffer/Buffer.h>
+#include <Graphics/Buffer/VAO.h>
 #include <Graphics/Texture/Texture.h>
 #include <Graphics/Texture/TextureSettings.h>
 
-#define GE_MAX_INSTANCE 64
-#define GE_MAX_LIGHT 4
-#define GE_MAX_CUBEMAP 4
+#define API_MAX_INSTANCE 64
+#define API_MAX_LIGHT 4
+#define API_MAX_CUBEMAP 4
 
 namespace GPU
 {
@@ -22,7 +23,7 @@ namespace GPU
 	{
 		glm::vec3 Position;
 		u32 Frame;
-		glm::vec2 ClipPlanes;
+		glm::vec2 Planes;
 		glm::vec2 Size;
 		glm::vec3 Parameters;
 		float FrameDelta;
@@ -80,9 +81,9 @@ namespace GPU
 
 	struct Scene
 	{
-		u32 InstanceCount;
 		gE::RenderFlags State;
-		API_ALIGN ObjectInfo Objects[GE_MAX_INSTANCE];
+		API_ALIGN u32 InstanceCount[API_MAX_MULTI_DRAW];
+		API_ALIGN ObjectInfo Objects[API_MAX_INSTANCE];
 	};
 
 	struct Lighting
@@ -92,8 +93,8 @@ namespace GPU
 
 		handle Skybox;
 
-		API_ALIGN Light Lights[GE_MAX_LIGHT];
-		API_ALIGN Cubemap Cubemaps[GE_MAX_CUBEMAP];
+		API_ALIGN Light Lights[API_MAX_LIGHT];
+		API_ALIGN Cubemap Cubemaps[API_MAX_CUBEMAP];
 	};
 }
 

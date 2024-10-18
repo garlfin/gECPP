@@ -47,7 +47,7 @@ namespace gE
 
 		cam.Position = transform.GetGlobalTransform().Position;
 		cam.Frame = Frame;
-		cam.ClipPlanes = GetClipPlanes();
+		cam.Planes = GetClipPlanes();
 		cam.Size = _viewportSize;
 		cam.Projection = Projection;
 		cam.PreviousViewProjection = Projection * inverse(transform.PreviousModel());

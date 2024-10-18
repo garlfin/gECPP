@@ -32,16 +32,16 @@ void main()
     VertexIn.UV = UV;
 
     gl_Position = viewProjection * vec4(VertexIn.FragPos, 1);
-    gl_Layer = int(InstanceID) / int(Scene.InstanceCount);
+    gl_Layer = int(ViewIndex);
     VertexIn.CurrentNDC = gl_Position;
 
-    if(bool(Scene.State & ENABLE_JITTER))
+    if(ENABLE_JITTER)
     {
         vec2 jitter = Jitter(Camera.Frame, Camera.Size);
         gl_Position.xy += jitter * gl_Position.w;
     }
 
-    if(!bool(Scene.State & ENABLE_COLOR)) return;
+    if(!ENABLE_COLOR) return;
 
     VertexIn.PreviousNDC = objectInfo.PreviousModel * vec4(Position, 1);
     VertexIn.PreviousNDC = Camera.PreviousViewProjection * vec4(VertexIn.PreviousNDC.xyz, 1);

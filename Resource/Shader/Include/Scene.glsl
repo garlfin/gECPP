@@ -1,10 +1,14 @@
 #include "Bindless.glsl"
 
+#define INT_CEIL(X, Y) (((X) + (Y) - 1) / (Y))
+
 #extension GL_ARB_shader_draw_parameters : require
+#extension GL_ARB_gpu_shader_int64 : enable
 
 #define MAX_OBJECTS 64
 #define MAX_LIGHTS 4
 #define MAX_CUBEMAPS 4
+#define MAX_MULTI_DRAW 8
 
 #define LIGHT_DIRECTIONAL 0
 #define LIGHT_POINT 1
@@ -15,13 +19,21 @@
 #define CUBEMAP_AABB 1
 #define CUBEMAP_SPHERE 2
 
-#define ENABLE_DEPTH (1 << 0)
-#define ENABLE_COLOR (1 << 1)
-#define ENABLE_VOXEL_WRITE (1 << 2)
-#define ENABLE_JITTER (1 << 3)
-#define ENABLE_SSEFFECTS (1 << 4)
-#define ENABLE_SPECULAR (1 << 5)
-#define ENABLE_FACE_CULL (1 << 6)
+#define DEPTH_MODE_DEFAULT 0
+#define DEPTH_MODE_LINEAR 1
+#define DEPTH_MODE_RADIAL 2
+
+#define ENABLE_DEPTH bool(Scene.State & 1)
+#define ENABLE_COLOR bool(Scene.State & (1 << 1))
+#define ENABLE_VOXEL_WRITE bool(Scene.State & (1 << 2))
+#define ENABLE_JITTER bool(Scene.State & (1 << 3))
+#define ENABLE_SSEFFECTS bool(Scene.State & (1 << 4))
+#define ENABLE_SPECULAR bool(Scene.State & (1 << 5))
+#define ENABLE_FACE_CULL bool(Scene.State & (1 << 6))
+#define ENABLE_DEPTH_TEST bool(Scene.State & (1 << 7))
+#define RASTER_MODE (Scene.State & (1 << 8))
+#define INSTANCE_MULTIPLIER (Scene.State >> 9 & 7)
+#define DEPTH_MODE (Scene.State >> 12 & 3)
 
 struct Light
 {
@@ -52,8 +64,8 @@ struct ObjectInfo
 
 struct SceneData
 {
-    uint InstanceCount;
     uint State;
+    uvec4 InstanceCount[INT_CEIL(MAX_MULTI_DRAW, 4)];
     ObjectInfo Objects[MAX_OBJECTS];
 };
 
@@ -100,7 +112,7 @@ layout(LIGHT_UNIFORM_LAYOUT, binding = LIGHT_UNIFORM_LOCATION) uniform LightingU
 #endif
 
 #ifdef VERTEX_SHADER
-    uint InstanceID = gl_BaseInstance + gl_InstanceID;
-    uint ViewIndex = InstanceID / Scene.InstanceCount;
-    uint ObjectIndex = InstanceID % Scene.InstanceCount;
+    uint InstanceCount = Scene.InstanceCount[gl_DrawID / 4][gl_DrawID % 4];
+    uint ViewIndex = gl_InstanceID / InstanceCount;
+    uint ObjectIndex = gl_BaseInstance + gl_InstanceID % InstanceCount;
 #endif

@@ -86,7 +86,7 @@ namespace gE
 		//		  (far - near) / 2 + near
 		//		  places the middle on the camera
 
-		transform.SetPosition((cameraTransform->Position) + offset);
+		transform.SetPosition(floor(cameraTransform->Position) + offset);
 		transform.OnUpdate(0.f); // Force update on model matrix since it passed its tick.
 
 		return true;

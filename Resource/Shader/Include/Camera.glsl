@@ -4,7 +4,7 @@ struct CameraData
 {
     vec3 Position;
     uint Frame;
-    vec2 ClipPlanes;
+    vec2 Planes;
     vec2 Size;
     vec3 Parameters;
     float FrameDelta;

@@ -21,9 +21,9 @@ layout(location = 0) out vec4 FragColor;
 
 void main()
 {
-   if(!bool(Scene.State & ENABLE_COLOR)) return;
+   if(!ENABLE_COLOR) return;
 
-   if(!bool(Scene.State & ENABLE_VOXEL_WRITE))
+   if(!ENABLE_VOXEL_WRITE)
    {
       float sine = sin(Camera.Frame * PI / 60.0) * 0.5 + 0.5;
       vec2 pos = floor(gl_FragCoord.xy / CHECKER_SIZE);
