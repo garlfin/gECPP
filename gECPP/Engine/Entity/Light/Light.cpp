@@ -145,8 +145,8 @@ namespace gE
 		light.ViewProjection = camera.GetProjection() * inverse(transform.Model());
 		light.Position = transform->Position;
 		light.Type = GPU::LightType::Point;
-		light.Color = glm::vec3(1);
-		light.PackedSettings = 1;
+		light.Color = glm::vec3(1.0);
+		light.PackedSettings = std::bit_cast<u32, float>(0.4);
 		light.Planes = camera.GetClipPlanes();
 		light.Depth = (handle) GetDepth();
 	}

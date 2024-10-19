@@ -110,8 +110,6 @@ vec3 GetLightingDirectional(const Vertex vert, const PBRFragment frag, const Lig
     return (diffuseBRDF + specularBRDF) * lambert * light.Color;
 }
 
-#define POINT_LIGHT_RADIUS 0.1
-
 vec3 GetLightingPoint(const Vertex vert, const PBRFragment frag, const Light light)
 {
     // Vector Setup
@@ -119,7 +117,9 @@ vec3 GetLightingPoint(const Vertex vert, const PBRFragment frag, const Light lig
     float lightDistance = length(lightDir);
     lightDir /= lightDistance;
 
-    lightDistance = max(lightDistance - POINT_LIGHT_RADIUS, 0.0);
+    float radius = uintBitsToFloat(light.PackedSettings);
+
+    lightDistance = max(lightDistance - radius, 0.0);
 
     vec3 eye = normalize(Camera.Position - vert.Position);
     vec3 halfEye = normalize(lightDir + eye);
@@ -132,7 +132,7 @@ vec3 GetLightingPoint(const Vertex vert, const PBRFragment frag, const Light lig
     // PBR Setup
     vec3 f0 = mix(frag.F0, frag.Albedo, frag.Metallic);
     vec3 f = FresnelSchlick(f0, eDotH);
-    float d = GGXNDFPoint(nDotH, frag.Roughness, POINT_LIGHT_RADIUS, lightDistance);
+    float d = GGXNDFPoint(nDotH, frag.Roughness, radius, lightDistance);
     float g = GSchlickAnalytical(nDotL, nDotV, frag.Roughness);
 
     vec3 kD = mix(1.0 - f, vec3(0.0), frag.Metallic);
@@ -143,7 +143,7 @@ vec3 GetLightingPoint(const Vertex vert, const PBRFragment frag, const Light lig
 
     // Falloff of nDotL * nDotL is nicer to me
     float lambert = min(nDotL * nDotL, GetShadowPoint(vert, light));
-    float attenuation = FalloffPoint(POINT_LIGHT_RADIUS, lightDistance, POINT_LIGHT_RADIUS + 10.f);
+    float attenuation = FalloffPoint(radius, lightDistance, radius + 10.f);
 
     return (diffuseBRDF + specularBRDF) * attenuation * lambert * light.Color;
 }
@@ -235,7 +235,7 @@ vec3 ImportanceSampleGGX(vec2 xi, vec3 n, float roughness)
 
     vec3 h = vec3(sinTheta * cos(phi), sinTheta * sin(phi), cosTheta);
 
-    return GetTangent(n) * h;
+    return GetTBN(n) * h;
 }
 
 // How someone came up with this, I don't know.
