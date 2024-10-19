@@ -55,8 +55,8 @@ void DemoWindow::OnInit()
 	auto* sun = new DirectionalLight(this, 1024, 10.f, glm::quat(radians(sunRotation)));
 	Lights->Sun = sun;
 
-	auto* pointLight = new PointLight(this, 256);
-	pointLight->GetTransform().SetPosition(glm::vec3(0, 0.5, 0));
+	auto* pointLight = new PointLight(this, 512);
+	pointLight->GetTransform().SetPosition(glm::vec3(1.1, 0.5, -1.7));
 
 	auto* camera = new FlyCamera(this);
 	Cameras.CurrentCamera = &camera->GetTarget();

@@ -146,7 +146,7 @@ namespace gE
 		light.Position = transform->Position;
 		light.Type = GPU::LightType::Point;
 		light.Color = glm::vec3(1.0);
-		light.PackedSettings = std::bit_cast<u32, float>(0.4);
+		light.PackedSettings = std::bit_cast<u32, float>(0.1);
 		light.Planes = camera.GetClipPlanes();
 		light.Depth = (handle) GetDepth();
 	}
@@ -172,7 +172,7 @@ namespace gE
 	{
 		static constexpr ICameraSettings PointSettings
 		{
-			ClipPlanes(0.1, 25),
+			ClipPlanes(0.1, 5.f),
 			DefaultCameraTiming,
 		};
 

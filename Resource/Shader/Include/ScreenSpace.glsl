@@ -192,10 +192,11 @@ RayResult SS_Trace(Ray ray, out int m)
 
 RayResult SS_TraceRough(Ray ray, LinearRaySettings settings)
 {
-    ray.Direction = normalize(ray.Direction) * ray.Length;
+    ray.Direction = normalize(ray.Direction);
 
     ray.Position += settings.Normal * settings.NormalBias;
-    ray.Position += ray.Direction / settings.Iterations * (settings.RayBias + max(IGNSample, EPSILON));
+    ray.Position += ray.Direction * settings.RayBias * (1.0 + max(IGNSample, EPSILON)) / settings.Iterations;
+    ray.Direction *= ray.Length;
 
     vec3 rayStart = SS_WorldToUV(ray.Position);
     vec3 rayEnd = SS_WorldToUV(ray.Position + ray.Direction);
@@ -218,7 +219,7 @@ RayResult SS_TraceRough(Ray ray, LinearRaySettings settings)
 
         float depth = textureLod(Camera.Depth, uv.xy, 0.f).r;
 
-        if(SS_GetDepthWithBias(depth, 0.01) < uv.z)
+        if(SS_GetDepthWithBias(depth, 0.05) < uv.z)
         {
             result.Result = uv.z - depth < RAY_THICKNESS ? RAY_RESULT_HIT : RAY_RESULT_TOO_FAR;
             break;
