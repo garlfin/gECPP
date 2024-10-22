@@ -1,3 +1,5 @@
+#include <Resource/Shader/Include/Math.glsl>
+
 #ifndef PIPELINE_DEPTH_COPY_FORMAT
     #define PIPELINE_DEPTH_COPY_FORMAT r32f
 #endif
@@ -11,7 +13,6 @@ layout(location = 1) uniform sampler2D DepthIn;
 layout(binding = 0, PIPELINE_DEPTH_COPY_FORMAT) restrict writeonly uniform image2D DepthOut;
 
 // Helper Functions
-float LinearizeDepth(float, vec2);
 float MinBox4(ivec2);
 
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
@@ -28,12 +29,6 @@ void main()
         depth = MinBox4(texel);
 
     imageStore(DepthOut, texel, vec4(depth));
-}
-
-float LinearizeDepth(float z, vec2 planes)
-{
-    z = 2.0 * z - 1.0;
-    return 2.0 * planes.x * planes.y / (planes.y + planes.x - z * (planes.y - planes.x));
 }
 
 float MinBox4(ivec2 uv)

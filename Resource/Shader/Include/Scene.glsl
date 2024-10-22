@@ -33,7 +33,6 @@
 #define ENABLE_DEPTH_TEST bool(Scene.State & (1 << 7))
 #define RASTER_MODE (Scene.State & (1 << 8))
 #define INSTANCE_MULTIPLIER (Scene.State >> 9 & 7)
-#define DEPTH_MODE (Scene.State >> 12 & 3)
 
 struct Light
 {

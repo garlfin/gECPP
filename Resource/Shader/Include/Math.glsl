@@ -13,6 +13,7 @@
 // Main Functions
 mat3 GetTBN(vec3);
 float LinearizeDepthOrtho(float, vec2);
+float LinearizeDepthOrthoNDC(float, vec2);
 float LinearizeDepth(float, vec2);
 float LinearizeDepthNDC(float z, vec2 planes);
 float LogarithmizeDepth(float z, vec2 planes);
@@ -31,6 +32,11 @@ mat3 GetTBN(vec3 normal)
 }
 
 float LinearizeDepthOrtho(float z, vec2 planes)
+{
+    return LinearizeDepthOrthoNDC(z * 2.0 - 1.0, planes);
+}
+
+float LinearizeDepthOrthoNDC(float z, vec2 planes)
 {
     return planes.x + z * (planes.y - planes.x);
 }

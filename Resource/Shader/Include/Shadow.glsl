@@ -7,52 +7,52 @@
 #include "Math.glsl"
 
 // In percent
+#ifndef SHADOW_SAMPLES
+    #define SHADOW_SAMPLES 32
+#endif
+
+#ifndef SMRT_SAMPLES
+    #define SMRT_SAMPLES 4
+#endif
+
+#ifndef SMRT_TRACE_STEPS
+    #define SMRT_TRACE_STEPS 6
+#endif
+
+#ifndef SMRT_DISTANCE
+    #define SMRT_TRACE_DISTANCE 10.0
+#endif
+
+#ifndef SMRT_TRACE_BIAS
+    #define SMRT_TRACE_BIAS 10.0
+#endif
+
+#ifndef SMRT_CONTACT_TRACE_BIAS
+    #define SMRT_CONTACT_TRACE_BIAS 1.5
+#endif
+
+#ifndef SMRT_CONTACT_SAMPLES
+    #define SMRT_CONTACT_SAMPLES SMRT_SAMPLES
+#endif
+
+#ifndef SMRT_CONTACT_TRACE_STEPS
+    #define SMRT_CONTACT_TRACE_STEPS 32
+#endif
+
+#ifndef SMRT_COLOR_BIAS
+    #define SMRT_COLOR_BIAS 10.0
+#endif
+
+#ifndef DIRECTIONAL_SHADOW_RADIUS
+    #define DIRECTIONAL_SHADOW_RADIUS 0.1
+#endif
+
 #ifndef DIRECTIONAL_SHADOW_BIAS
     #define DIRECTIONAL_SHADOW_BIAS 0.01
 #endif
 
 #ifndef POINT_SHADOW_BIAS
     #define POINT_SHADOW_BIAS 0.001
-#endif
-
-#ifndef SHADOW_SAMPLES
-    #define SHADOW_SAMPLES 32
-#endif
-
-#ifndef CONTACT_SAMPLES
-    #define CONTACT_SAMPLES 4
-#endif
-
-#define SOFT_SHADOW (defined(SOFT_SHADOW_AVERAGE) || defined(SOFT_SHADOW_MIN))
-
-#if SOFT_SHADOW
-    #ifndef SHADOW_BLOCKER_SAMPLES
-        #define SHADOW_BLOCKER_SAMPLES 8
-    #endif
-
-    #ifndef DIRECTIONAL_SHADOW_BLOCKER_RADIUS
-        #define DIRECTIONAL_SHADOW_BLOCKER_RADIUS 0.1
-    #endif
-
-    #ifndef POINT_SHADOW_BLOCKER_RADIUS
-        #define POINT_SHADOW_BLOCKER_RADIUS 0.1
-    #endif
-
-    #ifndef DIRECTIONAL_SHADOW_MIN_RADIUS
-        #define DIRECTIONAL_SHADOW_MIN_RADIUS 0.01
-    #endif
-
-    #ifndef POINT_SHADOW_MIN_RADIUS
-        #define POINT_SHADOW_MIN_RADIUS 0.01
-    #endif
-
-    #ifndef POINT_CONTACT_SHADOW_LENGTH
-        #define POINT_CONTACT_SHADOW_LENGTH 0.1
-    #endif
-#endif
-
-#ifndef DIRECTIONAL_SHADOW_RADIUS
-    #define DIRECTIONAL_SHADOW_RADIUS 0.1
 #endif
 
 // Main Functions
@@ -74,88 +74,63 @@ float GetShadowDirectional(const Vertex vert, const Light light, const vec4 frag
     float bias = mix(0.1, 1.0, nDotL) * DIRECTIONAL_SHADOW_BIAS;
 	vec3 fragPos = NDCLight(fragLightSpace, light.Planes);
 
-    float blocker = 0.0;
-#ifdef SOFT_SHADOW_AVERAGE
-    float blockerCount = 0.0;
-#endif
+    if(TexcoordOutOfBounds(fragPos.xy) || fragPos.z > light.Planes.y) return 1.0;
+
+    mat3 offsetMatrix = GetTBN(light.Position);
     float shadow = 0.0;
 
-#if SOFT_SHADOW
-    for(uint i = 0; i < SHADOW_BLOCKER_SAMPLES; i++)
+    for(int s = 0; s < SMRT_SAMPLES; s++)
     {
-        vec2 offset = VogelDisk(i, SHADOW_BLOCKER_SAMPLES, IGNSample * PI * 2.0);
-        vec3 uv = fragPos;
-        uv.xy += offset * DIRECTIONAL_SHADOW_BLOCKER_RADIUS / light.PackedSettings;
+        vec2 offset = VogelDisk(s, SMRT_SAMPLES, IGNSample * PI * 2.0);
+        vec3 rayDir = offsetMatrix * vec3(offset * DIRECTIONAL_SHADOW_RADIUS, 1.0) * SMRT_TRACE_DISTANCE;
 
-        float z = texture(sampler2D(light.Depth), uv.xy).r;
-        z = LinearizeDepthOrtho(z, light.Planes);
-        z = uv.z - z;
+        vec3 rayStart = vert.Position + rayDir;
+        rayStart = NDCLight(light.ViewProjection * vec4(rayStart, 1.0), light.Planes);
 
-        float shadowSample = z > bias ? 1.0 : 0.0;
+        vec3 rayEnd = vert.Position + rayDir * 0.005;
+        rayEnd = NDCLight(light.ViewProjection * vec4(rayEnd, 1.0), light.Planes);
 
-        #ifdef SOFT_SHADOW_AVERAGE
-            blocker += z * shadowSample;
-            blockerCount += shadowSample;
-        #else
-            blocker = max(blocker, z * shadowSample);
-        #endif
+        for(int i = 0; i < SMRT_TRACE_STEPS; i++)
+        {
+            float lerp = float(i + 1) / SMRT_TRACE_STEPS;
+            lerp = pow(lerp, 1.0 / SMRT_TRACE_BIAS);
+
+            vec3 rayPos = mix(rayStart, rayEnd, lerp);
+
+            float depth = texture(sampler2D(light.Depth), rayPos.xy).r;
+            depth = depth * 2.0 - 1.0;
+            depth = LinearizeDepthOrtho(depth, light.Planes);
+
+            if(depth > rayPos.z) continue;
+
+            shadow += 1.0;
+            break;
+        }
     }
 
-    #ifdef SOFT_SHADOW_AVERAGE
-        blockerCount = max(blockerCount, 1.f);
-        blocker /= blockerCount;
-    #endif
-    blocker = max(blocker * DIRECTIONAL_SHADOW_RADIUS, DIRECTIONAL_SHADOW_MIN_RADIUS);
-#else
-    blocker = DIRECTIONAL_SHADOW_RADIUS;
-#endif
+    shadow /= SMRT_SAMPLES;
+    shadow = pow(1.0 - shadow, SMRT_COLOR_BIAS);
 
-    for(uint i = 0; i < SHADOW_SAMPLES; i++)
-    {
-        vec2 offset = VogelDisk(i, SHADOW_SAMPLES, IGNSample * PI * 2.0);
-        vec3 uv = fragPos;
-        uv.xy += offset * blocker / light.PackedSettings;
-
-    #ifdef EXT_BINDLESS
-        float z = texture(sampler2D(light.Depth), uv.xy).r;
-    #else
-        float z = 1.0;
-    #endif
-
-        z = LinearizeDepthOrtho(z, light.Planes);
-        z = uv.z - z;
-
-        float shadowSample = z > bias ? 0.0 : 1.0;
-
-        shadowSample = TexcoordOutOfBounds(uv.xy) ? 1.0 : shadowSample;
-        shadowSample = uv.z > light.Planes.y ? 1.0 : shadowSample;
-
-        shadow += shadowSample;
-    }
-
-    shadow /= SHADOW_SAMPLES;
-
-#if defined(DIRECTIONAL_CONTACT_SHADOW) && CONTACT_SAMPLES > 0
+#if defined(ENABLE_SMRT) && defined(ENABLE_SMRT_CONTACT_SHADOW)
     if(shadow < EPSILON) return shadow;
 
     Ray ray;
-    LinearRaySettings raySettings = LinearRaySettings(32, EPSILON, EPSILON, vert.Normal);
+    LinearRaySettings raySettings = LinearRaySettings(SMRT_CONTACT_TRACE_STEPS, EPSILON, EPSILON, vert.Normal, SMRT_CONTACT_TRACE_BIAS);
     RayResult result;
 
     float contactShadow = 0.0;
-    mat3 offsetMatrix = GetTBN(light.Position);
-    for(uint i = 0; i < CONTACT_SAMPLES; i++)
+    for(uint i = 0; i < SMRT_CONTACT_SAMPLES; i++)
     {
-        vec2 offset = VogelDisk(i, CONTACT_SAMPLES, IGNSample * PI * 2.0) * DIRECTIONAL_SHADOW_RADIUS;
+        vec2 offset = VogelDisk(i, SMRT_CONTACT_SAMPLES, IGNSample * PI * 2.0) * DIRECTIONAL_SHADOW_RADIUS;
         vec3 rayDir = offsetMatrix * vec3(offset, 1.0);
 
-        ray = Ray(vert.Position, DIRECTIONAL_SHADOW_MIN_RADIUS / DIRECTIONAL_SHADOW_RADIUS, rayDir);
+        ray = Ray(vert.Position, SMRT_TRACE_DISTANCE / 50.0, rayDir);
         result = SS_TraceRough(ray, raySettings);
 
         contactShadow += float(result.Result != RAY_RESULT_HIT);
     }
 
-    shadow = min(shadow, contactShadow / CONTACT_SAMPLES);
+    shadow = min(shadow, contactShadow / SMRT_SAMPLES);
 #endif
 
     return shadow;
@@ -237,7 +212,7 @@ float GetShadowPoint(const Vertex vert, const Light light)
     if(shadow < EPSILON) return shadow;
 
     Ray ray;
-    LinearRaySettings raySettings = LinearRaySettings(32, bias, 0.001, vert.Normal);
+    LinearRaySettings raySettings = LinearRaySettings(32, bias, 0.001, vert.Normal, 1.5);
     RayResult result;
 
     float contactShadow = 0.0;
@@ -271,7 +246,7 @@ float GetShadowPoint(const Vertex vert, const Light light)
 vec3 NDCLight(vec4 frag, vec2 planes)
 {
 	frag.xyz = frag.xyz / frag.w;
-	frag.xyz = frag.xyz * 0.5 + 0.5;
+	frag.xy = frag.xy * 0.5 + 0.5;
 	frag.z = LinearizeDepthOrtho(frag.z, planes);
 	return frag.xyz;
 }

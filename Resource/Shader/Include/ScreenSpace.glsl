@@ -1,6 +1,7 @@
 #include "Camera.glsl"
 #include "Voxel.glsl"
 #include "Noise.glsl"
+#include "Math.glsl"
 
 #ifndef RAY_MAX_ITERATIONS
     #define RAY_MAX_ITERATIONS 64
@@ -35,6 +36,7 @@ struct LinearRaySettings
     float NormalBias;
     float RayBias;
     vec3 Normal;
+    float SearchBias;
 };
 
 // Functions
@@ -194,12 +196,18 @@ RayResult SS_TraceRough(Ray ray, LinearRaySettings settings)
 {
     ray.Direction = normalize(ray.Direction);
 
+    if(settings.SearchBias < 0.0)
+        settings.SearchBias = 1.0 / -settings.SearchBias;
+    else
+        settings.SearchBias = 1.0 + settings.SearchBias;
+
     ray.Position += settings.Normal * settings.NormalBias;
     ray.Position += ray.Direction * settings.RayBias * (1.0 + max(IGNSample, EPSILON)) / settings.Iterations;
     ray.Direction *= ray.Length;
 
     vec3 rayStart = SS_WorldToUV(ray.Position);
     vec3 rayEnd = SS_WorldToUV(ray.Position + ray.Direction);
+
     vec3 rayDir = (rayEnd - rayStart) / settings.Iterations;
 
     float near = rayStart.z, far = rayEnd.z;
@@ -209,10 +217,9 @@ RayResult SS_TraceRough(Ray ray, LinearRaySettings settings)
     int i;
     for(i = 0; i < settings.Iterations; i++)
     {
-        result.Position += rayDir;
+        float lerp = pow(float(i) / settings.Iterations, settings.SearchBias);
 
-        float lerp = float(i + 1) / settings.Iterations;
-        vec3 uv = result.Position;
+        vec3 uv = result.Position = mix(rayStart, rayEnd, lerp);
         uv.z = (near * far) / (near * lerp + far * (1.0 - lerp));
 
         if(uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0 || uv.z < 0.0) break;
