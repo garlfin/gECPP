@@ -196,10 +196,12 @@ RayResult SS_TraceRough(Ray ray, LinearRaySettings settings)
 {
     ray.Direction = normalize(ray.Direction);
 
+    float searchBias;
+
     if(settings.SearchBias < 0.0)
-        settings.SearchBias = 1.0 / -settings.SearchBias;
+        searchBias = 1.0 / -settings.SearchBias;
     else
-        settings.SearchBias = 1.0 + settings.SearchBias;
+        searchBias = 1.0 + settings.SearchBias;
 
     ray.Position += settings.Normal * settings.NormalBias;
     ray.Position += ray.Direction * settings.RayBias * (1.0 + max(IGNSample, EPSILON)) / settings.Iterations;
@@ -217,7 +219,7 @@ RayResult SS_TraceRough(Ray ray, LinearRaySettings settings)
     int i;
     for(i = 0; i < settings.Iterations; i++)
     {
-        float lerp = pow(float(i) / settings.Iterations, settings.SearchBias);
+        float lerp = pow(float(i) / settings.Iterations, searchBias);
 
         vec3 uv = result.Position = mix(rayStart, rayEnd, lerp);
         uv.z = (near * far) / (near * lerp + far * (1.0 - lerp));
