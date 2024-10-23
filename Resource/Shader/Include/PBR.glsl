@@ -180,14 +180,15 @@ float GGXNDF(float nDotV, float roughness)
 
 float GGXNDFPoint(float nDotV, float roughness, float radius, float distance)
 {
-    float alpha = max(roughness * roughness, 0.01);
-    float alphaPrime = clamp(roughness + radius / (2 * distance), 0.0, 1.0);
+    float alpha = roughness * roughness;
+    float alphaPrime = clamp(alpha + radius / (2.0 * distance), 0.0, 1.0);
 
+    // I have no clue what Epic meant.
     float normalizationFactor = alpha / alphaPrime;
     normalizationFactor *= normalizationFactor;
 
     // Very confident this isn't right but it looks good so oh well
-    return GGXNDFAlpha(nDotV, normalizationFactor);
+    return GGXNDFAlpha(nDotV, alphaPrime);
 }
 
 float GGXNDFAlpha(float nDotV, float alpha)
@@ -216,7 +217,7 @@ float GSchlick(float nDotL, float nDotV, float roughness)
 float GSchlickAnalytical(float nDotL, float nDotV, float roughness)
 {
     float r = roughness + 1.0;
-    float k = (r * r) / 8;
+    float k = (r * r) / 8.0;
     return GSchlick(nDotL, k) * GSchlick(nDotV, k);
 }
 
