@@ -44,7 +44,7 @@
 #endif
 
 #ifndef DIRECTIONAL_SHADOW_RADIUS
-    #define DIRECTIONAL_SHADOW_RADIUS 0.1
+    #define DIRECTIONAL_SHADOW_RADIUS 0.3
 #endif
 
 #ifndef DIRECTIONAL_SHADOW_BIAS
@@ -110,7 +110,7 @@ float GetShadowDirectional(const Vertex vert, const Light light, const vec4 frag
         }
     }
 
-    shadow = clamp(shadow / SMRT_SAMPLES, 0.0, 1.0);
+    shadow = saturate(shadow / SMRT_SAMPLES);
     shadow = pow(1.0 - shadow, SMRT_COLOR_BIAS);
 
 #if defined(ENABLE_SMRT) && defined(ENABLE_SMRT_CONTACT_SHADOW)

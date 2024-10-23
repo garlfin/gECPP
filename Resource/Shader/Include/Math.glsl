@@ -20,6 +20,10 @@ float LogarithmizeDepth(float z, vec2 planes);
 float LogarithmizeDepthNDC(float z, vec2 planes);
 bool TexcoordOutOfBounds(vec2 uv);
 vec2 VogelDisk(uint i, uint count, float phi);
+float saturate(float a) { return clamp(a, 0.0, 1.0); }
+vec2 saturate(vec2 a) { return clamp(a, vec2(0.0), vec2(1.0)); }
+vec3 saturate(vec3 a) { return clamp(a, vec3(0.0), vec3(1.0)); }
+vec4 saturate(vec4 a) { return clamp(a, vec4(0.0), vec4(1.0)); }
 
 // Implementation
 mat3 GetTBN(vec3 normal)

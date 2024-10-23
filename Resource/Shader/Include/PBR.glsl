@@ -87,10 +87,10 @@ vec3 GetLightingDirectional(const Vertex vert, const PBRFragment frag, const Lig
     vec3 eye = normalize(Camera.Position - vert.Position);
     vec3 halfEye = normalize(light.Position + eye);
 
-    float nDotV = max(dot(frag.Normal, eye), 0.0);
-    float nDotL = max(dot(frag.Normal, light.Position), 0.0);
-    float nDotH = max(dot(frag.Normal, halfEye), 0.0);
-    float eDotH = clamp(dot(halfEye, eye), 0.0, 1.0);
+    float nDotV = saturate(dot(frag.Normal, eye));
+    float nDotL = saturate(dot(frag.Normal, light.Position));
+    float nDotH = saturate(dot(frag.Normal, halfEye));
+    float eDotH = saturate(dot(halfEye, eye));
 
     // PBR Setup
     vec3 f0 = mix(frag.F0, frag.Albedo, frag.Metallic);
@@ -112,22 +112,31 @@ vec3 GetLightingDirectional(const Vertex vert, const PBRFragment frag, const Lig
 
 vec3 GetLightingPoint(const Vertex vert, const PBRFragment frag, const Light light)
 {
-    // Vector Setup
-    vec3 lightDir = light.Position - vert.Position;
-    float lightDistance = length(lightDir);
-    lightDir /= lightDistance;
-
     float radius = uintBitsToFloat(light.PackedSettings);
 
+    // Vector Setup
+    vec3 eye = normalize(Camera.Position - vert.Position);
+    vec3 lightDir = light.Position - vert.Position;
+
+    // Closest point to frag
+    vec3 reflection = reflect(eye, frag.Normal);
+    vec3 centerToRay = dot(lightDir, reflection) * reflection - lightDir;
+    vec3 closestPoint = lightDir + centerToRay * saturate(radius / length(centerToRay));
+
+    float closestDistance = length(closestPoint);
+    vec3 closestDir = closestPoint / closestDistance;
+
+    float lightDistance = length(lightDir);
+    lightDir /= lightDistance;
     lightDistance = max(lightDistance - radius, 0.0);
 
-    vec3 eye = normalize(Camera.Position - vert.Position);
-    vec3 halfEye = normalize(lightDir + eye);
+    // Vector Setup
+    vec3 halfEye = normalize(closestDir + eye);
 
-    float nDotV = max(dot(frag.Normal, eye), 0.0);
-    float nDotL = max(dot(frag.Normal, lightDir), 0.0);
-    float nDotH = max(dot(frag.Normal, halfEye), 0.0);
-    float eDotH = clamp(dot(halfEye, eye), 0.0, 1.0);
+    float nDotV = saturate(dot(frag.Normal, eye));
+    float nDotL = saturate(dot(frag.Normal, closestDir));
+    float nDotH = saturate(dot(frag.Normal, halfEye));
+    float eDotH = saturate(dot(halfEye, eye));
 
     // PBR Setup
     vec3 f0 = mix(frag.F0, frag.Albedo, frag.Metallic);
@@ -138,7 +147,7 @@ vec3 GetLightingPoint(const Vertex vert, const PBRFragment frag, const Light lig
     vec3 kD = mix(1.0 - f, vec3(0.0), frag.Metallic);
 
     // Final Calculations
-    vec3 specularBRDF = (f * d * g) / max(4.0 * nDotL * nDotV, EPSILON);
+    vec3 specularBRDF = vec3(f * d * g) / max(4.0 * nDotL * nDotV, EPSILON);
     vec3 diffuseBRDF = frag.Albedo * kD;
 
     // Falloff of nDotL * nDotL is nicer to me
@@ -153,7 +162,7 @@ vec3 FilterSpecular(const Vertex vert, const PBRFragment frag, const PBRSample p
     // PBR Setup
     vec3 eye = normalize(Camera.Position - vert.Position);
 
-    float nDotV = clamp(dot(frag.Normal, eye), 0.0, 1.0);
+    float nDotV = saturate(dot(frag.Normal, eye));
     vec3 f0 = mix(frag.F0, frag.Albedo, frag.Metallic);
     vec3 f = FresnelSchlick(f0, nDotV);
     vec2 brdf = pbrSample.BRDF;
@@ -165,29 +174,30 @@ vec3 FilterSpecular(const Vertex vert, const PBRFragment frag, const PBRSample p
 // PBR Functions
 float GGXNDF(float nDotV, float roughness)
 {
-    roughness *= roughness;
-    roughness = max(roughness, 0.01);
-
-    return GGXNDFAlpha(nDotV, roughness);
+    float alpha = max(roughness * roughness, 0.01);
+    return GGXNDFAlpha(nDotV, alpha);
 }
 
 float GGXNDFPoint(float nDotV, float roughness, float radius, float distance)
 {
-    roughness *= roughness;
-    roughness = max(roughness, 0.01);
+    float alpha = max(roughness * roughness, 0.01);
+    float alphaPrime = clamp(roughness + radius / (2 * distance), 0.0, 1.0);
 
-    float alpha = clamp(roughness + radius / (2 * distance), 0.0, 1.0);
+    float normalizationFactor = alpha / alphaPrime;
+    normalizationFactor *= normalizationFactor;
 
-    return GGXNDFAlpha(nDotV, alpha);
+    // Very confident this isn't right but it looks good so oh well
+    return GGXNDFAlpha(nDotV, normalizationFactor);
 }
 
 float GGXNDFAlpha(float nDotV, float alpha)
 {
-    alpha *= alpha;
-    float denom = (nDotV * nDotV) * (alpha - 1.0) + 1.0;
+    float alphaSqr = alpha * alpha;
+
+    float denom = (nDotV * nDotV) * (alphaSqr - 1.0) + 1.0;
     denom = PI * denom * denom;
 
-    return alpha / max(denom, EPSILON);
+    return alphaSqr / max(denom, EPSILON);
 }
 
 float GSchlick(float cosTheta, float roughness)
@@ -215,7 +225,7 @@ float FalloffPoint(float radius, float distance, float maxDistance)
     float numerator = -1 / (maxDistance - radius) * (distance - radius) + 1.0;
     float denominator = 1.0 + distance * distance;
 
-    return clamp(numerator, 0.0, 1.0) / denominator;
+    return saturate(numerator) / denominator;
 }
 
 vec3 FresnelSchlick(vec3 f0, float nDotV)
