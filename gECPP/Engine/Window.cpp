@@ -149,7 +149,6 @@ bool Window::Run()
 			);
 
 			glfwSetWindowTitle(_window, WindowTitleBuf);
-
 		}
 	#endif
 

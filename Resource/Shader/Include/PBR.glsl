@@ -59,7 +59,7 @@ float GSchlick(float cosTheta, float roughness); // AKA 'k'
 float GSchlick(float nDotL, float nDotH, float roughness);
 float GSchlickAnalytical(float nDotL, float nDotH, float roughness); // Read more: Section 3, "Specular G"
 vec3 FresnelSchlick(vec3 f0, float nDotV);
-float FalloffPoint(float radius, float distance, float maxDistance);
+float FalloffPoint(float distance, float maxDistance);
 vec3 CubemapParallax(vec3 pos, vec3 dir, Cubemap cubemap, out float weight);
 #ifdef FRAGMENT_SHADER
 vec3 FilterSpecular(const Vertex vert, const PBRFragment frag, const PBRSample pbrSample, vec3 color);
@@ -98,14 +98,14 @@ vec3 GetLightingDirectional(const Vertex vert, const PBRFragment frag, const Lig
     float d = GGXNDF(nDotH, frag.Roughness);
     float g = GSchlickAnalytical(nDotL, nDotV, frag.Roughness);
 
-    vec3 kD = mix(1.0 - f, vec3(0.0), frag.Metallic);
+    vec3 kD = (1.0 - f) * (1.0 - frag.Metallic);
 
     // Final Calculations
     vec3 specularBRDF = (f * d * g) / max(4.0 * nDotL * nDotV, EPSILON);
     vec3 diffuseBRDF = frag.Albedo * kD;
 
     // Falloff of nDotL * nDotL is nicer to me
-    float lambert = min(nDotL * nDotL, GetShadowDirectional(vert, light, fragLightSpace));
+    float lambert = min(nDotL, GetShadowDirectional(vert, light, fragLightSpace));
 
     return (diffuseBRDF + specularBRDF) * lambert * light.Color;
 }
@@ -144,15 +144,16 @@ vec3 GetLightingPoint(const Vertex vert, const PBRFragment frag, const Light lig
     float d = GGXNDFPoint(nDotH, frag.Roughness, radius, lightDistance);
     float g = GSchlickAnalytical(nDotL, nDotV, frag.Roughness);
 
-    vec3 kD = mix(1.0 - f, vec3(0.0), frag.Metallic);
+    vec3 kD = (1.0 - f) * (1.0 - frag.Metallic);
 
     // Final Calculations
     vec3 specularBRDF = vec3(f * d * g) / max(4.0 * nDotL * nDotV, EPSILON);
-    vec3 diffuseBRDF = frag.Albedo * kD;
+    vec3 diffuseBRDF = frag.Albedo * kD / PI;
 
     // Falloff of nDotL * nDotL is nicer to me
-    float lambert = min(nDotL * nDotL, GetShadowPoint(vert, light));
-    float attenuation = FalloffPoint(radius, lightDistance, radius + 10.f);
+    float lambert = saturate(dot(frag.Normal, lightDir)) * 0.5 + 0.5;
+    lambert = min(lambert, GetShadowPoint(vert, light));
+    float attenuation = FalloffPoint(lightDistance, 10.f);
 
     return (diffuseBRDF + specularBRDF) * attenuation * lambert * light.Color;
 }
@@ -172,32 +173,30 @@ vec3 FilterSpecular(const Vertex vert, const PBRFragment frag, const PBRSample p
 #endif
 
 // PBR Functions
-float GGXNDF(float nDotV, float roughness)
+float GGXNDF(float nDotH, float roughness)
 {
-    float alpha = max(roughness * roughness, 0.01);
-    return GGXNDFAlpha(nDotV, alpha);
+    float alpha = max(roughness * roughness, EPSILON);
+    return GGXNDFAlpha(nDotH, alpha);
 }
 
 float GGXNDFPoint(float nDotV, float roughness, float radius, float distance)
 {
     float alpha = max(roughness * roughness, 0.01);
-    float alphaPrime = clamp(roughness + radius / (2 * distance), 0.0, 1.0);
-
-    float normalizationFactor = alpha / alphaPrime;
-    normalizationFactor *= normalizationFactor;
-
-    // Very confident this isn't right but it looks good so oh well
-    return GGXNDFAlpha(nDotV, normalizationFactor);
+    float alphaPrime = roughness + 1.0 / (radius + 2 * distance);
+    // Sorta deviated from Epic Games' paper, but it looks good to me so oh well.
+    return GGXNDFAlpha(nDotV, alpha) * alphaPrime;
 }
 
-float GGXNDFAlpha(float nDotV, float alpha)
+float GGXNDFAlpha(float nDotH, float alpha)
 {
-    float alphaSqr = alpha * alpha;
+    float alphaSqr = max(alpha * alpha, 0.01);
 
-    float denom = (nDotV * nDotV) * (alphaSqr - 1.0) + 1.0;
+    nDotH = mix(0.1, 1.0, nDotH);
+
+    float denom = (nDotH * nDotH) * (alphaSqr - 1.0) + 1.0;
     denom = PI * denom * denom;
 
-    return alphaSqr / max(denom, EPSILON);
+    return alphaSqr / denom;
 }
 
 float GSchlick(float cosTheta, float roughness)
@@ -216,21 +215,21 @@ float GSchlick(float nDotL, float nDotV, float roughness)
 float GSchlickAnalytical(float nDotL, float nDotV, float roughness)
 {
     float r = roughness + 1.0;
-    float k = (r * r) / 8;
+    float k = (r * r) / 8.0;
     return GSchlick(nDotL, k) * GSchlick(nDotV, k);
 }
 
-float FalloffPoint(float radius, float distance, float maxDistance)
+float FalloffPoint(float distance, float maxDistance)
 {
-    float numerator = -1 / (maxDistance - radius) * (distance - radius) + 1.0;
-    float denominator = 1.0 + distance * distance;
+    float factor = 1.0 - min(distance, maxDistance) / maxDistance;
+    factor = factor * factor * (3.0 - 2.0 * factor);
 
-    return saturate(numerator) / denominator;
+    return factor / (1.0 + distance * distance);
 }
 
 vec3 FresnelSchlick(vec3 f0, float nDotV)
 {
-    return f0 + (1.0 - f0) * pow(1.0 - nDotV, 5.0);
+    return f0 + (1.0 - f0) * pow(2.0, (-5.55473 * nDotV - 6.98316) * nDotV);
 }
 
 // Epic Games black magic
