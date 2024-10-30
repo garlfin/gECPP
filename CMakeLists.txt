@@ -12,6 +12,10 @@ set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -fno-inline -static")
 
 include_directories(gECPP Vendor Vendor/FBX ${CMAKE_SOURCE_DIR})
 
+# JOLT
+file(GLOB_RECURSE JOLT_SRC "Vendor/JOLT/*.cpp" "Vendor/JOLT/*.h")
+add_library(JOLT STATIC ${JOLT_SRC})
+
 # GLFW
 add_library(GLFW STATIC IMPORTED)
 set_property(TARGET GLFW PROPERTY IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/GLFW/glfw3.dll")
@@ -34,12 +38,12 @@ add_library(PUGIXML STATIC Vendor/PUGIXML/pugixml.cpp Vendor/PUGIXML/pugixml.hpp
 
 # GEUI
 add_executable(gEUI gEUI/main.cpp)
-target_link_libraries(gEUI PRIVATE PUGIXML GETF GLAD)
+target_link_libraries(gEUI PUGIXML GETF GLAD)
 
 # GECPP
 file(GLOB_RECURSE GECPP_SRC "gECPP/*.cpp" "gECPP/*.h" "gECPP/*.inl")
 add_library(gECPP STATIC ${GECPP_SRC})
-target_link_libraries(gECPP GLAD GLFW GETF)
+target_link_libraries(gECPP GLAD GLFW GETF JOLT)
 
 # VOXELDEMO
 file(GLOB_RECURSE VOXELDEMO_SRC "Demo/*.cpp" "Demo/*.h" "gECPP/*.inl")
@@ -48,4 +52,4 @@ target_link_libraries(VoxelDemo gECPP)
 
 # GEMODEL
 add_executable(gEModel gEModel/main.cpp gEModel/Vertex.h)
-target_link_libraries(gEModel PRIVATE GLAD gECPP ASSIMP)
+target_link_libraries(gEModel GLAD gECPP ASSIMP)
