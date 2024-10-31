@@ -7,6 +7,7 @@
 #include <vector>
 #include <Engine/Utility/Binary.h>
 #include <Engine/Component/Transform.h>
+#include <Engine/Component/Layer.h>
 
 #include "Prototype.h"
 
@@ -17,7 +18,7 @@ namespace gE
 	 public:
 		virtual ~Entity() = default;
 
-		explicit Entity(Window*, Flags = Flags(), Entity* = nullptr);
+		explicit Entity(Window*, LayerMask layers = LayerMask::All, Flags = Flags(), Entity* = nullptr);
 
 		void Destroy(bool flagChildren = true);
 
@@ -30,7 +31,10 @@ namespace gE
 	 private:
 		Window* const _window = nullptr;
 		Entity* _parent = nullptr;
+
 		Flags _flags;
+		LayerMask _layers;
+
 		std::vector<Entity*> _children;
 
 		Transform _transform = Transform(this);

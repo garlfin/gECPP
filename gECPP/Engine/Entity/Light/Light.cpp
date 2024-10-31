@@ -15,7 +15,7 @@ namespace gE
 	CameraSettings1D CreatePointSettings(u16);
 
 	Light::Light(Window* w, Camera& c, IDepthTarget& d) :
-		Entity(w, Flags(false, UINT8_MAX)),
+		Entity(w),
 		IDepthTarget(d),
 		Managed(&GetWindow().GetLights(), *this),
 		_camera(c)

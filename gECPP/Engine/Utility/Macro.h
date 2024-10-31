@@ -141,4 +141,16 @@ using std::move;
 	DEFAULT_OPERATOR_COPY(TYPE); \
 	DEFAULT_OPERATOR_MOVE(TYPE)
 
+#define ENUM_OPERATOR(TYPE, OP) \
+	inline constexpr TYPE operator OP(TYPE a, TYPE b) \
+	{ \
+		return (TYPE) (std::underlying_type_t<TYPE>(a) OP std::underlying_type_t<TYPE>(b)); \
+	} \
+	inline TYPE& operator OP##=(TYPE& a, TYPE b) \
+	{ \
+		return a = (TYPE) (std::underlying_type_t<TYPE>(a) OP std::underlying_type_t<TYPE>(b)); \
+	}
+
+#define ENUM_OPERATOR_
+
 // Yapping about newline >: (
