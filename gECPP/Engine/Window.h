@@ -5,6 +5,7 @@
 #include <Engine/Component/Transform.h>
 #include <Engine/Component/Camera/Camera.h>
 #include <Engine/Component/MeshRenderer/MeshRenderer.h>
+#include <Engine/Component/Physics/Physics.h>
 #include <Engine/Entity/CubemapCapture.h>
 #include <Engine/Entity/SDFCapture.h>
 #include <Engine/Entity/VoxelCapture.h>
@@ -15,15 +16,20 @@
 #include <Graphics/Buffer/VAO.h>
 #include <Graphics/Shader/Shader.h>
 #include <Graphics/Texture/TextureSlotManager.h>
+#include <Engine/Utility/TickHandler.h>
 
 #include "WindowState.h"
+
 
 struct GLFWwindow;
 struct GLFWvidmode;
 
-#define TAA_GROUP_SIZE 8
-#define HIZ_GROUP_SIZE 8
-#define VOXEL_TAA_GROUP_SIZE 4
+#define GE_REFRESH_RATE _monitor.RefreshRate
+
+#define GE_DEBUG_POLL_RATE 16
+#define GE_UPDATE_TARGET_TICKRATE GE_REFRESH_RATE
+#define GE_RENDER_TARGET_TICKRATE GE_REFRESH_RATE
+#define GE_PHYSICS_TARGET_TICKRATE GE_PX_MIN_TICKRATE
 
 namespace gE
 {
@@ -82,8 +88,9 @@ namespace gE
 		GET_CONST(VoxelPipeline::Buffers&, VoxelBuffers, VoxelBuffers);
 		GET_CONST(DefaultPipeline::Buffers&, PipelineBuffers, PipelineBuffers);
 		GET_CONST(double, Time, _time);
-		GET_CONST(double, FrameDelta, _frameDelta);
+		GET_CONST(double, FrameDelta, _renderDelta);
 		GET_CONST(double, UpdateDelta, _updateDelta);
+		GET_CONST(double, PhysicsDelta, _physicsDelta);
 
 		NODISCARD ALWAYS_INLINE GLFWwindow* GLFWWindow() const { return _window; }
 
@@ -108,6 +115,7 @@ namespace gE
 		SmartPointer<LightManager> Lights;
 		SmartPointer<CubemapManager> Cubemaps;
 		SmartPointer<RendererManager> Renderers;
+		SmartPointer<PhysicsManager> Physics;
 		CullingManager CullingManager;
 		GPU::TextureSlotManager SlotManager;
 
@@ -128,7 +136,10 @@ namespace gE
 		GLFWwindow* _window;
 		Monitor _monitor;
 		double _time = DEFAULT;
-		double _updateDelta, _frameDelta;
+
+		double _renderDelta = DEFAULT;
+		double _updateDelta = DEFAULT;
+		double _physicsDelta = DEFAULT;
 	};
 }
 

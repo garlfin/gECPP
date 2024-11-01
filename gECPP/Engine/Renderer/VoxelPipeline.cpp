@@ -12,6 +12,8 @@
 #define MODE_TAA_VELOCITY 2
 #define MODE_TAA_COPY 3
 
+#define VOXEL_TAA_GROUP_SIZE 4
+
 namespace gE::VoxelPipeline
 {
 	Buffers::Buffers(Window* window) : _voxelBuffer(window, 1)

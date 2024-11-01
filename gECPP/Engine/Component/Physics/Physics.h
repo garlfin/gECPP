@@ -10,6 +10,7 @@
 #include <Jolt/Core/TempAllocator.h>
 #include <Jolt/Physics/PhysicsSystem.h>
 #include <Jolt/Physics/Collision/ObjectLayer.h>
+#include <Jolt/Core/JobSystemThreadPool.h>
 
 #include <Engine/Component/Component.h>
 #include <Engine/Utility/AssetManager.h>
@@ -18,6 +19,7 @@
 #define GE_PX_MAX_BODIES 1024
 #define GE_PX_MAX_CONSTRAINTS (GE_PX_MAX_BODIES * 4)
 #define GE_PX_MAX_BODY_PAIRS (GE_PX_MAX_BODIES * 4)
+#define GE_PX_MIN_TICKRATE 60
 
 namespace px = JPH;
 
@@ -47,12 +49,21 @@ namespace gE
 		px::BroadPhaseLayer _layers[2] = DEFAULT;
 	};
 
-	class Physics final : public ComponentManager<Component>
+	class PhysicsObject : public Component
 	{
 	public:
-		explicit Physics(Window* window);
+	protected:
+		px::Body* _body;
+	};
 
-		~Physics() override;
+	class PhysicsManager final : public ComponentManager<Component>
+	{
+	public:
+		explicit PhysicsManager(Window* window);
+
+		void Simulate(float delta);
+
+		~PhysicsManager() override;
 
 	private:
 		CollisionFilter _filter;
@@ -62,6 +73,7 @@ namespace gE
 		SmartPointer<px::Factory> _factory;
 		SmartPointer<px::TempAllocatorImpl> _allocator;
 		SmartPointer<px::PhysicsSystem> _physics;
+		SmartPointer<px::JobSystemThreadPool> _jobSystem;
 	};
 }
 

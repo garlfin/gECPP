@@ -7,21 +7,16 @@
 #include <GLAD/glad.h>
 #include <GLFW/glfw3.h>
 
-#ifdef DEBUG
-	#define ENABLE_STATISTICS
-#endif
-
-#define CLAMP_FPS _monitor.RefreshRate
+#include "Utility/TickHandler.h"
 
 using namespace gE;
 
-#ifdef ENABLE_STATISTICS
-	char WindowTitleBuf[100];
+#ifdef DEBUG
+	char WindowTitleBuf[256];
 #endif
 
 #define BRDF_SIZE 512
 #define BRDF_GROUP_SIZE 8
-#define FPS_POLL_RATE 0.1
 #define US_TO_MS (1.0 / 1000000.f)
 #define MS_TO_S (1.0 / 1000.f)
 
@@ -68,11 +63,11 @@ Window::~Window()
 }
 
 #ifdef DEBUG
-void DebugMessage(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
-{
-	if(severity == GL_DEBUG_SEVERITY_NOTIFICATION) return;
-	std::cout << message << std::endl;
-}
+	void DebugMessage(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
+	{
+		if(severity == GL_DEBUG_SEVERITY_NOTIFICATION) return;
+		std::cout << message << std::endl;
+	}
 #endif
 
 bool Window::Run()
@@ -83,77 +78,70 @@ bool Window::Run()
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 #endif
 
-#ifdef ENABLE_STATISTICS
-	u64 pollTick = 0;
-#endif
-
-	_time = glfwGetTime();
-
 	Window::OnInit();
 	glfwSwapInterval(0);
 
 	OnInit();
 	glMemoryBarrier(GL_ALL_BARRIER_BITS);
 
-#ifdef ENABLE_STATISTICS
-	LOG("INIT TOOK " << _time);
-#endif
-
-	_time = glfwGetTime();
-	_frameDelta = 0.0;
+#ifdef DEBUG
+	LOG("INIT TOOK " << glfwGetTime());
 
 	GLuint timer;
 	u64 timerResult;
 
 	glCreateQueries(GL_TIME_ELAPSED, 1, &timer);
 
+	auto debugTick = TickHandler(GE_DEBUG_POLL_RATE);
+#endif
+
+	auto updateTick = TickHandler(GE_UPDATE_TARGET_TICKRATE);
+	auto physicsTick = TickHandler(GE_PHYSICS_TARGET_TICKRATE);
+	auto renderTick = TickHandler(GE_RENDER_TARGET_TICKRATE);
+
 	while(!glfwWindowShouldClose(_window))
 	{
 		glfwPollEvents();
 
-		double currentTime = glfwGetTime();
-		_updateDelta = currentTime - _time;
-		_time = currentTime;
+		_time = glfwGetTime();
 
-		OnUpdate((float) _updateDelta);
+		if(const TickResult result = updateTick.ShouldTick(); result.ShouldTick)
+			OnUpdate(_updateDelta = result.Delta);
 
-		currentTime = glfwGetTime();
-		_frameDelta += _updateDelta + currentTime - _time;
+		if(const TickResult result = physicsTick.ShouldTick(); result.ShouldTick)
+			Physics->Simulate(_physicsDelta = result.Delta);
 
-	#ifdef CLAMP_FPS
-		if(_frameDelta < 1.0 / (CLAMP_FPS)) continue;
-	#endif
-
-	#ifdef ENABLE_STATISTICS
-		bool tickStatistics = _time > FPS_POLL_RATE * pollTick;
-		if(tickStatistics) glBeginQuery(GL_TIME_ELAPSED, timer);
-	#endif
-
-		OnRender((float) _frameDelta);
-
-	#ifdef ENABLE_STATISTICS
-		if(tickStatistics)
+		if(const TickResult result = renderTick.ShouldTick(); result.ShouldTick)
 		{
-			glEndQuery(GL_TIME_ELAPSED);
-			glGetQueryObjectui64v(timer, GL_QUERY_RESULT, &timerResult);
+		#ifdef DEBUG
+			const TickResult debugTickResult = debugTick.ShouldTick();
+			if(debugTickResult.ShouldTick) glBeginQuery(GL_TIME_ELAPSED, timer);
+		#endif
 
-			pollTick++;
-			float ms = timerResult * US_TO_MS * MS_TO_S;
+			OnRender(_renderDelta = result.Delta);
 
-			sprintf_s(
-				WindowTitleBuf,
-				"FPS: %u / %f, GPU/T:%u / %f, TICK: %f",
-				(unsigned) (1.0 / _frameDelta), _frameDelta,
-				(unsigned) (1.0 / ms), ms,
-				_updateDelta
-			);
+		#ifdef DEBUG
+			if(debugTickResult.ShouldTick)
+			{
+				glEndQuery(GL_TIME_ELAPSED);
+				glGetQueryObjectui64v(timer, GL_QUERY_RESULT, &timerResult);
 
-			glfwSetWindowTitle(_window, WindowTitleBuf);
+				float ms = timerResult * US_TO_MS * MS_TO_S;
+
+				sprintf_s(
+					WindowTitleBuf,
+					"FPS: %u / %f, FPS/T: %u / %f, UPDATE: %u / %f",
+					(unsigned) (1.0 / result.Delta), result.Delta,
+					(unsigned) (1.0 / ms), ms,
+					(unsigned) (1.0 / _updateDelta), _updateDelta
+				);
+
+				glfwSetWindowTitle(_window, WindowTitleBuf);
+			}
+		#endif
+
+			glfwSwapBuffers(_window);
 		}
-	#endif
-
-		glfwSwapBuffers(_window);
-		_frameDelta = 0.0;
 	}
 
 	return false;
@@ -171,6 +159,7 @@ void Window::OnInit()
 	Lights = ptr_create<LightManager>(this);
 	Cubemaps = ptr_create<CubemapManager>(this);
 	Renderers = ptr_create<RendererManager>(this);
+	Physics = ptr_create<PhysicsManager>(this);
 
 	BlitShader = ptr_create<API::Shader>(this, "Resource/Shader/blit.vert", "Resource/Shader/blit.frag");
 	TAAShader = ptr_create<API::ComputeShader>(this, "Resource/Shader/PostProcess/taa.comp");

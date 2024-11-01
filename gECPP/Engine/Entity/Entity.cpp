@@ -14,10 +14,7 @@ namespace gE
 	Entity::Entity(Window* w, LayerMask layers, Flags flags, Entity* parent) :
 		_window(w), _parent(parent), _flags(flags), _layers(layers)
 	{
-		// error: invalid conversion from 'int' to 'gE::LayerMask::T' {aka 'gE::LayerMask::LayerMask'}
-		if(flags.Static)
-			_layers |= LayerMask::Static;
-
+		if(flags.Static) _layers |= LayerMask::Static;
 		if(parent) parent->_children.push_back(this);
 	}
 

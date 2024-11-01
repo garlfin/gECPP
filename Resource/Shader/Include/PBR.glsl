@@ -184,7 +184,7 @@ float GGXNDFPoint(float nDotV, float roughness, float radius, float distance)
     float alpha = max(roughness * roughness, 0.01);
     float alphaPrime = roughness + 1.0 / (radius + 2 * distance);
     // Sorta deviated from Epic Games' paper, but it looks good to me so oh well.
-    return GGXNDFAlpha(nDotV, alpha) * alphaPrime;
+    return GGXNDFAlpha(nDotV, alpha) * alphaPrime / PI;
 }
 
 float GGXNDFAlpha(float nDotH, float alpha)

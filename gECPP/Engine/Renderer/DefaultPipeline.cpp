@@ -13,6 +13,9 @@
 #define HIZ_MODE_COPY 0
 #define HIZ_MODE_DOWNSAMPLE 1
 
+#define TAA_GROUP_SIZE 8
+#define HIZ_GROUP_SIZE 8
+
 namespace gE
 {
 	DefaultPipeline::Buffers::Buffers(Window* window) :

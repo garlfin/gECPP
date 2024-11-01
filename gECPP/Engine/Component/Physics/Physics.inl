@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <bitset>
-
 #include "Physics.h"
 #include "Engine/Component/Layer.h"
 
