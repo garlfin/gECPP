@@ -8,7 +8,7 @@
 
 namespace gE
 {
-    PhysicsManager::PhysicsManager(Window* window)
+    PhysicsManager::PhysicsManager(Window* window) : ComponentManager(window)
     {
         px::RegisterDefaultAllocator();
 

@@ -61,7 +61,7 @@ namespace gE
 		Window& window = camera.GetWindow();
 		TextureSize2D size = camera.GetViewportSize();
 
-		window.State = State::Shadow;
+		window.RenderState = RenderState::Shadow;
 
 		glDepthMask(1);
 		glColorMask(0, 0, 0, 0);
@@ -120,7 +120,7 @@ namespace gE
 		Window& window = camera->GetWindow();
 		TextureSize2D size = camera.GetViewportSize();
 
-		window.State = State::ShadowCube;
+		window.RenderState = RenderState::ShadowCube;
 
 		glDepthMask(1);
 		glColorMask(0, 0, 0, 0);

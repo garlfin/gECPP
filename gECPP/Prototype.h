@@ -3,8 +3,8 @@
 //
 
 #pragma once
+
 #include <gETF/Prototype.h>
-#include "Engine/Math/Math.h"
 
 namespace gE
 {
@@ -31,6 +31,9 @@ namespace gE
 	template<class T> class LinkedList;
 	template<class T> class Manager;
 	template<class T> class Managed;
+
+	using ComponentUpdateFunction = void (Component::*)(float);
+	using ComponentRenderFunction = void (Component::*)(float, Camera*);
 
 }
 

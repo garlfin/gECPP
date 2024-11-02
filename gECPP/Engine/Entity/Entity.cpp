@@ -48,6 +48,29 @@ namespace gE
 		 _window(o->GetWindow()), _owner(o)
 	{}
 
+	void IComponentManager::OnUpdate(float d)
+	{
+		const EngineFlags flags = _window->EngineState;
+
+		for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())
+			(**i)->OnInit();
+
+		List.MergeList(InitializationList);
+
+		for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())
+			((***i).*flags.UpdateFunction)(d);
+	}
+
+	void IComponentManager::OnRender(float d, Camera* camera)
+	{
+		const EngineFlags flags = _window->EngineState;
+
+		for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())
+			((***i).*flags.RenderFunction)(d, camera);
+	}
+
 	Behavior::Behavior(Entity* o) : Component(o, &o->GetWindow().GetBehaviors())
-	{}
+	{
+
+	}
 }

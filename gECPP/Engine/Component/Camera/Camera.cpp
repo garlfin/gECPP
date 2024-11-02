@@ -50,7 +50,7 @@ namespace gE
 		cam.Planes = GetClipPlanes();
 		cam.Size = _viewportSize;
 		cam.Projection = Projection;
-		cam.PreviousViewProjection = Projection * inverse(transform.PreviousModel());
+		cam.PreviousViewProjection = Projection * inverse(transform.PreviousRenderModel());
 		cam.FrameDelta = GetWindow().GetFrameDelta();
 
 		cam.DepthTexture = (handle) 0u;

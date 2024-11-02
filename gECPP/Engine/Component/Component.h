@@ -4,10 +4,10 @@
 
 #pragma once
 
-#include <Engine/Utility/Manager.h>
-
 #include "Prototype.h"
-#include "Engine/Utility/RelativePointer.h"
+
+#include <Engine/Utility/Manager.h>
+#include <Engine/Utility/RelativePointer.h>
 
 namespace gE
 {
@@ -19,7 +19,11 @@ namespace gE
 		GET_CONST(Entity&, Owner, *_owner);
 		GET_CONST(Window&, Window, _window);
 
+		using UpdateFunction = void(Component::*)(float);
+		using RenderFunction = void(Component::*)(float, Camera*);
+
 		virtual void OnInit() { };
+		virtual void OnFixedUpdate(float d) { };
 		virtual void OnUpdate(float d) { };
 		virtual void OnRender(float d, Camera* camera) { };
 		virtual void OnDestroy() { };
@@ -48,26 +52,14 @@ namespace gE
 	class IComponentManager : public Manager<Managed<Component>>
 	{
 	 public:
-		using Manager::Manager;
+		explicit IComponentManager(Window* window) : Manager(), _window(window) {};
 
-		void OnUpdate(float d) override
-		{
-			for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())
-				(**i)->OnInit();
-
-			List.MergeList(InitializationList);
-
-			for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())
-				(**i)->OnUpdate(d);
-		}
-
-		void OnRender(float d, Camera* camera) override
-		{
-			for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())
-				(**i)->OnRender(d, camera);
-		}
+		void OnUpdate(float d) override;
+		void OnRender(float d, Camera* camera) override;
 
 		ALWAYS_INLINE void OnRender(float d) { OnRender(d, nullptr); }
+
+		GET_CONST(Window*, Window, _window);
 
 		friend class Component;
 
@@ -77,6 +69,9 @@ namespace gE
 		void OnRegister(Managed<Component>& t) override { InitializationList.Add(t.GetIterator()); };
 
 		LinkedList<Managed<Component>> InitializationList;
+
+	private:
+		Window* _window;
 	};
 
 	template<class T>

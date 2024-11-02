@@ -120,7 +120,7 @@ namespace gE
 
 		u32 instanceCount = 0, totalInstanceCount = 0, batchCount = 0;
 
-		buffers.Scene.State = window.State;
+		buffers.Scene.State = window.RenderState;
 
 		for(ITER_T* m = List.GetFirst(); m; m = m->GetNext())
 		{
@@ -129,7 +129,7 @@ namespace gE
 			GPU::ObjectInfo& object = buffers.Scene.Objects[totalInstanceCount];
 
 			object.Model = call.GetTransform().Model();
-			object.PreviousModel = call.GetTransform().PreviousModel();
+			object.PreviousModel = call.GetTransform().PreviousRenderModel();
 			object.Normal = inverse(call.GetTransform().Model());
 
 		#ifdef GE_ENABLE_BATCHING

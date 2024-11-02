@@ -45,7 +45,7 @@ namespace gE
 		Window& window = camera.GetWindow();
 
 		// PRE-Z
-		window.State = State::PreZ;
+		window.RenderState = RenderState::PreZ;
 
 		glDepthMask(1);
 		glColorMask(0, 0, 0, 0);
@@ -90,7 +90,7 @@ namespace gE
 		window.GetCubemaps().UseNearestCubemaps(glm::vec3(0.0f));
 
 		// COLOR
-		window.State = State::Color;
+		window.RenderState = RenderState::Color;
 
 		glDepthMask(0);
 		glColorMask(1, 1, 1, 1);

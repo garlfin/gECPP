@@ -19,15 +19,11 @@ namespace gE
 	{
 		Entity* parent = GetOwner().GetParent();
 
-		_flags.Invalidated |= parent && parent->GetTransform()._flags.Invalidated;
-		_flags.PreviousInvalidated = _flags.Invalidated;
-		if(!_flags.Invalidated) return;
+		_flags.UpdateInvalidated |= parent && parent->GetTransform()._flags.UpdateInvalidated;
 
-		_model = GetParentTransform();
-		_model = translate(_model, _transform.Location);
-		_model *= toMat4(_transform.Rotation);
-		_model = scale(_model, _transform.Scale);
+		if(!_flags.Initialized && !_flags.UpdateInvalidated) return;
 
+		_model = GetParentTransform() * _transform.ToMat4();
 		Decompose(_model, _globalTransform.Location, _globalTransform.Rotation, _globalTransform.Scale);
 	}
 
@@ -40,14 +36,35 @@ namespace gE
 		_model(1.0)
 	{}
 
+	TransformData TransformData::mix(const TransformData& a, const TransformData& b, float factor)
+	{
+		return TransformData
+		{
+			glm::mix(a.Location, b.Location, factor),
+			glm::mix(a.Scale, b.Scale, factor),
+			slerp(a.Rotation, b.Rotation, factor)
+		};
+	}
+
+	glm::mat4 TransformData::ToMat4() const
+	{
+		glm::mat4 model = translate(glm::mat4(1.0), Location);
+		model *= toMat4(Rotation);
+		model = scale(model, Scale);
+
+		return model;
+	}
+
 	Transform::Transform(Entity* o, const TransformData& d) : Component(o, &GetWindow().GetTransforms()),
-		_model(1.0)
+	                                                          _model(1.0)
 	{
 		Set(d);
 	}
 
 	void TransformManager::OnUpdate(float d)
 	{
+		const EngineFlags flags = GetWindow()->EngineState;
+
 		for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())
 			(**i)->OnInit();
 
@@ -64,6 +81,6 @@ namespace gE
 		}
 
 		for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())
-			(**i)->OnUpdate(d);
+			((***i).*flags.UpdateFunction)(d);
 	}
 }

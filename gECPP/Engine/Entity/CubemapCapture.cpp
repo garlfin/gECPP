@@ -72,7 +72,7 @@ namespace gE
 		glDisable(GL_CULL_FACE);
 		glDepthFunc(GL_LEQUAL);
 
-		_skyboxVAO.Draw(0, _window->State.InstanceMultiplier);
+		_skyboxVAO.Draw(0, _window->RenderState.InstanceMultiplier);
 	}
 
 	void CubemapTarget::RenderPass(float, Camera*)
@@ -82,7 +82,7 @@ namespace gE
 
 		window.GetLights().UseNearestLights(glm::vec3(0.0f));
 
-		window.State = State::Cubemap;
+		window.RenderState = RenderState::Cubemap;
 
 		glDepthMask(1);
 		glColorMask(1, 1, 1, 1);

@@ -27,7 +27,7 @@ struct GLFWvidmode;
 #define GE_REFRESH_RATE _monitor.RefreshRate
 
 #define GE_DEBUG_POLL_RATE 16
-#define GE_UPDATE_TARGET_TICKRATE GE_REFRESH_RATE
+#define GE_UPDATE_TARGET_TICKRATE 60
 #define GE_RENDER_TARGET_TICKRATE GE_REFRESH_RATE
 #define GE_PHYSICS_TARGET_TICKRATE GE_PX_MIN_TICKRATE
 
@@ -81,16 +81,20 @@ namespace gE
 		GET(GPU::TextureSlotManager&, SlotManager, SlotManager);
 
 		// Engine States
-		RenderFlags State = DEFAULT;
+		RenderFlags RenderState = DEFAULT;
+		EngineFlags EngineState = DEFAULT;
 
 		GET_CONST(TextureSize2D, Size, _size);
 		GET_CONST(const Monitor&, Monitor, _monitor);
 		GET_CONST(VoxelPipeline::Buffers&, VoxelBuffers, VoxelBuffers);
 		GET_CONST(DefaultPipeline::Buffers&, PipelineBuffers, PipelineBuffers);
+
 		GET_CONST(double, Time, _time);
-		GET_CONST(double, FrameDelta, _renderDelta);
-		GET_CONST(double, UpdateDelta, _updateDelta);
-		GET_CONST(double, PhysicsDelta, _physicsDelta);
+		GET_CONST(double, FrameDelta, _renderTick.GetDelta());
+		GET_CONST(double, PhysicsDelta, _physicsTick.GetDelta());
+
+		GET_CONST(const TickHandler&, RenderTick, _renderTick);
+		GET_CONST(const TickHandler&, PhysicsTick, _physicsTick);
 
 		NODISCARD ALWAYS_INLINE GLFWwindow* GLFWWindow() const { return _window; }
 
@@ -137,9 +141,8 @@ namespace gE
 		Monitor _monitor;
 		double _time = DEFAULT;
 
-		double _renderDelta = DEFAULT;
-		double _updateDelta = DEFAULT;
-		double _physicsDelta = DEFAULT;
+		TickHandler _renderTick = DEFAULT;
+		TickHandler _physicsTick = DEFAULT;
 	};
 }
 

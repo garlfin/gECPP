@@ -16,7 +16,7 @@ namespace gE
 
 	void Material::Bind() const
 	{
-		RenderFlags state = GetWindow().State;
+		RenderFlags state = GetWindow().RenderState;
 
 		if((bool) _depthFunc && state.EnableDepthTest)
 		{

@@ -21,9 +21,11 @@ using namespace gE;
 #define MS_TO_S (1.0 / 1000.f)
 
 Window::Window(glm::u16vec2 size, const char* name) :
-	_size(size), _name(strdup(name))
+	Cameras(this), Transforms(this),
+	CullingManager(this), Behaviors(this),
+    _size(size), _name(strdup(name))
 {
-	if(!glfwInit()) GE_FAIL("Failed to initialize GLFW.");
+	if (!glfwInit()) GE_FAIL("Failed to initialize GLFW.");
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
@@ -36,20 +38,20 @@ Window::Window(glm::u16vec2 size, const char* name) :
 
 	GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
 	_monitor = Monitor(glfwGetVideoMode(primaryMonitor));
-	if((glm::u16vec2) _monitor.Size != size) primaryMonitor = nullptr;
+	if ((glm::u16vec2)_monitor.Size != size) primaryMonitor = nullptr;
 
 	_window = glfwCreateWindow(size.x, size.y, name, primaryMonitor, nullptr);
-	if(!_window) GE_FAIL("Failed to create Window.");
+	if (!_window) GE_FAIL("Failed to create Window.");
 
 	glfwMakeContextCurrent(_window);
 
 	PVR::Header iconHeader;
 	Array<u8> iconData = PVR::Read("Resource/gE.PVR", iconHeader);
 
-	GLFWimage image{ (int) iconHeader.Size.x, (int) iconHeader.Size.y, iconData.Data() };
+	GLFWimage image{(int)iconHeader.Size.x, (int)iconHeader.Size.y, iconData.Data()};
 	glfwSetWindowIcon(_window, 1, &image);
 
-	if(!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) GE_FAIL("Failed to initialize GLAD.");
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) GE_FAIL("Failed to initialize GLAD.");
 
 	LOG("Vendor: " << glGetString(GL_VENDOR));
 	LOG("Renderer: " << glGetString(GL_RENDERER));
@@ -95,9 +97,8 @@ bool Window::Run()
 	auto debugTick = TickHandler(GE_DEBUG_POLL_RATE);
 #endif
 
-	auto updateTick = TickHandler(GE_UPDATE_TARGET_TICKRATE);
-	auto physicsTick = TickHandler(GE_PHYSICS_TARGET_TICKRATE);
-	auto renderTick = TickHandler(GE_RENDER_TARGET_TICKRATE);
+	_physicsTick = TickHandler(GE_PHYSICS_TARGET_TICKRATE);
+	_renderTick = TickHandler(144);
 
 	while(!glfwWindowShouldClose(_window))
 	{
@@ -105,23 +106,35 @@ bool Window::Run()
 
 		_time = glfwGetTime();
 
-		if(const TickResult result = updateTick.ShouldTick(); result.ShouldTick)
-			OnUpdate(_updateDelta = result.Delta);
-
-		if(const TickResult result = physicsTick.ShouldTick(); result.ShouldTick)
-			Physics->Simulate(_physicsDelta = result.Delta);
-
-		if(const TickResult result = renderTick.ShouldTick(); result.ShouldTick)
+		if(_physicsTick.ShouldTick(_time))
 		{
+			EngineState.UpdateFunction = &Component::OnFixedUpdate;
+			EngineState.UpdateType = UpdateType::FixedUpdate;
+
+			OnUpdate(_physicsTick.GetDelta());
+			Physics->Simulate(_physicsTick.GetDelta());
+		}
+
+		if(_renderTick.ShouldTick(_time))
+		{
+			EngineState.UpdateFunction = &Component::OnUpdate;
+			EngineState.UpdateType = UpdateType::Update;
+			EngineState.RenderFunction = &Component::OnRender;
+			EngineState.RenderType = RenderType::Render;
+
+			OnUpdate(_renderTick.GetDelta());
+
 		#ifdef DEBUG
-			const TickResult debugTickResult = debugTick.ShouldTick();
-			if(debugTickResult.ShouldTick) glBeginQuery(GL_TIME_ELAPSED, timer);
+			const double afterUpdateTime = glfwGetTime();
+
+			const bool shouldDebugTick = debugTick.ShouldTick(_time);
+			if(shouldDebugTick) glBeginQuery(GL_TIME_ELAPSED, timer);
 		#endif
 
-			OnRender(_renderDelta = result.Delta);
+			OnRender(_renderTick.GetDelta());
 
 		#ifdef DEBUG
-			if(debugTickResult.ShouldTick)
+			if(shouldDebugTick)
 			{
 				glEndQuery(GL_TIME_ELAPSED);
 				glGetQueryObjectui64v(timer, GL_QUERY_RESULT, &timerResult);
@@ -131,9 +144,9 @@ bool Window::Run()
 				sprintf_s(
 					WindowTitleBuf,
 					"FPS: %u / %f, FPS/T: %u / %f, UPDATE: %u / %f",
-					(unsigned) (1.0 / result.Delta), result.Delta,
-					(unsigned) (1.0 / ms), ms,
-					(unsigned) (1.0 / _updateDelta), _updateDelta
+					(unsigned) ceil(1.0 / _renderTick.GetDelta()),_renderTick.GetDelta(),
+					(unsigned) ceil(1.0 / ms), ms,
+					(unsigned) ceil(1.0 / (afterUpdateTime - _time)), afterUpdateTime - _time
 				);
 
 				glfwSetWindowTitle(_window, WindowTitleBuf);
@@ -207,15 +220,10 @@ void Window::Blit(const API::Texture& texture)
 
 void Window::OnUpdate(float delta)
 {
-	Transforms.OnUpdate(delta);
-
 	Cameras.OnUpdate(delta);
-	Renderers->OnUpdate(delta);
-	Lights->OnUpdate(delta);
-	Cubemaps->OnUpdate(delta);
-	CullingManager.OnUpdate(delta);
-
 	Behaviors.OnUpdate(delta);
+
+	Transforms.OnUpdate(delta);
 }
 
 void Window::OnRender(float delta)

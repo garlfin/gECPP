@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <gECPP/Prototype.h>
 #include <Engine/Utility/Macro.h>
 #include <Engine/Math/Math.h>
 
@@ -17,7 +18,7 @@ namespace gE
 		Both = Depth | Color,
 	};
 
-	inline WriteMode operator&(WriteMode a, WriteMode b) { return WriteMode(u8(a) & u8(b)); }
+	ENUM_OPERATOR(WriteMode, &);
 
 	enum class VoxelWriteMode : u8
 	{
@@ -29,6 +30,20 @@ namespace gE
 	{
 		Normal,
 		Conservative
+	};
+
+	enum class UpdateType : u8
+	{
+		FixedUpdate,
+		Update,
+		LateUpdate
+	};
+
+	enum class RenderType : u8
+	{
+		PreRender,
+		Render,
+		PostRender
 	};
 
 	struct RenderFlags
@@ -44,7 +59,15 @@ namespace gE
 		u8 InstanceMultiplier : 3;
 	};
 
-	namespace State
+	struct EngineFlags
+	{
+		UpdateType UpdateType;
+		RenderType RenderType;
+		ComponentUpdateFunction UpdateFunction;
+		ComponentRenderFunction RenderFunction;
+	};
+
+	namespace RenderState
 	{
 		CONSTEXPR_GLOBAL RenderFlags Color { WriteMode::Color, VoxelWriteMode::Read, true, true, true, true, true, RasterMode::Normal, 1 };
 		CONSTEXPR_GLOBAL RenderFlags PreZ { WriteMode::Depth, VoxelWriteMode::Read, true, false, false, true, true, RasterMode::Normal, 1 };

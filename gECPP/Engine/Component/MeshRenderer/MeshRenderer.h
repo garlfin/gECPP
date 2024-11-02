@@ -37,7 +37,7 @@ namespace gE
 	class RendererManager : public ComponentManager<MeshRenderer>
 	{
 	 public:
-		explicit RendererManager(Window* window) : _drawCallManager(window) {};
+		explicit RendererManager(Window* window) : ComponentManager(window), _drawCallManager(window) {};
 
 		void OnRender(float d, Camera* camera) override;
 

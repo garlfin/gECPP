@@ -5,41 +5,48 @@
 #pragma once
 
 #include <Engine/Math/Math.h>
-#include <GLFW/glfw3.h>
 
-struct TickResult
-{
-    double Delta;
-    double CurrentTime;
-    bool ShouldTick;
-};
-
-template<bool STRICT = false>
 struct TickHandler
 {
 public:
     TickHandler() = default;
-    explicit TickHandler(u8 tickRate) : TickRate(tickRate) {};
+    explicit TickHandler(u32 tickRate) : TickRate(tickRate) {};
 
-    u8 TickRate = 0;
+    u32 TickRate = 0;
 
-    TickResult ShouldTick()
-    {
-        const double requiredTime = 1.0 / TickRate;
+    GET_CONST(float, LerpFactor, _lerpFactor);
+    GET_CONST(double, NextTickTime, _previousTime + GetTickDelta());
+    GET_CONST(double, TickDelta, 1.0 / (double) TickRate);
+    GET_CONST(double, Delta, _delta);
 
-        const double time = glfwGetTime();
-        const double delta = time - _previousTime;
-
-        if(delta < requiredTime) return { delta, time, false };
-
-        if constexpr(STRICT)
-            _previousTime = time - delta + requiredTime;
-        else
-            _previousTime = time;
-
-        return { delta, time, true };
-    }
+    bool ShouldTick(double time);
 
 private:
+    float _lerpFactor = DEFAULT;
     double _previousTime = DEFAULT;
+    double _delta = DEFAULT;
 };
+
+inline bool TickHandler::ShouldTick(const double time)
+{
+    const double requiredDelta = GetTickDelta();
+    const double delta = time - _previousTime;
+    const double adjDelta = glm::min(delta - requiredDelta, requiredDelta);
+
+    if(!TickRate)
+    {
+        _lerpFactor = 1.0;
+        return true;
+    }
+
+    _lerpFactor = delta / requiredDelta;
+    _lerpFactor = std::min(_lerpFactor, 1.f);
+    if(_lerpFactor >= 1 - FLT_EPSILON) _lerpFactor = adjDelta / requiredDelta;
+
+    if(delta < requiredDelta) return false;
+
+    _previousTime = time - adjDelta;
+    _delta = delta;
+
+    return true;
+}
