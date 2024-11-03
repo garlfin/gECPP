@@ -107,21 +107,10 @@ bool Window::Run()
 		_time = glfwGetTime();
 
 		if(_physicsTick.ShouldTick(_time))
-		{
-			EngineState.UpdateFunction = &Component::OnFixedUpdate;
-			EngineState.UpdateType = UpdateType::FixedUpdate;
-
-			OnUpdate(_physicsTick.GetDelta());
-			Physics->Simulate(_physicsTick.GetDelta());
-		}
+			OnFixedUpdate(_physicsTick.GetDelta());
 
 		if(_renderTick.ShouldTick(_time))
 		{
-			EngineState.UpdateFunction = &Component::OnUpdate;
-			EngineState.UpdateType = UpdateType::Update;
-			EngineState.RenderFunction = &Component::OnRender;
-			EngineState.RenderType = RenderType::Render;
-
 			OnUpdate(_renderTick.GetDelta());
 
 		#ifdef DEBUG
@@ -218,8 +207,21 @@ void Window::Blit(const API::Texture& texture)
 	glEnable(GL_CULL_FACE);
 }
 
+void Window::OnFixedUpdate(float delta)
+{
+	EngineState.UpdateFunction = &Component::OnFixedUpdate;
+	EngineState.UpdateType = UpdateType::FixedUpdate;
+
+	Behaviors.OnUpdate(delta);
+
+	Physics->OnUpdate(_physicsTick.GetDelta());
+}
+
 void Window::OnUpdate(float delta)
 {
+	EngineState.UpdateFunction = &Component::OnUpdate;
+	EngineState.UpdateType = UpdateType::Update;
+
 	Cameras.OnUpdate(delta);
 	Behaviors.OnUpdate(delta);
 
@@ -228,6 +230,9 @@ void Window::OnUpdate(float delta)
 
 void Window::OnRender(float delta)
 {
+	EngineState.RenderFunction = &Component::OnRender;
+	EngineState.RenderType = RenderType::Render;
+
 	Behaviors.OnRender(delta, nullptr);
 
 	Lights->OnRender(delta, nullptr);

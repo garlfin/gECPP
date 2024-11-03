@@ -79,6 +79,7 @@ namespace gE
 		GET(CubemapManager&, Cubemaps, Cubemaps);
 		GET(CullingManager&, CullingManager, CullingManager);
 		GET(GPU::TextureSlotManager&, SlotManager, SlotManager);
+		GET(PhysicsManager&, Physics, Physics);
 
 		// Engine States
 		RenderFlags RenderState = DEFAULT;
@@ -102,6 +103,7 @@ namespace gE
 
 	 protected:
 		virtual void OnInit();
+		virtual void OnFixedUpdate(float);
 		virtual void OnUpdate(float);
 		virtual void OnRender(float);
 		virtual void OnDestroy() {};

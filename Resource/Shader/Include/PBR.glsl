@@ -113,6 +113,7 @@ vec3 GetLightingDirectional(const Vertex vert, const PBRFragment frag, const Lig
 vec3 GetLightingPoint(const Vertex vert, const PBRFragment frag, const Light light)
 {
     float radius = uintBitsToFloat(light.PackedSettings);
+    float strength = max(light.Color.r, max(light.Color.g, light.Color.b));
 
     // Vector Setup
     vec3 eye = normalize(Camera.Position - vert.Position);
@@ -147,13 +148,15 @@ vec3 GetLightingPoint(const Vertex vert, const PBRFragment frag, const Light lig
     vec3 kD = (1.0 - f) * (1.0 - frag.Metallic);
 
     // Final Calculations
-    vec3 specularBRDF = vec3(f * d * g) / max(4.0 * nDotL * nDotV, EPSILON);
+    vec3 specularBRDF = (f * d * g) / max(4.0 * nDotL * nDotV, EPSILON);
+    specularBRDF = min(specularBRDF, 1.0);
+
     vec3 diffuseBRDF = frag.Albedo * kD / PI;
 
     // Falloff of nDotL * nDotL is nicer to me
     float lambert = saturate(dot(frag.Normal, lightDir)) * 0.5 + 0.5;
     lambert = min(lambert, GetShadowPoint(vert, light));
-    float attenuation = FalloffPoint(lightDistance, 10.f);
+    float attenuation = FalloffPoint(lightDistance, strength * 10.0);
 
     return (diffuseBRDF + specularBRDF) * attenuation * lambert * light.Color;
 }
@@ -189,7 +192,7 @@ float GGXNDFPoint(float nDotV, float roughness, float radius, float distance)
 
 float GGXNDFAlpha(float nDotH, float alpha)
 {
-    float alphaSqr = max(alpha * alpha, 0.01);
+    float alphaSqr = max(alpha * alpha, 0.001);
 
     nDotH = mix(0.1, 1.0, nDotH);
 

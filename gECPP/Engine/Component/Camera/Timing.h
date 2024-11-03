@@ -22,10 +22,11 @@ namespace gE
 
 		NODISCARD bool Tick(float delta)
 		{
-			bool v = !_frame || TickSkip &&                                          // first frame or no skip
-					  _frame >= TickOffset && (_frame - TickOffset) % TickSkip == 0; // equal to tick
-			 _frame++;
-			return v;
+			bool tick = !_frame || !TickSkip || // first frame or no skip
+						(_frame >= TickOffset &&
+						(_frame - TickOffset) % TickSkip == 0); // equal to tick
+			_frame++;
+			return tick;
 		}
 
 	 private:

@@ -49,11 +49,48 @@ namespace gE
 		px::BroadPhaseLayer _layers[2] = DEFAULT;
 	};
 
+	struct PhysicsMaterial
+	{
+		float Friction = 0.5;
+		float Bounciness = 0.1;
+		float Buoyancy = 0.5;
+	};
+
+	struct RigidBodySettings
+	{
+		float Mass = 2.0;
+		float LinearDamping = 0.05f;
+		float AngularDamping = 0.05f;
+		float TerminalVelocity = 500.f;
+		float MaxAngularVelocity = 0.25f * std::numbers::pi * 60.f;
+		float GravityFactor = 1.0;
+		PhysicsMaterial Material = DEFAULT;
+	};
+
 	class PhysicsObject : public Component
 	{
 	public:
+		PhysicsObject(Entity* owner, const RigidBodySettings&, const PhysicsMaterial&, const px::Shape&);
+
+		GET_CONST(const PhysicsMaterial&, Material, Material);
+		void SetMaterial(const PhysicsMaterial& material);
+
+		GET_CONST(float, Density, _density);
+
+		void OnFixedUpdate(float d) override;
+		void OnUpdate(float d) override;
+		void OnRender(float d, Camera* camera) override;
+
+		~PhysicsObject() override;
+
 	protected:
-		px::Body* _body;
+		PhysicsMaterial Material;
+
+	private:
+		const px::Shape* _shape;
+		px::Body* _body = nullptr;
+
+		float _density;
 	};
 
 	class PhysicsManager final : public ComponentManager<Component>
@@ -61,7 +98,9 @@ namespace gE
 	public:
 		explicit PhysicsManager(Window* window);
 
-		void Simulate(float delta);
+		void OnUpdate(float d) override;
+
+		friend class PhysicsObject;
 
 		~PhysicsManager() override;
 
@@ -74,6 +113,7 @@ namespace gE
 		SmartPointer<px::TempAllocatorImpl> _allocator;
 		SmartPointer<px::PhysicsSystem> _physics;
 		SmartPointer<px::JobSystemThreadPool> _jobSystem;
+		SmartPointer<px::BodyInterface> _interface;
 	};
 }
 

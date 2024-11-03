@@ -27,6 +27,7 @@ namespace gE
 		GET_CONST(Window&, Window, *_window);
 		GET_CONST(Entity*, Parent, _parent);
 		GET_CONST(Flags, Flags, _flags);
+ 		GET_CONST(LayerMask, Layer, _layers);
 
 	 private:
 		Window* const _window = nullptr;
