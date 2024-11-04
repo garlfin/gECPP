@@ -8,7 +8,7 @@
 
 // In percent
 #ifndef SHADOW_SAMPLES
-    #define SHADOW_SAMPLES 32
+    #define SHADOW_SAMPLES 16
 #endif
 
 #ifndef SMRT_SAMPLES
@@ -48,7 +48,7 @@
 #endif
 
 #ifndef DIRECTIONAL_SHADOW_BIAS
-    #define DIRECTIONAL_SHADOW_BIAS 0.01
+    #define DIRECTIONAL_SHADOW_BIAS DIRECTIONAL_SHADOW_RADIUS
 #endif
 
 #ifndef POINT_SHADOW_BIAS
@@ -71,25 +71,43 @@ float GetShadowDirectional(const Vertex vert, const Light light, const vec4 frag
 {
 #ifdef EXT_BINDLESS
     float nDotL = max(dot(vert.Normal, light.Position), 0.0);
-    float bias = mix(0.1, 1.0, nDotL) * DIRECTIONAL_SHADOW_BIAS;
-	vec3 fragPos = DirectionalPerspectiveDivide(fragLightSpace, light.Planes);
+    float bias = 1.0 - nDotL + EPSILON;
+
+    // IDK if im missing something obvious but my normal perspective divide function aint working
+    // I have to transform it from NDC to 0-1 and then treat it as it was NDC????
+	vec4 fragPos = fragLightSpace;
+    fragPos.xyz = fragPos.xyz / fragPos.w;
+    fragPos.xyz = fragPos.xyz * 0.5 + 0.5;
+    fragPos.z = LinearizeDepthOrthoNDC(fragPos.z, light.Planes);
 
     if(TexcoordOutOfBounds(fragPos.xy) || fragPos.z > light.Planes.y) return 1.0;
 
     mat3 offsetMatrix = GetTBN(light.Position);
     float shadow = 0.0;
 
+#ifndef ENABLE_SMRT
+    for(int s = 0; s < SHADOW_SAMPLES; s++)
+    {
+        vec2 offset = VogelDisk(s, SHADOW_SAMPLES, IGNSample * PI * 2.0);
+        vec3 uv = fragPos.xyz;
+        uv.xy += offset * DIRECTIONAL_SHADOW_RADIUS * 0.5 / light.PackedSettings;
+
+        float depth = texture(sampler2D(light.Depth), uv.xy).r;
+        depth = LinearizeDepthOrthoNDC(depth, light.Planes);
+
+        if(uv.z < depth + bias * DIRECTIONAL_SHADOW_BIAS) shadow += 1.0;
+    }
+    shadow /= SHADOW_SAMPLES;
+#else
     for(int s = 0; s < SMRT_SAMPLES; s++)
     {
         vec2 offset = VogelDisk(s, SMRT_SAMPLES, IGNSample * PI * 2.0);
         vec3 rayDir = offsetMatrix * vec3(offset * DIRECTIONAL_SHADOW_RADIUS, 1.0) * SMRT_TRACE_DISTANCE;
 
-        if(dot(rayDir, vert.Normal) < 0.0) continue;
-
         vec3 rayStart = vert.Position + rayDir;
         rayStart = DirectionalPerspectiveDivide(light.ViewProjection * vec4(rayStart, 1.0), light.Planes);
 
-        vec3 rayEnd = vert.Position + rayDir * 0.005;
+        vec3 rayEnd = vert.Position + rayDir * 0.002 * bias;
         rayEnd = DirectionalPerspectiveDivide(light.ViewProjection * vec4(rayEnd, 1.0), light.Planes);
 
         for(int i = 0; i < SMRT_TRACE_STEPS; i++)
@@ -112,8 +130,8 @@ float GetShadowDirectional(const Vertex vert, const Light light, const vec4 frag
 
     shadow = saturate(shadow / SMRT_SAMPLES);
     shadow = pow(1.0 - shadow, SMRT_COLOR_BIAS);
-
-#if defined(ENABLE_SMRT) && defined(ENABLE_SMRT_CONTACT_SHADOW)
+#endif
+#ifdef ENABLE_SMRT_CONTACT_SHADOW
     if(shadow < EPSILON) return shadow;
 
     Ray ray;
@@ -134,7 +152,6 @@ float GetShadowDirectional(const Vertex vert, const Light light, const vec4 frag
 
     shadow = min(shadow, contactShadow / SMRT_CONTACT_SAMPLES);
 #endif
-
     return shadow;
 #else
     return 1.0;
