@@ -14,6 +14,7 @@
 #include <Engine/Entity/Light/PointLight.h>
 #include <Engine/Renderer/PBRMaterial.h>
 
+#include "Engine/Entity/EmptyColliderEntity.h"
 #include "Engine/Entity/PhysicsCube.h"
 
 using namespace gE::VoxelDemo;
@@ -39,15 +40,18 @@ void DemoWindow::OnInit()
 	auto cobbleMaterial = gE::ref_create<PBRMaterial>(this, rasterShader, cobbleSettings);
 	auto tileMaterial = gE::ref_create<PBRMaterial>(this, rasterShader, tileSettings);
 
-	Reference<API::IndexedVAO> cube = ref_create<API::IndexedVAO>();
-	ReadSerializableFromFile(this, "Resource/Model/Plane.001.vao", *cube);
+	Reference<API::IndexedVAO> sceneMesh = ref_create<API::IndexedVAO>();
+	ReadSerializableFromFile(this, "Resource/Model/Plane.001.vao", *sceneMesh);
 
-	auto* mesh = new StaticMeshEntity(this, cube);
+	Reference<API::IndexedVAO> cubeMesh = ref_create<API::IndexedVAO>();
+	ReadSerializableFromFile(this, "Resource/Model/Cube.001.vao", *cubeMesh);
+
+	auto* mesh = new StaticMeshEntity(this, sceneMesh);
 	mesh->GetTransform().SetScale(glm::vec3(0.5));
 	mesh->GetRenderer().SetMaterial(0, cobbleMaterial);
 	mesh->GetRenderer().SetMaterial(1, tileMaterial);
 
-	mesh = new StaticMeshEntity(this, cube);
+	mesh = new StaticMeshEntity(this, sceneMesh);
 	mesh->GetTransform().SetPosition(glm::vec3(0, -5, 0));
 	mesh->GetRenderer().SetMaterial(0, tileMaterial);
 	mesh->GetRenderer().SetMaterial(1, cobbleMaterial);
@@ -66,8 +70,13 @@ void DemoWindow::OnInit()
 	cubemapCap->GetTransform().SetPosition(glm::vec3(0.0, 2.1, 0.0));
 	cubemapCap->GetTransform().SetScale(glm::vec3(2.1f));
 
-	auto* physicsCube = new PhysicsCubeEntity(this, cube);
-	physicsCube->GetRenderer().SetMaterial(0, cobbleMaterial);
+	Entity* physicsCube = new PhysicsCubeEntity(this, cubeMesh, glm::vec3(0.25f));
+	physicsCube->GetTransform().SetLocation(glm::vec3(0.f, 10.f, 0.f));
+	physicsCube->GetTransform().SetRotation(glm::quat(glm::vec3(32, 5, 28)));
+	physicsCube->GetTransform().SetScale(glm::vec3(0.5));
+
+	physicsCube = new EmptyColliderEntity(this, glm::vec3(5.f, 0.1f, 5.f), Flags(true));
+	physicsCube->GetTransform().SetLocation(glm::vec3(0.f, -0.1, 0.f));
 
 	Cubemaps->Skybox = ref_cast((GL::TextureCube*) PVR::Read(this, "Resource/Texture/sky.pvr", GPU::WrapMode::Clamp));
 

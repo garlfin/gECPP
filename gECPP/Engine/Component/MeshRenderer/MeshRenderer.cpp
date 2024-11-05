@@ -32,6 +32,9 @@ namespace gE
 		Component(o, &o->GetWindow().GetRenderers()), _mesh(mesh),
 		_drawCalls(mesh->GetData().Counts.MaterialCount)
 	{
+		DrawCallManager& manager = GetWindow().GetRenderers().GetDrawCallManager();
+		for(u8 i = 0; i < _drawCalls.Count(); i++)
+			SAFE_CONSTRUCT(_drawCalls[i], DrawCall, manager, *this, Reference<gE::Material>(), i);
 	}
 
 	void MeshRenderer::OnRender(float delta, Camera*)

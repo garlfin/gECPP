@@ -20,7 +20,7 @@ namespace gE
         Five = 1 << 5,
         Six = 1 << 6,
         Seven = 1 << 7,
-        All = UINT8_MAX,
+        All = 0b11111110,
         None = 0,
         Dynamic = 0,
     };

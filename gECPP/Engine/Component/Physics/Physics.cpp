@@ -57,11 +57,11 @@ namespace gE
         px::Factory::sInstance = nullptr;
     }
 
-    RigidBody::RigidBody(Entity* owner, const RigidBodySettings& s, const px::Shape& shape) :
+    RigidBody::RigidBody(Entity* owner, const RigidBodySettings& s, px::Shape& shape) :
         Component(owner, &owner->GetWindow().GetPhysics()),
         Material(s.Material),
-        _shape(&shape),
-        _settings(s)
+        _settings(s),
+        _shape(&shape)
     {
     }
 

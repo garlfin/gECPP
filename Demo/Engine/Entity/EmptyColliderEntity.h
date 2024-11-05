@@ -1,5 +1,5 @@
 //
-// Created by scion on 11/4/2024.
+// Created by scion on 11/5/2024.
 //
 
 #pragma once
@@ -9,21 +9,18 @@
 
 namespace gE
 {
-    class PhysicsCubeEntity : public Entity
+    class EmptyColliderEntity : public Entity
     {
     public:
-        PhysicsCubeEntity(Window* window, const Reference<GL::IVAO>& mesh, glm::vec3 size, Flags flags = DEFAULT) :
+        EmptyColliderEntity(Window* window, glm::vec3 size, Flags flags = DEFAULT) :
             Entity(window, LayerMask::All, flags),
-            _renderer(this, mesh),
             _collider(this, BoxColliderSettings{ RigidBodySettings(), size })
         {
         }
 
-        GET(MeshRenderer&, Renderer, _renderer);
         GET(BoxCollider&, Collider, _collider);
 
     private:
-        MeshRenderer _renderer;
         BoxCollider _collider;
     };
 }

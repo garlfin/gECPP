@@ -15,6 +15,31 @@ namespace gE
         float Radius = 1.f;
     };
 
+    struct BoxColliderSettings : public RigidBodySettings
+    {
+        glm::vec3 Extents = glm::vec3(1.f);
+    };
+
+    class ConvexCollider : public RigidBody
+    {
+    public:
+        ConvexCollider(Entity* owner, const RigidBodySettings& settings, px::ConvexShape& shape) :
+            RigidBody(owner, settings, shape)
+        {
+        }
+
+        GET_CONST(float, Density, GetShape().GetDensity());
+        GET_CONST(float, Mass, GetShape().GetDensity() * GetShape().GetVolume());
+
+        inline void SetDensity(float density) { GetShape().SetDensity(density); }
+        inline void SetMass(float mass) { GetShape().SetDensity(mass * GetShape().GetVolume()); }
+
+        GET_CONST(const px::ConvexShape&, Shape, (px::ConvexShape&) RigidBody::GetShape());
+
+    protected:
+        NODISCARD ALWAYS_INLINE px::ConvexShape& GetShape() { return (px::ConvexShape&) RigidBody::GetShape(); }
+    };
+
     class SphereCollider : public RigidBody
     {
     public:
@@ -25,11 +50,6 @@ namespace gE
     private:
         float _radius;
         ManagedPX<px::SphereShape> _shape;
-    };
-
-    struct BoxColliderSettings : public RigidBodySettings
-    {
-        glm::vec3 Extents = glm::vec3(1.f);
     };
 
     class BoxCollider : public RigidBody

@@ -71,8 +71,9 @@ namespace gE
 	class RigidBody : public Component
 	{
 	public:
-		RigidBody(Entity* owner, const RigidBodySettings&, const px::Shape&);
+		RigidBody(Entity* owner, const RigidBodySettings&, px::Shape&);
 
+		GET_CONST(const px::Shape&, Shape, *_shape);
 		GET_CONST(const PhysicsMaterial&, Material, Material);
 		void SetMaterial(const PhysicsMaterial& material);
 
@@ -84,13 +85,15 @@ namespace gE
 		~RigidBody() override;
 
 	protected:
-		PhysicsMaterial Material;
+		NODISCARD ALWAYS_INLINE px::Shape& GetShape() { return *_shape; }
 
 		void FinalizeConstruction();
 
+		PhysicsMaterial Material;
+
 	private:
 		RigidBodySettings _settings;
-		const px::Shape* _shape;
+		px::Shape* _shape;
 		px::Body* _body = nullptr;
 	};
 

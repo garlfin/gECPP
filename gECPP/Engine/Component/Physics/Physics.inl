@@ -11,7 +11,7 @@ namespace gE
 {
     inline bool CollisionFilter::ShouldCollide(px::ObjectLayer a, px::ObjectLayer b) const
     {
-        return !(a & b & (u8) LayerMask::Static) && (bool)(a & b);
+        return a & b;
     }
 
     inline bool BroadPhaseFilter::ShouldCollide(px::ObjectLayer a, px::BroadPhaseLayer b) const
