@@ -2,7 +2,6 @@
 // Created by scion on 8/9/2023.
 //
 
-#include <iostream>
 #include <GLAD/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -70,13 +69,18 @@ void DemoWindow::OnInit()
 	cubemapCap->GetTransform().SetPosition(glm::vec3(0.0, 2.1, 0.0));
 	cubemapCap->GetTransform().SetScale(glm::vec3(2.1f));
 
-	Entity* physicsCube = new PhysicsCubeEntity(this, cubeMesh, glm::vec3(0.25f));
-	physicsCube->GetTransform().SetLocation(glm::vec3(0.f, 10.f, 0.f));
-	physicsCube->GetTransform().SetRotation(glm::quat(glm::vec3(32, 5, 28)));
+	auto* physicsCube = new PhysicsCubeEntity(this, cubeMesh, glm::vec3(0.25f));
+	physicsCube->GetTransform().SetLocation(glm::vec3(0.f, 6.f, 0.f));
+	physicsCube->GetTransform().SetRotation(glm::quat(glm::vec3(32, 7, 22)));
+	physicsCube->GetTransform().SetScale(glm::vec3(0.5f));
+	physicsCube->GetRenderer().SetMaterial(0, cobbleMaterial);
+
+	physicsCube = new PhysicsCubeEntity(this, cubeMesh, glm::vec3(0.25f));
+	physicsCube->GetTransform().SetLocation(glm::vec3(0.f, 5.f, 0.f));
 	physicsCube->GetTransform().SetScale(glm::vec3(0.5));
 
-	physicsCube = new EmptyColliderEntity(this, glm::vec3(5.f, 0.1f, 5.f), Flags(true));
-	physicsCube->GetTransform().SetLocation(glm::vec3(0.f, -0.1, 0.f));
+	auto* floor = new EmptyColliderEntity(this, glm::vec3(5.f, 0.1f, 5.f), Flags(true));
+	floor->GetTransform().SetLocation(glm::vec3(0.f, -0.1, 0.f));
 
 	Cubemaps->Skybox = ref_cast((GL::TextureCube*) PVR::Read(this, "Resource/Texture/sky.pvr", GPU::WrapMode::Clamp));
 

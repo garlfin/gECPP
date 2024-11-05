@@ -133,7 +133,7 @@ namespace gE
 
 			object.Model = call.GetTransform().Model();
 			object.PreviousModel = call.GetTransform().PreviousRenderModel();
-			object.Normal = inverse(call.GetTransform().Model());
+			object.Normal = transpose(inverse(call.GetTransform().Model()));
 
 		#ifdef GE_ENABLE_BATCHING
 			totalInstanceCount++;
