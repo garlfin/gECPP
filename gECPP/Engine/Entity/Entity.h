@@ -38,7 +38,7 @@ namespace gE
 
 		std::vector<Entity*> _children;
 
-		Transform _transform = Transform(this);
+		Transform _transform;
 	};
 
 	typedef Entity Empty;

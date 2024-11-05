@@ -20,6 +20,7 @@
 #define GE_PX_MAX_CONSTRAINTS (GE_PX_MAX_BODIES * 4)
 #define GE_PX_MAX_BODY_PAIRS (GE_PX_MAX_BODIES * 4)
 #define GE_PX_MIN_TICKRATE 60
+#define GE_PX_MAX_STEPS 4
 
 namespace px = JPH;
 
@@ -58,7 +59,7 @@ namespace gE
 
 	struct RigidBodySettings
 	{
-		float Mass = 2.0;
+		float Mass = 1.0;
 		float LinearDamping = 0.05f;
 		float AngularDamping = 0.05f;
 		float TerminalVelocity = 500.f;
@@ -67,30 +68,30 @@ namespace gE
 		PhysicsMaterial Material = DEFAULT;
 	};
 
-	class PhysicsObject : public Component
+	class RigidBody : public Component
 	{
 	public:
-		PhysicsObject(Entity* owner, const RigidBodySettings&, const PhysicsMaterial&, const px::Shape&);
+		RigidBody(Entity* owner, const RigidBodySettings&, const px::Shape&);
 
 		GET_CONST(const PhysicsMaterial&, Material, Material);
 		void SetMaterial(const PhysicsMaterial& material);
 
-		GET_CONST(float, Density, _density);
-
+		void OnInit() override;
 		void OnFixedUpdate(float d) override;
 		void OnUpdate(float d) override;
 		void OnRender(float d, Camera* camera) override;
 
-		~PhysicsObject() override;
+		~RigidBody() override;
 
 	protected:
 		PhysicsMaterial Material;
 
+		void FinalizeConstruction();
+
 	private:
+		RigidBodySettings _settings;
 		const px::Shape* _shape;
 		px::Body* _body = nullptr;
-
-		float _density;
 	};
 
 	class PhysicsManager final : public ComponentManager<Component>
@@ -100,7 +101,7 @@ namespace gE
 
 		void OnUpdate(float d) override;
 
-		friend class PhysicsObject;
+		friend class RigidBody;
 
 		~PhysicsManager() override;
 
@@ -113,8 +114,51 @@ namespace gE
 		SmartPointer<px::TempAllocatorImpl> _allocator;
 		SmartPointer<px::PhysicsSystem> _physics;
 		SmartPointer<px::JobSystemThreadPool> _jobSystem;
-		SmartPointer<px::BodyInterface> _interface;
+		px::BodyInterface* _interface;
 	};
+
+	template<class T>
+	struct ManagedPX
+	{
+	public:
+		template<typename... ARGS>
+		explicit ManagedPX(ARGS&&... args) : _t(std::forward<ARGS>(args)...)
+		{
+			_t.SetEmbedded();
+		}
+
+		GET(T&,, _t);
+
+		ALWAYS_INLINE T* operator->() { return &_t; }
+		ALWAYS_INLINE const T* operator->() const { return &_t; }
+		ALWAYS_INLINE T& operator*() { return _t; }
+		ALWAYS_INLINE const T& operator*() const { return _t; }
+
+		DELETE_OPERATOR_CM(ManagedPX);
+
+	private:
+		T _t;
+	};
+
+	inline px::Vec3 ToPX(const glm::vec3& o)
+	{
+		return  { o.x, o.y, o.z };
+	}
+
+	inline glm::vec3 ToGLM(const px::Vec3& o)
+	{
+		return { o.GetX(), o.GetY(), o.GetZ() };
+	}
+
+	inline px::Quat ToPX(const glm::quat& o)
+	{
+		return { o.x, o.y, o.z, o.w };
+	}
+
+	inline glm::quat ToGLM(const px::Quat& o)
+	{
+		return { o.GetW(), o.GetX(), o.GetY(), o.GetZ() };
+	}
 }
 
 #include "Physics.inl"

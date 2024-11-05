@@ -34,7 +34,8 @@ namespace gE
 
 	Transform::Transform(Entity* o) : Component(o, &o->GetWindow().GetTransforms()),
 		_model(1.0)
-	{}
+	{
+	}
 
 	TransformData TransformData::mix(const TransformData& a, const TransformData& b, float factor)
 	{

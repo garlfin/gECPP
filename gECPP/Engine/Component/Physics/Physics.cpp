@@ -6,6 +6,7 @@
 
 #include <Engine/Window.h>
 #include <Engine/WindowState.h>
+#include <glm/gtx/string_cast.hpp>
 #include <Jolt/RegisterTypes.h>
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 
@@ -21,7 +22,7 @@ namespace gE
         px::RegisterTypes();
 
         _allocator = ptr_create<px::TempAllocatorImpl>(GE_PX_ALLOCATION);
-        _jobSystem = ptr_create<px::JobSystemThreadPool>(px::cMaxPhysicsJobs, px::cMaxPhysicsBarriers, std::thread::hardware_concurrency());
+        _jobSystem = ptr_create<px::JobSystemThreadPool>(px::cMaxPhysicsJobs, px::cMaxPhysicsBarriers, std::thread::hardware_concurrency() - 1);
 
         _physics = ptr_create<px::PhysicsSystem>();
         _physics->Init
@@ -34,13 +35,15 @@ namespace gE
             _broadFilter,
             _filter
         );
+
+        _interface = &_physics->GetBodyInterface();
     }
 
     void PhysicsManager::OnUpdate(float delta)
     {
         EngineFlags state = GetWindow()->EngineState;
 
-        const int steps = ceil(delta * GE_PX_MIN_TICKRATE);
+        const int steps = std::min<int>(ceil(delta * GE_PX_MIN_TICKRATE), GE_PX_MAX_STEPS);
 
         if(state.UpdateType == UpdateType::FixedUpdate)
             _physics->Update(delta, steps, _allocator.Get(), _jobSystem.Get());
@@ -54,45 +57,41 @@ namespace gE
         px::Factory::sInstance = nullptr;
     }
 
-    inline PhysicsObject::PhysicsObject(Entity* owner, const RigidBodySettings& s,  const PhysicsMaterial& material, const px::Shape& shape) :
-        Component(owner, &GetWindow().GetPhysics()),
-        Material(material),
+    RigidBody::RigidBody(Entity* owner, const RigidBodySettings& s, const px::Shape& shape) :
+        Component(owner, &owner->GetWindow().GetPhysics()),
+        Material(s.Material),
         _shape(&shape),
-        _density(s.Mass / shape.GetVolume())
+        _settings(s)
     {
-        Transform& transform = owner->GetTransform();
+    }
+
+    void RigidBody::FinalizeConstruction()
+    {
         PhysicsManager& manager = GetWindow().GetPhysics();
-
-        transform.OnUpdate(0.f);
-
-        px::MassProperties massProperties;
-        massProperties.ScaleToMass(s.Mass);
 
         px::BodyCreationSettings settings
         {
-            &shape,
-            *(px::Vec3*) &transform.GetGlobalTransform().Location,
-            *(px::Quat*) &transform.GetGlobalTransform().Rotation,
-            px::EMotionType::Dynamic,
-            (px::ObjectLayer) owner->GetLayer()
+            _shape,
+            px::Vec3(0.f, 0.f, 0.f),
+            px::Quat(0.f, 0.f, 0.f, 1.f),
+            GetOwner().GetFlags().Static ? px::EMotionType::Static : px::EMotionType::Dynamic,
+            (px::ObjectLayer) GetOwner().GetLayer()
         };
 
-        settings.mMassPropertiesOverride = massProperties;
-        settings.mOverrideMassProperties = JPH::EOverrideMassProperties::CalculateInertia;
         settings.mUserData = (u64) this;
-        settings.mFriction = material.Friction;
-        settings.mRestitution = material.Bounciness;
-        settings.mLinearDamping = s.LinearDamping;
-        settings.mAngularDamping = s.AngularDamping;
-        settings.mMaxLinearVelocity = s.TerminalVelocity;
-        settings.mMaxAngularVelocity = s.MaxAngularVelocity;
-        settings.mGravityFactor = s.GravityFactor;
+        settings.mFriction = _settings.Material.Friction;
+        settings.mRestitution = _settings.Material.Bounciness;
+        settings.mLinearDamping = _settings.LinearDamping;
+        settings.mAngularDamping = _settings.AngularDamping;
+        settings.mMaxLinearVelocity = _settings.TerminalVelocity;
+        settings.mMaxAngularVelocity = _settings.MaxAngularVelocity;
+        settings.mGravityFactor = _settings.GravityFactor;
 
         _body = manager._interface->CreateBody(settings);
         manager._interface->AddBody(_body->GetID(), JPH::EActivation::Activate);
     }
 
-    void PhysicsObject::SetMaterial(const PhysicsMaterial& material)
+    void RigidBody::SetMaterial(const PhysicsMaterial& material)
     {
         Material = material;
 
@@ -100,7 +99,20 @@ namespace gE
         _body->SetRestitution(material.Bounciness);
     }
 
-    inline void PhysicsObject::OnFixedUpdate(float d)
+    void RigidBody::OnInit()
+    {
+        PhysicsManager& physics = GetWindow().GetPhysics();
+        Transform& transform = GetOwner().GetTransform();
+
+        physics._interface->SetPositionAndRotation(
+            _body->GetID(),
+            ToPX(transform->Location),
+            ToPX(transform->Rotation),
+            JPH::EActivation::Activate
+        );
+    }
+
+    inline void RigidBody::OnFixedUpdate(float d)
     {
         Transform& transform = GetOwner().GetTransform();
 
@@ -111,17 +123,17 @@ namespace gE
         transform.SetRotation(*(glm::quat*) &rotation);
     }
 
-    inline void PhysicsObject::OnUpdate(float d)
+    inline void RigidBody::OnUpdate(float d)
     {
 
     }
 
-    inline void PhysicsObject::OnRender(float d, Camera* camera)
+    inline void RigidBody::OnRender(float d, Camera* camera)
     {
 
     }
 
-    PhysicsObject::~PhysicsObject()
+    RigidBody::~RigidBody()
     {
         if(!_body) return;
 

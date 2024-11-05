@@ -12,7 +12,7 @@
 namespace gE
 {
 	Entity::Entity(Window* w, LayerMask layers, Flags flags, Entity* parent) :
-		_window(w), _parent(parent), _flags(flags), _layers(layers)
+		_window(w), _parent(parent), _flags(flags), _layers(layers), _transform(this)
 	{
 		if(flags.Static) _layers |= LayerMask::Static;
 		if(parent) parent->_children.push_back(this);
@@ -52,7 +52,7 @@ namespace gE
 	{
 		const EngineFlags flags = _window->EngineState;
 
-		for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())
+		for(ITER_T* i = InitializationList.GetFirst(); i; i = i->GetNext())
 			(**i)->OnInit();
 
 		List.MergeList(InitializationList);

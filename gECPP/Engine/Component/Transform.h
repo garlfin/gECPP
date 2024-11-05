@@ -28,7 +28,7 @@ namespace gE
 			glm::vec3 Position;
 		};
 		glm::vec3 Scale = glm::vec3(1.f);
-		glm::quaternion Rotation = glm::quaternion();
+		glm::quaternion Rotation = glm::quat(1.0, 0.0, 0.0, 0.0);
 
 		NODISCARD ALWAYS_INLINE glm::vec3 Forward() const { return Rotation * glm::vec3(0, 0, -1); }
 		NODISCARD ALWAYS_INLINE glm::vec3 Up() const { return Rotation * glm::vec3(0, 1, 0); }

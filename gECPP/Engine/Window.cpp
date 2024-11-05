@@ -100,6 +100,7 @@ bool Window::Run()
 	_physicsTick = TickHandler(GE_PHYSICS_TARGET_TICKRATE);
 	_renderTick = TickHandler(144);
 
+	glfwSetTime(0.0);
 	while(!glfwWindowShouldClose(_window))
 	{
 		glfwPollEvents();

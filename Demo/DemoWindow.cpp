@@ -11,9 +11,10 @@
 #include <Demo/Engine/Entity/FlyCamera.h>
 #include <Demo/Engine/Entity/StaticMeshEntity.h>
 #include <Engine/Entity/Light/DirectionalLight.h>
+#include <Engine/Entity/Light/PointLight.h>
 #include <Engine/Renderer/PBRMaterial.h>
 
-#include "Engine/Entity/Light/PointLight.h"
+#include "Engine/Entity/PhysicsCube.h"
 
 using namespace gE::VoxelDemo;
 
@@ -64,6 +65,9 @@ void DemoWindow::OnInit()
 	auto* cubemapCap = new CubemapCapture(this, 512);
 	cubemapCap->GetTransform().SetPosition(glm::vec3(0.0, 2.1, 0.0));
 	cubemapCap->GetTransform().SetScale(glm::vec3(2.1f));
+
+	auto* physicsCube = new PhysicsCubeEntity(this, cube);
+	physicsCube->GetRenderer().SetMaterial(0, cobbleMaterial);
 
 	Cubemaps->Skybox = ref_cast((GL::TextureCube*) PVR::Read(this, "Resource/Texture/sky.pvr", GPU::WrapMode::Clamp));
 
