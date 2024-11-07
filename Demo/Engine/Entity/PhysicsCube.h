@@ -15,15 +15,18 @@ namespace gE
         PhysicsCubeEntity(Window* window, const Reference<GL::IVAO>& mesh, glm::vec3 size, Flags flags = DEFAULT) :
             Entity(window, LayerMask::All, flags),
             _renderer(this, mesh),
-            _collider(this, BoxColliderSettings{ RigidBodySettings(), size })
+            _rigidBody(this, RigidBodySettings(), _collider),
+            _collider(this, BoxColliderSettings{ ConvexColliderSettings(), size })
         {
         }
 
         GET(MeshRenderer&, Renderer, _renderer);
+        GET(RigidBody&, RigidBody, _rigidBody);
         GET(BoxCollider&, Collider, _collider);
 
     private:
         MeshRenderer _renderer;
+        RigidBody _rigidBody;
         BoxCollider _collider;
     };
 }

@@ -19,12 +19,15 @@ namespace gE
 	{
 		Entity* parent = GetOwner().GetParent();
 
-		_flags.UpdateInvalidated |= parent && parent->GetTransform()._flags.UpdateInvalidated;
+		if(parent)
+			_flags |= parent->GetTransform()._flags & TransformFlags::RenderInvalidated;
 
-		if(!_flags.Initialized && !_flags.UpdateInvalidated) return;
+		if(!(bool)(_flags & (TransformFlags::Initialized | TransformFlags::RenderInvalidated))) return;
 
 		_model = GetParentTransform() * _transform.ToMat4();
 		Decompose(_model, _globalTransform.Location, _globalTransform.Rotation, _globalTransform.Scale);
+
+		_flags &= ~(TransformFlags::Initialized | TransformFlags::RenderInvalidated);
 	}
 
 	void Transform::OnRender(float, Camera*)
@@ -32,8 +35,13 @@ namespace gE
 		_previousModel = _model;
 	}
 
+	void Transform::OnFixedUpdate(float x)
+	{
+		_flags &= ~TransformFlags::PhysicsInvalidated;
+	}
+
 	Transform::Transform(Entity* o) : Component(o, &o->GetWindow().GetTransforms()),
-		_model(1.0)
+	                                  _model(1.0)
 	{
 	}
 
@@ -64,8 +72,6 @@ namespace gE
 
 	void TransformManager::OnUpdate(float d)
 	{
-		const EngineFlags flags = GetWindow()->EngineState;
-
 		for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())
 			(**i)->OnInit();
 
@@ -82,6 +88,6 @@ namespace gE
 		}
 
 		for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())
-			((***i).*flags.UpdateFunction)(d);
+			(**i)->OnUpdate(d);
 	}
 }

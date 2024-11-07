@@ -36,7 +36,8 @@ namespace gE
 	{
 		FixedUpdate,
 		Update,
-		LateUpdate
+		LateUpdate,
+		EarlyFixedUpdate
 	};
 
 	enum class RenderType : u8
@@ -57,14 +58,6 @@ namespace gE
 		bool EnableDepthTest : 1;
 		RasterMode RasterMode : 1;
 		u8 InstanceMultiplier : 3;
-	};
-
-	struct EngineFlags
-	{
-		UpdateType UpdateType;
-		RenderType RenderType;
-		ComponentUpdateFunction UpdateFunction;
-		ComponentRenderFunction RenderFunction;
 	};
 
 	namespace RenderState

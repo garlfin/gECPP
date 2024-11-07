@@ -22,8 +22,7 @@ namespace gE
 
 		DirectionalLight* Sun;
 
-		void OnUpdate(float) override {};
-		void OnRender(float delta, Camera*) override;
+		void OnRender(float delta, Camera*);
 
 		void UseNearestLights(const glm::vec3& point) const;
 

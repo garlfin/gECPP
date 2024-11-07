@@ -54,8 +54,9 @@ namespace gE
 	 public:
 		explicit IComponentManager(Window* window) : Manager(), _window(window) {};
 
-		void OnUpdate(float d) override;
-		void OnRender(float d, Camera* camera) override;
+		virtual void OnUpdate(float d);
+		virtual void OnFixedUpdate(float d);
+		virtual void OnRender(float d, Camera* camera);
 
 		ALWAYS_INLINE void OnRender(float d) { OnRender(d, nullptr); }
 
@@ -66,6 +67,7 @@ namespace gE
 		~IComponentManager() override = default;
 
 	 protected:
+		void OnInit();
 		void OnRegister(Managed<Component>& t) override { InitializationList.Add(t.GetIterator()); };
 
 		LinkedList<Managed<Component>> InitializationList;

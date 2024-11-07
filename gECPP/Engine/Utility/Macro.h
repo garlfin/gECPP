@@ -153,6 +153,10 @@ using std::move;
 		return a = (TYPE) (std::underlying_type_t<TYPE>(a) OP std::underlying_type_t<TYPE>(b)); \
 	}
 
-#define ENUM_OPERATOR_
+#define ENUM_OPERATOR_LOGICAL(TYPE, OP) \
+	inline constexpr TYPE operator OP(TYPE a) \
+	{ \
+		return (TYPE) ~std::underlying_type_t<TYPE>(a); \
+	} \
 
 // Yapping about newline >: (

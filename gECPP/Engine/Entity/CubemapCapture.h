@@ -58,8 +58,7 @@ namespace gE
 
 		void DrawSkybox() const;
 
-		void OnUpdate(float delta) override {};
-		void OnRender(float delta, Camera*) override;
+		void OnRender(float delta, Camera*);
 
 		void UseNearestCubemaps(const glm::vec3& point) const;
 

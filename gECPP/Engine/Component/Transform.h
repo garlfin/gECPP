@@ -5,7 +5,6 @@
 #pragma once
 
 #include <Engine/Math/Math.h>
-#include <Engine/Utility/Manager.h>
 
 #include "Component.h"
 
@@ -13,12 +12,18 @@ namespace gE
 {
 	class TransformManager;
 
-	struct TransformFlags
+	enum class TransformFlags : u8
 	{
-		bool UpdateInvalidated : 1 = false;
-		bool RenderInvalidated : 1 = false;
-		bool Initialized : 1 = false;
+		PhysicsInvalidated = 1,
+		RenderInvalidated = 1 << 1,
+		Initialized = 1 << 2,
+		None = 0,
+		All = PhysicsInvalidated | RenderInvalidated
 	};
+
+	ENUM_OPERATOR(TransformFlags, |);
+	ENUM_OPERATOR(TransformFlags, &);
+	ENUM_OPERATOR_LOGICAL(TransformFlags, ~);
 
 	struct TransformData
 	{
@@ -28,7 +33,7 @@ namespace gE
 			glm::vec3 Position;
 		};
 		glm::vec3 Scale = glm::vec3(1.f);
-		glm::quaternion Rotation = glm::quat(1.0, 0.0, 0.0, 0.0);
+		glm::quaternion Rotation = glm::identity<glm::quat>();
 
 		NODISCARD ALWAYS_INLINE glm::vec3 Forward() const { return Rotation * glm::vec3(0, 0, -1); }
 		NODISCARD ALWAYS_INLINE glm::vec3 Up() const { return Rotation * glm::vec3(0, 1, 0); }
@@ -40,7 +45,7 @@ namespace gE
 		glm::mat4 ToMat4() const;
 	};
 
-	class Transform : public Component
+	class Transform final : public Component
 	{
 	 public:
 		Transform(Entity* o, const TransformData& d);
@@ -49,16 +54,17 @@ namespace gE
 
 		NODISCARD glm::mat4 GetParentTransform() const;
 
-		inline void SetPosition(const glm::vec3& pos) { _flags.UpdateInvalidated = true; _transform.Position = pos; }
-		inline void SetLocation(const glm::vec3& pos) { _flags.UpdateInvalidated = true; _transform.Position = pos; }
-		inline void SetRotation(const glm::quat& rot) { _flags.UpdateInvalidated = true; _transform.Rotation = rot; }
-		inline void SetScale(const glm::vec3& scale) { _flags.UpdateInvalidated = true; _transform.Scale = scale; }
+		ALWAYS_INLINE void SetPosition(const glm::vec3& pos) { SetPosition(pos, TransformFlags::All); }
+		ALWAYS_INLINE void SetLocation(const glm::vec3& pos) { SetLocation(pos, TransformFlags::All); }
+		ALWAYS_INLINE void SetRotation(const glm::quat& rot) { SetRotation(rot, TransformFlags::All); }
+		ALWAYS_INLINE void SetScale(const glm::vec3& scale) { SetScale(scale, TransformFlags::All); }
 
-		inline void Set(const TransformData& d) { _flags.UpdateInvalidated = true; _transform = d; };
-		inline void Set(const Transform& d) { _flags.UpdateInvalidated = true; _transform = d._transform; };
+		ALWAYS_INLINE void Set(const TransformData& d) { Set(d, TransformFlags::All); }
+		ALWAYS_INLINE void Set(const Transform& d) { Set(d._transform, TransformFlags::All); }
 
 		void OnUpdate(float) override;
 		void OnRender(float, Camera*) override;
+		void OnFixedUpdate(float) override;
 
 		ALWAYS_INLINE operator const glm::mat4&() const { return _model; }
 		NODISCARD ALWAYS_INLINE const glm::mat4& Model() const { return _model; }
@@ -69,8 +75,18 @@ namespace gE
 		GET_CONST(const TransformData&, GlobalTransform, _globalTransform);
 
 		friend class TransformManager;
+		friend class RigidBody;
 
-	 private:
+	protected:
+		inline void SetPosition(const glm::vec3& pos, TransformFlags flags) { _flags |= flags; _transform.Position = pos; }
+		inline void SetLocation(const glm::vec3& pos, TransformFlags flags) { _flags |= flags; _transform.Position = pos; }
+		inline void SetRotation(const glm::quat& rot, TransformFlags flags) { _flags |= flags; _transform.Rotation = rot; }
+		inline void SetScale(const glm::vec3& scale, TransformFlags flags) { _flags |= flags; _transform.Scale = scale; }
+
+		inline void Set(const TransformData& d, TransformFlags flags) { _flags |= flags; _transform = d; };
+		inline void Set(const Transform& d, TransformFlags flags) { _flags |= flags; _transform = d._transform; };
+
+	private:
 		TransformData _transform, _globalTransform;
 		glm::mat4 _model, _previousModel = glm::mat4(1.0);
 		TransformFlags _flags;

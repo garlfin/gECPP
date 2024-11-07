@@ -58,8 +58,8 @@ namespace gE
 			_indirectDrawBuffer.Bind(API::BufferTarget::IndirectDrawBuffer);
 		}
 
-		void OnUpdate(float d) override {};
-		void OnRender(float d, Camera* camera) override;
+		void OnRender(float d, Camera* camera);
+
 		ALWAYS_INLINE void UpdateDrawCalls(u64 size = sizeof(API::IndirectDrawIndexed) * API_MAX_MULTI_DRAW, u64 offset = 0) const
 		{
 			_indirectDrawBuffer.ReplaceData((u8*) IndirectDraws + offset, size, offset);

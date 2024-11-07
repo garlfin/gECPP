@@ -112,9 +112,15 @@ bool Window::Run()
 
 		if(_renderTick.ShouldTick(_time))
 		{
+		#ifdef DEBUG
+			double updateDelta = glfwGetTime();
+		#endif
+
 			OnUpdate(_renderTick.GetDelta());
 
 		#ifdef DEBUG
+			updateDelta = glfwGetTime() - updateDelta;
+
 			const bool shouldDebugTick = debugTick.ShouldTick(_time);
 			if(shouldDebugTick) glBeginQuery(GL_TIME_ELAPSED, timer);
 		#endif
@@ -131,10 +137,10 @@ bool Window::Run()
 
 				sprintf_s(
 					WindowTitleBuf,
-					"FPS: %u / %f, FPS/T: %u / %f, UPDATE: %u, FIXEDUPDATE: %u (%u)",
-					(unsigned) ceil(1.0 / _renderTick.GetDelta()), _renderTick.GetDelta(),
-					(unsigned) ceil(1.0 / ms), ms,
-					(unsigned) ceil(1.0 / (afterUpdateTime - _time)),
+					"FPS: %u (%u), UPDATE: %u, FIXEDUPDATE: %u (%u)",
+					(unsigned) ceil(1.0 / _renderTick.GetDelta()),
+					(unsigned) ceil(1.0 / ms),
+					(unsigned) ceil(1.0 / updateDelta),
 					(unsigned) ceil(1.0 / _physicsTick.GetDelta()),
 					(unsigned) floor(_physicsTick.GetDelta() * GE_PX_MIN_TICKRATE)
 				);
@@ -210,19 +216,14 @@ void Window::Blit(const API::Texture& texture)
 
 void Window::OnFixedUpdate(float delta)
 {
-	EngineState.UpdateFunction = &Component::OnFixedUpdate;
-	EngineState.UpdateType = UpdateType::FixedUpdate;
-
-	Behaviors.OnUpdate(delta);
-
-	Physics->OnUpdate(_physicsTick.GetDelta());
+	Physics->OnEarlyFixedUpdate(delta);
+	Behaviors.OnFixedUpdate(delta);
+	Physics->OnFixedUpdate(delta);
+	Transforms.OnFixedUpdate(delta);
 }
 
 void Window::OnUpdate(float delta)
 {
-	EngineState.UpdateFunction = &Component::OnUpdate;
-	EngineState.UpdateType = UpdateType::Update;
-
 	Cameras.OnUpdate(delta);
 	Behaviors.OnUpdate(delta);
 
@@ -231,9 +232,6 @@ void Window::OnUpdate(float delta)
 
 void Window::OnRender(float delta)
 {
-	EngineState.RenderFunction = &Component::OnRender;
-	EngineState.RenderType = RenderType::Render;
-
 	Behaviors.OnRender(delta, nullptr);
 
 	Lights->OnRender(delta, nullptr);

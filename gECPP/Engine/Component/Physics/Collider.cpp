@@ -7,20 +7,16 @@
 namespace gE
 {
     SphereCollider::SphereCollider(Entity* owner, const SphereColliderSettings& s) :
-        RigidBody(owner, s, *_shape),
+        ConvexCollider(owner, s, *_shape),
         _shape(s.Radius)
     {
         _shape->SetDensity(s.Mass / _shape->GetVolume());
-
-        FinalizeConstruction();
     }
 
     BoxCollider::BoxCollider(Entity* owner, const BoxColliderSettings& s) :
-        RigidBody(owner, s, *_shape),
+        ConvexCollider(owner, s, *_shape),
         _shape(ToPX(s.Extents))
     {
         _shape->SetDensity(s.Mass / _shape->GetVolume());
-
-        FinalizeConstruction();
     }
 }

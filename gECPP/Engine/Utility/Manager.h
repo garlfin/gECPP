@@ -144,9 +144,6 @@ namespace gE
 
 		typedef LinkedIterator<T> ITER_T;
 
-		virtual void OnUpdate(float d) = 0;
-		virtual void OnRender(float d, Camera* camera) = 0;
-
 		friend T;
 
 		virtual ~Manager() = default;

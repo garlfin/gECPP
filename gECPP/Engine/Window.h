@@ -5,7 +5,7 @@
 #include <Engine/Component/Transform.h>
 #include <Engine/Component/Camera/Camera.h>
 #include <Engine/Component/MeshRenderer/MeshRenderer.h>
-#include <Engine/Component/Physics/Physics.h>
+#include <Engine/Component/Physics/RigidBody.h>
 #include <Engine/Entity/CubemapCapture.h>
 #include <Engine/Entity/SDFCapture.h>
 #include <Engine/Entity/VoxelCapture.h>
@@ -83,7 +83,6 @@ namespace gE
 
 		// Engine States
 		RenderFlags RenderState = DEFAULT;
-		EngineFlags EngineState = DEFAULT;
 
 		GET_CONST(TextureSize2D, Size, _size);
 		GET_CONST(const Monitor&, Monitor, _monitor);

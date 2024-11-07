@@ -50,23 +50,32 @@ namespace gE
 
 	void IComponentManager::OnUpdate(float d)
 	{
-		const EngineFlags flags = _window->EngineState;
-
-		for(ITER_T* i = InitializationList.GetFirst(); i; i = i->GetNext())
-			(**i)->OnInit();
-
-		List.MergeList(InitializationList);
+		OnInit();
 
 		for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())
-			((***i).*flags.UpdateFunction)(d);
+			(**i)->OnUpdate(d);
+	}
+
+	void IComponentManager::OnFixedUpdate(float d)
+	{
+		OnInit();
+
+		for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())
+			(**i)->OnFixedUpdate(d);
 	}
 
 	void IComponentManager::OnRender(float d, Camera* camera)
 	{
-		const EngineFlags flags = _window->EngineState;
-
 		for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())
-			((***i).*flags.RenderFunction)(d, camera);
+			(**i)->OnRender(d, camera);
+	}
+
+	void IComponentManager::OnInit()
+	{
+		for(ITER_T* i = InitializationList.GetFirst(); i; i = i->GetNext())
+			(**i)->OnInit();
+
+		List.MergeList(InitializationList);
 	}
 
 	Behavior::Behavior(Entity* o) : Component(o, &o->GetWindow().GetBehaviors())

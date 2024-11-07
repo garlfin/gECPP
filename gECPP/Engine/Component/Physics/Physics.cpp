@@ -2,7 +2,7 @@
 // Created by scion on 10/30/2024.
 //
 
-#include "Physics.h"
+#include "RigidBody.h"
 
 #include <Engine/Window.h>
 #include <Engine/WindowState.h>
@@ -39,16 +39,21 @@ namespace gE
         _interface = &_physics->GetBodyInterface();
     }
 
-    void PhysicsManager::OnUpdate(float delta)
+    void PhysicsManager::OnFixedUpdate(float delta)
     {
-        EngineFlags state = GetWindow()->EngineState;
-
         const int steps = std::clamp<int>(floor(delta * GE_PX_MIN_TICKRATE), 1, GE_PX_MAX_STEPS);
+        _physics->Update(delta, steps, _allocator.Get(), _jobSystem.Get());
 
-        if(state.UpdateType == UpdateType::FixedUpdate)
-            _physics->Update(delta, steps, _allocator.Get(), _jobSystem.Get());
+        for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())
+            (**i)->OnFixedUpdate(delta);
+    }
 
-        IComponentManager::OnUpdate(delta);
+    void PhysicsManager::OnEarlyFixedUpdate(float d)
+    {
+        OnInit();
+
+        for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())
+            ((RigidBody*) &***i)->OnEarlyFixedUpdate(d);
     }
 
     PhysicsManager::~PhysicsManager()
@@ -57,21 +62,29 @@ namespace gE
         px::Factory::sInstance = nullptr;
     }
 
-    RigidBody::RigidBody(Entity* owner, const RigidBodySettings& s, px::Shape& shape) :
+    RigidBody::RigidBody(Entity* owner, const RigidBodySettings& s, Collider& collider) :
         Component(owner, &owner->GetWindow().GetPhysics()),
         Material(s.Material),
         _settings(s),
-        _shape(&shape)
+        _collider(&collider)
     {
     }
 
-    void RigidBody::FinalizeConstruction()
+    void RigidBody::SetMaterial(const PhysicsMaterial& material)
+    {
+        Material = material;
+
+        _body->SetFriction(material.Friction);
+        _body->SetRestitution(material.Bounciness);
+    }
+
+    void RigidBody::OnInit()
     {
         PhysicsManager& manager = GetWindow().GetPhysics();
 
         px::BodyCreationSettings settings
         {
-            _shape,
+            &_collider->GetShape(),
             px::Vec3(0.f, 0.f, 0.f),
             px::Quat(0.f, 0.f, 0.f, 1.f),
             GetOwner().GetFlags().Static ? px::EMotionType::Static : px::EMotionType::Dynamic,
@@ -91,23 +104,18 @@ namespace gE
         manager._interface->AddBody(_body->GetID(), JPH::EActivation::Activate);
     }
 
-    void RigidBody::SetMaterial(const PhysicsMaterial& material)
-    {
-        Material = material;
-
-        _body->SetFriction(material.Friction);
-        _body->SetRestitution(material.Bounciness);
-    }
-
-    void RigidBody::OnInit()
+    void RigidBody::OnEarlyFixedUpdate(float d)
     {
         PhysicsManager& physics = GetWindow().GetPhysics();
         Transform& transform = GetOwner().GetTransform();
+        const ColliderTransform& offset = _collider->GetTransform();
+
+        if(!(bool)(transform._flags & TransformFlags::PhysicsInvalidated)) return;
 
         physics._interface->SetPositionAndRotation(
             _body->GetID(),
-            ToPX(transform->Location),
-            ToPX(transform->Rotation),
+            ToPX(transform->Location + offset.Position * transform->Rotation),
+            ToPX(transform->Rotation * offset.Rotation),
             JPH::EActivation::Activate
         );
     }
@@ -115,12 +123,15 @@ namespace gE
     inline void RigidBody::OnFixedUpdate(float d)
     {
         Transform& transform = GetOwner().GetTransform();
+        const ColliderTransform& offset = _collider->GetTransform();
 
-        px::Vec3 location = _body->GetPosition();
-        px::Quat rotation = _body->GetRotation();
+        glm::quat rotation = ToGLM(_body->GetRotation());
+        glm::vec3 location = ToGLM(_body->GetPosition()) - offset.Position * inverse(rotation);
 
-        transform.SetPosition(*(glm::vec3*) &location);
-        transform.SetRotation(*(glm::quat*) &rotation);
+        rotation *= inverse(offset.Rotation);
+
+        transform.SetPosition(location, TransformFlags::RenderInvalidated);
+        transform.SetRotation(rotation, TransformFlags::RenderInvalidated);
     }
 
     inline void RigidBody::OnUpdate(float d)
