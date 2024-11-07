@@ -55,8 +55,8 @@ namespace gE
 	private:
 		RigidBodySettings _settings;
 		RelativePointer<Collider> _collider;
-		px::Ref<px::ScaledShape> _scaledShape;
 		px::Body* _body = nullptr;
+		glm::vec3 _previousScale;
 	};
 
 	class PhysicsManager final : public ComponentManager<Component>

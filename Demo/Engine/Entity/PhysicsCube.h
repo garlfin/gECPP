@@ -9,7 +9,7 @@
 
 namespace gE
 {
-    class PhysicsCubeEntity : public Entity
+    class PhysicsCubeEntity final : public Entity
     {
     public:
         PhysicsCubeEntity(Window* window, const Reference<GL::IVAO>& mesh, glm::vec3 size, Flags flags = DEFAULT) :

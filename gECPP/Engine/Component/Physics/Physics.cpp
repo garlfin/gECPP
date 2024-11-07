@@ -80,13 +80,17 @@ namespace gE
 
     void RigidBody::OnInit()
     {
+        const Transform& transform = GetOwner().GetTransform();
         PhysicsManager& manager = GetWindow().GetPhysics();
+
+        const px::ShapeSettings::ShapeResult result = _collider->GetShape().ScaleShape(ToPX(transform->Scale));
+        GE_ASSERT(result.IsValid(), "INVALID SCALED SHAPE!");
 
         px::BodyCreationSettings settings
         {
-            &_collider->GetShape(),
-            px::Vec3(0.f, 0.f, 0.f),
-            px::Quat(0.f, 0.f, 0.f, 1.f),
+            result.Get(),
+            px::Vec3(),
+            px::Quat::sIdentity(),
             GetOwner().GetFlags().Static ? px::EMotionType::Static : px::EMotionType::Dynamic,
             (px::ObjectLayer) GetOwner().GetLayer()
         };
@@ -106,15 +110,26 @@ namespace gE
 
     void RigidBody::OnEarlyFixedUpdate(float d)
     {
-        PhysicsManager& physics = GetWindow().GetPhysics();
-        Transform& transform = GetOwner().GetTransform();
+        const PhysicsManager& physics = GetWindow().GetPhysics();
+        const Transform& transform = GetOwner().GetTransform();
         const ColliderTransform& offset = _collider->GetTransform();
 
         if(!(bool)(transform._flags & TransformFlags::PhysicsInvalidated)) return;
 
+        if(_previousScale != transform->Scale)
+        {
+            LOG("INFO: UPDATED SHAPE'S SCALE");
+
+            const px::ShapeSettings::ShapeResult result = _collider->GetShape().ScaleShape(ToPX(transform->Scale));
+            GE_ASSERT(result.IsValid(), "INVALID SCALED SHAPE!");
+
+            physics._interface->SetShape(_body->GetID(), result.Get(), true, JPH::EActivation::Activate);
+            _previousScale = transform->Scale;
+        }
+
         physics._interface->SetPositionAndRotation(
             _body->GetID(),
-            ToPX(transform->Location + offset.Position * transform->Rotation),
+            ToPX(transform->Location + offset.Position * transform->Scale * transform->Rotation),
             ToPX(transform->Rotation * offset.Rotation),
             JPH::EActivation::Activate
         );
@@ -126,7 +141,7 @@ namespace gE
         const ColliderTransform& offset = _collider->GetTransform();
 
         glm::quat rotation = ToGLM(_body->GetRotation());
-        glm::vec3 location = ToGLM(_body->GetPosition()) - offset.Position * inverse(rotation);
+        glm::vec3 location = ToGLM(_body->GetPosition()) - offset.Position * transform->Scale * inverse(rotation);
 
         rotation *= inverse(offset.Rotation);
 

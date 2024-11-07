@@ -69,15 +69,15 @@ void DemoWindow::OnInit()
 	cubemapCap->GetTransform().SetPosition(glm::vec3(0.0, 2.1, 0.0));
 	cubemapCap->GetTransform().SetScale(glm::vec3(2.1f));
 
-	auto* physicsCube = new PhysicsCubeEntity(this, cubeMesh, glm::vec3(0.25f));
+	auto* physicsCube = new PhysicsCubeEntity(this, cubeMesh, glm::vec3(0.5f));
 	physicsCube->GetTransform().SetLocation(glm::vec3(0.f, 6.f, 0.f));
 	physicsCube->GetTransform().SetRotation(glm::quat(glm::vec3(32, 7, 22)));
 	physicsCube->GetTransform().SetScale(glm::vec3(0.5f));
 	physicsCube->GetRenderer().SetMaterial(0, cobbleMaterial);
 
-	physicsCube = new PhysicsCubeEntity(this, cubeMesh, glm::vec3(0.25f));
+	physicsCube = new PhysicsCubeEntity(this, cubeMesh, glm::vec3(0.5f));
 	physicsCube->GetTransform().SetLocation(glm::vec3(0.f, 5.f, 0.f));
-	physicsCube->GetTransform().SetScale(glm::vec3(0.5));
+	physicsCube->GetTransform().SetScale(glm::vec3(0.25));
 
 	auto* floor = new EmptyColliderEntity(this, glm::vec3(5.f, 0.1f, 5.f), Flags(true));
 	floor->GetTransform().SetLocation(glm::vec3(0.f, -0.1, 0.f));
