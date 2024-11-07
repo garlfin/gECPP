@@ -43,7 +43,7 @@ namespace gE
     {
         EngineFlags state = GetWindow()->EngineState;
 
-        const int steps = std::min<int>(ceil(delta * GE_PX_MIN_TICKRATE), GE_PX_MAX_STEPS);
+        const int steps = std::clamp<int>(floor(delta * GE_PX_MIN_TICKRATE), 1, GE_PX_MAX_STEPS);
 
         if(state.UpdateType == UpdateType::FixedUpdate)
             _physics->Update(delta, steps, _allocator.Get(), _jobSystem.Get());

@@ -115,8 +115,6 @@ bool Window::Run()
 			OnUpdate(_renderTick.GetDelta());
 
 		#ifdef DEBUG
-			const double afterUpdateTime = glfwGetTime();
-
 			const bool shouldDebugTick = debugTick.ShouldTick(_time);
 			if(shouldDebugTick) glBeginQuery(GL_TIME_ELAPSED, timer);
 		#endif
@@ -133,10 +131,12 @@ bool Window::Run()
 
 				sprintf_s(
 					WindowTitleBuf,
-					"FPS: %u / %f, FPS/T: %u / %f, UPDATE: %u / %f",
-					(unsigned) ceil(1.0 / _renderTick.GetDelta()),_renderTick.GetDelta(),
+					"FPS: %u / %f, FPS/T: %u / %f, UPDATE: %u, FIXEDUPDATE: %u (%u)",
+					(unsigned) ceil(1.0 / _renderTick.GetDelta()), _renderTick.GetDelta(),
 					(unsigned) ceil(1.0 / ms), ms,
-					(unsigned) ceil(1.0 / (afterUpdateTime - _time)), afterUpdateTime - _time
+					(unsigned) ceil(1.0 / (afterUpdateTime - _time)),
+					(unsigned) ceil(1.0 / _physicsTick.GetDelta()),
+					(unsigned) floor(_physicsTick.GetDelta() * GE_PX_MIN_TICKRATE)
 				);
 
 				glfwSetWindowTitle(_window, WindowTitleBuf);
