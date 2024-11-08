@@ -86,6 +86,8 @@ namespace gE
         const px::ShapeSettings::ShapeResult result = _collider->GetShape().ScaleShape(ToPX(transform->Scale));
         GE_ASSERT(result.IsValid(), "INVALID SCALED SHAPE!");
 
+        _previousScale = transform->Scale;
+
         px::BodyCreationSettings settings
         {
             result.Get(),
@@ -118,7 +120,7 @@ namespace gE
 
         if(_previousScale != transform->Scale)
         {
-            LOG("INFO: UPDATED SHAPE'S SCALE");
+            LOG("INFO: SHAPE SCALING");
 
             const px::ShapeSettings::ShapeResult result = _collider->GetShape().ScaleShape(ToPX(transform->Scale));
             GE_ASSERT(result.IsValid(), "INVALID SCALED SHAPE!");
