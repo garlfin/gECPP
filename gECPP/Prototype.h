@@ -17,10 +17,10 @@ namespace gE
 	template<class T> class TypedComponent;
 	template<class T> class TypedBehavior;
 
-	struct Flags
+	struct EntityFlags
 	{
-		Flags() = default;
-		explicit Flags(bool s) : Static(s) {};
+		EntityFlags() = default;
+		explicit EntityFlags(bool s) : Static(s) {};
 
 		bool Static : 1 = false;
 		bool Enabled : 1 = true;

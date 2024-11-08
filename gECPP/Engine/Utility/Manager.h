@@ -45,7 +45,7 @@ namespace gE
 		void Insert(LinkedIterator<T>& t, LinkedIterator<T>& at, Direction = Direction::Right);
 		void Move(LinkedIterator<T>& t, LinkedIterator<T>& to, Direction = Direction::Right);
 		void Remove(LinkedIterator<T>& t);
-		void MergeList(LinkedList& list);
+		void MergeList(LinkedList& from, ITER_T* begin = nullptr, ITER_T* end = nullptr);
 
 		NODISCARD LinkedIterator<T>* At(u32 index);
 		NODISCARD ALWAYS_INLINE LinkedIterator<T>* operator[](u32 i) { return At(i); }

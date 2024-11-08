@@ -79,7 +79,7 @@ void DemoWindow::OnInit()
 	physicsCube->GetTransform().SetLocation(glm::vec3(0.f, 5.f, 0.f));
 	physicsCube->GetTransform().SetScale(glm::vec3(0.25));
 
-	auto* floor = new EmptyColliderEntity(this, glm::vec3(5.f, 0.1f, 5.f), Flags(true));
+	auto* floor = new EmptyColliderEntity(this, glm::vec3(5.f, 0.1f, 5.f), EntityFlags(true));
 	floor->GetTransform().SetLocation(glm::vec3(0.f, -0.1, 0.f));
 
 	Cubemaps->Skybox = ref_cast((GL::TextureCube*) PVR::Read(this, "Resource/Texture/sky.pvr", GPU::WrapMode::Clamp));

@@ -40,25 +40,41 @@ namespace gE
 
 
 	template<class T>
-	void LinkedList<T>::MergeList(LinkedList& list)
+	void LinkedList<T>::MergeList(LinkedList& from, ITER_T* begin, ITER_T* end)
 	{
-		if(!list._size) return;
+		const u32 previousSize = _size;
 
-		for(ITER_T* i = list._first; i; i = i->_next)
-			i->_list = this;
+		if(!from._size) return;
+		if(!begin) begin = from._first;
+		if(!end) end = from._last;
 
-		if (_size)
+		for(ITER_T* i = begin; i; i = i->_next)
 		{
-			list._first->_previous = _first;
-			_last->_next = list._first;
+			i->_list = this;
+			_size++;
+			from._size--;
 		}
-		else _first = list._first;
 
-		_size += list._size;
-		_last = list._last;
+		if(!previousSize)
+		{
+			_first = begin;
+			_last = end;
+		}
+		else
+			_last->_next = begin;
 
-		list._first = list._last = nullptr;
-		list._size = 0;
+		if(begin->_previous)
+			begin->_previous->_next = end->_next;
+		else
+			from._first = end->_next;
+
+		if(end->_next)
+			end->_next->_previous = begin->_previous;
+		else
+			from._last = end->_previous;
+
+		begin->_previous = _last;
+		end->_next = nullptr;
 	}
 
 	template<class T>

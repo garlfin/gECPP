@@ -12,7 +12,7 @@ namespace gE
     class PhysicsCubeEntity final : public Entity
     {
     public:
-        PhysicsCubeEntity(Window* window, const Reference<GL::IVAO>& mesh, glm::vec3 size, Flags flags = DEFAULT) :
+        PhysicsCubeEntity(Window* window, const Reference<GL::IVAO>& mesh, glm::vec3 size, EntityFlags flags = DEFAULT) :
             Entity(window, LayerMask::All, flags),
             _renderer(this, mesh),
             _rigidBody(this, RigidBodySettings(), _collider),

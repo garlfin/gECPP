@@ -11,18 +11,21 @@
 
 namespace gE
 {
-	Entity::Entity(Window* w, LayerMask layers, Flags flags, Entity* parent) :
+	Entity::Entity(Window* w, LayerMask layers, EntityFlags flags, Entity* parent) :
 		_window(w), _parent(parent), _flags(flags), _layers(layers), _transform(this)
 	{
 		if(flags.Static) _layers |= LayerMask::Static;
-		if(parent) parent->_children.push_back(this);
+		if(!parent) return;
+
+		_depth = _parent->_depth + 1;
+		parent->_children.push_back(this);
 	}
 
 	void Entity::Destroy(bool flagChildren)
 	{
 		_flags.Deletion = true;
 
-		RemoveFirstFromVec(_parent->_children, this);
+		if(_parent) RemoveFirstFromVec(_parent->_children, this);
 
 		std::vector stack{ this };
 
@@ -44,9 +47,30 @@ namespace gE
 			}
 	}
 
-	Component::Component(Entity* o, IComponentManager* m) : Managed(m, *this),
-		 _window(o->GetWindow()), _owner(o)
-	{}
+	void EntityManager::FinalizeDeletions()
+	{
+	}
+
+	void EntityManager::DestroyEntity(Entity& entity, bool destroyChildren)
+	{
+		u8 depth = entity._depth;
+
+		/*for(ITER_T* i = &entity.Iterator; i && (**i)->_depth > depth; i = i->GetNext())
+		{
+			Entity& t = ***i;
+'
+
+		}*/
+
+		//_deletionList.MergeList(List, entity.GetNext(), i);
+	}
+
+	Component::Component(Entity* o, IComponentManager* m) :
+		Managed(m, *this),
+		_window(o->GetWindow()), _owner(o)
+	{
+
+	}
 
 	void IComponentManager::OnUpdate(float d)
 	{

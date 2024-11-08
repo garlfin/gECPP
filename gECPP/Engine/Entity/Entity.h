@@ -13,12 +13,14 @@
 
 namespace gE
 {
+	class EntityManager;
+
  	class Entity
 	{
 	 public:
 		virtual ~Entity() = default;
 
-		explicit Entity(Window*, LayerMask layers = LayerMask::All, Flags = Flags(), Entity* = nullptr);
+		explicit Entity(Window*, LayerMask layers = LayerMask::All, EntityFlags = EntityFlags(), Entity* = nullptr);
 
 		void Destroy(bool flagChildren = true);
 
@@ -26,15 +28,18 @@ namespace gE
 		GET_CONST(const std::vector<Entity*>&, Children, _children);
 		GET_CONST(Window&, Window, *_window);
 		GET_CONST(Entity*, Parent, _parent);
-		GET_CONST(Flags, Flags, _flags);
+		GET_CONST(EntityFlags, Flags, _flags);
  		GET_CONST(LayerMask, Layer, _layers);
+
+ 		friend class EntityManager;
 
 	 private:
 		Window* const _window = nullptr;
 		Entity* _parent = nullptr;
 
-		Flags _flags;
+		EntityFlags _flags;
 		LayerMask _layers;
+ 		u8 _depth = DEFAULT;
 
 		std::vector<Entity*> _children;
 
@@ -42,4 +47,16 @@ namespace gE
 	};
 
 	typedef Entity Empty;
+
+	class EntityManager : Manager<Managed<Entity>>
+	{
+	public:
+		using Manager::Manager;
+
+		void FinalizeDeletions();
+		void DestroyEntity(Entity&, bool destroyChildren = true);
+
+	private:
+		LinkedList<Entity> _deletionList;
+	};
 }

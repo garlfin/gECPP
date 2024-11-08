@@ -149,6 +149,11 @@ namespace gE
 
         transform.SetPosition(location, TransformFlags::RenderInvalidated);
         transform.SetRotation(rotation, TransformFlags::RenderInvalidated);
+
+        if(_body->IsStatic() || _body->IsActive()) return;
+        std::cout << "kill all humans\n";
+
+        GetOwner().Destroy();
     }
 
     inline void RigidBody::OnUpdate(float d)

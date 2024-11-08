@@ -9,7 +9,7 @@ namespace gE
 	CameraSettings3D CreateSDFSettings(u16);
 
 	SDFCapture::SDFCapture(Window* w, u16 resolution) :
-		Entity(w, LayerMask::All, Flags(true)),
+		Entity(w, LayerMask::All, EntityFlags(true)),
 		_camera(this, _target, CreateSDFSettings(resolution)),
 		_target(*this, _camera)
 	{
