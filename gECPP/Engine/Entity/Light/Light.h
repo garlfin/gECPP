@@ -40,6 +40,7 @@ namespace gE
 		GET(Camera&, Camera, _camera);
 
 	 private:
+		Managed<Light> _managedLight;
 		Camera& _camera;
 	};
 }

@@ -38,7 +38,7 @@ Window::Window(glm::u16vec2 size, const char* name) :
 
 	GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
 	_monitor = Monitor(glfwGetVideoMode(primaryMonitor));
-	if ((glm::u16vec2)_monitor.Size != size) primaryMonitor = nullptr;
+	if ((glm::u16vec2) _monitor.Size != size) primaryMonitor = nullptr;
 
 	_window = glfwCreateWindow(size.x, size.y, name, primaryMonitor, nullptr);
 	if (!_window) GE_FAIL("Failed to create Window.");
@@ -48,10 +48,10 @@ Window::Window(glm::u16vec2 size, const char* name) :
 	PVR::Header iconHeader;
 	Array<u8> iconData = PVR::Read("Resource/gE.PVR", iconHeader);
 
-	GLFWimage image{(int)iconHeader.Size.x, (int)iconHeader.Size.y, iconData.Data()};
+	GLFWimage image{ (int) iconHeader.Size.x, (int) iconHeader.Size.y, iconData.Data() };
 	glfwSetWindowIcon(_window, 1, &image);
 
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) GE_FAIL("Failed to initialize GLAD.");
+	if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) GE_FAIL("Failed to initialize GLAD.");
 
 	LOG("Vendor: " << glGetString(GL_VENDOR));
 	LOG("Renderer: " << glGetString(GL_RENDERER));
@@ -224,10 +224,14 @@ void Window::OnFixedUpdate(float delta)
 
 void Window::OnUpdate(float delta)
 {
+	Entities.MarkDeletions();
+
+	Physics->OnUpdate(delta);
 	Cameras.OnUpdate(delta);
 	Behaviors.OnUpdate(delta);
-
 	Transforms.OnUpdate(delta);
+
+	Entities.FinalizeDeletions();
 }
 
 void Window::OnRender(float delta)
@@ -236,7 +240,6 @@ void Window::OnRender(float delta)
 
 	Lights->OnRender(delta, nullptr);
 	Cubemaps->OnRender(delta, nullptr);
-
 	Cameras.OnRender(delta);
 
 	GE_ASSERT(Cameras.CurrentCamera, "CAMERA SHOULD NOT BE NULL!");

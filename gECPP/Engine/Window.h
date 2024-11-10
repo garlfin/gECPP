@@ -80,6 +80,7 @@ namespace gE
 		GET(CullingManager&, CullingManager, CullingManager);
 		GET(GPU::TextureSlotManager&, SlotManager, SlotManager);
 		GET(PhysicsManager&, Physics, Physics);
+		GET(EntityManager&, Entities, Entities);
 
 		// Engine States
 		RenderFlags RenderState = DEFAULT;
@@ -123,6 +124,7 @@ namespace gE
 		SmartPointer<PhysicsManager> Physics;
 		CullingManager CullingManager;
 		GPU::TextureSlotManager SlotManager;
+		EntityManager Entities;
 
 		ComponentManager<Behavior> Behaviors;
 

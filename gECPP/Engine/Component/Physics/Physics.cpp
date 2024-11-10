@@ -137,7 +137,7 @@ namespace gE
         );
     }
 
-    inline void RigidBody::OnFixedUpdate(float d)
+    void RigidBody::OnFixedUpdate(float d)
     {
         Transform& transform = GetOwner().GetTransform();
         const ColliderTransform& offset = _collider->GetTransform();
@@ -151,28 +151,30 @@ namespace gE
         transform.SetRotation(rotation, TransformFlags::RenderInvalidated);
 
         if(_body->IsStatic() || _body->IsActive()) return;
-        std::cout << "kill all humans\n";
 
         GetOwner().Destroy();
     }
 
-    inline void RigidBody::OnUpdate(float d)
+    void RigidBody::OnUpdate(float d)
     {
 
     }
 
-    inline void RigidBody::OnRender(float d, Camera* camera)
-    {
 
-    }
-
-    RigidBody::~RigidBody()
+    void RigidBody::OnDestroy()
     {
         if(!_body) return;
 
         PhysicsManager& manager = GetWindow().GetPhysics();
 
-        manager._interface->DeactivateBody(_body->GetID());
         manager._interface->RemoveBody(_body->GetID());
+        manager._interface->DestroyBody(_body->GetID());
+
+        _body = nullptr;
+    }
+
+    RigidBody::~RigidBody()
+    {
+        RigidBody::OnDestroy();
     }
 }

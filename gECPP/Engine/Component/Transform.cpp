@@ -70,7 +70,7 @@ namespace gE
 		Set(d);
 	}
 
-	void TransformManager::OnUpdate(float d)
+	void TransformManager::OnUpdate(float delta)
 	{
 		for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())
 			(**i)->OnInit();
@@ -88,6 +88,6 @@ namespace gE
 		}
 
 		for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())
-			(**i)->OnUpdate(d);
+			(**i)->OnUpdate(delta);
 	}
 }

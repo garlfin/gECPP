@@ -97,7 +97,7 @@ namespace gE
 	 public:
 		using ComponentManager::ComponentManager;
 
-		void OnUpdate(float d) override;
+		void OnUpdate(float delta) override;
 
 	private:
 		LinkedList<Managed<Component>> _deletionList = DEFAULT;

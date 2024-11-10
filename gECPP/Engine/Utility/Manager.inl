@@ -11,13 +11,14 @@ namespace gE
 	template<class T>
 	void LinkedList<T>::Add(LinkedIterator<T>& t, Direction dir)
 	{
-		SAFE_CONSTRUCT(t, ITER_T, t.Get(), *this, nullptr, dir);
+		SAFE_CONSTRUCT(t, ITER_T, t.Get(), this, nullptr, dir);
 	}
 
 	template<class T>
 	void LinkedList<T>::Remove(LinkedIterator<T>& t)
 	{
-		SAFE_CONSTRUCT(t, ITER_T, t.Get(), *this);
+		if(t._list != this) return;
+		SAFE_CONSTRUCT(t, ITER_T, t.Get(), nullptr);
 	}
 
 	template<class T>
@@ -35,7 +36,7 @@ namespace gE
 	template<class T>
 	void LinkedList<T>::Insert(LinkedIterator<T>& t, LinkedIterator<T>* at, Direction dir)
 	{
-		SAFE_CONSTRUCT(t, ITER_T, t.Get(), *this, at, dir);
+		SAFE_CONSTRUCT(t, ITER_T, t.Get(), this, at, dir);
 	}
 
 
@@ -53,7 +54,11 @@ namespace gE
 			i->_list = this;
 			_size++;
 			from._size--;
+			if(i == end) break;
 		}
+
+		begin->_previous = _last;
+		end->_next = nullptr;
 
 		if(!previousSize)
 		{
@@ -72,9 +77,24 @@ namespace gE
 			end->_next->_previous = begin->_previous;
 		else
 			from._last = end->_previous;
+	}
 
-		begin->_previous = _last;
-		end->_next = nullptr;
+	template <class T>
+	void LinkedList<T>::EmptyUnsafe()
+	{
+		_size = 0;
+		_first = _last = nullptr;
+	}
+
+	template <class T>
+	void LinkedList<T>::Empty()
+	{
+		for(ITER_T* i = _first; i;)
+		{
+			ITER_T& toBeDeleted = *i;
+			i = i->GetNext();
+			SAFE_CONSTRUCT(toBeDeleted, ITER_T);
+		}
 	}
 
 	template<class T>
@@ -115,9 +135,11 @@ namespace gE
 	}
 
 	template<class T>
-	LinkedIterator<T>::LinkedIterator(T& owner, LinkedList<T>& l, LinkedIterator* at, Direction direction):
-		_list(&l), _owner(owner)
+	LinkedIterator<T>::LinkedIterator(T& owner, LinkedList<T>* l, LinkedIterator* at, Direction direction):
+		_list(l), _owner(owner)
 	{
+		if(!_list) return;
+
 		_list->_size++;
 
 		if(!_list->_first)
@@ -151,6 +173,22 @@ namespace gE
 
 			_next->_previous = this;
 		}
+	}
+
+	template <class T>
+	LinkedIterator<T>::~LinkedIterator()
+	{
+		if(!_list) return;
+
+		if(_previous) _previous->_next = _next;
+		else _list->_first = _next;
+
+		if(_next) _next->_previous = _previous;
+		else _list->_last = _previous;
+
+		_list->_size--;
+
+		_list = nullptr;
 	}
 
 	template<class T>

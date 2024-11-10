@@ -46,6 +46,8 @@ namespace gE
 		void Move(LinkedIterator<T>& t, LinkedIterator<T>& to, Direction = Direction::Right);
 		void Remove(LinkedIterator<T>& t);
 		void MergeList(LinkedList& from, ITER_T* begin = nullptr, ITER_T* end = nullptr);
+		void EmptyUnsafe();
+		void Empty();
 
 		NODISCARD LinkedIterator<T>* At(u32 index);
 		NODISCARD ALWAYS_INLINE LinkedIterator<T>* operator[](u32 i) { return At(i); }
@@ -73,7 +75,7 @@ namespace gE
 	public:
 		LinkedIterator() = default;
 		explicit LinkedIterator(T& owner) : _owner(owner) {};
-		LinkedIterator(T& owner, LinkedList<T>& l, LinkedIterator* at = nullptr, Direction direction = Direction::Right);
+		LinkedIterator(T& owner, LinkedList<T>* l, LinkedIterator* at = nullptr, Direction direction = Direction::Right);
 
 		DELETE_OPERATOR_COPY(LinkedIterator);
 		OPERATOR_MOVE(LinkedIterator, o,
@@ -112,20 +114,7 @@ namespace gE
 
 		friend class LinkedList<T>;
 
-		~LinkedIterator()
-		{
-			if(!_list) return;
-
-			if(_previous) _previous->_next = _next;
-			else _list->_first = _next;
-
-			if(_next) _next->_previous = _previous;
-			else _list->_last = _previous;
-
-			_list->_size--;
-
-			_list = nullptr;
-		}
+		~LinkedIterator();
 
 	private:
 		LinkedList<T>* _list = nullptr;
@@ -160,7 +149,7 @@ namespace gE
 	{
 	 public:
 		Managed() = default;
-		Managed(Manager<Managed>* m, T& t, bool overrideRegister = false) : Iterator(t), _t(&t), _manager(m)
+		Managed(Manager<Managed>* m, T& t, bool overrideRegister = false) : Iterator(*this), _t(&t), _manager(m)
 		{
 			if(!overrideRegister) Register();
 		}

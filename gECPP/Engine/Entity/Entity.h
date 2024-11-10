@@ -15,11 +15,9 @@ namespace gE
 {
 	class EntityManager;
 
- 	class Entity
+ 	class Entity : public Managed<Entity>
 	{
 	 public:
-		virtual ~Entity() = default;
-
 		explicit Entity(Window*, LayerMask layers = LayerMask::All, EntityFlags = EntityFlags(), Entity* = nullptr);
 
 		void Destroy(bool flagChildren = true);
@@ -48,15 +46,16 @@ namespace gE
 
 	typedef Entity Empty;
 
-	class EntityManager : Manager<Managed<Entity>>
+	class EntityManager : public Manager<Managed<Entity>>
 	{
 	public:
 		using Manager::Manager;
 
-		void FinalizeDeletions();
+		void MarkDeletions() const;
+		void FinalizeDeletions() const;
 		void DestroyEntity(Entity&, bool destroyChildren = true);
 
 	private:
-		LinkedList<Entity> _deletionList;
+		LinkedList<Managed<Entity>> _deletionList;
 	};
 }

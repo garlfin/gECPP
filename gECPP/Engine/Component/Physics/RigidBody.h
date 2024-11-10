@@ -43,7 +43,7 @@ namespace gE
 		void OnEarlyFixedUpdate(float d);
 		void OnFixedUpdate(float d) override;
 		void OnUpdate(float d) override;
-		void OnRender(float d, Camera* camera) override;
+		void OnDestroy() override;
 
 		~RigidBody() override;
 

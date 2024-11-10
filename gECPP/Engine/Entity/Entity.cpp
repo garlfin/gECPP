@@ -11,8 +11,10 @@
 
 namespace gE
 {
-	Entity::Entity(Window* w, LayerMask layers, EntityFlags flags, Entity* parent) :
-		_window(w), _parent(parent), _flags(flags), _layers(layers), _transform(this)
+	Entity::Entity(Window* window, LayerMask layers, EntityFlags flags, Entity* parent) :
+		Managed(&window->GetEntities(), *this),
+		_window(window), _parent(parent), _flags(flags),
+		_layers(layers), _transform(this)
 	{
 		if(flags.Static) _layers |= LayerMask::Static;
 		if(!parent) return;
@@ -23,46 +25,53 @@ namespace gE
 
 	void Entity::Destroy(bool flagChildren)
 	{
-		_flags.Deletion = true;
-
-		if(_parent) RemoveFirstFromVec(_parent->_children, this);
-
-		std::vector stack{ this };
-
-		if(flagChildren)
-			while(!stack.empty())
-			{
-				Entity* back = stack.back();
-				back->_flags.Deletion = true;
-				stack.pop_back();
-
-				for(Entity* child: back->GetChildren())
-					stack.push_back(child);
-			}
-		else
-			for(Entity* child: _children)
-			{
-				child->_parent = GetParent();
-				GetParent()->_children.push_back(child);
-			}
+		GetWindow().GetEntities().DestroyEntity(*this, flagChildren);
 	}
 
-	void EntityManager::FinalizeDeletions()
+	void EntityManager::MarkDeletions() const
 	{
+		for(ITER_T* i = _deletionList.GetFirst(); i; i = i->GetNext())
+			(**i)->_flags.Deletion = true;
+	}
+
+	void EntityManager::FinalizeDeletions() const
+	{
+		for(ITER_T* i = _deletionList.GetFirst(); i;)
+		{
+			const Entity& toBeDeleted = ***i;
+			i = i->GetNext();
+
+			delete &toBeDeleted;
+		}
 	}
 
 	void EntityManager::DestroyEntity(Entity& entity, bool destroyChildren)
 	{
-		u8 depth = entity._depth;
+		const u8 depth = entity._depth;
 
-		/*for(ITER_T* i = &entity.Iterator; i && (**i)->_depth > depth; i = i->GetNext())
+		if(destroyChildren)
 		{
-			Entity& t = ***i;
-'
+			ITER_T* end = &entity.Iterator;
 
-		}*/
+			for(ITER_T* i = &entity.Iterator; i && (**i)->_depth > depth; i = i->GetNext())
+			{
+				(**i)->_flags.Deletion = true;
+				end = i;
+			}
 
-		//_deletionList.MergeList(List, entity.GetNext(), i);
+			_deletionList.MergeList(List, &entity.Iterator, end);
+		}
+		else
+		{
+			std::vector<Entity*>& children = entity._children;
+			if(entity._parent)
+				entity._parent->_children.insert(entity._parent->_children.end(), children.begin(), children.end());
+
+			for(ITER_T* i = &entity.Iterator; i && (**i)->_depth > depth; i = i->GetNext())
+				(**i)->_parent = entity._parent;
+
+			_deletionList.Add(entity.Iterator);
+		}
 	}
 
 	Component::Component(Entity* o, IComponentManager* m) :
@@ -72,12 +81,19 @@ namespace gE
 
 	}
 
-	void IComponentManager::OnUpdate(float d)
+	void IComponentManager::OnUpdate(float delta)
 	{
 		OnInit();
 
 		for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())
-			(**i)->OnUpdate(d);
+		{
+			Component& iter = ***i;
+
+			if(iter.GetOwner().GetFlags().Deletion)
+				iter.OnDestroy();
+			else
+				iter.OnUpdate(delta);
+		}
 	}
 
 	void IComponentManager::OnFixedUpdate(float d)
