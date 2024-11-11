@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "Physics.h"
+#include "../../../Physics/Physics.h"
 #include <Jolt/Physics/Collision/Shape/ScaledShape.h>
 
 #include <Engine/Component/Component.h>

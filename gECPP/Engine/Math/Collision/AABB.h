@@ -14,8 +14,8 @@ namespace gE
 	struct AABB
 	{
 		typedef Position<DIMENSION> POS_T;
-		typedef glm::mat<(u8) DIMENSION + 1, (u8) DIMENSION + 1, float, glm::defaultp> MAT_T;
-		typedef Position<Dimension((u8) DIMENSION + 1)> TEMP_T;
+		typedef glm::mat<(u8) DIMENSION + 1, (u8) DIMENSION + 1, float> MAT_T;
+		typedef Position<(Dimension) ((u8) DIMENSION + 1)> TEMP_T;
 
 		POS_T Min;
 		POS_T Max;
@@ -53,7 +53,7 @@ namespace gE
 	}
 
 	template<Dimension DIMENSION>
-	AABB<DIMENSION> AABB<DIMENSION>::operator&(const AABB<DIMENSION>& o) const
+	AABB<DIMENSION> AABB<DIMENSION>::operator&(const AABB& o) const
 	{
 		return { glm::min(Min, o.Min), glm::max(Max, o.Max) };
 	}

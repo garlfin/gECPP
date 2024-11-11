@@ -9,6 +9,12 @@ using std::move;
 
 #define COPY_MOVE(x) std::move(std::remove_cvref_t<decltype(x)>(x))
 
+#define SAFE_CONSTRUCT_NAMESPACE(TO, TYPE, NAMESPACE, ...) \
+	{ \
+		(TO).~TYPE(); \
+		new(&(TO)) NAMESPACE::TYPE(__VA_ARGS__); \
+	}
+
 #define SAFE_CONSTRUCT(TO, TYPE, ...) \
 	{ \
 		(TO).~TYPE(); \

@@ -15,14 +15,13 @@
 	TYPE() = default; \
 	TYPE(istream& in, gE::Window* window) \
 	{ \
-		SUPER::Serialize(in, window); \
-		SUPER tmp = move(*this); \
+		SUPER tmp(in, nullptr); \
 		new(this) TYPE(window, move(tmp)); \
 		SUPER::Free(); \
 	} \
 	TYPE(gE::Window* window, const SUPER& settings) : TYPE(window, (SUPER&&) SUPER(settings)) {} \
-	TYPE(gE::Window* window, SUPER&& INTERNAL_SETTINGS)
-
+	TYPE(gE::Window* window, SUPER&& INTERNAL_SETTINGS) \
+	GET_CONST(SUPER_T&, Settings, *this)
 
 #define API_DEFAULT_CM_CONSTRUCTOR(TYPE) \
 	public: \

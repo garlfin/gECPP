@@ -16,7 +16,7 @@ namespace gE
             Entity(window, LayerMask::All, flags),
             _renderer(this, mesh),
             _rigidBody(this, RigidBodySettings(), _collider),
-            _collider(this, BoxColliderSettings{ ConvexColliderSettings(), size })
+            _collider(this, Physics::BoxColliderSettings{ Physics::ConvexColliderSettings(), size })
         {
         }
 

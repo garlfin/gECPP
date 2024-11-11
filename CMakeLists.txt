@@ -30,20 +30,17 @@ FILE(COPY "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ASSIMP/libassimp-5.dll" DESTINATIO
 # GLAD
 add_library(GLAD STATIC Vendor/GLAD/glad.c Vendor/GLAD/glad.h)
 
-# GETF
-add_library(GETF STATIC gECPP/gETF/File.h gECPP/gETF/File.cpp gECPP/Engine/Utility/Binary.h gECPP/gETF/File.h gECPP/gETF/Serializable.h gECPP/Engine/Utility/Binary.cpp gECPP/Graphics/API/GL/Buffer/VAO.cpp gECPP/gETF/GUI/Stylesheet.h)
-
 # PUGIXML
 add_library(PUGIXML STATIC Vendor/PUGIXML/pugixml.cpp Vendor/PUGIXML/pugixml.hpp Vendor/PUGIXML/pugiconfig.hpp)
 
 # GEUI
 add_executable(gEUI gEUI/main.cpp)
-target_link_libraries(gEUI PUGIXML GETF GLAD)
+target_link_libraries(gEUI PUGIXML GLAD)
 
 # GECPP
 file(GLOB_RECURSE GECPP_SRC "gECPP/*.cpp" "gECPP/*.h" "gECPP/*.inl")
 add_library(gECPP STATIC ${GECPP_SRC})
-target_link_libraries(gECPP GLAD GLFW GETF JOLT)
+target_link_libraries(gECPP GLAD GLFW JOLT)
 
 # VOXELDEMO
 file(GLOB_RECURSE VOXELDEMO_SRC "Demo/*.cpp" "Demo/*.h" "gECPP/*.inl")

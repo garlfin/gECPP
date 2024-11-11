@@ -99,7 +99,7 @@ template<> void Write(std::ostream& out, u32 count, const std::string* t);
 	char magic[SERIALIZABLE_MAGIC_LENGTH]; \
 	Read<char>(in, SERIALIZABLE_MAGIC_LENGTH, magic); \
 	GE_ASSERT(strcmpb(magic, MAGIC, SERIALIZABLE_MAGIC_LENGTH), "UNEXPECTED MAGIC!"); \
-	u8 version = Read<u8>(in);
+	Version = Read<u8>(in);
 
 // Implementation
 #define SERIALIZABLE_PROTO(MAGIC_VAL, VERSION_VAL, TYPE, SUPER) \
@@ -110,6 +110,7 @@ template<> void Write(std::ostream& out, u32 count, const std::string* t);
 		typedef SUPER::SETTINGS_T SETTINGS_T;\
 		inline void Serialize(istream& in, SETTINGS_T s) override { SAFE_CONSTRUCT(*this, TYPE, in, s); } \
 		inline void Deserialize(ostream& out) const override { SUPER::Deserialize(out); Write(out, SERIALIZABLE_MAGIC_LENGTH, MAGIC); Write<u8>(out, VERSION_VAL); IDeserialize(out); } \
+		u8 Version; \
 	private: \
 		void ISerialize(istream& in, SETTINGS_T s); \
 		void IDeserialize(ostream& out) const;

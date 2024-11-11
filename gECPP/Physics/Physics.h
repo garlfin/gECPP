@@ -4,16 +4,13 @@
 
 #pragma once
 
-#include <Jolt/Jolt.h>
+#include <gECPP/Engine/Utility/Macro.h>
+#include <gECPP/Engine/Math/Math.h>
 
-#include <Jolt/Core/Factory.h>
-#include <Jolt/Core/TempAllocator.h>
-#include <Jolt/Physics/PhysicsSystem.h>
-#include <Jolt/Physics/Collision/ObjectLayer.h>
-#include <Jolt/Core/JobSystemThreadPool.h>
-
-#include <Engine/Component/Component.h>
-#include <Engine/Utility/AssetManager.h>
+#include <Vendor/Jolt/Jolt.h>
+#include <Vendor/Jolt/Core/JobSystemThreadPool.h>
+#include <Vendor/Jolt/Physics/PhysicsSystem.h>
+#include <Vendor/Jolt/Physics/Collision/ObjectLayer.h>
 
 #define GE_PX_ALLOCATION 10485760
 #define GE_PX_MAX_BODIES 1024

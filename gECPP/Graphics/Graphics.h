@@ -5,19 +5,13 @@
 #pragma once
 
 #include <Prototype.h>
-#include <gETF/Serializable.h>
+#include <Serializable/Serializable.h>
 
 #define API_NONE 0
 #define API_GL 1
 
 #if API_ID == API_GL
 	#define API GL
-#endif
-
-#ifdef DEBUG
-	#define ASSET_CHECK_FREE(TYPE) if(!TYPE::IsFree()) LOG("WARNING: ASSET NOT DELETED\n\tAsset: " << this);
-#else
-	#define ASSET_CHECK_FREE(TYPE)
 #endif
 
 namespace GPU
@@ -50,18 +44,5 @@ namespace GPU
 
 	 private:
 		gE::Window* _window;
-	};
-
-	class Asset
-	{
-	public:
-		Asset() = default;
-
-		DEFAULT_OPERATOR_CM(Asset);
-
-		virtual void Free() = 0;
-		NODISCARD virtual bool IsFree() const = 0;
-
-		virtual ~Asset() = default;
 	};
 }

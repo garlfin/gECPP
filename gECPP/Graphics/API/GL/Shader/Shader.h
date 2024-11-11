@@ -1,7 +1,7 @@
 #pragma once
 
 #include <GLAD/glad.h>
-#include <Graphics/Macro.h>
+#include <Serializable/Macro.h>
 #include <Graphics/API/GL/GL.h>
 #include <Graphics/Shader/Preprocessor.h>
 #include <Graphics/Shader/Shader.h>

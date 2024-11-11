@@ -1,11 +1,10 @@
 //
-// Created by scion on 10/30/2024.
+// Created by scion on 11/9/2024.
 //
 
 #include "RigidBody.h"
 
 #include <Engine/Window.h>
-#include <Engine/WindowState.h>
 #include <glm/gtx/string_cast.hpp>
 #include <Jolt/RegisterTypes.h>
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
@@ -114,7 +113,7 @@ namespace gE
     {
         const PhysicsManager& physics = GetWindow().GetPhysics();
         const Transform& transform = GetOwner().GetTransform();
-        const ColliderTransform& offset = _collider->GetTransform();
+        const Physics::ColliderTransform& offset = _collider->GetTransform();
 
         if(!(bool)(transform._flags & TransformFlags::PhysicsInvalidated)) return;
 
@@ -140,7 +139,7 @@ namespace gE
     void RigidBody::OnFixedUpdate(float d)
     {
         Transform& transform = GetOwner().GetTransform();
-        const ColliderTransform& offset = _collider->GetTransform();
+        const Physics::ColliderTransform& offset = _collider->GetTransform();
 
         glm::quat rotation = ToGLM(_body->GetRotation());
         glm::vec3 location = ToGLM(_body->GetPosition()) - offset.Position * transform->Scale * inverse(rotation);

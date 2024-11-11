@@ -15,7 +15,7 @@ namespace gE
         EmptyColliderEntity(Window* window, glm::vec3 size, EntityFlags flags = DEFAULT) :
             Entity(window, LayerMask::All, flags),
             _rigidBody(this, RigidBodySettings(), _collider),
-            _collider(this, BoxColliderSettings{ ConvexColliderSettings(), size })
+            _collider(this, Physics::BoxColliderSettings{ Physics::ConvexColliderSettings(), size })
         {
         }
 
