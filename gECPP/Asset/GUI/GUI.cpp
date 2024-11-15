@@ -7,17 +7,17 @@
 
 namespace gETF::UI
 {
-	void IElement::ISerialize(istream& in, const Header& settings)
+	void Element::ISerialize(istream& in, void* settings)
 	{
 		_window = nullptr;
 	}
 
-	void IElement::IDeserialize(ostream& out) const
+	void Element::IDeserialize(ostream& out) const
 	{
 
 	}
 
-	void Frame::ISerialize(istream& in, const Header& s)
+	void Frame::ISerialize(istream& in, void* s)
 	{
 	}
 

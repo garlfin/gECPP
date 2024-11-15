@@ -35,9 +35,6 @@ namespace gE
 		RelativePointer<Entity> _owner;
 	};
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "HidingNonVirtualFunction"
-
 	template<class T>
 	class TypedComponent : public Component
 	{
@@ -46,8 +43,6 @@ namespace gE
 
 		GET_CONST(T*, Owner, (T*) Component::GetOwner());
 	};
-
-#pragma clang diagnostic pop
 
 	class IComponentManager : public Manager<Managed<Component>>
 	{

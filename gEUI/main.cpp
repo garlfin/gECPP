@@ -20,6 +20,8 @@ int main()
 
 	pugi::xml_node root = file.root();
 
+	root.find_child()
+
 	return 0;
 }
 

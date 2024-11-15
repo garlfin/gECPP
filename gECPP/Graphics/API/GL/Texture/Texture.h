@@ -37,7 +37,7 @@ namespace GL
 
 		inline u32 Bind(u32 unit, GLenum access, u8 mip = 0, GLenum format = 0) const
 		{
-			glBindImageTexture(unit, ID, mip, Target == GL_TEXTURE_3D, 0, access, format ?: Settings.Format);
+			glBindImageTexture(unit, ID, mip, Target == GL_TEXTURE_3D, 0, access, format ? format : Settings.Format);
 			return unit;
 		}
 

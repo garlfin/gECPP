@@ -21,7 +21,7 @@ namespace gE
 			_counter = o._counter;
 			if(_counter)
 			{
-				LOG("INFO: COPIED REFERENCE\n\tCOUNT: " << *_counter << "\n\tFUNCTION: " << __PRETTY_FUNCTION__);
+				LOG("INFO: COPIED REFERENCE\n\tCOUNT: " << *_counter << "\n\tFUNCTION: " << PRETTY_FUNCTION);
 				(*_counter)++;
 			}
 		);
@@ -40,8 +40,8 @@ namespace gE
 
 		ALWAYS_INLINE const T& operator||(const T& t) const { return _t ? *_t : t; };
 		ALWAYS_INLINE T& operator||(T& t) const { return _t ? *_t : t; }
-		ALWAYS_INLINE const T* operator||(const T* t) const { return _t ?: t; };
-		ALWAYS_INLINE T* operator||(T* t) const { return _t ?: t; }
+		ALWAYS_INLINE const T* operator||(const T* t) const { return _t ? _t : t; };
+		ALWAYS_INLINE T* operator||(T* t) const { return _t ? _t : t; }
 
 		ALWAYS_INLINE bool operator == (const Reference& o) const { return _t == o._t; }
 		ALWAYS_INLINE bool operator != (const Reference& o) const { return _t != o._t; }
@@ -60,7 +60,7 @@ namespace gE
 		{
 			if(!_t || --(*_counter)) return;
 
-			LOG("INFO: DELETED REFERENCE\n\tFunction: " << __PRETTY_FUNCTION__);
+			LOG("INFO: DELETED REFERENCE\n\tFunction: " << PRETTY_FUNCTION);
 			delete _t;
 			delete _counter;
 		}
@@ -107,8 +107,8 @@ namespace gE
 
 		ALWAYS_INLINE const T& operator||(const T& t) const { return _t ? *_t : t; };
 		ALWAYS_INLINE T& operator||(T& t) const { return _t ? *_t : t; }
-		ALWAYS_INLINE const T* operator||(const T* t) const { return _t ?: t; };
-		ALWAYS_INLINE T* operator||(T* t) const { return _t ?: t; }
+		ALWAYS_INLINE const T* operator||(const T* t) const { return _t ? _t : t; };
+		ALWAYS_INLINE T* operator||(T* t) const { return _t ? _t : t; }
 
 		ALWAYS_INLINE bool operator == (const SmartPointer& o) const { return _t == o._t; }
 		ALWAYS_INLINE bool operator != (const SmartPointer& o) const { return _t != o._t; }

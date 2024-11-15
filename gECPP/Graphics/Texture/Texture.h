@@ -5,6 +5,7 @@
 #pragma once
 
 #include <Graphics/Graphics.h>
+#include <Serializable/Asset.h>
 #include "TextureSettings.h"
 
 namespace GPU
@@ -12,7 +13,7 @@ namespace GPU
 	template<Dimension T>
 	u8 GetMipCount(const Size<T>& size);
 
-	class Texture : public Serializable<gE::Window*>, public Asset
+	class Texture : public Serializable<gE::Window*>, public gE::Asset
 	{
 		SERIALIZABLE_PROTO(TEX, 1, Texture, Serializable);
 

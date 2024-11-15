@@ -49,6 +49,7 @@ namespace GL
 	class VAO : protected GPU::VAO, public IVAO
 	{
 		API_SERIALIZABLE(VAO, GPU::VAO);
+		API_UNDERLYING_IMPL(IVAO);
 
 	 public:
 		API_DEFAULT_CM_CONSTRUCTOR(VAO);
@@ -67,6 +68,7 @@ namespace GL
 	class IndexedVAO final : protected GPU::IndexedVAO, public IVAO
 	{
 		API_SERIALIZABLE(IndexedVAO, GPU::IndexedVAO);
+		API_UNDERLYING_IMPL(IVAO);
 
 	 public:
 		API_DEFAULT_CM_CONSTRUCTOR(IndexedVAO);

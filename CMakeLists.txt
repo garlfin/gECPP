@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 project(VoxelField)
 
-add_compile_definitions(API_ID=API_GL)
 set(CMAKE_CXX_STANDARD 23)
 
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -static -s")
@@ -39,14 +38,17 @@ target_link_libraries(gEUI PUGIXML GLAD)
 
 # GECPP
 file(GLOB_RECURSE GECPP_SRC "gECPP/*.cpp" "gECPP/*.h" "gECPP/*.inl")
+
 add_library(gECPP STATIC ${GECPP_SRC})
+target_compile_definitions(gECPP PUBLIC API_ID=API_GL)
 target_link_libraries(gECPP GLAD GLFW JOLT)
 
 # VOXELDEMO
-file(GLOB_RECURSE VOXELDEMO_SRC "Demo/*.cpp" "Demo/*.h" "gECPP/*.inl")
+file(GLOB_RECURSE VOXELDEMO_SRC "Demo/*.cpp" "Demo/*.h" "Demo/*.inl")
 add_executable(VoxelDemo ${VOXELDEMO_SRC})
 target_link_libraries(VoxelDemo gECPP)
 
 # GEMODEL
-add_executable(gEModel gEModel/main.cpp gEModel/Vertex.h)
+file(GLOB_RECURSE GEMODEL_SRC "gEModel/*.cpp" "gEModel/*.h" "gEModel/*.inl")
+add_executable(gEModel ${GEMODEL_SRC})
 target_link_libraries(gEModel GLAD gECPP ASSIMP)

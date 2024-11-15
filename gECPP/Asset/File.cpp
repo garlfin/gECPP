@@ -5,6 +5,8 @@
 #include "File.h"
 #include <Engine/Utility/Binary.h>
 
+#include "Engine/Window.h"
+
 /*
  * void Deserialize(ostream& ptr);
  * void Serialize(void*& ptr);
@@ -15,7 +17,7 @@
  * 	struct MaterialSlot;
 */
 
-namespace gETF
+namespace gE
 {
 	void Header::IDeserialize(ostream& out) const
 	{
@@ -49,14 +51,19 @@ namespace gETF
 
 void IFileContainer::IDeserialize(std::ostream& out) const
 {
-	Write(out, _type);
-	Write(out, _name);
+	const TypeSystem::Type* type = _t->GetType();
+	GE_ASSERT(type, "NO TYPE INFO!");
+
+	Write(out, type->Name);
 	_t->Deserialize(out);
 }
 
-void IFileContainer::ISerialize(std::istream& in, gE::Window*)
+void IFileContainer::ISerialize(std::istream& in, gE::Window* window)
 {
-	_type = Read<TypeSystem<gE::Window*>::TypeID>(in);
-	_name = Read<std::string>(in);
-	//_t->Serialize(ptr, settings);
+	const std::string typeName = Read<std::string>(in);
+
+	const TypeSystem::Type* type = TypeSystem::GetTypeInfo(typeName);
+	GE_ASSERT(type, "NO TYPE INFO!");
+
+	_t = type->Factory(in, window);
 }

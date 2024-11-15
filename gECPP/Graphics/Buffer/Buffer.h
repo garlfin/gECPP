@@ -4,14 +4,23 @@
 
 #pragma once
 
-#include "Graphics/Graphics.h"
+#include <Graphics/Graphics.h>
+#include <Serializable/Asset.h>
+#include <Serializable/Macro.h>
+
+namespace GL
+{
+	template<class T, bool DYNAMIC>
+	class Buffer;
+}
 
 namespace GPU
 {
 	template<typename T = void>
-	class Buffer : public Serializable<gE::Window*>, public Asset
+	class Buffer : public Serializable<gE::Window*>, public gE::Asset
 	{
 		SERIALIZABLE_PROTO(SBUF, 1, Buffer, Serializable<gE::Window*>);
+		API_REFLECTABLE(Buffer, "GPU::Buffer", API::Buffer<T, false>);
 
 	 public:
 		static_assert(!std::is_pointer_v<T>, "Buffer data shouldn't be a pointer!");
@@ -42,3 +51,9 @@ namespace GPU
 #include "Buffer.inl"
 
 #include <Graphics/API/GL/Buffer/Buffer.h>
+
+template <typename T>
+GL::Buffer<T, false>* GPU::Buffer<T>::BufferFACTORY(std::istream& in, SETTINGS_T t)
+{
+	return new GL::Buffer<T, false>(in, t);
+}

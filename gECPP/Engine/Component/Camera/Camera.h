@@ -17,9 +17,6 @@ namespace GPU
 	struct Camera;
 }
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "HidingNonVirtualFunction"
-
 namespace gE
 {
 	class Camera : public Component
@@ -160,5 +157,3 @@ namespace gE
 		~CameraManager() override = default;
 	};
 }
-
-#pragma clang diagnostic pop

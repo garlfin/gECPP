@@ -13,33 +13,48 @@
 
 #include "Serializable.h"
 
-// Defines SERIALIZABLE_PROTO
-
-// TODO: REDO THIS AGAIN
-
 template<class T>
-struct TypeSystem
+struct ITypeSystem
 {
-	using TypeID = u64;
-	using FactoryFunction = std::conditional_t<std::is_same_v<T, void>,
-		Serializable<T>*(*)(std::istream&),
-		Serializable<T>*(*)(std::istream&, T)>;
+	ITypeSystem() = delete;
+
+	using FactoryFunction = Serializable<T>*(*)(std::istream&, T);
 
 	struct Type
 	{
-		Type(const char* n, FactoryFunction f) : Name(n), ID(0), Factory(f)
+		Type(const std::string& name, FactoryFunction factory) : Name(name), Factory(factory)
 		{
-			Types[ID];
+			_types[name] = this;
 		};
 
-		const char* Name;
-		TypeID ID;
-
+		std::string Name;
 		FactoryFunction Factory;
 	};
 
-	static GLOBAL std::unordered_map<TypeID, Type> Types;
+	using MAP_T = std::unordered_map<std::string, Type*>;
+
+	static const Type* GetTypeInfo(const std::string& type)
+	{
+		typename MAP_T::const_iterator it = _types.find(type);
+
+		if(it != _types.end()) return it->second;
+
+		ERR("NO SUCH REFLECTED TYPE!");
+		return nullptr;
+	}
+
+private:
+	static inline MAP_T _types {};
 };
+
+template class ITypeSystem<gE::Window*>;
+using TypeSystem = ITypeSystem<gE::Window*>;
+
+#define SERIALIZABLE_REFLECTABLE(TYPE) \
+	public: \
+		static TYPE* TYPE##FACTORY(std::istream& in, SETTINGS_T t) { return new TYPE(in, t); } \
+		static GLOBAL typename ITypeSystem<SETTINGS_T>::Type Type{ NAME, (typename ITypeSystem<SETTINGS_T>::FactoryFunction) TYPE##FACTORY }; \
+		const typename ITypeSystem<SETTINGS_T>::Type* GetType() const { return &Type; }
 
 template<class T, class S>
 concept is_serializable_in = requires(T t, S s, std::istream& i)
@@ -70,6 +85,9 @@ template<class T> T Read(std::istream& in) { T t; Read(in, t); return t; }
 template<class T> void Write(std::ostream& out, u32 count, const T* t);
 template<class T> void Write(std::ostream& out, const T& t) { Write(out, 1, &t); }
 
+template<class T> const typename ITypeSystem<T>::Type* ReadType(std::istream& in);
+template<class T> void WriteType(std::ostream& out, const typename ITypeSystem<T>::Type& type);
+
 template<typename UINT_T, class T> void Read(std::istream& in, u32 count, Array<T>* t);
 template<typename UINT_T, class T> void Read(std::istream& in, Array<T>& t) { Read<UINT_T>(in, 1, &t); }
 
@@ -85,8 +103,6 @@ template<class T> void ReadSerializable(std::istream& in, T& t, typename T::SETT
 template<> void Read(std::istream& in, u32 count, std::string* t);
 template<> void Write(std::ostream& out, u32 count, const std::string* t);
 
-#define SERIALIZABLE_MAGIC_LENGTH 4
-
 #define VIRTUAL_H(FUNC_RETURN, FUNC) \
 	inline FUNC_RETURN FUNC override {};
 
@@ -96,9 +112,9 @@ template<> void Write(std::ostream& out, u32 count, const std::string* t);
 		FUNC_RETURN I##FUNC_NAME FUNC_ARG;
 
 #define SERIALIZABLE_CHECK_HEADER() \
-	char magic[SERIALIZABLE_MAGIC_LENGTH]; \
-	Read<char>(in, SERIALIZABLE_MAGIC_LENGTH, magic); \
-	GE_ASSERT(strcmpb(magic, MAGIC, SERIALIZABLE_MAGIC_LENGTH), "UNEXPECTED MAGIC!"); \
+	char magic[4]; \
+	Read<char>(in, 4, magic); \
+	GE_ASSERT(strcmpb(magic, MAGIC, 4), "UNEXPECTED MAGIC!"); \
 	Version = Read<u8>(in);
 
 // Implementation
@@ -106,19 +122,14 @@ template<> void Write(std::ostream& out, u32 count, const std::string* t);
 	public: \
 		explicit TYPE(istream& in, SETTINGS_T s) : SUPER(in, s) { SERIALIZABLE_CHECK_HEADER(); ISerialize(in, s); } \
 		TYPE() = default; \
-		static const constexpr char MAGIC[SERIALIZABLE_MAGIC_LENGTH + 1] = #MAGIC_VAL; \
+		static const constexpr char MAGIC[5] = #MAGIC_VAL; \
 		typedef SUPER::SETTINGS_T SETTINGS_T;\
 		inline void Serialize(istream& in, SETTINGS_T s) override { SAFE_CONSTRUCT(*this, TYPE, in, s); } \
-		inline void Deserialize(ostream& out) const override { SUPER::Deserialize(out); Write(out, SERIALIZABLE_MAGIC_LENGTH, MAGIC); Write<u8>(out, VERSION_VAL); IDeserialize(out); } \
-		u8 Version; \
+		inline void Deserialize(ostream& out) const override { SUPER::Deserialize(out); Write(out, 4, MAGIC); Write<u8>(out, Version); IDeserialize(out); } \
+		u8 Version = VERSION_VAL; \
 	private: \
 		void ISerialize(istream& in, SETTINGS_T s); \
 		void IDeserialize(ostream& out) const;
-
-#define SERIALIZABLE_REFLECTABLE(TYPE) \
- 	public: \
-		static TYPE* TYPE##FACTORY(std::istream& in, SETTINGS_T t) { return new TYPE(in, t); } \
-		static GLOBAL TypeSystem<SETTINGS_T>::Type Type{ #TYPE, (TypeSystem<SETTINGS_T>::FactoryFunction) TYPE##FACTORY };
 
 template<class T>
 struct Serializable
@@ -132,6 +143,7 @@ public:
 
 	virtual void Serialize(istream& in, SETTINGS_T settings) {};
 	virtual void Deserialize(ostream& out) const {};
+	virtual const typename ITypeSystem<T>::Type* GetType() const { return nullptr; }
 
 	virtual ~Serializable() = default;
 };
@@ -142,7 +154,7 @@ struct IFileContainer : public Serializable<gE::Window*>
 
  public:
 	template<class T> requires requires { T::Type; }
-	explicit IFileContainer(T& t, const std::string& path) : _name(path), _type(T::Type), _t(&t)
+	explicit IFileContainer(T& t) : _t(&t)
 	{
 		static_assert(std::is_base_of_v<IFileContainer, T>);
 	}
@@ -151,7 +163,7 @@ struct IFileContainer : public Serializable<gE::Window*>
 	T* Cast()
 	{
 		static_assert(std::is_base_of_v<IFileContainer, T>);
-		if(T::Type == _type)
+		if(&T::Type == GetFileType())
 			return (T*) this;
 		return nullptr;
 	}
@@ -159,13 +171,10 @@ struct IFileContainer : public Serializable<gE::Window*>
 	template<class T>
 	T& Cast() { T* t = Cast<T>(); GE_ASSERT(t, "NO T!"); return *t; }
 
-	GET_CONST(const std::string&, Name, _name);
-	GET_CONST(const TypeSystem<gE::Window*>::TypeID&, Type, _type);
+	GET_CONST(const TypeSystem::Type*, FileType, _t->GetType());
 	GET(Serializable<gE::Window*>&,, *_t);
 
  private:
-	std::string _name;
-	TypeSystem<gE::Window*>::TypeID _type;
 	Serializable* _t;
 };
 
@@ -260,6 +269,18 @@ inline void Read(std::istream& in, u32 count, std::string* t)
 		str = std::string(length, 0);
 		Read(in, length, str.data());
 	}
+}
+
+template<class T>
+const typename ITypeSystem<T>::Type* ReadType(std::istream& in)
+{
+	return ITypeSystem<T>::GetTypeInfo(Read<std::string>(in));
+}
+
+template<class T>
+void WriteType(std::ostream& out, const typename ITypeSystem<T>::Type& type)
+{
+	Write(out, type.Name);
 }
 
 template<>

@@ -7,7 +7,7 @@
 #include <Serializable/Serializable.h>
 
 #ifdef DEBUG
-    #define ASSET_CHECK_FREE(TYPE) if(!TYPE::IsFree()) LOG("WARNING: ASSET NOT DELETED\n\tAsset: " << this);
+    #define ASSET_CHECK_FREE(TYPE) if(!TYPE::IsFree()) { LOG("WARNING: ASSET NOT DELETED\n\tAsset: " << this); }
 #else
     #define ASSET_CHECK_FREE(TYPE)
 #endif

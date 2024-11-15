@@ -4,15 +4,15 @@
 
 #pragma once
 
-namespace gETF
+namespace gE
 {
 	struct IFileContainer;
 	struct Header;
 }
 
-namespace gETF::UI
+namespace gE::UI
 {
 	class IDelegate;
 	template<class> class Delegate;
-	class IElement;
+	class Element;
 }

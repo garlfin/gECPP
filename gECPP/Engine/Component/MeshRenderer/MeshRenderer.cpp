@@ -20,7 +20,7 @@ namespace gE
 	typedef LinkedList<MAN_T> LIST_T;
 
 	template<CompareFunc<MAN_T, MAN_T> FUNC, ITER_T DrawCall::* MEMBER>
-	inline DrawCall* FindSimilarSafe(MAN_T& t, LIST_T& list, DrawCall* similar, DrawCall* next)
+	DrawCall* FindSimilarSafe(MAN_T& t, LIST_T& list, DrawCall* similar, DrawCall* next)
 	{
 		ITER_T* searchFrom = similar ? &(similar->*MEMBER) : nullptr;
 		ITER_T* searchTo = next ? &(next->*MEMBER) : nullptr;
@@ -28,9 +28,9 @@ namespace gE
 		return found ? IPTR_TO_TPTR(found) : nullptr;
 	}
 
-	MeshRenderer::MeshRenderer(Entity* o, const Reference<API::IVAO>& mesh) :
+	MeshRenderer::MeshRenderer(Entity* o, const Reference<Mesh>& mesh) :
 		Component(o, &o->GetWindow().GetRenderers()), _mesh(mesh),
-		_drawCalls(mesh->GetData().Counts.MaterialCount)
+		_drawCalls(mesh->VAO->GetData().Counts.MaterialCount)
 	{
 	#ifdef DEBUG
 		DrawCallManager& manager = GetWindow().GetRenderers().GetDrawCallManager();
@@ -46,7 +46,7 @@ namespace gE
 
 	void MeshRenderer::SetMaterial(u8 i, const Reference<Material>& mat)
 	{
-		GE_ASSERT(i < GE_MAX_VAO_MATERIAL, "MATERIAL OUT OF RANGE");
+		GE_ASSERT(i < _drawCalls.Count(), "MATERIAL OUT OF RANGE");
 		if(mat.Get() == _drawCalls[i].GetMaterial()) return;
 
 		DrawCallManager& manager = GetWindow().GetRenderers().GetDrawCallManager();
@@ -55,7 +55,7 @@ namespace gE
 
 	void MeshRenderer::SetMaterial(u8 i, Reference<Material>&& mat)
 	{
-		GE_ASSERT(i < GE_MAX_VAO_MATERIAL, "MATERIAL OUT OF RANGE");
+		GE_ASSERT(i < _drawCalls.Count(), "MATERIAL OUT OF RANGE");
 		if(mat.Get() == _drawCalls[i].GetMaterial()) return;
 
 		DrawCallManager& manager = GetWindow().GetRenderers().GetDrawCallManager();
@@ -64,7 +64,7 @@ namespace gE
 
 	void MeshRenderer::SetNullMaterial(u8 i)
 	{
-		GE_ASSERT(i < GE_MAX_VAO_MATERIAL, "MATERIAL OUT OF RANGE");
+		GE_ASSERT(i < _drawCalls.Count(), "MATERIAL OUT OF RANGE");
 		if(!_drawCalls[i].GetMaterial()) return;
 
 		DrawCallManager& manager = GetWindow().GetRenderers().GetDrawCallManager();
@@ -167,7 +167,9 @@ namespace gE
 			u32 updateTo = offsetof(GPU::Scene, Objects) + sizeof(GPU::ObjectInfo) * totalInstanceCount;
 			buffers.UpdateScene(updateTo);
 
-			(call.GetMaterial() ?: &window.GetDefaultMaterial())->Bind();
+			const Material* material = call.GetMaterial() ? call.GetMaterial() : &window.GetDefaultMaterial();
+
+			material->Bind();
 			call.GetVAO().Draw(batchCount, IndirectDrawArray);
 
 			batchCount = totalInstanceCount = instanceCount = 0;
@@ -183,8 +185,8 @@ namespace gE
 
 	DrawCall::DrawCall(DrawCallManager& manager, const MeshRenderer& r, Reference<Material>&& mat, u8 mesh) :
 		Managed(&manager, *this, true),
-		_vaoIterator(*this), _materialIterator(*this), _subMeshIterator(*this), _lodIterator(*this),
-		_vao(&r.GetMesh()), _transform(&r.GetOwner().GetTransform()), _material(move(mat)), _subMesh(mesh), _lod(0)
+		_vao(r.GetMesh().VAO), _transform(&r.GetOwner().GetTransform()), _material(move(mat)), _subMesh(mesh),
+		_lod(0), _vaoIterator(*this), _materialIterator(*this), _subMeshIterator(*this), _lodIterator(*this)
 	{
 		Register();
 	}

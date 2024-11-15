@@ -60,6 +60,13 @@ namespace gE
 		u8 InstanceMultiplier : 3;
 	};
 
+	enum class CloseFlags : u8
+	{
+		None,
+		Close,
+		Restart,
+	};
+
 	namespace RenderState
 	{
 		CONSTEXPR_GLOBAL RenderFlags Color { WriteMode::Color, VoxelWriteMode::Read, true, true, true, true, true, RasterMode::Normal, 1 };

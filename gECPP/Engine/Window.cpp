@@ -101,7 +101,7 @@ bool Window::Run()
 	_renderTick = TickHandler(144);
 
 	glfwSetTime(0.0);
-	while(!glfwWindowShouldClose(_window))
+	while(!glfwWindowShouldClose(_window) && !(bool) CloseState)
 	{
 		glfwPollEvents();
 
@@ -153,7 +153,7 @@ bool Window::Run()
 		}
 	}
 
-	return false;
+	return CloseState == CloseFlags::Restart;
 }
 
 void Window::OnInit()

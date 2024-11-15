@@ -4,9 +4,11 @@
 
 #pragma once
 
+#include <Asset/Mesh.h>
 #include <Engine/Entity/Entity.h>
 #include <Engine/Renderer/Material.h>
 #include <Graphics/Buffer/VAO.h>
+
 #include "DrawCall.h"
 
 namespace gE
@@ -14,12 +16,12 @@ namespace gE
 	class MeshRenderer : public Component
 	{
 	 public:
-		MeshRenderer(Entity* o, const Reference<API::IVAO>& mesh);
+		MeshRenderer(Entity* o, const Reference<Mesh>& mesh);
 
 		void OnUpdate(float delta) override {};
 		void OnRender(float delta, Camera*) override;
 
-		GET_CONST(API::IVAO&, Mesh, *_mesh);
+		GET_CONST(Mesh&, Mesh, *_mesh);
 
 		NODISCARD ALWAYS_INLINE Material& GetMaterial(u8 i) const { return *_drawCalls[i].GetMaterial(); }
 
@@ -30,7 +32,7 @@ namespace gE
 		friend class RendererManager;
 
 	 private:
-		Reference<API::IVAO> _mesh;
+		Reference<Mesh> _mesh;
 		Array<DrawCall> _drawCalls;
 	};
 

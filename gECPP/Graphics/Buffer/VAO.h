@@ -11,6 +11,12 @@
 
 #define API_MAX_MULTI_DRAW 8
 
+namespace GL
+{
+	class VAO;
+	class IndexedVAO;
+}
+
 namespace GPU
 {
 	struct VAOFieldCounts
@@ -27,9 +33,11 @@ namespace GPU
 		u8 LOD;
 	};
 
-	class VAO : public Serializable<gE::Window*>, public Asset
+	class VAO : public Serializable<gE::Window*>, public gE::Asset
 	{
 		SERIALIZABLE_PROTO(VAO, 1, VAO, Serializable);
+		API_REFLECTABLE(VAO, "GPU::VAO", API::VAO);
+		API_UNDERLYING();
 
 	public:
 		DEFAULT_OPERATOR_CM(VAO);
@@ -55,6 +63,7 @@ namespace GPU
 	class IndexedVAO : public VAO
 	{
 		SERIALIZABLE_PROTO(IVAO, 1, IndexedVAO, VAO);
+		API_REFLECTABLE(IndexedVAO, "GPU::IndexedVAO", API::IndexedVAO);
 
 	public:
 		DEFAULT_OPERATOR_CM(IndexedVAO);

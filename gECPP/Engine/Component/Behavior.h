@@ -18,9 +18,6 @@ namespace gE
 		void OnDestroy() override { }
 	};
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "HidingNonVirtualFunction"
-
 	template<class T>
 	class TypedBehavior : public Behavior
 	{
@@ -29,6 +26,4 @@ namespace gE
 
 		GET_CONST(T*, Owner, (T*) Component::GetOwner());
 	};
-
-#pragma clang diagnostic pop
 }

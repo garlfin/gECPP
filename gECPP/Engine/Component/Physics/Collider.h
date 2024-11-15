@@ -4,43 +4,37 @@
 
 #pragma once
 
-#include <Physics/Physics.h>
 #include <Physics/Shapes.h>
-
-#include <Jolt/Physics/Collision/Shape/ConvexShape.h>
-#include <Jolt/Physics/Collision/Shape/BoxShape.h>
-#include <Jolt/Physics/Collision/Shape/SphereShape.h>
-
 #include <Engine/Component/Component.h>
-#include <Engine/Math/Math.h>
+#include <Engine/Entity/Entity.h>
 
 namespace gE
 {
     class Collider : public Component
     {
     public:
-        Collider(Entity* owner, const Physics::Shape& settings, px::Shape& shape) :
+        Collider(Entity* owner, Jolt::Shape& shape) :
             Component(owner),
-            _settings(settings), _shape(shape)
+            _shape(shape)
         {
 
         }
 
-        const Physics::Shape* operator->() { return _shape.Get(); }
+        const Jolt::Shape* operator->() { return _shape.Get(); }
 
-        GET_CONST(const Physics::ColliderTransform&, Transform, _settings.Transform);
-        GET_CONST(const Physics::Shape&, Shape, _shape);
+        GET_CONST(const Physics::ColliderTransform&, Transform, GetSettings().Transform);
+        GET_CONST(const Physics::Shape&, Settings, _shape->GetSettings());
+        GET_CONST(const Jolt::Shape&, Shape, *_shape);
 
     private:
-        Physics::ColliderSettings _settings;
-        RelativePointer<Physics::Shape> _shape;
+        RelativePointer<Jolt::Shape> _shape;
     };
 
     class ConvexCollider : public Collider
     {
     public:
-        ConvexCollider(Entity* owner, const Physics::ConvexColliderSettings& settings, px::ConvexShape& shape) :
-            Collider(owner, settings, shape)
+        ConvexCollider(Entity* owner, Jolt::ConvexShape& shape) :
+            Collider(owner, shape)
         {
         }
 
@@ -50,34 +44,37 @@ namespace gE
         inline void SetDensity(float density) { GetShape().SetDensity(density); }
         inline void SetMass(float mass) { GetShape().SetDensity(mass * GetShape().GetVolume()); }
 
-        GET_CONST(const px::ConvexShape&, Shape, (px::ConvexShape&) Collider::GetShape());
+        const Jolt::ConvexShape* operator->() { return &GetShape(); }
+
+        GET_CONST(const Physics::ConvexShape&, Settings, GetShape().GetSettings());
+        GET_CONST(const Jolt::ConvexShape&, Shape, (const Jolt::ConvexShape&) Collider::GetShape());
 
     protected:
-        NODISCARD ALWAYS_INLINE px::ConvexShape& GetShape() { return (px::ConvexShape&) Collider::GetShape(); }
+        NODISCARD ALWAYS_INLINE Jolt::ConvexShape& GetShape() { return (Jolt::ConvexShape&) Collider::GetShape(); }
     };
 
-    class SphereCollider final : public ConvexCollider
+    template<class SHAPE_T, class SUPER_T>
+    class ShapeCollider final : public SUPER_T
     {
     public:
-        SphereCollider(Entity*, const Physics::SphereColliderSettings& s);
+        ShapeCollider(Entity* owner, const typename SHAPE_T::SUPER& settings) :
+            SUPER_T(owner, _shape),
+            _shape(&owner->GetWindow(), settings)
+        {
+        }
 
-        GET_CONST(float, Radius, _radius);
-        GET_CONST(const px::SphereShape&, Shape, *_shape);
+        const SHAPE_T* operator->() { return &_shape; }
 
-    private:
-        float _radius;
-        ManagedPX<px::SphereShape> _shape;
-    };
+        GET_CONST(const typename SHAPE_T::SUPER&, Settings, _shape.GetSettings());
+        GET_CONST(const SHAPE_T&, Shape, _shape);
 
-    class BoxCollider final : public ConvexCollider
-    {
-    public:
-        BoxCollider(Entity*, const Physics::BoxShape& s);
-
-        GET_CONST(glm::vec3, Scale, _scale);
-        GET_CONST(const px::BoxShape&, Shape, *_shape);
+    protected:
+        NODISCARD ALWAYS_INLINE SHAPE_T& GetShape() { return _shape; }
 
     private:
-        Jolt::BoxShape _shape;
+        SHAPE_T _shape;
     };
+
+    using SphereCollider = ShapeCollider<Jolt::SphereShape, ConvexCollider>;
+    using BoxCollider = ShapeCollider<Jolt::BoxShape, ConvexCollider>;
 }

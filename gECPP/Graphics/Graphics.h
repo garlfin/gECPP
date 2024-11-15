@@ -12,6 +12,8 @@
 
 #if API_ID == API_GL
 	#define API GL
+#elif API_ID == API_NONE
+	#define API GPU
 #endif
 
 namespace GPU

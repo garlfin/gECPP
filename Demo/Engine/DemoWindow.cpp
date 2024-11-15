@@ -2,19 +2,18 @@
 // Created by scion on 8/9/2023.
 //
 
-#include <GLAD/glad.h>
-#include <GLFW/glfw3.h>
+#include <Vendor/GLAD/glad.h>
+#include <Vendor/GLFW/glfw3.h>
 
 #include "DemoWindow.h"
 
 #include <Demo/Engine/Entity/FlyCamera.h>
 #include <Demo/Engine/Entity/StaticMeshEntity.h>
-#include <Engine/Entity/Light/DirectionalLight.h>
-#include <Engine/Entity/Light/PointLight.h>
-#include <Engine/Renderer/PBRMaterial.h>
-
-#include "Engine/Entity/EmptyColliderEntity.h"
-#include "Engine/Entity/PhysicsCube.h"
+#include <gECPP/Engine/Entity/Light/DirectionalLight.h>
+#include <gECPP/Engine/Entity/Light/PointLight.h>
+#include <gECPP/Engine/Renderer/PBRMaterial.h>
+#include <Demo/Engine/Entity/EmptyColliderEntity.h>
+#include <Demo/Engine/Entity/PhysicsCube.h>
 
 using namespace gE::VoxelDemo;
 
@@ -39,11 +38,11 @@ void DemoWindow::OnInit()
 	auto cobbleMaterial = gE::ref_create<PBRMaterial>(this, rasterShader, cobbleSettings);
 	auto tileMaterial = gE::ref_create<PBRMaterial>(this, rasterShader, tileSettings);
 
-	Reference<API::IndexedVAO> sceneMesh = ref_create<API::IndexedVAO>();
-	ReadSerializableFromFile(this, "Resource/Model/Plane.001.vao", *sceneMesh);
+	Reference<Mesh> sceneMesh = ref_create<Mesh>();
+	ReadSerializableFromFile(this, "Resource/Model/Plane.001.mesh", *sceneMesh);
 
-	Reference<API::IndexedVAO> cubeMesh = ref_create<API::IndexedVAO>();
-	ReadSerializableFromFile(this, "Resource/Model/Cube.001.vao", *cubeMesh);
+	Reference<Mesh> cubeMesh = ref_create<Mesh>();
+	ReadSerializableFromFile(this, "Resource/Model/Cube.mesh", *cubeMesh);
 
 	auto* mesh = new StaticMeshEntity(this, sceneMesh);
 	mesh->GetTransform().SetScale(glm::vec3(0.5));

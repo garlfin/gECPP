@@ -24,7 +24,13 @@ namespace GPU
 		else if constexpr(T == Dimension::D2D) largest = glm::max(size.x, size.y);
 		else largest = glm::max(size.x, glm::max(size.y, size.z));
 
+#ifdef GE_COMPILER_GCC
 		return 32 - __builtin_clz(largest);
+#endif
+
+#ifdef GE_COMPILER_MSVC
+		return 32 - __lzcnt(largest);
+#endif
 	}
 
 	inline Texture::Texture(gE::Window* window, const ITextureSettings& settings, TextureData&& data) :

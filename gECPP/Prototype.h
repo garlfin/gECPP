@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <gETF/Prototype.h>
+#include <Asset/Prototype.h>
 
 namespace gE
 {

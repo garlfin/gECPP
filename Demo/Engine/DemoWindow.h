@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <Engine/Window.h>
+#include <gECPP/Engine/Window.h>
 
 namespace gE::VoxelDemo
 {

@@ -9,14 +9,16 @@
 
 namespace gE
 {
+    inline Physics::BoxShape GetShapeSettings(const glm::vec3& extents);
+
     class PhysicsCubeEntity final : public Entity
     {
     public:
-        PhysicsCubeEntity(Window* window, const Reference<GL::IVAO>& mesh, glm::vec3 size, EntityFlags flags = DEFAULT) :
+        PhysicsCubeEntity(Window* window, const Reference<Mesh>& mesh, glm::vec3 size, EntityFlags flags = DEFAULT) :
             Entity(window, LayerMask::All, flags),
             _renderer(this, mesh),
             _rigidBody(this, RigidBodySettings(), _collider),
-            _collider(this, Physics::BoxColliderSettings{ Physics::ConvexColliderSettings(), size })
+            _collider(this, GetShapeSettings(size))
         {
         }
 

@@ -31,7 +31,7 @@ namespace Physics
         void Free() override {};
         NODISCARD bool IsFree() const override { return true; };
 
-        ColliderTransform Transform;
+        ColliderTransform Transform = DEFAULT;
     };
 
     struct ConvexShape : public Shape
@@ -69,7 +69,7 @@ namespace Jolt
 
         GET_CONST(const Physics::ColliderTransform&, Transform, _settings->Transform);
         GET_CONST(const Physics::Shape&, Settings, _settings);
-        GET(px::Shape&, Shape, _shape);
+        GET(px::Shape&, JoltShape, _shape);
 
     private:
         RelativePointer<Physics::Shape> _settings = DEFAULT;
@@ -80,23 +80,23 @@ namespace Jolt
     {
     public:
         ConvexShape() = default;
-        ConvexShape(Physics::Shape& settings, px::Shape& shape);
+        ConvexShape(Physics::ConvexShape& settings, px::ConvexShape& shape);
 
-        GET_CONST(float, Density, GetShape().GetDensity());
-        GET_CONST(float, Mass, GetShape().GetDensity() * GetShape().GetVolume());
+        GET_CONST(float, Density, GetJoltShape().GetDensity());
+        GET_CONST(float, Volume, GetJoltShape().GetVolume());
+        GET_CONST(float, Mass, GetDensity() * GetVolume());
 
-        inline void SetDensity(float density) { GetShape().SetDensity(density); }
-        inline void SetMass(float mass) { GetShape().SetDensity(mass * GetShape().GetVolume()); }
+        inline void SetDensity(float density) { GetJoltShape().SetDensity(density); }
+        inline void SetMass(float mass) { GetJoltShape().SetDensity(mass * GetJoltShape().GetVolume()); }
 
         GET_CONST(const Physics::ConvexShape&, Settings, (const Physics::ConvexShape&) Shape::GetSettings());
-        GET(px::ConvexShape&, Shape, (px::ConvexShape&) Shape::GetShape());
+        GET(px::ConvexShape&, JoltShape, (px::ConvexShape&) Shape::GetJoltShape());
     };
 
     class SphereShape : public Physics::SphereShape, public ConvexShape
     {
         API_SERIALIZABLE(SphereShape, Physics::SphereShape);
     public:
-        GET_CONST(const Physics::ConvexShape&, Settings, *this);
         GET(px::ConvexShape&, Shape, *_shape);
 
     private:
@@ -107,12 +107,13 @@ namespace Jolt
     {
         API_SERIALIZABLE(BoxShape, Physics::BoxShape);
     public:
-        GET_CONST(const Physics::ConvexShape&, Settings, *this);
-        GET(px::ConvexShape&, Shape, *_shape);
+        GET(px::ConvexShape&, JoltShape, *_shape);
 
     private:
         gE::ManagedPX<px::BoxShape> _shape;
     };
+
+
 }
 
 #include "Shapes.inl"

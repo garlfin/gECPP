@@ -82,7 +82,7 @@ namespace gE
         const Transform& transform = GetOwner().GetTransform();
         PhysicsManager& manager = GetWindow().GetPhysics();
 
-        const px::ShapeSettings::ShapeResult result = _collider->GetShape().ScaleShape(ToPX(transform->Scale));
+        const px::ShapeSettings::ShapeResult result = _collider->GetShape().GetJoltShape().ScaleShape(ToPX(transform->Scale));
         GE_ASSERT(result.IsValid(), "INVALID SCALED SHAPE!");
 
         _previousScale = transform->Scale;
@@ -121,7 +121,7 @@ namespace gE
         {
             LOG("INFO: SHAPE SCALING");
 
-            const px::ShapeSettings::ShapeResult result = _collider->GetShape().ScaleShape(ToPX(transform->Scale));
+            const px::ShapeSettings::ShapeResult result = _collider->GetShape().GetJoltShape().ScaleShape(ToPX(transform->Scale));
             GE_ASSERT(result.IsValid(), "INVALID SCALED SHAPE!");
 
             physics._interface->SetShape(_body->GetID(), result.Get(), true, JPH::EActivation::Activate);

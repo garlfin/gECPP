@@ -1,6 +1,6 @@
-#include "DemoWindow.h"
+#include "Engine/DemoWindow.h"
 
-int main()
+int main(int argc, char** argv)
 {
 	bool restart = true;
 	while(restart)
@@ -8,4 +8,6 @@ int main()
 		gE::VoxelDemo::DemoWindow window(glm::u16vec2(1280, 720));
 		restart = window.Run();
 	}
+
+	return 0;
 }

@@ -25,7 +25,7 @@ namespace gE
 		float LinearDamping = 0.05f;
 		float AngularDamping = 0.05f;
 		float TerminalVelocity = 500.f;
-		float MaxAngularVelocity = 0.25f * std::numbers::pi * 60.f;
+		float MaxAngularVelocity = 0.25f * glm::pi<float>() * 60.f;
 		float GravityFactor = 1.0;
 		PhysicsMaterial Material = DEFAULT;
 	};

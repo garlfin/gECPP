@@ -56,7 +56,7 @@ namespace Jolt
     {
     }
 
-    inline ConvexShape::ConvexShape(Physics::Shape& settings, px::Shape& shape) :
+    inline ConvexShape::ConvexShape(Physics::ConvexShape& settings, px::ConvexShape& shape) :
         Shape(settings, shape)
     {
     }

@@ -37,7 +37,7 @@ class Array
 
 	OPERATOR_COPY(Array, o,
 	{
-		ERR("WARNING: REALLOCATION! \n\tSIZE: " << o._size * sizeof(I) << " bytes\n\tFUNCTION: " << __PRETTY_FUNCTION__);
+		LOG("WARNING: REALLOCATION! \n\tSIZE: " << o._size * sizeof(I) << " bytes\n\tFUNCTION: " << PRETTY_FUNCTION);
 
 		_size = o._size;
 		_t = new I[_size];

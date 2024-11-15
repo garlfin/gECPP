@@ -7,6 +7,22 @@
 
 using std::move;
 
+#if defined(__GNUC__)
+	#define GE_COMPILER_GCC
+#elif defined(_MSC_VER)
+	#define GE_COMPILER_MSVC
+#endif
+
+#ifdef GE_COMPILER_GCC
+	#define PRETTY_FUNCTION __PRETTY_FUNCTION__
+	#define TRAP __builtin_trap
+#endif
+
+#ifdef GE_COMPILER_MSVC
+	#define PRETTY_FUNCTION __FUNCSIG__
+	#define TRAP __debugbreak
+#endif
+
 #define COPY_MOVE(x) std::move(std::remove_cvref_t<decltype(x)>(x))
 
 #define SAFE_CONSTRUCT_NAMESPACE(TO, TYPE, NAMESPACE, ...) \
@@ -38,7 +54,7 @@ using std::move;
 
 #ifdef DEBUG
 #define LOG(MSG) std::cout << MSG << '\n'
-#define ERR(MSG) { __builtin_trap(); std::cerr << MSG << std::endl; }
+#define ERR(MSG) { TRAP(); std::cerr << MSG << std::endl; }
 #else
 #define LOG(MSG)
 #define ERR(MSG) std::cerr << MSG << std::endl
@@ -47,7 +63,7 @@ using std::move;
 #define assertm(exp, msg) assert(((void) msg, exp))
 
 #ifdef DEBUG
-	#define GE_ASSERT(COND, ERR) { bool cond = COND; if(!cond) __builtin_trap(); assertm(cond, ERR); }
+	#define GE_ASSERT(COND, ERR) { bool cond = COND; if(!cond) TRAP(); assertm(cond, ERR); }
 #else
 	#define GE_ASSERT(COND, ERR) assertm(cond, ERR)
 #endif

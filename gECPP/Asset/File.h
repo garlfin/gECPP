@@ -5,7 +5,7 @@
 
 #define GETF_VERSION 1
 
-namespace gETF
+namespace gE
 {
 	struct Header : public Serializable<const Header&>
 	{

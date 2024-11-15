@@ -20,7 +20,6 @@
 
 #include "WindowState.h"
 
-
 struct GLFWwindow;
 struct GLFWvidmode;
 
@@ -51,6 +50,8 @@ namespace gE
 		explicit Window(glm::u16vec2 size, const char* name = "gE");
 
 		bool Run();
+		bool Close(bool restart = false);
+
 		void Blit(const API::Texture& texture);
 
 		// Entities & Data
@@ -84,6 +85,7 @@ namespace gE
 
 		// Engine States
 		RenderFlags RenderState = DEFAULT;
+		CloseFlags CloseState = DEFAULT;
 
 		GET_CONST(TextureSize2D, Size, _size);
 		GET_CONST(const Monitor&, Monitor, _monitor);

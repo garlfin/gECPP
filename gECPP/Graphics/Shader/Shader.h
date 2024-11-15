@@ -5,11 +5,12 @@
 #pragma once
 
 #include <Graphics/Graphics.h>
+#include <Serializable/Asset.h>
 #include "ShaderStageType.h"
 
 namespace GPU
 {
-	struct ShaderStage : public Serializable<gE::Window*>, public Asset
+	struct ShaderStage : public Serializable<gE::Window*>, public gE::Asset
 	{
 		SERIALIZABLE_PROTO(STGE, 1, ShaderStage, Serializable);
 
@@ -25,7 +26,7 @@ namespace GPU
 		~ShaderStage() override { ASSET_CHECK_FREE(ShaderStage); }
 	};
 
-	struct Shader : public Serializable<gE::Window*>, public Asset
+	struct Shader : public Serializable<gE::Window*>, public gE::Asset
 	{
 		SERIALIZABLE_PROTO(SHDR, 1, Shader, Serializable);
 
@@ -39,7 +40,7 @@ namespace GPU
 		NODISCARD ALWAYS_INLINE bool IsFree() const override { return VertexStage.IsFree() && FragmentStage.IsFree(); }
 	};
 
-	struct ComputeShader : public Serializable<gE::Window*>, public Asset
+	struct ComputeShader : public Serializable<gE::Window*>, public gE::Asset
 	{
 		SERIALIZABLE_PROTO(COMP, 1, ComputeShader, Serializable);
 

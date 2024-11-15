@@ -18,7 +18,8 @@ namespace GL
 			Buffer<u8>& buffer = _buffers[i];
 
 			SAFE_CONSTRUCT(buffer, Buffer, window, move(bufSettings));
-			buffer.Free();
+			bufSettings = move(buffer.GetSettings());
+
 			glVertexArrayVertexBuffer(ID, i, buffer.Get(), 0, bufSettings.Stride);
 		}
 
@@ -52,7 +53,8 @@ namespace GL
 	IndexedVAO::IndexedVAO(gE::Window* window, SUPER&& INTERNAL_SETTINGS) : SUPER(move(INTERNAL_SETTINGS)), IVAO(window, *this)
 	{
 		SAFE_CONSTRUCT(_triangleBuffer, Buffer, window, move(TriangleBuffer));
-		_triangleBuffer.Free();
+		TriangleBuffer = move(_triangleBuffer.GetSettings());
+
 		glVertexArrayElementBuffer(ID, _triangleBuffer.Get());
 	}
 
