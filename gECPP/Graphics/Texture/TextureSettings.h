@@ -118,26 +118,6 @@ namespace GPU
 		NODISCARD ALWAYS_INLINE explicit operator bool() const { return BlockSize != 1; }
 	};
 
-	struct ITextureSettings
-	{
-		GLenum Format = GL_NONE;
-		WrapMode WrapMode = WrapMode::Repeat;
-		FilterMode Filter = FilterMode::Linear;
-		u8 MipCount = 1;
-
-		constexpr operator bool() const { return (bool) Format; } // NOLINT
-	};
-
-	template<Dimension DIMENSION>
-	struct TextureSettings : public ITextureSettings
-	{
-		Size<DIMENSION> Size = Size<DIMENSION>(1);
-	};
-
-	typedef TextureSettings<Dimension::D1D> TextureSettings1D;
-	typedef TextureSettings<Dimension::D2D> TextureSettings2D;
-	typedef TextureSettings<Dimension::D3D> TextureSettings3D;
-
 	struct TextureData : public Serializable<>
 	{
 		SERIALIZABLE_PROTO(TEXD, 1, TextureData, Serializable);

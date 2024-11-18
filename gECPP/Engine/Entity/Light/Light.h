@@ -13,7 +13,13 @@ namespace gE
 	class Light;
 	class DirectionalLight;
 
-	CONSTEXPR_GLOBAL GPU::ITextureSettings ShadowMapFormat { GL_DEPTH_COMPONENT16, GPU::WrapMode::Clamp, GPU::FilterMode::Linear };
+	GLOBAL GPU::Texture ShadowMapFormat = []
+	{
+		GPU::Texture tex;
+		tex.Format = GL_DEPTH_COMPONENT16;
+		tex.WrapMode = GPU::WrapMode::Clamp;
+		return tex;
+	}();
 
 	class LightManager : public Manager<Managed<Light>>
 	{

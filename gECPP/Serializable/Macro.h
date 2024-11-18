@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <Engine/Utility/Macro.h>
+
 // TODO: Find better alternative to creating a copy of the settings.
 // Prevents _settings from being initialied to 0.
 
@@ -36,8 +38,8 @@
 		static GLOBAL typename ITypeSystem<SETTINGS_T>::Type Type{ NAME, (typename ITypeSystem<SETTINGS_T>::FactoryFunction) TYPE##FACTORY }; \
 		const typename ITypeSystem<SETTINGS_T>::Type* GetType() const { return &Type; }
 
-#define API_REFLECTABLE_IMPL(TYPE, API_TYPE) \
-	inline API_TYPE* TYPE::TYPE##FACTORY(std::istream& in, SETTINGS_T t) { return new API_TYPE(in, t); }
+#define API_REFLECTABLE_IMPL(TYPE, ...) \
+	inline __VA_ARGS__* TYPE::TYPE##FACTORY(std::istream& in, SETTINGS_T t) { return new __VA_ARGS__(in, t); }
 
 #define API_UNDERLYING() \
 	public: \
@@ -48,3 +50,13 @@
 	public: \
 		inline void* GetUnderlying() override { return (UNDERLYING_T*) this; } \
 		inline const void* GetUnderlying() const override { return (const UNDERLYING_T*) this; }
+
+#define API_SETTINGS_OPERATOR(UNDERLYING_T) \
+	public: \
+		ALWAYS_INLINE UNDERLYING_T* operator->() { return (UNDERLYING_T*) this; } \
+		ALWAYS_INLINE const UNDERLYING_T* operator->() const { return this; }
+
+#define API_SERIALIZABLE_IMPL_NAMESPACE(NAMESPACE, ...) \
+	NAMESPACE##__VA_ARGS__::__VA_ARGS__(gE::Window* window, SUPER&& INTERNAL_SETTINGS) : SUPER(move(INTERNAL_SETTINGS))
+
+#define API_SERIALIZABLE_IMPL(...) API_SERIALIZABLE_IMPL_NAMESPACE(, __VA_ARGS__)

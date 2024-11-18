@@ -7,10 +7,7 @@
 #include "Texture.h"
 
 #define GPU_TEXTURE_DEFINITION(TYPE, DIMENSION) \
-	inline TYPE::TYPE(gE::Window* w, const GPU::TextureSettings<DIMENSION>& s, TextureData&& d) : \
-		Texture(w, s, std::move(d)), Size(s.Size) \
-	{ if(!Settings.MipCount) Settings.MipCount = GetMipCount<DIMENSION>(Size); } \
-	inline void TYPE::ISerialize(istream& in, SETTINGS_T s) { Read(in, Size); } \
+	inline void TYPE::ISerialize(istream& in, SETTINGS_T s) { Read(in, Size); if(!MipCount) MipCount = GetMipCount<DIMENSION>(Size); } \
 	inline void TYPE::IDeserialize(ostream& out) const { Write(out, Size); }
 
 namespace GPU
@@ -33,20 +30,21 @@ namespace GPU
 #endif
 	}
 
-	inline Texture::Texture(gE::Window* window, const ITextureSettings& settings, TextureData&& data) :
-		Settings(settings), Data(std::move(data))
-	{
-	}
-
 	inline void Texture::ISerialize(istream& in, SETTINGS_T s)
 	{
-		Read(in, Settings);
+		Read(in, Format);
+		Read(in, WrapMode);
+		Read(in, Filter);
+		Read(in, MipCount);
 		ReadSerializable(in, Data, nullptr);
 	}
 
 	inline void Texture::IDeserialize(ostream& out) const
 	{
-		Write(out, Settings);
+		Write(out, Format);
+		Write(out, WrapMode);
+		Write(out, Filter);
+		Write(out, MipCount);
 		Write(out, Data);
 	}
 

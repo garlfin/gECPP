@@ -100,10 +100,41 @@ namespace GPU
 
 namespace gE::DefaultPipeline
 {
-	CONSTEXPR_GLOBAL GPU::ITextureSettings DepthFormat { GL_DEPTH_COMPONENT32, GPU::WrapMode::Clamp, GPU::FilterMode::Nearest, 1 };
-	CONSTEXPR_GLOBAL GPU::ITextureSettings HiZFormat { GL_R32F, GPU::WrapMode::Clamp, GPU::FilterMode::Nearest, 0 };
-	CONSTEXPR_GLOBAL GPU::ITextureSettings ColorFormat { GL_RGBA16F, GPU::WrapMode::Clamp, GPU::FilterMode::Linear, 0 };
-	CONSTEXPR_GLOBAL GPU::ITextureSettings VelocityFormat { GL_RG32F, GPU::WrapMode::Clamp };
+	GLOBAL GPU::Texture DepthFormat = []
+	{
+		GPU::Texture tex;
+		tex.Format = GL_DEPTH_COMPONENT;
+		tex.WrapMode = GPU::WrapMode::Clamp;
+		tex.Filter = GPU::FilterMode::Nearest;
+		return tex;
+	}();
+
+	GLOBAL GPU::Texture HiZFormat = []
+	{
+		GPU::Texture tex;
+		tex.Format = GL_R32F;
+		tex.WrapMode = GPU::WrapMode::Clamp;
+		tex.Filter = GPU::FilterMode::Nearest;
+		tex.MipCount = 0;
+		return tex;
+	}();
+
+	GLOBAL GPU::Texture ColorFormat = []
+	{
+		GPU::Texture tex;
+		tex.Format = GL_RGBA16F;
+		tex.WrapMode = GPU::WrapMode::Clamp;
+		tex.MipCount = 0;
+		return tex;
+	}();
+
+	GLOBAL GPU::Texture VelocityFormat = []
+	{
+		GPU::Texture tex;
+		tex.Format = GL_RG32F;
+		tex.WrapMode = GPU::WrapMode::Clamp;
+		return tex;
+	}();
 
  	class Target2D : public RenderTarget<Camera2D>, public IDepthTarget, public IColorTarget
 	{

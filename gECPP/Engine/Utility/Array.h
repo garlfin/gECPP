@@ -14,7 +14,7 @@ class Array
 	static constexpr bool IS_VOID = std::is_same_v<T, void>;
 	using I = std::conditional_t<IS_VOID, u8, T>;
 	
-	Array() = default;
+	constexpr Array() = default;
 
 	template<typename... ARGS>
 	explicit Array(size_t count, ARGS&&... args) : _size(count), _t(nullptr)

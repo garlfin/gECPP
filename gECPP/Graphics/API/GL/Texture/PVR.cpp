@@ -37,49 +37,45 @@ namespace PVR
 
 		if(header.Faces == 1)
 		{
-			GPU::TextureSettings2D settings
-			{
-				PVRToInternalFormat(header.Format),
-				wrapMode,
-				filterMode,
-				0,
-				header.Size,
-			};
+			GPU::Texture2D settings;
+			GPU::TextureData data;
 
-			GPU::TextureData data
-			{
-				GL_NONE,
-				GL_NONE,
-				GPU::CompressionScheme(4, 16), // 16 bytes per 4x4 block
-				1,
-				std::move(imageData)
-			};
+			data.PixelFormat = GL_NONE;
+			data.PixelType = GL_NONE;
+			data.Scheme = GPU::CompressionScheme(4, 16);
+			data.MipCount = 1;
+			data.Data = move(imageData);
 
-			tex = new GL::Texture2D(window, settings, std::move(data));
+			settings.Format = PVRToInternalFormat(header.Format);
+			settings.WrapMode = wrapMode;
+			settings.Filter = filterMode;
+			settings.MipCount = 0;
+			settings.Data = move(data);
+			settings.Size = header.Size;
+
+			tex = new GL::Texture2D(window, settings);
 		}
 		else if(header.Faces == 6)
 		{
 			GE_ASSERT(header.Size.x == header.Size.y, "Cubemap not square!");
 
-			GPU::TextureSettings1D settings
-			{
-				PVRToInternalFormat(header.Format),
-				wrapMode,
-				filterMode,
-				0,
-				header.Size.x,
-			};
+			GPU::TextureCube settings;
+			GPU::TextureData data;
 
-			GPU::TextureData data
-			{
-				GL_RGB,
-				GL_HALF_FLOAT,
-				GPU::CompressionScheme(1, 6), // 6 bytes per pixel
-				1,
-				std::move(imageData)
-			};
+			data.PixelFormat = GL_NONE;
+			data.PixelType = GL_NONE;
+			data.Scheme = GPU::CompressionScheme(4, 16);
+			data.MipCount = 1;
+			data.Data = move(imageData);
 
-			tex = new GL::TextureCube(window, settings, std::move(data));
+			settings.Format = PVRToInternalFormat(header.Format);
+			settings.WrapMode = wrapMode;
+			settings.Filter = filterMode;
+			settings.MipCount = 0;
+			settings.Data = move(data);
+			settings.Size = header.Size.x;
+
+			tex = new GL::TextureCube(window, move(settings));
 		}
 		else
 			LOG("Unsupported texture format!");

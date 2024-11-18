@@ -93,17 +93,18 @@ namespace gE
 		window.GetCubemaps().DrawSkybox();
 	}
 
-	CONSTEXPR_GLOBAL GPU::ITextureSettings CubemapColorFormat
+	GLOBAL GPU::Texture CubemapColorFormat = []
 	{
-		GL_R11F_G11F_B10F,
-		GPU::WrapMode::Clamp,
-		GPU::FilterMode::Linear
-	};
+		GPU::Texture tex;
+		tex.Format = GL_R11F_G11F_B10F;
+		tex.WrapMode = GPU::WrapMode::Clamp;
+		return tex;
+	}();
 
 	CubemapTarget::CubemapTarget(CameraCube& camera) :
 		RenderTarget(camera.GetOwner(), camera), IDepthTarget(_depth.Get()),
-		_depth(GetFrameBuffer(), GPU::TextureSettings1D{ DefaultPipeline::DepthFormat, camera.GetSize() }),
-		_color(GetFrameBuffer(), GPU::TextureSettings1D{ CubemapColorFormat, camera.GetSize() })
+		_depth(GetFrameBuffer(), GPU::TextureCube{ DefaultPipeline::DepthFormat, camera.GetSize() }),
+		_color(GetFrameBuffer(), GPU::TextureCube{ CubemapColorFormat, camera.GetSize() })
 	{
 	}
 

@@ -121,7 +121,7 @@ template<> void Write(std::ostream& out, u32 count, const std::string* t);
 #define SERIALIZABLE_PROTO(MAGIC_VAL, VERSION_VAL, TYPE, SUPER) \
 	public: \
 		explicit TYPE(istream& in, SETTINGS_T s) : SUPER(in, s) { SERIALIZABLE_CHECK_HEADER(); ISerialize(in, s); } \
-		TYPE() = default; \
+		constexpr TYPE() = default; \
 		static const constexpr char MAGIC[5] = #MAGIC_VAL; \
 		typedef SUPER::SETTINGS_T SETTINGS_T;\
 		inline void Serialize(istream& in, SETTINGS_T s) override { SAFE_CONSTRUCT(*this, TYPE, in, s); } \

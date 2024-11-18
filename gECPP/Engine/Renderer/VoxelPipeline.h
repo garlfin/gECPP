@@ -44,8 +44,23 @@ namespace gE::VoxelPipeline
 		API::Buffer<API::VoxelScene> _voxelBuffer;
 	};
 
-	CONSTEXPR_GLOBAL GPU::ITextureSettings ColorFormat { GL_RGB10_A2, GPU::WrapMode::Clamp, GPU::FilterMode::Linear, 0 };
-	CONSTEXPR_GLOBAL GPU::ITextureSettings ColorBackFormat { GL_RGB10_A2, GPU::WrapMode::Clamp, GPU::FilterMode::Nearest, 1 };
+	GLOBAL GPU::Texture ColorFormat = []
+	{
+		GPU::Texture tex;
+		tex.Format = GL_RGB10_A2;
+		tex.WrapMode = GPU::WrapMode::Clamp;
+		tex.MipCount = 0;
+		return tex;
+	}();
+
+	GLOBAL GPU::Texture ColorBackFormat = []
+	{
+		GPU::Texture tex;
+		tex.Format = GL_RGB10_A2;
+		tex.WrapMode = GPU::WrapMode::Clamp;
+		tex.Filter = GPU::FilterMode::Nearest, 1;
+		return tex;
+	}();
 
 	class Target3D : public RenderTarget<Camera3D>
 	{

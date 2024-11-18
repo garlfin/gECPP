@@ -96,6 +96,7 @@ namespace Jolt
     class SphereShape : public Physics::SphereShape, public ConvexShape
     {
         API_SERIALIZABLE(SphereShape, Physics::SphereShape);
+
     public:
         GET(px::ConvexShape&, Shape, *_shape);
 
@@ -106,14 +107,13 @@ namespace Jolt
     class BoxShape : public Physics::BoxShape, public ConvexShape
     {
         API_SERIALIZABLE(BoxShape, Physics::BoxShape);
+
     public:
         GET(px::ConvexShape&, JoltShape, *_shape);
 
     private:
         gE::ManagedPX<px::BoxShape> _shape;
     };
-
-
 }
 
 #include "Shapes.inl"

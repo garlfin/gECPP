@@ -68,6 +68,8 @@ using std::move;
 	#define GE_ASSERT(COND, ERR) assertm(cond, ERR)
 #endif
 
+#define UNPACK(...) __VA_ARGS__
+
 #define GE_FAIL(ERR) GE_ASSERT(false, ERR);
 
 #define BIT_FIELD(FIELD, INDEX) (((FIELD) >> (INDEX)) & 1)

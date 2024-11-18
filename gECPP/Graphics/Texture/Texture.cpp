@@ -43,4 +43,8 @@ namespace GPU
 		GE_ASSERT(_index < GE_MAX_TEXTURE_SLOT, "TEXTURE SLOT OVERFLOW!");
 		return _index - 1;
 	}
+
+	API_REFLECTABLE_IMPL(Texture2D, API::Texture2D);
+	API_REFLECTABLE_IMPL(Texture3D, API::Texture3D);
+	API_REFLECTABLE_IMPL(TextureCube, API::TextureCube);
 }
