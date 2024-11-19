@@ -9,6 +9,13 @@
 // TODO: Find better alternative to creating a copy of the settings.
 // Prevents _settings from being initialied to 0.
 
+#define API_DEFAULT_CM_CONSTRUCTOR(TYPE) \
+	public: \
+		TYPE(TYPE&&) = default; \
+		TYPE& operator=(TYPE&&) = default; \
+		TYPE(const TYPE&) = delete; \
+		TYPE& operator=(const TYPE&) = delete
+
 #define API_SERIALIZABLE(TYPE, SUPER_T)\
 	public: \
 		typedef SUPER_T::SETTINGS_T SETTINGS_T; \
@@ -24,13 +31,6 @@
 		GET(SUPER_T&, Settings, *this) \
 		TYPE(gE::Window* window, const SUPER_T& settings) : TYPE(window, (SUPER_T&&) SUPER_T(settings)) {} \
 		TYPE(gE::Window* window, SUPER_T&& INTERNAL_SETTINGS)
-
-#define API_DEFAULT_CM_CONSTRUCTOR(TYPE) \
-	public: \
-		TYPE(TYPE&&) = default; \
-		TYPE& operator=(TYPE&&) = default; \
-		TYPE(const TYPE&) = delete; \
-		TYPE& operator=(const TYPE&) = delete
 
 #define API_REFLECTABLE(TYPE, NAME, ...) \
 	public: \

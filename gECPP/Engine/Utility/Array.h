@@ -35,7 +35,7 @@ class Array
 				_t[i] = t[i];
 	}
 
-	OPERATOR_COPY(Array, o,
+	OPERATOR_COPY_NOSUPER(Array,
 	{
 		if(!o._size || !o._t) break;
 
@@ -49,9 +49,9 @@ class Array
 		else
 			for(size_t i = 0; i < _size; i++)
 				_t[i] = o._t[i];
-	})
+	});
 
-	OPERATOR_MOVE(Array, o,
+	OPERATOR_MOVE_NOSUPER(Array,
 	{
 		_size = o._size;
 		_t = o._t;

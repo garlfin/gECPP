@@ -78,7 +78,7 @@ namespace gE
 		LinkedIterator(T& owner, LinkedList<T>* l, LinkedIterator* at = nullptr, Direction direction = Direction::Right);
 
 		DELETE_OPERATOR_COPY(LinkedIterator);
-		OPERATOR_MOVE(LinkedIterator, o,
+		OPERATOR_MOVE_NOSUPER(LinkedIterator,
 			if(!o._list) break;
 
 			_owner = o._owner;
@@ -154,7 +154,7 @@ namespace gE
 		}
 
 		DELETE_OPERATOR_COPY(Managed);
-		OPERATOR_MOVE(Managed, o,
+		OPERATOR_MOVE_NOSUPER(Managed,
 			_t = o._t;
 			Iterator = move(o.Iterator);
 		);

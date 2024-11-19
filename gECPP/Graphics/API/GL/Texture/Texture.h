@@ -62,6 +62,7 @@ namespace GL
 	class Texture2D final : protected GPU::Texture2D, public Texture
 	{
 		API_SERIALIZABLE(Texture2D, GPU::Texture2D);
+		API_DEFAULT_CM_CONSTRUCTOR(Texture2D);
 		API_UNDERLYING_IMPL(GL::Texture);
 
 	 public:
@@ -73,6 +74,7 @@ namespace GL
 	class Texture3D final : protected GPU::Texture3D, public Texture
 	{
 		API_SERIALIZABLE(Texture3D, GPU::Texture3D);
+		API_DEFAULT_CM_CONSTRUCTOR(Texture3D);
 		API_UNDERLYING_IMPL(GL::Texture);
 
 	 public:
@@ -84,7 +86,7 @@ namespace GL
 	class TextureCube final : protected GPU::TextureCube, public Texture
 	{
 		API_SERIALIZABLE(TextureCube, GPU::TextureCube);
-		API_SETTINGS_OPERATOR(GPU::TextureCube);
+		API_DEFAULT_CM_CONSTRUCTOR(TextureCube);
 		API_UNDERLYING_IMPL(GL::Texture);
 
 	 public:

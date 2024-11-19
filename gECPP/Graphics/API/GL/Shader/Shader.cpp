@@ -37,10 +37,10 @@ namespace GL
 		ShaderStage vert(window, move(VertexStage));
 
 		frag.Attach(*this);
-		FragmentStage = move(frag.GetSettings());
+		//FragmentStage = move(frag.GetSettings());
 
 		vert.Attach(*this);
-		VertexStage = move(vert.GetSettings());
+		//VertexStage = move(vert.GetSettings());
 
 		glLinkProgram(ID);
 
@@ -82,7 +82,7 @@ namespace GL
 		glShaderSource(ID, 1, &sourceCString, &sourceLength);
 		glCompileShader(ID);
 
-		GetShaderStatus(*this, "", sourceCString);
+		GetShaderStatus(*this, BasePath, sourceCString);
 	}
 
 	template<typename T>

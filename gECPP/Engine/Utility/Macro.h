@@ -116,32 +116,44 @@ using std::move;
 	TYPE& operator=(const TYPE& ACCESSOR);
 
 // terrible non nested if statement emulator...
-#define OPERATOR_MOVE_NAMESPACE(NAMESPACE, TYPE, ACCESSOR, CODE) \
-    NAMESPACE##TYPE(TYPE&& ACCESSOR) noexcept \
+#define OPERATOR_MOVE_UNSAFE(TYPE, INHERIT, CODE) \
+    TYPE(TYPE&& o) noexcept \
 	{ \
-		if(&ACCESSOR == this) return; \
-		for(bool INTERNAL_BREAK = false; !INTERNAL_BREAK; INTERNAL_BREAK = true) { CODE; } \
+		if(&o == this) return; \
+		for(bool INTERNAL_BREAK = false; !INTERNAL_BREAK; INTERNAL_BREAK = true) { INHERIT; CODE; } \
 	} \
-	NAMESPACE##TYPE& NAMESPACE##operator=(TYPE&& ACCESSOR) noexcept \
+	TYPE& operator=(TYPE&& o) noexcept \
 	{ \
-		if(&ACCESSOR == this) return *this; \
+		if(&o == this) return *this; \
 		this->~TYPE(); \
-		for(bool INTERNAL_BREAK = false; !INTERNAL_BREAK; INTERNAL_BREAK = true) { CODE; } \
+		for(bool INTERNAL_BREAK = false; !INTERNAL_BREAK; INTERNAL_BREAK = true) { INHERIT; CODE; } \
 		return* this; \
 	}
 
-#define OPERATOR_COPY_NAMESPACE(NAMESPACE, TYPE, ACCESSOR, CODE) \
-	NAMESPACE##TYPE(const TYPE& ACCESSOR) { for(bool INTERNAL_BREAK = false; !INTERNAL_BREAK; INTERNAL_BREAK = true) { CODE; } } \
-	NAMESPACE##TYPE& NAMESPACE##operator=(const TYPE& ACCESSOR) \
+#define OPERATOR_COPY_UNSAFE(TYPE, INHERIT, CODE) \
+	TYPE(const TYPE& o) \
 	{ \
-		if(&ACCESSOR == this) return *this; \
+		for(bool INTERNAL_BREAK = false; !INTERNAL_BREAK; INTERNAL_BREAK = true) { INHERIT; CODE; } \
+	} \
+	TYPE& operator=(const TYPE& o) \
+	{ \
+		if(&o == this) return *this; \
 		this->~TYPE(); \
-		for(bool INTERNAL_BREAK = false; !INTERNAL_BREAK; INTERNAL_BREAK = true) { CODE; } \
+		for(bool INTERNAL_BREAK = false; !INTERNAL_BREAK; INTERNAL_BREAK = true) { INHERIT; CODE; } \
 		return *this; \
 	}
 
-#define OPERATOR_MOVE(TYPE, ACCESSOR, CODE) OPERATOR_MOVE_NAMESPACE(, TYPE, ACCESSOR, CODE)
-#define OPERATOR_COPY(TYPE, ACCESSOR, CODE) OPERATOR_COPY_NAMESPACE(, TYPE, ACCESSOR, CODE)
+#define OPERATOR_MOVE(TYPE, SUPER, CODE) \
+	OPERATOR_MOVE_UNSAFE(TYPE, SUPER::operator=(move(o)), CODE)
+
+#define OPERATOR_COPY(TYPE, SUPER, CODE) \
+	OPERATOR_COPY_UNSAFE(TYPE, SUPER::operator=(o), CODE)
+
+#define OPERATOR_MOVE_NOSUPER(TYPE, CODE) \
+	OPERATOR_MOVE_UNSAFE(TYPE,, CODE)
+
+#define OPERATOR_COPY_NOSUPER(TYPE, CODE) \
+	OPERATOR_COPY_UNSAFE(TYPE,, CODE)
 
 #define OPERATOR_CAST_CONST(TYPE, FIELD) ALWAYS_INLINE operator TYPE() const { return FIELD; }
 #define OPERATOR_CAST(TYPE, FIELD) \

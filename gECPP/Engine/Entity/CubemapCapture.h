@@ -63,8 +63,6 @@ namespace gE
 
 		void UseNearestCubemaps(const glm::vec3& point) const;
 
-		~CubemapManager() override = default;
-
 	 private:
 		Window* _window = nullptr;
 

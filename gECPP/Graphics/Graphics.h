@@ -28,11 +28,15 @@ namespace GPU
 	class APIObject
 	{
 	public:
-		explicit APIObject() = default;
+		APIObject() = default;
 		explicit APIObject(gE::Window* window) : _window(window) { };
 
 		DELETE_OPERATOR_COPY(APIObject);
-		OPERATOR_MOVE(APIObject, o, ID = o.ID; o.ID = 0);
+		OPERATOR_MOVE_NOSUPER(APIObject,
+			_window = o._window;
+			ID = o.ID;
+			o.ID = 0
+		);
 
 		virtual void Bind() const = 0;
 
@@ -42,9 +46,9 @@ namespace GPU
 		virtual ~APIObject() = default;
 
 	 protected:
-		T ID {};
+		T ID = DEFAULT;
 
 	 private:
-		gE::Window* _window;
+		gE::Window* _window = DEFAULT;
 	};
 }

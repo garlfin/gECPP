@@ -39,7 +39,6 @@ namespace gE
 		SAFE_CONSTRUCT(t, ITER_T, t.Get(), this, at, dir);
 	}
 
-
 	template<class T>
 	void LinkedList<T>::MergeList(LinkedList& from, ITER_T* begin, ITER_T* end)
 	{
@@ -60,13 +59,13 @@ namespace gE
 		begin->_previous = _last;
 		end->_next = nullptr;
 
-		if(!previousSize)
-		{
-			_first = begin;
-			_last = end;
-		}
-		else
+		if(previousSize)
 			_last->_next = begin;
+		else
+			{
+				_first = begin;
+				_last = end;
+			}
 
 		if(begin->_previous)
 			begin->_previous->_next = end->_next;
@@ -77,6 +76,8 @@ namespace gE
 			end->_next->_previous = begin->_previous;
 		else
 			from._last = end->_previous;
+
+		if(_size) GE_ASSERT(_first && _last, "");
 	}
 
 	template <class T>
@@ -95,6 +96,7 @@ namespace gE
 			i = i->GetNext();
 			SAFE_CONSTRUCT(toBeDeleted, ITER_T);
 		}
+		_size = 0;
 	}
 
 	template<class T>

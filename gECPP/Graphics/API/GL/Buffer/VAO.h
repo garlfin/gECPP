@@ -49,11 +49,10 @@ namespace GL
 	class VAO : protected GPU::VAO, public IVAO
 	{
 		API_SERIALIZABLE(VAO, GPU::VAO);
+		API_DEFAULT_CM_CONSTRUCTOR(VAO);
 		API_UNDERLYING_IMPL(IVAO);
 
 	 public:
-		API_DEFAULT_CM_CONSTRUCTOR(VAO);
-
 		GET_CONST(const GPU::VAO&, Data, *this);
 
 		using SUPER::Free;
@@ -68,11 +67,10 @@ namespace GL
 	class IndexedVAO final : protected GPU::IndexedVAO, public IVAO
 	{
 		API_SERIALIZABLE(IndexedVAO, GPU::IndexedVAO);
+		API_DEFAULT_CM_CONSTRUCTOR(IndexedVAO);
 		API_UNDERLYING_IMPL(IVAO);
 
 	 public:
-		API_DEFAULT_CM_CONSTRUCTOR(IndexedVAO);
-
 		GET_CONST(u8, MaterialCount, Counts.MaterialCount);
 		GET_CONST(u8, BufferCount, Counts.BufferCount);
 		GET_CONST(u8, FieldCount, Counts.FieldCount);
