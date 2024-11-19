@@ -7,6 +7,7 @@
 
 #include <filesystem>
 #include <Graphics/Graphics.h>
+
 #include "ShaderStageType.h"
 
 #define API_DEFINE_DIRECTIVE "#define "
@@ -27,7 +28,7 @@ namespace GPU
 	};
 
 	void CompileDirectives(const std::vector<PreprocessorPair>& pairs, std::string& out);
-	void CompileIncludes(std::istream& source, std::string& extensions, std::string& out, std::string& includes, const Path& path = DEFAULT);
+	void CompileIncludes(std::istream& source, std::string& extensions, std::string& out, std::string& includes, const Path& path);
 	void CompileShaderType(ShaderStageType stage, std::string& out);
 	Path GetIncludePath(const std::string&, const Path& path = DEFAULT);
 }

@@ -34,7 +34,7 @@ void DemoWindow::OnInit()
 	normal = ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/tile_nor.pvr"));
 	PBRMaterialSettings tileSettings { albedo, amr, normal };
 
-	auto rasterShader = gE::ref_create<GL::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/uber.frag");
+	auto rasterShader = gE::ref_create<GL::Shader>(this, GPU::Shader("Resource/Shader/uber.vert", "Resource/Shader/uber.frag"));
 	auto cobbleMaterial = gE::ref_create<PBRMaterial>(this, rasterShader, cobbleSettings);
 	auto tileMaterial = gE::ref_create<PBRMaterial>(this, rasterShader, tileSettings);
 

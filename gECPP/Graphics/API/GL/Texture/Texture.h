@@ -22,8 +22,6 @@ struct handle
 
 namespace GL
 {
-	class FrameBuffer;
-
 	CONSTEXPR_GLOBAL handle NullHandle = handle();
 
  	class Texture : public GLObject
@@ -34,7 +32,7 @@ namespace GL
 
 		inline void Bind() const override { glBindTexture(_target, ID); }
 
-		ALWAYS_INLINE int32_t Use(int32_t slot) const { glBindTextureUnit(slot, ID); return slot; } // NOLINT
+		ALWAYS_INLINE i32 Use(i32 slot) const { glBindTextureUnit(slot, ID); return slot; } // NOLINT
 
 		inline u32 Bind(u32 unit, GLenum access, u8 mip = 0, GLenum format = 0) const
 		{
@@ -50,7 +48,7 @@ namespace GL
  		GET(GPU::Texture&, Settings, *_settings);
 
  		GET_CONST(GLenum, Target, _target);
-		GET_CONST(GLenum, Format, _settings->Format);
+ 		GET_CONST(GLenum, Format, _settings->Format);
 		GET_CONST(u8, MipCount, _settings->MipCount);
 
 		~Texture() override;

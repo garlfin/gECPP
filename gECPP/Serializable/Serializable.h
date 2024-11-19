@@ -10,8 +10,7 @@
 #include <Engine/Utility/Array.h>
 #include <Engine/Utility/Binary.h>
 #include "Engine/Math/Math.h"
-
-#include "Serializable.h"
+#include "Macro.h"
 
 template<class T>
 struct ITypeSystem

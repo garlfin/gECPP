@@ -11,13 +11,13 @@ namespace GPU
 {
 	void ShaderStage::ISerialize(istream& in, SETTINGS_T s)
 	{
-		Type = Read<ShaderStageType>(in);
+		StageType = Read<ShaderStageType>(in);
 		Read<std::string>(in, Source);
 	}
 
 	void ShaderStage::IDeserialize(ostream& out) const
 	{
-		Write(out, Type);
+		Write(out, StageType);
 		Write(out, Source);
 	}
 
@@ -55,4 +55,32 @@ namespace GPU
 	{
 		_shader->SetUniform(_location, t, _shader->GetWindow().GetSlotManager().Increment(&t));
 	}
+
+	API_REFLECTABLE_IMPL(ShaderStage, API::ShaderStage)
+
+	ShaderStage::ShaderStage(ShaderStageType type, const Path& path) : StageType(type), BasePath(path)
+	{
+		auto file = std::ifstream(path, std::ios::in | std::ios::binary | std::ios::ate);
+		const u64 length = file.tellg();
+
+		Source.resize(length);
+
+		file.seekg(std::ios::beg);
+		file.read(Source.data(), length);
+	};
+
+	API_REFLECTABLE_IMPL(Shader, API::Shader)
+
+	Shader::Shader(const Path& v, const Path& f) :
+		VertexStage(ShaderStageType::Vertex, v),
+		FragmentStage(ShaderStageType::Fragment, f)
+	{
+	};
+
+	API_REFLECTABLE_IMPL(ComputeShader, API::ComputeShader)
+
+	ComputeShader::ComputeShader(const Path& c) :
+		ComputeStage(ShaderStageType::Compute, c)
+	{
+	};
 }

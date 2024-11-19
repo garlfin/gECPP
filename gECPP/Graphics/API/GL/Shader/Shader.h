@@ -41,25 +41,20 @@ namespace GL
 		inline ~IShader() override { glDeleteProgram(ID); }
 	};
 
-	class Shader : protected GPU::Shader, public IShader
+	class Shader final : protected GPU::Shader, public IShader
 	{
 		API_SERIALIZABLE(Shader, GPU::Shader);
 		API_DEFAULT_CM_CONSTRUCTOR(Shader);
-
-	 public:
-		Shader(gE::Window*, const Path& vertPath, const Path& fragPath);
-		Shader(gE::Window*, const ShaderStage& vert, const ShaderStage& frag);
+		API_UNDERLYING_IMPL(IShader);
 	};
 
 	class ComputeShader final : protected GPU::ComputeShader, public IShader
 	{
 		API_SERIALIZABLE(ComputeShader, GPU::ComputeShader);
 		API_DEFAULT_CM_CONSTRUCTOR(ComputeShader);
+		API_UNDERLYING_IMPL(IShader);
 
 	 public:
-		ComputeShader(gE::Window*, const Path& compPath);
-		ComputeShader(gE::Window*, const ShaderStage& comp);
-
 		ALWAYS_INLINE void Dispatch(u16 x, u16 y, u16 z) const { Bind(); glDispatchCompute(x, y, z); }
 		ALWAYS_INLINE void Dispatch(u16 x, u16 y) const { Bind(); glDispatchCompute(x, y, 1); }
 		ALWAYS_INLINE void Dispatch(u16 x) const { Bind(); glDispatchCompute(x, 1, 1); }
@@ -74,8 +69,6 @@ namespace GL
 		API_DEFAULT_CM_CONSTRUCTOR(ShaderStage);
 
 	 public:
-		ShaderStage(gE::Window*, GPU::ShaderStageType, const Path& path);
-
 		ALWAYS_INLINE void Bind() const override { }
 		ALWAYS_INLINE void Attach(const IShader& shader) const { glAttachShader(shader.Get(), ID); }
 

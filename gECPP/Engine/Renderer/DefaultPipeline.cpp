@@ -28,12 +28,12 @@ namespace gE
 
 	DefaultPipeline::Target2D::Target2D(Entity& owner, Camera2D& camera, const std::vector<PostProcessEffect<Target2D>*>& effects) :
 		RenderTarget(owner, camera), IDepthTarget(*_depth), IColorTarget(*_color),
-		_depth(GetFrameBuffer(), GPU::TextureSettings2D(DepthFormat, camera.GetSize())),
-		_color(GetFrameBuffer(), GPU::TextureSettings2D(ColorFormat, camera.GetSize())),
-		_velocity(GetFrameBuffer(), GPU::TextureSettings2D(VelocityFormat, camera.GetSize())),
-		_taaBack(&GetWindow(), GPU::TextureSettings2D(ColorFormat, camera.GetSize())),
-		_depthBack(&GetWindow(), GPU::TextureSettings2D(HiZFormat, camera.GetSize())),
-		_postProcessBack(&GetWindow(), GPU::TextureSettings2D(ColorFormat, camera.GetSize())),
+		_depth(GetFrameBuffer(), GPU::Texture2D(DepthFormat, camera.GetSize())),
+		_color(GetFrameBuffer(), GPU::Texture2D(ColorFormat, camera.GetSize())),
+		_velocity(GetFrameBuffer(), GPU::Texture2D(VelocityFormat, camera.GetSize())),
+		_taaBack(&GetWindow(), GPU::Texture2D(ColorFormat, camera.GetSize())),
+		_depthBack(&GetWindow(), GPU::Texture2D(HiZFormat, camera.GetSize())),
+		_postProcessBack(&GetWindow(), GPU::Texture2D(ColorFormat, camera.GetSize())),
 		_effects(effects)
 	{
 	}

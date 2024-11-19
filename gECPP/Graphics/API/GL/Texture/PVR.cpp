@@ -53,7 +53,7 @@ namespace PVR
 			settings.Data = move(data);
 			settings.Size = header.Size;
 
-			tex = new GL::Texture2D(window, settings);
+			tex = new GL::Texture2D(window, move(settings));
 		}
 		else if(header.Faces == 6)
 		{
@@ -62,9 +62,9 @@ namespace PVR
 			GPU::TextureCube settings;
 			GPU::TextureData data;
 
-			data.PixelFormat = GL_NONE;
-			data.PixelType = GL_NONE;
-			data.Scheme = GPU::CompressionScheme(4, 16);
+			data.PixelFormat = GL_RGB;
+			data.PixelType = GL_HALF_FLOAT;
+			data.Scheme = GPU::CompressionScheme(1, 6);
 			data.MipCount = 1;
 			data.Data = move(imageData);
 

@@ -37,12 +37,18 @@ class Array
 
 	OPERATOR_COPY(Array, o,
 	{
+		if(!o._size || !o._t) break;
+
 		LOG("WARNING: REALLOCATION! \n\tSIZE: " << o._size * sizeof(I) << " bytes\n\tFUNCTION: " << PRETTY_FUNCTION);
 
 		_size = o._size;
 		_t = new I[_size];
 
-		for (size_t i = 0; i < _size; i++) _t[i] = o._t[i];
+		if constexpr(std::is_trivially_copyable_v<I>)
+			memcpy(_t, o._t, _size * sizeof(I));
+		else
+			for(size_t i = 0; i < _size; i++)
+				_t[i] = o._t[i];
 	})
 
 	OPERATOR_MOVE(Array, o,

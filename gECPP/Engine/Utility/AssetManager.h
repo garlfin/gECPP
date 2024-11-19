@@ -19,11 +19,11 @@ namespace gE
 		OPERATOR_COPY(Reference, o,
 			_t = o._t;
 			_counter = o._counter;
-			if(_counter)
-			{
-				LOG("INFO: COPIED REFERENCE\n\tCOUNT: " << *_counter << "\n\tFUNCTION: " << PRETTY_FUNCTION);
-				(*_counter)++;
-			}
+
+			if(!_counter) break;
+
+			LOG("INFO: COPIED REFERENCE\n\tCOUNT: " << *_counter << "\n\tFUNCTION: " << PRETTY_FUNCTION);
+			(*_counter)++;
 		);
 
 		OPERATOR_MOVE(Reference, o,

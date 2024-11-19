@@ -38,7 +38,7 @@ namespace GPU
 		FilterMode Filter = FilterMode::Linear;
 		u8 MipCount = 1;
 
-		TextureData Data;
+		TextureData Data = DEFAULT;
 
 		constexpr ~Texture() override { ASSET_CHECK_FREE(Texture); }
 	};
@@ -49,6 +49,9 @@ namespace GPU
  		API_REFLECTABLE(Texture2D, "GPU::Texture2D", API::Texture2D);
 
  	public:
+ 		Texture2D(const Texture& super, TextureSize2D size) : Texture(super), Size(size) {};
+ 		Texture2D(Texture&& super, TextureSize2D size) : Texture(move(super)), Size(size) {};
+
 		TextureSize2D Size;
 	};
 
@@ -58,6 +61,9 @@ namespace GPU
 		API_REFLECTABLE(Texture3D, "GPU::Texture3D", API::Texture3D);
 
 	public:
+		Texture3D(const Texture& super, TextureSize3D size) : Texture(super), Size(size) {};
+		Texture3D(Texture&& super, TextureSize3D size) : Texture(move(super)), Size(size) {};
+
 		TextureSize3D Size;
 	};
 
@@ -67,7 +73,9 @@ namespace GPU
 		API_REFLECTABLE(TextureCube, "GPU::TextureCube", API::TextureCube);
 
 	public:
-		TextureCube(const Texture& tex, TextureSize1D size);
+		TextureCube(const Texture& super, TextureSize1D size) : Texture(super), Size(size) {};
+		TextureCube(Texture&& super, TextureSize1D size) : Texture(move(super)), Size(size) {};
+
 		TextureSize1D Size;
 	};
 }

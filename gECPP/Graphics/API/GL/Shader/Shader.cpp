@@ -31,112 +31,47 @@ namespace GL
 		SetUniform(loc, GetWindow().GetSlotManager().Increment(&tex));
 	}
 
-	Shader::Shader(gE::Window* window, const Path& vertPath, const Path& fragPath) : IShader(window)
+	API_SERIALIZABLE_IMPL(Shader), IShader(window)
 	{
-		const ShaderStage vert(window, GPU::ShaderStageType::Vertex, vertPath);
-		const ShaderStage frag(window, GPU::ShaderStageType::Fragment, fragPath);
+		ShaderStage frag(window, move(FragmentStage));
+		ShaderStage vert(window, move(VertexStage));
 
 		frag.Attach(*this);
+		FragmentStage = move(frag.GetSettings());
+
 		vert.Attach(*this);
+		VertexStage = move(vert.GetSettings());
 
 		glLinkProgram(ID);
 
 		GetShaderStatus(*this);
 	}
 
-	Shader::Shader(gE::Window* window, const ShaderStage& vert, const ShaderStage& frag) : IShader(window)
+	API_SERIALIZABLE_IMPL(ComputeShader), IShader(window)
 	{
-		vert.Attach(*this);
-		frag.Attach(*this);
-
-		glLinkProgram(ID);
-
-		GetShaderStatus(*this);
-	}
-
-	Shader::Shader(gE::Window* window, SUPER&& INTERNAL_SETTINGS) : SUPER(move(INTERNAL_SETTINGS)), IShader(window)
-	{
-		const ShaderStage frag(window, move(FragmentStage));
-		const ShaderStage vert(window, move(VertexStage));
-
-		frag.Attach(*this);
-		vert.Attach(*this);
-
-		glLinkProgram(ID);
-
-		GetShaderStatus(*this);
-	}
-
-	ComputeShader::ComputeShader(gE::Window* window, const Path& compPath) : IShader(window)
-	{
-		const ShaderStage comp(window, GPU::ShaderStageType::Compute, compPath);
+		ShaderStage comp(window, move(ComputeStage));
 
 		comp.Attach(*this);
+		ComputeStage = move(comp.GetSettings());
 
 		glLinkProgram(ID);
 
 		GetShaderStatus(*this);
 	}
 
-	ComputeShader::ComputeShader(gE::Window* window, const ShaderStage& comp) : IShader(window)
+	API_SERIALIZABLE_IMPL(ShaderStage), APIObject(window)
 	{
-		comp.Attach(*this);
-
-		glLinkProgram(ID);
-
-		GetShaderStatus(*this);
-	}
-
-	ComputeShader::ComputeShader(gE::Window* window, SUPER&& INTERNAL_SETTINGS) : SUPER(move(INTERNAL_SETTINGS)), IShader(window)
-	{
-		const ShaderStage comp(window, move(ComputeStage));
-
-		comp.Attach(*this);
-
-		glLinkProgram(ID);
-
-		GetShaderStatus(*this);
-	}
-
-	ShaderStage::ShaderStage(gE::Window* window, GPU::ShaderStageType stage, const Path& path) : APIObject(window)
-	{
-		ID = glCreateShader((GLenum) stage);
-
-		std::string finalSource, source, extensions;
-		std::string& includes = finalSource; // temp alias
-		auto file = std::ifstream(path, std::ios_base::in | std::ios_base::binary);
-
-		GPU::CompileIncludes(file, extensions, source, includes, path);
-
-		finalSource.clear();
-		finalSource += GL_VERSION_DIRECTIVE;
-		CompileShaderType(stage, finalSource);
-		CompileDirectives(window->GetShaderCompilationState(), finalSource);
-		finalSource += extensions;
-		finalSource += source;
-
-		const char* sourceCString = finalSource.data();
-		const i32 sourceLength = finalSource.length();
-
-		glShaderSource(ID, 1, &sourceCString, &sourceLength);
-		glCompileShader(ID);
-
-		GetShaderStatus(*this, path, sourceCString);
-	}
-
-	ShaderStage::ShaderStage(gE::Window* window, SUPER&& INTERNAL_SETTINGS) : SUPER(move(INTERNAL_SETTINGS)), APIObject(window)
-	{
-		ID = glCreateShader((GLenum) Type);
+		ID = glCreateShader((GLenum) StageType);
 
 		std::string finalSource, source, extensions;
 		std::string& includes = finalSource; // temp alias
 		auto stream = std::istringstream(Source);
 
-		GPU::CompileIncludes(stream, extensions, source, includes);
+		GPU::CompileIncludes(stream, extensions, source, includes, BasePath);
 
 		finalSource.clear();
 		finalSource += GL_VERSION_DIRECTIVE;
-		CompileShaderType(Type, finalSource);
+		CompileShaderType(StageType, finalSource);
 		CompileDirectives(window->GetShaderCompilationState(), finalSource);
 		finalSource += extensions;
 		finalSource += source;

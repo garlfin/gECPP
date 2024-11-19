@@ -51,7 +51,7 @@ namespace gE
 
 	DirectionalLightTarget::DirectionalLightTarget(Light& l, OrthographicCamera& c) :
 		RenderTarget(l, c), IDepthTarget((API::Texture&) _depth),
-		_depth(GetFrameBuffer(), GPU::TextureSettings2D(ShadowMapFormat, c.GetSize()))
+		_depth(GetFrameBuffer(), GPU::Texture2D(ShadowMapFormat, c.GetSize()))
 	{
 	}
 
@@ -109,7 +109,7 @@ namespace gE
 	PointLightTarget::PointLightTarget(Light& light, CameraCube& camera) :
 		RenderTarget(light, camera),
 		IDepthTarget((GL::TextureCube&) _depth),
-		_depth(GetFrameBuffer(), GPU::TextureSettings1D(ShadowMapFormat, camera.GetSize()))
+		_depth(GetFrameBuffer(), GPU::TextureCube(ShadowMapFormat, camera.GetSize()))
 	{
 
 	}

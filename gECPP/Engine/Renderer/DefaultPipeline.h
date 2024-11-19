@@ -103,7 +103,7 @@ namespace gE::DefaultPipeline
 	GLOBAL GPU::Texture DepthFormat = []
 	{
 		GPU::Texture tex;
-		tex.Format = GL_DEPTH_COMPONENT;
+		tex.Format = GL_DEPTH_COMPONENT32F;
 		tex.WrapMode = GPU::WrapMode::Clamp;
 		tex.Filter = GPU::FilterMode::Nearest;
 		return tex;

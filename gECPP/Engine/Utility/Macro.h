@@ -81,12 +81,12 @@ using std::move;
 #endif
 #define BIT_SIZE(X) (sizeof(decltype(X)) * 8)
 
-#ifndef CONSTEXPR_GLOBAL
+#ifndef GLOBAL
 #define GLOBAL inline const
 #endif
 
 #ifndef CONSTEXPR_GLOBAL
-#define CONSTEXPR_GLOBAL inline constexpr const
+#define CONSTEXPR_GLOBAL inline constexpr
 #endif
 
 #define DEFAULT {}
@@ -115,23 +115,28 @@ using std::move;
 	TYPE(const TYPE&); \
 	TYPE& operator=(const TYPE& ACCESSOR);
 
+// terrible non nested if statement emulator...
 #define OPERATOR_MOVE_NAMESPACE(NAMESPACE, TYPE, ACCESSOR, CODE) \
-    NAMESPACE##  TYPE(TYPE&& ACCESSOR) noexcept { if(&ACCESSOR == this) return; CODE; } \
+    NAMESPACE##TYPE(TYPE&& ACCESSOR) noexcept \
+	{ \
+		if(&ACCESSOR == this) return; \
+		for(bool INTERNAL_BREAK = false; !INTERNAL_BREAK; INTERNAL_BREAK = true) { CODE; } \
+	} \
 	NAMESPACE##TYPE& NAMESPACE##operator=(TYPE&& ACCESSOR) noexcept \
 	{ \
 		if(&ACCESSOR == this) return *this; \
 		this->~TYPE(); \
-		CODE; \
+		for(bool INTERNAL_BREAK = false; !INTERNAL_BREAK; INTERNAL_BREAK = true) { CODE; } \
 		return* this; \
 	}
 
 #define OPERATOR_COPY_NAMESPACE(NAMESPACE, TYPE, ACCESSOR, CODE) \
-	NAMESPACE##TYPE(const TYPE& ACCESSOR) { CODE; } \
+	NAMESPACE##TYPE(const TYPE& ACCESSOR) { for(bool INTERNAL_BREAK = false; !INTERNAL_BREAK; INTERNAL_BREAK = true) { CODE; } } \
 	NAMESPACE##TYPE& NAMESPACE##operator=(const TYPE& ACCESSOR) \
 	{ \
 		if(&ACCESSOR == this) return *this; \
 		this->~TYPE(); \
-		CODE; \
+		for(bool INTERNAL_BREAK = false; !INTERNAL_BREAK; INTERNAL_BREAK = true) { CODE; } \
 		return *this; \
 	}
 

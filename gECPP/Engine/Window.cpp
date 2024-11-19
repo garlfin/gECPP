@@ -170,30 +170,31 @@ void Window::OnInit()
 	Renderers = ptr_create<RendererManager>(this);
 	Physics = ptr_create<PhysicsManager>(this);
 
-	BlitShader = ptr_create<API::Shader>(this, "Resource/Shader/blit.vert", "Resource/Shader/blit.frag");
-	TAAShader = ptr_create<API::ComputeShader>(this, "Resource/Shader/PostProcess/taa.comp");
-	TonemapShader = ptr_create<API::ComputeShader>(this, "Resource/Shader/PostProcess/tonemap.comp");
-	BloomShader = ptr_create<API::ComputeShader>(this, "Resource/Shader/PostProcess/bloom.comp");
-	VoxelTAAShader = ptr_create<API::ComputeShader>(this, "Resource/Shader/Compute/voxel.comp");
-	HiZShader = ptr_create<API::ComputeShader>(this, "Resource/Shader/Compute/hiz.comp");
+	BlitShader = ptr_create<API::Shader>(this, GPU::Shader("Resource/Shader/blit.vert", "Resource/Shader/blit.frag"));
+	TAAShader = ptr_create<API::ComputeShader>(this, GPU::ComputeShader("Resource/Shader/PostProcess/taa.comp"));
+	TonemapShader = ptr_create<API::ComputeShader>(this, GPU::ComputeShader("Resource/Shader/PostProcess/tonemap.comp"));
+	BloomShader = ptr_create<API::ComputeShader>(this, GPU::ComputeShader("Resource/Shader/PostProcess/bloom.comp"));
+	VoxelTAAShader = ptr_create<API::ComputeShader>(this, GPU::ComputeShader("Resource/Shader/Compute/voxel.comp"));
+	HiZShader = ptr_create<API::ComputeShader>(this, GPU::ComputeShader("Resource/Shader/Compute/hiz.comp"));
 
 	{
-		API::ComputeShader brdfShader(this, "Resource/Shader/Compute/brdf.comp");
-		GPU::TextureSettings2D brdfSettings
-		{
-			{ GL_RG16F, GPU::WrapMode::Clamp, GPU::FilterMode::Linear, 1 },
-			TextureSize2D(BRDF_SIZE)
-		};
+		API::ComputeShader brdfShader(this, GPU::ComputeShader("Resource/Shader/Compute/brdf.comp"));
 
-		glm::uvec2 brdfGroupSize = DIV_CEIL_T(BRDF_SIZE, BRDF_GROUP_SIZE, glm::uvec2);
+		GPU::Texture2D brdfTextureSettings;
+		brdfTextureSettings.Format = GL_RG16F;
+		brdfTextureSettings.WrapMode = GPU::WrapMode::Clamp;
+		brdfTextureSettings.Size = TextureSize2D(BRDF_SIZE);
 
-		BRDFLookup = ptr_create<API::Texture2D>(this, brdfSettings);
-		BRDFLookup->Bind(0, GL_WRITE_ONLY);
+		BRDFLookup = ptr_create<API::Texture2D>(this, brdfTextureSettings);
+
+		constexpr glm::uvec2 brdfGroupSize = DIV_CEIL_T(BRDF_SIZE, BRDF_GROUP_SIZE, glm::uvec2);
+
 		brdfShader.Bind();
+		BRDFLookup->Bind(0, GL_WRITE_ONLY);
 		brdfShader.Dispatch(brdfGroupSize);
 	}
 
-	auto defaultShader = ref_create<API::Shader>(this, "Resource/Shader/uber.vert", "Resource/Shader/missing.frag");
+	auto defaultShader = ref_create<API::Shader>(this, GPU::Shader("Resource/Shader/uber.vert", "Resource/Shader/missing.frag"));
 	DefaultMaterial = ptr_create<Material>(this, defaultShader);
 }
 

@@ -130,7 +130,7 @@ namespace GPU
 		CompressionScheme Scheme = { 1, 1 };
 		u8 MipCount = 0;
 
-		Array<u8> Data;
+		Array<u8> Data = DEFAULT;
 
 		NODISCARD ALWAYS_INLINE bool IsFree() const { return Data.IsFree(); }
 		ALWAYS_INLINE void Free() { Data.Free(); }

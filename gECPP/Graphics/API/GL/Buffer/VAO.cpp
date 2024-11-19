@@ -33,7 +33,7 @@ namespace GL
 		}
 	}
 
-	VAO::VAO(gE::Window* window, SUPER&& INTERNAL_SETTINGS) : SUPER(move(INTERNAL_SETTINGS)), IVAO(window, *this)
+	API_SERIALIZABLE_IMPL(VAO), IVAO(window, *this)
 	{
 	}
 
@@ -50,7 +50,7 @@ namespace GL
 		glDeleteVertexArrays(1, &ID);
 	}
 
-	IndexedVAO::IndexedVAO(gE::Window* window, SUPER&& INTERNAL_SETTINGS) : SUPER(move(INTERNAL_SETTINGS)), IVAO(window, *this)
+	API_SERIALIZABLE_IMPL(IndexedVAO), IVAO(window, *this)
 	{
 		SAFE_CONSTRUCT(_triangleBuffer, Buffer, window, move(TriangleBuffer));
 		TriangleBuffer = move(_triangleBuffer.GetSettings());

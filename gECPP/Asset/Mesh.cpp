@@ -6,7 +6,6 @@
 
 #include "Engine/Window.h"
 
-
 namespace gE
 {
     void Mesh::ISerialize(istream& in, SETTINGS_T s)

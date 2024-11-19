@@ -50,7 +50,7 @@ namespace GL
 		glm::u32vec2 size = Size;
 		u8* dataPtr = Data.Data.Data();
 
-		for(u8 i = 0; i < MipCount; i++, size >>= TextureSize2D(1))
+		for(u8 i = 0; i < Data.MipCount; i++, size >>= TextureSize2D(1))
 		{
 			size = max(size, TextureSize2D(1));
 			u64 dataSize = Data.Scheme.Size<Dimension::D2D>(size);
