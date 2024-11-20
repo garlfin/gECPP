@@ -26,16 +26,6 @@ namespace GL
 	 public:
 		Buffer(gE::Window* window, u32 count, const T* data = nullptr);
 
-		using SUPER::GetStride;
-		using SUPER::GetArray;
-		using SUPER::GetData;
-		using SUPER::GetElementCount;
-		using SUPER::GetCount;
-		using SUPER::GetByteCount;
-
-		using SUPER::Free;
-		using SUPER::IsFree;
-
 		template<typename I>
 		ALWAYS_INLINE void ReplaceData(const I* data, uint32_t count = 1, uint32_t offset = 0) const;
 

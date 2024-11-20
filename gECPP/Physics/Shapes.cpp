@@ -9,12 +9,12 @@ namespace Jolt
     SphereShape::SphereShape(gE::Window*, SUPER&& INTERNAL_SETTINGS) :
         Jolt::ConvexShape(*this, *_shape)
     {
-        SAFE_CONSTRUCT_NAMESPACE(_shape, ManagedPX<px::SphereShape>, gE, INTERNAL_SETTINGS.Radius);
+        SAFE_CONSTRUCT_NAMESPACE(_shape, gE, ManagedPX<px::SphereShape>, INTERNAL_SETTINGS.Radius);
     }
 
     BoxShape::BoxShape(gE::Window*, SUPER&& INTERNAL_SETTINGS) :
         Jolt::ConvexShape(*this, *_shape)
     {
-        SAFE_CONSTRUCT_NAMESPACE(_shape, ManagedPX<px::BoxShape>, gE, gE::ToPX(INTERNAL_SETTINGS.Extents));
+        SAFE_CONSTRUCT_NAMESPACE(_shape, gE, ManagedPX<px::BoxShape>, gE::ToPX(INTERNAL_SETTINGS.Extents));
     }
 }

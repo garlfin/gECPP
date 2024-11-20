@@ -55,9 +55,6 @@ namespace GL
 	 public:
 		GET_CONST(const GPU::VAO&, Data, *this);
 
-		using SUPER::Free;
-		using SUPER::IsFree;
-
 		void Draw(u8 index, u16 instanceCount = 1) const override;
 		void Draw(u32 count, const GPU::IndirectDraw*) const override;
 
@@ -81,9 +78,6 @@ namespace GL
 
 		GET_CONST(GLenum, TriangleMode, TriangleFormat);
 		GET_CONST(const GPU::Buffer<u8>&, TriBuffer, TriangleBuffer);
-
-		using SUPER::Free;
-		using SUPER::IsFree;
 
 		void Draw(u8 index, u16 instanceCount = 1) const override;
 		void Draw(u32 count, const GPU::IndirectDraw*) const override;

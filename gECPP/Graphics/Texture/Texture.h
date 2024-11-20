@@ -31,7 +31,7 @@ namespace GPU
 	public:
 		ALWAYS_INLINE void Free() override { Data.Free(); }
 		NODISCARD ALWAYS_INLINE bool IsFree() const override { return Data.IsFree(); }
-		constexpr operator bool() const { return (bool) Format; }
+		operator bool() const { return (bool) Format; }
 
 		GLenum Format = GL_NONE;
 		WrapMode WrapMode = WrapMode::Repeat;
@@ -40,7 +40,7 @@ namespace GPU
 
 		TextureData Data = DEFAULT;
 
-		constexpr ~Texture() override { ASSET_CHECK_FREE(Texture); }
+		~Texture() override { ASSET_CHECK_FREE(Texture); }
 	};
 
  	class Texture2D : public Texture

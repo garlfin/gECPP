@@ -37,10 +37,10 @@ namespace GL
 		ShaderStage vert(window, move(VertexStage));
 
 		frag.Attach(*this);
-		//FragmentStage = move(frag.GetSettings());
+		FragmentStage = move(frag.GetSettings());
 
 		vert.Attach(*this);
-		//VertexStage = move(vert.GetSettings());
+		VertexStage = move(vert.GetSettings());
 
 		glLinkProgram(ID);
 

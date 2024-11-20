@@ -25,7 +25,7 @@ using std::move;
 
 #define COPY_MOVE(x) std::move(std::remove_cvref_t<decltype(x)>(x))
 
-#define SAFE_CONSTRUCT_NAMESPACE(TO, TYPE, NAMESPACE, ...) \
+#define SAFE_CONSTRUCT_NAMESPACE(TO, NAMESPACE, TYPE, ...) \
 	{ \
 		(TO).~TYPE(); \
 		new(&(TO)) NAMESPACE::TYPE(__VA_ARGS__); \
@@ -53,7 +53,7 @@ using std::move;
 #endif // #ifdef DEBUG
 
 #ifdef DEBUG
-#define LOG(MSG) std::cout << MSG << '\n'
+#define LOG(MSG) std::cout << MSG << std::endl;
 #define ERR(MSG) { TRAP(); std::cerr << MSG << std::endl; }
 #else
 #define LOG(MSG)

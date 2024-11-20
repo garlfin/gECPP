@@ -6,19 +6,7 @@
 
 #define GE_ANISOTROPY_COUNT 8
 
-// Type is more "integral" so I use a lowercase convention
-// Opaque type to prevent accidental pointer-to-handle conversions
-struct handle
-{
-	handle() = default;
-	ALWAYS_INLINE explicit handle(u64 i) : ID(i) {};
-
-	ALWAYS_INLINE handle& operator=(u64 o) { ID = o; return *this; }
-
-	OPERATOR_CAST_CONST(u64, ID);
-
-	u64 ID = 0;
-};
+using handle = u64;
 
 namespace GL
 {

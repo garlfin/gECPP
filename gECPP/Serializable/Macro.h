@@ -22,12 +22,15 @@
 		typedef SUPER_T SUPER; \
 		inline void Serialize(istream& in, gE::Window* window) override { SAFE_CONSTRUCT(*this, TYPE, in, window); } \
 		TYPE() = default; \
+		using SUPER_T::Free; \
+		using SUPER_T::IsFree; \
 		TYPE(istream& in, gE::Window* window) \
 		{ \
 			SUPER_T tmp(in, window); \
-			new(this) TYPE(window, move(tmp)); \
+			SAFE_CONSTRUCT(*this, TYPE, window, move(tmp)); \
 			SUPER_T::Free(); \
 		} \
+		ALWAYS_INLINE const SUPER_T* operator->() const { return this; } \
 		GET(SUPER_T&, Settings, *this) \
 		TYPE(gE::Window* window, const SUPER_T& settings) : TYPE(window, (SUPER_T&&) SUPER_T(settings)) {} \
 		TYPE(gE::Window* window, SUPER_T&& INTERNAL_SETTINGS)
@@ -50,11 +53,6 @@
 	public: \
 		inline void* GetUnderlying() override { return (UNDERLYING_T*) this; } \
 		inline const void* GetUnderlying() const override { return (const UNDERLYING_T*) this; }
-
-#define API_SETTINGS_OPERATOR(UNDERLYING_T) \
-	public: \
-		ALWAYS_INLINE UNDERLYING_T* operator->() { return (UNDERLYING_T*) this; } \
-		ALWAYS_INLINE const UNDERLYING_T* operator->() const { return this; }
 
 #define API_SERIALIZABLE_IMPL_NAMESPACE(NAMESPACE, ...) \
 	NAMESPACE##__VA_ARGS__::__VA_ARGS__(gE::Window* window, SUPER&& INTERNAL_SETTINGS) : SUPER(move(INTERNAL_SETTINGS))
