@@ -4,6 +4,7 @@
 #pragma once
 
 #include <utility>
+#include <iostream>
 
 using std::move;
 
@@ -38,17 +39,17 @@ using std::move;
 	}
 
 #define NODISCARD [[nodiscard]]
+
 #ifdef DEBUG
-#define ALWAYS_INLINE inline
+	#define ALWAYS_INLINE inline
 #else
-#define ALWAYS_INLINE __attribute__((always_inline)) inline
+	#define ALWAYS_INLINE __forceinline
 #endif // #if DEBUG
 
-#define NOINLINE __attribute__((noinline))
+#define NOINLINE __declspec(noinline)
 
 #ifdef DEBUG
 #include <csignal>
-#include <iostream>
 #include <vector>
 #endif // #ifdef DEBUG
 
