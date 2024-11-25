@@ -37,7 +37,7 @@ class Array
 
 	OPERATOR_COPY_NOSUPER(Array,
 	{
-		if(!o._size || !o._t) break;
+		if(!o._size || !o._t) return;
 
 		LOG("WARNING: REALLOCATION! \n\tSIZE: " << o._size * sizeof(I) << " bytes\n\tFUNCTION: " << PRETTY_FUNCTION);
 

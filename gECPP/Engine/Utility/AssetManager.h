@@ -20,7 +20,7 @@ namespace gE
 			_t = o._t;
 			_counter = o._counter;
 
-			if(!_counter) break;
+			if(!_counter) return;
 
 			LOG("INFO: COPIED REFERENCE\n\tCOUNT: " << *_counter << "\n\tFUNCTION: " << PRETTY_FUNCTION);
 			(*_counter)++;

@@ -79,7 +79,7 @@ namespace gE
 
 		DELETE_OPERATOR_COPY(LinkedIterator);
 		OPERATOR_MOVE_NOSUPER(LinkedIterator,
-			if(!o._list) break;
+			if(!o._list) return;
 
 			_owner = o._owner;
 			_list = o._list;

@@ -122,7 +122,7 @@ using std::move;
 	TYPE& operator=(const TYPE& ACCESSOR);
 
 // terrible non nested if statement emulator...
-#define OPERATOR_MOVE_UNSAFE(TYPE, INHERIT, CODE) \
+#define OPERATOR_MOVE_UNSAFE(TYPE, DESTRUCTOR, INHERIT, CODE) \
     TYPE(TYPE&& o) noexcept \
 	{ \
 		if(&o == this) return; \
@@ -131,12 +131,12 @@ using std::move;
 	TYPE& operator=(TYPE&& o) noexcept \
 	{ \
 		if(&o == this) return *this; \
-		this->~TYPE(); \
-		for(bool INTERNAL_BREAK = false; !INTERNAL_BREAK; INTERNAL_BREAK = true) { INHERIT; CODE; } \
+		DESTRUCTOR; \
+		[&]() { INHERIT; CODE; }(); \
 		return* this; \
 	}
 
-#define OPERATOR_COPY_UNSAFE(TYPE, INHERIT, CODE) \
+#define OPERATOR_COPY_UNSAFE(TYPE, DESTRUCTOR, INHERIT, CODE) \
 	TYPE(const TYPE& o) \
 	{ \
 		for(bool INTERNAL_BREAK = false; !INTERNAL_BREAK; INTERNAL_BREAK = true) { INHERIT; CODE; } \
@@ -144,22 +144,22 @@ using std::move;
 	TYPE& operator=(const TYPE& o) \
 	{ \
 		if(&o == this) return *this; \
-		this->~TYPE(); \
-		for(bool INTERNAL_BREAK = false; !INTERNAL_BREAK; INTERNAL_BREAK = true) { INHERIT; CODE; } \
+		DESTRUCTOR; \
+		[&]() { INHERIT; CODE; }(); \
 		return *this; \
 	}
 
 #define OPERATOR_MOVE(TYPE, SUPER, CODE) \
-	OPERATOR_MOVE_UNSAFE(TYPE, SUPER::operator=(move(o)), CODE)
+	OPERATOR_MOVE_UNSAFE(TYPE, this->~TYPE(), SUPER::operator=(move(o)), CODE)
 
 #define OPERATOR_COPY(TYPE, SUPER, CODE) \
-	OPERATOR_COPY_UNSAFE(TYPE, SUPER::operator=(o), CODE)
+	OPERATOR_COPY_UNSAFE(TYPE, this->~TYPE(), SUPER::operator=(o), CODE)
 
 #define OPERATOR_MOVE_NOSUPER(TYPE, CODE) \
-	OPERATOR_MOVE_UNSAFE(TYPE,, CODE)
+	OPERATOR_MOVE_UNSAFE(TYPE, this->~TYPE(),, CODE)
 
 #define OPERATOR_COPY_NOSUPER(TYPE, CODE) \
-	OPERATOR_COPY_UNSAFE(TYPE,, CODE)
+	OPERATOR_COPY_UNSAFE(TYPE, this->~TYPE(),, CODE)
 
 #define OPERATOR_CAST_CONST(TYPE, FIELD) ALWAYS_INLINE operator TYPE() const { return FIELD; }
 #define OPERATOR_CAST(TYPE, FIELD) \
