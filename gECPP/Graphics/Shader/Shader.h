@@ -19,47 +19,6 @@ namespace GL
 
 namespace GPU
 {
-	struct StringWatcher : public std::string
-	{
-	public:
-		using std::string::string;
-
-		StringWatcher(const StringWatcher& o)
-		{
-			std::string::operator=(o);
-			std::cout << "goofyassstring&: " << (void*) this;
-		}
-
-		StringWatcher& operator=(const StringWatcher& o)
-		{
-			if(&o == this) return *this;
-			this->~StringWatcher();
-			std::string::operator=(o);
-			std::cout << "StringWatcher&: " << (void*) this;
-			return *this;
-		};
-
-		StringWatcher(StringWatcher&& o) noexcept
-		{
-			if(&o == this) return;
-			std::string::operator=(move(o));
-			std::cout << "StringWatcher&&: " << (void*) this << " takes ownership of " << (void*) c_str() << std::endl;
-		}
-		StringWatcher& operator=(StringWatcher&& o) noexcept
-		{
-			if(&o == this) return *this;
-			this->~StringWatcher();
-			std::string::operator=(move(o));
-			std::cout << "StringWatcher&&: " << (void*) this << " <- " << (void*) c_str() << std::endl;
-			return* this;
-		}
-
-		~StringWatcher()
-		{
-			if(empty()) return;
-			std::cout << "~StringWatcher: " << (void*) this << " deletes " << (void*) c_str() << std::endl;
-		}
-	};
 	struct ShaderStage : public Serializable<gE::Window*>, public gE::Asset
 	{
 		SERIALIZABLE_PROTO(STGE, 1, ShaderStage, Serializable);
@@ -67,16 +26,10 @@ namespace GPU
 
 	public:
 		ShaderStage(ShaderStageType, const Path&);
-		DEFAULT_OPERATOR_COPY(ShaderStage);
-
-		OPERATOR_MOVE_NOSUPER(ShaderStage,
-			StageType = o.StageType;
-			Source = move(o.Source);
-			BasePath = move(o.BasePath);
-		)
+		DEFAULT_OPERATOR_CM(ShaderStage);
 
 		ShaderStageType StageType = DEFAULT;
-		StringWatcher Source = DEFAULT;
+		std::string Source = DEFAULT;
 		Path BasePath = DEFAULT;
 
 		ALWAYS_INLINE void Free() override { Source.clear(); };

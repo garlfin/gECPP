@@ -65,7 +65,6 @@ namespace gE
 		GPU::Shader shaderSettings("Resource/Shader/skybox.vert", "Resource/Shader/skybox.frag");
 		API::Shader shader(window, move(shaderSettings));
 		_skyboxShader = move(shader);
-		LOG("END");
 		_skyboxShader.Free();
 	}
 
