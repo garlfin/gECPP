@@ -6,10 +6,6 @@
 #include "ScreenSpace.glsl"
 #include "Math.glsl"
 
-#ifndef PI
-    #define PI 3.141592
-#endif
-
 #ifndef EPSILON
     #define EPSILON 0.001
 #endif
@@ -171,7 +167,7 @@ vec3 FilterSpecular(const Vertex vert, const PBRFragment frag, const PBRSample p
     vec3 f = FresnelSchlick(f0, nDotV);
     vec2 brdf = pbrSample.BRDF;
 
-    return (brdf.g + f * brdf.r) * color;
+    return (brdf.g + f * brdf.r) * color * (1.0 - frag.Roughness);
 }
 #endif
 

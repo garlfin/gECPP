@@ -1,6 +1,6 @@
 /*
 ---------------------------------------------------------------------------
-Open GLAsset Import Library (assimp)
+Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
 Copyright (c) 2006-2022, assimp team
@@ -154,7 +154,7 @@ struct aiMeshKey {
     /** The time of this key */
     double mTime;
 
-    /** BufferIndex into the aiMesh::mAnimMeshes array of the
+    /** Index into the aiMesh::mAnimMeshes array of the
      *  mesh corresponding to the #aiMeshAnim hosting this
      *  key frame. The referenced anim mesh is evaluated
      *  according to the rules defined in the docs for #aiAnimMesh.*/
@@ -342,13 +342,13 @@ struct aiNodeAnim {
  *  define keyframes linking each mesh attachment to a particular
  *  point in time. */
 struct aiMeshAnim {
-    /** InternalPath of the mesh to be animated. An empty string is not allowed,
+    /** Name of the mesh to be animated. An empty string is not allowed,
      *  animated meshes need to be named (not necessarily uniquely,
      *  the name can basically serve as wild-card to select a group
      *  of meshes with similar animation setup)*/
     C_STRUCT aiString mName;
 
-    /** _size of the #mKeys array. Must be 1, at least. */
+    /** Size of the #mKeys array. Must be 1, at least. */
     unsigned int mNumKeys;
 
     /** Key frames of the animation. May not be nullptr. */
@@ -370,13 +370,13 @@ struct aiMeshAnim {
 // ---------------------------------------------------------------------------
 /** Describes a morphing animation of a given mesh. */
 struct aiMeshMorphAnim {
-    /** InternalPath of the mesh to be animated. An empty string is not allowed,
+    /** Name of the mesh to be animated. An empty string is not allowed,
      *  animated meshes need to be named (not necessarily uniquely,
      *  the name can basically serve as wildcard to select a group
      *  of meshes with similar animation setup)*/
     C_STRUCT aiString mName;
 
-    /** _size of the #mKeys array. Must be 1, at least. */
+    /** Size of the #mKeys array. Must be 1, at least. */
     unsigned int mNumKeys;
 
     /** Key frames of the animation. May not be nullptr. */
@@ -500,7 +500,7 @@ struct Interpolator {
     }
 }; // ! Interpolator <T>
 
-//! @cond NEVER
+//! @cond Never
 
 template <>
 struct Interpolator<aiQuaternion> {

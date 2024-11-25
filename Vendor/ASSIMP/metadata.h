@@ -1,6 +1,6 @@
 /*
 ---------------------------------------------------------------------------
-Open GLAsset Import Library (assimp)
+Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
 Copyright (c) 2006-2022, assimp team
@@ -144,7 +144,7 @@ inline aiMetadataType GetAiType(const aiMetadata &) {
   */
 // -------------------------------------------------------------------------------
 struct aiMetadata {
-    /** Count of the mKeys and mValues arrays, respectively */
+    /** Length of the mKeys and mValues arrays, respectively */
     unsigned int mNumProperties;
 
     /** Arrays of keys, may not be NULL. Entries in this array may not be NULL as well. */

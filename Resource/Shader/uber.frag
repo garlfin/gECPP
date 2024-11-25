@@ -36,7 +36,7 @@ struct VertexOut
 in VertexOut VertexIn;
 
 layout(location = 0) out vec4 FragColor;
-layout(location = 1) out vec2 Velocity;
+layout(location = 1) out vec3 Velocity;
 
 layout(early_fragment_tests) in;
 void main()
@@ -94,7 +94,7 @@ void main()
             float weight;
             vec3 cubemapDir = CubemapParallax(vert.Position, pbrSample.Specular, Lighting.Cubemaps[i], weight);
 
-            cubemapSpecular += textureLod(Lighting.Cubemaps[0].Color, cubemapDir, 0.f).rgb * 2.0; // it looks more right??
+            cubemapSpecular += textureLod(Lighting.Cubemaps[0].Color, cubemapDir, 0.f).rgb;
             cubemapWeight += weight;
             maxCubemapWeight = max(maxCubemapWeight, weight);
         }
@@ -113,7 +113,7 @@ void main()
                 ray.Position = vert.Position + ray.Direction * result.Distance;
                 result = Voxel_TraceOffset(ray, vert.Normal);
                 raySpecular = textureLod(VoxelGrid.Color, Voxel_WorldToUV(result.Position), 0.0).rgb;
-                raySpecular = UnpackColor(raySpecular) * 2.0;
+                raySpecular = UnpackColor(raySpecular);
             }
         #endif
 
@@ -126,7 +126,7 @@ void main()
 
     FragColor.a = 1.0;
 
-	Velocity = ((VertexIn.CurrentNDC.xy / VertexIn.CurrentNDC.w) - (VertexIn.PreviousNDC.xy / VertexIn.PreviousNDC.w)) * 0.5;
+    Velocity = PerspectiveToUV(VertexIn.PreviousNDC);
 
     if(!ENABLE_VOXEL_WRITE) return;
 

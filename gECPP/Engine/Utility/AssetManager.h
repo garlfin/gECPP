@@ -63,6 +63,9 @@ namespace gE
 			LOG("INFO: DELETED REFERENCE\n\tFunction: " << PRETTY_FUNCTION);
 			delete _t;
 			delete _counter;
+
+			_t = nullptr;
+			_counter = nullptr;
 		}
 
 	 private:

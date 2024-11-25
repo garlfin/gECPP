@@ -71,7 +71,7 @@ namespace GPU
 		GE_ASSERT(end != std::string::npos, "INVALID INCLUDE!");
 
 		if(delimiter == '>')
-			return line.substr(10, end - 10);
+			return std::filesystem::weakly_canonical(line.substr(10, end - 10));
 		return weakly_canonical(path.parent_path() / line.substr(10, end - 10));
 	}
 

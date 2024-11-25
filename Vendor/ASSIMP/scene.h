@@ -1,6 +1,6 @@
 /*
 ---------------------------------------------------------------------------
-Open GLAsset Import Library (assimp)
+Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
 Copyright (c) 2006-2022, assimp team
@@ -145,7 +145,7 @@ struct ASSIMP_API aiNode {
      *  nodes. Normally you will call this method on the root node
      *  of the scene.
      *
-     *  @param name InternalPath to search for
+     *  @param name Name to search for
      *  @return nullptr or a valid Node if the search was successful.
      */
     inline
@@ -263,7 +263,7 @@ struct aiScene
 
     /** The array of meshes.
     *
-    * Bind the indices given in the aiNode structure to access
+    * Use the indices given in the aiNode structure to access
     * this array. The array is mNumMeshes in size. If the
     * AI_SCENE_FLAGS_INCOMPLETE flag is not set there will always
     * be at least ONE material.
@@ -275,7 +275,7 @@ struct aiScene
 
     /** The array of materials.
     *
-    * Bind the index given in each aiMesh structure to access this
+    * Use the index given in each aiMesh structure to access this
     * array. The array is mNumMaterials in size. If the
     * AI_SCENE_FLAGS_INCOMPLETE flag is not set there will always
     * be at least ONE material.

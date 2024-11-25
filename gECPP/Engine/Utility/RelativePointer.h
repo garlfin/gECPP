@@ -17,7 +17,7 @@ public:
 	RelativePointer(T* t) : _t(t) {};
 
 	OPERATOR_COPY_NOSUPER(RelativePointer,
-		_t = (T*) ((u8*) o._t - (u8*) &o + (u8*) this);
+		_t = (T*) ((u64) o._t - (u64) &o + (u64) this);
 		if(!o._t) _t = nullptr;
 	);
 

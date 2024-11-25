@@ -1,5 +1,5 @@
 /*
-Open GLAsset Import Library (assimp)
+Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
 Copyright (c) 2006-2022, assimp team
@@ -131,9 +131,9 @@ enum aiPostProcessSteps
 
     // -------------------------------------------------------------------------
     /** <hr>Removes some parts of the data structure (animations, materials,
-     *  light sources, cameras, textures, vertex Components).
+     *  light sources, cameras, textures, vertex components).
      *
-     * The  Components to be removed are specified in a separate
+     * The  components to be removed are specified in a separate
      * importer property, <tt>#AI_CONFIG_PP_RVC_FLAGS</tt>. This is quite useful
      * if you don't need all parts of the output structure. Vertex colors
      * are rarely used today for example... Calling this step to remove unneeded
@@ -150,7 +150,7 @@ enum aiPostProcessSteps
      * shared, thus the #aiProcess_JoinIdenticalVertices step fails to
      * optimize the data because of these nasty little vertex colors.
      * Most apps don't even process them, so it's all for nothing. By using
-     * this step, unneeded Components are excluded as early as possible
+     * this step, unneeded components are excluded as early as possible
      * thus opening more room for internal optimizations.
      */
     aiProcess_RemoveComponent = 0x10,
@@ -483,7 +483,7 @@ enum aiPostProcessSteps
      *  list of node names you want to be kept. Nodes matching one of the names
      *  in this list won't be touched or modified.
      *
-     *  Bind this flag with caution. Most simple files will be collapsed to a
+     *  Use this flag with caution. Most simple files will be collapsed to a
      *  single node, so complex hierarchies are usually completely lost. This is not
      *  useful for editor environments, but probably a very effective
      *  optimization if you just want to get the model data, convert it to your
@@ -549,8 +549,8 @@ enum aiPostProcessSteps
      *  animating nodes is extremely cheap, so this step is offered to clean up
      *  the data in that regard.
      *
-     *  Bind <tt>#AI_CONFIG_PP_DB_THRESHOLD</tt> to control this.
-     *  Bind <tt>#AI_CONFIG_PP_DB_ALL_OR_NONE</tt> if you want bones removed if and
+     *  Use <tt>#AI_CONFIG_PP_DB_THRESHOLD</tt> to control this.
+     *  Use <tt>#AI_CONFIG_PP_DB_ALL_OR_NONE</tt> if you want bones removed if and
      *  only if all bones within the scene qualify for removal.
     */
     aiProcess_Debone  = 0x4000000,
@@ -562,10 +562,10 @@ enum aiPostProcessSteps
     *
     *  Some importers are providing a mechanism to define a scaling unit for the
     *  model. This post processing step can be used to do so. You need to get the
-    *  global scaling from your importer settings like in FBX. Bind the flag
+    *  global scaling from your importer settings like in FBX. Use the flag
     *  AI_CONFIG_GLOBAL_SCALE_FACTOR_KEY from the global property table to configure this.
     *
-    *  Bind <tt>#AI_CONFIG_GLOBAL_SCALE_FACTOR_KEY</tt> to setup the global scaling factor.
+    *  Use <tt>#AI_CONFIG_GLOBAL_SCALE_FACTOR_KEY</tt> to setup the global scaling factor.
     */
     aiProcess_GlobalScale = 0x8000000,
 

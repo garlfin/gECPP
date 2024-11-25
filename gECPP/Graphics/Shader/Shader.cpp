@@ -18,7 +18,7 @@ namespace GPU
 	void ShaderStage::IDeserialize(ostream& out) const
 	{
 		Write(out, StageType);
-		Write(out, Source);
+		Write(out, (std::string&) Source);
 	}
 
 	void Shader::ISerialize(istream& in, SETTINGS_T s)

@@ -1,6 +1,6 @@
 /*
 ---------------------------------------------------------------------------
-Open GLAsset Import Library (assimp)
+Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
 Copyright (c) 2006-2022, assimp team
@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file  Importer.hpp
- *  @brief Defines the C++-API to the Open GLAsset Import Library.
+ *  @brief Defines the C++-API to the Open Asset Import Library.
  */
 #pragma once
 #ifndef AI_ASSIMP_HPP_INC
@@ -53,7 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #ifndef __cplusplus
-#error This header requires C++ to be used. Bind assimp.h for plain C.
+#error This header requires C++ to be used. Use assimp.h for plain C.
 #endif // __cplusplus
 
 // Public ASSIMP data structures
@@ -97,7 +97,7 @@ namespace Assimp {
 
 // ----------------------------------------------------------------------------------
 /** CPP-API: The Importer class forms an C++ interface to the functionality of the
-*   Open GLAsset Import Library.
+*   Open Asset Import Library.
 *
 * Create an object of this class and call ReadFile() to import a file.
 * If the import succeeds, the function returns a pointer to the imported data.
@@ -203,7 +203,7 @@ public:
 
     // -------------------------------------------------------------------
     /** Set an integer configuration property.
-     * @param szName InternalPath of the property. All supported properties
+     * @param szName Name of the property. All supported properties
      *   are defined in the aiConfig.g header (all constants share the
      *   prefix AI_CONFIG_XXX and are simple strings).
      * @param iValue New value of the property
@@ -253,7 +253,7 @@ public:
 
     // -------------------------------------------------------------------
     /** Get a configuration property.
-     * @param szName InternalPath of the property. All supported properties
+     * @param szName Name of the property. All supported properties
      *   are defined in the aiConfig.g header (all constants share the
      *   prefix AI_CONFIG_XXX).
      * @param iErrorReturn Value that is returned if the property
@@ -321,7 +321,7 @@ public:
      *
      * The Importer takes ownership of the object and will destroy it
      * afterwards. The previously assigned handler will be deleted.
-     * RenderPass nullptr to take again ownership of your IOSystem and reset Assimp
+     * Pass nullptr to take again ownership of your IOSystem and reset Assimp
      * to use its default implementation.
      *
      * @param pIOHandler The IO handler to be used in all file accesses
@@ -354,7 +354,7 @@ public:
      *  isn't as periodically as you'd like it to have ...).
      *  This can be used to implement progress bars and loading
      *  timeouts.
-     *  @param pHandler Progress callback interface. RenderPass nullptr to
+     *  @param pHandler Progress callback interface. Pass nullptr to
      *    disable progress reporting.
      *  @note Progress handlers can be used to abort the loading
      *    at almost any time.*/
@@ -409,7 +409,7 @@ public:
      *   consider to use #ApplyPostProcessing().
      * @return A pointer to the imported data, nullptr if the import failed.
      *   The pointer to the scene remains in possession of the Importer
-     *   instance. Bind GetOrphanedScene() to take ownership of it.
+     *   instance. Use GetOrphanedScene() to take ownership of it.
      *
      * @note Assimp is able to determine the file format of a file
      * automatically.
@@ -430,7 +430,7 @@ public:
      * GetErrorString(). The previous scene will be deleted during this call.
      * Calling this method doesn't affect the active IOSystem.
      * @param pBuffer Pointer to the file data
-     * @param pLength Count of pBuffer, in bytes
+     * @param pLength Length of pBuffer, in bytes
      * @param pFlags Optional post processing steps to be executed after
      *   a successful import. Provide a bitwise combination of the
      *   #aiPostProcessSteps flags. If you wish to inspect the imported
@@ -445,7 +445,7 @@ public:
      *   Check the return value, and you'll know ...
      * @return A pointer to the imported data, nullptr if the import failed.
      *   The pointer to the scene remains in possession of the Importer
-     *   instance. Bind GetOrphanedScene() to take ownership of it.
+     *   instance. Use GetOrphanedScene() to take ownership of it.
      *
      * @note This is a straightforward way to decode models from memory
      * buffers, but it doesn't handle model formats that spread their
@@ -535,7 +535,7 @@ public:
      *  will return nullptr - until a new scene has been loaded via ReadFile().
      *
      * @return Current scene or nullptr if there is currently no scene loaded
-     * @note Bind this method with maximal caution, and only if you have to.
+     * @note Use this method with maximal caution, and only if you have to.
      *   By design, aiScene's are exclusively maintained, allocated and
      *   deallocated by Assimp and no one else. The reasoning behind this
      *   is the golden rule that deallocations should always be done
@@ -593,7 +593,7 @@ public:
     /** Get meta data for the importer corresponding to a specific index..
     *
     *  For the declaration of #aiImporterDesc, include <assimp/importerdesc.h>.
-    *  @param index BufferIndex to query, must be within [0,GetImporterCount())
+    *  @param index Index to query, must be within [0,GetImporterCount())
     *  @return Importer meta data structure, nullptr if the index does not
     *     exist or if the importer doesn't offer meta information (
     *     importers may do this at the cost of being hated by their peers).*/
@@ -602,7 +602,7 @@ public:
     // -------------------------------------------------------------------
     /** Find the importer corresponding to a specific index.
     *
-    *  @param index BufferIndex to query, must be within [0,GetImporterCount())
+    *  @param index Index to query, must be within [0,GetImporterCount())
     *  @return Importer instance. nullptr if the index does not
     *     exist. */
     BaseImporter *GetImporter(size_t index) const;

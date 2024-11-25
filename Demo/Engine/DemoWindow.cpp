@@ -34,9 +34,15 @@ void DemoWindow::OnInit()
 	normal = ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/tile_nor.pvr"));
 	PBRMaterialSettings tileSettings { albedo, amr, normal };
 
+	albedo = ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/grass_col.pvr"));
+	amr = ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/grass_armd.pvr"));
+	normal = ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/grass_nor.pvr"));
+	PBRMaterialSettings grassSettings { albedo, amr, normal };
+
 	auto rasterShader = gE::ref_create<GL::Shader>(this, GPU::Shader("Resource/Shader/uber.vert", "Resource/Shader/uber.frag"));
 	auto cobbleMaterial = gE::ref_create<PBRMaterial>(this, rasterShader, cobbleSettings);
 	auto tileMaterial = gE::ref_create<PBRMaterial>(this, rasterShader, tileSettings);
+	auto grassMaterial = gE::ref_create<PBRMaterial>(this, rasterShader, grassSettings);
 
 	Reference<Mesh> sceneMesh = ref_create<Mesh>();
 	ReadSerializableFromFile(this, "Resource/Model/Plane.001.mesh", *sceneMesh);
@@ -48,11 +54,7 @@ void DemoWindow::OnInit()
 	mesh->GetTransform().SetScale(glm::vec3(0.5));
 	mesh->GetRenderer().SetMaterial(0, cobbleMaterial);
 	mesh->GetRenderer().SetMaterial(1, tileMaterial);
-
-	mesh = new StaticMeshEntity(this, sceneMesh);
-	mesh->GetTransform().SetPosition(glm::vec3(0, -5, 0));
-	mesh->GetRenderer().SetMaterial(0, tileMaterial);
-	mesh->GetRenderer().SetMaterial(1, cobbleMaterial);
+	mesh->GetRenderer().SetMaterial(2, grassMaterial);
 
 	glm::vec3 sunRotation(-31.f, 30.f, 0.f);
 	auto* sun = new DirectionalLight(this, 1024, 10.f, glm::quat(radians(sunRotation)));
@@ -82,6 +84,7 @@ void DemoWindow::OnInit()
 	floor->GetTransform().SetLocation(glm::vec3(0.f, -0.1, 0.f));
 
 	Cubemaps->Skybox = ref_cast((GL::TextureCube*) PVR::Read(this, "Resource/Texture/sky.pvr", GPU::WrapMode::Clamp));
+	Cubemaps->Skybox->Free();
 
 	VoxelSceneCapture = gE::ptr_create<VoxelCapture>(this, 128, 4.2f);
 }

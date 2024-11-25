@@ -50,6 +50,7 @@ namespace GPU
 
 #include "Buffer.inl"
 
+#if API == GL
 #include <Graphics/API/GL/Buffer/Buffer.h>
 
 template <typename T>
@@ -57,3 +58,10 @@ GL::Buffer<T, false>* GPU::Buffer<T>::BufferFACTORY(std::istream& in, SETTINGS_T
 {
 	return new GL::Buffer<T, false>(in, t);
 }
+#else
+template <typename T>
+GL::Buffer<T, false>* GPU::Buffer<T>::BufferFACTORY(std::istream& in, SETTINGS_T t)
+{
+	return new Buffer(in, t);
+}
+#endif

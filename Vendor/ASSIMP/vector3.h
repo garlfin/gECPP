@@ -1,6 +1,6 @@
 /*
 ---------------------------------------------------------------------------
-Open GLAsset Import Library (assimp)
+Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
 Copyright (c) 2006-2022, assimp team
@@ -71,7 +71,7 @@ public:
     /// @brief  The default class constructor.
     aiVector3t() AI_NO_EXCEPT : x(), y(), z() {}
     
-    /// @brief  The class constructor with the Components.
+    /// @brief  The class constructor with the components.
     /// @param  _x  The x-component for the vector.
     /// @param  _y  The y-component for the vector.
     /// @param  _z  The z-component for the vector.
@@ -119,7 +119,7 @@ public:
     template <typename TOther>
     operator aiVector3t<TOther> () const;
 
-    /** @brief Set the Components of a vector
+    /** @brief Set the components of a vector
      *  @param pX X component
      *  @param pY Y component
      *  @param pZ Z component  */

@@ -1,8 +1,5 @@
 #include "Camera.glsl"
-
-#ifndef PI
-    #define PI 3.141592
-#endif
+#include "Math.glsl"
 
 // Functions
 float InterleavedGradientNoise(vec2);

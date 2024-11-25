@@ -2,7 +2,7 @@
 #include "Include/Scene.glsl"
 
 layout(location = 0) out vec4 FragColor;
-layout(location = 1) out vec2 Velocity;
+layout(location = 1) out vec3 Velocity;
 
 struct VertexOut
 {
@@ -21,5 +21,5 @@ void main()
     FragColor = vec4(2.0);
 #endif
 
-	Velocity = ((VertexIn.CurrentNDC.xy / VertexIn.CurrentNDC.w) - (VertexIn.PreviousNDC.xy / VertexIn.PreviousNDC.w)) * 0.5;
+    Velocity = PerspectiveToUV(VertexIn.PreviousNDC);
 }

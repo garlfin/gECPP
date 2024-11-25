@@ -6,4 +6,6 @@
 
 #include "Graphics/Graphics.h"
 
-#include <Graphics/API/GL/Buffer/Framebuffer.h>
+#if API == GL
+    #include <Graphics/API/GL/Buffer/Framebuffer.h>
+#endif

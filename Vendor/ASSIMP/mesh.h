@@ -1,6 +1,6 @@
 /*
 ---------------------------------------------------------------------------
-Open GLAsset Import Library (assimp)
+Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
 Copyright (c) 2006-2022, assimp team
@@ -137,7 +137,7 @@ struct aiFace {
     //! The maximum value for this member is #AI_MAX_FACE_INDICES.
     unsigned int mNumIndices;
 
-    //! Pointer to the indices array. _size of the array is given in numIndices.
+    //! Pointer to the indices array. Size of the array is given in numIndices.
     unsigned int *mIndices;
 
 #ifdef __cplusplus
@@ -214,7 +214,7 @@ struct aiFace {
 /** @brief A single influence of a bone on a vertex.
  */
 struct aiVertexWeight {
-    //! BufferIndex of the vertex which is influenced by the bone.
+    //! Index of the vertex which is influenced by the bone.
     unsigned int mVertexId;
 
     //! The strength of the influence in the range (0...1).
@@ -448,7 +448,7 @@ enum aiPrimitiveType {
  *  replaces only certain vertex data streams at a particular time.
  *  Each mesh stores n attached attached meshes (#aiMesh::mAnimMeshes).
  *  The actual relationship between the time line and anim meshes is
- *  established by #aiMeshAnim, which references singular mesh p_attachments
+ *  established by #aiMeshAnim, which references singular mesh attachments
  *  by their ID and binds them to a time offset.
 */
 struct aiAnimMesh {
@@ -458,7 +458,7 @@ struct aiAnimMesh {
     /** Replacement for aiMesh::mVertices. If this array is non-nullptr,
      *  it *must* contain mNumVertices entries. The corresponding
      *  array in the host mesh must be non-nullptr as well - animation
-     *  meshes may neither add or nor remove vertex Components (if
+     *  meshes may neither add or nor remove vertex components (if
      *  a replacement array is nullptr and the corresponding source
      *  array is not, the source data is taken instead)*/
     C_STRUCT aiVector3D *mVertices;
@@ -642,7 +642,7 @@ struct aiMesh {
     * #define IS_QNAN(f) (f != f)
     * @endcode
     * still dangerous because even 1.f == 1.f could evaluate to false! (
-    * remember the subtleties of IEEE754 artithmetics). Bind stuff like
+    * remember the subtleties of IEEE754 artithmetics). Use stuff like
     * @c fpclassify instead.
     * @note Normal vectors computed by Assimp are always unit-length.
     * However, this needn't apply for normals that have been taken
@@ -684,15 +684,9 @@ struct aiMesh {
     * A mesh may contain 0 to AI_MAX_NUMBER_OF_TEXTURECOORDS per
     * vertex. nullptr if not present. The array is mNumVertices in size.
     */
-    union {
-		C_STRUCT aiVector3D *mTextureCoords[AI_MAX_NUMBER_OF_TEXTURECOORDS];
-		struct
-		{
-			C_STRUCT aiVector3D* FirstMap;
-		};
-	};
+    C_STRUCT aiVector3D *mTextureCoords[AI_MAX_NUMBER_OF_TEXTURECOORDS];
 
-    /** Specifies the number of Components for a given UV channel.
+    /** Specifies the number of components for a given UV channel.
     * Up to three channels are supported (UVW, for accessing volume
     * or cube maps). If the value is 2 for a given channel n, the
     * component p.z of mTextureCoords[n][p] is set to 0.0f.
@@ -722,12 +716,12 @@ struct aiMesh {
 
     /** The material used by this mesh.
      * A mesh uses only a single material. If an imported model uses
-     * multiple materials, the import splits up the mesh. Bind this value
+     * multiple materials, the import splits up the mesh. Use this value
      * as index into the scene's material list.
      */
     unsigned int mMaterialIndex;
 
-    /** InternalPath of the mesh. Meshes can be named, but this is not a
+    /** Name of the mesh. Meshes can be named, but this is not a
      *  requirement and leaving this field empty is totally fine.
      *  There are mainly three uses for mesh names:
      *   - some formats name nodes and meshes independently.
@@ -743,9 +737,9 @@ struct aiMesh {
     /** The number of attachment meshes. Note! Currently only works with Collada loader. */
     unsigned int mNumAnimMeshes;
 
-    /** AttachmentsSSR meshes for this mesh, for vertex-based animation.
-     *  AttachmentsSSR meshes carry replacement data for some of the
-     *  mesh'es vertex Components (usually positions, normals).
+    /** Attachment meshes for this mesh, for vertex-based animation.
+     *  Attachment meshes carry replacement data for some of the
+     *  mesh'es vertex components (usually positions, normals).
      *  Note! Currently only works with Collada loader.*/
     C_STRUCT aiAnimMesh **mAnimMeshes;
 
@@ -856,7 +850,7 @@ struct aiMesh {
     bool HasTangentsAndBitangents() const { return mTangents != nullptr && mBitangents != nullptr && mNumVertices > 0; }
 
     //! Check whether the mesh contains a vertex color set
-    //! \param pIndex BufferIndex of the vertex color set
+    //! \param pIndex Index of the vertex color set
     bool HasVertexColors(unsigned int pIndex) const {
         if (pIndex >= AI_MAX_NUMBER_OF_COLOR_SETS) {
             return false;
@@ -866,7 +860,7 @@ struct aiMesh {
     }
 
     //! Check whether the mesh contains a texture coordinate set
-    //! \param pIndex BufferIndex of the texture coordinates set
+    //! \param pIndex Index of the texture coordinates set
     bool HasTextureCoords(unsigned int pIndex) const {
         if (pIndex >= AI_MAX_NUMBER_OF_TEXTURECOORDS) {
             return false;
@@ -900,7 +894,7 @@ struct aiMesh {
     }
 
     //! Check whether the mesh contains a texture coordinate set name
-    //! \param pIndex BufferIndex of the texture coordinates set
+    //! \param pIndex Index of the texture coordinates set
     bool HasTextureCoordsName(unsigned int pIndex) const {
         if (mTextureCoordsNames == nullptr || pIndex >= AI_MAX_NUMBER_OF_TEXTURECOORDS) {
             return false;
@@ -909,7 +903,7 @@ struct aiMesh {
     }
 
     //! Set a texture coordinate set name
-    //! \param pIndex BufferIndex of the texture coordinates set
+    //! \param pIndex Index of the texture coordinates set
     //! \param texCoordsName name of the texture coordinate set
     void SetTextureCoordsName(unsigned int pIndex, const aiString &texCoordsName) {
         if (pIndex >= AI_MAX_NUMBER_OF_TEXTURECOORDS) {
@@ -936,7 +930,7 @@ struct aiMesh {
     }
 
     //! Get a texture coordinate set name
-    //! \param pIndex BufferIndex of the texture coordinates set
+    //! \param pIndex Index of the texture coordinates set
     const aiString *GetTextureCoordsName(unsigned int pIndex) const {
         if (mTextureCoordsNames == nullptr || pIndex >= AI_MAX_NUMBER_OF_TEXTURECOORDS) {
             return nullptr;

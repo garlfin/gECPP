@@ -1,5 +1,5 @@
 #ifndef EPSILON
-    #define EPSILON 0.01
+    #define EPSILON 0.001
 #endif
 
 #ifndef PI

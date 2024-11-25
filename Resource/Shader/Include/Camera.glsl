@@ -1,4 +1,5 @@
 #include "Bindless.glsl"
+#include "Math.glsl"
 
 struct CameraData
 {
@@ -34,4 +35,12 @@ layout(CAMERA_UNIFORM_LAYOUT, binding = CAMERA_UNIFORM_LOCATION) uniform CameraU
 {
     CameraData Camera;
 };
+
+vec3 PerspectiveToUV(vec4 proj)
+{
+    proj.xyz /= proj.w;
+    proj.xy = proj.xy * 0.5 + 0.5;
+
+    return vec3(proj.xy, LinearizeDepthNDC(proj.z, Camera.Planes));
+}
 

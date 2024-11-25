@@ -1,6 +1,6 @@
 /*
 ---------------------------------------------------------------------------
-Open GLAsset Import Library (assimp)
+Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
 Copyright (c) 2006-2022, assimp team
@@ -232,7 +232,7 @@ struct aiLight {
      */
     float mAngleOuterCone;
 
-    /** _size of area light source. */
+    /** Size of area light source. */
     C_STRUCT aiVector2D mSize;
 
 #ifdef __cplusplus

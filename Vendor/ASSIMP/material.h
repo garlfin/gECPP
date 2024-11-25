@@ -1,6 +1,6 @@
 /*
 ---------------------------------------------------------------------------
-Open GLAsset Import Library (assimp)
+Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
 Copyright (c) 2006-2022, assimp team
@@ -56,7 +56,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-// InternalPath for default materials (2nd is used if meshes have UV coords)
+// Name for default materials (2nd is used if meshes have UV coords)
 #define AI_DEFAULT_MATERIAL_NAME "DefaultMaterial"
 
 // ---------------------------------------------------------------------------
@@ -636,7 +636,7 @@ struct aiMaterialProperty {
      */
     unsigned int mIndex;
 
-    /** _size of the buffer mData is pointing to, in bytes.
+    /** Size of the buffer mData is pointing to, in bytes.
      *  This value may not be 0.
      */
     unsigned int mDataLength;
@@ -738,7 +738,7 @@ public:
      * @param pKey Key to search for. One of the AI_MATKEY_XXX constants.
     * @param type Specifies the type of the texture to be retrieved (
     *    e.g. diffuse, specular, height map ...)
-    * @param idx BufferIndex of the texture to be retrieved.
+    * @param idx Index of the texture to be retrieved.
      * @param pOut Reference to receive the output value
      */
     template <typename Type>
@@ -778,12 +778,12 @@ public:
      *  read the single material properties manually.
      *  @param type Specifies the type of the texture to be retrieved (
      *    e.g. diffuse, specular, height map ...)
-     *  @param index BufferIndex of the texture to be retrieved. The function fails
+     *  @param index Index of the texture to be retrieved. The function fails
      *    if there is no texture of that type with this index.
      *    #GetTextureCount() can be used to determine the number of textures
      *    per texture type.
      *  @param path Receives the path to the texture.
-     *    Bind aiScene::GetEmbeddedTexture() method to determine if returned path
+     *    Use aiScene::GetEmbeddedTexture() method to determine if returned path
      *    is an image file to be opened or a string key of embedded texture stored in the corresponding scene
      *    (could be a '*' followed by the id of the texture in case of no name)
      *    NULL is a valid value.
@@ -817,7 +817,7 @@ public:
      *  structure
      *
      *  @param pInput Pointer to input data
-     *  @param pSizeInBytes _size of input data
+     *  @param pSizeInBytes Size of input data
      *  @param pKey Key/Usage of the property (AI_MATKEY_XXX)
      *  @param type Set by the AI_MATKEY_XXX macro
      *  @param index Set by the AI_MATKEY_XXX macro
@@ -1470,7 +1470,7 @@ extern "C" {
  * @param pKey Key to search for. One of the AI_MATKEY_XXX constants.
  * @param type Specifies the type of the texture to be retrieved (
  *    e.g. diffuse, specular, height map ...)
- * @param index BufferIndex of the texture to be retrieved.
+ * @param index Index of the texture to be retrieved.
  * @param pPropOut Pointer to receive a pointer to a valid aiMaterialProperty
  *        structure or NULL if the key has not been found. */
 // ---------------------------------------------------------------------------
@@ -1485,7 +1485,7 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialProperty(
 /** @brief Retrieve an array of float values with a specific key
  *  from the material
  *
- * RenderPass one of the AI_MATKEY_XXX constants for the last three parameters (the
+ * Pass one of the AI_MATKEY_XXX constants for the last three parameters (the
  * example reads the #AI_MATKEY_UVTRANSFORM property of the first diffuse texture)
  * @code
  * aiUVTransform trafo;
@@ -1518,7 +1518,7 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialFloatArray(
 // ---------------------------------------------------------------------------
 /** @brief Retrieve a single float property with a specific key from the material.
 *
-* RenderPass one of the AI_MATKEY_XXX constants for the last three parameters (the
+* Pass one of the AI_MATKEY_XXX constants for the last three parameters (the
 * example reads the #AI_MATKEY_SHININESS_STRENGTH property of the first diffuse texture)
 * @code
 * float specStrength = 1.f; // default value, remains unmodified if we fail.
@@ -1621,7 +1621,7 @@ ASSIMP_API unsigned int aiGetMaterialTextureCount(const C_STRUCT aiMaterial *pMa
  *  @param[in] mat Pointer to the input material. May not be NULL
  *  @param[in] type Specifies the texture stack to read from (e.g. diffuse,
  *     specular, height map ...).
- *  @param[in] index BufferIndex of the texture. The function fails if the
+ *  @param[in] index Index of the texture. The function fails if the
  *     requested index is not available for this texture type.
  *     #aiGetMaterialTextureCount() can be used to determine the number of
  *     textures in a particular texture stack.
@@ -1631,17 +1631,17 @@ ASSIMP_API unsigned int aiGetMaterialTextureCount(const C_STRUCT aiMaterial *pMa
  *     can be converted to an int using a function like atoi.
  *     This parameter must be non-null.
  *  @param mapping The texture mapping mode to be used.
- *      RenderPass NULL if you're not interested in this information.
+ *      Pass NULL if you're not interested in this information.
  *  @param[out] uvindex For UV-mapped textures: receives the index of the UV
  *      source channel. Unmodified otherwise.
- *      RenderPass NULL if you're not interested in this information.
+ *      Pass NULL if you're not interested in this information.
  *  @param[out] blend Receives the blend factor for the texture
- *      RenderPass NULL if you're not interested in this information.
+ *      Pass NULL if you're not interested in this information.
  *  @param[out] op Receives the texture blend operation to be perform between
  *      this texture and the previous texture.
- *      RenderPass NULL if you're not interested in this information.
+ *      Pass NULL if you're not interested in this information.
  *  @param[out] mapmode Receives the mapping modes to be used for the texture.
- *      RenderPass NULL if you're not interested in this information. Otherwise,
+ *      Pass NULL if you're not interested in this information. Otherwise,
  *      pass a pointer to an array of two aiTextureMapMode's (one for each
  *      axis, UV order).
  *  @param[out] flags Receives the the texture flags.

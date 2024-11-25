@@ -78,4 +78,6 @@ namespace GPU
 	};
 }
 
-#include <Graphics/API/GL/Buffer/VAO.h>
+#if API == GL
+	#include <Graphics/API/GL/Buffer/VAO.h>
+#endif

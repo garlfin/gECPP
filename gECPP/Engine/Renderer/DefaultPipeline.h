@@ -119,6 +119,15 @@ namespace gE::DefaultPipeline
 		return tex;
 	}();
 
+	GLOBAL GPU::Texture PreviousDepthFormat = []
+	{
+		GPU::Texture tex;
+		tex.Format = GL_R32F;
+		tex.WrapMode = GPU::WrapMode::Clamp;
+		tex.Filter = GPU::FilterMode::Nearest;
+		return tex;
+	}();
+
 	GLOBAL GPU::Texture ColorFormat = []
 	{
 		GPU::Texture tex;
@@ -131,7 +140,7 @@ namespace gE::DefaultPipeline
 	GLOBAL GPU::Texture VelocityFormat = []
 	{
 		GPU::Texture tex;
-		tex.Format = GL_RG32F;
+		tex.Format = GL_RGB32F;
 		tex.WrapMode = GPU::WrapMode::Clamp;
 		return tex;
 	}();
@@ -160,6 +169,7 @@ namespace gE::DefaultPipeline
 		API::Texture2D _taaBack;
 		API::Texture2D _depthBack;
 		API::Texture2D _postProcessBack;
+		API::Texture2D _previousDepth;
 
 		std::vector<PostProcessEffect<Target2D>*> _effects;
 	};

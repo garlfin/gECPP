@@ -33,6 +33,7 @@ namespace gE
 		_velocity(GetFrameBuffer(), GPU::Texture2D(VelocityFormat, camera.GetSize())),
 		_taaBack(&GetWindow(), GPU::Texture2D(ColorFormat, camera.GetSize())),
 		_depthBack(&GetWindow(), GPU::Texture2D(HiZFormat, camera.GetSize())),
+		_previousDepth(&GetWindow(), GPU::Texture2D(PreviousDepthFormat, camera.GetSize())),
 		_postProcessBack(&GetWindow(), GPU::Texture2D(ColorFormat, camera.GetSize())),
 		_effects(effects)
 	{
@@ -105,16 +106,21 @@ namespace gE
 
 		taaShader.Bind();
 
+		if(!GetCamera().GetTiming().GetFrame())
+			_previousDepth.CopyFrom(_depthBack);
+
 		_postProcessBack.Bind(0, GL_WRITE_ONLY);
 		taaShader.SetUniform(0, _color->Use(0));
 		taaShader.SetUniform(1, _taaBack.Use(1));
 		taaShader.SetUniform(2, _velocity->Use(2));
+		taaShader.SetUniform(3, _previousDepth.Use(3));
 
 		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 		taaShader.Dispatch(DIV_CEIL(_color->GetSize(), TAA_GROUP_SIZE));
 
 		// Copy TAA result to taa "backbuffer"
 		_taaBack.CopyFrom(_postProcessBack);
+		_previousDepth.CopyFrom(_depthBack);
 
 		// Post process loop
 		API::Texture2D* front = &*_color, *back = &_postProcessBack;

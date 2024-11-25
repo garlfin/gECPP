@@ -1,6 +1,6 @@
 /*
 ---------------------------------------------------------------------------
-Open GLAsset Import Library (assimp)
+Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
 Copyright (c) 2006-2022, assimp team
@@ -389,7 +389,7 @@ struct aiString {
      *  the number of bytes from the beginning of the string to its end.*/
     ai_uint32 length;
 
-    /** String buffer. _size limit is MAXLEN */
+    /** String buffer. Size limit is MAXLEN */
     char data[MAXLEN];
 }; // !struct aiString
 
@@ -478,7 +478,7 @@ enum aiDefaultLogStream {
 #define DLS_DEBUGGER aiDefaultLogStream_DEBUGGER
 
 // ----------------------------------------------------------------------------------
-/** Stores the memory requirements for different Components (e.g. meshes, materials,
+/** Stores the memory requirements for different components (e.g. meshes, materials,
  *  animations) of an import. All sizes are in bytes.
  *  @see Importer::GetMemoryRequirements()
 */

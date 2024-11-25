@@ -63,7 +63,10 @@ namespace gE
 		ReadSerializableFromFile(_window, "Resource/Model/skybox.vao", _skyboxVAO);
 
 		GPU::Shader shaderSettings("Resource/Shader/skybox.vert", "Resource/Shader/skybox.frag");
-		_skyboxShader = API::Shader(window, move(shaderSettings));
+		API::Shader shader(window, move(shaderSettings));
+		_skyboxShader = move(shader);
+		LOG("END");
+		_skyboxShader.Free();
 	}
 
 	void CubemapManager::DrawSkybox() const

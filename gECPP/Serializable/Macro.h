@@ -31,8 +31,8 @@
 			SUPER_T::Free(); \
 		} \
 		ALWAYS_INLINE const SUPER_T* operator->() const { return this; } \
-		GET(SUPER_T&, Settings, *this) \
-		TYPE(gE::Window* window, const SUPER_T& settings) : TYPE(window, (SUPER_T&&) SUPER_T(settings)) {} \
+		SUPER_T& GetSettings() { return *this; } \
+		TYPE(gE::Window* window, const SUPER_T& settings) : TYPE(window, move(SUPER_T(settings))) {} \
 		TYPE(gE::Window* window, SUPER_T&& INTERNAL_SETTINGS)
 
 #define API_REFLECTABLE(TYPE, NAME, ...) \

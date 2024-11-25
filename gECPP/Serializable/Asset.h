@@ -12,7 +12,6 @@
     #define ASSET_CHECK_FREE(TYPE)
 #endif
 
-
 namespace gE
 {
     class Asset

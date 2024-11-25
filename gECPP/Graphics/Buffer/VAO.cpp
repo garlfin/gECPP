@@ -49,6 +49,6 @@ namespace GPU
 		Write(out, Count);
 	}
 
-	API_REFLECTABLE_IMPL(VAO, GL::VAO);
-	API_REFLECTABLE_IMPL(IndexedVAO, GL::IndexedVAO);
+	API_REFLECTABLE_IMPL(VAO, API::VAO);
+	API_REFLECTABLE_IMPL(IndexedVAO, API::IndexedVAO);
 }

@@ -8,7 +8,7 @@
 
 using std::move;
 
-#if defined(__GNUC__)
+#if defined(__GNUC__) || defined(__clang__)
 	#define GE_COMPILER_GCC
 #elif defined(_MSC_VER)
 	#define GE_COMPILER_MSVC
@@ -43,7 +43,12 @@ using std::move;
 #ifdef DEBUG
 	#define ALWAYS_INLINE inline
 #else
+#ifdef GE_COMPILER_MSVC
 	#define ALWAYS_INLINE __forceinline
+#endif
+#ifdef GE_COMPILER_GCC
+	#define ALWAYS_INLINE inline __attribute__((always_inline))
+#endif
 #endif // #if DEBUG
 
 #define NOINLINE __declspec(noinline)
@@ -174,10 +179,12 @@ using std::move;
 	DELETE_OPERATOR_MOVE(TYPE)
 
 #define DEFAULT_OPERATOR_COPY(TYPE) \
+	public: \
 	TYPE(const TYPE&) = default; \
 	TYPE& operator=(const TYPE&) = default
 
 #define DEFAULT_OPERATOR_MOVE(TYPE) \
+	public: \
 	TYPE(TYPE&&) = default; \
 	TYPE& operator=(TYPE&&) = default
 

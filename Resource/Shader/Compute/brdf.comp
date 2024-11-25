@@ -29,7 +29,7 @@ void main()
     {
         vec2 xi = Hammersley(i, BRDF_SAMPLE_COUNT);
         vec3 h = ImportanceSampleGGX(xi, UP_VECTOR, roughness);
-        vec3 l = 2.0 * dot(v, h) * h - v;
+        vec3 l = normalize(2.0 * dot(v, h) * h - v);
 
         float nDotL = max(l.z, 0.0);
         float nDotH = max(h.z, 0.0);

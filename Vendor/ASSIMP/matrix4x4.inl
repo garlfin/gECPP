@@ -1,6 +1,6 @@
 /*
 ---------------------------------------------------------------------------
-Open GLAsset Import Library (assimp)
+Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
 Copyright (c) 2006-2022, assimp team
@@ -433,7 +433,7 @@ void aiMatrix4x4t<TReal>::Decompose(aiVector3t<TReal>& pScaling, aiVector3t<TRea
 	E = cos(angle_z), F = sin(angle_z);
 	*/
 
-	// Bind a small epsilon to solve floating-point inaccuracies
+	// Use a small epsilon to solve floating-point inaccuracies
     const TReal epsilon = Assimp::Math::getEpsilon<TReal>();
 
 	pRotation.y  = std::asin(-vCols[0].z);// D. Angle around oY.
@@ -480,7 +480,7 @@ void aiMatrix4x4t<TReal>::Decompose(aiVector3t<TReal>& pScaling, aiVector3t<TRea
 
 	pRotationAngle = std::acos(angle_cos) * 2;
 
-	// Bind a small epsilon to solve floating-point inaccuracies
+	// Use a small epsilon to solve floating-point inaccuracies
     const TReal epsilon = 10e-3f;
 
 	if(std::fabs(angle_sin) < epsilon) angle_sin = 1;
@@ -546,7 +546,7 @@ aiMatrix4x4t<TReal>& aiMatrix4x4t<TReal>::FromEulerAnglesXYZ(TReal x, TReal y, T
 template <typename TReal>
 AI_FORCE_INLINE
 bool aiMatrix4x4t<TReal>::IsIdentity() const {
-    // Bind a small epsilon to solve floating-point inaccuracies
+    // Use a small epsilon to solve floating-point inaccuracies
     const static TReal epsilon = 10e-3f;
 
     return (a2 <= epsilon && a2 >= -epsilon &&

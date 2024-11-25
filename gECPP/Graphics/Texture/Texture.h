@@ -82,4 +82,6 @@ namespace GPU
 
 #include "Texture.inl"
 
-#include <Graphics/API/GL/Texture/Texture.h>
+#if API == GL
+	#include <Graphics/API/GL/Texture/Texture.h>
+#endif

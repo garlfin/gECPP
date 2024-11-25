@@ -3,7 +3,6 @@
 #include "Include/Voxel.glsl"
 
 #define CHECKER_SIZE 10
-#define PI 3.14159
 
 struct VertexOut
 {

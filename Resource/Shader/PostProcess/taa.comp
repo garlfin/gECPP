@@ -1,5 +1,6 @@
 #include <Resource/Shader/Include/TAA.glsl>
 #include <Resource/Shader/Include/Camera.glsl>
+#include <Resource/Shader/Include/Math.glsl>
 
 #define TAA_MODE_FULL
 #define TAA_CLIP_AABB
@@ -27,6 +28,7 @@
 layout(location = 0) uniform sampler2D ColorIn;
 layout(location = 1) uniform sampler2D PreviousColorIn;
 layout(location = 2) uniform sampler2D VelocityIn;
+layout(location = 3) uniform sampler2D PreviousDepth;
 
 layout(binding = 0, PIPELINE_COLOR_FORMAT) restrict writeonly uniform image2D ColorOut;
 
@@ -43,9 +45,9 @@ void main()
     vec2 uv = (vec2(texel) + 0.5) / size;
 
 #ifdef ENABLE_TAA
-    vec2 previousUV = uv - texture(VelocityIn, uv).xy;
+    vec3 previousUV = texture(VelocityIn, uv).xyz;
     vec4 currentColor = clamp(texture(ColorIn, uv), vec4(0.0), vec4(vec3(TAA_CLAMP_MAX), 1.0));
-    vec4 previousColor = CatmullRom(PreviousColorIn, previousUV, size);
+    vec4 previousColor = CatmullRom(PreviousColorIn, previousUV.xy, size);
 
     vec3 boxMin = currentColor.rgb, boxMax = currentColor.rgb;
 
@@ -68,20 +70,33 @@ void main()
     previousColor.rgb = clamp(previousColor.rgb, boxMin, boxMax);
 #endif
 
-    float weight = min(TAA_WEIGHT * Camera.FrameDelta * 100, 1.0);
-    float previousWeight = (1.0 - weight) / (1.0 + Luminance(previousColor.rgb));
-    float currentWeight = weight / (1.0 + Luminance(currentColor.rgb));
+    float baseWeight = min(TAA_WEIGHT * Camera.FrameDelta * 100, 1.0);
 
-    if(previousUV.x < 0.0 || previousUV.x > 1.0 || previousUV.y < 0.0 || previousUV.y > 1.0)
-    {
-        previousWeight = 0.0;
-        currentWeight = 1.0;
-    }
+    vec2 weight;
+    weight.x = (1.0 - baseWeight) / (1.0 + Luminance(previousColor.rgb));
+    weight.y = baseWeight / (1.0 + Luminance(currentColor.rgb));
 
-    vec3 color = (currentColor.rgb * currentWeight + previousColor.rgb * previousWeight);
-    color /= max(currentWeight + previousWeight, 0.001);
+    float rejectionFactor = 0.0;
+    if(previousUV.x < 0.0 || previousUV.x > 1.0 || previousUV.y < 0.0 || previousUV.y > 1.0) rejectionFactor = 1.0;
 
-    imageStore(ColorOut, texel, vec4(color.rgb, currentColor.a));
+    /**float blockerDepth = texture(PreviousDepth, previousUV.xy).r;
+    blockerDepth = max(blockerDepth, textureOffset(PreviousDepth, previousUV.xy, ivec2(-1, 1)).r);
+    blockerDepth = max(blockerDepth, textureOffset(PreviousDepth, previousUV.xy, ivec2(-1, 0)).r);
+    blockerDepth = max(blockerDepth, textureOffset(PreviousDepth, previousUV.xy, ivec2(-1, -1)).r);
+    blockerDepth = max(blockerDepth, textureOffset(PreviousDepth, previousUV.xy, ivec2(0, 1)).r);
+    blockerDepth = max(blockerDepth, textureOffset(PreviousDepth, previousUV.xy, ivec2(0, -1)).r);
+    blockerDepth = max(blockerDepth, textureOffset(PreviousDepth, previousUV.xy, ivec2(1, 1)).r);
+    blockerDepth = max(blockerDepth, textureOffset(PreviousDepth, previousUV.xy, ivec2(1, 0)).r);
+    blockerDepth = max(blockerDepth, textureOffset(PreviousDepth, previousUV.xy, ivec2(1, -1)).r);
+
+    rejectionFactor = max(rejectionFactor, saturate(previousUV.z - blockerDepth));*/
+
+    weight = mix(weight, vec2(0.0, 1.0), rejectionFactor);
+
+    vec3 color = (currentColor.rgb * weight.y + previousColor.rgb * weight.x);
+    color /= max(weight.y + weight.x, EPSILON);
+
+    imageStore(ColorOut, texel, vec4(color, currentColor.a));
 #else
     vec4 color = clamp(texture(ColorIn, uv), vec4(0.0), vec4(vec3(TAA_CLAMP_MAX), 1.0));
     imageStore(ColorOut, texel, color);
