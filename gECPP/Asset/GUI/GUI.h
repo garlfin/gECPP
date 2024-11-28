@@ -9,8 +9,6 @@
 
 #include "Stylesheet.h"
 
-#define GE_UI_MAX_STYLES 4
-
 namespace gETF::UI
 {
 	class Element : public Serializable<>
@@ -18,22 +16,26 @@ namespace gETF::UI
 	 	SERIALIZABLE_PROTO(ELMT, 1, Element, Serializable);
 
 	 public:
-		Element(gE::Window* w, Element* p) : _window(w), _parent(p) {};
+		Element(gE::Window* w, Element* p = nullptr) : _window(w), _parent(p) {};
 
-		GET_CONST(gE::Window*, Window, _window);
+		GET_CONST(gE::Window&, Window, *_window);
 		GET_CONST(Element*, Parent, _parent);
-		//GET_CONST(const Style* const*, Styles, _styles);
-		//GET_CONST(const Style&, EvaluatedStyle, _evaluatedStyle);
+		GET_CONST(Style&, Styles, *_style);
 
 	 private:
 		gE::Window* _window = DEFAULT;
 		Element* _parent = DEFAULT;
-
+		Style* _style = DEFAULT;
 	};
 
 	class Frame : public Element
 	{
 		SERIALIZABLE_PROTO(FRM, 1, Frame, Element);
+	public:
+		Frame(gE::Window* w, Element* p = nullptr);
+
+	private:
+		FrameStyle _style = DEFAULT;
 	};
 
 	class Scene : public Serializable<gE::Window*>
@@ -41,7 +43,9 @@ namespace gETF::UI
 		SERIALIZABLE_PROTO(SCN, 1, Scene, Serializable);
 
 	 public:
-		std::string Name;
-		Array<Element> Elements;
+		std::string Name = DEFAULT;
+		Array<Element> Elements = DEFAULT;
+
+	private:
 	};
 }

@@ -14,25 +14,43 @@ namespace gETF::UI
 		Absolute
 	};
 
+	struct TransformModes
+	{
+		TransformMode PosX : 2;
+		TransformMode PosY : 2;
+		TransformMode ScaleX : 2;
+		TransformMode ScaleY : 2;
+	};
+
 	struct Transform
 	{
-		glm::vec2 Size;
-		float Rotation;
-		i16 Layer = INT16_MIN;
+		union
+		{
+			glm::vec2 Location;
+			glm::vec2 Position;
+		};
 
-		TransformMode ModeX;
-		TransformMode ModeY;
+		glm::vec2 Size;
+
+		float Rotation;
+		u8 Layer = 0;
+		TransformModes TransformMode;
 	};
 
 	struct FrameStyle
 	{
-		Transform Transform;
+
+	};
+
+	struct ButtonStyle
+	{
+
 	};
 
 	struct Style
 	{
 		Transform Transform;
-		gE::SmartPointer<FrameStyle> FrameStyle;
+		//gE::SmartPointer<FrameStyle> FrameStyle;
 	};
 
 

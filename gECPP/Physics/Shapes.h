@@ -7,6 +7,7 @@
 #include <Jolt/Jolt.h>
 #include <Jolt/Physics/Collision/Shape/BoxShape.h>
 #include <Jolt/Physics/Collision/Shape/SphereShape.h>
+#include <Jolt/Physics/Collision/Shape/CapsuleShape.h>
 #include <Serializable/Serializable.h>
 
 #include "Physics.h"
@@ -57,6 +58,15 @@ namespace Physics
     public:
         glm::vec3 Extents = glm::vec3(1.f);
     };
+
+    struct CapsuleShape : public ConvexShape
+    {
+        SERIALIZABLE_PROTO(CPSL, 1, CapsuleShape, ConvexShape);
+
+    public:
+        float Height;
+        float Radius;
+    };
 }
 
 namespace Jolt
@@ -93,26 +103,37 @@ namespace Jolt
         GET(px::ConvexShape&, JoltShape, (px::ConvexShape&) Shape::GetJoltShape());
     };
 
-    class SphereShape : public Physics::SphereShape, public ConvexShape
+    class SphereShape : protected Physics::SphereShape, public ConvexShape
     {
         API_SERIALIZABLE(SphereShape, Physics::SphereShape);
 
     public:
-        GET(px::ConvexShape&, Shape, *_shape);
+        GET(px::SphereShape&, Shape, *_shape);
 
     private:
         gE::ManagedPX<px::SphereShape> _shape;
     };
 
-    class BoxShape : public Physics::BoxShape, public ConvexShape
+    class BoxShape : protected Physics::BoxShape, public ConvexShape
     {
         API_SERIALIZABLE(BoxShape, Physics::BoxShape);
 
     public:
-        GET(px::ConvexShape&, JoltShape, *_shape);
+        GET(px::BoxShape&, JoltShape, *_shape);
 
     private:
         gE::ManagedPX<px::BoxShape> _shape;
+    };
+
+    class CapsuleShape : protected Physics::CapsuleShape, public ConvexShape
+    {
+        API_SERIALIZABLE(CapsuleShape, Physics::CapsuleShape);
+
+    public:
+        GET(px::CapsuleShape&, JoltShape, *_shape);
+
+    private:
+        gE::ManagedPX<px::CapsuleShape> _shape;
     };
 }
 

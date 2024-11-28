@@ -11,6 +11,7 @@
 #include <Vendor/Jolt/Core/JobSystemThreadPool.h>
 #include <Vendor/Jolt/Physics/PhysicsSystem.h>
 #include <Vendor/Jolt/Physics/Collision/ObjectLayer.h>
+#include <Engine/Entity/Layer.h>
 
 #define GE_PX_ALLOCATION 10485760
 #define GE_PX_MAX_BODIES 1024
@@ -27,12 +28,40 @@ namespace gE
     {
     public:
         NODISCARD inline bool ShouldCollide(px::ObjectLayer a, px::ObjectLayer b) const override;
+        NODISCARD static inline bool ShouldCollideStatic(px::ObjectLayer a, px::ObjectLayer b);
     };
 
     class BroadPhaseFilter final : public px::ObjectVsBroadPhaseLayerFilter
     {
     public:
         NODISCARD inline bool ShouldCollide(px::ObjectLayer a, px::BroadPhaseLayer b) const override;
+        NODISCARD static inline bool ShouldCollideStatic(px::ObjectLayer a, px::BroadPhaseLayer b);
+    };
+
+    // Unary CollisionFilter
+    class UCollisionFilter final : public px::ObjectLayerFilter
+    {
+    public:
+        UCollisionFilter() = default;
+        explicit UCollisionFilter(LayerMask layer) : _layer((px::ObjectLayer) layer) {};
+
+        bool ShouldCollide(JPH::ObjectLayer inLayer) const override;
+
+    private:
+        px::ObjectLayer _layer = DEFAULT;
+    };
+
+    // Unary BroadPhaseFilter
+    class UBroadPhaseFilter final : public px::BroadPhaseLayerFilter
+    {
+    public:
+        UBroadPhaseFilter() = default;
+        explicit UBroadPhaseFilter(LayerMask layer) : _layer((px::ObjectLayer) layer) {};
+
+        bool ShouldCollide(JPH::BroadPhaseLayer inLayer) const override;
+
+    private:
+        px::ObjectLayer _layer = DEFAULT;
     };
 
     class BroadPhase final : public px::BroadPhaseLayerInterface
@@ -46,6 +75,9 @@ namespace gE
     private:
         px::BroadPhaseLayer _layers[2] = DEFAULT;
     };
+
+    GLOBAL px::ShapeFilter DefaultShapeFilter = DEFAULT;
+    GLOBAL px::BodyFilter DefaultBodyFilter = DEFAULT;
 
     template<class T>
     struct ManagedPX
@@ -70,25 +102,10 @@ namespace gE
         T _t;
     };
 
-    inline px::Vec3 ToPX(const glm::vec3& o)
-    {
-        return  { o.x, o.y, o.z };
-    }
-
-    inline glm::vec3 ToGLM(const px::Vec3& o)
-    {
-        return { o.GetX(), o.GetY(), o.GetZ() };
-    }
-
-    inline px::Quat ToPX(const glm::quat& o)
-    {
-        return { o.x, o.y, o.z, o.w };
-    }
-
-    inline glm::quat ToGLM(const px::Quat& o)
-    {
-        return { o.GetW(), o.GetX(), o.GetY(), o.GetZ() };
-    }
+    inline px::Vec3 ToPX(const glm::vec3& o) { return { o.x, o.y, o.z }; }
+    inline glm::vec3 ToGLM(const px::Vec3& o) { return { o.GetX(), o.GetY(), o.GetZ() }; }
+    inline px::Quat ToPX(const glm::quat& o) { return { o.x, o.y, o.z, o.w }; }
+    inline glm::quat ToGLM(const px::Quat& o) { return { o.GetW(), o.GetX(), o.GetY(), o.GetZ() }; }
 }
 
 #include "Physics.inl"

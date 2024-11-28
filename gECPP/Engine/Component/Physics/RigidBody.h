@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "../../../Physics/Physics.h"
+#include <Physics/Physics.h>
 #include <Jolt/Physics/Collision/Shape/ScaledShape.h>
 
 #include <Engine/Component/Component.h>
@@ -66,6 +66,11 @@ namespace gE
 
 		void OnFixedUpdate(float d) override;
 		void OnEarlyFixedUpdate(float d);
+
+		GET(CollisionFilter&, Filter, _filter);
+		GET(BroadPhaseFilter&, BroadFilter, _broadFilter);
+		GET(px::PhysicsSystem&, System, _physics);
+		GET(px::TempAllocator&, TempAllocator, _allocator);
 
 		friend class RigidBody;
 

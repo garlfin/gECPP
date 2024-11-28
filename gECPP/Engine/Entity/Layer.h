@@ -5,8 +5,7 @@
 #pragma once
 
 #include <Engine/Math/Math.h>
-
-#include "Engine/Utility/Macro.h"
+#include <Engine/Utility/Macro.h>
 
 namespace gE
 {

@@ -7,7 +7,7 @@
 #include <vector>
 #include <Engine/Utility/Binary.h>
 #include <Engine/Component/Transform.h>
-#include <Engine/Component/Layer.h>
+#include "Layer.h"
 
 #include "Prototype.h"
 

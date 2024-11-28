@@ -47,6 +47,18 @@ namespace Physics
     {
         Write(out, Extents);
     }
+
+    inline void CapsuleShape::ISerialize(istream& in, SETTINGS_T s)
+    {
+        Read(in, Height);
+        Read(in, Radius);
+    }
+
+    inline void CapsuleShape::IDeserialize(ostream& out) const
+    {
+        Write(out, Height);
+        Write(out, Radius);
+    }
 }
 
 namespace Jolt

@@ -5,18 +5,37 @@
 #pragma once
 
 #include "Physics.h"
-#include <Engine/Component/Layer.h>
 
 namespace gE
 {
-    inline bool CollisionFilter::ShouldCollide(px::ObjectLayer a, px::ObjectLayer b) const
+    inline bool CollisionFilter::ShouldCollideStatic(px::ObjectLayer a, px::ObjectLayer b)
     {
         return !(a & b & (u16) LayerMask::Static) && (a & b);
     }
 
-    inline bool BroadPhaseFilter::ShouldCollide(px::ObjectLayer a, px::BroadPhaseLayer b) const
+    inline bool CollisionFilter::ShouldCollide(px::ObjectLayer a, px::ObjectLayer b) const
+    {
+        return ShouldCollideStatic(a, b);
+    }
+
+    inline bool BroadPhaseFilter::ShouldCollideStatic(px::ObjectLayer a, px::BroadPhaseLayer b)
     {
         return !(a & b.GetValue() & (u8) LayerMask::Static);
+    }
+
+    inline bool BroadPhaseFilter::ShouldCollide(px::ObjectLayer a, px::BroadPhaseLayer b) const
+    {
+        return ShouldCollideStatic(a, b);
+    }
+
+    inline bool UCollisionFilter::ShouldCollide(JPH::ObjectLayer inLayer) const
+    {
+        return CollisionFilter::ShouldCollideStatic(_layer, inLayer);
+    }
+
+    inline bool UBroadPhaseFilter::ShouldCollide(JPH::BroadPhaseLayer inLayer) const
+    {
+        return BroadPhaseFilter::ShouldCollideStatic(_layer, inLayer);
     }
 
     inline BroadPhase::BroadPhase()
