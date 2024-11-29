@@ -48,14 +48,10 @@ namespace gE
 
     void CharacterController::OnInit()
     {
+        PhysicsComponent::OnInit();
+
         const Transform& transform = GetOwner().GetTransform();
-
         _controller->SetPosition(ToPX(transform->Position));
-    }
-
-    void CharacterController::OnUpdate(float delta)
-    {
-
     }
 
     void CharacterController::OnEarlyFixedUpdate(float delta)
@@ -77,7 +73,6 @@ namespace gE
     {
         PhysicsManager& manager = GetWindow().GetPhysics();
         const px::PhysicsSystem& system = manager.GetSystem();
-        Transform& transform = GetOwner().GetTransform();
 
         _controller->Update(
             delta,
@@ -89,6 +84,7 @@ namespace gE
             manager.GetTempAllocator()
         );
 
-        transform.SetPosition(ToGLM(_controller->GetPosition()));
+        PreviousPosition = Position;
+        Position = ToGLM(_controller->GetPosition());
     }
 }

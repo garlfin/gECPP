@@ -73,9 +73,10 @@ namespace gE
 		NODISCARD ALWAYS_INLINE const TransformData* operator->() const { return &_transform; }
 
 		GET_CONST(const TransformData&, GlobalTransform, _globalTransform);
+		GET_CONST(TransformFlags, Flags, _flags);
 
 		friend class TransformManager;
-		friend class RigidBody;
+		friend class PhysicsComponent;
 
 	protected:
 		inline void SetPosition(const glm::vec3& pos, TransformFlags flags) { _flags |= flags; _transform.Position = pos; }

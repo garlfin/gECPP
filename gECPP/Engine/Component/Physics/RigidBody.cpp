@@ -6,61 +6,10 @@
 
 #include <Engine/Window.h>
 #include <glm/gtx/string_cast.hpp>
-#include <Jolt/RegisterTypes.h>
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 
 namespace gE
 {
-    PhysicsManager::PhysicsManager(Window* window) : ComponentManager(window)
-    {
-        px::RegisterDefaultAllocator();
-
-        _factory = ptr_create<px::Factory>();
-
-        px::Factory::sInstance = (px::Factory*) _factory;
-        px::RegisterTypes();
-
-        _allocator = ptr_create<px::TempAllocatorImpl>(GE_PX_ALLOCATION);
-        _jobSystem = ptr_create<px::JobSystemThreadPool>(px::cMaxPhysicsJobs, px::cMaxPhysicsBarriers, std::thread::hardware_concurrency() - 1);
-
-        _physics = ptr_create<px::PhysicsSystem>();
-        _physics->Init
-        (
-            GE_PX_MAX_BODIES,
-            0,
-            GE_PX_MAX_BODY_PAIRS,
-            GE_PX_MAX_CONSTRAINTS,
-            _broadPhase,
-            _broadFilter,
-            _filter
-        );
-
-        _interface = &_physics->GetBodyInterface();
-    }
-
-    void PhysicsManager::OnFixedUpdate(float delta)
-    {
-        const int steps = std::clamp<int>(floor(delta * GE_PX_MIN_TICKRATE), 1, GE_PX_MAX_STEPS);
-        _physics->Update(delta, steps, _allocator.Get(), _jobSystem.Get());
-
-        for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())
-            (**i)->OnFixedUpdate(delta);
-    }
-
-    void PhysicsManager::OnEarlyFixedUpdate(float d)
-    {
-        OnInit();
-
-        for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())
-            ((RigidBody*) &***i)->OnEarlyFixedUpdate(d);
-    }
-
-    PhysicsManager::~PhysicsManager()
-    {
-        px::UnregisterTypes();
-        px::Factory::sInstance = nullptr;
-    }
-
     RigidBody::RigidBody(Entity* owner, const RigidBodySettings& s, Collider& collider) :
         PhysicsComponent(owner, &owner->GetWindow().GetPhysics()),
         Material(s.Material),
@@ -79,6 +28,8 @@ namespace gE
 
     void RigidBody::OnInit()
     {
+        PhysicsComponent::OnInit();
+
         const Transform& transform = GetOwner().GetTransform();
         PhysicsManager& manager = GetWindow().GetPhysics();
 
@@ -115,7 +66,7 @@ namespace gE
         const Transform& transform = GetOwner().GetTransform();
         const Physics::ColliderTransform& offset = _collider->GetTransform();
 
-        if(!(bool)(transform._flags & TransformFlags::PhysicsInvalidated)) return;
+        if(!(bool)(transform.GetFlags() & TransformFlags::PhysicsInvalidated)) return;
 
         if(_previousScale != transform->Scale)
         {
@@ -130,8 +81,8 @@ namespace gE
 
         physics._interface->SetPositionAndRotation(
             _body->GetID(),
-            ToPX(transform->Location + offset.Position * transform->Scale * transform->Rotation),
-            ToPX(transform->Rotation * offset.Rotation),
+            ToPX(Position + offset.Position * transform->Scale * Rotation),
+            ToPX(Rotation * offset.Rotation),
             JPH::EActivation::Activate
         );
     }
@@ -141,22 +92,13 @@ namespace gE
         Transform& transform = GetOwner().GetTransform();
         const Physics::ColliderTransform& offset = _collider->GetTransform();
 
-        glm::quat rotation = ToGLM(_body->GetRotation());
-        glm::vec3 location = ToGLM(_body->GetPosition()) - offset.Position * transform->Scale * inverse(rotation);
+        PreviousRotation = Rotation;
+        PreviousPosition = Position;
 
-        rotation *= inverse(offset.Rotation);
+        Rotation = ToGLM(_body->GetRotation());
+        Position = ToGLM(_body->GetPosition()) - offset.Position * transform->Scale * inverse(Rotation);
 
-        transform.SetPosition(location, TransformFlags::RenderInvalidated);
-        transform.SetRotation(rotation, TransformFlags::RenderInvalidated);
-
-        if(_body->IsStatic() || _body->IsActive()) return;
-
-        GetOwner().Destroy();
-    }
-
-    void RigidBody::OnUpdate(float d)
-    {
-
+        Rotation *= inverse(offset.Rotation);
     }
 
     void RigidBody::OnDestroy()

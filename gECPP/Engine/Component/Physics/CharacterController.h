@@ -11,11 +11,11 @@
 #include <Jolt/Physics/Character/CharacterVirtual.h>
 #include <Engine/Utility/AssetManager.h>
 
-#include "RigidBody.h"
+#include "Physics.h"
 
 namespace gE
 {
-    class CharacterController : public PhysicsComponent
+    class CharacterController final : public PhysicsComponent
     {
     public:
         CharacterController(Entity* owner, const Physics::CapsuleShape&);
@@ -23,7 +23,6 @@ namespace gE
         void OnInit() override;
         void OnEarlyFixedUpdate(float delta) override;
         void OnFixedUpdate(float delta) override;
-        void OnUpdate(float delta) override;
 
         GET_CONST(const Jolt::CapsuleShape&, Shape, _shape);
         GET_CONST(const px::CharacterVirtual&, JoltController, *_controller);

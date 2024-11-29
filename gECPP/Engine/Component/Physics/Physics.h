@@ -1,0 +1,71 @@
+
+//
+// Created by scion on 11/29/2024.
+//
+
+#pragma once
+
+#include <Physics/Physics.h>
+#include <Engine/Component/Component.h>
+#include <Engine/Utility/AssetManager.h>
+
+namespace gE
+{
+    enum class PhysicsInterpolationMode : u8
+    {
+        None,
+        Interpolate,
+        Extrapolate
+    };
+
+    class PhysicsComponent : public Component
+    {
+    public:
+        using Component::Component;
+
+        virtual void OnEarlyFixedUpdate(float d) = 0;
+
+        void OnInit() override;
+        void OnUpdate(float d) final;
+
+        GET_SET_VALUE(PhysicsInterpolationMode, InterpolationMode, _interpolationMode);
+        GET_SET_VALUE(glm::vec3, Velocity, Velocity);
+
+    protected:
+        glm::vec3 Velocity, PreviousVelocity;
+        glm::vec3 Position, PreviousPosition;
+        glm::quat Rotation, PreviousRotation;
+
+    private:
+        PhysicsInterpolationMode _interpolationMode = PhysicsInterpolationMode::Interpolate;
+    };
+
+    class PhysicsManager final : public ComponentManager<Component>
+    {
+    public:
+        explicit PhysicsManager(Window* window);
+
+        void OnFixedUpdate(float delta) override;
+        void OnEarlyFixedUpdate(float delta);
+
+        GET(CollisionFilter&, Filter, _filter);
+        GET(BroadPhaseFilter&, BroadFilter, _broadFilter);
+        GET(px::PhysicsSystem&, System, _physics);
+        GET(px::TempAllocator&, TempAllocator, _allocator);
+
+        friend class RigidBody;
+
+        ~PhysicsManager() override;
+
+    private:
+        CollisionFilter _filter;
+        BroadPhaseFilter _broadFilter;
+        BroadPhase _broadPhase;
+
+        SmartPointer<px::Factory> _factory;
+        SmartPointer<px::TempAllocatorImpl> _allocator;
+        SmartPointer<px::PhysicsSystem> _physics;
+        SmartPointer<px::JobSystemThreadPool> _jobSystem;
+        px::BodyInterface* _interface;
+    };
+}
