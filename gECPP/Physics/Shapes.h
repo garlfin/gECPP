@@ -64,8 +64,8 @@ namespace Physics
         SERIALIZABLE_PROTO(CPSL, 1, CapsuleShape, ConvexShape);
 
     public:
-        float Height;
-        float Radius;
+        float Height = 1.75f;
+        float Radius = 0.45f;
     };
 }
 
@@ -75,22 +75,22 @@ namespace Jolt
     {
     public:
         Shape() = default;
-        Shape(Physics::Shape& settings, px::Shape& shape);
+        Shape(Physics::Shape& settings, gE::ManagedPX<px::Shape>& shape);
 
         GET_CONST(const Physics::ColliderTransform&, Transform, _settings->Transform);
         GET_CONST(const Physics::Shape&, Settings, _settings);
-        GET(px::Shape&, JoltShape, _shape);
+        GET(px::Shape&, JoltShape, **_shape);
 
     private:
         RelativePointer<Physics::Shape> _settings = DEFAULT;
-        RelativePointer<px::Shape> _shape = DEFAULT;
+        RelativePointer<gE::ManagedPX<px::Shape>> _shape = DEFAULT;
     };
 
     class ConvexShape : public Shape
     {
     public:
         ConvexShape() = default;
-        ConvexShape(Physics::ConvexShape& settings, px::ConvexShape& shape);
+        ConvexShape(Physics::ConvexShape& settings, gE::ManagedPX<px::ConvexShape>& shape);
 
         GET_CONST(float, Density, GetJoltShape().GetDensity());
         GET_CONST(float, Volume, GetJoltShape().GetVolume());
@@ -128,6 +128,7 @@ namespace Jolt
     class CapsuleShape : protected Physics::CapsuleShape, public ConvexShape
     {
         API_SERIALIZABLE(CapsuleShape, Physics::CapsuleShape);
+        API_DEFAULT_CM_CONSTRUCTOR(CapsuleShape);
 
     public:
         GET(px::CapsuleShape&, JoltShape, *_shape);

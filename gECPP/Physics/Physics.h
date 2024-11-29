@@ -17,7 +17,7 @@
 #define GE_PX_MAX_BODIES 1024
 #define GE_PX_MAX_CONSTRAINTS (GE_PX_MAX_BODIES * 4)
 #define GE_PX_MAX_BODY_PAIRS (GE_PX_MAX_BODIES * 4)
-#define GE_PX_MIN_TICKRATE 120
+#define GE_PX_MIN_TICKRATE 60
 #define GE_PX_MAX_STEPS 4
 
 namespace px = JPH;
@@ -84,22 +84,34 @@ namespace gE
     {
     public:
         template<typename... ARGS>
-        explicit ManagedPX(ARGS&&... args) : _t(std::forward<ARGS>(args)...)
+        explicit ManagedPX(ARGS&&... args) : _t(new T(std::forward<ARGS>(args)...))
         {
-            _t.SetEmbedded();
+            _t->SetEmbedded();
         }
+
+        DELETE_OPERATOR_COPY(ManagedPX);
+        OPERATOR_MOVE_NOSUPER(ManagedPX,
+            _t = o._t;
+            o._t = nullptr;
+        );
 
         GET(T&,, _t);
 
-        ALWAYS_INLINE T* operator->() { return &_t; }
-        ALWAYS_INLINE const T* operator->() const { return &_t; }
-        ALWAYS_INLINE T& operator*() { return _t; }
-        ALWAYS_INLINE const T& operator*() const { return _t; }
+        ALWAYS_INLINE T* operator->() { return _t; }
+        ALWAYS_INLINE const T* operator->() const { return _t; }
+        ALWAYS_INLINE T& operator*() { return *_t; }
+        ALWAYS_INLINE const T& operator*() const { return *_t; }
 
-        DELETE_OPERATOR_CM(ManagedPX);
+        template<class O> requires std::is_base_of_v<O, T>
+        ManagedPX<O>& To() { return (ManagedPX<O>&) *this; }
+
+        template<class O> requires std::is_base_of_v<O, T>
+        const ManagedPX<O>& To() const { return (ManagedPX<O>&) *this; }
+
+        ~ManagedPX() { delete _t; _t = nullptr; }
 
     private:
-        T _t;
+        T* _t = DEFAULT;
     };
 
     inline px::Vec3 ToPX(const glm::vec3& o) { return { o.x, o.y, o.z }; }

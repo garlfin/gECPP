@@ -8,6 +8,7 @@
 #include <Engine/Component/Behavior.h>
 #include <Engine/Entity/Entity.h>
 
+#include "Engine/Component/Physics/CharacterController.h"
 #include "GLFW/glfw3.h"
 
 #define SENSITIVITY 0.1f
@@ -19,13 +20,15 @@ namespace gE::VoxelDemo
 	class Movement : public Behavior
 	{
 	 public:
-		explicit Movement(Entity* o) : Behavior(o),
-			_transform(o->GetTransform()), _window(o->GetWindow().GLFWWindow())
+		explicit Movement(Entity* o, CharacterController& controller) : Behavior(o),
+			_transform(o->GetTransform()), _window(o->GetWindow().GLFWWindow()),
+			_controller(controller)
 		{
 		}
 
-		void OnUpdate(float d) override
+		void OnUpdate(float delta) override
 		{
+			Transform& transform = *_transform;
 			glm::dvec2 mousePos, mouseDelta;
 			glfwGetCursorPos(_window, &mousePos.x, &mousePos.y);
 			mouseDelta = _prevCursorPos - mousePos;
@@ -35,7 +38,7 @@ namespace gE::VoxelDemo
 			_rot.x += mouseDelta.y * SENSITIVITY;
 			_rot.x = std::clamp(_rot.x, -89.9f, 89.9f);
 
-			_transform.SetRotation(radians(_rot));
+			transform.SetRotation(radians(_rot));
 
 			glm::vec3 dir(0.f);
 			if(glfwGetKey(_window, GLFW_KEY_W)) dir.z -= SPEED;
@@ -44,16 +47,25 @@ namespace gE::VoxelDemo
 			if(glfwGetKey(_window, GLFW_KEY_A)) dir.x -= SPEED;
 
 			dir = normalize(dir);
-			if(glm::isnan(dir.x)) return;
+			if(glm::isnan(dir.x)) dir = DEFAULT;
 
-			if(glfwGetKey(_window, GLFW_KEY_LEFT_SHIFT)) dir *= SPEED_MULTIPLIER;
-			_transform.SetPosition(_transform->Position + _transform->Rotation * dir * d);
+			const float rotRad = glm::radians(_rot.y);
+			const float sinY = glm::sin(rotRad);
+			const float cosY = glm::cos(rotRad);
+
+			glm::vec3 rotated;
+			rotated = glm::vec3(cosY, 0, -sinY) * dir.x;
+			rotated += glm::vec3(sinY, 0, cosY) * dir.z;
+
+			if(glfwGetKey(_window, GLFW_KEY_LEFT_SHIFT)) rotated *= SPEED_MULTIPLIER;
+			_controller->SetVelocity(rotated);
 		}
 
 	 private:
-		Transform& _transform;
-		GLFWwindow* const _window;
-		glm::dvec2 _prevCursorPos {};
-		glm::vec3 _rot {};
+		RelativePointer<Transform> _transform;
+		GLFWwindow* const _window = DEFAULT;
+		glm::dvec2 _prevCursorPos = DEFAULT;
+		glm::vec3 _rot = DEFAULT;
+		RelativePointer<CharacterController> _controller;
 	};
 }

@@ -63,13 +63,13 @@ namespace Physics
 
 namespace Jolt
 {
-    inline Shape::Shape(Physics::Shape& settings, px::Shape& shape) :
-        _settings(&settings), _shape(shape)
+    inline Shape::Shape(Physics::Shape& settings, gE::ManagedPX<px::Shape>& shape) :
+        _settings(&settings), _shape(&shape)
     {
     }
 
-    inline ConvexShape::ConvexShape(Physics::ConvexShape& settings, px::ConvexShape& shape) :
-        Shape(settings, shape)
+    inline ConvexShape::ConvexShape(Physics::ConvexShape& settings, gE::ManagedPX<px::ConvexShape>& shape) :
+        Shape(settings, shape.To<px::Shape>())
     {
     }
 }

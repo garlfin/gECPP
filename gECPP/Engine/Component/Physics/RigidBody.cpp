@@ -62,7 +62,7 @@ namespace gE
     }
 
     RigidBody::RigidBody(Entity* owner, const RigidBodySettings& s, Collider& collider) :
-        Component(owner, &owner->GetWindow().GetPhysics()),
+        PhysicsComponent(owner, &owner->GetWindow().GetPhysics()),
         Material(s.Material),
         _settings(s),
         _collider(&collider)
@@ -158,7 +158,6 @@ namespace gE
     {
 
     }
-
 
     void RigidBody::OnDestroy()
     {

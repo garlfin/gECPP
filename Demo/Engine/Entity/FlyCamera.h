@@ -9,6 +9,7 @@
 #include <Engine/Component/Camera/Camera.h>
 #include <Engine/Renderer/PostProcess/Bloom.h>
 #include <Engine/Renderer/PostProcess/Tonemap.h>
+#include <Engine/Component/Physics/CharacterController.h>
 
 namespace gE::VoxelDemo
 {
@@ -25,7 +26,8 @@ namespace gE::VoxelDemo
 			_camera(this, _target, {{ FlyCameraSettings, window->GetSize() }}, &window->GetCameras()),
 			_target(*this, _camera, { &_bloom, &_tonemap }),
 			_bloom(_target), _tonemap(_target),
-			_movement(this)
+			_movement(this, _controller),
+			_controller(this, Physics::CapsuleShape())
 		{
 		}
 
@@ -42,5 +44,6 @@ namespace gE::VoxelDemo
 		DefaultPipeline::Tonemap _tonemap;
 
 		Movement _movement;
+		CharacterController _controller;
 	};
 }

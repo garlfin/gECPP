@@ -30,7 +30,27 @@ namespace gE
 		PhysicsMaterial Material = DEFAULT;
 	};
 
-	class RigidBody : public Component
+	enum class PhysicsInterpolationMode : u8
+	{
+		None,
+		Interpolation,
+		Extrapolation
+	};
+
+	class PhysicsComponent : public Component
+	{
+	public:
+		using Component::Component;
+
+		virtual void OnEarlyFixedUpdate(float d) = 0;
+
+		GET_SET_VALUE(PhysicsInterpolationMode, InterpolationMode, _interpolationMode);
+
+	private:
+		PhysicsInterpolationMode _interpolationMode = PhysicsInterpolationMode::None;
+	};
+
+	class RigidBody : public PhysicsComponent
 	{
 	public:
 		RigidBody(Entity* owner, const RigidBodySettings&, Collider&);
@@ -40,7 +60,7 @@ namespace gE
 		void SetMaterial(const PhysicsMaterial& material);
 
 		void OnInit() override;
-		void OnEarlyFixedUpdate(float d);
+		void OnEarlyFixedUpdate(float d) override;
 		void OnFixedUpdate(float d) override;
 		void OnUpdate(float d) override;
 		void OnDestroy() override;

@@ -64,6 +64,7 @@ void DemoWindow::OnInit()
 	pointLight->GetTransform().SetPosition(glm::vec3(1.1, 0.5, -1.7));
 
 	auto* camera = new FlyCamera(this);
+	camera->GetTransform().SetPosition(glm::vec3(0, 10, 0));
 	Cameras.CurrentCamera = &camera->GetTarget();
 
 	auto* cubemapCap = new CubemapCapture(this, 512);
