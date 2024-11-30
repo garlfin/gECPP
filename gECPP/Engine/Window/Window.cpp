@@ -4,10 +4,10 @@
 #include <Engine/Component/Camera/Camera.h>
 #include <Engine/Renderer/DefaultPipeline.h>
 
-#include <GLAD/glad.h>
-#include <GLFW/glfw3.h>
+#include <Vendor/GLAD/glad.h>
+#include <Vendor/GLFW/glfw3.h>
 
-#include "Utility/TickHandler.h"
+#include <Engine/Utility/TickHandler.h>
 
 using namespace gE;
 
@@ -115,6 +115,9 @@ bool Window::Run()
 		#ifdef DEBUG
 			double updateDelta = glfwGetTime();
 		#endif
+
+			_keyboardState.Update(_window);
+			_mouseState.Update(_window);
 
 			OnUpdate(_renderTick.GetDelta());
 

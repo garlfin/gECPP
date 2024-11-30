@@ -44,6 +44,5 @@ namespace gE
 
         bool _useGravity = true;
         glm::vec3 _velocity = DEFAULT;
-        glm::vec3 _previousVelocity = DEFAULT;
     };
 }

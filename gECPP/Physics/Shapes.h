@@ -65,7 +65,7 @@ namespace Physics
 
     public:
         float Height = 1.75f;
-        float Radius = 0.45f;
+        float Radius = 0.225f;
     };
 }
 

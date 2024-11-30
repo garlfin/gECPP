@@ -3,7 +3,7 @@
 //
 
 #include "Camera.h"
-#include <Engine/Window.h>
+#include <Engine/Window/Window.h>
 #include <Engine/Component/Transform.h>
 #include <glm/gtx/string_cast.hpp>
 
@@ -28,7 +28,6 @@ CONSTEXPR_GLOBAL glm::vec3 UpDirs[]
 	glm::vec3(0, -1, 0),
 	glm::vec3(0, -1, 0)
 };
-
 
 namespace gE
 {

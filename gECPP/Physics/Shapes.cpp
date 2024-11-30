@@ -18,6 +18,8 @@ namespace Jolt
 
     API_SERIALIZABLE_IMPL(CapsuleShape), Jolt::ConvexShape(*this, _shape.To<px::ConvexShape>())
     {
-        SAFE_CONSTRUCT_NAMESPACE(_shape, gE, ManagedPX<px::CapsuleShape>, Height / 2.f, Radius);
+        const float height = Height * 0.5f - Radius;
+
+        SAFE_CONSTRUCT_NAMESPACE(_shape, gE, ManagedPX<px::CapsuleShape>, height, Radius);
     }
 }

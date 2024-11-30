@@ -4,7 +4,7 @@
 
 #include "RigidBody.h"
 
-#include <Engine/Window.h>
+#include <Engine/Window/Window.h>
 #include <glm/gtx/string_cast.hpp>
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 
@@ -111,6 +111,36 @@ namespace gE
         manager._interface->DestroyBody(_body->GetID());
 
         _body = nullptr;
+    }
+
+    void RigidBody::SetInstantVelocity(const glm::vec3& velocity)
+    {
+        px::BodyInterface& physics = *GetWindow().GetPhysics()._interface;
+        physics.SetLinearVelocity(_body->GetID(), ToPX(velocity));
+    }
+
+    void RigidBody::AddImpulse(const glm::vec3& impulse)
+    {
+        px::BodyInterface& physics = *GetWindow().GetPhysics()._interface;
+        physics.AddImpulse(_body->GetID(), ToPX(impulse));
+    }
+
+    void RigidBody::AddImpulse(const glm::vec3& impulse, const glm::vec3& dir)
+    {
+        px::BodyInterface& physics = *GetWindow().GetPhysics()._interface;
+        physics.AddImpulse(_body->GetID(), ToPX(impulse), ToPX(dir));
+    }
+
+    void RigidBody::AddForce(const glm::vec3& force)
+    {
+        px::BodyInterface& physics = *GetWindow().GetPhysics()._interface;
+        physics.AddForce(_body->GetID(), ToPX(force));
+    }
+
+    void RigidBody::AddForce(const glm::vec3& force, const glm::vec3& dir)
+    {
+        px::BodyInterface& physics = *GetWindow().GetPhysics()._interface;
+        physics.AddForce(_body->GetID(), ToPX(force), ToPX(dir));
     }
 
     RigidBody::~RigidBody()

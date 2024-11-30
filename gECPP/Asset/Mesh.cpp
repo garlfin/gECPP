@@ -4,7 +4,7 @@
 
 #include "Mesh.h"
 
-#include "Engine/Window.h"
+#include "Engine/Window/Window.h"
 
 namespace gE
 {

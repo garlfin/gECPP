@@ -15,7 +15,7 @@ namespace gE
     {
     public:
         PhysicsCubeEntity(Window* window, const Reference<Mesh>& mesh, glm::vec3 size, EntityFlags flags = DEFAULT) :
-            Entity(window, LayerMask::All, flags),
+            Entity(window, nullptr, LayerMask::All, flags),
             _renderer(this, mesh),
             _rigidBody(this, RigidBodySettings(), _collider),
             _collider(this, GetShapeSettings(size))

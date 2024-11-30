@@ -6,7 +6,7 @@
 #include "DirectionalLight.h"
 #include "PointLight.h"
 
-#include <Engine/Window.h>
+#include <Engine/Window/Window.h>
 #include <glm/gtx/string_cast.hpp>
 
 namespace gE

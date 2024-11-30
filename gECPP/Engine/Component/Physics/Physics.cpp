@@ -7,7 +7,7 @@
 #include <Jolt/RegisterTypes.h>
 #include <Engine/Entity/Entity.h>
 
-#include "Engine/Window.h"
+#include "Engine/Window/Window.h"
 
 namespace gE
 {
@@ -67,12 +67,11 @@ namespace gE
 
         PreviousPosition = Position = transform->Position;
         PreviousRotation = Rotation = transform->Rotation;
-        PreviousVelocity = Velocity = glm::vec3(0.f);
     }
 
     void PhysicsComponent::OnUpdate(float)
     {
-        const float lerpFactor = GetWindow().GetPhysicsTick().GetLerpFactor();
+        GE_ASSERT(!GetOwner().GetParent(), "Physics objects must not have a parent!");
 
         glm::vec3 position;
         glm::quat rotation;

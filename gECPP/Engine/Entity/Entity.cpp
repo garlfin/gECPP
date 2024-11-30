@@ -7,11 +7,11 @@
 #include <Engine/Component/Behavior.h>
 #include <Engine/Component/Component.h>
 
-#include "Engine/Window.h"
+#include "Engine/Window/Window.h"
 
 namespace gE
 {
-	Entity::Entity(Window* window, LayerMask layers, EntityFlags flags, Entity* parent) :
+	Entity::Entity(Window* window, Entity* parent, LayerMask layers, EntityFlags flags) :
 		Managed(&window->GetEntities(), *this),
 		_window(window), _parent(parent), _flags(flags),
 		_layers(layers), _transform(this)

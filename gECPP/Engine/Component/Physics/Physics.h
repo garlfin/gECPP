@@ -29,10 +29,8 @@ namespace gE
         void OnUpdate(float d) final;
 
         GET_SET_VALUE(PhysicsInterpolationMode, InterpolationMode, _interpolationMode);
-        GET_SET_VALUE(glm::vec3, Velocity, Velocity);
 
     protected:
-        glm::vec3 Velocity, PreviousVelocity;
         glm::vec3 Position, PreviousPosition;
         glm::quat Rotation, PreviousRotation;
 

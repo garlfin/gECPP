@@ -4,7 +4,7 @@
 
 #include "VoxelPipeline.h"
 
-#include <Engine/Window.h>
+#include <Engine/Window/Window.h>
 #include <Engine/Entity/VoxelCapture.h>
 
 #define MODE_TAA_COMBINE 0

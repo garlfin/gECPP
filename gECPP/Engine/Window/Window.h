@@ -13,10 +13,11 @@
 #include <Engine/Math/Math.h>
 #include <Engine/Renderer/VoxelPipeline.h>
 #include <Engine/Utility/AssetManager.h>
-#include <Graphics/Buffer/VAO.h>
 #include <Graphics/Shader/Shader.h>
 #include <Graphics/Texture/TextureSlotManager.h>
 #include <Engine/Utility/TickHandler.h>
+#include <Engine/Window/KeyboardState.h>
+#include <Engine/Window/MouseState.h>
 
 #include "WindowState.h"
 
@@ -99,6 +100,9 @@ namespace gE
 		GET_CONST(const TickHandler&, RenderTick, _renderTick);
 		GET_CONST(const TickHandler&, PhysicsTick, _physicsTick);
 
+		GET_CONST(const KeyboardState&, Keyboard, _keyboardState);
+		GET_CONST(const MouseState&, Mouse, _mouseState);
+
 		NODISCARD ALWAYS_INLINE GLFWwindow* GLFWWindow() const { return _window; }
 
 		virtual ~Window();
@@ -144,7 +148,10 @@ namespace gE
 		const char* _name;
 		GLFWwindow* _window;
 		Monitor _monitor;
+
 		double _time = DEFAULT;
+		KeyboardState _keyboardState;
+		MouseState _mouseState;
 
 		TickHandler _renderTick = DEFAULT;
 		TickHandler _physicsTick = DEFAULT;

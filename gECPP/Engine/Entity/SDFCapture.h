@@ -12,7 +12,7 @@ namespace gE
 	class SDFCapture : public Entity
 	{
 	 public:
-		SDFCapture(Window* w, u16 resolution);
+		SDFCapture(Window* window, u16 resolution);
 
 		void GetGPUSDFScene(API::SDFScene& scene);
 

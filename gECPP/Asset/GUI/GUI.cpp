@@ -3,7 +3,7 @@
 //
 
 #include "GUI.h"
-#include <Demo/Engine/Entity/FlyCamera.h>
+#include <Demo/Engine/Entity/Player.h>
 
 namespace gETF::UI
 {

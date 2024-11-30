@@ -18,7 +18,7 @@ namespace gE
  	class Entity : public Managed<Entity>
 	{
 	 public:
-		explicit Entity(Window*, LayerMask layers = LayerMask::All, EntityFlags = EntityFlags(), Entity* = nullptr);
+		explicit Entity(Window*, Entity* = nullptr, LayerMask layers = LayerMask::All, EntityFlags = DEFAULT);
 
 		void Destroy(bool flagChildren = true);
 

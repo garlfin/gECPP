@@ -7,7 +7,7 @@
 
 #include "DemoWindow.h"
 
-#include <Demo/Engine/Entity/FlyCamera.h>
+#include <Demo/Engine/Entity/Player.h>
 #include <Demo/Engine/Entity/StaticMeshEntity.h>
 #include <gECPP/Engine/Entity/Light/DirectionalLight.h>
 #include <gECPP/Engine/Entity/Light/PointLight.h>
@@ -63,9 +63,12 @@ void DemoWindow::OnInit()
 	auto* pointLight = new PointLight(this, 512);
 	pointLight->GetTransform().SetPosition(glm::vec3(1.1, 0.5, -1.7));
 
-	auto* camera = new FlyCamera(this);
-	camera->GetTransform().SetPosition(glm::vec3(0, 10, 0));
-	Cameras.CurrentCamera = &camera->GetTarget();
+	auto* player = new Player(this);
+	player->GetTransform().SetPosition(glm::vec3(0, 10, 0));
+
+	auto* playerCamera = new PlayerCamera(this, *player);
+	Cameras.CurrentCamera = &playerCamera->GetTarget();
+	player->GetMovement().SetFPCamera(playerCamera);
 
 	auto* cubemapCap = new CubemapCapture(this, 512);
 	cubemapCap->GetTransform().SetPosition(glm::vec3(0.0, 2.1, 0.0));

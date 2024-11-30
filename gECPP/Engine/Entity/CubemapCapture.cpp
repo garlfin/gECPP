@@ -3,7 +3,7 @@
 //
 
 #include "CubemapCapture.h"
-#include <Engine/Window.h>
+#include <Engine/Window/Window.h>
 #include <Engine/Entity/Light/DirectionalLight.h>
 
 namespace gE
@@ -15,7 +15,7 @@ namespace gE
 	};
 
 	CubemapCapture::CubemapCapture(Window* w, u16 size) :
-		Entity(w, LayerMask::All, EntityFlags(true)),
+		Entity(w, nullptr, LayerMask::All, EntityFlags(true)),
 		_cubemapManaged(&GetWindow().GetCubemaps(), *this),
 		_camera(this, _target, { CubemapCameraSettings, size }),
 		_target(_camera)

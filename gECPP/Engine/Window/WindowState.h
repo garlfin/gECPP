@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <gECPP/Prototype.h>
+#include <Prototype.h>
 #include <Engine/Utility/Macro.h>
 #include <Engine/Math/Math.h>
 

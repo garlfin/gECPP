@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <Engine/WindowState.h>
+#include <Engine/Window/WindowState.h>
 #include <Engine/Component/Camera/Camera.h>
 #include <Engine/Component/Camera/PostProcessEffect.h>
 #include <Engine/Component/Camera/RenderTarget.h>

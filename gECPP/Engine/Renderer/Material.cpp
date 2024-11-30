@@ -5,7 +5,7 @@
 #include "Material.h"
 #include "PBRMaterial.h"
 
-#include <Engine/Window.h>
+#include <Engine/Window/Window.h>
 
 namespace gE
 {

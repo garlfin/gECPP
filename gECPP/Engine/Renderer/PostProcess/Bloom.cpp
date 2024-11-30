@@ -3,7 +3,7 @@
 //
 
 #include "Bloom.h"
-#include <Engine/Window.h>
+#include <Engine/Window/Window.h>
 
 #define BLOOM_STAGE_DOWNSAMPLE 1
 #define BLOOM_STAGE_UPSAMPLE (-1)

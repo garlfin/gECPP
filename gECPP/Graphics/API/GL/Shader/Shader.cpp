@@ -5,7 +5,7 @@
 #include "Shader.h"
 #include <iostream>
 #include <sstream>
-#include <Engine/Window.h>
+#include <Engine/Window/Window.h>
 #include <Graphics/Shader/Preprocessor.h>
 #include <Graphics/Texture/Texture.h>
 

@@ -5,7 +5,7 @@
 #pragma once
 
 #include <Demo/Engine/Component/Movement.h>
-#include <Engine/Window.h>
+#include <gECPP/Engine/Window/Window.h>
 #include <Engine/Component/Camera/Camera.h>
 #include <Engine/Renderer/PostProcess/Bloom.h>
 #include <Engine/Renderer/PostProcess/Tonemap.h>
@@ -19,16 +19,33 @@ namespace gE::VoxelDemo
 		DefaultCameraTiming,
 	};
 
-	class FlyCamera : public Entity
+	class Player : public Entity
 	{
 	 public:
-		explicit FlyCamera(Window* window) : Entity(window),
-			_camera(this, _target, {{ FlyCameraSettings, window->GetSize() }}, &window->GetCameras()),
-			_target(*this, _camera, { &_bloom, &_tonemap }),
-			_bloom(_target), _tonemap(_target),
+		explicit Player(Window* window) : Entity(window),
 			_movement(this, _controller),
 			_controller(this, Physics::CapsuleShape())
 		{
+		}
+
+		GET(Movement&, Movement, _movement);
+		GET(CharacterController&, Controller, _controller);
+
+	 private:
+		Movement _movement;
+		CharacterController _controller;
+	};
+
+	class PlayerCamera : public Entity
+	{
+	public:
+		PlayerCamera(Window* window, Player& player) : Entity(window, &player),
+			_camera(this, _target, {{ FlyCameraSettings, window->GetSize() }}, &window->GetCameras()),
+			_target(*this, _camera, { &_bloom, &_tonemap }),
+			_bloom(_target), _tonemap(_target)
+		{
+			const auto offset = glm::vec3(0.f, player.GetController().GetShape()->Height / 2.f, 0.f);
+			GetTransform().SetPosition(offset);
 		}
 
 		GET(gE::PerspectiveCamera&, Camera, _camera);
@@ -36,14 +53,11 @@ namespace gE::VoxelDemo
 		GET(GL::Texture2D&, Color, _target.GetColor());
 		GET(GL::Texture2D&, Depth, _target.GetDepth());
 
-	 private:
+	private:
 		PerspectiveCamera _camera;
 
 		DefaultPipeline::Target2D _target;
 		DefaultPipeline::Bloom _bloom;
 		DefaultPipeline::Tonemap _tonemap;
-
-		Movement _movement;
-		CharacterController _controller;
 	};
 }

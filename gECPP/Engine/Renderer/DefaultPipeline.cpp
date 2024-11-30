@@ -4,7 +4,7 @@
 
 #include "DefaultPipeline.h"
 
-#include <Engine/Window.h>
+#include <Engine/Window/Window.h>
 #include <Engine/Entity/Light/DirectionalLight.h>
 #include <Engine/Entity/Light/Light.h>
 

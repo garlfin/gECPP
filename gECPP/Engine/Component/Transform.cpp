@@ -4,7 +4,7 @@
 
 #include "Transform.h"
 
-#include <Engine/Window.h>
+#include <Engine/Window/Window.h>
 #include <Engine/Entity/Entity.h>
 
 namespace gE
@@ -40,8 +40,9 @@ namespace gE
 		_flags &= ~TransformFlags::PhysicsInvalidated;
 	}
 
-	Transform::Transform(Entity* o) : Component(o, &o->GetWindow().GetTransforms()),
-	                                  _model(1.0)
+	Transform::Transform(Entity* o) :
+		Component(o, &o->GetWindow().GetTransforms()),
+	    _model(1.0)
 	{
 	}
 
@@ -64,8 +65,9 @@ namespace gE
 		return model;
 	}
 
-	Transform::Transform(Entity* o, const TransformData& d) : Component(o, &GetWindow().GetTransforms()),
-	                                                          _model(1.0)
+	Transform::Transform(Entity* o, const TransformData& d) :
+		Component(o, &GetWindow().GetTransforms()),
+	    _model(1.0)
 	{
 		Set(d);
 	}

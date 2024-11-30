@@ -4,7 +4,7 @@
 
 #include "VAO.h"
 
-#include "Engine/Window.h"
+#include "Engine/Window/Window.h"
 
 namespace GL
 {

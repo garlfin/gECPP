@@ -8,6 +8,7 @@
 #include "Collider.h"
 
 #include <Engine/Component/Component.h>
+#include <Engine/Utility/Macro.h>
 
 namespace gE
 {
@@ -41,6 +42,13 @@ namespace gE
 		void OnEarlyFixedUpdate(float d) override;
 		void OnFixedUpdate(float d) override;
 		void OnDestroy() override;
+
+		GET_CONST(glm::vec3, Velocity, ToGLM(_body->GetLinearVelocity()));
+		void SetInstantVelocity(const glm::vec3&);
+		void AddImpulse(const glm::vec3&);
+		void AddImpulse(const glm::vec3&, const glm::vec3& dir);
+		void AddForce(const glm::vec3&);
+		void AddForce(const glm::vec3&, const glm::vec3& dir);
 
 		~RigidBody() override;
 
