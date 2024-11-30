@@ -40,6 +40,8 @@ namespace Physics
         SERIALIZABLE_PROTO(CSHP, 1, ConvexShape, Shape);
 
     public:
+        bool operator==(const ConvexShape& o) const { return Mass == o.Mass; }
+
         float Mass = 1.0;
     };
 
@@ -48,6 +50,11 @@ namespace Physics
         SERIALIZABLE_PROTO(SSHP, 1, SphereShape, ConvexShape);
 
     public:
+        bool operator==(const SphereShape& o) const
+        {
+            return ConvexShape::operator==(o) && Radius == o.Radius;
+        }
+
         float Radius = 1.f;
     };
 
@@ -56,6 +63,11 @@ namespace Physics
         SERIALIZABLE_PROTO(BSHP, 1, BoxShape, ConvexShape);
 
     public:
+        bool operator==(const BoxShape& o) const
+        {
+            return ConvexShape::operator==(o) && Extents == o.Extents;
+        }
+
         glm::vec3 Extents = glm::vec3(1.f);
     };
 
@@ -64,6 +76,11 @@ namespace Physics
         SERIALIZABLE_PROTO(CPSL, 1, CapsuleShape, ConvexShape);
 
     public:
+        bool operator==(const CapsuleShape& o) const
+        {
+            return ConvexShape::operator==(o) && Height == o.Height && Radius == o.Radius;
+        }
+
         float Height = 1.75f;
         float Radius = 0.225f;
     };
@@ -80,6 +97,8 @@ namespace Jolt
         GET_CONST(const Physics::ColliderTransform&, Transform, _settings->Transform);
         GET_CONST(const Physics::Shape&, Settings, _settings);
         GET(px::Shape&, JoltShape, **_shape);
+
+        NODISCARD operator bool() const { return _shape.GetPointer() && _shape->GetPointer(); }
 
     private:
         RelativePointer<Physics::Shape> _settings = DEFAULT;

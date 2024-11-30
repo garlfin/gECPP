@@ -58,8 +58,8 @@ namespace gE
 		// Entities & Data
 		Camera3D* GetReflectionSystem() const;
 
-		GET(gE::VoxelCapture*, VoxelCapture, VoxelSceneCapture.Get());
-		GET(gE::SDFCapture*, SDFCapture, SDFSceneCapture.Get());
+		GET(gE::VoxelCapture*, VoxelCapture, VoxelSceneCapture.GetPointer());
+		GET(gE::SDFCapture*, SDFCapture, SDFSceneCapture.GetPointer());
 
 		GET(gE::Material&, DefaultMaterial, DefaultMaterial);
 		GET(API::Texture2D&, BRDFLookupTexture, BRDFLookup);

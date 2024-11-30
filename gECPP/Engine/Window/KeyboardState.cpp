@@ -14,7 +14,7 @@ namespace gE
     {
         const KeyState previousState = to;
 
-        to = glfwGetKey(window, (u8) key) ? KeyState::Down : KeyState::Up;
+        to = glfwGetKey(window, (int) key) ? KeyState::Down : KeyState::Up;
         to |= ((to ^ previousState) & KeyState::Down) << (KeyState) 1;
     }
 

@@ -19,8 +19,9 @@ namespace gE
 
         JPH::CharacterVirtualSettings settings = DEFAULT;
 
-        settings.mMass = 80.f; // Average person weight.
+        settings.mMass = 500.f; // Average person weight.
         settings.mEnhancedInternalEdgeRemoval = true;
+        settings.mInnerBodyLayer = (px::ObjectLayer) GetOwner().GetLayer();
 
         _controller = ptr_create<px::CharacterVirtual>(&settings, px::Vec3::sZero(), px::Quat::sIdentity(), (u64) this, &system);
 
@@ -32,6 +33,8 @@ namespace gE
         PhysicsManager& manager = GetWindow().GetPhysics();
         px::PhysicsSystem& system = manager.GetSystem();
         const px::PhysicsSettings& physicsSettings = system.GetPhysicsSettings();
+
+        if(_shape && _shape.GetSettings() == shape) return;
 
         _shape = move(Jolt::CapsuleShape(&GetWindow(), shape));
 

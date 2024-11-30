@@ -23,7 +23,8 @@ namespace gE
 
 		GET_CONST(Mesh&, Mesh, *_mesh);
 
-		NODISCARD ALWAYS_INLINE Material& GetMaterial(u8 i) const { return *_drawCalls[i].GetMaterial(); }
+		NODISCARD ALWAYS_INLINE Material& GetMaterial(u8 i) { return *_drawCalls[i].GetMaterial(); }
+		NODISCARD ALWAYS_INLINE const Material& GetMaterial(u8 i) const { return *_drawCalls[i].GetMaterial(); }
 
 		void SetMaterial(u8 i, const Reference<Material>& mat);
 		void SetMaterial(u8 i, Reference<Material>&& mat);

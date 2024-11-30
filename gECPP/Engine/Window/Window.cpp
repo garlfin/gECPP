@@ -256,8 +256,8 @@ void Window::OnRender(float delta)
 
 Camera3D* Window::GetReflectionSystem() const
 {
-	if(VoxelSceneCapture.Get()) return &VoxelSceneCapture->GetCamera();
-	if(SDFSceneCapture.Get()) return &SDFSceneCapture->GetCamera();
+	if(VoxelSceneCapture.GetPointer()) return &VoxelSceneCapture->GetCamera();
+	if(SDFSceneCapture.GetPointer()) return &SDFSceneCapture->GetCamera();
 	return nullptr;
 }
 

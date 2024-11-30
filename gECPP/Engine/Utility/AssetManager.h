@@ -33,10 +33,13 @@ namespace gE
 			o._counter = nullptr;
 		);
 
-		ALWAYS_INLINE T* Get() const { return _t; }
+		GET(T&, , *_t);
+		GET(T*, Pointer, _t);
+
 		ALWAYS_INLINE T* operator->() const { return _t; }
 		ALWAYS_INLINE T& operator*() const { return *_t; }
 		ALWAYS_INLINE operator T&() const { return *_t; } // NOLINT
+		explicit ALWAYS_INLINE operator T*() const { return _t; } // NOLINT
 
 		ALWAYS_INLINE const T& operator||(const T& t) const { return _t ? *_t : t; };
 		ALWAYS_INLINE T& operator||(T& t) const { return _t ? *_t : t; }
@@ -47,7 +50,6 @@ namespace gE
 		ALWAYS_INLINE bool operator != (const Reference& o) const { return _t != o._t; }
 
 		explicit ALWAYS_INLINE operator bool() const { return _t; }
-		explicit ALWAYS_INLINE operator T*() const { return _t; } // NOLINT
 
 		template<class I>
 		ALWAYS_INLINE operator Reference<I>()
@@ -100,10 +102,13 @@ namespace gE
 		DEFAULT_OPERATOR_COPY(SmartPointer);
 		OPERATOR_MOVE_NOSUPER(SmartPointer, _t = o.Release())
 
-		ALWAYS_INLINE T* Get() const { return _t; }
+		GET(T&, , *_t);
+		GET(T*, Pointer, _t);
+
 		ALWAYS_INLINE T* operator->() const { return _t; }
 		ALWAYS_INLINE T& operator*() const { return *_t; }
 		ALWAYS_INLINE operator T&() const { return *_t; } // NOLINT
+		explicit ALWAYS_INLINE operator T*() const { return _t; } // NOLINT
 
 		ALWAYS_INLINE const T& operator||(const T& t) const { return _t ? *_t : t; };
 		ALWAYS_INLINE T& operator||(T& t) const { return _t ? *_t : t; }
@@ -114,7 +119,6 @@ namespace gE
 		ALWAYS_INLINE bool operator != (const SmartPointer& o) const { return _t != o._t; }
 
 		explicit ALWAYS_INLINE operator bool() const { return _t; }
-		explicit ALWAYS_INLINE operator T*() const { return _t; } // NOLINT
 
 		template<class O>
 		ALWAYS_INLINE SmartPointer<O> Move()

@@ -89,6 +89,8 @@ namespace gE
             _t->SetEmbedded();
         }
 
+        ManagedPX() = default;
+
         DELETE_OPERATOR_COPY(ManagedPX);
         OPERATOR_MOVE_NOSUPER(ManagedPX,
             _t = o._t;
@@ -96,6 +98,7 @@ namespace gE
         );
 
         GET(T&,, _t);
+        GET(T*, Pointer, _t);
 
         ALWAYS_INLINE T* operator->() { return _t; }
         ALWAYS_INLINE const T* operator->() const { return _t; }

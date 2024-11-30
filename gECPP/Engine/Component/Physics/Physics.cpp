@@ -41,7 +41,7 @@ namespace gE
     void PhysicsManager::OnFixedUpdate(float delta)
     {
         const int steps = std::clamp<int>(floor(delta * GE_PX_MIN_TICKRATE), 1, GE_PX_MAX_STEPS);
-        _physics->Update(delta, steps, _allocator.Get(), _jobSystem.Get());
+        _physics->Update(delta, steps, _allocator.GetPointer(), _jobSystem.GetPointer());
 
         for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())
             (**i)->OnFixedUpdate(delta);

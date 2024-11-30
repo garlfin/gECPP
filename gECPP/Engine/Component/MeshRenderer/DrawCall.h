@@ -31,7 +31,7 @@ namespace gE
 
 		GET_CONST(API::IVAO&, VAO, *_vao);
 		GET_CONST(const Transform&, Transform, *_transform);
-		GET_CONST(Material*, Material, _material.Get());
+		GET(Material*, Material, _material.GetPointer());
 		GET_CONST(u8, MaterialIndex, _subMesh);
 		GET_CONST(u8, LOD, _lod);
 

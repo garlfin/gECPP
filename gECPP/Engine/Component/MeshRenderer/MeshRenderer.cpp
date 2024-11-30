@@ -47,7 +47,7 @@ namespace gE
 	void MeshRenderer::SetMaterial(u8 i, const Reference<Material>& mat)
 	{
 		GE_ASSERT(i < _drawCalls.Count(), "MATERIAL OUT OF RANGE");
-		if(mat.Get() == _drawCalls[i].GetMaterial()) return;
+		if(mat.GetPointer() == _drawCalls[i].GetMaterial()) return;
 
 		DrawCallManager& manager = GetWindow().GetRenderers().GetDrawCallManager();
 		SAFE_CONSTRUCT(_drawCalls[i], DrawCall, manager, *this, COPY_MOVE(mat), i);
@@ -56,7 +56,7 @@ namespace gE
 	void MeshRenderer::SetMaterial(u8 i, Reference<Material>&& mat)
 	{
 		GE_ASSERT(i < _drawCalls.Count(), "MATERIAL OUT OF RANGE");
-		if(mat.Get() == _drawCalls[i].GetMaterial()) return;
+		if(mat.GetPointer() == _drawCalls[i].GetMaterial()) return;
 
 		DrawCallManager& manager = GetWindow().GetRenderers().GetDrawCallManager();
 		SAFE_CONSTRUCT(_drawCalls[i], DrawCall, manager, *this, move(mat), i);

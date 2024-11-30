@@ -27,6 +27,7 @@ public:
 	);
 
 	GET_SET(T*, , _t);
+	GET(T*, Pointer, _t);
 
 	ALWAYS_INLINE RelativePointer& operator=(T& t) { _t = &t; return *this; }
 	ALWAYS_INLINE RelativePointer& operator=(T* t) { _t = t; return *this; }
