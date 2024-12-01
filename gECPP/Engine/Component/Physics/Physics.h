@@ -23,14 +23,17 @@ namespace gE
     public:
         using Component::Component;
 
-        virtual void OnEarlyFixedUpdate(float d) = 0;
-
         void OnInit() override;
         void OnUpdate(float d) final;
+
+        virtual void ForceUpdateTransforms() = 0;
+        virtual void OnEarlyFixedUpdate(float d) = 0;
 
         GET_SET_VALUE(PhysicsInterpolationMode, InterpolationMode, _interpolationMode);
 
     protected:
+        void ResetTransformFlag();
+
         glm::vec3 Position, PreviousPosition;
         glm::quat Rotation, PreviousRotation;
 

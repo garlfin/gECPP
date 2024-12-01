@@ -111,7 +111,15 @@ namespace gE
         template<class O> requires std::is_base_of_v<O, T>
         const ManagedPX<O>& To() const { return (ManagedPX<O>&) *this; }
 
-        ~ManagedPX() { delete _t; _t = nullptr; }
+        ~ManagedPX()
+        {
+            if(!_t) return;
+
+            LOG("INFO: DELETED PXOBJECT\n\tCOUNT: " << _t->GetRefCount() << "\n\tFUNCTION: " << PRETTY_FUNCTION);
+
+            delete _t;
+            _t = nullptr;
+        }
 
     private:
         T* _t = DEFAULT;

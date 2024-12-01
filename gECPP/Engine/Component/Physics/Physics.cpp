@@ -11,6 +11,11 @@
 
 namespace gE
 {
+    void PhysicsComponent::ResetTransformFlag()
+    {
+        GetOwner().GetTransform()._flags &= ~TransformFlags::PhysicsInvalidated;
+    }
+
     PhysicsManager::PhysicsManager(Window* window) : ComponentManager(window)
     {
         px::RegisterDefaultAllocator();
@@ -40,7 +45,7 @@ namespace gE
 
     void PhysicsManager::OnFixedUpdate(float delta)
     {
-        const int steps = std::clamp<int>(floor(delta * GE_PX_MIN_TICKRATE), 1, GE_PX_MAX_STEPS);
+        const int steps = std::clamp<int>(std::floor(delta * GE_PX_MIN_TICKRATE), 1, GE_PX_MAX_STEPS);
         _physics->Update(delta, steps, _allocator.GetPointer(), _jobSystem.GetPointer());
 
         for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())

@@ -54,10 +54,10 @@ namespace gE
 
 		NODISCARD glm::mat4 GetParentTransform() const;
 
-		ALWAYS_INLINE void SetPosition(const glm::vec3& pos) { SetPosition(pos, TransformFlags::All); }
-		ALWAYS_INLINE void SetLocation(const glm::vec3& pos) { SetLocation(pos, TransformFlags::All); }
-		ALWAYS_INLINE void SetRotation(const glm::quat& rot) { SetRotation(rot, TransformFlags::All); }
-		ALWAYS_INLINE void SetScale(const glm::vec3& scale) { SetScale(scale, TransformFlags::All); }
+		inline void SetPosition(const glm::vec3& pos, TransformFlags flags = TransformFlags::All) { _flags |= flags; _transform.Position = pos; }
+		inline void SetLocation(const glm::vec3& pos, TransformFlags flags = TransformFlags::All) { _flags |= flags; _transform.Position = pos; }
+		inline void SetRotation(const glm::quat& rot, TransformFlags flags = TransformFlags::All) { _flags |= flags; _transform.Rotation = rot; }
+		inline void SetScale(const glm::vec3& scale, TransformFlags flags = TransformFlags::All) { _flags |= flags; _transform.Scale = scale; }
 
 		ALWAYS_INLINE void Set(const TransformData& d) { Set(d, TransformFlags::All); }
 		ALWAYS_INLINE void Set(const Transform& d) { Set(d._transform, TransformFlags::All); }
@@ -79,11 +79,6 @@ namespace gE
 		friend class PhysicsComponent;
 
 	protected:
-		inline void SetPosition(const glm::vec3& pos, TransformFlags flags) { _flags |= flags; _transform.Position = pos; }
-		inline void SetLocation(const glm::vec3& pos, TransformFlags flags) { _flags |= flags; _transform.Position = pos; }
-		inline void SetRotation(const glm::quat& rot, TransformFlags flags) { _flags |= flags; _transform.Rotation = rot; }
-		inline void SetScale(const glm::vec3& scale, TransformFlags flags) { _flags |= flags; _transform.Scale = scale; }
-
 		inline void Set(const TransformData& d, TransformFlags flags) { _flags |= flags; _transform = d; };
 		inline void Set(const Transform& d, TransformFlags flags) { _flags |= flags; _transform = d._transform; };
 

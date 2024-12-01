@@ -62,29 +62,10 @@ namespace gE
 
     void RigidBody::OnEarlyFixedUpdate(float d)
     {
-        const PhysicsManager& physics = GetWindow().GetPhysics();
         const Transform& transform = GetOwner().GetTransform();
-        const Physics::ColliderTransform& offset = _collider->GetTransform();
 
-        if(!(bool)(transform.GetFlags() & TransformFlags::PhysicsInvalidated)) return;
-
-        if(_previousScale != transform->Scale)
-        {
-            LOG("INFO: SHAPE SCALING");
-
-            const px::ShapeSettings::ShapeResult result = _collider->GetShape().GetJoltShape().ScaleShape(ToPX(transform->Scale));
-            GE_ASSERT(result.IsValid(), "INVALID SCALED SHAPE!");
-
-            physics._interface->SetShape(_body->GetID(), result.Get(), true, JPH::EActivation::Activate);
-            _previousScale = transform->Scale;
-        }
-
-        physics._interface->SetPositionAndRotation(
-            _body->GetID(),
-            ToPX(Position + offset.Position * transform->Scale * Rotation),
-            ToPX(Rotation * offset.Rotation),
-            JPH::EActivation::Activate
-        );
+        if((bool)(transform.GetFlags() & TransformFlags::PhysicsInvalidated))
+            ForceUpdateTransforms();
     }
 
     void RigidBody::OnFixedUpdate(float d)
@@ -111,6 +92,34 @@ namespace gE
         manager._interface->DestroyBody(_body->GetID());
 
         _body = nullptr;
+    }
+
+    void RigidBody::ForceUpdateTransforms()
+    {
+        const PhysicsManager& physics = GetWindow().GetPhysics();
+        const Transform& transform = GetOwner().GetTransform();
+        const Physics::ColliderTransform& offset = _collider->GetTransform();
+
+        if(_previousScale != transform->Scale)
+        {
+            LOG("INFO: SHAPE SCALING");
+
+            const px::ShapeSettings::ShapeResult result = _collider->GetShape().GetJoltShape().ScaleShape(ToPX(transform->Scale));
+            GE_ASSERT(result.IsValid(), "INVALID SCALED SHAPE!");
+
+            physics._interface->SetShape(_body->GetID(), result.Get(), true, JPH::EActivation::Activate);
+            _previousScale = transform->Scale;
+        }
+
+        physics._interface->SetPositionAndRotation
+        (
+            _body->GetID(),
+            ToPX(Position + offset.Position * transform->Scale * Rotation),
+            ToPX(Rotation * offset.Rotation),
+            JPH::EActivation::Activate
+        );
+
+        ResetTransformFlag();
     }
 
     void RigidBody::SetInstantVelocity(const glm::vec3& velocity)

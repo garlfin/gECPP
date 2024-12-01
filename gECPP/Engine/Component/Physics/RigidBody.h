@@ -42,6 +42,7 @@ namespace gE
 		void OnEarlyFixedUpdate(float d) override;
 		void OnFixedUpdate(float d) override;
 		void OnDestroy() override;
+		void ForceUpdateTransforms() override;
 
 		GET_CONST(glm::vec3, Velocity, ToGLM(_body->GetLinearVelocity()));
 		void SetInstantVelocity(const glm::vec3&);

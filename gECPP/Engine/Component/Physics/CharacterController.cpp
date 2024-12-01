@@ -19,7 +19,7 @@ namespace gE
 
         JPH::CharacterVirtualSettings settings = DEFAULT;
 
-        settings.mMass = 500.f; // Average person weight.
+        settings.mMass = shape.Mass;
         settings.mEnhancedInternalEdgeRemoval = true;
         settings.mInnerBodyLayer = (px::ObjectLayer) GetOwner().GetLayer();
 
@@ -36,17 +36,24 @@ namespace gE
 
         if(_shape && _shape.GetSettings() == shape) return;
 
-        _shape = move(Jolt::CapsuleShape(&GetWindow(), shape));
+        auto newShape = Jolt::CapsuleShape(&GetWindow(), shape);
 
-        _controller->SetShape(
-            &_shape.GetJoltShape(),
-            physicsSettings.mPenetrationSlop,
+        _controller->SetMass(shape.Mass);
+        bool result = _controller->SetShape(
+            &newShape.GetJoltShape(),
+            FLT_MAX,
             _broadFilter,
             _filter,
             DefaultBodyFilter,
             DefaultShapeFilter,
             manager.GetTempAllocator()
         );
+
+        GE_ASSERT(result, "COULD NOT CHANGE SHAPE!");
+
+        _controller->SetInnerBodyShape(&newShape.GetJoltShape());
+
+        _shape = move(newShape);
     }
 
     void CharacterController::OnInit()
@@ -63,6 +70,7 @@ namespace gE
     {
         const PhysicsManager& manager = GetWindow().GetPhysics();
         const px::PhysicsSystem& system = manager.GetSystem();
+        const Transform& transform = GetOwner().GetTransform();
 
         glm::vec3 velocity = _velocity;
         velocity.y += system.GetGravity().GetY();
@@ -70,6 +78,9 @@ namespace gE
         if(_controller->IsSupported() || !_useGravity) velocity.y = 0.f;
 
         _controller->SetLinearVelocity(ToPX(velocity));
+
+        if((bool)(transform.GetFlags() & TransformFlags::PhysicsInvalidated))
+            ForceUpdateTransforms();
     }
 
     void CharacterController::OnFixedUpdate(float delta)
@@ -89,5 +100,18 @@ namespace gE
 
         PreviousPosition = Position;
         Position = ToGLM(_controller->GetPosition());
+    }
+
+    void CharacterController::ForceUpdateTransforms()
+    {
+        const Transform& transform = GetOwner().GetTransform();
+
+        ResetTransformFlag();
+
+        Position = transform->Position;
+        Rotation = transform->Rotation;
+
+        _controller->SetPosition(ToPX(Position));
+        _controller->SetRotation(ToPX(Rotation));
     }
 }

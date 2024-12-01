@@ -19,7 +19,8 @@ namespace gE
 		_cubemapManaged(&GetWindow().GetCubemaps(), *this),
 		_camera(this, _target, { CubemapCameraSettings, size }),
 		_target(_camera)
-	{}
+	{
+	}
 
 	void CubemapCapture::GetGPUCubemap(GPU::Cubemap& cubemap)
 	{

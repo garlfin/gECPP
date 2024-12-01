@@ -26,6 +26,10 @@ namespace gE::VoxelDemo
 		{
 		}
 
+		GET_SET_VALUE(Entity*, FPCamera, _camera);
+		GET_SET_VALUE(float, StandingHeight, _standingHeight);
+		GET_SET_VALUE(float, CrouchingHeight, _crouchingHeight);
+
 		void OnUpdate(float delta) override
 		{
 			Transform& transform = GetOwner().GetTransform();
@@ -34,12 +38,14 @@ namespace gE::VoxelDemo
 			const KeyboardState& keyboard = GetWindow().GetKeyboard();
 			const MouseState& mouse = GetWindow().GetMouse();
 
+			const KeyState crouchState = keyboard.GetKey(Key::C);
+
 			_rot.y += mouse.GetDelta().x * SENSITIVITY;
 			_rot.x += mouse.GetDelta().y * SENSITIVITY;
 			_rot.x = std::clamp(_rot.x, -89.9f, 89.9f);
 
-			transform.SetRotation(glm::vec3(0, _rot.y * TO_RAD, 0));
-			cameraTransform.SetRotation(glm::vec3(_rot.x * TO_RAD, 0, 0));
+			transform.SetRotation(glm::vec3(0, _rot.y * TO_RAD, 0), TransformFlags::RenderInvalidated);
+			cameraTransform.SetRotation(glm::vec3(_rot.x * TO_RAD, 0, 0), TransformFlags::RenderInvalidated);
 
 			glm::vec3 dir(0.f);
 			if(IsPressed(keyboard.GetKey(Key::W))) dir.z -= SPEED;
@@ -50,14 +56,33 @@ namespace gE::VoxelDemo
 			dir = normalize(dir);
 			if(glm::isnan(dir.x)) dir = DEFAULT;
 
-			if(IsPressed(keyboard.GetKey(Key::LShift))) dir *= SPEED_MULTIPLIER;
+			Physics::CapsuleShape capsuleShape = DEFAULT;
+			capsuleShape.Height = _standingHeight;
+
+			if(IsPressed(crouchState))
+			{
+				capsuleShape.Height = _crouchingHeight;
+				dir *= 0.5;
+			}
+
+			if(crouchState == KeyState::Released)
+			{
+				float heightDifference = (_standingHeight - _crouchingHeight) / 2.f;
+				transform.SetPosition(transform->Position + glm::vec3(0, heightDifference, 0));
+				_controller->ForceUpdateTransforms();
+			}
+
+			cameraTransform.SetPosition(glm::vec3(0, capsuleShape.Height / 2.f, 0));
+			_controller->SetShape(capsuleShape);
+
+			if(!IsPressed(crouchState) && IsPressed(keyboard.GetKey(Key::LShift))) dir *= SPEED_MULTIPLIER;
 			_controller->SetVelocity(transform->Rotation * dir);
 		}
 
-		GET_SET_VALUE(Entity*, FPCamera, _camera);
-
 	 private:
 		glm::vec3 _rot = DEFAULT;
+		float _standingHeight = 1.75;
+		float _crouchingHeight = 0.875;
 		RelativePointer<CharacterController> _controller;
 		Entity* _camera;
 	};

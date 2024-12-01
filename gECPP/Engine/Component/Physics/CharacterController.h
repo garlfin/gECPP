@@ -24,7 +24,9 @@ namespace gE
         void OnEarlyFixedUpdate(float delta) override;
         void OnFixedUpdate(float delta) override;
 
-        GET_CONST(const Jolt::CapsuleShape&, Shape, _shape);
+        void ForceUpdateTransforms() override;
+
+        GET_CONST(const Jolt::CapsuleShape&, Shape, _shape)
         GET_CONST(const px::CharacterVirtual&, JoltController, *_controller);
 
         GET_CONST(float, Mass, _controller->GetMass());

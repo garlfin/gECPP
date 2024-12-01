@@ -48,7 +48,7 @@ public:
 	inline RefTarget &		operator = (const RefTarget &)					{ /* Don't copy refcount */ return *this; }
 
 	/// Get current refcount of this object
-	uint32					GetRefCount() const								{ return mRefCount.load(memory_order_relaxed); }
+	uint32					GetRefCount() const								{ uint32 count = mRefCount.load(memory_order_relaxed); return count >= cEmbedded ? count - cEmbedded : count; }
 
 	/// Add or release a reference to this object
 	inline void				AddRef() const
