@@ -8,10 +8,12 @@
 #include <gECPP/Engine/Math/Math.h>
 
 #include <Vendor/Jolt/Jolt.h>
-#include <Vendor/Jolt/Core/JobSystemThreadPool.h>
 #include <Vendor/Jolt/Physics/PhysicsSystem.h>
 #include <Vendor/Jolt/Physics/Collision/ObjectLayer.h>
 #include <Engine/Entity/Layer.h>
+#include <Engine/Utility/Array.h>
+
+#include "Engine/Math/Collision/AABB.h"
 
 #define GE_PX_ALLOCATION 10485760
 #define GE_PX_MAX_BODIES 1024
@@ -93,6 +95,7 @@ namespace gE
 
         DELETE_OPERATOR_COPY(ManagedPX);
         OPERATOR_MOVE_NOSUPER(ManagedPX,
+            if(_t) LOG("INFO: MOVED PXOBJECT\n\tCOUNT: " << _t->GetRefCount() << "\n\tFUNCTION: " << PRETTY_FUNCTION);
             _t = o._t;
             o._t = nullptr;
         );
@@ -115,7 +118,7 @@ namespace gE
         {
             if(!_t) return;
 
-            LOG("INFO: DELETED PXOBJECT\n\tCOUNT: " << _t->GetRefCount() << "\n\tFUNCTION: " << PRETTY_FUNCTION);
+            LOG("INFO: DELETED PXOBJECT\n\tFUNCTION: " << PRETTY_FUNCTION);
 
             delete _t;
             _t = nullptr;
@@ -125,10 +128,63 @@ namespace gE
         T* _t = DEFAULT;
     };
 
-    inline px::Vec3 ToPX(const glm::vec3& o) { return { o.x, o.y, o.z }; }
-    inline glm::vec3 ToGLM(const px::Vec3& o) { return { o.GetX(), o.GetY(), o.GetZ() }; }
-    inline px::Quat ToPX(const glm::quat& o) { return { o.x, o.y, o.z, o.w }; }
-    inline glm::quat ToGLM(const px::Quat& o) { return { o.GetW(), o.GetX(), o.GetY(), o.GetZ() }; }
+    template<typename IN_T, typename OUT_T>
+    using PXCastFunction = OUT_T(*)(const IN_T& from);
+
+    template<typename IN_T, typename OUT_T>
+    OUT_T PXBitCast(const IN_T& in)
+    {
+        return *(OUT_T*) &in;
+    }
+
+    NODISCARD inline px::Vec3 ToPX(const glm::vec3& o) { return { o.x, o.y, o.z }; }
+    NODISCARD inline glm::vec3 ToGLM(const px::Vec3& o) { return { o.GetX(), o.GetY(), o.GetZ() }; }
+    NODISCARD inline px::Quat ToPX(const glm::quat& o) { return { o.x, o.y, o.z, o.w }; }
+    NODISCARD inline glm::quat ToGLM(const px::Quat& o) { return { o.GetW(), o.GetX(), o.GetY(), o.GetZ() }; }
+    NODISCARD inline px::Mat44 ToPX(const glm::mat4& o) { return PXBitCast<glm::mat4, px::Mat44>(o); }
+    NODISCARD inline glm::mat4 ToGLM(const px::Mat44& o) { return PXBitCast<px::Mat44, glm::mat4>(o); }
+    NODISCARD inline AABB<Dimension::D3D> ToGE(const px::AABox& o) { return { ToGLM(o.mMin), ToGLM(o.mMax) }; }
+    NODISCARD inline px::AABox ToPX(const AABB<Dimension::D3D>& o) { return { ToPX(o.Min), ToPX(o.Max) }; }
+
+    template<class IN_T, class OUT_T, PXCastFunction<IN_T, OUT_T> CAST_FUNC = PXBitCast<IN_T, OUT_T>>
+    px::Array<OUT_T> ToPX(const Array<IN_T>& array)
+    {
+        if constexpr(CAST_FUNC == PXBitCast<IN_T, OUT_T>)
+        {
+            static_assert(std::is_trivially_copyable_v<IN_T>);
+            static_assert(std::is_trivially_copyable_v<OUT_T>);
+            static_assert(sizeof(IN_T) == sizeof(OUT_T));
+
+            return px::Array<OUT_T>(array.Data(), array.Data() + array.Count());
+        }
+
+        px::Array<OUT_T> arr(array.Count());
+
+        for(size_t i = 0; i < array.Count(); i++)
+            arr[i] = CAST_FUNC(array[i]);
+
+        return arr;
+    }
+
+    template<class IN_T, class OUT_T, PXCastFunction<IN_T, OUT_T> CAST_FUNC = PXBitCast<IN_T, OUT_T>>
+    Array<OUT_T> ToGE(const px::Array<IN_T>& array)
+    {
+        if constexpr(CAST_FUNC == PXBitCast<IN_T, OUT_T>)
+        {
+            static_assert(std::is_trivially_copyable_v<IN_T>);
+            static_assert(std::is_trivially_copyable_v<OUT_T>);
+            static_assert(sizeof(IN_T) == sizeof(OUT_T));
+
+            return Array<OUT_T>((OUT_T*) array.data(), array.size());
+        }
+
+        Array<OUT_T> arr(array.size());
+
+        for(size_t i = 0; i < arr.Count(); i++)
+            arr[i] = CAST_FUNC(array[i]);
+
+        return arr;
+    }
 }
 
 #include "Physics.inl"

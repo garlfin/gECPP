@@ -31,8 +31,6 @@ namespace gE
     void CharacterController::SetShape(const Physics::CapsuleShape& shape)
     {
         PhysicsManager& manager = GetWindow().GetPhysics();
-        px::PhysicsSystem& system = manager.GetSystem();
-        const px::PhysicsSettings& physicsSettings = system.GetPhysicsSettings();
 
         if(_shape && _shape.GetSettings() == shape) return;
 

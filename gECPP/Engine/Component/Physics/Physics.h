@@ -8,6 +8,7 @@
 #include <Physics/Physics.h>
 #include <Engine/Component/Component.h>
 #include <Engine/Utility/AssetManager.h>
+#include <Jolt/Core/JobSystemThreadPool.h>
 
 namespace gE
 {

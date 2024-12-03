@@ -353,6 +353,40 @@ ConvexHullShape::ConvexHullShape(const ConvexHullShapeSettings &inSettings, Shap
 	outResult.Set(this);
 }
 
+ConvexHullShape::ConvexHullShape(BakedConvexHullShapeSettings&& inSettings) :
+	ConvexShape(EShapeSubType::ConvexHull, nullptr)
+{
+	mCenterOfMass = inSettings.mCenterOfMass;
+	mInertia = inSettings.mInertia;
+	mLocalBounds = inSettings.mLocalBounds;
+	mPoints = std::move(inSettings.mPoints);
+	mFaces = std::move(inSettings.mFaces);
+	mPlanes = std::move(inSettings.mPlanes);
+	mVertexIdx = std::move(inSettings.mVertexIdx);
+	mConvexRadius = inSettings.mConvexRadius;
+	mVolume = inSettings.mVolume;
+	mInnerRadius = inSettings.mInnerRadius;
+}
+
+void ConvexHullShape::GetBakedHullShapeSettings(BakedConvexHullShapeSettings& outSettings)
+{
+	outSettings.mCenterOfMass = mCenterOfMass;
+	outSettings.mInertia = mInertia;
+	outSettings.mLocalBounds = mLocalBounds;
+	outSettings.mPoints = std::move(mPoints);
+	outSettings.mFaces = std::move(mFaces);
+	outSettings.mPlanes = std::move(mPlanes);
+	outSettings.mVertexIdx = mVertexIdx;
+	outSettings.mConvexRadius = mConvexRadius;
+	outSettings.mVolume = mVolume;
+	outSettings.mInnerRadius = mInnerRadius;
+}
+
+ShapeSettings::ShapeResult BakedConvexHullShapeSettings::Create() const
+{
+	return ShapeResult();
+}
+
 MassProperties ConvexHullShape::GetMassProperties() const
 {
 	MassProperties p;

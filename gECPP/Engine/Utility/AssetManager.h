@@ -6,11 +6,12 @@
 
 #include <vector>
 #include "Binary.h"
+#include "Serializable/Asset.h"
 
 namespace gE
 {
 	template<class T>
-	class Reference
+	class Reference : public Asset
 	{
 	 public:
 		explicit inline Reference(T* t) : _t(t) { if(t) _counter = new u32(1); }
@@ -51,14 +52,7 @@ namespace gE
 
 		explicit ALWAYS_INLINE operator bool() const { return _t; }
 
-		template<class I>
-		ALWAYS_INLINE operator Reference<I>()
-		{
-			static_assert(std::is_base_of_v<I, T>);
-			return Reference<I>(_t, _counter);
-		}
-
-		~Reference()
+		void Free() override
 		{
 			if(!_t || --(*_counter)) return;
 
@@ -69,6 +63,17 @@ namespace gE
 			_t = nullptr;
 			_counter = nullptr;
 		}
+		
+		NODISCARD bool IsFree() const override { return !_t; }
+
+		template<class I>
+		ALWAYS_INLINE operator Reference<I>()
+		{
+			static_assert(std::is_base_of_v<I, T>);
+			return Reference<I>(_t, _counter);
+		}
+
+		~Reference() override { Reference::Free(); }
 
 	 private:
 		Reference(T* t, u32* c) : _t(t), _counter(c) { if(_counter) (*_counter)++; }
@@ -93,7 +98,7 @@ namespace gE
 	}
 
 	template<class T>
-	class SmartPointer
+	class SmartPointer : public Asset
 	{
 	 public:
 		ALWAYS_INLINE explicit SmartPointer(T* t) : _t(t) { };
@@ -120,6 +125,9 @@ namespace gE
 
 		explicit ALWAYS_INLINE operator bool() const { return _t; }
 
+		void Free() override { delete _t; _t = nullptr; }
+		NODISCARD bool IsFree() const override { return !_t; }
+
 		template<class O>
 		ALWAYS_INLINE SmartPointer<O> Move()
 		{
@@ -129,7 +137,7 @@ namespace gE
 
 		T* Release() { T* t = _t; _t = nullptr; return t; }
 
-		~SmartPointer() { delete _t; _t = nullptr; }
+		~SmartPointer() override { SmartPointer::Free(); }
 
 	 private:
 		T* _t = nullptr;

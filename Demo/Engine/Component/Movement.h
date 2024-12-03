@@ -39,6 +39,7 @@ namespace gE::VoxelDemo
 			const MouseState& mouse = GetWindow().GetMouse();
 
 			const KeyState crouchState = keyboard.GetKey(Key::C);
+			const bool grounded = _controller->GetIsGrounded();
 
 			_rot.y += mouse.GetDelta().x * SENSITIVITY;
 			_rot.x += mouse.GetDelta().y * SENSITIVITY;
@@ -65,7 +66,7 @@ namespace gE::VoxelDemo
 				dir *= 0.5;
 			}
 
-			if(crouchState == KeyState::Released)
+			if(crouchState == KeyState::Released && grounded)
 			{
 				float heightDifference = (_standingHeight - _crouchingHeight) / 2.f;
 				transform.SetPosition(transform->Position + glm::vec3(0, heightDifference, 0));
@@ -76,6 +77,8 @@ namespace gE::VoxelDemo
 			_controller->SetShape(capsuleShape);
 
 			if(!IsPressed(crouchState) && IsPressed(keyboard.GetKey(Key::LShift))) dir *= SPEED_MULTIPLIER;
+			if(!grounded) dir *= 0.0;
+
 			_controller->SetVelocity(transform->Rotation * dir);
 		}
 

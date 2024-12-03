@@ -13,6 +13,45 @@
 
 JPH_NAMESPACE_BEGIN
 
+struct ConvexHullFace
+{
+	uint16				mFirstVertex;				///< First index in mVertexIdx to use
+	uint16				mNumVertices = 0;			///< Number of vertices in the mVertexIdx to use
+};
+
+static_assert(sizeof(ConvexHullFace) == 4, "Unexpected size");
+static_assert(alignof(ConvexHullFace) == 2, "Unexpected alignment");
+
+struct ConvexHullPoint
+{
+	Vec3				mPosition;					///< Position of vertex
+	int					mNumFaces = 0;				///< Number of faces in the face array below
+	int					mFaces[3] = { -1, -1, -1 };	///< Indices of 3 neighboring faces with the biggest difference in normal (used to shift vertices for convex radius)
+};
+
+static_assert(sizeof(ConvexHullPoint) == 32, "Unexpected size");
+static_assert(alignof(ConvexHullPoint) == JPH_VECTOR_ALIGNMENT, "Unexpected alignment");
+
+
+class JPH_EXPORT BakedConvexHullShapeSettings final : public ConvexShapeSettings
+{
+public:
+	BakedConvexHullShapeSettings() = default;
+
+	Vec3					mCenterOfMass;
+	Mat44					mInertia;
+	AABox					mLocalBounds;
+	Array<ConvexHullPoint>	mPoints;
+	Array<ConvexHullFace>	mFaces;
+	Array<Plane>			mPlanes;
+	Array<uint8>			mVertexIdx;
+	float					mConvexRadius = 0.0f;
+	float					mVolume;
+	float					mInnerRadius = FLT_MAX;
+
+	virtual ShapeResult		Create() const override;
+};
+
 /// Class that constructs a ConvexHullShape
 class JPH_EXPORT ConvexHullShapeSettings final : public ConvexShapeSettings
 {
@@ -49,6 +88,9 @@ public:
 	/// Constructor
 							ConvexHullShape() : ConvexShape(EShapeSubType::ConvexHull) { }
 							ConvexHullShape(const ConvexHullShapeSettings &inSettings, ShapeResult &outResult);
+							explicit ConvexHullShape(BakedConvexHullShapeSettings&& inSettings);
+
+	void GetBakedHullShapeSettings(BakedConvexHullShapeSettings& outSettings);
 
 	// See Shape::GetCenterOfMass
 	virtual Vec3			GetCenterOfMass() const override									{ return mCenterOfMass; }
@@ -164,24 +206,8 @@ private:
 	class					HullWithConvex;
 	class					HullWithConvexScaled;
 
-	struct Face
-	{
-		uint16				mFirstVertex;				///< First index in mVertexIdx to use
-		uint16				mNumVertices = 0;			///< Number of vertices in the mVertexIdx to use
-	};
-
-	static_assert(sizeof(Face) == 4, "Unexpected size");
-	static_assert(alignof(Face) == 2, "Unexpected alignment");
-
-	struct Point
-	{
-		Vec3				mPosition;					///< Position of vertex
-		int					mNumFaces = 0;				///< Number of faces in the face array below
-		int					mFaces[3] = { -1, -1, -1 };	///< Indices of 3 neighboring faces with the biggest difference in normal (used to shift vertices for convex radius)
-	};
-
-	static_assert(sizeof(Point) == 32, "Unexpected size");
-	static_assert(alignof(Point) == JPH_VECTOR_ALIGNMENT, "Unexpected alignment");
+	using Point = ConvexHullPoint;
+	using Face = ConvexHullFace;
 
 	Vec3					mCenterOfMass;				///< Center of mass of this convex hull
 	Mat44					mInertia;					///< Inertia matrix assuming density is 1 (needs to be multiplied by density)

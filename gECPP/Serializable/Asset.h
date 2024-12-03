@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <Serializable/Serializable.h>
+#include <Engine/Utility/Macro.h>
 
 #ifdef DEBUG
     #define ASSET_CHECK_FREE(TYPE) if(!TYPE::IsFree()) { LOG("WARNING: ASSET NOT DELETED\n\tAsset: " << this); }

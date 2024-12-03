@@ -35,6 +35,9 @@ namespace gE
         GET_SET_VALUE(bool, UseGravity, _useGravity);
         GET_SET_VALUE(glm::vec3, Velocity, _velocity);
 
+        GET_CONST(bool, IsGrounded, _controller->IsSupported());
+        NODISCARD PhysicsComponent* GetGround() const { return (PhysicsComponent*) _controller->GetGroundUserData(); }
+
         void SetShape(const Physics::CapsuleShape& shape);
 
     private:

@@ -6,9 +6,10 @@
 
 #include <Engine/Math/Math.h>
 #include <Engine/Utility/Macro.h>
+#include <Serializable/Asset.h>
 
 template<typename T>
-class Array
+class Array : public gE::Asset
 {
  public:
 	static constexpr bool IS_VOID = std::is_same_v<T, void>;
@@ -24,7 +25,7 @@ class Array
 			for(size_t i = 0; i < count; i++) _t[i] = I(std::forward<ARGS>(args)...);
 	}
 
-	Array(size_t count, const T* t) : _size(count), _t(nullptr)
+	Array(const T* t, size_t count) : _size(count), _t(nullptr)
 	{
 		if(_size) _t = new I[count];
 		if(!t) return;
@@ -70,12 +71,12 @@ class Array
 	NODISCARD ALWAYS_INLINE I& operator[](u64 i) { GE_ASSERT(_t, "ERROR: ARRAY NOT INITIALIZED"); return _t[i]; }
 	NODISCARD ALWAYS_INLINE const I& operator[](u64 i) const { GE_ASSERT(_t, "ERROR: ARRAY NOT INITIALIZED"); return _t[i]; }
 
-	NODISCARD ALWAYS_INLINE bool IsFree() const { return !_t; }
-	ALWAYS_INLINE void Free() { delete[] _t; _t = nullptr; _size = 0; }
+	NODISCARD ALWAYS_INLINE bool IsFree() const override { return !_t; }
+	ALWAYS_INLINE void Free() override { delete[] _t; _t = nullptr; _size = 0; }
 
 	ALWAYS_INLINE operator bool() const { return _t; }
 
-	~Array() { Free(); }
+	~Array() override { Array::Free(); }
 
  private:
 	u64 _size = 0;

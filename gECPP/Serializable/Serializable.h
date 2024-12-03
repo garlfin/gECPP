@@ -248,12 +248,21 @@ void WriteArray(std::ostream& out, u32 count, const Array<T>* t)
 }
 
 template<typename UINT_T, class T>
+void ReadArray(std::istream& in, Array<T>& array)
+{
+	static_assert(std::is_trivially_copyable_v<T>);
+
+	UINT_T length = Read<UINT_T>(in);
+	array = Array<T>(length);
+	in.read((char*) array.Data(), length * sizeof(typename Array<T>::I));
+}
+
+template<typename UINT_T, class T>
 Array<T> ReadArray(std::istream& in)
 {
-	UINT_T length = Read<UINT_T>(in);
-	Array<T> arr = Array<T>(length);
-	in.read((char*) arr.Data(), length * sizeof(typename Array<T>::I));
-	return arr;
+	Array<T> array;
+	ReadArray<UINT_T, T>(in, array);
+	return array;
 }
 
 template<>
@@ -315,11 +324,11 @@ void Write(ostream& out, u32 count, const T* t)
 }
 
 template<typename UINT_T, class T>
-void ReadArraySerializable(std::istream& in, u32 count, Array<T>* t, typename T::SETTINGS_T s)
+void ReadArraySerializable(std::istream& in, u32 count, Array<T>* ts, typename T::SETTINGS_T s)
 {
 	for(u32 i = 0; i < count; i++)
 	{
-		Array<T>& t = t[i];
+		Array<T>& t = ts[i];
 
 		UINT_T length = Read<UINT_T>(in);
 

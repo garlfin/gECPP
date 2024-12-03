@@ -8,6 +8,7 @@
 #include <Jolt/Physics/Collision/Shape/BoxShape.h>
 #include <Jolt/Physics/Collision/Shape/SphereShape.h>
 #include <Jolt/Physics/Collision/Shape/CapsuleShape.h>
+#include <Jolt/Physics/Collision/Shape/ConvexHullShape.h>
 #include <Serializable/Serializable.h>
 
 #include "Physics.h"
@@ -15,6 +16,9 @@
 #include <Serializable/Macro.h>
 #include <Graphics/Graphics.h>
 #include <Serializable/Asset.h>
+
+#include "Engine/Math/Collision/AABB.h"
+#include "Engine/Utility/AssetManager.h"
 
 namespace Physics
 {
@@ -84,6 +88,64 @@ namespace Physics
         float Height = 1.75f;
         float Radius = 0.225f;
     };
+
+    struct ConvexMeshFace
+    {
+        u16 FirstVertex = DEFAULT;
+        u16 VertexCount = DEFAULT;
+    };
+
+    struct ConvexMeshPoint
+    {
+        glm::vec3 Position = DEFAULT;
+        u32 FaceCount = DEFAULT;
+        u32 Faces[3] = DEFAULT;
+    };
+
+    struct BakedConvexMeshShape : public Serializable<>, public gE::Asset
+    {
+        SERIALIZABLE_PROTO(BCVX, 1, BakedConvexMeshShape, Serializable);
+
+    public:
+        void Free() override;
+        NODISCARD bool IsFree() const override;
+
+        glm::vec3 CenterOfMass = DEFAULT;
+        glm::mat4 Inertia = DEFAULT;
+        gE::AABB<Dimension::D3D> Bounds = DEFAULT;
+        Array<ConvexMeshPoint> Points = DEFAULT;
+        Array<ConvexMeshFace> Faces = DEFAULT;
+        Array<u8> VertexIDs = DEFAULT;
+        float ConvexRadius = DEFAULT;
+        float Volume = DEFAULT;
+        float InnerRadius = DEFAULT;
+    };
+
+    enum class BakeConvexShapeResult
+    {
+        Success,
+        MaxVerticesReached,
+        TooFewPoints,
+        TooFewFaces,
+        Degenerate
+    };
+
+    struct ConvexMeshShape : public ConvexShape
+    {
+        SERIALIZABLE_PROTO(CNVX, 1, ConvexMeshShape, ConvexShape);
+
+    public:
+        Array<glm::vec3> Points = DEFAULT;
+        gE::SmartPointer<BakedConvexMeshShape> BakedSettings = DEFAULT;
+
+        void Free() override { Points.Free(); BakedSettings.Free(); }
+        [[nodiscard]] bool IsFree() const override { return Points.IsFree() && !BakedSettings; }
+
+        BakeConvexShapeResult Bake();
+    };
+
+    NODISCARD ConvexMeshPoint ToGE(const px::ConvexHullPoint&);
+    NODISCARD px::ConvexHullPoint ToPX(const ConvexMeshPoint&);
 }
 
 namespace Jolt
@@ -154,6 +216,18 @@ namespace Jolt
 
     private:
         gE::ManagedPX<px::CapsuleShape> _shape;
+    };
+
+    class ConvexMeshShape : protected Physics::ConvexMeshShape, public ConvexShape
+    {
+        API_SERIALIZABLE(ConvexMeshShape, Physics::ConvexMeshShape);
+        API_DEFAULT_CM_CONSTRUCTOR(ConvexMeshShape);
+
+    public:
+        GET(px::ConvexHullShape&, JoltShape, *_shape);
+
+    private:
+        gE::ManagedPX<px::ConvexHullShape> _shape;
     };
 }
 
