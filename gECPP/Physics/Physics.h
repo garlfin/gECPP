@@ -82,7 +82,7 @@ namespace gE
     GLOBAL px::BodyFilter DefaultBodyFilter = DEFAULT;
 
     template<class T>
-    struct ManagedPX
+    struct ManagedPX : public Asset
     {
     public:
         template<typename... ARGS>
@@ -94,7 +94,7 @@ namespace gE
         ManagedPX() = default;
 
         DELETE_OPERATOR_COPY(ManagedPX);
-        OPERATOR_MOVE_NOSUPER(ManagedPX,
+        OPERATOR_MOVE_NOSUPER(ManagedPX, Free,
             if(_t) LOG("INFO: MOVED PXOBJECT\n\tCOUNT: " << _t->GetRefCount() << "\n\tFUNCTION: " << PRETTY_FUNCTION);
             _t = o._t;
             o._t = nullptr;
@@ -114,7 +114,7 @@ namespace gE
         template<class O> requires std::is_base_of_v<O, T>
         const ManagedPX<O>& To() const { return (ManagedPX<O>&) *this; }
 
-        ~ManagedPX()
+        void Free() override
         {
             if(!_t) return;
 
@@ -123,6 +123,10 @@ namespace gE
             delete _t;
             _t = nullptr;
         }
+
+        NODISCARD bool IsFree() const override { return !_t; }
+
+        inline ~ManagedPX() override { ManagedPX::Free(); }
 
     private:
         T* _t = DEFAULT;

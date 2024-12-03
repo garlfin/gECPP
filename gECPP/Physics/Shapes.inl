@@ -99,11 +99,13 @@ namespace Physics
 
     inline void ConvexMeshShape::IDeserialize(ostream& out) const
     {
-        WriteArray<u32>(out, Points);
-        Write(out, (bool) BakedSettings);
+        const bool hasBakedSettings = !BakedSettings.IsFree();
 
-        if(!(bool) BakedSettings)
-            Write(out, BakedSettings.Get());
+        WriteArray<u32>(out, Points);
+        Write(out, hasBakedSettings);
+
+        if(hasBakedSettings)
+            Write(out, BakedSettings);
     }
 }
 

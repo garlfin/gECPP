@@ -36,7 +36,7 @@ class Array : public gE::Asset
 				_t[i] = t[i];
 	}
 
-	OPERATOR_COPY_NOSUPER(Array,
+	OPERATOR_COPY_NOSUPER(Array, Free,
 	{
 		if(!o._size || !o._t) return;
 
@@ -52,12 +52,12 @@ class Array : public gE::Asset
 				_t[i] = o._t[i];
 	});
 
-	OPERATOR_MOVE_NOSUPER(Array,
+	OPERATOR_MOVE_NOSUPER(Array, Free,
 	{
 		_size = o._size;
 		_t = o._t;
 		o._t = nullptr;
-	})
+	});
 
 	size_t CopyToCArray(I* arr, size_t arrSize) const;
 

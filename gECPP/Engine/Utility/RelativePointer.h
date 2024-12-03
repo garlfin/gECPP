@@ -16,12 +16,12 @@ public:
 	RelativePointer(T& t) : _t(&t) {};
 	RelativePointer(T* t) : _t(t) {};
 
-	OPERATOR_COPY_NOSUPER(RelativePointer,
+	OPERATOR_COPY_UNSAFE(RelativePointer,,,
 		_t = (T*) ((u64) o._t - (u64) &o + (u64) this);
 		if(!o._t) _t = nullptr;
 	);
 
-	OPERATOR_MOVE_NOSUPER(RelativePointer,
+	OPERATOR_MOVE_UNSAFE(RelativePointer,,,
 		_t = (T*) ((u8*) o._t - (u8*) &o + (u8*) this);
 		if(!o._t) _t = nullptr;
 	);

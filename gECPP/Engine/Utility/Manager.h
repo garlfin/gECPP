@@ -78,7 +78,7 @@ namespace gE
 		LinkedIterator(T& owner, LinkedList<T>* l, LinkedIterator* at = nullptr, Direction direction = Direction::Right);
 
 		DELETE_OPERATOR_COPY(LinkedIterator);
-		OPERATOR_MOVE_NOSUPER(LinkedIterator,
+		OPERATOR_MOVE_NOSUPER(LinkedIterator, Free,
 			if(!o._list) return;
 
 			_owner = o._owner;
@@ -113,13 +113,15 @@ namespace gE
 
 		friend class LinkedList<T>;
 
-		~LinkedIterator();
+		~LinkedIterator() { Free(); }
 
 	private:
 		LinkedList<T>* _list = nullptr;
 		LinkedIterator* _previous = nullptr;
 		LinkedIterator* _next = nullptr;
 		RelativePointer<T> _owner;
+
+		void Free();
 	};
 
 	template<class T>
@@ -154,7 +156,7 @@ namespace gE
 		}
 
 		DELETE_OPERATOR_COPY(Managed);
-		OPERATOR_MOVE_NOSUPER(Managed,
+		OPERATOR_MOVE_NOSUPER(Managed, Free,
 			_t = o._t;
 			Iterator = move(o.Iterator);
 		);
@@ -176,7 +178,7 @@ namespace gE
 
 		friend class Manager<T>;
 
-		virtual ~Managed();
+		virtual ~Managed() { Free(); }
 
 	protected:
 		ALWAYS_INLINE void Register();
@@ -189,6 +191,8 @@ namespace gE
 #ifdef DEBUG
 		bool _init = false;
 #endif
+
+		void Free();
 	};
 }
 

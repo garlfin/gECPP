@@ -13,45 +13,6 @@
 
 JPH_NAMESPACE_BEGIN
 
-struct ConvexHullFace
-{
-	uint16				mFirstVertex;				///< First index in mVertexIdx to use
-	uint16				mNumVertices = 0;			///< Number of vertices in the mVertexIdx to use
-};
-
-static_assert(sizeof(ConvexHullFace) == 4, "Unexpected size");
-static_assert(alignof(ConvexHullFace) == 2, "Unexpected alignment");
-
-struct ConvexHullPoint
-{
-	Vec3				mPosition;					///< Position of vertex
-	int					mNumFaces = 0;				///< Number of faces in the face array below
-	int					mFaces[3] = { -1, -1, -1 };	///< Indices of 3 neighboring faces with the biggest difference in normal (used to shift vertices for convex radius)
-};
-
-static_assert(sizeof(ConvexHullPoint) == 32, "Unexpected size");
-static_assert(alignof(ConvexHullPoint) == JPH_VECTOR_ALIGNMENT, "Unexpected alignment");
-
-
-class JPH_EXPORT BakedConvexHullShapeSettings final : public ConvexShapeSettings
-{
-public:
-	BakedConvexHullShapeSettings() = default;
-
-	Vec3					mCenterOfMass;
-	Mat44					mInertia;
-	AABox					mLocalBounds;
-	Array<ConvexHullPoint>	mPoints;
-	Array<ConvexHullFace>	mFaces;
-	Array<Plane>			mPlanes;
-	Array<uint8>			mVertexIdx;
-	float					mConvexRadius = 0.0f;
-	float					mVolume;
-	float					mInnerRadius = FLT_MAX;
-
-	virtual ShapeResult		Create() const override;
-};
-
 /// Class that constructs a ConvexHullShape
 class JPH_EXPORT ConvexHullShapeSettings final : public ConvexShapeSettings
 {
@@ -75,6 +36,59 @@ public:
 	float					mHullTolerance = 1.0e-3f;											///< Points are allowed this far outside of the hull (increasing this yields a hull with less vertices). Note that the actual used value can be larger if the points of the hull are far apart.
 };
 
+struct ConvexHullFace
+{
+	uint16				mFirstVertex = 0;				///< First index in mVertexIdx to use
+	uint16				mNumVertices = 0;			///< Number of vertices in the mVertexIdx to use
+};
+
+static_assert(sizeof(ConvexHullFace) == 4, "Unexpected size");
+static_assert(alignof(ConvexHullFace) == 2, "Unexpected alignment");
+
+struct ConvexHullPoint
+{
+	Vec3				mPosition;					///< Position of vertex
+	int					mNumFaces = 0;				///< Number of faces in the face array below
+	int					mFaces[3] = { -1, -1, -1 };	///< Indices of 3 neighboring faces with the biggest difference in normal (used to shift vertices for convex radius)
+};
+
+static_assert(sizeof(ConvexHullPoint) == 32, "Unexpected size");
+static_assert(alignof(ConvexHullPoint) == JPH_VECTOR_ALIGNMENT, "Unexpected alignment");
+
+class JPH_EXPORT BakedConvexHullShapeSettings final : public ConvexShapeSettings
+{
+	JPH_DECLARE_SERIALIZABLE_VIRTUAL(JPH_EXPORT, BakedConvexHullShapeSettings)
+
+public:
+	enum class EResult
+	{
+		Success,											///< Hull building finished successfully
+		MaxVerticesReached,									///< Hull building finished successfully, but the desired accuracy was not reached because the max vertices limit was reached
+		TooFewPoints,										///< Too few points to create a hull
+		TooFewFaces,										///< Too few faces in the created hull (signifies precision errors during building)
+		Degenerate,											///< Degenerate hull detected
+		InvalidRadius,										///< Radius !<= 0
+		ExceededTolerance,									///< Radius !<= 0
+		TooManyPoints,
+	};
+
+	BakedConvexHullShapeSettings() = default;
+	BakedConvexHullShapeSettings(const ConvexHullShapeSettings& inSettings, EResult& outResult);
+
+	Vec3					mCenterOfMass;  ///< Center of mass of this convex hull
+	Mat44					mInertia;   ///< Inertia matrix assuming density is 1 (needs to be multiplied by density)
+	AABox					mLocalBounds;   ///< Local bounding box for the convex hull
+	Array<ConvexHullPoint>	mPoints;    ///< Points on the convex hull surface
+	Array<ConvexHullFace>	mFaces; ///< Faces of the convex hull surface
+	Array<Plane>			mPlanes;    ///< Planes for the faces (1-on-1 with mFaces array, separate because they need to be 16 byte aligned)
+	Array<uint8>			mVertexIdx; ///< A list of vertex indices (indexing in mPoints) for each of the faces
+	float					mConvexRadius = 0.0f;   ///< Convex radius
+	float					mVolume;    ///< Total volume of the convex hull
+	float					mInnerRadius = FLT_MAX; ///< Radius of the biggest sphere that fits entirely in the convex hull
+
+	virtual ShapeResult		Create() const override;
+};
+
 /// A convex hull
 class JPH_EXPORT ConvexHullShape final : public ConvexShape
 {
@@ -88,9 +102,7 @@ public:
 	/// Constructor
 							ConvexHullShape() : ConvexShape(EShapeSubType::ConvexHull) { }
 							ConvexHullShape(const ConvexHullShapeSettings &inSettings, ShapeResult &outResult);
-							explicit ConvexHullShape(BakedConvexHullShapeSettings&& inSettings);
-
-	void GetBakedHullShapeSettings(BakedConvexHullShapeSettings& outSettings);
+							explicit ConvexHullShape(const BakedConvexHullShapeSettings& inSettings);
 
 	// See Shape::GetCenterOfMass
 	virtual Vec3			GetCenterOfMass() const override									{ return mCenterOfMass; }

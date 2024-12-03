@@ -17,7 +17,7 @@ namespace gE
 		explicit inline Reference(T* t) : _t(t) { if(t) _counter = new u32(1); }
 		inline Reference() = default;
 
-		OPERATOR_COPY_NOSUPER(Reference,
+		OPERATOR_COPY_NOSUPER(Reference, Free,
 			_t = o._t;
 			_counter = o._counter;
 
@@ -27,7 +27,7 @@ namespace gE
 			(*_counter)++;
 		);
 
-		OPERATOR_MOVE_NOSUPER(Reference,
+		OPERATOR_MOVE_NOSUPER(Reference, Free,
 			_t = o._t;
 			_counter = o._counter;
 			o._t = nullptr;
@@ -104,8 +104,8 @@ namespace gE
 		ALWAYS_INLINE explicit SmartPointer(T* t) : _t(t) { };
 		SmartPointer() = default;
 
-		DEFAULT_OPERATOR_COPY(SmartPointer);
-		OPERATOR_MOVE_NOSUPER(SmartPointer, _t = o.Release())
+		DELETE_OPERATOR_COPY(SmartPointer);
+		OPERATOR_MOVE_NOSUPER(SmartPointer, Free, _t = o.Release())
 
 		GET(T&, , *_t);
 		GET(T*, Pointer, _t);

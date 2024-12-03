@@ -14,24 +14,21 @@ namespace Physics
         // I hate the unnecessary memory copies, but oh wells
     	BakedSettings = gE::ptr_create<BakedConvexMeshShape>();
 
-        px::Shape::ShapeResult result;
         px::ConvexHullShapeSettings settings = DEFAULT;
-
         settings.mPoints = gE::ToPX<glm::vec3, px::Vec3, gE::ToPX>(Points);
 
-        px::ConvexHullShape shape(settings, result);
-        px::BakedConvexHullShapeSettings bakedPXSettings = DEFAULT;
-        shape.GetBakedHullShapeSettings(bakedPXSettings);
+        px::BakedConvexHullShapeSettings::EResult result;
+        px::BakedConvexHullShapeSettings bakedPXSettings(settings, result);
 
-        BakedSettings->CenterOfMass = gE::ToGLM(bakedPXSettings.mCenterOfMass);
-        BakedSettings->Inertia = gE::ToGLM(bakedPXSettings.mInertia);
-        BakedSettings->Bounds = gE::ToGE(bakedPXSettings.mLocalBounds);
-        BakedSettings->Points = gE::ToGE<px::ConvexHullPoint, ConvexMeshPoint, ToGE>(bakedPXSettings.mPoints);
-        BakedSettings->Faces = gE::ToGE<px::ConvexHullFace, ConvexMeshFace>(bakedPXSettings.mFaces);
-        BakedSettings->VertexIDs = gE::ToGE<px::uint8, u8>(bakedPXSettings.mVertexIdx);
-        BakedSettings->ConvexRadius = bakedPXSettings.mConvexRadius;
-        BakedSettings->Volume = bakedPXSettings.mVolume;
-        BakedSettings->InnerRadius = bakedPXSettings.mInnerRadius;
+        BakedSettings.CenterOfMass = gE::ToGLM(bakedPXSettings.mCenterOfMass);
+        BakedSettings.Inertia = gE::ToGLM(bakedPXSettings.mInertia);
+        BakedSettings.Bounds = gE::ToGE(bakedPXSettings.mLocalBounds);
+        BakedSettings.Points = gE::ToGE<px::ConvexHullPoint, ConvexMeshPoint, ToGE>(bakedPXSettings.mPoints);
+        BakedSettings.Faces = gE::ToGE<px::ConvexHullFace, ConvexMeshFace>(bakedPXSettings.mFaces);
+        BakedSettings.VertexIDs = gE::ToGE<px::uint8, u8>(bakedPXSettings.mVertexIdx);
+        BakedSettings.ConvexRadius = bakedPXSettings.mConvexRadius;
+        BakedSettings.Volume = bakedPXSettings.mVolume;
+        BakedSettings.InnerRadius = bakedPXSettings.mInnerRadius;
 
         return BakeConvexShapeResult::Success;
     }
@@ -92,7 +89,7 @@ namespace Jolt
 
     API_SERIALIZABLE_IMPL(ConvexMeshShape), Jolt::ConvexShape(*this, _shape.To<px::ConvexShape>())
     {
-        GE_ASSERT((bool) BakedSettings, "MESH NOT BAKED BEFORE CREATION!");
+        GE_ASSERT(!BakedSettings.IsFree(), "MESH NOT BAKED BEFORE CREATION!");
 
         px::BakedConvexHullShapeSettings settings;
 

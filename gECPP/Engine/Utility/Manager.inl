@@ -178,7 +178,7 @@ namespace gE
 	}
 
 	template <class T>
-	LinkedIterator<T>::~LinkedIterator()
+	void LinkedIterator<T>::Free()
 	{
 		if(!_list) return;
 
@@ -194,7 +194,7 @@ namespace gE
 	}
 
 	template<class T>
-	Managed<T>::~Managed()
+	void Managed<T>::Free()
 	{
 		if(!_manager) return;
 

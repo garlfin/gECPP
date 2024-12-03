@@ -136,10 +136,10 @@ namespace Physics
 
     public:
         Array<glm::vec3> Points = DEFAULT;
-        gE::SmartPointer<BakedConvexMeshShape> BakedSettings = DEFAULT;
+        BakedConvexMeshShape BakedSettings = DEFAULT;
 
         void Free() override { Points.Free(); BakedSettings.Free(); }
-        [[nodiscard]] bool IsFree() const override { return Points.IsFree() && !BakedSettings; }
+        NODISCARD bool IsFree() const override { return Points.IsFree() && !BakedSettings.IsFree(); }
 
         BakeConvexShapeResult Bake();
     };

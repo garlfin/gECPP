@@ -33,6 +33,22 @@ JPH_IMPLEMENT_SERIALIZABLE_VIRTUAL(ConvexHullShapeSettings)
 	JPH_ADD_ATTRIBUTE(ConvexHullShapeSettings, mHullTolerance)
 }
 
+JPH_IMPLEMENT_SERIALIZABLE_VIRTUAL(BakedConvexHullShapeSettings)
+{
+	JPH_ADD_BASE_CLASS(BakedConvexHullShapeSettings, ConvexShapeSettings)
+
+	JPH_ADD_ATTRIBUTE(BakedConvexHullShapeSettings, mCenterOfMass)
+	JPH_ADD_ATTRIBUTE(BakedConvexHullShapeSettings, mInertia)
+	JPH_ADD_ATTRIBUTE(BakedConvexHullShapeSettings, mLocalBounds)
+	JPH_ADD_ATTRIBUTE(BakedConvexHullShapeSettings, mPoints)
+	JPH_ADD_ATTRIBUTE(BakedConvexHullShapeSettings, mFaces)
+	JPH_ADD_ATTRIBUTE(BakedConvexHullShapeSettings, mPlanes)
+	JPH_ADD_ATTRIBUTE(BakedConvexHullShapeSettings, mVertexIdx)
+	JPH_ADD_ATTRIBUTE(BakedConvexHullShapeSettings, mConvexRadius)
+	JPH_ADD_ATTRIBUTE(BakedConvexHullShapeSettings, mVolume)
+	JPH_ADD_ATTRIBUTE(BakedConvexHullShapeSettings, mInnerRadius)
+}
+
 ShapeSettings::ShapeResult ConvexHullShapeSettings::Create() const
 {
 	if (mCachedResult.IsEmpty())
@@ -353,33 +369,330 @@ ConvexHullShape::ConvexHullShape(const ConvexHullShapeSettings &inSettings, Shap
 	outResult.Set(this);
 }
 
-ConvexHullShape::ConvexHullShape(BakedConvexHullShapeSettings&& inSettings) :
+ConvexHullShape::ConvexHullShape(const BakedConvexHullShapeSettings& inSettings) :
 	ConvexShape(EShapeSubType::ConvexHull, nullptr)
 {
 	mCenterOfMass = inSettings.mCenterOfMass;
 	mInertia = inSettings.mInertia;
 	mLocalBounds = inSettings.mLocalBounds;
-	mPoints = std::move(inSettings.mPoints);
-	mFaces = std::move(inSettings.mFaces);
-	mPlanes = std::move(inSettings.mPlanes);
+	mPoints = inSettings.mPoints;
+	mFaces = inSettings.mFaces;
+	mPlanes = inSettings.mPlanes;
 	mVertexIdx = std::move(inSettings.mVertexIdx);
 	mConvexRadius = inSettings.mConvexRadius;
 	mVolume = inSettings.mVolume;
 	mInnerRadius = inSettings.mInnerRadius;
 }
 
-void ConvexHullShape::GetBakedHullShapeSettings(BakedConvexHullShapeSettings& outSettings)
+BakedConvexHullShapeSettings::BakedConvexHullShapeSettings(const ConvexHullShapeSettings& inSettings, EResult& outResult)
 {
-	outSettings.mCenterOfMass = mCenterOfMass;
-	outSettings.mInertia = mInertia;
-	outSettings.mLocalBounds = mLocalBounds;
-	outSettings.mPoints = std::move(mPoints);
-	outSettings.mFaces = std::move(mFaces);
-	outSettings.mPlanes = std::move(mPlanes);
-	outSettings.mVertexIdx = mVertexIdx;
-	outSettings.mConvexRadius = mConvexRadius;
-	outSettings.mVolume = mVolume;
-	outSettings.mInnerRadius = mInnerRadius;
+	using BuilderFace = ConvexHullBuilder::Face;
+	using Edge = ConvexHullBuilder::Edge;
+	using Faces = Array<BuilderFace *>;
+
+	// Check convex radius
+	if (mConvexRadius < 0.0f)
+	{
+		outResult = EResult::InvalidRadius;
+		return;
+	}
+
+	// Build convex hull
+	const char *error = nullptr;
+	ConvexHullBuilder builder(inSettings.mPoints);
+	ConvexHullBuilder::EResult result = builder.Initialize(ConvexHullShape::cMaxPointsInHull, inSettings.mHullTolerance, error);
+	if (result != ConvexHullBuilder::EResult::Success && result != ConvexHullBuilder::EResult::MaxVerticesReached)
+	{
+		outResult = (EResult) result;
+		return;
+	}
+	const Faces &builder_faces = builder.GetFaces();
+
+	// Check the consistency of the resulting hull if we fully built it
+	if (result == ConvexHullBuilder::EResult::Success)
+	{
+		ConvexHullBuilder::Face *max_error_face;
+		float max_error_distance, coplanar_distance;
+		int max_error_idx;
+		builder.DetermineMaxError(max_error_face, max_error_distance, max_error_idx, coplanar_distance);
+		if (max_error_distance > 4.0f * max(coplanar_distance, inSettings.mHullTolerance)) // Coplanar distance could be bigger than the allowed tolerance if the points are far apart
+		{
+			outResult = EResult::ExceededTolerance;
+			return;
+		}
+	}
+
+	// Calculate center of mass and volume
+	builder.GetCenterOfMassAndVolume(mCenterOfMass, mVolume);
+
+	// Calculate covariance matrix
+	// See:
+	// - Why the inertia tensor is the inertia tensor - Jonathan Blow (http://number-none.com/blow/inertia/deriving_i.html)
+	// - How to find the inertia tensor (or other mass properties) of a 3D solid body represented by a triangle mesh (Draft) - Jonathan Blow, Atman J Binstock (http://number-none.com/blow/inertia/bb_inertia.doc)
+	Mat44 covariance_canonical(Vec4(1.0f / 60.0f, 1.0f / 120.0f, 1.0f / 120.0f, 0), Vec4(1.0f / 120.0f, 1.0f / 60.0f, 1.0f / 120.0f, 0), Vec4(1.0f / 120.0f, 1.0f / 120.0f, 1.0f / 60.0f, 0), Vec4(0, 0, 0, 1));
+	Mat44 covariance_matrix = Mat44::sZero();
+	for (BuilderFace *f : builder_faces)
+	{
+		// Fourth point of the tetrahedron is at the center of mass, we subtract it from the other points so we get a tetrahedron with one vertex at zero
+		// The first point on the face will be used to form a triangle fan
+		Edge *e = f->mFirstEdge;
+		Vec3 v1 = inSettings.mPoints[e->mStartIdx] - mCenterOfMass;
+
+		// Get the 2nd point
+		e = e->mNextEdge;
+		Vec3 v2 = inSettings.mPoints[e->mStartIdx] - mCenterOfMass;
+
+		// Loop over the triangle fan
+		for (e = e->mNextEdge; e != f->mFirstEdge; e = e->mNextEdge)
+		{
+			Vec3 v3 = inSettings.mPoints[e->mStartIdx] - mCenterOfMass;
+
+			// Affine transform that transforms a unit tetrahedon (with vertices (0, 0, 0), (1, 0, 0), (0, 1, 0) and (0, 0, 1) to this tetrahedron
+			Mat44 a(Vec4(v1, 0), Vec4(v2, 0), Vec4(v3, 0), Vec4(0, 0, 0, 1));
+
+			// Calculate covariance matrix for this tetrahedron
+			float det_a = a.GetDeterminant3x3();
+			Mat44 c = det_a * (a * covariance_canonical * a.Transposed());
+
+			// Add it
+			covariance_matrix += c;
+
+			// Prepare for next triangle
+			v2 = v3;
+		}
+	}
+
+	// Calculate inertia matrix assuming density is 1, note that element (3, 3) is garbage
+	mInertia = Mat44::sIdentity() * (covariance_matrix(0, 0) + covariance_matrix(1, 1) + covariance_matrix(2, 2)) - covariance_matrix;
+
+	// Convert polygons from the builder to our internal representation
+	using VtxMap = UnorderedMap<int, uint8>;
+	VtxMap vertex_map;
+	for (BuilderFace *builder_face : builder_faces)
+	{
+		// Determine where the vertices go
+		JPH_ASSERT(mVertexIdx.size() <= 0xFFFF);
+		uint16 first_vertex = (uint16)mVertexIdx.size();
+		uint16 num_vertices = 0;
+
+		// Loop over vertices in face
+		Edge *edge = builder_face->mFirstEdge;
+		do
+		{
+			// Remap to new index, not all points in the original input set are required to form the hull
+			uint8 new_idx;
+			int original_idx = edge->mStartIdx;
+			VtxMap::iterator m = vertex_map.find(original_idx);
+			if (m != vertex_map.end())
+			{
+				// Found, reuse
+				new_idx = m->second;
+			}
+			else
+			{
+				// This is a new point
+				// Make relative to center of mass
+				Vec3 p = inSettings.mPoints[original_idx] - mCenterOfMass;
+
+				// Update local bounds
+				mLocalBounds.Encapsulate(p);
+
+				// Add to point list
+				JPH_ASSERT(mPoints.size() <= 0xff);
+				new_idx = (uint8)mPoints.size();
+				mPoints.push_back({ p });
+				vertex_map[original_idx] = new_idx;
+			}
+
+			// Append to vertex list
+			JPH_ASSERT(mVertexIdx.size() < 0xffff);
+			mVertexIdx.push_back(new_idx);
+			num_vertices++;
+
+			edge = edge->mNextEdge;
+		} while (edge != builder_face->mFirstEdge);
+
+		// Add face
+		mFaces.push_back({ first_vertex, num_vertices });
+
+		// Add plane
+		Plane plane = Plane::sFromPointAndNormal(builder_face->mCentroid - mCenterOfMass, builder_face->mNormal.Normalized());
+		mPlanes.push_back(plane);
+	}
+
+	// Test if GetSupportFunction can support this many points
+	if (mPoints.size() > ConvexHullShape::cMaxPointsInHull)
+	{
+		outResult = EResult::TooManyPoints;
+		return;
+	}
+
+	for (int p = 0; p < (int)mPoints.size(); ++p)
+	{
+		// For each point, find faces that use the point
+		Array<int> faces;
+		for (int f = 0; f < (int)mFaces.size(); ++f)
+		{
+			const ConvexHullFace &face = mFaces[f];
+			for (int v = 0; v < face.mNumVertices; ++v)
+				if (mVertexIdx[face.mFirstVertex + v] == p)
+				{
+					faces.push_back(f);
+					break;
+				}
+		}
+
+		if (faces.size() < 2)
+		{
+			outResult = EResult::TooFewFaces;
+			return;
+		}
+
+		// Find the 3 normals that form the largest tetrahedron
+		// The largest tetrahedron we can get is ((1, 0, 0) x (0, 1, 0)) . (0, 0, 1) = 1, if the volume is only 5% of that,
+		// the three vectors are too coplanar and we fall back to using only 2 plane normals
+		float biggest_volume = 0.05f;
+		int best3[3] = { -1, -1, -1 };
+
+		// When using 2 normals, we get the two with the biggest angle between them with a minimal difference of 1 degree
+		// otherwise we fall back to just using 1 plane normal
+		float smallest_dot = Cos(DegreesToRadians(1.0f));
+		int best2[2] = { -1, -1 };
+
+		for (int face1 = 0; face1 < (int)faces.size(); ++face1)
+		{
+			Vec3 normal1 = mPlanes[faces[face1]].GetNormal();
+			for (int face2 = face1 + 1; face2 < (int)faces.size(); ++face2)
+			{
+				Vec3 normal2 = mPlanes[faces[face2]].GetNormal();
+				Vec3 cross = normal1.Cross(normal2);
+
+				// Determine the 2 face normals that are most apart
+				float dot = normal1.Dot(normal2);
+				if (dot < smallest_dot)
+				{
+					smallest_dot = dot;
+					best2[0] = faces[face1];
+					best2[1] = faces[face2];
+				}
+
+				// Determine the 3 face normals that form the largest tetrahedron
+				for (int face3 = face2 + 1; face3 < (int)faces.size(); ++face3)
+				{
+					Vec3 normal3 = mPlanes[faces[face3]].GetNormal();
+					float volume = abs(cross.Dot(normal3));
+					if (volume > biggest_volume)
+					{
+						biggest_volume = volume;
+						best3[0] = faces[face1];
+						best3[1] = faces[face2];
+						best3[2] = faces[face3];
+					}
+				}
+			}
+		}
+
+		// If we didn't find 3 planes, use 2, if we didn't find 2 use 1
+		if (best3[0] != -1)
+			faces = { best3[0], best3[1], best3[2] };
+		else if (best2[0] != -1)
+			faces = { best2[0], best2[1] };
+		else
+			faces = { faces[0] };
+
+		// Copy the faces to the points buffer
+		ConvexHullPoint &point = mPoints[p];
+		point.mNumFaces = (int)faces.size();
+		for (int i = 0; i < (int)faces.size(); ++i)
+			point.mFaces[i] = faces[i];
+	}
+
+	// If the convex radius is already zero, there's no point in further reducing it
+	if (mConvexRadius > 0.0f)
+	{
+		// Find out how thin the hull is by walking over all planes and checking the thickness of the hull in that direction
+		float min_size = FLT_MAX;
+		for (const Plane &plane : mPlanes)
+		{
+			// Take the point that is furthest away from the plane as thickness of this hull
+			float max_dist = 0.0f;
+			for (const ConvexHullPoint &point : mPoints)
+			{
+				float dist = -plane.SignedDistance(point.mPosition); // Point is always behind plane, so we need to negate
+				if (dist > max_dist)
+					max_dist = dist;
+			}
+			min_size = min(min_size, max_dist);
+		}
+
+		// We need to fit in 2x the convex radius in min_size, so reduce the convex radius if it's bigger than that
+		mConvexRadius = min(mConvexRadius, 0.5f * min_size);
+	}
+
+	// Now walk over all points and see if we have to further reduce the convex radius because of sharp edges
+	if (mConvexRadius > 0.0f)
+	{
+		for (const ConvexHullPoint &point : mPoints)
+			if (point.mNumFaces != 1) // If we have a single face, shifting back is easy and we don't need to reduce the convex radius
+			{
+				// Get first two planes
+				Plane p1 = mPlanes[point.mFaces[0]];
+				Plane p2 = mPlanes[point.mFaces[1]];
+				Plane p3;
+				Vec3 offset_mask;
+
+				if (point.mNumFaces == 3)
+				{
+					// Get third plane
+					p3 = mPlanes[point.mFaces[2]];
+
+					// All 3 planes will be offset by the convex radius
+					offset_mask = Vec3::sReplicate(1);
+				}
+				else
+				{
+					// Third plane has normal perpendicular to the other two planes and goes through the vertex position
+					JPH_ASSERT(point.mNumFaces == 2);
+					p3 = Plane::sFromPointAndNormal(point.mPosition, p1.GetNormal().Cross(p2.GetNormal()));
+
+					// Only the first and 2nd plane will be offset, the 3rd plane is only there to guide the intersection point
+					offset_mask = Vec3(1, 1, 0);
+				}
+
+				// Plane equation: point . normal + constant = 0
+				// Offsetting the plane backwards with convex radius r: point . normal + constant + r = 0
+				// To find the intersection 'point' of 3 planes we solve:
+				// |n1x n1y n1z| |x|     | r + c1 |
+				// |n2x n2y n2z| |y| = - | r + c2 | <=> n point = -r (1, 1, 1) - (c1, c2, c3)
+				// |n3x n3y n3z| |z|     | r + c3 |
+				// Where point = (x, y, z), n1x is the x component of the first plane, c1 = plane constant of plane 1, etc.
+				// The relation between how much the intersection point shifts as a function of r is: -r * n^-1 (1, 1, 1) = r * offset
+				// Where offset = -n^-1 (1, 1, 1) or -n^-1 (1, 1, 0) in case only the first 2 planes are offset
+				// The error that is introduced by a convex radius r is: error = r * |offset| - r
+				// So the max convex radius given error is: r = error / (|offset| - 1)
+				Mat44 n = Mat44(Vec4(p1.GetNormal(), 0), Vec4(p2.GetNormal(), 0), Vec4(p3.GetNormal(), 0), Vec4(0, 0, 0, 1)).Transposed();
+				float det_n = n.GetDeterminant3x3();
+				if (det_n == 0.0f)
+				{
+					// If the determinant is zero, the matrix is not invertible so no solution exists to move the point backwards and we have to choose a convex radius of zero
+					mConvexRadius = 0.0f;
+					break;
+				}
+				Mat44 adj_n = n.Adjointed3x3();
+				float offset = ((adj_n * offset_mask) / det_n).Length();
+				JPH_ASSERT(offset > 1.0f);
+				float max_convex_radius = inSettings.mMaxErrorConvexRadius / (offset - 1.0f);
+				mConvexRadius = min(mConvexRadius, max_convex_radius);
+			}
+		}
+
+	// Calculate the inner radius by getting the minimum distance from the origin to the planes of the hull
+	mInnerRadius = FLT_MAX;
+	for (const Plane &p : mPlanes)
+		mInnerRadius = min(mInnerRadius, -p.GetConstant());
+	mInnerRadius = max(0.0f, mInnerRadius); // Clamp against zero, this should do nothing as the shape is centered around the center of mass but for flat convex hulls there may be numerical round off issues
+
+	outResult = (EResult) result;
 }
 
 ShapeSettings::ShapeResult BakedConvexHullShapeSettings::Create() const
