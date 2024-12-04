@@ -17,6 +17,7 @@ struct VertexOut
 in VertexOut VertexIn;
 
 layout(location = 0) out vec4 FragColor;
+layout(location = 1) out vec3 Velocity;
 
 void main()
 {
@@ -38,4 +39,6 @@ void main()
       ivec3 texel = Voxel_WorldToTexel(VertexIn.FragPos, imageSize(VoxelColorOut).x);
       imageStore(VoxelColorOut, texel, PackColor(FragColor));
    }
+
+   Velocity = PerspectiveToUV(VertexIn.PreviousNDC);
 }

@@ -15,17 +15,17 @@ namespace Physics
     	BakedSettings = gE::ptr_create<BakedConvexMeshShape>();
 
         px::ConvexHullShapeSettings settings = DEFAULT;
-        settings.mPoints = gE::ToPX<glm::vec3, px::Vec3, gE::ToPX>(Points);
+        settings.mPoints = ToPX<glm::vec3, px::Vec3, ToPX>(Points);
 
         px::BakedConvexHullShapeSettings::EResult result;
         px::BakedConvexHullShapeSettings bakedPXSettings(settings, result);
 
-        BakedSettings.CenterOfMass = gE::ToGLM(bakedPXSettings.mCenterOfMass);
-        BakedSettings.Inertia = gE::ToGLM(bakedPXSettings.mInertia);
-        BakedSettings.Bounds = gE::ToGE(bakedPXSettings.mLocalBounds);
-        BakedSettings.Points = gE::ToGE<px::ConvexHullPoint, ConvexMeshPoint, ToGE>(bakedPXSettings.mPoints);
-        BakedSettings.Faces = gE::ToGE<px::ConvexHullFace, ConvexMeshFace>(bakedPXSettings.mFaces);
-        BakedSettings.VertexIDs = gE::ToGE<px::uint8, u8>(bakedPXSettings.mVertexIdx);
+        BakedSettings.CenterOfMass = ToGLM(bakedPXSettings.mCenterOfMass);
+        BakedSettings.Inertia = ToGLM(bakedPXSettings.mInertia);
+        BakedSettings.Bounds = ToGE(bakedPXSettings.mLocalBounds);
+        BakedSettings.Points = ToGE<px::ConvexHullPoint, ConvexMeshPoint, ToGE>(bakedPXSettings.mPoints);
+        BakedSettings.Faces = ToGE<px::ConvexHullFace, ConvexMeshFace>(bakedPXSettings.mFaces);
+        BakedSettings.VertexIDs = ToGE<px::uint8, u8>(bakedPXSettings.mVertexIdx);
         BakedSettings.ConvexRadius = bakedPXSettings.mConvexRadius;
         BakedSettings.Volume = bakedPXSettings.mVolume;
         BakedSettings.InnerRadius = bakedPXSettings.mInnerRadius;
@@ -49,7 +49,7 @@ namespace Physics
     {
         ConvexMeshPoint point;
 
-        point.Position = gE::ToGLM(o.mPosition);
+        point.Position = ToGLM(o.mPosition);
         point.FaceCount = o.mNumFaces;
         memcpy(point.Faces, o.mFaces, sizeof(ConvexMeshPoint::Faces));
 
@@ -60,7 +60,7 @@ namespace Physics
     {
         px::ConvexHullPoint point;
 
-        point.mPosition = gE::ToPX(o.Position);
+        point.mPosition = ToPX(o.Position);
         point.mNumFaces = o.FaceCount;
         memcpy(point.mFaces, o.Faces, sizeof(ConvexMeshPoint::Faces));
 
@@ -77,7 +77,7 @@ namespace Jolt
 
     API_SERIALIZABLE_IMPL(BoxShape), Jolt::ConvexShape(*this, _shape.To<px::ConvexShape>())
     {
-        SAFE_CONSTRUCT_NAMESPACE(_shape, gE, ManagedPX<px::BoxShape>, gE::ToPX(Extents));
+        SAFE_CONSTRUCT_NAMESPACE(_shape, gE, ManagedPX<px::BoxShape>, Physics::ToPX(Extents));
     }
 
     API_SERIALIZABLE_IMPL(CapsuleShape), Jolt::ConvexShape(*this, _shape.To<px::ConvexShape>())
@@ -92,6 +92,15 @@ namespace Jolt
         GE_ASSERT(!BakedSettings.IsFree(), "MESH NOT BAKED BEFORE CREATION!");
 
         px::BakedConvexHullShapeSettings settings;
+        settings.mCenterOfMass = Physics::ToPX(BakedSettings.CenterOfMass);
+        settings.mInertia = Physics::ToPX(BakedSettings.Inertia);
+        settings.mLocalBounds = Physics::ToPX(BakedSettings.Bounds);
+        settings.mPoints = Physics::ToPX<Physics::ConvexMeshPoint, px::ConvexHullPoint, Physics::ToPX>(BakedSettings.Points);
+        settings.mFaces = Physics::ToPX<Physics::ConvexMeshFace, px::ConvexHullFace>(BakedSettings.Faces);
+        settings.mVertexIdx = Physics::ToPX<u8, px::uint8>(BakedSettings.VertexIDs);
+        settings.mConvexRadius = BakedSettings.ConvexRadius;
+        settings.mVolume = BakedSettings.Volume;
+        settings.mInnerRadius = BakedSettings.InnerRadius;
 
         SAFE_CONSTRUCT_NAMESPACE(_shape, gE, ManagedPX<px::ConvexHullShape>, move(settings));
 

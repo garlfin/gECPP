@@ -32,8 +32,9 @@ namespace gE
 
         const Transform& transform = GetOwner().GetTransform();
         PhysicsManager& manager = GetWindow().GetPhysics();
+        const px::Shape& joltShape = _collider->GetShape().GetJoltShape();
 
-        const px::ShapeSettings::ShapeResult result = _collider->GetShape().GetJoltShape().ScaleShape(ToPX(transform->Scale));
+        const px::ShapeSettings::ShapeResult result = joltShape.ScaleShape(Physics::ToPX(transform->Scale));
         GE_ASSERT(result.IsValid(), "INVALID SCALED SHAPE!");
 
         _previousScale = transform->Scale;
@@ -76,8 +77,8 @@ namespace gE
         PreviousRotation = Rotation;
         PreviousPosition = Position;
 
-        Rotation = ToGLM(_body->GetRotation());
-        Position = ToGLM(_body->GetPosition()) - offset.Position * transform->Scale * inverse(Rotation);
+        Rotation = Physics::ToGLM(_body->GetRotation());
+        Position = Physics::ToGLM(_body->GetPosition()) - offset.Position * transform->Scale * inverse(Rotation);
 
         Rotation *= inverse(offset.Rotation);
     }
@@ -104,7 +105,8 @@ namespace gE
         {
             LOG("INFO: SHAPE SCALING");
 
-            const px::ShapeSettings::ShapeResult result = _collider->GetShape().GetJoltShape().ScaleShape(ToPX(transform->Scale));
+            const px::Shape& joltShape = _collider->GetShape().GetJoltShape();
+            const px::ShapeSettings::ShapeResult result = joltShape.ScaleShape(Physics::ToPX(transform->Scale));
             GE_ASSERT(result.IsValid(), "INVALID SCALED SHAPE!");
 
             physics._interface->SetShape(_body->GetID(), result.Get(), true, JPH::EActivation::Activate);
@@ -114,8 +116,8 @@ namespace gE
         physics._interface->SetPositionAndRotation
         (
             _body->GetID(),
-            ToPX(Position + offset.Position * transform->Scale * Rotation),
-            ToPX(Rotation * offset.Rotation),
+            Physics::ToPX(Position + offset.Position * transform->Scale * Rotation),
+            Physics::ToPX(Rotation * offset.Rotation),
             JPH::EActivation::Activate
         );
 
@@ -125,31 +127,31 @@ namespace gE
     void RigidBody::SetInstantVelocity(const glm::vec3& velocity)
     {
         px::BodyInterface& physics = *GetWindow().GetPhysics()._interface;
-        physics.SetLinearVelocity(_body->GetID(), ToPX(velocity));
+        physics.SetLinearVelocity(_body->GetID(), Physics::ToPX(velocity));
     }
 
     void RigidBody::AddImpulse(const glm::vec3& impulse)
     {
         px::BodyInterface& physics = *GetWindow().GetPhysics()._interface;
-        physics.AddImpulse(_body->GetID(), ToPX(impulse));
+        physics.AddImpulse(_body->GetID(), Physics::ToPX(impulse));
     }
 
     void RigidBody::AddImpulse(const glm::vec3& impulse, const glm::vec3& dir)
     {
         px::BodyInterface& physics = *GetWindow().GetPhysics()._interface;
-        physics.AddImpulse(_body->GetID(), ToPX(impulse), ToPX(dir));
+        physics.AddImpulse(_body->GetID(), Physics::ToPX(impulse), Physics::ToPX(dir));
     }
 
     void RigidBody::AddForce(const glm::vec3& force)
     {
         px::BodyInterface& physics = *GetWindow().GetPhysics()._interface;
-        physics.AddForce(_body->GetID(), ToPX(force));
+        physics.AddForce(_body->GetID(), Physics::ToPX(force));
     }
 
     void RigidBody::AddForce(const glm::vec3& force, const glm::vec3& dir)
     {
         px::BodyInterface& physics = *GetWindow().GetPhysics()._interface;
-        physics.AddForce(_body->GetID(), ToPX(force), ToPX(dir));
+        physics.AddForce(_body->GetID(), Physics::ToPX(force), Physics::ToPX(dir));
     }
 
     RigidBody::~RigidBody()

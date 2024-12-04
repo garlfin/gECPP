@@ -131,7 +131,10 @@ namespace gE
     private:
         T* _t = DEFAULT;
     };
+}
 
+namespace Physics
+{
     template<typename IN_T, typename OUT_T>
     using PXCastFunction = OUT_T(*)(const IN_T& from);
 
@@ -147,8 +150,8 @@ namespace gE
     NODISCARD inline glm::quat ToGLM(const px::Quat& o) { return { o.GetW(), o.GetX(), o.GetY(), o.GetZ() }; }
     NODISCARD inline px::Mat44 ToPX(const glm::mat4& o) { return PXBitCast<glm::mat4, px::Mat44>(o); }
     NODISCARD inline glm::mat4 ToGLM(const px::Mat44& o) { return PXBitCast<px::Mat44, glm::mat4>(o); }
-    NODISCARD inline AABB<Dimension::D3D> ToGE(const px::AABox& o) { return { ToGLM(o.mMin), ToGLM(o.mMax) }; }
-    NODISCARD inline px::AABox ToPX(const AABB<Dimension::D3D>& o) { return { ToPX(o.Min), ToPX(o.Max) }; }
+    NODISCARD inline gE::AABB<Dimension::D3D> ToGE(const px::AABox& o) { return { ToGLM(o.mMin), ToGLM(o.mMax) }; }
+    NODISCARD inline px::AABox ToPX(const gE::AABB<Dimension::D3D>& o) { return { ToPX(o.Min), ToPX(o.Max) }; }
 
     template<class IN_T, class OUT_T, PXCastFunction<IN_T, OUT_T> CAST_FUNC = PXBitCast<IN_T, OUT_T>>
     px::Array<OUT_T> ToPX(const Array<IN_T>& array)
@@ -159,7 +162,7 @@ namespace gE
             static_assert(std::is_trivially_copyable_v<OUT_T>);
             static_assert(sizeof(IN_T) == sizeof(OUT_T));
 
-            return px::Array<OUT_T>(array.Data(), array.Data() + array.Count());
+            return px::Array<OUT_T>((OUT_T*) array.Data(), (OUT_T*) array.Data() + array.Count());
         }
 
         px::Array<OUT_T> arr(array.Count());

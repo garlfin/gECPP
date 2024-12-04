@@ -59,7 +59,7 @@ namespace gE
         PhysicsComponent::OnInit();
 
         const Transform& transform = GetOwner().GetTransform();
-        _controller->SetPosition(ToPX(transform->Position));
+        _controller->SetPosition(Physics::ToPX(transform->Position));
 
         _velocity = glm::vec3(0.f);
     }
@@ -75,7 +75,7 @@ namespace gE
 
         if(_controller->IsSupported() || !_useGravity) velocity.y = 0.f;
 
-        _controller->SetLinearVelocity(ToPX(velocity));
+        _controller->SetLinearVelocity(Physics::ToPX(velocity));
 
         if((bool)(transform.GetFlags() & TransformFlags::PhysicsInvalidated))
             ForceUpdateTransforms();
@@ -97,7 +97,7 @@ namespace gE
         );
 
         PreviousPosition = Position;
-        Position = ToGLM(_controller->GetPosition());
+        Position = Physics::ToGLM(_controller->GetPosition());
     }
 
     void CharacterController::ForceUpdateTransforms()
@@ -109,7 +109,7 @@ namespace gE
         Position = transform->Position;
         Rotation = transform->Rotation;
 
-        _controller->SetPosition(ToPX(Position));
-        _controller->SetRotation(ToPX(Rotation));
+        _controller->SetPosition(Physics::ToPX(Position));
+        _controller->SetRotation(Physics::ToPX(Rotation));
     }
 }

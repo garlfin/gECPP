@@ -44,7 +44,7 @@ namespace gE
 		void OnDestroy() override;
 		void ForceUpdateTransforms() override;
 
-		GET_CONST(glm::vec3, Velocity, ToGLM(_body->GetLinearVelocity()));
+		GET_CONST(glm::vec3, Velocity, Physics::ToGLM(_body->GetLinearVelocity()));
 		void SetInstantVelocity(const glm::vec3&);
 		void AddImpulse(const glm::vec3&);
 		void AddImpulse(const glm::vec3&, const glm::vec3& dir);
