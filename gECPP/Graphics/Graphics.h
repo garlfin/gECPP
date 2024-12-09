@@ -32,7 +32,7 @@ namespace GPU
 		explicit APIObject(gE::Window* window) : _window(window) { };
 
 		DELETE_OPERATOR_COPY(APIObject);
-		OPERATOR_MOVE_UNSAFE(APIObject,,,
+		OPERATOR_MOVE_IMPL(APIObject,,,
 			_window = o._window;
 			ID = o.ID;
 			o.ID = 0;

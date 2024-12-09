@@ -1,7 +1,6 @@
 #define ENABLE_VOXEL_TRACE
 #define ENABLE_SMRT
-// #define ENABLE_SMRT_CONTACT_SHADOW
-#define RAY_MAX_MIP 6
+#define ENABLE_SMRT_CONTACT_SHADOW
 
 #define POM_MIN_LAYER 8
 #define POM_MAX_LAYER 32
@@ -103,8 +102,7 @@ void main()
 
     #if defined(ENABLE_SS_TRACE) || defined(ENABLE_VOXEL_TRACE)
         Ray ray = Ray(vert.Position, 10.f, pbrSample.Specular);
-        int mip;
-        RayResult result = SS_Trace(ray, mip);
+        RayResult result = SS_Trace(ray);
         vec3 raySpecular = textureLod(Camera.Color, result.Position.xy, 0.f).rgb;
 
         #ifdef ENABLE_VOXEL_TRACE

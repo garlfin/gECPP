@@ -78,7 +78,7 @@ namespace gE
 		OrthographicCamera& camera = GetCamera();
 
 		Transform& transform = GetOwner().GetTransform();
-		Transform& cameraTransform = callingCamera->GetOwner().GetTransform();
+		const TransformData& cameraTransform = callingCamera->GetOwner().GetTransform().GetGlobalTransform();
 
 		glm::vec2 planes = GetCamera().GetClipPlanes();
 		glm::vec3 offset = -transform->Forward();
@@ -86,7 +86,7 @@ namespace gE
 		//		  (far - near) / 2 + near
 		//		  places the middle on the camera
 
-		transform.SetPosition(floor(cameraTransform->Position) + offset);
+		transform.SetPosition(floor(cameraTransform.Position) + offset);
 		transform.OnUpdate(0.f); // Force update on model matrix since it passed its tick.
 
 		return true;

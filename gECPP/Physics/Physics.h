@@ -91,6 +91,14 @@ namespace gE
             _t->SetEmbedded();
         }
 
+        explicit ManagedPX(T* t) : _t(t)
+        {
+            if(!t) return;
+
+            GE_ASSERT(t->GetRefCount() < 0x0ebedded, "PXOBJECT ALREADY EMBEDDED");
+            t->SetEmbedded();
+        }
+
         ManagedPX() = default;
 
         DELETE_OPERATOR_COPY(ManagedPX);

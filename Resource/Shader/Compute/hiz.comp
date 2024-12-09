@@ -35,30 +35,31 @@ float MinBox4(ivec2 uv)
 {
     uv *= 2;
 
-    int mip = int(Settings.y);
+    int sourceMip = int(Settings.y);
 
-    float depth = texelFetch(DepthIn, uv, mip).r;
-    depth = min(depth, texelFetch(DepthIn, uv + ivec2(0, 1), mip).r);
-    depth = min(depth, texelFetch(DepthIn, uv + ivec2(1, 0), mip).r);
-    depth = min(depth, texelFetch(DepthIn, uv + ivec2(1, 1), mip).r);
+    float depth = texelFetch(DepthIn, uv, sourceMip).r;
+    depth = min(depth, texelFetch(DepthIn, uv + ivec2(0, 1), sourceMip).r);
+    depth = min(depth, texelFetch(DepthIn, uv + ivec2(1, 0), sourceMip).r);
+    depth = min(depth, texelFetch(DepthIn, uv + ivec2(1, 1), sourceMip).r);
 
-    vec2 oldSize = vec2(textureSize(DepthIn, mip)) / 2.0;
-    vec2 newSize = vec2(textureSize(DepthIn, mip + 1));
+    ivec2 previousMipSize = textureSize(DepthIn, sourceMip);
+    bool changedX = (previousMipSize.x & 1) != 0;
+    bool changedY = (previousMipSize.y & 1) != 0;
 
-    if(oldSize.x != newSize.x)
+    if(changedX)
     {
-        depth = min(depth, texelFetch(DepthIn, uv + ivec2(2, 0), mip).r);
-        depth = min(depth, texelFetch(DepthIn, uv + ivec2(2, 1), mip).r);
+        depth = min(depth, texelFetch(DepthIn, uv + ivec2(2, 0), sourceMip).r);
+        depth = min(depth, texelFetch(DepthIn, uv + ivec2(2, 1), sourceMip).r);
     }
 
-    if(oldSize.y != newSize.y)
+    if(changedY)
     {
-        depth = min(depth, texelFetch(DepthIn, uv + ivec2(0, 2), mip).r);
-        depth = min(depth, texelFetch(DepthIn, uv + ivec2(1, 2), mip).r);
+        depth = min(depth, texelFetch(DepthIn, uv + ivec2(0, 2), sourceMip).r);
+        depth = min(depth, texelFetch(DepthIn, uv + ivec2(1, 2), sourceMip).r);
     }
 
-    if(oldSize.x != newSize.x && oldSize.y != newSize.y)
-        depth = min(depth, texelFetch(DepthIn, uv + ivec2(2, 2), mip).r);
+    if(changedX && changedY)
+        depth = min(depth, texelFetch(DepthIn, uv + ivec2(2, 2), sourceMip).r);
 
     return depth;
 }

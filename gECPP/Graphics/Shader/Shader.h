@@ -52,7 +52,7 @@ namespace GPU
 		Shader(const Path& v, const Path& f);
 
 		// implicit constructor was giving me issues...
-		OPERATOR_MOVE_UNSAFE(Shader, this->~Shader(),,
+		OPERATOR_MOVE_IMPL(Shader, this->~Shader(),,
 			FragmentStage = move(o.FragmentStage);
 			VertexStage = move(o.VertexStage);
 		);
