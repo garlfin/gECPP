@@ -10,6 +10,10 @@
     #define GOLDEN_ANGLE 2.4
 #endif
 
+#ifndef FLT_INF
+    #define FLT_INF uintBitsToFloat(0x7F800000)
+#endif
+
 // Main Functions
 mat3 GetTBN(vec3);
 float LinearizeDepthOrtho(float, vec2);

@@ -3,14 +3,6 @@
 #include "Noise.glsl"
 #include "Math.glsl"
 
-#ifndef RAY_MAX_ITERATIONS
-    #define RAY_MAX_ITERATIONS 128
-#endif
-
-#ifndef RAY_THICKNESS
-    #define RAY_THICKNESS 0.2
-#endif
-
 #ifndef RAY_CELL_EPSILON
     #define RAY_CELL_EPSILON 0.1
 #endif
@@ -40,28 +32,48 @@ struct AOSettings
     float InvRadiusS;
 };
 
-struct LinearRaySettings
+struct SSRay
+{
+    vec3 Start;
+    vec3 End;
+};
+
+struct SSRaySettings
+{
+    int Iterations;
+    float NormalBias;
+    float Thickness;
+    vec3 Normal;
+    float SearchBias;
+};
+
+struct SSLinearRaySettings
 {
     int Iterations;
     float NormalBias;
     float RayBias;
+    float Thickness;
     vec3 Normal;
     float SearchBias;
 };
 
 // Functions
 #if defined(EXT_BINDLESS) && defined(FRAGMENT_SHADER)
-RayResult SS_Trace(Ray, out int);
-RayResult SS_TraceRough(Ray, LinearRaySettings);
+RayResult SS_Trace(SSRay, SSRaySettings);
+RayResult SS_TraceRough(SSRay, SSLinearRaySettings);
+SSRay CreateSSRayHiZ(Ray, SSRaySettings);
+SSRay CreateSSRayLinear(Ray, SSLinearRaySettings);
 float SS_AO(AOSettings, Vertex);
 #endif
 
 // Helper Functions
 vec3 SS_WorldToUV(vec3);
+vec3 SS_WorldToView(vec3);
+vec3 SS_ViewToUV(vec3);
 ivec2 SS_UVToTexel(vec2, ivec2);
 vec2 SS_TexelToUV(ivec2, ivec2);
 vec2 SS_AlignUVToTexel(vec2, ivec2);
-void SS_CrossCell(inout vec3, vec3, ivec2);
+vec3 SS_CrossCell(vec3, vec3, ivec2, float);
 vec3 SS_DirToView(vec3);
 float LengthSquared(vec3 v) { return dot(v, v); }
 float SS_GetDepthWithBias(float d, float bias) { return d + min(RAY_MAX_BIAS, d * bias); }
@@ -72,28 +84,40 @@ float SS_CorrectDepth(float near, float far, float lerp) { return SS_CorrectDept
 
 // Implementation
 #if defined(EXT_BINDLESS) && defined(FRAGMENT_SHADER)
-void SS_CrossCell(inout vec3 pos, vec3 dir, ivec2 size)
+vec3 SS_CrossCell(vec3 pos, vec3 dir, ivec2 size, float crossDirection)
 {
     vec2 cellSize = 0.5 / size;
 
     vec2 planes = SS_AlignUVToTexel(pos.xy, size);
-    planes += SS_Sign(dir.xy) * cellSize * (1 + EPSILON);
+    planes += SS_Sign(dir.xy) * cellSize * (1 + RAY_CELL_EPSILON * crossDirection);
 
     vec2 solution = (planes - pos.xy) / dir.xy;
     float dist = min(solution.x, solution.y);
 
-    pos += dist * dir;
+    return pos += dist * dir;
 }
 
-vec3 SS_WorldToUV(vec3 pos)
+vec3 SS_WorldToView(vec3 worldSpace)
 {
-    vec4 viewSpace = Camera.View[0] * vec4(pos, 1.0);
+    vec3 viewSpace = vec3(Camera.View[0] * vec4(worldSpace, 1.0));
+    return vec3(viewSpace.xy, -viewSpace.z);
+}
+
+vec3 SS_ViewToUV(vec3 viewSpace)
+{
+    viewSpace *= vec3(1, 1, -1);
     vec4 projSpace = Camera.Projection * vec4(viewSpace.xyz, 1.0);
 
     projSpace.xy /= projSpace.w;
     projSpace.xy = projSpace.xy * 0.5 + 0.5;
 
     return vec3(projSpace.xy, -viewSpace.z);
+}
+
+vec3 SS_WorldToUV(vec3 worldSpace)
+{
+    vec3 viewSpace = SS_WorldToView(worldSpace);
+    return SS_ViewToUV(viewSpace);
 }
 
 vec3 SS_DirToView(vec3 dir)
@@ -122,16 +146,13 @@ float SS_CorrectDepth(vec2 planes, float lerp)
     return (planes.x * planes.y) / (planes.x * lerp + planes.y * (1.0 - lerp));
 }
 
-RayResult SS_Trace(Ray ray)
+RayResult SS_Trace(SSRay ray, SSRaySettings settings)
 {
-    ray.Direction = normalize(ray.Direction);
-
-    vec3 rayStart = SS_WorldToUV(ray.Position);
-    vec3 rayEnd = SS_WorldToUV(ray.Position + ray.Direction * ray.Length);
-    vec3 rayDir = rayEnd - rayStart;
+    float thickness = settings.Thickness > 0 ? settings.Thickness : FLT_INF;
+    vec3 rayDir = ray.End - ray.Start;
 
     float rayLength = length(rayDir.xy);
-    float near = rayStart.z, far = rayEnd.z;
+    float near = ray.Start.z, far = ray.End.z;
 
     int mip = RAY_MIN_MIP;
     int maxMip = textureQueryLevels(Camera.Depth) - 1;
@@ -140,28 +161,22 @@ RayResult SS_Trace(Ray ray)
     maxMip = min(maxMip, RAY_MAX_MIP);
 #endif
 
-    RayResult result = RayResult(rayStart, 0.0, vec3(0.0), RAY_RESULT_NO_HIT);
-
-    if(far < near)
-    {
-        result.Result = RAY_RESULT_OUT_OF_BOUNDS;
-        return result; // Temporary while I debug backwards rays.
-    }
+    RayResult result = RayResult(ray.Start, 0.0, vec3(0.0), RAY_RESULT_NO_HIT);
 
     int i;
-    for(i = 0; i < RAY_MAX_ITERATIONS; i++)
+    for(i = 0; i < settings.Iterations; i++)
     {
         vec3 oldPos = result.Position;
         ivec2 mipSize = textureSize(Camera.Depth, mip);
         ivec2 mipSizeUp = textureSize(Camera.Depth, mip + RAY_MIP_SKIP);
         ivec2 oldCell = SS_UVToTexel(result.Position.xy, mipSizeUp);
 
-        SS_CrossCell(result.Position, rayDir, mipSize);
+        result.Position = SS_CrossCell(result.Position, rayDir, mipSize, 1.0);
 
         ivec2 newCell = SS_UVToTexel(result.Position.xy, mipSizeUp);
-        float lerp = distance(rayStart.xy, result.Position.xy) / rayLength;
 
         vec3 uv = result.Position;
+        float lerp = distance(ray.Start.xy, uv.xy) / rayLength;
         uv.z = SS_CorrectDepth(near, far, lerp);
 
         if(uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0)
@@ -176,7 +191,7 @@ RayResult SS_Trace(Ray ray)
         if(depth < uv.z)
             if(mip == RAY_MIN_MIP)
             {
-                bool crossed = uv.z < depth + RAY_THICKNESS;
+                bool crossed = uv.z < depth + thickness;
                 result.Result = crossed ? RAY_RESULT_HIT : RAY_RESULT_TOO_FAR;
                 break;
             }
@@ -189,55 +204,46 @@ RayResult SS_Trace(Ray ray)
             mip = min(mip + RAY_MIP_SKIP, maxMip);
     }
 
-    if(i == RAY_MAX_ITERATIONS) result.Result = RAY_RESULT_EXHAUSTED;
+    if(i == settings.Iterations) result.Result = RAY_RESULT_EXHAUSTED;
     return result;
 }
 
-RayResult SS_TraceRough(Ray ray, LinearRaySettings settings)
+RayResult SS_TraceRough(SSRay ray, SSLinearRaySettings settings)
 {
-    ray.Direction = normalize(ray.Direction);
+    float thickness = settings.Thickness > 0 ? settings.Thickness : FLT_INF;
 
     float searchBias;
-
     if(settings.SearchBias < 0.0)
         searchBias = 1.0 / -settings.SearchBias;
     else
         searchBias = 1.0 + settings.SearchBias;
 
-    ray.Position += settings.Normal * settings.NormalBias;
-    ray.Position += ray.Direction * settings.RayBias * (1.0 + max(IGNSample, EPSILON)) / settings.Iterations;
-    ray.Direction *= ray.Length;
+    float near = ray.Start.z, far = ray.End.z;
 
-    vec3 rayStart = SS_WorldToUV(ray.Position);
-    vec3 rayEnd = SS_WorldToUV(ray.Position + ray.Direction);
-
-    vec3 rayDir = (rayEnd - rayStart) / settings.Iterations;
-
-    float near = rayStart.z, far = rayEnd.z;
-
-    RayResult result = RayResult(rayStart, 0.0, vec3(0.0), RAY_RESULT_NO_HIT);
+    RayResult result = RayResult(ray.Start, 0.0, vec3(0.0), RAY_RESULT_NO_HIT);
+    if(far < Camera.Planes.x) return result;
 
     int i;
     for(i = 0; i < settings.Iterations; i++)
     {
         float lerp = pow(float(i) / settings.Iterations, searchBias);
 
-        vec3 uv = result.Position = mix(rayStart, rayEnd, lerp);
+        vec3 uv = result.Position = mix(ray.Start, ray.End, lerp);
         uv.z = SS_CorrectDepth(near, far, lerp);
 
-        if(uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0 || uv.z < 0.0) break;
+        if(uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) break;
 
         float depth = textureLod(Camera.Depth, uv.xy, 0.f).r;
         depth = SS_GetDepthWithBias(depth, 0.05);
 
         if(depth < uv.z)
         {
-            result.Result = uv.z - depth < RAY_THICKNESS ? RAY_RESULT_HIT : RAY_RESULT_TOO_FAR;
+            result.Result = uv.z - depth < thickness ? RAY_RESULT_HIT : RAY_RESULT_TOO_FAR;
             return result;
         }
     }
 
-    if(i == RAY_MAX_ITERATIONS) result.Result = RAY_RESULT_EXHAUSTED;
+    if(i == settings.Iterations) result.Result = RAY_RESULT_EXHAUSTED;
     return result;
 }
 
@@ -261,5 +267,57 @@ float SS_AO(AOSettings s, Vertex vert)
 
     float ao = SS_ComputeAO(s, vert);
     return clamp(ao * 2.0 - 1.0, 0.0, 1.0);
+}
+
+void ClipSSRay(inout SSRay ray)
+{
+    if(ray.End.z > Camera.Planes.x) return;
+
+    float nearPlane = Camera.Planes.x;
+    float near = ray.End.z;
+    float far = ray.Start.z;
+    vec3 rayDir = ray.End - ray.Start;
+
+    float rayTime = near - far;
+    float collisionTime = (1.0 - EPSILON) * (rayTime - near) / rayTime;
+
+    ray.End = ray.Start + rayDir * collisionTime;
+}
+
+SSRay CreateSSRayHiZ(Ray ray, SSRaySettings settings)
+{
+    SSRay result;
+
+    ray.Direction = normalize(ray.Direction);
+    ray.Position += settings.Normal * settings.NormalBias;
+
+    result.Start = SS_WorldToView(ray.Position);
+    result.End = SS_WorldToView(ray.Position + ray.Direction * ray.Length);
+
+    ClipSSRay(result);
+
+    result.Start = SS_ViewToUV(result.Start);
+    result.End = SS_ViewToUV(result.End);
+
+    return result;
+}
+
+SSRay CreateSSRayLinear(Ray ray, SSLinearRaySettings settings)
+{
+    SSRay result;
+
+    ray.Direction = normalize(ray.Direction);
+    ray.Position += settings.Normal * settings.NormalBias;
+    ray.Position += ray.Direction * (1.0 + IGNSample) * settings.RayBias / settings.Iterations;
+
+    result.Start = SS_WorldToView(ray.Position);
+    result.End = SS_WorldToView(ray.Position + ray.Direction * ray.Length);
+
+    ClipSSRay(result);
+
+    result.Start = SS_ViewToUV(result.Start);
+    result.End = SS_ViewToUV(result.End);
+
+    return result;
 }
 #endif

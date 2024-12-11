@@ -2,6 +2,8 @@
 #define ENABLE_SMRT
 #define ENABLE_SMRT_CONTACT_SHADOW
 
+#define HIZ_MAX_ITER 128
+
 #define POM_MIN_LAYER 8
 #define POM_MAX_LAYER 32
 
@@ -102,7 +104,11 @@ void main()
 
     #if defined(ENABLE_SS_TRACE) || defined(ENABLE_VOXEL_TRACE)
         Ray ray = Ray(vert.Position, 10.f, pbrSample.Specular);
-        RayResult result = SS_Trace(ray);
+
+        SSRaySettings raySettings = SSRaySettings(HIZ_MAX_ITER, EPSILON, 0.2, vert.Normal, 0.0);
+        SSRay ssRay = CreateSSRayHiZ(ray, raySettings);
+
+        RayResult result = SS_Trace(ssRay, raySettings);
         vec3 raySpecular = textureLod(Camera.Color, result.Position.xy, 0.f).rgb;
 
         #ifdef ENABLE_VOXEL_TRACE

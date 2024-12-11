@@ -134,9 +134,13 @@ float GetShadowDirectional(const Vertex vert, const Light light, const vec4 frag
 #ifdef ENABLE_SMRT_CONTACT_SHADOW
     if(shadow < EPSILON) return shadow;
 
-    Ray ray;
-    LinearRaySettings raySettings = LinearRaySettings(SMRT_CONTACT_TRACE_STEPS, EPSILON, EPSILON, vert.Normal, SMRT_CONTACT_TRACE_BIAS);
-    RayResult result;
+    SSLinearRaySettings raySettings = SSLinearRaySettings
+    (
+        SMRT_CONTACT_TRACE_STEPS,
+        EPSILON, EPSILON,
+        0.2, vert.Normal,
+        SMRT_CONTACT_TRACE_BIAS
+    );
 
     float contactShadow = 0.0;
     for(uint i = 0; i < SMRT_CONTACT_SAMPLES; i++)
@@ -144,8 +148,9 @@ float GetShadowDirectional(const Vertex vert, const Light light, const vec4 frag
         vec2 offset = VogelDisk(i, SMRT_CONTACT_SAMPLES, IGNSample * PI * 2.0) * DIRECTIONAL_SHADOW_RADIUS;
         vec3 rayDir = offsetMatrix * vec3(offset, 1.0);
 
-        ray = Ray(vert.Position, SMRT_TRACE_DISTANCE / 50.0, rayDir);
-        result = SS_TraceRough(ray, raySettings);
+        Ray ray = Ray(vert.Position, SMRT_TRACE_DISTANCE / 10.0, rayDir);
+        SSRay ssRay = CreateSSRayLinear(ray, raySettings);
+        RayResult result = SS_TraceRough(ssRay, raySettings);
 
         contactShadow += float(result.Result != RAY_RESULT_HIT);
     }
@@ -230,8 +235,7 @@ float GetShadowPoint(const Vertex vert, const Light light)
 #if defined(DIRECTIONAL_CONTACT_SHADOW) && CONTACT_SAMPLES > 0
     if(shadow < EPSILON) return shadow;
 
-    Ray ray;
-    LinearRaySettings raySettings = LinearRaySettings(32, bias, 0.001, vert.Normal, 1.5);
+    LinearSSRaySettings raySettings = LinearSSRaySettings(32, bias, 0.001, vert.Normal, 1.5);
     RayResult result;
 
     float contactShadow = 0.0;
@@ -243,7 +247,8 @@ float GetShadowPoint(const Vertex vert, const Light light)
 
         vec3 rayDir = (light.Position + lightOffset) - vert.Position;
 
-        ray = Ray(vert.Position, POINT_CONTACT_SHADOW_LENGTH, rayDir);
+        Ray ray = Ray(vert.Position, POINT_CONTACT_SHADOW_LENGTH, rayDir);
+        LinearRay linearRay = CreateLinearRay(ray, raySettings);
         result = SS_TraceRough(ray, raySettings);
 
         contactShadow += float(result.Result != RAY_RESULT_HIT);
