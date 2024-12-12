@@ -28,6 +28,8 @@ float saturate(float a) { return clamp(a, 0.0, 1.0); }
 vec2 saturate(vec2 a) { return clamp(a, vec2(0.0), vec2(1.0)); }
 vec3 saturate(vec3 a) { return clamp(a, vec3(0.0), vec3(1.0)); }
 vec4 saturate(vec4 a) { return clamp(a, vec4(0.0), vec4(1.0)); }
+float VDCInverse(uint bits);
+vec2 Hammersley(uint i, uint sampleCount);
 
 // Implementation
 mat3 GetTBN(vec3 normal)
@@ -79,4 +81,32 @@ vec2 VogelDisk(uint i, uint count, float phi)
     float radius = sqrt((i + 0.5) / count);
     float theta = i * GOLDEN_ANGLE + phi;
     return vec2(cos(theta), sin(theta)) * radius;
+}
+
+
+// How someone came up with this, I don't know.
+// http://holger.dammertz.org/stuff/notes_HammersleyOnHemisphere.html
+float VDCInverse(uint bits)
+{
+    bits = (bits << 16u) | (bits >> 16u);
+    bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);
+    bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xCCCCCCCCu) >> 2u);
+    bits = ((bits & 0x0F0F0F0Fu) << 4u) | ((bits & 0xF0F0F0F0u) >> 4u);
+    bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);
+    return float(bits) * 2.3283064365386963e-10; // / 0x100000000
+}
+
+vec2 Hammersley(uint i, uint sampleCount)
+{
+    return vec2(float(i) / float(sampleCount), VDCInverse(i));
+}
+
+vec2 Rotate(vec2 vec, float angle)
+{
+    vec2 result;
+
+    result.x = vec.x * cos(angle) + vec.y * sin(angle);
+    result.y = vec.x * sin(angle) + vec.y * cos(angle);
+
+    return result;
 }

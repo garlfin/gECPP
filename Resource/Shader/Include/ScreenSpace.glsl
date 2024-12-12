@@ -226,19 +226,20 @@ RayResult SS_TraceRough(SSRay ray, SSLinearRaySettings settings)
     int i;
     for(i = 0; i < settings.Iterations; i++)
     {
-        float lerp = pow(float(i) / settings.Iterations, searchBias);
+        float lerp = pow(float(i) / (settings.Iterations - 1), searchBias);
 
         vec3 uv = result.Position = mix(ray.Start, ray.End, lerp);
         uv.z = SS_CorrectDepth(near, far, lerp);
 
         if(uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) break;
 
-        float depth = textureLod(Camera.Depth, uv.xy, 0.f).r;
-        depth = SS_GetDepthWithBias(depth, 0.05);
+        float depth = textureLod(Camera.Depth, uv.xy, 0.0).r;
+        depth = SS_GetDepthWithBias(depth, 0.01);
 
-        if(depth < uv.z)
+        float offset = uv.z - depth;
+        if(offset > 0.0)
         {
-            result.Result = uv.z - depth < thickness ? RAY_RESULT_HIT : RAY_RESULT_TOO_FAR;
+            result.Result = offset < thickness ? RAY_RESULT_HIT : RAY_RESULT_TOO_FAR;
             return result;
         }
     }
@@ -306,9 +307,10 @@ SSRay CreateSSRayLinear(Ray ray, SSLinearRaySettings settings)
 {
     SSRay result;
 
+    float ign = InterleavedGradientNoise(gl_FragCoord.xy);
     ray.Direction = normalize(ray.Direction);
     ray.Position += settings.Normal * settings.NormalBias;
-    ray.Position += ray.Direction * (1.0 + IGNSample) * settings.RayBias / settings.Iterations;
+    ray.Position += ray.Direction * IGNSample * settings.RayBias / settings.Iterations;
 
     result.Start = SS_WorldToView(ray.Position);
     result.End = SS_WorldToView(ray.Position + ray.Direction * ray.Length);

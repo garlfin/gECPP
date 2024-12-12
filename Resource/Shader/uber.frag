@@ -52,8 +52,6 @@ void main()
         VertexIn.UV * 10
     );
 
-    int maxSample = int((POM_MAX_LAYER - POM_MIN_LAYER) * IGNSample) + POM_MIN_LAYER;
-
 	ParallaxEffectSettings parallaxSettings = ParallaxEffectSettings(0.5f, POM_MIN_LAYER, POM_MAX_LAYER, 0.0, 0.5);
 
     vec3 viewDir = normalize(Camera.Position - VertexIn.FragPos);
