@@ -307,7 +307,6 @@ SSRay CreateSSRayLinear(Ray ray, SSLinearRaySettings settings)
 {
     SSRay result;
 
-    float ign = InterleavedGradientNoise(gl_FragCoord.xy);
     ray.Direction = normalize(ray.Direction);
     ray.Position += settings.Normal * settings.NormalBias;
     ray.Position += ray.Direction * IGNSample * settings.RayBias / settings.Iterations;

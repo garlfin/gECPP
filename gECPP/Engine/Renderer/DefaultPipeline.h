@@ -23,9 +23,9 @@ namespace GPU
 	{
 		glm::vec3 Position;
 		u32 Frame;
-		glm::vec2 Planes;
-		glm::vec2 Size;
-		glm::vec3 Parameters;
+		glm::vec2 Planes; // Near, Far
+		glm::ivec2 Size; // Viewport Size
+		glm::vec3 Parameters; // Up to implementation
 		float FrameDelta;
 
 		handle ColorTexture;

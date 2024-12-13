@@ -129,6 +129,7 @@ void main()
     FragColor.a = 1.0;
 
     Velocity = PerspectiveToUV(VertexIn.PreviousNDC);
+    Velocity.xy -= PerspectiveToUV(VertexIn.CurrentNDC).xy;
 
     if(!ENABLE_VOXEL_WRITE) return;
 

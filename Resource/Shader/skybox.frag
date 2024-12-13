@@ -22,4 +22,5 @@ void main()
 #endif
 
     Velocity = PerspectiveToUV(VertexIn.PreviousNDC);
+    Velocity.xy -= PerspectiveToUV(VertexIn.CurrentNDC).xy;
 }

@@ -40,5 +40,6 @@ void main()
       imageStore(VoxelColorOut, texel, PackColor(FragColor));
    }
 
-   Velocity = PerspectiveToUV(VertexIn.PreviousNDC);
+    Velocity = PerspectiveToUV(VertexIn.PreviousNDC);
+    Velocity.xy -= PerspectiveToUV(VertexIn.CurrentNDC).xy;
 }

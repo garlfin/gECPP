@@ -4,6 +4,7 @@
 
 #define TAA_MODE_FULL
 #define TAA_CLIP_AABB
+#define TAA_DEPTH_REJECTION
 
 #ifndef PIPELINE_COLOR_FORMAT
     #define PIPELINE_COLOR_FORMAT rgba16f
@@ -46,6 +47,8 @@ void main()
 
 #ifdef ENABLE_TAA
     vec3 previousUV = texture(VelocityIn, uv).xyz;
+    previousUV.xy += uv;
+
     vec4 currentColor = clamp(texture(ColorIn, uv), vec4(0.0), vec4(vec3(TAA_CLAMP_MAX), 1.0));
     vec4 previousColor = CatmullRom(PreviousColorIn, previousUV.xy, size);
 
@@ -79,17 +82,18 @@ void main()
     float rejectionFactor = 0.0;
     if(previousUV.x < 0.0 || previousUV.x > 1.0 || previousUV.y < 0.0 || previousUV.y > 1.0) rejectionFactor = 1.0;
 
-    /**float blockerDepth = texture(PreviousDepth, previousUV.xy).r;
-    blockerDepth = max(blockerDepth, textureOffset(PreviousDepth, previousUV.xy, ivec2(-1, 1)).r);
-    blockerDepth = max(blockerDepth, textureOffset(PreviousDepth, previousUV.xy, ivec2(-1, 0)).r);
-    blockerDepth = max(blockerDepth, textureOffset(PreviousDepth, previousUV.xy, ivec2(-1, -1)).r);
-    blockerDepth = max(blockerDepth, textureOffset(PreviousDepth, previousUV.xy, ivec2(0, 1)).r);
-    blockerDepth = max(blockerDepth, textureOffset(PreviousDepth, previousUV.xy, ivec2(0, -1)).r);
-    blockerDepth = max(blockerDepth, textureOffset(PreviousDepth, previousUV.xy, ivec2(1, 1)).r);
-    blockerDepth = max(blockerDepth, textureOffset(PreviousDepth, previousUV.xy, ivec2(1, 0)).r);
-    blockerDepth = max(blockerDepth, textureOffset(PreviousDepth, previousUV.xy, ivec2(1, -1)).r);
+#ifdef TAA_DEPTH_REJECTION
+    //for(int y = -1; y <= 1; y++)
+    //   for(int x = -1; x <= 1; x++)
+    //        previousUV.z = min(previousUV.z, textureOffset(VelocityIn, uv, ivec2(x, y)).z);
 
-    rejectionFactor = max(rejectionFactor, saturate(previousUV.z - blockerDepth));*/
+    float blockerDepth = 0.0;
+    for(int y = -1; y <= 1; y++)
+        for(int x = -1; x <= 1; x++)
+            blockerDepth = max(blockerDepth, textureOffset(PreviousDepth, previousUV.xy, ivec2(x, y)).r);
+
+    rejectionFactor = max(rejectionFactor, saturate(previousUV.z - blockerDepth * 1.01));
+#endif
 
     weight = mix(weight, vec2(0.0, 1.0), rejectionFactor);
 

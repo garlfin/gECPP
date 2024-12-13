@@ -6,7 +6,7 @@ struct CameraData
     vec3 Position;
     uint Frame;
     vec2 Planes;
-    vec2 Size;
+    ivec2 Size;
     vec3 Parameters;
     float FrameDelta;
 

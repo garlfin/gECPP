@@ -46,12 +46,6 @@ void main()
     VertexIn.PreviousNDC = objectInfo.PreviousModel * vec4(Position, 1);
     VertexIn.PreviousNDC = Camera.PreviousViewProjection * vec4(VertexIn.PreviousNDC.xyz, 1);
 
-    if(ENABLE_JITTER)
-    {
-        vec2 jitter = Jitter(Camera.Frame, Camera.Size);
-        VertexIn.PreviousNDC.xy += jitter * VertexIn.PreviousNDC.w;
-    }
-
     vec3 nor, tan, bitan;
     nor = normalize(objectInfo.Normal * Normal);
     tan = normalize(objectInfo.Normal * Tangent);
