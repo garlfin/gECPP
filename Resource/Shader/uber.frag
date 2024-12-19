@@ -1,6 +1,8 @@
 #define ENABLE_VOXEL_TRACE
 #define ENABLE_SMRT
 #define ENABLE_SMRT_CONTACT_SHADOW
+#define ENABLE_GI
+#define ENABLE_GI_MULTIBOUNCE
 
 #define HIZ_MAX_ITER 128
 
@@ -39,6 +41,8 @@ in VertexOut VertexIn;
 layout(location = 0) out vec4 FragColor;
 layout(location = 1) out vec3 Velocity;
 
+vec3 SampleLighting(Vertex vert, vec3 dir, bool useParallax = true, int baseMip = 0);
+
 layout(early_fragment_tests) in;
 void main()
 {
@@ -76,55 +80,25 @@ void main()
 
     PBRSample pbrSample = ImportanceSample(vert, frag);
 
-    FragColor.rgb = albedo * 0.1;// * SS_AO(vert);
+    vec3 ambient = vec3(0.2);
+
+#ifdef ENABLE_GI
+    #ifndef ENABLE_GI_MULTIBOUNCE
+        if(!ENABLE_VOXEL_WRITE)
+    #endif
+            ambient = SampleLighting(vert, pbrSample.Diffuse, true, 1);
+#endif
+
+    FragColor.rgb = albedo * ambient;
 
     for(int i = 0; i < Lighting.LightCount; i++)
         FragColor.rgb += GetLighting(vert, frag, Lighting.Lights[i], VertexIn.FragPosLightSpace[i]);
 
-#ifdef EXT_BINDLESS
     if(ENABLE_SPECULAR)
     {
-        vec3 specular = textureLod(Lighting.Skybox, pbrSample.Specular, 0.0).rgb;
-        vec3 cubemapSpecular;
-
-        float cubemapWeight, maxCubemapWeight;
-        for(uint i = 0; i < Lighting.CubemapCount; i++)
-        {
-            float weight;
-            vec3 cubemapDir = CubemapParallax(vert.Position, pbrSample.Specular, Lighting.Cubemaps[i], weight);
-
-            cubemapSpecular += textureLod(Lighting.Cubemaps[0].Color, cubemapDir, 0.f).rgb;
-            cubemapWeight += weight;
-            maxCubemapWeight = max(maxCubemapWeight, weight);
-        }
-
-        specular = mix(specular, cubemapSpecular / max(cubemapWeight, EPSILON), maxCubemapWeight);
-
-    #if defined(ENABLE_SS_TRACE) || defined(ENABLE_VOXEL_TRACE)
-        Ray ray = Ray(vert.Position, 10.f, pbrSample.Specular);
-
-        SSRaySettings raySettings = SSRaySettings(HIZ_MAX_ITER, EPSILON, 0.2, vert.Normal, 0.0);
-        SSRay ssRay = CreateSSRayHiZ(ray, raySettings);
-
-        RayResult result = SS_Trace(ssRay, raySettings);
-        vec3 raySpecular = textureLod(Camera.Color, result.Position.xy, 0.f).rgb;
-
-        #ifdef ENABLE_VOXEL_TRACE
-            if(result.Result != RAY_RESULT_HIT)
-            {
-                ray.Position = vert.Position + ray.Direction * result.Distance;
-                result = Voxel_TraceOffset(ray, vert.Normal);
-                raySpecular = textureLod(VoxelGrid.Color, Voxel_WorldToUV(result.Position), 0.0).rgb;
-                raySpecular = UnpackColor(raySpecular);
-            }
-        #endif
-
-        if(result.Result == RAY_RESULT_HIT) specular = raySpecular;
-    #endif
-
+        vec3 specular = SampleLighting(vert, pbrSample.Specular);
         FragColor.rgb += FilterSpecular(vert, frag, pbrSample, specular);
     }
-#endif
 
     FragColor.a = 1.0;
 
@@ -135,4 +109,50 @@ void main()
 
     ivec3 texel = Voxel_WorldToTexel(vert.Position, imageSize(VoxelColorOut).x);
     imageStore(VoxelColorOut, texel, PackColor(FragColor));
+}
+
+vec3 SampleLighting(Vertex vert, vec3 sampleDirection, bool useParallax, int baseMip)
+{
+    vec3 color = textureLod(Lighting.Skybox, sampleDirection, 0.0).rgb;
+    vec3 cubemapColor;
+
+    float cubemapWeight, maxCubemapWeight;
+    for(uint i = 0; i < Lighting.CubemapCount; i++)
+    {
+        float weight = 1.0;
+        vec3 cubemapDir = sampleDirection;
+
+        if(useParallax)
+            cubemapDir = CubemapParallax(vert.Position, sampleDirection, Lighting.Cubemaps[i], weight);
+
+        cubemapColor += textureLod(Lighting.Cubemaps[i].Color, cubemapDir, 0.f).rgb;
+        cubemapWeight += weight;
+        maxCubemapWeight = max(maxCubemapWeight, weight);
+    }
+
+    color = mix(color, cubemapColor / max(cubemapWeight, EPSILON), maxCubemapWeight);
+
+#if defined(ENABLE_SS_TRACE) || defined(ENABLE_VOXEL_TRACE)
+    Ray ray = Ray(vert.Position, 10.f, sampleDirection, baseMip);
+
+    SSRaySettings raySettings = SSRaySettings(HIZ_MAX_ITER, EPSILON, 0.2, vert.Normal, 0.0);
+    SSRay ssRay = CreateSSRayHiZ(ray, raySettings);
+
+    RayResult result = SS_Trace(ssRay, raySettings);
+    vec3 rayColor = textureLod(Camera.Color, result.Position.xy, 0.f).rgb;
+
+    #ifdef ENABLE_VOXEL_TRACE
+    if(result.Result != RAY_RESULT_HIT)
+    {
+        ray.Position = vert.Position + ray.Direction * result.Distance;
+        result = Voxel_TraceOffset(ray, vert.Normal);
+        rayColor = textureLod(VoxelGrid.Color, Voxel_WorldToUV(result.Position), 0.0).rgb;
+        rayColor = UnpackColor(rayColor);
+    }
+    #endif
+
+    if(result.Result == RAY_RESULT_HIT) color = rayColor;
+#endif
+
+    return color;
 }

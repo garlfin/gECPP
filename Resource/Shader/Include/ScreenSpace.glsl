@@ -1,11 +1,6 @@
 #include "Camera.glsl"
-#include "Voxel.glsl"
 #include "Noise.glsl"
 #include "Math.glsl"
-
-#ifndef RAY_CELL_EPSILON
-    #define RAY_CELL_EPSILON 0.1
-#endif
 
 #ifndef RAY_EPSILON
     #define RAY_EPSILON 0.01
@@ -13,10 +8,6 @@
 
 #ifndef RAY_MAX_BIAS
     #define RAY_MAX_BIAS 0.1
-#endif
-
-#ifndef RAY_MIN_MIP
-    #define RAY_MIN_MIP 0
 #endif
 
 #ifndef RAY_MIP_SKIP
@@ -36,6 +27,7 @@ struct SSRay
 {
     vec3 Start;
     vec3 End;
+    int BaseMip;
 };
 
 struct SSRaySettings
@@ -77,8 +69,6 @@ vec3 SS_CrossCell(vec3, vec3, ivec2, float);
 vec3 SS_DirToView(vec3);
 float LengthSquared(vec3 v) { return dot(v, v); }
 float SS_GetDepthWithBias(float d, float bias) { return d + min(RAY_MAX_BIAS, d * bias); }
-float SS_Sign(float f) { return f < 0 ? -1 : 1; }
-vec2 SS_Sign(vec2 v) { return vec2(SS_Sign(v.x), SS_Sign(v.y)); }
 float SS_CorrectDepth(vec2, float);
 float SS_CorrectDepth(float near, float far, float lerp) { return SS_CorrectDepth(vec2(near, far), lerp); }
 
@@ -86,15 +76,15 @@ float SS_CorrectDepth(float near, float far, float lerp) { return SS_CorrectDept
 #if defined(EXT_BINDLESS) && defined(FRAGMENT_SHADER)
 vec3 SS_CrossCell(vec3 pos, vec3 dir, ivec2 size, float crossDirection)
 {
-    vec2 cellSize = 0.5 / size;
+    vec2 halfCellSize = 0.5 / size;
 
     vec2 planes = SS_AlignUVToTexel(pos.xy, size);
-    planes += SS_Sign(dir.xy) * cellSize * (1 + RAY_CELL_EPSILON * crossDirection);
+    planes += Sign(dir.xy) * halfCellSize * (1 + EPSILON * crossDirection);
 
     vec2 solution = (planes - pos.xy) / dir.xy;
     float dist = min(solution.x, solution.y);
 
-    return pos += dist * dir;
+    return pos + dist * dir;
 }
 
 vec3 SS_WorldToView(vec3 worldSpace)
@@ -154,7 +144,7 @@ RayResult SS_Trace(SSRay ray, SSRaySettings settings)
     float rayLength = length(rayDir.xy);
     float near = ray.Start.z, far = ray.End.z;
 
-    int mip = RAY_MIN_MIP;
+    int mip = ray.BaseMip;
     int maxMip = textureQueryLevels(Camera.Depth) - 1;
 
 #ifdef RAY_MAX_MIP
@@ -189,7 +179,7 @@ RayResult SS_Trace(SSRay ray, SSRaySettings settings)
         depth = SS_GetDepthWithBias(depth, 0.01);
 
         if(depth < uv.z)
-            if(mip == RAY_MIN_MIP)
+            if(mip == ray.BaseMip)
             {
                 bool crossed = uv.z < depth + thickness;
                 result.Result = crossed ? RAY_RESULT_HIT : RAY_RESULT_TOO_FAR;
@@ -233,7 +223,7 @@ RayResult SS_TraceRough(SSRay ray, SSLinearRaySettings settings)
 
         if(uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) break;
 
-        float depth = textureLod(Camera.Depth, uv.xy, 0.0).r;
+        float depth = textureLod(Camera.Depth, uv.xy, float(ray.BaseMip)).r;
         depth = SS_GetDepthWithBias(depth, 0.01);
 
         float offset = uv.z - depth;
@@ -290,7 +280,7 @@ SSRay CreateSSRayHiZ(Ray ray, SSRaySettings settings)
     SSRay result;
 
     ray.Direction = normalize(ray.Direction);
-    ray.Position += settings.Normal * settings.NormalBias;
+    ray.Position += settings.Normal * settings.NormalBias * (ray.BaseMip + 1);
 
     result.Start = SS_WorldToView(ray.Position);
     result.End = SS_WorldToView(ray.Position + ray.Direction * ray.Length);
@@ -308,8 +298,8 @@ SSRay CreateSSRayLinear(Ray ray, SSLinearRaySettings settings)
     SSRay result;
 
     ray.Direction = normalize(ray.Direction);
-    ray.Position += settings.Normal * settings.NormalBias;
-    ray.Position += ray.Direction * IGNSample * settings.RayBias / settings.Iterations;
+    ray.Position += settings.Normal * settings.NormalBias * (ray.BaseMip + 1);
+    ray.Position += ray.Direction * IGNSample * settings.RayBias / settings.Iterations * (ray.BaseMip + 1);
 
     result.Start = SS_WorldToView(ray.Position);
     result.End = SS_WorldToView(ray.Position + ray.Direction * ray.Length);
@@ -318,6 +308,7 @@ SSRay CreateSSRayLinear(Ray ray, SSLinearRaySettings settings)
 
     result.Start = SS_ViewToUV(result.Start);
     result.End = SS_ViewToUV(result.End);
+    result.BaseMip = ray.BaseMip;
 
     return result;
 }

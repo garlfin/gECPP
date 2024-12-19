@@ -278,12 +278,13 @@ PBRSample ImportanceSample(const Vertex vert, const PBRFragment frag)
 
     vec2 xi = Hammersley(int(IGNSample * HAMMERSLEY_ROUGHNESS_SAMPLE), HAMMERSLEY_ROUGHNESS_SAMPLE);
     vec3 n = ImportanceSampleGGX(xi, frag.Normal, frag.Roughness);
+    vec3 d = ImportanceSampleGGX(xi, vert.Normal, 1.0);
     vec3 r = -normalize(reflect(eye, n));
 
     vec3 f0 = mix(frag.F0, frag.Albedo, frag.Metallic);
     vec3 f = FresnelSchlick(f0, nDotV);
     vec2 brdf = textureLod(BRDFLutTex, vec2(nDotV, frag.Roughness), 0.0).rg;
 
-    return PBRSample(brdf, f, r, vec3(0.0));
+    return PBRSample(brdf, f, r, d);
 }
 #endif

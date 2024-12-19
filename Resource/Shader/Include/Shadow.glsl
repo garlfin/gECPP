@@ -156,7 +156,7 @@ float GetShadowDirectional(const Vertex vert, const Light light, const vec4 frag
         vec2 offset = VogelDisk(i, SMRT_CONTACT_SAMPLES, IGNSample * PI * 2.0) * DIRECTIONAL_SHADOW_RADIUS;
         vec3 rayDir = offsetMatrix * vec3(offset, 1.0);
 
-        Ray ray = Ray(vert.Position, viewDistance * SMRT_CONTACT_TRACE_LENGTH, rayDir);
+        Ray ray = Ray(vert.Position, viewDistance * SMRT_CONTACT_TRACE_LENGTH, rayDir, 0);
         SSRay ssRay = CreateSSRayLinear(ray, raySettings);
         RayResult result = SS_TraceRough(ssRay, raySettings);
 
@@ -262,7 +262,7 @@ float GetShadowPoint(const Vertex vert, const Light light)
 
         vec3 rayDir = (light.Position + lightOffset) - vert.Position;
 
-        Ray ray = Ray(vert.Position, viewDistance * SMRT_CONTACT_TRACE_LENGTH, rayDir);
+        Ray ray = Ray(vert.Position, viewDistance * SMRT_CONTACT_TRACE_LENGTH, rayDir, 0);
         SSRay ssRay = CreateSSRayLinear(ray, raySettings);
         RayResult result = SS_TraceRough(ssRay, raySettings);
 

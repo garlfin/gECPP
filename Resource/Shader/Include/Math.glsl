@@ -28,8 +28,34 @@ float saturate(float a) { return clamp(a, 0.0, 1.0); }
 vec2 saturate(vec2 a) { return clamp(a, vec2(0.0), vec2(1.0)); }
 vec3 saturate(vec3 a) { return clamp(a, vec3(0.0), vec3(1.0)); }
 vec4 saturate(vec4 a) { return clamp(a, vec4(0.0), vec4(1.0)); }
+float Sign(float f) { return f < 0 ? -1 : 1; }
+vec2 Sign(vec2 v) { return vec2(Sign(v.x), Sign(v.y)); }
+vec3 Sign(vec3 v) { return vec3(Sign(v.x), Sign(v.y), Sign(v.z)); }
 float VDCInverse(uint bits);
 vec2 Hammersley(uint i, uint sampleCount);
+
+#define RAY_RESULT_NO_HIT 0
+#define RAY_RESULT_HIT 1
+#define RAY_RESULT_TOO_FAR 2
+#define RAY_RESULT_EXHAUSTED 3
+#define RAY_RESULT_OUT_OF_BOUNDS 4
+#define RAY_RESULT_PRECISION_ERROR 5
+
+struct Ray
+{
+    vec3 Position;
+    float Length;
+    vec3 Direction;
+    int BaseMip;
+};
+
+struct RayResult
+{
+    vec3 Position;
+    float Distance;
+    vec3 Normal;
+    int Result;
+};
 
 // Implementation
 mat3 GetTBN(vec3 normal)

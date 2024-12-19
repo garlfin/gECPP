@@ -54,11 +54,11 @@ namespace gE::VoxelPipeline
 		Buffers& buffers = GetWindow().GetVoxelBuffers();
 		API::ComputeShader& voxelShader = GetWindow().GetVoxelTAAShader();
 		Transform& transform = GetOwner().GetTransform();
-		Transform& cameraTransform = camera->GetOwner().GetTransform();
+		const TransformData& cameraTransform = camera->GetOwner().GetTransform().GetGlobalTransform();
 
-		float cellSize = GetScale() * 2.f / GetSize().x;
+		float cellSize = GetScale() * 2.f / GetSize().x * 5.0;
 
-		glm::ivec3 pos = glm::ivec3(cameraTransform->Position / cellSize);
+		glm::ivec3 pos = glm::ivec3(cameraTransform.Position / cellSize);
 		_velocity = pos - glm::ivec3(transform->Position / cellSize);
 		transform.SetPosition(glm::vec3(pos) * cellSize);
 		transform.OnUpdate(0.f); // Force update on model matrix since it passed its tick.
