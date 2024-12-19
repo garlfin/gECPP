@@ -41,7 +41,7 @@ in VertexOut VertexIn;
 layout(location = 0) out vec4 FragColor;
 layout(location = 1) out vec3 Velocity;
 
-vec3 SampleLighting(Vertex vert, vec3 dir, bool useParallax = true, int baseMip = 0);
+vec3 SampleLighting(Vertex vert, vec3 dir, int baseMip = 0);
 
 layout(early_fragment_tests) in;
 void main()
@@ -86,7 +86,7 @@ void main()
     #ifndef ENABLE_GI_MULTIBOUNCE
         if(!ENABLE_VOXEL_WRITE)
     #endif
-            ambient = SampleLighting(vert, pbrSample.Diffuse, true, 1);
+            ambient = SampleLighting(vert, pbrSample.Diffuse, 1);
 #endif
 
     FragColor.rgb = albedo * ambient;
@@ -111,7 +111,7 @@ void main()
     imageStore(VoxelColorOut, texel, PackColor(FragColor));
 }
 
-vec3 SampleLighting(Vertex vert, vec3 sampleDirection, bool useParallax, int baseMip)
+vec3 SampleLighting(Vertex vert, vec3 sampleDirection, int baseMip)
 {
     vec3 color = textureLod(Lighting.Skybox, sampleDirection, 0.0).rgb;
     vec3 cubemapColor;
@@ -120,10 +120,7 @@ vec3 SampleLighting(Vertex vert, vec3 sampleDirection, bool useParallax, int bas
     for(uint i = 0; i < Lighting.CubemapCount; i++)
     {
         float weight = 1.0;
-        vec3 cubemapDir = sampleDirection;
-
-        if(useParallax)
-            cubemapDir = CubemapParallax(vert.Position, sampleDirection, Lighting.Cubemaps[i], weight);
+        vec3 cubemapDir = CubemapParallax(vert.Position, sampleDirection, Lighting.Cubemaps[i], weight);
 
         cubemapColor += textureLod(Lighting.Cubemaps[i].Color, cubemapDir, 0.f).rgb;
         cubemapWeight += weight;

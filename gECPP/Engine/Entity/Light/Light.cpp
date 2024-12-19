@@ -33,12 +33,16 @@ namespace gE
 		DefaultPipeline::Buffers& buffers = _window->GetPipelineBuffers();
 		GPU::Lighting& lighting = buffers.Lighting;
 
-		lighting.LightCount = 2;
-		(**List.GetFirst())->GetGPULight(lighting.Lights[0]);
-		(**List.GetFirst()->GetNext())->GetGPULight(lighting.Lights[1]);
+		lighting.LightCount = List.GetSize();
+
+		GE_ASSERT(lighting.LightCount <= 4, "TOO MANY LIGHTS!");
+
+		int i = 0;
+		for(ITER_T* light = List.GetFirst(); light; light = light->GetNext(), i++)
+			(**light)->GetGPULight(lighting.Lights[i]);
 
 		buffers.UpdateLighting(sizeof(u32));
-		buffers.UpdateLighting(sizeof(GPU::Light) * 2, offsetof(GPU::Lighting, Lights));
+		buffers.UpdateLighting(sizeof(GPU::Light) * lighting.LightCount, offsetof(GPU::Lighting, Lights));
 	}
 
 	DirectionalLight::DirectionalLight(Window* w, u16 size, float scale, const glm::quat& rot) :
