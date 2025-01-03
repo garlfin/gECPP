@@ -2,17 +2,10 @@
     #define EPSILON 0.001
 #endif
 
-#ifndef PI
-    #define PI 3.141592
-#endif
-
-#ifndef GOLDEN_ANGLE
-    #define GOLDEN_ANGLE 2.4
-#endif
-
-#ifndef FLT_INF
-    #define FLT_INF uintBitsToFloat(0x7F800000)
-#endif
+#define PI 3.141592
+#define SQRT_PI 1.772454
+#define GOLDEN_ANGLE 2.4
+#define FLT_INF uintBitsToFloat(0x7F800000)
 
 // Main Functions
 mat3 GetTBN(vec3);
@@ -33,6 +26,9 @@ vec2 Sign(vec2 v) { return vec2(Sign(v.x), Sign(v.y)); }
 vec3 Sign(vec3 v) { return vec3(Sign(v.x), Sign(v.y), Sign(v.z)); }
 float VDCInverse(uint bits);
 vec2 Hammersley(uint i, uint sampleCount);
+float CreateBias(float);
+vec3 ToHemisphere(vec2 vec);
+vec3 ToSphere(vec2 vec);
 
 #define RAY_RESULT_NO_HIT 0
 #define RAY_RESULT_HIT 1
@@ -109,7 +105,6 @@ vec2 VogelDisk(uint i, uint count, float phi)
     return vec2(cos(theta), sin(theta)) * radius;
 }
 
-
 // How someone came up with this, I don't know.
 // http://holger.dammertz.org/stuff/notes_HammersleyOnHemisphere.html
 float VDCInverse(uint bits)
@@ -135,4 +130,28 @@ vec2 Rotate(vec2 vec, float angle)
     result.y = vec.x * sin(angle) + vec.y * cos(angle);
 
     return result;
+}
+
+vec3 ToHemisphere(vec2 vec)
+{
+    float phi = vec.y * 2.0 * PI;
+    float cosTheta = 1.0 - vec.x;
+    float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
+
+    return vec3(cos(phi) * cosTheta, sin(phi) * sinTheta, cosTheta);
+}
+
+vec3 ToSphere(vec2 vec)
+{
+    vec *= 2.0 * PI;
+    float sinPhi = sin(vec.y);
+
+    return vec3(cos(vec.x) * sinPhi, sin(vec.x) * sinPhi, cos(vec.y));
+}
+
+float CreateBias(float bias)
+{
+    if(bias < 0.0)
+        return 1.0 / -bias;
+    return 1.0 + bias;
 }

@@ -69,7 +69,7 @@ namespace gE
 		GET(API::ComputeShader&, TAAShader, TAAShader);
 		GET(API::ComputeShader&, TonemapShader, TonemapShader);
 		GET(API::ComputeShader&, BloomShader, BloomShader);
-		GET(API::ComputeShader&, VoxelTAAShader, VoxelTAAShader);
+		GET(API::ComputeShader&, VoxelComputeShader, VoxelComputeShader);
 		GET(API::ComputeShader&, HiZShader, HiZShader);
 
 		// Managers
@@ -140,7 +140,7 @@ namespace gE
 		SmartPointer<API::ComputeShader> TAAShader;
 		SmartPointer<API::ComputeShader> TonemapShader;
 		SmartPointer<API::ComputeShader> BloomShader;
-		SmartPointer<API::ComputeShader> VoxelTAAShader;
+		SmartPointer<API::ComputeShader> VoxelComputeShader;
 		SmartPointer<API::ComputeShader> HiZShader;
 
 	 private:

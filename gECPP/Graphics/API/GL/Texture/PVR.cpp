@@ -27,7 +27,7 @@ namespace PVR
 		return data;
 	}
 
-	GL::Texture* Read(gE::Window* window, const Path& path, GPU::WrapMode wrapMode, GPU::FilterMode filterMode)
+	API::Texture* Read(gE::Window* window, const Path& path, GPU::WrapMode wrapMode, GPU::FilterMode filterMode)
 	{
 		Header header;
 		Array<u8> imageData = Read(path, header);
@@ -53,7 +53,7 @@ namespace PVR
 			settings.Data = move(data);
 			settings.Size = header.Size;
 
-			tex = new GL::Texture2D(window, move(settings));
+			tex = new API::Texture2D(window, move(settings));
 		}
 		else if(header.Faces == 6)
 		{
@@ -75,7 +75,7 @@ namespace PVR
 			settings.Data = move(data);
 			settings.Size = header.Size.x;
 
-			tex = new GL::TextureCube(window, move(settings));
+			tex = new API::TextureCube(window, move(settings));
 		}
 		else
 			LOG("Unsupported texture format!");

@@ -48,6 +48,7 @@ namespace GPU
 		Write(out, Data);
 	}
 
+	GPU_TEXTURE_DEFINITION(Texture1D, Dimension::D1D);
 	GPU_TEXTURE_DEFINITION(Texture2D, Dimension::D2D);
 	GPU_TEXTURE_DEFINITION(Texture3D, Dimension::D3D);
 	GPU_TEXTURE_DEFINITION(TextureCube, Dimension::D1D);

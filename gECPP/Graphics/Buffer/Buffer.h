@@ -10,22 +10,34 @@
 
 namespace GL
 {
-	template<class T, bool DYNAMIC>
+	template<class T>
 	class Buffer;
 }
 
 namespace GPU
 {
+	enum class BufferUsageHint
+	{
+		Mutable = 1,
+		Dynamic = 1 << 1,
+		Read = 1 << 2,
+		Write = 1 << 3,
+		Default = 0
+	};
+
+	ENUM_OPERATOR(BufferUsageHint, |);
+	ENUM_OPERATOR(BufferUsageHint, &);
+
 	template<typename T = void>
 	class Buffer : public Serializable<gE::Window*>, public gE::Asset
 	{
-		SERIALIZABLE_PROTO(SBUF, 1, Buffer, Serializable<gE::Window*>);
-		API_REFLECTABLE(Buffer, "GPU::Buffer", API::Buffer<T, false>);
+		SERIALIZABLE_PROTO(SBUF, 1, Buffer, Serializable);
+		API_REFLECTABLE(Buffer, "GPU::Buffer", API::Buffer<T>);
 
 	 public:
 		static_assert(!std::is_pointer_v<T>, "Buffer data shouldn't be a pointer!");
 
-		explicit Buffer(u32 count, const T* data = nullptr) : Stride(sizeof(typename Array<T>::I)), Data(count, data) {}
+		explicit Buffer(u32 count, const T* data = nullptr) : Stride(sizeof(typename Array<T>::I)), Data(data, count) {}
 		explicit Buffer(const Array<T>& arr) : Stride(sizeof(typename Array<T>::I)), Data(arr) {}
 		explicit Buffer(Array<T>&& arr) : Stride(sizeof(typename Array<T>::I)), Data(arr) {}
 
@@ -36,13 +48,14 @@ namespace GPU
 		GET_CONST(const T*, Data, Data.Data())
 		GET_CONST(u32, ElementCount, Data.Count() / Stride);
 		GET_CONST(u32, Count, Data.Count());
-		GET_CONST(u32, ByteCount, sizeof(typename Array<T>::I) * Data.Count());
+		GET_CONST(u32, ByteCount, Data.ByteCount());
 
 		ALWAYS_INLINE void Free() override { Data.Free(); }
 		ALWAYS_INLINE bool IsFree() const override { return Data.IsFree(); }
 
-		uint8_t Stride;
-		Array<T> Data;
+		uint8_t Stride = DEFAULT;
+		Array<T> Data = DEFAULT;
+		BufferUsageHint UsageHint = BufferUsageHint::Default;
 
 		~Buffer() override { ASSET_CHECK_FREE(Buffer); }
 	};
@@ -54,9 +67,9 @@ namespace GPU
 #include <Graphics/API/GL/Buffer/Buffer.h>
 
 template <typename T>
-GL::Buffer<T, false>* GPU::Buffer<T>::BufferFACTORY(std::istream& in, SETTINGS_T t)
+GL::Buffer<T>* GPU::Buffer<T>::BufferFACTORY(std::istream& in, SETTINGS_T t)
 {
-	return new GL::Buffer<T, false>(in, t);
+	return new GL::Buffer<T>(in, t);
 }
 #else
 template <typename T>

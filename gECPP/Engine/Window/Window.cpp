@@ -9,16 +9,18 @@
 
 #include <Engine/Utility/TickHandler.h>
 
+#include "Graphics/API/GL/Timer.h"
+
 using namespace gE;
 
-#ifdef DEBUG
+#define GE_DEBUG_PERFORMANCE
+
+#ifdef GE_DEBUG_PERFORMANCE
 	char WindowTitleBuf[256];
 #endif
 
 #define BRDF_SIZE 512
 #define BRDF_GROUP_SIZE 8
-#define US_TO_MS (1.0 / 1000000.f)
-#define MS_TO_S (1.0 / 1000.f)
 
 Window::Window(glm::u16vec2 size, const char* name) :
 	Cameras(this), Transforms(this),
@@ -86,19 +88,16 @@ bool Window::Run()
 	OnInit();
 	glMemoryBarrier(GL_ALL_BARRIER_BITS);
 
-#ifdef DEBUG
+#ifdef GE_DEBUG_PERFORMANCE
 	LOG("INIT TOOK " << glfwGetTime());
 
-	GLuint timer;
-	u64 timerResult;
-
-	glCreateQueries(GL_TIME_ELAPSED, 1, &timer);
+	GL::Timer timer(this);
 
 	auto debugTick = TickHandler(GE_DEBUG_POLL_RATE);
 #endif
 
 	_physicsTick = TickHandler(GE_PHYSICS_TARGET_TICKRATE);
-	_renderTick = TickHandler(144);
+	_renderTick = TickHandler(GE_RENDER_TARGET_TICKRATE);
 
 	glfwSetTime(0.0);
 	while(!glfwWindowShouldClose(_window) && !(bool) CloseState)
@@ -112,7 +111,7 @@ bool Window::Run()
 
 		if(_renderTick.ShouldTick(_time))
 		{
-		#ifdef DEBUG
+		#ifdef GE_DEBUG_PERFORMANCE
 			double updateDelta = glfwGetTime();
 		#endif
 
@@ -121,28 +120,27 @@ bool Window::Run()
 
 			OnUpdate(_renderTick.GetDelta());
 
-		#ifdef DEBUG
+		#ifdef GE_DEBUG_PERFORMANCE
 			updateDelta = glfwGetTime() - updateDelta;
 
 			const bool shouldDebugTick = debugTick.ShouldTick(_time);
-			if(shouldDebugTick) glBeginQuery(GL_TIME_ELAPSED, timer);
+			if(shouldDebugTick) timer.Start();
 		#endif
 
 			OnRender(_renderTick.GetDelta());
 
-		#ifdef DEBUG
+			glfwSwapBuffers(_window);
+
+		#ifdef GE_DEBUG_PERFORMANCE
 			if(shouldDebugTick)
 			{
-				glEndQuery(GL_TIME_ELAPSED);
-				glGetQueryObjectui64v(timer, GL_QUERY_RESULT, &timerResult);
-
-				float ms = timerResult * US_TO_MS * MS_TO_S;
+				float renderTime = timer.End() * MS_TO_S;
 
 				sprintf_s(
 					WindowTitleBuf,
 					"FPS: %u (%u), UPDATE: %u, FIXEDUPDATE: %u (%u)",
 					(unsigned) ceil(1.0 / _renderTick.GetDelta()),
-					(unsigned) ceil(1.0 / ms),
+					(unsigned) ceil(1.0 / renderTime),
 					(unsigned) ceil(1.0 / updateDelta),
 					(unsigned) ceil(1.0 / _physicsTick.GetDelta()),
 					(unsigned) floor(_physicsTick.GetDelta() * GE_PX_MIN_TICKRATE)
@@ -151,8 +149,6 @@ bool Window::Run()
 				glfwSetWindowTitle(_window, WindowTitleBuf);
 			}
 		#endif
-
-			glfwSwapBuffers(_window);
 		}
 	}
 
@@ -177,7 +173,7 @@ void Window::OnInit()
 	TAAShader = ptr_create<API::ComputeShader>(this, GPU::ComputeShader("Resource/Shader/PostProcess/taa.comp"));
 	TonemapShader = ptr_create<API::ComputeShader>(this, GPU::ComputeShader("Resource/Shader/PostProcess/tonemap.comp"));
 	BloomShader = ptr_create<API::ComputeShader>(this, GPU::ComputeShader("Resource/Shader/PostProcess/bloom.comp"));
-	VoxelTAAShader = ptr_create<API::ComputeShader>(this, GPU::ComputeShader("Resource/Shader/Compute/voxel.comp"));
+	VoxelComputeShader = ptr_create<API::ComputeShader>(this, GPU::ComputeShader("Resource/Shader/Compute/voxel.comp"));
 	HiZShader = ptr_create<API::ComputeShader>(this, GPU::ComputeShader("Resource/Shader/Compute/hiz.comp"));
 
 	{

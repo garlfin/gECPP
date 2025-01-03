@@ -68,7 +68,7 @@ namespace GL
 
 	void Texture2D::CopyFrom(const GL::Texture& o)
 	{
-		glCopyImageSubData(o.Get(), GL_TEXTURE_2D, 0, 0, 0, 0, ID, GL_TEXTURE_2D, 0, 0, 0, 0, GetSize().x, GetSize().y, 1);
+		glCopyImageSubData(o.Get(), o.GetTarget(), 0, 0, 0, 0, ID, GL_TEXTURE_2D, 0, 0, 0, 0, GetSize().x, GetSize().y, 1);
 	}
 
 	API_SERIALIZABLE_IMPL(Texture3D), GL::Texture(window, GL_TEXTURE_3D, *this)
@@ -99,7 +99,7 @@ namespace GL
 
 	void Texture3D::CopyFrom(const GL::Texture& o)
 	{
-		glCopyImageSubData(o.Get(), GL_TEXTURE_3D, 0, 0, 0, 0, ID, GL_TEXTURE_3D, 0, 0, 0, 0, GetSize().x, GetSize().y, GetSize().z);
+		glCopyImageSubData(o.Get(), o.GetTarget(), 0, 0, 0, 0, ID, GL_TEXTURE_3D, 0, 0, 0, 0, GetSize().x, GetSize().y, GetSize().z);
 	}
 
 	API_SERIALIZABLE_IMPL(TextureCube), GL::Texture(window, GL_TEXTURE_CUBE_MAP, *this)
@@ -129,6 +129,37 @@ namespace GL
 	}
 
 	void TextureCube::CopyFrom(const GL::Texture& o)
+	{
+		// TODO
+	}
+
+	API_SERIALIZABLE_IMPL(Texture1D), GL::Texture(window, GL_TEXTURE_1D, *this)
+	{
+		if(!MipCount) MipCount = GPU::GetMipCount<Dimension::D1D>(Size);
+		glTextureStorage1D(ID, MipCount, Format, Size);
+
+		if(!Data.Data) return;
+
+		u32 size = Size;
+		u8* dataPtr = Data.Data.Data(); // sobbing rn
+
+		for(u8 i = 0; i < Data.MipCount; i++, size >>= 1)
+		{
+			size = glm::max(size, 1u);
+			u64 dataSize = Data.Scheme.Size<Dimension::D1D>(size);
+
+			if(Data.Scheme.IsCompressed())
+				glCompressedTextureSubImage1D(ID, i, 0, size, Format, dataSize, dataPtr);
+			else
+				glTextureSubImage3D(ID, i, 0, 0, 0, size, size, 6, Data.PixelFormat, Data.PixelType, dataPtr);
+
+			dataPtr += dataSize;
+		}
+
+		if(MipCount != 1 && Data.MipCount == 1) glGenerateTextureMipmap(ID);
+	}
+
+	void Texture1D::CopyFrom(const GL::Texture& o)
 	{
 		// TODO
 	}

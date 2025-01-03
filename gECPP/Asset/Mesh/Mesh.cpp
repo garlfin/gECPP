@@ -1,0 +1,64 @@
+//
+// Created by scion on 11/13/2024.
+//
+
+#include "Mesh.h"
+
+#include "Engine/Window/Window.h"
+
+namespace gE
+{
+    void Mesh::ISerialize(istream& in, SETTINGS_T s)
+    {
+        Read(in, Name);
+
+        if(Version == 2)
+        {
+            Read<u8>(in);
+            //MaterialNames = ReadArray<u8, std::string>(in);
+
+            Read(in, Bounds);
+        }
+
+        const TypeSystem::Type* type = ReadType<Window*>(in);
+        GE_ASSERT(type, "NO TYPE INFO!");
+
+        // Super dumb but super works.
+        Serializable* vao = type->Factory(in, s);
+        VAO = ptr_cast((API::IVAO*) vao->GetUnderlying());
+
+        if(Version == 2 && Read<bool>(in))
+        {
+            const TypeSystem::Type* shapeType = ReadType<Window*>(in);
+            GE_ASSERT(shapeType, "NO SHAPE TYPE INFO!");
+
+            Serializable* shape = shapeType->Factory(in, s);
+            Shape = ptr_cast((Jolt::Shape*) shape->GetUnderlying());
+        }
+    }
+
+    void Mesh::IDeserialize(ostream& out) const
+    {
+        Write(out, Name);
+        Write(out, (u8) 0);
+        //WriteArray<u8>(out, MaterialNames);
+
+        Write(out, Bounds);
+
+        const TypeSystem::Type* type = GetMeshType();
+        GE_ASSERT(type, "NO TYPE INFO!");
+
+        WriteType<Window*>(out, *type);
+        Write(out, VAO->GetSettings());
+
+        Write(out, (bool) Shape);
+        if(Shape)
+        {
+            const TypeSystem::Type* shapeType = GetShapeType();
+            GE_ASSERT(shapeType, "NO SHAPE TYPE INFO!");
+
+            WriteType<Window*>(out, *shapeType);
+            Write(out, Shape->GetSettings());
+        }
+    }
+}

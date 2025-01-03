@@ -5,6 +5,7 @@
 #pragma once
 
 #include <Asset/Prototype.h>
+#include <cstddef>
 
 namespace gE
 {
@@ -37,4 +38,4 @@ namespace gE
 
 }
 
-template<class T = void*> struct Serializable;
+template<class T = std::nullptr_t> struct Serializable;

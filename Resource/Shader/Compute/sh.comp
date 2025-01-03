@@ -1,0 +1,69 @@
+#include <Resource/Shader/Include/SphericalHarmonics.glsl>
+
+#define SH_GROUP_SIZE 32
+#define SH_LOG2_GROUP_SIZE 5
+#define SH_MODE_SAMPLE 0
+#define SH_MODE_MERGE 1
+
+layout(location = 0) uniform samplerCube Cubemap;
+layout(location = 1) uniform uint Mode;
+
+shared ColorHarmonic Harmonics[SH_GROUP_SIZE];
+
+layout(std140, binding = 9) restrict buffer OutputBuffer
+{
+    ColorHarmonic OutHarmonics[];
+};
+
+layout(local_size_x = SH_GROUP_SIZE, local_size_y = 1, local_size_z = 1) in;
+void main()
+{
+    uint localIndex = gl_LocalInvocationIndex;
+
+    if(Mode == SH_MODE_SAMPLE)
+    {
+        uint maxSamples = gl_NumWorkGroups.x * SH_GROUP_SIZE;
+        uint sampleID = gl_GlobalInvocationID.x;
+
+        vec3 sampleDir = ToSphere(Hammersley(sampleID, maxSamples));
+        vec3 sampleColor = texture(Cubemap, sampleDir).rgb;
+
+        ColorHarmonic harmonic;
+        SH_Project(harmonic, sampleDir, sampleColor);
+
+        Harmonics[localIndex] = harmonic;
+
+        barrier();
+
+        for (uint i = 1; i <= SH_LOG2_GROUP_SIZE; i++)
+        {
+            uint sumCount = SH_GROUP_SIZE >> i;
+
+            if (localIndex < sumCount)
+                Harmonics[localIndex] = SH_Add(Harmonics[localIndex], Harmonics[sumCount + localIndex]);
+
+            barrier();
+        }
+
+        if (localIndex == 0)
+        {
+            for (uint i = 0; i < 9; i++)
+                Harmonics[0].Coefficients[i] *= 4.0 * PI / maxSamples;
+
+            OutHarmonics[gl_WorkGroupID.x] = Harmonics[0];
+        }
+    }
+    else
+    {
+        for (uint i = 1; i <= SH_LOG2_GROUP_SIZE; i++)
+        {
+            uint sumCount = SH_GROUP_SIZE >> i;
+            uint mergeIndex = sumCount + localIndex;
+
+            if (localIndex < sumCount && mergeIndex < OutHarmonics.length())
+                OutHarmonics[localIndex] = SH_Add(OutHarmonics[localIndex], OutHarmonics[mergeIndex]);
+
+            barrier();
+        }
+    }
+}

@@ -250,7 +250,6 @@ vec3 CubemapParallax(vec3 pos, vec3 dir, Cubemap cubemap, out float weight)
     switch(cubemap.Type)
     {
         case CUBEMAP_AABB:
-
             vec3 boxMin = cubemap.Position - cubemap.Scale;
             vec3 boxMax = cubemap.Position + cubemap.Scale;
 

@@ -5,7 +5,6 @@
 #pragma once
 
 #include "Shapes.h"
-#include "Engine/Utility/AssetManager.h"
 
 namespace Physics
 {
@@ -94,7 +93,7 @@ namespace Physics
         // HasBakedSettings
         if(!Read<bool>(in)) return;
 
-        BakedSettings = ptr_create<BakedConvexMeshShape>(in, s);
+        BakedSettings = gE::ptr_create<BakedConvexMeshShape>(in, nullptr);
     }
 
     inline void ConvexMeshShape::IDeserialize(ostream& out) const

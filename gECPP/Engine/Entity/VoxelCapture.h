@@ -9,10 +9,17 @@
 
 namespace gE
 {
+	struct VoxelCaptureSettings
+	{
+	public:
+		u16 Resolution;
+		float Size;
+		VoxelPipeline::ProbeSettings ProbeSettings;
+	};
 	class VoxelCapture : public Entity
 	{
 	 public:
-		VoxelCapture(Window* w, u16 resolution, float size);
+		VoxelCapture(Window* w, VoxelCaptureSettings settings);
 
 		void GetGPUVoxelScene(API::VoxelScene&);
 

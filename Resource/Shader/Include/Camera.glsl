@@ -19,19 +19,15 @@ struct CameraData
 };
 
 #if defined(FRAGMENT_SHADER) && !defined(GL_ARB_bindless_texture)
-uniform sampler2D CameraDepth;
-uniform sampler2D CameraColor;
+    uniform sampler2D CameraDepth;
+    uniform sampler2D CameraColor;
 #endif
 
 #ifndef CAMERA_UNIFORM_LOCATION
-#define CAMERA_UNIFORM_LOCATION 1
+    #define CAMERA_UNIFORM_LOCATION 1
 #endif
 
-#ifndef CAMERA_UNIFORM_LAYOUT
-#define CAMERA_UNIFORM_LAYOUT std140
-#endif
-
-layout(CAMERA_UNIFORM_LAYOUT, binding = CAMERA_UNIFORM_LOCATION) uniform CameraUniform
+layout(std140, binding = CAMERA_UNIFORM_LOCATION) uniform CameraUniform
 {
     CameraData Camera;
 };

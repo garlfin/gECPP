@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <Asset/Mesh.h>
+#include <Asset/Mesh/Mesh.h>
 #include <Engine/Entity/Entity.h>
 #include <Engine/Renderer/Material.h>
 #include <Graphics/Buffer/VAO.h>

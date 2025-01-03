@@ -1,8 +1,8 @@
-#define ENABLE_VOXEL_TRACE
+#define ENABLE_SS_TRACE
 #define ENABLE_SMRT
-#define ENABLE_SMRT_CONTACT_SHADOW
+//#define ENABLE_SMRT_CONTACT_SHADOW
 #define ENABLE_GI
-#define ENABLE_GI_MULTIBOUNCE
+//#define ENABLE_GI_MULTIBOUNCE
 
 #define HIZ_MAX_ITER 128
 
@@ -80,14 +80,7 @@ void main()
 
     PBRSample pbrSample = ImportanceSample(vert, frag);
 
-    vec3 ambient = vec3(0.2);
-
-#ifdef ENABLE_GI
-    #ifndef ENABLE_GI_MULTIBOUNCE
-        if(!ENABLE_VOXEL_WRITE)
-    #endif
-            ambient = SampleLighting(vert, pbrSample.Diffuse, 1);
-#endif
+    vec3 ambient = SH_GetColor(Lighting.SkyboxIrradiance, frag.Normal) / PI;
 
     FragColor.rgb = albedo * ambient;
 
@@ -113,6 +106,9 @@ void main()
 
 vec3 SampleLighting(Vertex vert, vec3 sampleDirection, int baseMip)
 {
+#ifndef EXT_BINDLESS
+    return vec3(0.0);
+#else
     vec3 color = textureLod(Lighting.Skybox, sampleDirection, 0.0).rgb;
     vec3 cubemapColor;
 
@@ -152,4 +148,5 @@ vec3 SampleLighting(Vertex vert, vec3 sampleDirection, int baseMip)
 #endif
 
     return color;
+#endif
 }

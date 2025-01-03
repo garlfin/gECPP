@@ -24,6 +24,9 @@
 #define TO_RAD 0.01745329251f
 #define TO_DEG 57.2957795131f
 
+#define US_TO_MS (1.0 / 1000000.0)
+#define MS_TO_S (1.0 / 1000.0)
+
 typedef std::filesystem::path Path;
 typedef uint8_t u8;
 typedef int8_t i8;
@@ -107,3 +110,8 @@ inline void Decompose(const glm::mat4& m, glm::vec3& p, glm::quat& r, glm::vec3&
 	r.y = (m[2][0] - m[0][2]) * root;
 	r.z = (m[0][1] - m[1][0]) * root;
 }
+
+struct ColorHarmonic
+{
+	API_ALIGN glm::vec4 Coefficients[9];
+};

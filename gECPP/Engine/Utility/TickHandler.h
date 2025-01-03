@@ -10,8 +10,8 @@ struct TickHandler
 {
 public:
     TickHandler() = default;
-    explicit TickHandler(double requiredDelta) : RequiredDelta(requiredDelta) {};
-    explicit TickHandler(int hertz) : RequiredDelta(1.0 / hertz) {}
+    explicit TickHandler(double requiredDelta, bool strict = true) : RequiredDelta(requiredDelta), _strict(strict) {};
+    explicit TickHandler(int hertz, bool strict = true) : RequiredDelta(1.0 / hertz), _strict(strict) {}
 
     double RequiredDelta = 0.0;
 
@@ -28,6 +28,7 @@ private:
     float _lerpFactor = DEFAULT;
     double _previousTime = DEFAULT;
     double _delta = DEFAULT;
+    bool _strict = true;
 };
 
 inline bool TickHandler::ShouldTickDelta(const double delta)

@@ -89,6 +89,8 @@ void DemoWindow::OnInit()
 
 	Cubemaps->Skybox = ref_cast((GL::TextureCube*) PVR::Read(this, "Resource/Texture/sky.pvr", GPU::WrapMode::Clamp));
 	Cubemaps->Skybox->Free();
+	Cubemaps->CreateHarmonic();
 
-	VoxelSceneCapture = gE::ptr_create<VoxelCapture>(this, 128, 4.2f);
+	VoxelCaptureSettings voxelSettings(128, 8.4f, VoxelPipeline::ProbeSettings{ 32, glm::u8vec3(8) });
+	VoxelSceneCapture = gE::ptr_create<VoxelCapture>(this, voxelSettings);
 }

@@ -24,20 +24,28 @@ namespace gE
         Mesh
     };
 
+    struct VertexWeight
+    {
+        glm::u8vec4 IDs = glm::u8vec4(-1);
+        glm::u8vec4 Weights = glm::u8vec4(0);
+    };
+
     struct Mesh : public Serializable<Window*>
     {
-        SERIALIZABLE_PROTO(MESH, 1, Mesh, Serializable);
+        SERIALIZABLE_PROTO(MESH, 2, Mesh, Serializable);
 
     public:
-        std::string Name;
-        Array<std::string> MaterialNames;
+        std::string Name = DEFAULT;
+        Array<std::string> MaterialNames = DEFAULT;
 
-        AABB<Dimension::D3D> AABB;
+        AABB<Dimension::D3D> Bounds = DEFAULT;
 
-        GET_CONST(const TypeSystem::Type*, MeshType, VAO->GetData().GetType());
+        GET_CONST(const TypeSystem::Type*, MeshType, VAO->GetSettings().GetType());
         SmartPointer<API::IVAO> VAO;
 
-        // GET_CONST(const TypeSystem::Type*, ShapeType, VAO->GetData().GetType());
+        GET_CONST(const TypeSystem::Type*, ShapeType, Shape->GetSettings().GetType());
         SmartPointer<Jolt::Shape> Shape;
+
+        SmartPointer<API::Buffer<VertexWeight>> BoneWeights = DEFAULT;
     };
 }

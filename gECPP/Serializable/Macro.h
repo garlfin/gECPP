@@ -44,11 +44,6 @@
 #define API_REFLECTABLE_IMPL(TYPE, ...) \
 	inline __VA_ARGS__* TYPE::TYPE##FACTORY(std::istream& in, SETTINGS_T t) { return new __VA_ARGS__(in, t); }
 
-#define API_UNDERLYING() \
-	public: \
-		virtual inline void* GetUnderlying() { return nullptr; } \
-		virtual inline const void* GetUnderlying() const { return nullptr; }
-
 #define API_UNDERLYING_IMPL(UNDERLYING_T) \
 	public: \
 		inline void* GetUnderlying() override { return (UNDERLYING_T*) this; } \

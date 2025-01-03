@@ -17,6 +17,7 @@ using std::move;
 #ifdef GE_COMPILER_GCC
 	#define PRETTY_FUNCTION __PRETTY_FUNCTION__
 	#define TRAP __builtin_trap
+	#define DEBUGBREAK __debugbreak
 #endif
 
 #ifdef GE_COMPILER_MSVC
@@ -69,7 +70,7 @@ using std::move;
 #define assertm(exp, msg) assert(((void) msg, exp))
 
 #ifdef DEBUG
-	#define GE_ASSERT(COND, ERR) { bool cond = COND; if(!cond) TRAP(); assertm(cond, ERR); }
+	#define GE_ASSERT(COND, ERR) { bool cond = COND; if(!cond) __debugbreak(); assertm(cond, ERR); }
 #else
 	#define GE_ASSERT(COND, ERR) assertm(cond, ERR)
 #endif
@@ -206,5 +207,8 @@ using std::move;
 	{ \
 		return (TYPE) ~std::underlying_type_t<TYPE>(a); \
 	} \
+
+#define offsetbetween(TYPE, FIELDFROM, FIELDTO) (offsetof(TYPE, FIELDTO) - offsetof(TYPE, FIELDFROM))
+#define sizebetween(TYPE, FIELDFROM, FIELDTO) (offsetof(TYPE, FIELDTO) + sizeof(typeof(TYPE::FIELDTO)) - offsetof(TYPE, FIELDFROM))
 
 // Yapping about newline >: (

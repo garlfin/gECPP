@@ -46,13 +46,12 @@ namespace GPU
 		SERIALIZABLE_PROTO(SHDR, 1, Shader, Serializable);
 		API_REFLECTABLE(Shader, "GPU::Shader", API::Shader);
 		DEFAULT_OPERATOR_COPY(Shader);
-		API_UNDERLYING();
 
 	public:
 		Shader(const Path& v, const Path& f);
 
 		// implicit constructor was giving me issues...
-		OPERATOR_MOVE_IMPL(Shader, this->~Shader(),,
+		OPERATOR_MOVE_IMPL(Shader, Shader::Free(),,
 			FragmentStage = move(o.FragmentStage);
 			VertexStage = move(o.VertexStage);
 		);
@@ -68,7 +67,6 @@ namespace GPU
 	{
 		SERIALIZABLE_PROTO(COMP, 1, ComputeShader, Serializable);
 		API_REFLECTABLE(ComputeShader, "GPU::ComputeShader", API::ComputeShader);
-		API_UNDERLYING();
 
 	public:
 		explicit ComputeShader(const Path& c);

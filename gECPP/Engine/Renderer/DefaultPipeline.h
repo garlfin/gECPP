@@ -13,6 +13,8 @@
 #include <Graphics/Texture/Texture.h>
 #include <Graphics/Texture/TextureSettings.h>
 
+#include "Graphics/API/GL/Timer.h"
+
 #define API_MAX_INSTANCE 64
 #define API_MAX_LIGHT 4
 #define API_MAX_CUBEMAP 4
@@ -92,6 +94,7 @@ namespace GPU
 		u32 CubemapCount = 1;
 
 		handle Skybox;
+		ColorHarmonic SkyboxIrradiance;
 
 		API_ALIGN Light Lights[API_MAX_LIGHT];
 		API_ALIGN Cubemap Cubemaps[API_MAX_CUBEMAP];

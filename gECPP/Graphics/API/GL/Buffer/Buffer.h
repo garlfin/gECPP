@@ -17,14 +17,14 @@ namespace GL
 		IndirectDrawBuffer = GL_DRAW_INDIRECT_BUFFER
 	};
 
-	template<typename T = void, bool DYNAMIC = false>
+	template<typename T = void>
  	class Buffer : protected GPU::Buffer<T>, public GLObject
 	{
 		API_SERIALIZABLE(Buffer, GPU::Buffer<T>);
 		API_DEFAULT_CM_CONSTRUCTOR(Buffer);
 
 	 public:
-		Buffer(gE::Window* window, u32 count, const T* data = nullptr);
+		Buffer(gE::Window* window, u32 count, const T* data = nullptr, GPU::BufferUsageHint hint = GPU::BufferUsageHint::Default);
 
 		template<typename I>
 		ALWAYS_INLINE void ReplaceData(const I* data, uint32_t count = 1, uint32_t offset = 0) const;
@@ -36,11 +36,15 @@ namespace GL
 		ALWAYS_INLINE void Bind(BufferTarget target) const;
 		ALWAYS_INLINE void Bind() const override;
 
-		inline ~Buffer() override;
-	};
+		void RetrieveData(u64 size = sizeof(T), u64 offset = 0);
+		void RetrieveData(T* data, u64 size = sizeof(T), u64 offset = 0);
 
-	template<class T>
-	using DynamicBuffer = Buffer<T, true>;
+		inline ~Buffer() override;
+
+	private:
+		static u32 GetMutableFlags(GPU::BufferUsageHint);
+		static u32 GetImmutableFlags(GPU::BufferUsageHint);
+	};
 }
 
 #include "Buffer.inl"

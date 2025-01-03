@@ -12,6 +12,7 @@
 namespace GL
 {
 	class Texture;
+	class Texture1D;
 	class Texture2D;
 	class Texture3D;
 	class TextureCube;
@@ -25,7 +26,6 @@ namespace GPU
 	class Texture : public Serializable<gE::Window*>, public gE::Asset
 	{
 		SERIALIZABLE_PROTO(TEX, 1, Texture, Serializable);
-		API_UNDERLYING();
 		DEFAULT_OPERATOR_CM(Texture);
 
 	public:
@@ -41,6 +41,18 @@ namespace GPU
 		TextureData Data = DEFAULT;
 
 		~Texture() override { ASSET_CHECK_FREE(Texture); }
+	};
+
+	class Texture1D : public Texture
+	{
+		SERIALIZABLE_PROTO(TEX1, 1, Texture1D, Texture);
+		API_REFLECTABLE(Texture1D, "API::Texture2D", API::Texture1D);
+
+	public:
+		Texture1D(const Texture& super, TextureSize1D size) : Texture(super), Size(size) {};
+		Texture1D(Texture&& super, TextureSize1D size) : Texture(move(super)), Size(size) {};
+
+		TextureSize1D Size;
 	};
 
  	class Texture2D : public Texture

@@ -53,7 +53,8 @@ namespace gE
 	class DrawCallManager : public Manager<Managed<DrawCall>>
 	{
 	public:
-		explicit DrawCallManager(Window* window) : _indirectDrawBuffer(window, API_MAX_MULTI_DRAW)
+		explicit DrawCallManager(Window* window) :
+			_indirectDrawBuffer(window, API_MAX_MULTI_DRAW, nullptr, GPU::BufferUsageHint::Dynamic)
 		{
 			_indirectDrawBuffer.Bind(API::BufferTarget::IndirectDrawBuffer);
 		}

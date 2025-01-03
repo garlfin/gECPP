@@ -202,11 +202,7 @@ RayResult SS_TraceRough(SSRay ray, SSLinearRaySettings settings)
 {
     float thickness = settings.Thickness > 0 ? settings.Thickness : FLT_INF;
 
-    float searchBias;
-    if(settings.SearchBias < 0.0)
-        searchBias = 1.0 / -settings.SearchBias;
-    else
-        searchBias = 1.0 + settings.SearchBias;
+    float searchBias = CreateBias(settings.SearchBias);
 
     float near = ray.Start.z, far = ray.End.z;
 
@@ -260,6 +256,7 @@ float SS_AO(AOSettings s, Vertex vert)
     return clamp(ao * 2.0 - 1.0, 0.0, 1.0);
 }
 
+// TODO: CLIP RAY TO SCREEN BOUNDS
 void ClipSSRay(inout SSRay ray)
 {
     if(ray.End.z > Camera.Planes.x) return;

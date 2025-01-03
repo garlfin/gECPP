@@ -37,7 +37,6 @@ namespace GPU
 	{
 		SERIALIZABLE_PROTO(VAO, 1, VAO, Serializable);
 		API_REFLECTABLE(VAO, "GPU::VAO", API::VAO);
-		API_UNDERLYING();
 
 	public:
 		DEFAULT_OPERATOR_CM(VAO);

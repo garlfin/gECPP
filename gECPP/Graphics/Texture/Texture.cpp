@@ -44,6 +44,7 @@ namespace GPU
 		return _index - 1;
 	}
 
+	API_REFLECTABLE_IMPL(Texture1D, API::Texture1D);
 	API_REFLECTABLE_IMPL(Texture2D, API::Texture2D);
 	API_REFLECTABLE_IMPL(Texture3D, API::Texture3D);
 	API_REFLECTABLE_IMPL(TextureCube, API::TextureCube);

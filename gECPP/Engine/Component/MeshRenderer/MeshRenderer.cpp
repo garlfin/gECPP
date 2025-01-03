@@ -30,7 +30,7 @@ namespace gE
 
 	MeshRenderer::MeshRenderer(Entity* o, const Reference<Mesh>& mesh) :
 		Component(o, &o->GetWindow().GetRenderers()), _mesh(mesh),
-		_drawCalls(mesh->VAO->GetData().Counts.MaterialCount)
+		_drawCalls(mesh->VAO->GetSettings().Counts.MaterialCount)
 	{
 	#ifdef DEBUG
 		DrawCallManager& manager = GetWindow().GetRenderers().GetDrawCallManager();

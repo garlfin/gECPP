@@ -29,13 +29,26 @@
     #define VOXEL_COLOR_RANGE 2.f
 #endif
 
+#define VOXEL_GRID_RESOLUTION 8
+#define VOXEL_MAX_PROBES 64
+#define VOXEL_SAMPLE_DIRECTIONS 6
+
 uniform layout(binding = VOXEL_TEXTURE_LOCATION, PIPELINE_COLOR_FORMAT) restrict image3D VoxelColorOut;
+
+struct Probe
+{
+    vec3 Position;
+    uint IDx;
+};
 
 struct VoxelGridData
 {
     vec3 Position;
     float Scale;
     BINDLESS_TEXTURE(sampler3D, Color);
+    BINDLESS_TEXTURE(samplerCubeArray, ProbeColor);
+    uint ProbeGridSettings;
+    Probe Probes[VOXEL_MAX_PROBES];
 };
 
 #if defined(FRAGMENT_SHADER) && !defined(GL_ARB_bindless_texture)
@@ -47,21 +60,20 @@ uniform sampler3D VoxelData;
     #define VOXEL_UNIFORM_LOCATION 4
 #endif
 
-#ifndef VOXEL_UNIFORM_LAYOUT
-    #define VOXEL_UNIFORM_LAYOUT std140
-#endif
-
-layout(VOXEL_UNIFORM_LAYOUT, binding = VOXEL_UNIFORM_LOCATION) uniform VoxelGridUniform
+layout(std430, binding = VOXEL_UNIFORM_LOCATION) restrict buffer VoxelGridUniform
 {
     VoxelGridData VoxelGrid;
 };
 
-// Functions
-vec4 PackColor(vec4);
-vec3 PackColor(vec3);
-vec4 UnpackColor(vec4);
-vec3 UnpackColor(vec3);
+// Globals
+const uvec3 Voxel_ProbeGridSize =
+    uvec3(
+    VoxelGrid.ProbeGridSettings & 255,
+    VoxelGrid.ProbeGridSettings >> 8 & 255,
+    VoxelGrid.ProbeGridSettings >> 16 & 255
+    );
 
+// Functions
 #ifdef EXT_BINDLESS
 RayResult Voxel_Trace(Ray);
 RayResult Voxel_TraceOffset(Ray, vec3);
@@ -77,6 +89,15 @@ vec3 Voxel_TexelToUV(ivec3, uint);
 vec3 Voxel_AlignUVToTexel(vec3, uint);
 vec3 Voxel_AlignWorldToTexel(vec3, uint);
 float Voxel_CrossCell(inout vec3, vec3, uint, float);
+ivec3 Voxel_GetProbe(vec3);
+uint Voxel_GetProbeIndex(ivec3);
+uint Voxel_GetProbeIndex(vec3);
+bool Voxel_IsInProbeGrid(ivec3);
+bool Voxel_IsInProbeGrid(vec3);
+vec4 PackColor(vec4);
+vec3 PackColor(vec3);
+vec4 UnpackColor(vec4);
+vec3 UnpackColor(vec3);
 
 // Implementation
 vec3 Voxel_WorldToUV(vec3 pos)
@@ -131,6 +152,26 @@ vec3 UnpackColor(vec3 color)
     return pow(color, vec3(2.2)) * VOXEL_COLOR_RANGE;
 }
 
+uint PackColorUInt(vec3 color)
+{
+    color = saturate(color);
+
+    uint result;
+    result = uint(color.r * 1023.0) & 1023;
+    result |= (uint(color.g * 1023.0) & 1023) << 10;
+    result |= (uint(color.b * 1023.0) & 1023) << 20;
+    return result;
+}
+
+vec3 UnpackColorUInt(uint color)
+{
+    vec3 result;
+    result.r = (color & 1023) / 1023.0;
+    result.g = (color >> 10 & 1023) / 1023.0;
+    result.b = (color >> 20 & 1023) / 1023.0;
+    return result;
+}
+
 vec4 UnpackColor(vec4 color)
 {
     color.rgb = pow(color.rgb, vec3(2.2)) * VOXEL_COLOR_RANGE;
@@ -149,6 +190,34 @@ float Voxel_CrossCell(inout vec3 pos, vec3 dir, uint cellCount, float crossDirec
 
     pos += dist * dir;
     return dist;
+}
+
+uint Voxel_GetProbeIndex(ivec3 id)
+{
+    const uvec3 gridSize = Voxel_ProbeGridSize;
+    if(!Voxel_IsInProbeGrid(id)) return -1;
+    return id.x + id.y * gridSize.x + id.z * gridSize.x * gridSize.y;
+}
+
+uint Voxel_GetProbeIndex(vec3 position)
+{
+    return Voxel_GetProbeIndex(Voxel_GetProbe(position));
+}
+
+ivec3 Voxel_GetProbe(vec3 position)
+{
+    return ivec3((position - VoxelGrid.Position) / VoxelGrid.Scale);
+}
+
+bool Voxel_IsInProbeGrid(ivec3 id)
+{
+    const uvec3 gridSize = Voxel_ProbeGridSize;
+    return id.x < gridSize.x && id.z < gridSize.y && id.y < gridSize.z;
+}
+
+bool Voxel_IsInProbeGrid(vec3 position)
+{
+    return Voxel_IsInProbeGrid(Voxel_GetProbe(position));
 }
 
 // Adapted from two sources:
@@ -183,7 +252,11 @@ RayResult Voxel_Trace(Ray ray)
             result.Distance += Voxel_CrossCell(result.Position, ray.Direction, size >> mip, 1.0);
             ivec3 newCell = Voxel_WorldToTexel(result.Position, size >> (mip + 1));
 
-            if (cell >> 1 != newCell) if (mip == mipCount - 1) break; else mip++;
+            if (cell >> 1 != newCell)
+                if (mip == mipCount - 1)
+                    break;
+                else
+                    mip++;
         }
     }
 

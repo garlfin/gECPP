@@ -65,6 +65,7 @@ class Array : public gE::Asset
 	ALWAYS_INLINE size_t CopyToCArray(I(& arr)[COUNT]) const { return CopyToCArray(arr, COUNT); }
 
 	NODISCARD ALWAYS_INLINE u64 Count() const { return _size; }
+	NODISCARD ALWAYS_INLINE u64 ByteCount() const { return _size * sizeof(T); }
 	NODISCARD ALWAYS_INLINE I* Data() { return _t; }
 	NODISCARD ALWAYS_INLINE const I* Data() const { return _t; }
 

@@ -1,4 +1,5 @@
 #include <Resource/Shader/Include/Voxel.glsl>
+#include <Resource/Shader/Include/Scene.glsl>
 
 #ifndef VOXEL_TAA_SAMPLE_COUNT
     #define VOXEL_TAA_SAMPLE_COUNT 32
@@ -11,9 +12,11 @@
 #define VOXEL_TAA_MODE_FULL
 
 #define MODE_TAA_COMBINE 0
-#define MODE_TAA_DOWNSAMPLE 1
-#define MODE_TAA_VELOCITY 2
-#define MODE_TAA_COPY 3
+#define MODE_TAA_VELOCITY 1
+#define MODE_TAA_COPY 2
+#define MODE_DOWNSAMPLE 3
+#define MODE_CALCULATE_PROBES 4
+#define MODE_CALCULATE_GI 5
 
 // IO
 layout(binding = 2, PIPELINE_COLOR_FORMAT) restrict uniform image3D VoxelColorIn;
@@ -27,6 +30,10 @@ vec4 AverageNeighbors(ivec3);
 vec4 LoadVoxelData(ivec3);
 vec4 AverageBox4(ivec3);
 vec4 MaxBox4(ivec3);
+vec4 TAA(ivec3);
+uint GetProbeIndex(ivec3);
+void CalculateProbeLocations(ivec3);
+void CalculateProbeColor(ivec3);
 
 layout(local_size_x = 4, local_size_y = 4, local_size_z = 4) in;
 void main()
@@ -34,38 +41,40 @@ void main()
     ivec3 texel = ivec3(gl_GlobalInvocationID);
     vec4 color;
 
-    if (Data.w == MODE_TAA_DOWNSAMPLE)
-        color = AverageBox4(texel);
-    else if (Data.w == MODE_TAA_VELOCITY)
+    switch(Data.w)
     {
+    case MODE_TAA_COMBINE:
+        color = TAA(texel);
+        imageStore(VoxelColorOut, texel, color);
+        break;
+
+    case MODE_TAA_VELOCITY:
         color = imageLoad(VoxelColorIn, texel + Data.xyz);
         imageStore(VoxelColorIn, texel + Data.xyz, vec4(0.0));
-    }
-    else if(Data.w == MODE_TAA_COPY)
+        imageStore(VoxelColorOut, texel, color);
+        break;
+
+    case MODE_DOWNSAMPLE:
+        color = AverageBox4(texel);
+        imageStore(VoxelColorOut, texel, color);
+        break;
+
+    case MODE_TAA_COPY:
         color = imageLoad(VoxelColorIn, texel);
-    else
-    {
-        vec4 currentColor = imageLoad(VoxelColorIn, texel);
-        vec4 previousColor = imageLoad(VoxelColorOut, texel + Data.xyz);
+        imageStore(VoxelColorOut, texel, color);
+        break;
 
-        // No significant difference in speed using conditionals.
-        vec4 neighbor = AverageNeighbors(texel);
-        if(currentColor.a == 0.0) currentColor.rgb = neighbor.rgb;
+    case MODE_CALCULATE_PROBES:
+        CalculateProbeLocations(texel);
+        break;
 
-        if(max(previousColor.r, max(previousColor.g, previousColor.b)) == 0) color.rgb = currentColor.rgb;
-        else
-        {
-            float previousWeight = (1.0 - VOXEL_TAA_WEIGHT) / (1.0 + Luminance(previousColor.rgb));
-            float currentWeight = VOXEL_TAA_WEIGHT / (1.0 + Luminance(currentColor.rgb));
+    case MODE_CALCULATE_GI:
+        CalculateProbeColor(texel);
+        break;
 
-            color.rgb = (currentColor.rgb * currentWeight + previousColor.rgb * previousWeight);
-            color.rgb /= max(currentWeight + previousWeight, 0.001);
-        }
-
-        color.a = currentColor.a;
+    default:
+        break;
     }
-
-    imageStore(VoxelColorOut, texel, color);
 }
 
 float Luminance(vec3 color) { return dot(color, vec3(0.299, 0.587, 0.114)); }
@@ -125,3 +134,45 @@ vec4 AverageBox4(ivec3 texel)
 
     return neighbor;
 }
+
+vec4 TAA(ivec3 texel)
+{
+    vec4 color;
+
+    vec4 currentColor = imageLoad(VoxelColorIn, texel);
+    vec4 previousColor = imageLoad(VoxelColorOut, texel + Data.xyz);
+
+    // No significant difference in speed using conditionals.
+    vec4 neighbor = AverageNeighbors(texel);
+    if(currentColor.a == 0.0)
+        currentColor.rgb = neighbor.rgb;
+
+    if(max(previousColor.r, max(previousColor.g, previousColor.b)) == 0)
+        color.rgb = currentColor.rgb;
+    else
+    {
+        float previousWeight = (1.0 - VOXEL_TAA_WEIGHT) / (1.0 + Luminance(previousColor.rgb));
+        float currentWeight = VOXEL_TAA_WEIGHT / (1.0 + Luminance(currentColor.rgb));
+
+        color.rgb = (currentColor.rgb * currentWeight + previousColor.rgb * previousWeight);
+        color.rgb /= max(currentWeight + previousWeight, 0.001);
+    }
+
+    color.a = currentColor.a;
+
+    return color;
+}
+
+void CalculateProbeLocations(ivec3 probeID)
+{
+    uint index = Voxel_GetProbeIndex(probeID);
+    if(index == -1) return;
+
+    VoxelGrid.Probes[index].IDx = index;
+    VoxelGrid.Probes[index].Position = (vec3(probeID) + 0.5) / Voxel_ProbeGridSize * VoxelGrid.Scale;
+};
+
+void CalculateProbeColor(ivec3 probeID)
+{
+
+};

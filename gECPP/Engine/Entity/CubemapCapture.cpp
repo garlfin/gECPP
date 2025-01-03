@@ -6,6 +6,10 @@
 #include <Engine/Window/Window.h>
 #include <Engine/Entity/Light/DirectionalLight.h>
 
+#define SH_MODE_SAMPLE 0u
+#define SH_MODE_MERGE 1u
+#define SH_SAMPLE_GROUPS 4
+
 namespace gE
 {
 	CONSTEXPR_GLOBAL ICameraSettings CubemapCameraSettings
@@ -41,7 +45,8 @@ namespace gE
 		GE_ASSERT((bool) Skybox, "ERROR: NO SKYBOX TEXTURE");
 
 		lighting.Skybox = Skybox->GetHandle();
-		buffers.UpdateLighting(sizeof(handle), offsetof(GPU::Lighting, Skybox));
+
+		buffers.UpdateLighting(sizebetween(GPU::Lighting, Skybox, SkyboxIrradiance), offsetof(GPU::Lighting, Skybox));
 
 		for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())
 			(**i)->GetCamera().OnRender(delta, camera);
@@ -57,6 +62,37 @@ namespace gE
 
 		buffers.UpdateLighting(sizeof(u32), offsetof(GPU::Lighting, CubemapCount));
 		buffers.UpdateLighting(sizeof(GPU::Cubemap), offsetof(GPU::Lighting, Cubemaps));
+	}
+
+	void CubemapManager::CreateHarmonic() const
+	{
+		DefaultPipeline::Buffers& buffers = _window->GetPipelineBuffers();
+		GPU::Lighting& lighting = buffers.Lighting;
+
+		GPU::ComputeShader shaderSettings("Resource/Shader/Compute/sh.comp");
+		API::ComputeShader shader(_window, move(shaderSettings));
+		shader.Free();
+
+		GPU::Buffer<ColorHarmonic> bufferSettings(SH_SAMPLE_GROUPS, nullptr);
+		bufferSettings.UsageHint = GPU::BufferUsageHint::Read;
+
+		API::Buffer<ColorHarmonic> buf(_window, move(bufferSettings));
+		buf.Free();
+
+		glMemoryBarrier(GL_TEXTURE_UPDATE_BARRIER_BIT);
+		buf.Bind(GL::BufferTarget::ShaderStorage, 9);
+		shader.SetUniform(0, Skybox, 0);
+		shader.SetUniform(1, SH_MODE_SAMPLE);
+		shader.Dispatch(SH_SAMPLE_GROUPS);
+
+		static_assert(SH_SAMPLE_GROUPS <= 32);
+
+		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_UNIFORM_BARRIER_BIT);
+		shader.SetUniform(1, SH_MODE_MERGE);
+		shader.Dispatch(1);
+
+		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_UNIFORM_BARRIER_BIT);
+		buf.RetrieveData(&lighting.SkyboxIrradiance);
 	}
 
 	CubemapManager::CubemapManager(Window* window): Manager(), _window(window)

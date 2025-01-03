@@ -11,31 +11,31 @@
 #endif
 
 #ifndef SMRT_SAMPLES
-    #define SMRT_SAMPLES 6
+    #define SMRT_SAMPLES 4
 #endif
 
 #ifndef SMRT_TRACE_STEPS
-    #define SMRT_TRACE_STEPS 16
+    #define SMRT_TRACE_STEPS 8
 #endif
 
 #ifndef SMRT_DISTANCE
-    #define SMRT_TRACE_DISTANCE 10.0
+    #define SMRT_TRACE_DISTANCE 1.0
 #endif
 
 #ifndef SMRT_TRACE_BIAS
-    #define SMRT_TRACE_BIAS 10.0
+    #define SMRT_TRACE_BIAS 0.5
 #endif
 
 #ifndef SMRT_CONTACT_TRACE_BIAS
-    #define SMRT_CONTACT_TRACE_BIAS 1.5
+    #define SMRT_CONTACT_TRACE_BIAS 0.5
 #endif
 
 #ifndef SMRT_CONTACT_SAMPLES
-    #define SMRT_CONTACT_SAMPLES 8
+    #define SMRT_CONTACT_SAMPLES 2
 #endif
 
 #ifndef SMRT_CONTACT_TRACE_STEPS
-    #define SMRT_CONTACT_TRACE_STEPS 16
+    #define SMRT_CONTACT_TRACE_STEPS 8
 #endif
 
 #ifndef SMRT_CONTACT_LENGTH
@@ -109,17 +109,20 @@ float GetShadowDirectional(const Vertex vert, const Light light, const vec4 frag
         for(int s = 0; s < SMRT_SAMPLES; s++)
         {
             vec2 offset = VogelDisk(s, SMRT_SAMPLES, IGNSample * PI * 2.0);
-            vec3 rayDir = offsetMatrix * vec3(offset * DIRECTIONAL_SHADOW_RADIUS, 1.0) * SMRT_TRACE_DISTANCE;
+            vec3 rayDir = offsetMatrix * vec3(offset * DIRECTIONAL_SHADOW_RADIUS, 1.0);
+            rayDir = normalize(rayDir);
 
-            vec3 rayStart = vert.Position + rayDir;
+            vec3 rayStart = vert.Position + rayDir * bias * 0.02;
             rayStart = DirectionalPerspectiveDivide(light.ViewProjection * vec4(rayStart, 1.0), light.Planes);
 
-            vec3 rayEnd = vert.Position + rayDir * 0.002 * bias;
+            vec3 rayEnd = vert.Position + rayDir * SMRT_TRACE_DISTANCE * (1 + IGNSample / SMRT_TRACE_STEPS);
             rayEnd = DirectionalPerspectiveDivide(light.ViewProjection * vec4(rayEnd, 1.0), light.Planes);
+
+            float searchBias = CreateBias(SMRT_TRACE_BIAS);
 
             for(int i = 0; i < SMRT_TRACE_STEPS; i++)
             {
-                float lerp = pow(float(i) / (SMRT_TRACE_STEPS - 1), 1.0 / SMRT_TRACE_BIAS);
+                float lerp = pow(float(i) / (SMRT_TRACE_STEPS - 1), searchBias);
 
                 vec3 rayPos = mix(rayStart, rayEnd, lerp);
 

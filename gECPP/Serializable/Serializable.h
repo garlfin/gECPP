@@ -9,7 +9,7 @@
 #include <unordered_map>
 #include <Engine/Utility/Array.h>
 #include <Engine/Utility/Binary.h>
-#include "Engine/Math/Math.h"
+#include <Engine/Math/Math.h>
 #include "Macro.h"
 
 template<class T>
@@ -117,12 +117,13 @@ template<> void Write(std::ostream& out, u32 count, const std::string* t);
 	Version = Read<u8>(in);
 
 // Implementation
-#define SERIALIZABLE_PROTO(MAGIC_VAL, VERSION_VAL, TYPE, SUPER) \
+#define SERIALIZABLE_PROTO(MAGIC_VAL, VERSION_VAL, TYPE, SUPER_T) \
 	public: \
+		typedef SUPER_T SUPER; \
+		typedef typename SUPER::SETTINGS_T SETTINGS_T;\
 		explicit TYPE(istream& in, SETTINGS_T s) : SUPER(in, s) { SERIALIZABLE_CHECK_HEADER(); ISerialize(in, s); } \
-		constexpr TYPE() = default; \
+		TYPE() = default; \
 		static const constexpr char MAGIC[5] = #MAGIC_VAL; \
-		typedef SUPER::SETTINGS_T SETTINGS_T;\
 		inline void Serialize(istream& in, SETTINGS_T s) override { SAFE_CONSTRUCT(*this, TYPE, in, s); } \
 		inline void Deserialize(ostream& out) const override { SUPER::Deserialize(out); Write(out, 4, MAGIC); Write<u8>(out, Version); IDeserialize(out); } \
 		u8 Version = VERSION_VAL; \
@@ -142,7 +143,11 @@ public:
 
 	virtual void Serialize(istream& in, SETTINGS_T settings) {};
 	virtual void Deserialize(ostream& out) const {};
+
 	virtual const typename ITypeSystem<T>::Type* GetType() const { return nullptr; }
+
+	virtual inline void* GetUnderlying() { return nullptr; } \
+	virtual inline const void* GetUnderlying() const { return nullptr; } \
 
 	virtual ~Serializable() = default;
 };

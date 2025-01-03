@@ -47,6 +47,18 @@ namespace GL
  		GLenum _target = DEFAULT;
 	};
 
+	class Texture1D final : protected GPU::Texture1D, public Texture
+	{
+		API_SERIALIZABLE(Texture1D, GPU::Texture1D);
+		API_DEFAULT_CM_CONSTRUCTOR(Texture1D);
+		API_UNDERLYING_IMPL(GL::Texture);
+
+	public:
+		NODISCARD ALWAYS_INLINE TextureSize1D GetSize(u8 mip = 0) const { return std::max<TextureSize1D>(Size >> mip, 1); }
+
+		void CopyFrom(const GL::Texture&) override;
+	};
+
 	class Texture2D final : protected GPU::Texture2D, public Texture
 	{
 		API_SERIALIZABLE(Texture2D, GPU::Texture2D);
@@ -86,6 +98,6 @@ namespace GL
 
 namespace PVR
 {
-	NODISCARD GL::Texture* Read(gE::Window*, const Path&, GPU::WrapMode = GPU::WrapMode::Repeat, GPU::FilterMode = GPU::FilterMode::Linear);
+	NODISCARD API::Texture* Read(gE::Window*, const Path&, GPU::WrapMode = GPU::WrapMode::Repeat, GPU::FilterMode = GPU::FilterMode::Linear);
 	NODISCARD Array<u8> Read(const Path& path, Header& header);
 }

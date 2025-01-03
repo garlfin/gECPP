@@ -8,22 +8,25 @@
 
 #include <filesystem>
 #include <fstream>
-#include <Asset/Mesh.h>
+#include <Asset/Mesh/Mesh.h>
 #include <ASSIMP/Importer.hpp>
 #include <ASSIMP/postprocess.h>
 #include <ASSIMP/scene.h>
 #include <Engine/Utility/AssetManager.h>
 #include <Graphics/Buffer/VAO.h>
 
+#include "Asset/Mesh/Skeleton.h"
+#include "Engine/Utility/AssetManager.h"
+
 using pp = aiPostProcessSteps;
 
 CONSTEXPR_GLOBAL unsigned POST_PROCESS =
 	aiProcess_Triangulate | aiProcess_FindInvalidData | aiProcess_OptimizeMeshes |
 	aiProcess_ImproveCacheLocality | aiProcess_FindInstances |
-	aiProcess_OptimizeGraph | aiProcess_JoinIdenticalVertices;
+	aiProcess_OptimizeGraph | aiProcess_JoinIdenticalVertices | aiProcess_PopulateArmatureData;
 
 template<class T, class F>
-using ConversionFunc = void(u32, const F&, T&);
+using ConversionFunc = void(u32 id, const F& from, T& to);
 
 template<class T, class S>
 GPU::VertexField CreateField(T S::* DST, const char[4], u8 index, u8 bufIndex);
@@ -37,15 +40,18 @@ void AllocateBuffer(u32 aiMesh::* COUNT, GPU::Buffer<u8>& buf, const std::vector
 
 void FillUVBuffer(GPU::Buffer<u8>& buf, const std::vector<aiMesh*>& src);
 
-void TransformMesh(const std::vector<aiMesh*>&, GPU::IndexedVAO&);
+void ConvertMesh(const std::vector<aiMesh*>&, GPU::IndexedVAO&);
+void ConvertBones(const std::vector<aiMesh*>&, const gE::Skeleton&, GPU::Buffer<gE::VertexWeight>&);
 void ConvertVec(u32, const aiVector3t<float>&, glm::i8vec3&);
 void ConvertFace(u32, const aiFace&, glm::uvec3&);
+void ConvertAABB(const aiAABB&, gE::AABB<Dimension::D3D>&);
+void InsertAvailableWeight(u8 boneID, float weight, gE::VertexWeight& dst);
 
 namespace gE::gEModel
 {
-	void ConvertFile(gE::Window* window, const std::string& source, const std::filesystem::path& output)
+	void ConvertFile(Window* window, const std::string& source, const std::filesystem::path& output)
 	{
-		Assimp::Importer importer;
+		Assimp::Importer importer = DEFAULT;
 		const aiScene& scene = *importer.ReadFile(source, POST_PROCESS);
 
 		aiMesh* previousMesh = nullptr;
@@ -62,14 +68,43 @@ namespace gE::gEModel
 			previousMesh = mesh;
 		}
 
+		for(unsigned i = 0; i < scene.mNumSkeletons; i++)
+		{
+			aiNode& rootNode = *scene.mSkeletons[i]->mBones[0]->mNode;
+
+			Skeleton skeleton;
+			iterate
+		}
+
 		for(const auto& src : meshes)
 		{
 			GPU::IndexedVAO meshSettings;
-			TransformMesh(src, meshSettings);
+			ConvertMesh(src, meshSettings);
 
 			Mesh mesh;
 			mesh.Name = std::string(src[0]->mName.data);
+			mesh.Bounds = AABB<Dimension::D3D>(glm::vec3(FP_PINF), glm::vec3(FP_NINF));
+
+			bool hasSkeleton = false;
+
+			for(aiMesh* subMesh : src)
+			{
+				AABB<Dimension::D3D> aabb;
+				ConvertAABB(subMesh->mAABB, aabb);
+				mesh.Bounds = mesh.Bounds & aabb;
+
+				hasSkeleton |= subMesh->HasBones();
+			}
+
 			mesh.VAO = gE::ptr_cast<API::IVAO>(new API::IndexedVAO(window, move(meshSettings)));
+
+			if(hasSkeleton)
+			{
+				GPU::Buffer<VertexWeight> weightSettings;
+				ConvertBones(src, , weightSettings);
+
+				mesh.BoneWeights = ptr_create<API::Buffer<VertexWeight>>(window, move(weightSettings));
+			}
 
 			Path path = output / (mesh.Name + ".mesh");
 			WriteSerializableToFile(path, mesh);
@@ -79,7 +114,7 @@ namespace gE::gEModel
 	}
 }
 
-void TransformMesh(const std::vector<aiMesh*>& src, GPU::IndexedVAO& dst)
+void ConvertMesh(const std::vector<aiMesh*>& src, GPU::IndexedVAO& dst)
 {
 	u64 vertexCount = 0;
 
@@ -197,3 +232,63 @@ void AllocateBuffer(u32 aiMesh::* COUNT, GPU::Buffer<u8>& buf, const std::vector
 	buf.Stride = sizeof(T);
 	buf.Data = Array<u8>(buf.Stride * finalCount);
 };
+
+void ConvertBones(const std::vector<aiMesh*>& src, const gE::Skeleton& skeleton, GPU::Buffer<gE::VertexWeight>& dst)
+{
+	u64 vertexCount = 0;
+	for(const aiMesh* mesh : src)
+		vertexCount += mesh->mNumVertices;
+
+	dst = GPU::Buffer<gE::VertexWeight>(vertexCount);
+
+	for(const aiMesh* mesh : src)
+		for(u32 b = 0; b < mesh->mNumBones; b++)
+		{
+			const aiBone& bone = *mesh->mBones[b];
+			const std::string boneName = std::string(bone.mName.C_Str());
+			const gE::Bone* foundBone = skeleton.FindBone(boneName);
+
+			GE_ASSERT(foundBone, "COULD NOT FIND BONE!");
+			const u8 boneIndex = skeleton.GetIndex(*foundBone);
+
+			for(u32 w = 0; w < bone.mNumWeights; w++)
+			{
+				const aiVertexWeight& weight = bone.mWeights[w];
+				InsertAvailableWeight(boneIndex, weight.mWeight, dst.Data[weight.mVertexId]);
+			}
+		}
+}
+
+void ConvertAABB(const aiAABB& src, gE::AABB<Dimension::D3D>& dst)
+{
+	dst.Min = *(glm::vec3*) &src.mMin;
+	dst.Max = *(glm::vec3*) &src.mMax;
+}
+
+void InsertAvailableWeight(u8 boneID, float weight, gE::VertexWeight& dst)
+{
+	for(int i = 0; i < 4; i++)
+		if(!dst.IDs[i])
+		{
+			dst.Weights[i] = (u8) (weight * UINT8_MAX);
+			dst.IDs[i] = boneID;
+			return;
+		}
+
+	GE_ASSERT(false, "NUMBER OF WEIGHTS EXCEEDED 4!")
+}
+
+void IterateNodes(const aiNode& node, gE::Bone*& bone)
+{
+	bone->Name = std::string(node.mName.C_Str());
+
+	aiVector3D scale, position;
+	aiQuaternion rotation;
+	node.mTransformation.Decompose(scale, rotation, position);
+
+	bone->Transform.Location = *(glm::vec3*) &position;
+	bone->Transform.Scale = *(glm::vec3*) &scale;
+	bone->Transform.Rotation = *(glm::quat*) &rotation;
+
+	bone++;
+}

@@ -9,6 +9,7 @@
 #include <Engine/Entity/Light/Light.h>
 
 #include <utility>
+#include <glm/gtx/string_cast.hpp>
 
 #define HIZ_MODE_COPY 0
 #define HIZ_MODE_DOWNSAMPLE 1
@@ -19,7 +20,9 @@
 namespace gE
 {
 	DefaultPipeline::Buffers::Buffers(Window* window) :
-		_cameraBuffer(window, 1), _sceneBuffer(window, 1), _lightBuffer(window, 1)
+		_cameraBuffer(window, 1, nullptr, GPU::BufferUsageHint::Dynamic),
+		_sceneBuffer(window, 1, nullptr, GPU::BufferUsageHint::Dynamic),
+		_lightBuffer(window, 1, nullptr, GPU::BufferUsageHint::Dynamic)
 	{
 		_sceneBuffer.Bind(API::BufferTarget::Uniform, 0);
 		_cameraBuffer.Bind(API::BufferTarget::Uniform, 1);
@@ -116,6 +119,7 @@ namespace gE
 		taaShader.SetUniform(3, _previousDepth.Use(3));
 
 		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
 		taaShader.Dispatch(DIV_CEIL(_color->GetSize(), TAA_GROUP_SIZE));
 
 		// Copy TAA result to taa "backbuffer"

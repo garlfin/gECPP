@@ -1,4 +1,5 @@
 #include "Bindless.glsl"
+#include "SphericalHarmonics.glsl"
 
 #define INT_CEIL(X, Y) (((X) + (Y) - 1) / (Y))
 
@@ -74,6 +75,7 @@ struct LightingData
     uint CubemapCount;
 
     BINDLESS_TEXTURE(samplerCube, Skybox);
+    ColorHarmonic SkyboxIrradiance;
 
     Light Lights[MAX_LIGHTS];
     Cubemap Cubemaps[MAX_CUBEMAPS];
@@ -83,11 +85,7 @@ struct LightingData
     #define SCENE_UNIFORM_LOCATION 0
 #endif
 
-#ifndef SCENE_UNIFORM_LAYOUT
-    #define SCENE_UNIFORM_LAYOUT std140
-#endif
-
-layout(SCENE_UNIFORM_LAYOUT, binding = SCENE_UNIFORM_LOCATION) uniform SceneUniform
+layout(std140, binding = SCENE_UNIFORM_LOCATION) uniform SceneUniform
 {
     SceneData Scene;
 };
