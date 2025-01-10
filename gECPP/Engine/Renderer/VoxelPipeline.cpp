@@ -12,15 +12,11 @@
 #define MODE_TAA_VELOCITY 1
 #define MODE_TAA_COPY 2
 #define MODE_DOWNSAMPLE 3
-#define MODE_CALCULATE_PROBES 4
-#define MODE_CALCULATE_GI 5
 
 #define VOXEL_TAA_GROUP_SIZE 4
 
 namespace gE::VoxelPipeline
 {
-	GPU::Texture1D CreateProbeSettings(ProbeSettings);
-
 	Buffers::Buffers(Window* window) :
 		_voxelBuffer(window, 1, nullptr, GPU::BufferUsageHint::Dynamic)
 	{
@@ -74,7 +70,7 @@ namespace gE::VoxelPipeline
 		transform.OnUpdate(0.f); // Force update on model matrix since it passed its tick.
 
 		GetOwner().GetGPUVoxelScene(buffers.Scene);
-		buffers.UpdateScene(offsetof(API::VoxelScene, Probes));
+		buffers.UpdateScene();
 
 		glm::u16vec3 dispatchSize = DIV_CEIL_T(_colorBack.GetSize(), VOXEL_TAA_GROUP_SIZE, glm::u16vec3);
 
@@ -101,13 +97,8 @@ namespace gE::VoxelPipeline
 	{
 		API::ComputeShader& voxelShader = GetWindow().GetVoxelComputeShader();
 
-		voxelShader.Bind();
-
 		_color.Bind(0, GL_READ_WRITE);
 		_colorBack.Bind(2, GL_READ_WRITE);
-
-		voxelShader.SetUniform(0, glm::ivec4(MODE_CALCULATE_PROBES));
-		voxelShader.Dispatch(DIV_CEIL_T(_probeSettings.GridResolution, VOXEL_TAA_GROUP_SIZE, glm::u16vec3));
 
 		voxelShader.SetUniform(0, glm::ivec4(MODE_TAA_COMBINE));
 		voxelShader.Dispatch(DIV_CEIL_T(_colorBack.GetSize(), VOXEL_TAA_GROUP_SIZE, glm::u16vec3));
@@ -122,22 +113,7 @@ namespace gE::VoxelPipeline
 			voxelShader.Dispatch(DIV_CEIL_T(_colorBack.GetSize(i), VOXEL_TAA_GROUP_SIZE, glm::u16vec3));
 		}
 
-		glMemoryBarrier(GL_BUFFER_UPDATE_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-		voxelShader.SetUniform(0, glm::ivec4(MODE_CALCULATE_PROBES));
-		voxelShader.Dispatch(DIV_CEIL_T(_probeSettings.GridResolution, VOXEL_TAA_GROUP_SIZE, glm::u16vec3));
-
-		glMemoryBarrier(GL_BUFFER_UPDATE_BARRIER_BIT);
-	}
-
-	GPU::Texture1D CreateProbeSettings(ProbeSettings s)
-	{
-		const u32 probeCount = s.GridResolution.x * s.GridResolution.y * s.GridResolution.z;
-
-		return
-		{
-			ProbeFormat,
-			probeCount * GE_VOXEL_SAMPLE_DIRECTIONS
-		};
+		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 	}
 }
 

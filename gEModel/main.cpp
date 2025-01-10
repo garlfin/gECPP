@@ -6,6 +6,10 @@
 
 int main(int argc, char** argv)
 {
+#ifdef DEBUG
+    gE::OverrideSTDTerminate();
+#endif
+
     auto window = gE::gEModel::gEModelWindow();
     window.Run();
 

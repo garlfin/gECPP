@@ -1,3 +1,5 @@
+#extension GL_NV_shader_atomic_float : enable
+
 #include <Resource/Shader/Include/SphericalHarmonics.glsl>
 
 #define SH_GROUP_SIZE 32
@@ -19,48 +21,41 @@ layout(local_size_x = SH_GROUP_SIZE, local_size_y = 1, local_size_z = 1) in;
 void main()
 {
     uint localIndex = gl_LocalInvocationIndex;
+    uint sampleCount = gl_NumWorkGroups.x * SH_GROUP_SIZE;
 
     if(Mode == SH_MODE_SAMPLE)
     {
-        uint maxSamples = gl_NumWorkGroups.x * SH_GROUP_SIZE;
-        uint sampleID = gl_GlobalInvocationID.x;
+        uint sampleIndex = gl_GlobalInvocationID.x;
 
-        vec3 sampleDir = ToSphere(Hammersley(sampleID, maxSamples));
+        vec3 sampleDir = ToSphere(Hammersley(sampleIndex, sampleCount));
         vec3 sampleColor = texture(Cubemap, sampleDir).rgb;
 
-        ColorHarmonic harmonic;
-        SH_Project(harmonic, sampleDir, sampleColor);
+        ColorHarmonic harmonic = SH_DefaultColorHarmonic;
+        SH_Project(harmonic, sampleDir, vec4(sampleColor, 1.0));
 
         Harmonics[localIndex] = harmonic;
 
         barrier();
 
-        for (uint i = 1; i <= SH_LOG2_GROUP_SIZE; i++)
+        for(uint batchSize = SH_GROUP_SIZE / 2; batchSize > 0; batchSize /= 2)
         {
-            uint sumCount = SH_GROUP_SIZE >> i;
-
-            if (localIndex < sumCount)
-                Harmonics[localIndex] = SH_Add(Harmonics[localIndex], Harmonics[sumCount + localIndex]);
-
+            if (localIndex < batchSize)
+                Harmonics[localIndex] = SH_Add(Harmonics[localIndex], Harmonics[batchSize + localIndex]);
             barrier();
         }
 
         if (localIndex == 0)
         {
-            for (uint i = 0; i < 9; i++)
-                Harmonics[0].Coefficients[i] *= 4.0 * PI / maxSamples;
-
+            SH_NormalizeHarmonic(Harmonics[0], sampleCount);
             OutHarmonics[gl_WorkGroupID.x] = Harmonics[0];
         }
     }
     else
     {
-        for (uint i = 1; i <= SH_LOG2_GROUP_SIZE; i++)
+        for(uint batchSize = SH_GROUP_SIZE / 2; batchSize > 0; batchSize /= 2)
         {
-            uint sumCount = SH_GROUP_SIZE >> i;
-            uint mergeIndex = sumCount + localIndex;
-
-            if (localIndex < sumCount && mergeIndex < OutHarmonics.length())
+            uint mergeIndex = batchSize + localIndex;
+            if (localIndex < batchSize && mergeIndex < OutHarmonics.length())
                 OutHarmonics[localIndex] = SH_Add(OutHarmonics[localIndex], OutHarmonics[mergeIndex]);
 
             barrier();

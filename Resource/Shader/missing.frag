@@ -37,7 +37,7 @@ void main()
       FragColor = vec4(1, 0, 1, 1);
 
       ivec3 texel = Voxel_WorldToTexel(VertexIn.FragPos, imageSize(VoxelColorOut).x);
-      imageStore(VoxelColorOut, texel, PackColor(FragColor));
+      imageStore(VoxelColorOut, texel, Voxel_PackColor(FragColor));
    }
 
     Velocity = PerspectiveToUV(VertexIn.PreviousNDC);

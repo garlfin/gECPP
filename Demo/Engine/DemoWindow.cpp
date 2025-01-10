@@ -91,6 +91,6 @@ void DemoWindow::OnInit()
 	Cubemaps->Skybox->Free();
 	Cubemaps->CreateHarmonic();
 
-	VoxelCaptureSettings voxelSettings(128, 8.4f, VoxelPipeline::ProbeSettings{ 32, glm::u8vec3(8) });
+	VoxelCaptureSettings voxelSettings(128, 8.4f, VoxelPipeline::ProbeSettings(glm::u8vec3(8)));
 	VoxelSceneCapture = gE::ptr_create<VoxelCapture>(this, voxelSettings);
 }

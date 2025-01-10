@@ -9,6 +9,10 @@ float InterleavedGradientNoise(vec2, int);
     float IGNSample = InterleavedGradientNoise(gl_FragCoord.xy, 64);
 #endif
 
+#ifdef COMPUTE_SHADER
+    float IGNSample = InterleavedGradientNoise(gl_GlobalInvocationID.xy, 64);
+#endif
+
 float InterleavedGradientNoise(vec2 uv, int mod)
 {
 #ifdef ENABLE_TAA

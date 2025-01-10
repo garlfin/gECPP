@@ -247,13 +247,18 @@ float GetShadowPoint(const Vertex vert, const Light light)
 #if false
     if(shadow < EPSILON) return shadow;
 
-    SSLinearRaySettings raySettings = SSLinearRaySettings
+    SSRaySettings raySettings = SSRaySettings
     (
         SMRT_CONTACT_TRACE_STEPS,
         EPSILON,
-        EPSILON,
         0.2,
-        vert.Normal,
+        vert.Normal
+    )
+
+    SSLinearRaySettings linearSettings = SSLinearRaySettings
+    (
+        raySettings,
+        EPSILON,
         SMRT_CONTACT_TRACE_BIAS
     );
 
@@ -266,8 +271,8 @@ float GetShadowPoint(const Vertex vert, const Light light)
         vec3 rayDir = (light.Position + lightOffset) - vert.Position;
 
         Ray ray = Ray(vert.Position, viewDistance * SMRT_CONTACT_TRACE_LENGTH, rayDir, 0);
-        SSRay ssRay = CreateSSRayLinear(ray, raySettings);
-        RayResult result = SS_TraceRough(ssRay, raySettings);
+        SSRay ssRay = CreateSSRayLinear(ray, linearSettings);
+        RayResult result = SS_TraceRough(ssRay, linearSettings);
 
         contactShadow += float(!(result.Result == RAY_RESULT_HIT));
     }

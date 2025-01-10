@@ -53,6 +53,8 @@ struct RayResult
     int Result;
 };
 
+const RayResult DefaultRayResult = { vec3(0.0), 0.0, vec3(0.0), RAY_RESULT_NO_HIT };
+
 // Implementation
 mat3 GetTBN(vec3 normal)
 {
@@ -126,8 +128,11 @@ vec2 Rotate(vec2 vec, float angle)
 {
     vec2 result;
 
-    result.x = vec.x * cos(angle) + vec.y * sin(angle);
-    result.y = vec.x * sin(angle) + vec.y * cos(angle);
+    float cosTheta = cos(angle);
+    float sinTheta = sin(angle);
+
+    result.x = vec.x * cosTheta - vec.y * sinTheta;
+    result.y = vec.x * sinTheta + vec.y * cosTheta;
 
     return result;
 }
@@ -143,10 +148,12 @@ vec3 ToHemisphere(vec2 vec)
 
 vec3 ToSphere(vec2 vec)
 {
-    vec *= 2.0 * PI;
-    float sinPhi = sin(vec.y);
+    vec = vec * 2.0 - 1.0;
+    vec *= PI;
 
-    return vec3(cos(vec.x) * sinPhi, sin(vec.x) * sinPhi, cos(vec.y));
+    float cosTheta = cos(vec.x);
+
+    return vec3(cos(vec.y) * cosTheta, sin(vec.y) * sin(vec.x), cosTheta);
 }
 
 float CreateBias(float bias)

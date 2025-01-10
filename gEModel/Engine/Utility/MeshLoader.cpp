@@ -73,7 +73,7 @@ namespace gE::gEModel
 			aiNode& rootNode = *scene.mSkeletons[i]->mBones[0]->mNode;
 
 			Skeleton skeleton;
-			iterate
+			//iterate
 		}
 
 		for(const auto& src : meshes)
@@ -98,13 +98,13 @@ namespace gE::gEModel
 
 			mesh.VAO = gE::ptr_cast<API::IVAO>(new API::IndexedVAO(window, move(meshSettings)));
 
-			if(hasSkeleton)
+			/*if(hasSkeleton)
 			{
 				GPU::Buffer<VertexWeight> weightSettings;
 				ConvertBones(src, , weightSettings);
 
 				mesh.BoneWeights = ptr_create<API::Buffer<VertexWeight>>(window, move(weightSettings));
-			}
+			}*/
 
 			Path path = output / (mesh.Name + ".mesh");
 			WriteSerializableToFile(path, mesh);
@@ -275,7 +275,7 @@ void InsertAvailableWeight(u8 boneID, float weight, gE::VertexWeight& dst)
 			return;
 		}
 
-	GE_ASSERT(false, "NUMBER OF WEIGHTS EXCEEDED 4!")
+	GE_ASSERT(false, "NUMBER OF WEIGHTS EXCEEDED 4!");
 }
 
 void IterateNodes(const aiNode& node, gE::Bone*& bone)

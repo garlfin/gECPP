@@ -18,7 +18,7 @@
 // L2 Spherical Harmonics
 struct ColorHarmonic
 {
-    vec3 Coefficients[9];
+    vec4 Coefficients[9];
 };
 
 struct Harmonic
@@ -26,16 +26,22 @@ struct Harmonic
     float Coefficients[9];
 };
 
+const ColorHarmonic SH_DefaultColorHarmonic = {{(vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0))}};
+
 // Functions
-void SH_Project(inout ColorHarmonic h, vec3 direction, vec3 color);
-void SH_NormalizeHarmonic(inout ColorHarmonic h, uint samples);
+void SH_Project(inout ColorHarmonic h, vec3 direction, vec4 color);
+void SH_NormalizeHarmonic(inout ColorHarmonic h, float fac);
 ColorHarmonic SH_Mix(ColorHarmonic a, ColorHarmonic b, float t);
 ColorHarmonic SH_Add(ColorHarmonic a, ColorHarmonic b);
+ColorHarmonic SH_Multiply(ColorHarmonic a, ColorHarmonic b);
+ColorHarmonic SH_Multiply(ColorHarmonic a, vec4 b);
+ColorHarmonic SH_Multiply(ColorHarmonic a, float b);
+vec4 SH_Dot(ColorHarmonic a, Harmonic b);
 Harmonic SH_CreateCosineLobeHarmonic(vec3 direction);
-vec3 SH_GetColor(ColorHarmonic h, vec3 direction);
+vec4 SH_SampleProbe(ColorHarmonic h, vec3 direction);
 
 // Implementation
-void SH_Project(inout ColorHarmonic h, vec3 direction, vec3 color)
+void SH_Project(inout ColorHarmonic h, vec3 direction, vec4 color)
 {
     h.Coefficients[0] += SH_BL0 * color;
 
@@ -50,9 +56,9 @@ void SH_Project(inout ColorHarmonic h, vec3 direction, vec3 color)
     h.Coefficients[8] += SH_BL2_M2 * (direction.x * direction.x - direction.y * direction.y) * color;
 }
 
-void SH_NormalizeHarmonic(inout ColorHarmonic h, uint samples)
+void SH_NormalizeHarmonic(inout ColorHarmonic h, float fac)
 {
-    const float weight = 1.0 / samples;
+    const float weight = 4.0 * PI / fac;
 
     #pragma unroll
     for(uint i = 0; i < 9; i++)
@@ -61,19 +67,41 @@ void SH_NormalizeHarmonic(inout ColorHarmonic h, uint samples)
 
 ColorHarmonic SH_Mix(ColorHarmonic a, ColorHarmonic b, float t)
 {
-    ColorHarmonic h;
-
     #pragma unroll
     for(uint i = 0; i < 9; i++)
-        h.Coefficients[i] = mix(a.Coefficients[i], b.Coefficients[i], t);
+        a.Coefficients[i] = mix(a.Coefficients[i], b.Coefficients[i], t);
 
-    return h;
+    return a;
 }
 
 ColorHarmonic SH_Add(ColorHarmonic a, ColorHarmonic b)
 {
     for(uint i = 0; i < 9; i++)
         a.Coefficients[i] += b.Coefficients[i];
+
+    return a;
+}
+
+ColorHarmonic SH_Multiply(ColorHarmonic a, ColorHarmonic b)
+{
+    for(uint i = 0; i < 9; i++)
+        a.Coefficients[i] *= b.Coefficients[i];
+
+    return a;
+}
+
+ColorHarmonic SH_Multiply(ColorHarmonic a, vec4 b)
+{
+    for(uint i = 0; i < 9; i++)
+        a.Coefficients[i] *= b;
+
+    return a;
+}
+
+ColorHarmonic SH_Multiply(ColorHarmonic a, float b)
+{
+    for(uint i = 0; i < 9; i++)
+        a.Coefficients[i] *= b;
 
     return a;
 }
@@ -97,15 +125,19 @@ Harmonic SH_CreateCosineLobeHarmonic(vec3 direction)
     return h;
 }
 
-vec3 SH_GetColor(ColorHarmonic h, vec3 direction)
+vec4 SH_Dot(ColorHarmonic a, Harmonic b)
 {
-    Harmonic cosine = SH_CreateCosineLobeHarmonic(direction);
-
-    vec3 color = vec3(0.0);
+    vec4 color = vec4(0.0);
 
     #pragma unroll
     for(int i = 0; i < 9; i++)
-        color += cosine.Coefficients[i] * h.Coefficients[i];
+        color += a.Coefficients[i] * b.Coefficients[i];
 
     return color;
+}
+
+vec4 SH_SampleProbe(ColorHarmonic h, vec3 direction)
+{
+    Harmonic cosine = SH_CreateCosineLobeHarmonic(direction);
+    return SH_Dot(h, cosine);
 }

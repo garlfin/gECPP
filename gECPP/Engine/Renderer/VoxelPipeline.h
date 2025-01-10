@@ -11,25 +11,15 @@
 #include <Graphics/Texture/Texture.h>
 
 #define GE_VOXEL_GRID_RESOLUTION 8
-#define GE_VOXEL_MAX_PROBES 64
-#define GE_VOXEL_SAMPLE_DIRECTIONS 6
+#define GE_VOXEL_MAX_PROBES 512
 
 namespace GL
 {
-	struct Probe
-	{
-		glm::vec3 Position;
-		u32 ID;
-		ColorHarmonic Color;
-	};
-
 	struct VoxelScene
 	{
 		glm::vec3 Center;
 		float Scale;
 		API_ALIGN handle Color;
-		u32 ProbeSettings;
-		API_ALIGN Probe Probes[GE_VOXEL_MAX_PROBES];
 	};
 }
 
@@ -58,7 +48,6 @@ namespace gE::VoxelPipeline
 
 	struct ProbeSettings
 	{
-		u8 Resolution;
 		glm::u8vec3 GridResolution;
 	};
 

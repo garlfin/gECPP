@@ -24,7 +24,6 @@ namespace gE
 		scene.Center = transform->Position;
 		scene.Scale = transform->Scale.x;
 		scene.Color = (handle) GetTarget().GetColor();
-		scene.ProbeSettings = *(u32*) &_target.GetProbeSettings().GridResolution;
 	}
 
 	CameraSettings3D CreateVoxelSettings(u16 resolution, float size)

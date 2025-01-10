@@ -36,16 +36,12 @@ struct SSRaySettings
     float NormalBias;
     float Thickness;
     vec3 Normal;
-    float SearchBias;
 };
 
 struct SSLinearRaySettings
 {
-    int Iterations;
-    float NormalBias;
+    SSRaySettings Base;
     float RayBias;
-    float Thickness;
-    vec3 Normal;
     float SearchBias;
 };
 
@@ -200,7 +196,7 @@ RayResult SS_Trace(SSRay ray, SSRaySettings settings)
 
 RayResult SS_TraceRough(SSRay ray, SSLinearRaySettings settings)
 {
-    float thickness = settings.Thickness > 0 ? settings.Thickness : FLT_INF;
+    float thickness = settings.Base.Thickness > 0 ? settings.Base.Thickness : FLT_INF;
 
     float searchBias = CreateBias(settings.SearchBias);
 
@@ -210,9 +206,9 @@ RayResult SS_TraceRough(SSRay ray, SSLinearRaySettings settings)
     if(far < Camera.Planes.x) return result;
 
     int i;
-    for(i = 0; i < settings.Iterations; i++)
+    for(i = 0; i < settings.Base.Iterations; i++)
     {
-        float lerp = pow(float(i) / (settings.Iterations - 1), searchBias);
+        float lerp = pow(float(i) / (settings.Base.Iterations - 1), searchBias);
 
         vec3 uv = result.Position = mix(ray.Start, ray.End, lerp);
         uv.z = SS_CorrectDepth(near, far, lerp);
@@ -230,7 +226,7 @@ RayResult SS_TraceRough(SSRay ray, SSLinearRaySettings settings)
         }
     }
 
-    if(i == settings.Iterations) result.Result = RAY_RESULT_EXHAUSTED;
+    if(i == settings.Base.Iterations) result.Result = RAY_RESULT_EXHAUSTED;
     return result;
 }
 
@@ -295,8 +291,8 @@ SSRay CreateSSRayLinear(Ray ray, SSLinearRaySettings settings)
     SSRay result;
 
     ray.Direction = normalize(ray.Direction);
-    ray.Position += settings.Normal * settings.NormalBias * (ray.BaseMip + 1);
-    ray.Position += ray.Direction * IGNSample * settings.RayBias / settings.Iterations * (ray.BaseMip + 1);
+    ray.Position += settings.Base.Normal * settings.Base.NormalBias * (ray.BaseMip + 1);
+    ray.Position += ray.Direction * IGNSample * settings.RayBias / settings.Base.Iterations * (ray.BaseMip + 1);
 
     result.Start = SS_WorldToView(ray.Position);
     result.End = SS_WorldToView(ray.Position + ray.Direction * ray.Length);

@@ -8,7 +8,7 @@
 
 #define SH_MODE_SAMPLE 0u
 #define SH_MODE_MERGE 1u
-#define SH_SAMPLE_GROUPS 4
+#define SH_SAMPLE_GROUPS 32
 
 namespace gE
 {
@@ -79,10 +79,11 @@ namespace gE
 		API::Buffer<ColorHarmonic> buf(_window, move(bufferSettings));
 		buf.Free();
 
-		glMemoryBarrier(GL_TEXTURE_UPDATE_BARRIER_BIT);
 		buf.Bind(GL::BufferTarget::ShaderStorage, 9);
 		shader.SetUniform(0, Skybox, 0);
 		shader.SetUniform(1, SH_MODE_SAMPLE);
+
+		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_UNIFORM_BARRIER_BIT);
 		shader.Dispatch(SH_SAMPLE_GROUPS);
 
 		static_assert(SH_SAMPLE_GROUPS <= 32);

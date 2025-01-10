@@ -45,6 +45,8 @@ namespace gE
 		~Monitor() { delete[] Name; }
 	};
 
+	void OverrideSTDTerminate();
+
 	class Window
 	{
 	 public:

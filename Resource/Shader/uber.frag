@@ -41,7 +41,7 @@ in VertexOut VertexIn;
 layout(location = 0) out vec4 FragColor;
 layout(location = 1) out vec3 Velocity;
 
-vec3 SampleLighting(Vertex vert, vec3 dir, int baseMip = 0);
+vec3 SampleLighting(Vertex vert, vec3 dir, int baseMip = 0, bool rough = false);
 
 layout(early_fragment_tests) in;
 void main()
@@ -80,9 +80,18 @@ void main()
 
     PBRSample pbrSample = ImportanceSample(vert, frag);
 
-    vec3 ambient = SH_GetColor(Lighting.SkyboxIrradiance, frag.Normal) / PI;
+    vec3 ambient = SH_SampleProbe(Lighting.SkyboxIrradiance, frag.Normal).rgb;
 
-    FragColor.rgb = albedo * ambient;
+#ifdef ENABLE_GI
+    #ifndef ENABLE_GI_MULTIBOUNCE
+    if(ENABLE_VOXEL_WRITE)
+        ambient = vec3(0.0);
+    else
+    #endif
+        ambient = SampleLighting(vert, pbrSample.Diffuse, 0, false);
+#endif
+
+    FragColor.rgb = albedo * ambient / PI;
 
     for(int i = 0; i < Lighting.LightCount; i++)
         FragColor.rgb += GetLighting(vert, frag, Lighting.Lights[i], VertexIn.FragPosLightSpace[i]);
@@ -101,10 +110,10 @@ void main()
     if(!ENABLE_VOXEL_WRITE) return;
 
     ivec3 texel = Voxel_WorldToTexel(vert.Position, imageSize(VoxelColorOut).x);
-    imageStore(VoxelColorOut, texel, PackColor(FragColor));
+    imageStore(VoxelColorOut, texel, Voxel_PackColor(FragColor));
 }
 
-vec3 SampleLighting(Vertex vert, vec3 sampleDirection, int baseMip)
+vec3 SampleLighting(Vertex vert, vec3 sampleDirection, int baseMip, bool rough)
 {
 #ifndef EXT_BINDLESS
     return vec3(0.0);
@@ -127,20 +136,36 @@ vec3 SampleLighting(Vertex vert, vec3 sampleDirection, int baseMip)
 
 #if defined(ENABLE_SS_TRACE) || defined(ENABLE_VOXEL_TRACE)
     Ray ray = Ray(vert.Position, 10.f, sampleDirection, baseMip);
+    RayResult result = DefaultRayResult;
+    vec3 rayColor;
 
-    SSRaySettings raySettings = SSRaySettings(HIZ_MAX_ITER, EPSILON, 0.2, vert.Normal, 0.0);
-    SSRay ssRay = CreateSSRayHiZ(ray, raySettings);
+    if(!ENABLE_VOXEL_WRITE)
+    {
+        SSRaySettings raySettings = SSRaySettings(HIZ_MAX_ITER, EPSILON, 0.2, vert.Normal);
 
-    RayResult result = SS_Trace(ssRay, raySettings);
-    vec3 rayColor = textureLod(Camera.Color, result.Position.xy, 0.f).rgb;
+        if (rough)
+        {
+            SSLinearRaySettings linearSettings = SSLinearRaySettings(raySettings, EPSILON, 0.1);
+            SSRay ssRay = CreateSSRayLinear(ray, linearSettings);
+            result = SS_TraceRough(ssRay, linearSettings);
+        }
+        else
+        {
+            SSRay ssRay = CreateSSRayHiZ(ray, raySettings);
+            result = SS_Trace(ssRay, raySettings);
+        }
+
+        rayColor = textureLod(Camera.Color, result.Position.xy, float(baseMip)).rgb;
+    }
 
     #ifdef ENABLE_VOXEL_TRACE
     if(result.Result != RAY_RESULT_HIT)
     {
         ray.Position = vert.Position + ray.Direction * result.Distance;
+        ray.BaseMip = 0;
         result = Voxel_TraceOffset(ray, vert.Normal);
-        rayColor = textureLod(VoxelGrid.Color, Voxel_WorldToUV(result.Position), 0.0).rgb;
-        rayColor = UnpackColor(rayColor);
+        rayColor = textureLod(VoxelGrid.Color, Voxel_WorldToUV(result.Position), 0.f).rgb;
+        rayColor = Voxel_UnpackColor(rayColor);
     }
     #endif
 

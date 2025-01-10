@@ -39,7 +39,7 @@ namespace GL
 	template<typename I>
 	void Buffer<T>::ReplaceData(const I* data, uint32_t count, uint32_t offset) const
 	{
-		static constexpr size_t SIZE_T = sizeof(std::conditional_t<std::is_same_v<I, void>, uint8_t, I>);
+		static constexpr size_t SIZE_T = sizeof(typename Array<I>::I);
 		if(!data || !count) return;
 		glNamedBufferSubData(ID, offset, SIZE_T * count, data);
 	}
@@ -66,7 +66,7 @@ namespace GL
 	void Buffer<T>::RetrieveData(u64 size, u64 offset)
 	{
 		GE_ASSERT(!IsFree(), "DATA MAY NOT BE FREE");
-		GE_ASSERT(SUPER::Data.MemSize() > size + offset, "DATA ARRAY NOT LARGE ENOUGH TO STORE MEMORY")
+		GE_ASSERT(SUPER::Data.MemSize() > size + offset, "DATA ARRAY NOT LARGE ENOUGH TO STORE MEMORY");
 		RetrieveData(SUPER::Data.Data(), size, offset);
 	}
 
@@ -80,7 +80,7 @@ namespace GL
 	template<typename I>
 	void Buffer<T>::Realloc(uint32_t count, I* data)
 	{
-		static constexpr size_t SIZE_T = sizeof(std::conditional_t<std::is_same_v<I, void>, uint8_t, I>);
+		static constexpr size_t SIZE_T = sizeof(typename Array<I>::I);
 		if((bool)(SUPER::UsageHint & GPU::BufferUsageHint::Mutable))
 			glNamedBufferData(ID, SIZE_T * count, data, GetMutableFlags(SUPER::UsageHint));
 		else

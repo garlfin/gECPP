@@ -61,6 +61,8 @@ namespace GPU
 	ShaderStage::ShaderStage(ShaderStageType type, const Path& path) : StageType(type), BasePath(path)
 	{
 		auto file = std::ifstream(path, std::ios::in | std::ios::binary | std::ios::ate);
+		GE_ASSERT(file.is_open(), "COULD NOT OPEN FILE!");
+
 		const u64 length = file.tellg();
 
 		Source.resize(length);

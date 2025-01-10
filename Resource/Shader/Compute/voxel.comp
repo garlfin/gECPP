@@ -15,8 +15,6 @@
 #define MODE_TAA_VELOCITY 1
 #define MODE_TAA_COPY 2
 #define MODE_DOWNSAMPLE 3
-#define MODE_CALCULATE_PROBES 4
-#define MODE_CALCULATE_GI 5
 
 // IO
 layout(binding = 2, PIPELINE_COLOR_FORMAT) restrict uniform image3D VoxelColorIn;
@@ -31,9 +29,7 @@ vec4 LoadVoxelData(ivec3);
 vec4 AverageBox4(ivec3);
 vec4 MaxBox4(ivec3);
 vec4 TAA(ivec3);
-uint GetProbeIndex(ivec3);
 void CalculateProbeLocations(ivec3);
-void CalculateProbeColor(ivec3);
 
 layout(local_size_x = 4, local_size_y = 4, local_size_z = 4) in;
 void main()
@@ -62,14 +58,6 @@ void main()
     case MODE_TAA_COPY:
         color = imageLoad(VoxelColorIn, texel);
         imageStore(VoxelColorOut, texel, color);
-        break;
-
-    case MODE_CALCULATE_PROBES:
-        CalculateProbeLocations(texel);
-        break;
-
-    case MODE_CALCULATE_GI:
-        CalculateProbeColor(texel);
         break;
 
     default:
@@ -162,17 +150,3 @@ vec4 TAA(ivec3 texel)
 
     return color;
 }
-
-void CalculateProbeLocations(ivec3 probeID)
-{
-    uint index = Voxel_GetProbeIndex(probeID);
-    if(index == -1) return;
-
-    VoxelGrid.Probes[index].IDx = index;
-    VoxelGrid.Probes[index].Position = (vec3(probeID) + 0.5) / Voxel_ProbeGridSize * VoxelGrid.Scale;
-};
-
-void CalculateProbeColor(ivec3 probeID)
-{
-
-};

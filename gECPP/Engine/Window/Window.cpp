@@ -22,6 +22,17 @@ using namespace gE;
 #define BRDF_SIZE 512
 #define BRDF_GROUP_SIZE 8
 
+void Terminate()
+{
+	DEBUGBREAK();
+	exit(-1);
+}
+
+void gE::OverrideSTDTerminate()
+{
+	std::set_terminate(Terminate);
+}
+
 Window::Window(glm::u16vec2 size, const char* name) :
 	Cameras(this), Transforms(this),
 	CullingManager(this), Behaviors(this),

@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "Asset/Mesh/Mesh.h"
 #include "Engine/Component/Camera/Camera.h"
 #include "Engine/Renderer/VoxelPipeline.h"
 
@@ -16,6 +17,7 @@ namespace gE
 		float Size;
 		VoxelPipeline::ProbeSettings ProbeSettings;
 	};
+
 	class VoxelCapture : public Entity
 	{
 	 public:
