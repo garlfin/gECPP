@@ -37,7 +37,7 @@ namespace gE
 
 		EntityFlags _flags;
 		LayerMask _layers;
- 		u8 _depth = DEFAULT;
+ 		u8 _sceneTreeDepth = DEFAULT;
 
 		std::vector<Entity*> _children;
 

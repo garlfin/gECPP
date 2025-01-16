@@ -2,21 +2,23 @@
 #include "Math.glsl"
 
 // Functions
-float InterleavedGradientNoise(vec2, int);
+float InterleavedGradientNoise(vec2);
 
 // Helper Variables
 #ifdef FRAGMENT_SHADER
-    float IGNSample = InterleavedGradientNoise(gl_FragCoord.xy, 64);
+    float IGNSample = InterleavedGradientNoise(gl_FragCoord.xy);
 #endif
 
 #ifdef COMPUTE_SHADER
-    float IGNSample = InterleavedGradientNoise(gl_GlobalInvocationID.xy, 64);
+    float IGNSample = InterleavedGradientNoise(gl_GlobalInvocationID.xy);
 #endif
 
-float InterleavedGradientNoise(vec2 uv, int mod)
+// https://www.shadertoy.com/view/fdl3zn
+float InterleavedGradientNoise(vec2 uv)
 {
-#ifdef ENABLE_TAA
-    uv += (Camera.Frame % mod) * vec2(32.665, 11.815);
-#endif
-    return fract(52.9829189 * fract(uv.x * 0.06711056 + uv.y * 0.00583715));
+    uint frame = Camera.Frame % 128;
+    if((frame & 2u) != 0u) uv = vec2(-uv.y, uv.x);
+    if((frame & 1u) != 0u) uv.x = -uv.x;
+
+    return fract(uv.x * 0.7548776662 + uv.y * 0.56984029 + float(frame) * 0.41421356);
 }

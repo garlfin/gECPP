@@ -16,10 +16,22 @@ namespace gE
 
 	Light::Light(Window* w, Camera& c, IDepthTarget& d) :
 		Entity(w),
-		IDepthTarget(d),
-		_managedLight(&GetWindow().GetLights(), *this),
-		_camera(c)
+		Managed<Light>(&GetWindow().GetLights(), *this),
+		_camera(c),
+		Depth(nullptr)
 	{
+	}
+
+	void Light::GetGPULight(GPU::Light& light)
+	{
+		const Transform& transform = GetTransform();
+		const Camera& camera = GetCamera();
+
+		light.Depth = GetDepth().GetHandle();
+ 		light.ViewProjection = camera.GetProjection() * inverse(transform.Model());
+		light.Position = transform->Position;
+		light.Color = GetColor();
+		light.Planes = camera.GetClipPlanes();
 	}
 
 	void LightManager::OnRender(float delta, Camera* camera)
@@ -51,10 +63,12 @@ namespace gE
 		_target(*this, _camera)
 	{
 		GetTransform().SetRotation(rot);
+		Depth = &_target.GetDepth();
 	}
 
 	DirectionalLightTarget::DirectionalLightTarget(Light& l, OrthographicCamera& c) :
-		RenderTarget(l, c), IDepthTarget((API::Texture&) _depth),
+		RenderTarget(l, c),
+		IDepthTarget((API::Texture&) _depth),
 		_depth(GetFrameBuffer(), GPU::Texture2D(ShadowMapFormat, c.GetSize()))
 	{
 	}
@@ -79,8 +93,6 @@ namespace gE
 	{
 		if(!callingCamera) return false;
 
-		OrthographicCamera& camera = GetCamera();
-
 		Transform& transform = GetOwner().GetTransform();
 		const TransformData& cameraTransform = callingCamera->GetOwner().GetTransform().GetGlobalTransform();
 
@@ -98,16 +110,14 @@ namespace gE
 
 	void DirectionalLight::GetGPULight(GPU::Light& light)
 	{
-		Transform& transform = GetTransform();
-		OrthographicCamera& camera = GetCamera();
+		Light::GetGPULight(light);
 
-		light.ViewProjection = camera.GetProjection() * inverse(transform.Model());
+		const Transform& transform = GetTransform();
+		const OrthographicCamera& camera = GetCamera();
+
 		light.Position = -transform->Forward();
 		light.Type = GPU::LightType::Directional;
-		light.Color = glm::vec3(1);
 		light.PackedSettings = u32(camera.GetScale().y * 2);
-		light.Planes = camera.GetClipPlanes();
-		light.Depth = (handle) GetDepth();
 	}
 
 	PointLightTarget::PointLightTarget(Light& light, CameraCube& camera) :
@@ -138,21 +148,15 @@ namespace gE
 		_camera(this, _target, CreatePointSettings(resolution)),
 		_target(*this, _camera)
     {
-
+		Depth = &_target.GetDepth();
     }
 
 	void PointLight::GetGPULight(GPU::Light& light)
 	{
-		Transform& transform = GetTransform();
-		CameraCube& camera = GetCamera();
+		Light::GetGPULight(light);
 
-		light.ViewProjection = camera.GetProjection() * inverse(transform.Model());
-		light.Position = transform->Position;
 		light.Type = GPU::LightType::Point;
-		light.Color = glm::vec3(1.0);
 		light.PackedSettings = std::bit_cast<u32, float>(0.1);
-		light.Planes = camera.GetClipPlanes();
-		light.Depth = (handle) GetDepth();
 	}
 
 	OrthographicCameraSettings CreateDirectionalSettings(u16 size, float scale)

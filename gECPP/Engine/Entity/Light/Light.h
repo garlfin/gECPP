@@ -36,17 +36,23 @@ namespace gE
 		Window* _window;
 	};
 
-	class Light : public Entity, public IDepthTarget, public Managed<Light>
+	class Light : public Entity, public Managed<Light>
 	{
 	 public:
 		Light(Window*, Camera&, IDepthTarget&);
 
-		virtual void GetGPULight(GPU::Light& light) = 0;
+		virtual void GetGPULight(GPU::Light& light);
 
 		GET(Camera&, Camera, _camera);
+		GET(GL::Texture&, Depth, *Depth);
+		GET_SET_VALUE(glm::vec3, Color, _color);
+
+	 protected:
+		// Temporary workaround to bizzare bug.
+		API::Texture* Depth;
 
 	 private:
-		Managed<Light> _managedLight;
-		Camera& _camera;
+		RelativePointer<Camera> _camera;
+		glm::vec3 _color = glm::vec3(1.0);
 	};
 }

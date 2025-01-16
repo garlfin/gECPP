@@ -10,7 +10,7 @@
     #define EPSILON 0.001
 #endif
 
-#define HAMMERSLEY_ROUGHNESS_SAMPLE (TAA_SAMPLE_SQUARED * TAA_SAMPLE_SQUARED)
+#define HAMMERSLEY_SAMPLE 1024
 
 #ifdef FRAGMENT_SHADER
     uniform sampler2D BRDFLutTex;
@@ -275,9 +275,9 @@ PBRSample ImportanceSample(const Vertex vert, const PBRFragment frag)
     vec3 eye = normalize(Camera.Position - vert.Position);
     float nDotV = max(dot(frag.Normal, eye), 0.0);
 
-    vec2 xi = Hammersley(int(IGNSample * HAMMERSLEY_ROUGHNESS_SAMPLE), HAMMERSLEY_ROUGHNESS_SAMPLE);
+    vec2 xi = Hammersley(uint(IGNSample * HAMMERSLEY_SAMPLE), HAMMERSLEY_SAMPLE);
     vec3 n = ImportanceSampleGGX(xi, frag.Normal, frag.Roughness);
-    vec3 d = ImportanceSampleGGX(xi, vert.Normal, 1.0);
+    vec3 d = GetTBN(frag.Normal) * ToHemisphere(xi);
     vec3 r = -normalize(reflect(eye, n));
 
     vec3 f0 = mix(frag.F0, frag.Albedo, frag.Metallic);

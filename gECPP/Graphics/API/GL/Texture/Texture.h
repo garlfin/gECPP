@@ -10,7 +10,7 @@ using handle = u64;
 
 namespace GL
 {
-	CONSTEXPR_GLOBAL handle NullHandle = handle();
+	CONSTEXPR_GLOBAL handle NullHandle = 0;
 
  	class Texture : public GLObject
 	{

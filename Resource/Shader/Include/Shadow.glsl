@@ -23,11 +23,11 @@
 #endif
 
 #ifndef SMRT_TRACE_BIAS
-    #define SMRT_TRACE_BIAS 0.5
+    #define SMRT_TRACE_BIAS 1.0
 #endif
 
 #ifndef SMRT_CONTACT_TRACE_BIAS
-    #define SMRT_CONTACT_TRACE_BIAS 0.5
+    #define SMRT_CONTACT_TRACE_BIAS 1.0
 #endif
 
 #ifndef SMRT_CONTACT_SAMPLES
@@ -112,10 +112,10 @@ float GetShadowDirectional(const Vertex vert, const Light light, const vec4 frag
             vec3 rayDir = offsetMatrix * vec3(offset * DIRECTIONAL_SHADOW_RADIUS, 1.0);
             rayDir = normalize(rayDir);
 
-            vec3 rayStart = vert.Position + rayDir * bias * 0.02;
+            vec3 rayStart = vert.Position + rayDir * bias * (1.0 + IGNSample) / SMRT_SAMPLES * 0.02;
             rayStart = DirectionalPerspectiveDivide(light.ViewProjection * vec4(rayStart, 1.0), light.Planes);
 
-            vec3 rayEnd = vert.Position + rayDir * SMRT_TRACE_DISTANCE * (1 + IGNSample / SMRT_TRACE_STEPS);
+            vec3 rayEnd = vert.Position + rayDir * SMRT_TRACE_DISTANCE;
             rayEnd = DirectionalPerspectiveDivide(light.ViewProjection * vec4(rayEnd, 1.0), light.Planes);
 
             float searchBias = CreateBias(SMRT_TRACE_BIAS);

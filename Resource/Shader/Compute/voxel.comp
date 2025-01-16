@@ -128,14 +128,14 @@ vec4 TAA(ivec3 texel)
     vec4 color;
 
     vec4 currentColor = imageLoad(VoxelColorIn, texel);
-    vec4 previousColor = imageLoad(VoxelColorOut, texel + Data.xyz);
+    vec4 previousColor = imageLoad(VoxelColorOut, texel);
 
     // No significant difference in speed using conditionals.
     vec4 neighbor = AverageNeighbors(texel);
     if(currentColor.a == 0.0)
         currentColor.rgb = neighbor.rgb;
 
-    if(max(previousColor.r, max(previousColor.g, previousColor.b)) == 0)
+    if(previousColor.a == 0.0)
         color.rgb = currentColor.rgb;
     else
     {

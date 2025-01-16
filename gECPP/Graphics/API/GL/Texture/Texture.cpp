@@ -31,8 +31,10 @@ namespace GL
 
 	handle Texture::GetHandle()
 	{
-		if(_handle) return _handle;
-		if(!GLAD_GL_ARB_bindless_texture) return _handle = 1;
+		if(_handle)
+			return _handle;
+		if(!GLAD_GL_ARB_bindless_texture)
+			return NullHandle;
 
 		_handle = glGetTextureHandleARB(ID);
 		glMakeTextureHandleResidentARB(_handle);

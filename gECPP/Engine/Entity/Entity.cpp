@@ -19,7 +19,7 @@ namespace gE
 		if(flags.Static) _layers |= LayerMask::Static;
 		if(!parent) return;
 
-		_depth = _parent->_depth + 1;
+		_sceneTreeDepth = _parent->_sceneTreeDepth + 1;
 		parent->_children.push_back(this);
 	}
 
@@ -47,13 +47,13 @@ namespace gE
 
 	void EntityManager::DestroyEntity(Entity& entity, bool destroyChildren)
 	{
-		const u8 depth = entity._depth;
+		const u8 depth = entity._sceneTreeDepth;
 
 		if(destroyChildren)
 		{
 			ITER_T* end = &entity.Iterator;
 
-			for(ITER_T* i = &entity.Iterator; i && (**i)->_depth > depth; i = i->GetNext())
+			for(ITER_T* i = &entity.Iterator; i && (**i)->_sceneTreeDepth > depth; i = i->GetNext())
 			{
 				(**i)->_flags.Deletion = true;
 				end = i;
@@ -67,7 +67,7 @@ namespace gE
 			if(entity._parent)
 				entity._parent->_children.insert(entity._parent->_children.end(), children.begin(), children.end());
 
-			for(ITER_T* i = &entity.Iterator; i && (**i)->_depth > depth; i = i->GetNext())
+			for(ITER_T* i = &entity.Iterator; i && (**i)->_sceneTreeDepth > depth; i = i->GetNext())
 				(**i)->_parent = entity._parent;
 
 			_deletionList.Add(entity.Iterator);

@@ -15,6 +15,8 @@
 
 #define VOXEL_TAA_GROUP_SIZE 4
 
+#define VOXEL_SNAP 10.0
+
 namespace gE::VoxelPipeline
 {
 	Buffers::Buffers(Window* window) :
@@ -59,12 +61,10 @@ namespace gE::VoxelPipeline
 		Transform& transform = GetOwner().GetTransform();
 		const TransformData& cameraTransform = camera->GetOwner().GetTransform().GetGlobalTransform();
 
-		float cellSize = GetScale() / GetSize().x * 10.f;
+		float cellSize = GetScale() / GetSize().x * VOXEL_SNAP;
 
-		glm::vec3 pos = floor(cameraTransform.Position / cellSize) * cellSize;
-		glm::vec3 oldPos = transform->Position;
-
-		glm::ivec3 velocity = (pos - oldPos) / cellSize;
+		const glm::vec3 pos = round(cameraTransform.Position / cellSize) * cellSize;
+		const glm::ivec3 velocity = pos - transform->Position;
 
 		transform.SetPosition(pos);
 		transform.OnUpdate(0.f); // Force update on model matrix since it passed its tick.
@@ -78,7 +78,7 @@ namespace gE::VoxelPipeline
 
 		_colorBack.Bind(0, GL_READ_WRITE);
 		_color.Bind(2, GL_READ_WRITE);
-		voxelShader.SetUniform(0, glm::ivec4(velocity, MODE_TAA_COPY));
+		voxelShader.SetUniform(0, glm::ivec4(MODE_TAA_COPY));
 
 		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 		voxelShader.Dispatch(dispatchSize);

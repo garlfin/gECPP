@@ -140,10 +140,9 @@ vec2 Rotate(vec2 vec, float angle)
 vec3 ToHemisphere(vec2 vec)
 {
     float phi = vec.y * 2.0 * PI;
-    float cosTheta = 1.0 - vec.x;
+    float cosTheta = sqrt(1.0 - vec.x);
     float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
-
-    return vec3(cos(phi) * cosTheta, sin(phi) * sinTheta, cosTheta);
+    return vec3(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
 }
 
 vec3 ToSphere(vec2 vec)

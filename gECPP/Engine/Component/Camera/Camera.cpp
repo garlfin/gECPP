@@ -31,8 +31,8 @@ CONSTEXPR_GLOBAL glm::vec3 UpDirs[]
 
 namespace gE
 {
-	Camera::Camera(Entity* p, TextureSize2D size, IRenderTarget& t, const ICameraSettings& s, ComponentManager<Camera>* m) : Component(
-			p, m),
+	Camera::Camera(Entity* p, TextureSize2D size, IRenderTarget& t, const ICameraSettings& s, ComponentManager<Camera>* m) :
+		Component(p, m),
 		Projection(),
 		_settings(s),
 		_target(t),
