@@ -19,6 +19,17 @@ namespace gE
 	};
 
 	ENUM_OPERATOR(WriteMode, &);
+	ENUM_OPERATOR(WriteMode, |);
+
+	enum class RenderMode : u8
+	{
+		Geometry = 1,
+		Fragment = 1 << 1,
+		Both = Geometry | Fragment
+	};
+
+	ENUM_OPERATOR(RenderMode, &);
+	ENUM_OPERATOR(RenderMode, |);
 
 	enum class VoxelWriteMode : u8
 	{
@@ -32,48 +43,44 @@ namespace gE
 		Conservative
 	};
 
-	enum class UpdateType : u8
+	enum class DepthMode : u8
 	{
-		FixedUpdate,
-		Update,
-		LateUpdate,
-		EarlyFixedUpdate
-	};
-
-	enum class RenderType : u8
-	{
-		PreRender,
-		Render,
-		PostRender
+		Normal,
+		Radial
 	};
 
 	struct RenderFlags
 	{
-		WriteMode WriteMode : 2;
-		VoxelWriteMode VoxelWriteMode : 1;
-		bool EnableJitter : 1;
-		bool EnableSSEffects : 1;
-		bool EnableSpecular : 1;
-		bool EnableFaceCull : 1;
-		bool EnableDepthTest : 1;
-		RasterMode RasterMode : 1;
-		u8 InstanceMultiplier : 3;
+		RenderMode RenderMode : 2 = RenderMode::Both; // 0
+		WriteMode WriteMode : 2 = WriteMode::Both; // 2
+		DepthMode DepthMode : 1 = DepthMode::Normal; // 4
+		VoxelWriteMode VoxelWriteMode : 1 = VoxelWriteMode::Read; // 5
+		RasterMode RasterMode : 1 = RasterMode::Normal; // 6
+
+		BIT_FIELD_ALIGN;
+		u8 InstanceMultiplier : 4 = 1; // 8
+		bool EnableJitter : 1 = true; // 12
+		bool EnableFaceCull : 1 = true; // 13
+		bool EnableDepthTest : 1 = true; // 14
+		bool EnableSpecular : 1 = true; // 15
 	};
 
 	enum class CloseFlags : u8
 	{
-		None,
 		Close,
 		Restart,
 	};
 
 	namespace RenderState
 	{
-		CONSTEXPR_GLOBAL RenderFlags Color { WriteMode::Color, VoxelWriteMode::Read, true, true, true, true, true, RasterMode::Normal, 1 };
-		CONSTEXPR_GLOBAL RenderFlags PreZ { WriteMode::Depth, VoxelWriteMode::Read, true, false, false, true, true, RasterMode::Normal, 1 };
-		CONSTEXPR_GLOBAL RenderFlags Shadow { WriteMode::Depth, VoxelWriteMode::Read, false, false, false, false, true, RasterMode::Normal, 1 };
-		CONSTEXPR_GLOBAL RenderFlags ShadowCube { WriteMode::Depth, VoxelWriteMode::Read, false, false, false, false, true, RasterMode::Normal, 6 };
-		CONSTEXPR_GLOBAL RenderFlags Cubemap { WriteMode::Both, VoxelWriteMode::Read, false, false, false, true, true, RasterMode::Normal, 6 };
-		CONSTEXPR_GLOBAL RenderFlags Voxel { WriteMode::Color, VoxelWriteMode::Write, false, false, false, false, false, RasterMode::Normal, 3 };
+		CONSTEXPR_GLOBAL RenderFlags Forward     = DEFAULT;
+		CONSTEXPR_GLOBAL RenderFlags PreZ        = { RenderMode::Geometry, WriteMode::Depth };
+		CONSTEXPR_GLOBAL RenderFlags PreZForward = { RenderMode::Fragment, WriteMode::Color };
+		CONSTEXPR_GLOBAL RenderFlags GBuffer     = { RenderMode::Geometry };
+		CONSTEXPR_GLOBAL RenderFlags Deferred    = { RenderMode::Fragment, WriteMode::Color, DepthMode::Normal, VoxelWriteMode::Read, RasterMode::Normal, 1, false, false, false, true };
+		CONSTEXPR_GLOBAL RenderFlags Shadow      = { RenderMode::Geometry, WriteMode::Depth, DepthMode::Normal, VoxelWriteMode::Read, RasterMode::Normal, 1, false, false };
+		CONSTEXPR_GLOBAL RenderFlags ShadowCube  = { RenderMode::Geometry, WriteMode::Depth, DepthMode::Radial, VoxelWriteMode::Read, RasterMode::Normal, 6, false, false };
+		CONSTEXPR_GLOBAL RenderFlags Cubemap     = { RenderMode::Both, WriteMode::Both, DepthMode::Normal, VoxelWriteMode::Read, RasterMode::Normal, 6, false, false, true, false };
+		CONSTEXPR_GLOBAL RenderFlags Voxel       = { RenderMode::Both, WriteMode::Color, DepthMode::Normal, VoxelWriteMode::Write, RasterMode::Normal, 6, false, false, false, false };
 	}
 }

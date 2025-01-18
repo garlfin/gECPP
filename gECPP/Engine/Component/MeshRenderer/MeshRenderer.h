@@ -6,7 +6,7 @@
 
 #include <Asset/Mesh/Mesh.h>
 #include <Engine/Entity/Entity.h>
-#include <Engine/Renderer/Material.h>
+#include <Engine/Renderer/Material/Material.h>
 #include <Graphics/Buffer/VAO.h>
 
 #include "DrawCall.h"

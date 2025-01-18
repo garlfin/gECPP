@@ -17,6 +17,13 @@ class Array : public gE::Asset
 	
 	constexpr Array() = default;
 
+	Array(std::initializer_list<I> init) : _size(init.size())
+	{
+		if(_size) _t = new I[_size];
+		for(size_t i = 0; i < _size; i++)
+			_t[i] = *(init.begin() + i);
+	}
+
 	template<typename... ARGS>
 	explicit Array(size_t count, ARGS&&... args) : _size(count), _t(nullptr)
 	{

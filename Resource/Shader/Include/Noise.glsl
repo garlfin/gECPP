@@ -1,6 +1,8 @@
 #include "Camera.glsl"
 #include "Math.glsl"
 
+#define IGN_MODULO 512
+
 // Functions
 float InterleavedGradientNoise(vec2);
 
@@ -16,7 +18,8 @@ float InterleavedGradientNoise(vec2);
 // https://www.shadertoy.com/view/fdl3zn
 float InterleavedGradientNoise(vec2 uv)
 {
-    uint frame = Camera.Frame % 128;
+    const uint frame = Camera.Frame % IGN_MODULO;
+
     if((frame & 2u) != 0u) uv = vec2(-uv.y, uv.x);
     if((frame & 1u) != 0u) uv.x = -uv.x;
 

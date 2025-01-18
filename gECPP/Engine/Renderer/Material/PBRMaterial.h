@@ -4,10 +4,11 @@
 
 #pragma once
 
-#include <Engine/Renderer/Material.h>
+#include <Engine/Renderer/Material/Material.h>
 #include <Engine/Utility/AssetManager.h>
-#include <Graphics/Shader/Shader.h>
 #include <Graphics/Texture/Texture.h>
+
+#include "Uniform.h"
 
 namespace gE
 {
@@ -21,7 +22,7 @@ namespace gE
 	class PBRMaterial : public Material
 	{
 	 public:
-		PBRMaterial(Window* w, const Reference<API::Shader>& s, const PBRMaterialSettings& settings);
+		PBRMaterial(Window* w, const Reference<Shader>& s, const PBRMaterialSettings& settings);
 
 		void Bind() const override;
 
@@ -29,6 +30,6 @@ namespace gE
 		const gE::ReferenceUniform<API::Texture2D> _albedo;
 		const gE::ReferenceUniform<API::Texture2D> _amr;
 		const gE::ReferenceUniform<API::Texture2D> _normal;
-		const GPU::DynamicUniform _brdfLUT;
+		const DynamicUniform _brdfLUT;
 	};
 }

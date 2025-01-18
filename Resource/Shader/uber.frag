@@ -1,8 +1,8 @@
 #define ENABLE_VOXEL_TRACE
-#define ENABLE_SS_TRACE
+//#define ENABLE_SS_TRACE
 #define ENABLE_SMRT
 //#define ENABLE_SMRT_CONTACT_SHADOW
-//#define ENABLE_GI
+#define ENABLE_GI
 
 #define HIZ_MAX_ITER 128
 
@@ -46,7 +46,7 @@ vec3 SampleLighting(Vertex vert, vec3 dir, bool rough = false);
 layout(early_fragment_tests) in;
 void main()
 {
-    if(!ENABLE_COLOR) return;
+    if(!bool(Scene_WriteMode & WRITE_MODE_COLOR)) return;
 
     Vertex vert = Vertex
     (
@@ -75,15 +75,14 @@ void main()
         albedo,
         arm.z,
         vec3(0.04),
-        ENABLE_SPECULAR ? 1.0 : 0.0
+        Scene_EnableSpecular ? 1.0 : 0.0
     );
 
     PBRSample pbrSample = ImportanceSample(vert, frag);
 
-
     vec3 ambient = SH_SampleProbe(Lighting.SkyboxIrradiance, frag.Normal).rgb / PI;
 #ifdef ENABLE_GI
-        ambient = SampleLighting(vert, pbrSample.Diffuse, true);
+    ambient = SampleLighting(vert, pbrSample.Diffuse, true);
 #endif
 
     FragColor.rgb = albedo * ambient;
@@ -91,7 +90,7 @@ void main()
     for(int i = 0; i < Lighting.LightCount; i++)
         FragColor.rgb += GetLighting(vert, frag, Lighting.Lights[i], VertexIn.FragPosLightSpace[i]);
 
-    if(ENABLE_SPECULAR)
+    if(Scene_EnableSpecular)
     {
         vec3 specular = SampleLighting(vert, pbrSample.Specular);
         FragColor.rgb += FilterSpecular(vert, frag, pbrSample, specular);
@@ -102,7 +101,7 @@ void main()
     Velocity = PerspectiveToUV(VertexIn.PreviousNDC);
     Velocity.xy -= PerspectiveToUV(VertexIn.CurrentNDC).xy;
 
-    if(!ENABLE_VOXEL_WRITE) return;
+    if(Scene_VoxelWriteMode != VOXEL_MODE_WRITE) return;
 
     ivec3 texel = Voxel_WorldToTexel(vert.Position, imageSize(VoxelColorOut).x);
     imageStore(VoxelColorOut, texel, Voxel_PackColor(FragColor));
@@ -113,9 +112,9 @@ vec3 SampleLighting(Vertex vert, vec3 sampleDirection, bool rough)
 #ifndef EXT_BINDLESS
     return vec3(0.0);
 #else
-    vec3 color = textureLod(Lighting.Skybox, sampleDirection, 0.0).rgb;
-    vec3 cubemapColor;
+    vec3 color = textureLod(Lighting.Skybox, sampleDirection, 0.0).rgb * PI;
 
+    vec3 cubemapColor;
     float cubemapWeight, maxCubemapWeight;
     for(uint i = 0; i < Lighting.CubemapCount; i++)
     {
@@ -136,11 +135,21 @@ vec3 SampleLighting(Vertex vert, vec3 sampleDirection, bool rough)
 #endif
 
 #ifdef ENABLE_SS_TRACE
-    if(!ENABLE_VOXEL_WRITE && !rough)
+    if(Scene_VoxelWriteMode != VOXEL_MODE_WRITE && !rough)
     {
         SSRaySettings raySettings = SSRaySettings(HIZ_MAX_ITER, EPSILON, 0.2, vert.Normal);
-        SSRay ssRay = CreateSSRayHiZ(ray, raySettings);
-        result = SS_Trace(ssRay, raySettings);
+
+        if(rough)
+        {
+            SSLinearRaySettings linearSettings = SSLinearRaySettings(raySettings, 0.1, 1.0);
+            SSRay ssRay = CreateSSRayLinear(ray, linearSettings);
+            result = SS_TraceRough(ssRay, linearSettings);
+        }
+        else
+        {
+            SSRay ssRay = CreateSSRayHiZ(ray, raySettings);
+            result = SS_Trace(ssRay, raySettings);
+        }
 
         rayColor = textureLod(Camera.Color, result.Position.xy, 0.0).rgb;
     }

@@ -94,7 +94,7 @@ namespace gE
 		window.GetCubemaps().UseNearestCubemaps(glm::vec3(0.0f));
 
 		// COLOR
-		window.RenderState = RenderState::Color;
+		window.RenderState = RenderState::PreZForward;
 
 		glDepthMask(0);
 		glColorMask(1, 1, 1, 1);

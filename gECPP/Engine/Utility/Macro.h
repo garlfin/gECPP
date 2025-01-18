@@ -55,13 +55,13 @@ using std::move;
 #define NOINLINE __declspec(noinline)
 
 #ifdef DEBUG
-#include <csignal>
-#include <vector>
+	#include <csignal>
+	#include <vector>
 #endif // #ifdef DEBUG
 
 #ifdef DEBUG
-#define LOG(MSG) std::cout << MSG << std::endl;
-#define ERR(MSG) { TRAP(); std::cerr << MSG << std::endl; }
+	#define LOG(MSG) std::cout << MSG << std::endl;
+	#define ERR(MSG) { TRAP(); std::cerr << MSG << std::endl; }
 #else
 #define LOG(MSG)
 #define ERR(MSG) std::cerr << MSG << std::endl
@@ -79,21 +79,24 @@ using std::move;
 
 #define GE_FAIL(ERR) GE_ASSERT(false, ERR);
 
-#define BIT_FIELD(FIELD, INDEX) (((FIELD) >> (INDEX)) & 1)
-#ifndef MIN
-#define MIN(X, Y) ((X) < (Y) ? (X) : (Y))
-#endif
-#ifndef MAX
-#define MAX(X, Y) ((X) > (Y) ? (X) : (Y))
-#endif
+#define BIT_FIELD(FIELD, INDEX) ((FIELD) >> (INDEX) & 1)
 #define BIT_SIZE(X) (sizeof(decltype(X)) * 8)
+#define BIT_FIELD_ALIGN u8 : 0
+
+#ifndef MIN
+	#define MIN(X, Y) ((X) < (Y) ? (X) : (Y))
+#endif
+
+#ifndef MAX
+	#define MAX(X, Y) ((X) > (Y) ? (X) : (Y))
+#endif
 
 #ifndef GLOBAL
-#define GLOBAL inline const
+	#define GLOBAL inline const
 #endif
 
 #ifndef CONSTEXPR_GLOBAL
-#define CONSTEXPR_GLOBAL inline constexpr
+	#define CONSTEXPR_GLOBAL inline constexpr
 #endif
 
 #define DEFAULT {}

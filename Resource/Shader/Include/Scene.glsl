@@ -20,21 +20,6 @@
 #define CUBEMAP_AABB 1
 #define CUBEMAP_SPHERE 2
 
-#define DEPTH_MODE_DEFAULT 0
-#define DEPTH_MODE_LINEAR 1
-#define DEPTH_MODE_RADIAL 2
-
-#define ENABLE_DEPTH bool(Scene.State & 1)
-#define ENABLE_COLOR bool(Scene.State & (1 << 1))
-#define ENABLE_VOXEL_WRITE bool(Scene.State & (1 << 2))
-#define ENABLE_JITTER bool(Scene.State & (1 << 3))
-#define ENABLE_SSEFFECTS bool(Scene.State & (1 << 4))
-#define ENABLE_SPECULAR bool(Scene.State & (1 << 5))
-#define ENABLE_FACE_CULL bool(Scene.State & (1 << 6))
-#define ENABLE_DEPTH_TEST bool(Scene.State & (1 << 7))
-#define RASTER_MODE (Scene.State & (1 << 8))
-#define INSTANCE_MULTIPLIER (Scene.State >> 9 & 7)
-
 struct Light
 {
     mat4 ViewProjection;
@@ -113,3 +98,30 @@ layout(LIGHT_UNIFORM_LAYOUT, binding = LIGHT_UNIFORM_LOCATION) uniform LightingU
     uint ViewIndex = gl_InstanceID / InstanceCount;
     uint ObjectIndex = gl_BaseInstance + gl_InstanceID % InstanceCount;
 #endif
+
+#define RENDER_MODE_GEOMETRY 1
+#define RENDER_MODE_FRAGMENT 2
+
+#define WRITE_MODE_NONE 0
+#define WRITE_MODE_DEPTH 1
+#define WRITE_MODE_COLOR 2
+
+#define DEPTH_MODE_NORMAL 0
+#define DEPTH_MODE_RADIAL 1
+
+#define VOXEL_MODE_READ 0
+#define VOXEL_MODE_WRITE 1
+
+#define RASTER_MODE_NORMAL 0
+#define RASTER_MODE_CONSERVATIVE 1
+
+const uint Scene_RenderMode = Scene.State & 2;
+const uint Scene_WriteMode = Scene.State >> 2 & 2;
+const uint Scene_DepthMode = Scene.State >> 4 & 1;
+const uint Scene_VoxelWriteMode = Scene.State >> 5 & 1;
+const uint Scene_RasterMode = Scene.State >> 6 & 1;
+const uint Scene_InstanceMultiplier = Scene.State >> 8 & 7;
+const bool Scene_EnableJitter = bool(Scene.State >> 12 & 1);
+const bool Scene_EnableFaceCull = bool(Scene.State >> 13 & 1);
+const bool Scene_EnableDepthTest = bool(Scene.State >> 14 & 1);
+const bool Scene_EnableSpecular = bool(Scene.State >> 15 & 1);

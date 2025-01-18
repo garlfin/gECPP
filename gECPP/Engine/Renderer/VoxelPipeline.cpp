@@ -63,8 +63,8 @@ namespace gE::VoxelPipeline
 
 		float cellSize = GetScale() / GetSize().x * VOXEL_SNAP;
 
-		const glm::vec3 pos = round(cameraTransform.Position / cellSize) * cellSize;
-		const glm::ivec3 velocity = pos - transform->Position;
+		const glm::vec3 pos = floor(cameraTransform.Position / cellSize) * cellSize;
+		const glm::ivec3 velocity = ceil(pos - transform->Position);
 
 		transform.SetPosition(pos);
 		transform.OnUpdate(0.f); // Force update on model matrix since it passed its tick.

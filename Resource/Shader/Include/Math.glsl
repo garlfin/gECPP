@@ -2,6 +2,8 @@
     #define EPSILON 0.001
 #endif
 
+#define HEMISPHERE_COSINUS
+
 #define PI 3.141592
 #define SQRT_PI 1.772454
 #define GOLDEN_ANGLE 2.4
@@ -139,10 +141,17 @@ vec2 Rotate(vec2 vec, float angle)
 
 vec3 ToHemisphere(vec2 vec)
 {
+#ifdef HEMISPHERE_COSINE_WEIGHTED
     float phi = vec.y * 2.0 * PI;
     float cosTheta = sqrt(1.0 - vec.x);
     float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
     return vec3(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
+#else
+    float phi = vec.y * 2.0 * PI;
+    float cosTheta = 1.0 - vec.x;
+    float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
+    return vec3(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
+#endif
 }
 
 vec3 ToSphere(vec2 vec)

@@ -96,6 +96,8 @@ vec3 GetLightingDirectional(const Vertex vert, const PBRFragment frag, const Lig
 
     // Final Calculations
     vec3 specularBRDF = (f * d * g) / max(4.0 * nDotL * nDotV, EPSILON);
+    specularBRDF = min(specularBRDF, vec3(1.0));
+
     vec3 diffuseBRDF = frag.Albedo * kD;
 
     // Falloff of nDotL * nDotL is nicer to me
@@ -239,9 +241,7 @@ vec3 ImportanceSampleGGX(vec2 xi, vec3 n, float roughness)
     float cosTheta = sqrt((1.0 - xi.y) / (1.0 + (a * a - 1.0) * xi.y));
     float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
 
-    vec3 h = vec3(sinTheta * cos(phi), sinTheta * sin(phi), cosTheta);
-
-    return GetTBN(n) * h;
+    return vec3(sinTheta * cos(phi), sinTheta * sin(phi), cosTheta);
 }
 
 // https://seblagarde.wordpress.com/2012/09/29/image-based-lighting-approaches-and-parallax-corrected-cubemap/
@@ -275,9 +275,11 @@ PBRSample ImportanceSample(const Vertex vert, const PBRFragment frag)
     vec3 eye = normalize(Camera.Position - vert.Position);
     float nDotV = max(dot(frag.Normal, eye), 0.0);
 
+    mat3 normalTBN = GetTBN(frag.Normal);
+
     vec2 xi = Hammersley(uint(IGNSample * HAMMERSLEY_SAMPLE), HAMMERSLEY_SAMPLE);
-    vec3 n = ImportanceSampleGGX(xi, frag.Normal, frag.Roughness);
-    vec3 d = GetTBN(frag.Normal) * ToHemisphere(xi);
+    vec3 n = normalTBN * ImportanceSampleGGX(xi, frag.Normal, frag.Roughness);
+    vec3 d = normalTBN * ToHemisphere(xi);
     vec3 r = -normalize(reflect(eye, n));
 
     vec3 f0 = mix(frag.F0, frag.Albedo, frag.Metallic);

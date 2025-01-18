@@ -21,9 +21,9 @@ layout(location = 1) out vec3 Velocity;
 
 void main()
 {
-   if(!ENABLE_COLOR) return;
+   if(!bool(Scene_WriteMode & WRITE_MODE_COLOR)) return;
 
-   if(!ENABLE_VOXEL_WRITE)
+   if(Scene_VoxelWriteMode != VOXEL_MODE_WRITE)
    {
       float sine = sin(Camera.Frame * PI / 60.0) * 0.5 + 0.5;
       vec2 pos = floor(gl_FragCoord.xy / CHECKER_SIZE);

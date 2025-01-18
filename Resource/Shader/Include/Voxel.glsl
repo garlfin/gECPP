@@ -27,7 +27,8 @@
 #endif
 
 #ifndef VOXEL_COLOR_RANGE
-    #define VOXEL_COLOR_RANGE 2.f
+    // RGB10, 2^10 colors. 2^10 / 2^8 = 4
+    #define VOXEL_COLOR_RANGE 4.f
 #endif
 
 #define VOXEL_GRID_RESOLUTION 8

@@ -35,13 +35,13 @@ void main()
     gl_Layer = int(ViewIndex);
     VertexIn.CurrentNDC = gl_Position;
 
-    if(ENABLE_JITTER)
+    if(Scene_EnableJitter)
     {
         vec2 jitter = Jitter(Camera.Frame, Camera.Size);
         gl_Position.xy += jitter * gl_Position.w;
     }
 
-    if(!ENABLE_COLOR) return;
+    if(!bool(Scene_WriteMode & WRITE_MODE_COLOR)) return;
 
     VertexIn.PreviousNDC = objectInfo.PreviousModel * vec4(Position, 1);
     VertexIn.PreviousNDC = Camera.PreviousViewProjection * vec4(VertexIn.PreviousNDC.xyz, 1);

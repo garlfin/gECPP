@@ -3,7 +3,6 @@
 //
 
 #include "Shader.h"
-#include "Uniform.h"
 
 #include <Engine/Window/Window.h>
 
@@ -18,7 +17,7 @@ namespace GPU
 	void ShaderStage::IDeserialize(ostream& out) const
 	{
 		Write(out, StageType);
-		Write(out, (std::string&) Source);
+		Write(out, Source);
 	}
 
 	void Shader::ISerialize(istream& in, SETTINGS_T s)
@@ -41,19 +40,6 @@ namespace GPU
 	void ComputeShader::IDeserialize(ostream& out) const
 	{
 		Write(out, ComputeStage);
-	}
-
-	DynamicUniform::DynamicUniform(API::Shader* shader, u32 location) :
-		_shader(shader), _location(location)
-	{ }
-	DynamicUniform::DynamicUniform(API::Shader* shader, const std::string& name) :
-		_shader(shader), _location(shader->GetUniformLocation(name))
-	{ }
-
-	template<>
-	void DynamicUniform::Set(const API::Texture& t) const
-	{
-		_shader->SetUniform(_location, t, _shader->GetWindow().GetSlotManager().Increment(&t));
 	}
 
 	API_REFLECTABLE_IMPL(ShaderStage, API::ShaderStage)

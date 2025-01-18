@@ -9,9 +9,9 @@
 
 #include <Demo/Engine/Entity/Player.h>
 #include <Demo/Engine/Entity/StaticMeshEntity.h>
-#include <gECPP/Engine/Entity/Light/DirectionalLight.h>
-#include <gECPP/Engine/Entity/Light/PointLight.h>
-#include <gECPP/Engine/Renderer/PBRMaterial.h>
+#include <Engine/Entity/Light/DirectionalLight.h>
+#include <Engine/Entity/Light/PointLight.h>
+#include <Engine/Renderer/Material/PBRMaterial.h>
 #include <Demo/Engine/Entity/EmptyColliderEntity.h>
 #include <Demo/Engine/Entity/PhysicsCube.h>
 
@@ -39,7 +39,7 @@ void DemoWindow::OnInit()
 	normal = ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/grass_nor.pvr"));
 	PBRMaterialSettings grassSettings { albedo, amr, normal };
 
-	auto rasterShader = gE::ref_create<GL::Shader>(this, GPU::Shader("Resource/Shader/uber.vert", "Resource/Shader/uber.frag"));
+	auto rasterShader = gE::ref_create<ForwardShader>(*this, GPU::Shader("Resource/Shader/uber.vert", "Resource/Shader/uber.frag"));
 	auto cobbleMaterial = gE::ref_create<PBRMaterial>(this, rasterShader, cobbleSettings);
 	auto tileMaterial = gE::ref_create<PBRMaterial>(this, rasterShader, tileSettings);
 	auto grassMaterial = gE::ref_create<PBRMaterial>(this, rasterShader, grassSettings);
