@@ -19,14 +19,13 @@ namespace GL
 
 namespace GPU
 {
-	struct ShaderStage : public Serializable<gE::Window*>, public gE::Asset
+	struct ShaderStage : public gE::Asset
 	{
-		SERIALIZABLE_PROTO(STGE, 1, ShaderStage, Serializable);
-		API_REFLECTABLE(ShaderStage, "GPU::ShaderStage", API::ShaderStage);
+		SERIALIZABLE_PROTO("STGE", 1, ShaderStage, Asset);
+		SERIALIZABLE_REFLECTABLE(ShaderStage, "GPU::ShaderStage");
 
 	public:
 		ShaderStage(ShaderStageType, const Path&);
-		DEFAULT_OPERATOR_CM(ShaderStage);
 
 		ShaderStageType StageType = DEFAULT;
 		std::string Source = DEFAULT;
@@ -41,20 +40,13 @@ namespace GPU
 		}
 	};
 
-	struct Shader : public Serializable<gE::Window*>, public gE::Asset
+	struct Shader : public gE::Asset
 	{
-		SERIALIZABLE_PROTO(SHDR, 1, Shader, Serializable);
-		API_REFLECTABLE(Shader, "GPU::Shader", API::Shader);
-		DEFAULT_OPERATOR_COPY(Shader);
+		SERIALIZABLE_PROTO("SHDR", 1, Shader, Asset);
+		SERIALIZABLE_REFLECTABLE(Shader, "GPU::Shader");
 
 	public:
 		Shader(const Path& v, const Path& f);
-
-		// implicit constructor was giving me issues...
-		OPERATOR_MOVE_IMPL(Shader, Shader::Free(),,
-			FragmentStage = move(o.FragmentStage);
-			VertexStage = move(o.VertexStage);
-		);
 
 		ShaderStage VertexStage = DEFAULT;
 		ShaderStage FragmentStage = DEFAULT;
@@ -63,14 +55,13 @@ namespace GPU
 		NODISCARD ALWAYS_INLINE bool IsFree() const override { return VertexStage.IsFree() && FragmentStage.IsFree(); }
 	};
 
-	struct ComputeShader : public Serializable<gE::Window*>, public gE::Asset
+	struct ComputeShader : public gE::Asset
 	{
-		SERIALIZABLE_PROTO(COMP, 1, ComputeShader, Serializable);
-		API_REFLECTABLE(ComputeShader, "GPU::ComputeShader", API::ComputeShader);
+		SERIALIZABLE_PROTO("COMP", 1, ComputeShader, Asset);
+		SERIALIZABLE_REFLECTABLE(ComputeShader, "GPU::ComputeShader");
 
 	public:
 		explicit ComputeShader(const Path& c);
-		DEFAULT_OPERATOR_CM(ComputeShader);
 
 		ShaderStage ComputeStage = DEFAULT;
 

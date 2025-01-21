@@ -7,8 +7,8 @@
 #include <Engine/Math/Math.h>
 #include <Engine/Math/Transform.h>
 #include <Serializable/Serializable.h>
-
-#include "Engine/Utility/AssetManager.h"
+#include <Engine/Utility/AssetManager.h>
+#include <Serializable/Asset.h>
 
 #define GE_MAX_BONES 256
 
@@ -37,20 +37,20 @@ namespace gE
     template<class T, class SKELETON_T>
     struct BoneReference : public Serializable<SKELETON_T&>
     {
-        SERIALIZABLE_PROTO(BREF, 1, BoneReference, Serializable<SKELETON_T&>);
+        SERIALIZABLE_PROTO("BREF", 1, BoneReference, Serializable<SKELETON_T&>);
 
     public:
         T* Parent = DEFAULT;
         u8 SuggestedLocation = -1;
     };
 
-    struct Bone : public Serializable<Skeleton&>, public Asset
+    struct Bone : public Serializable<Skeleton&>
     {
-        SERIALIZABLE_PROTO(BONE, 1, Bone, Serializable);
+        SERIALIZABLE_PROTO("BONE", 1, Bone, Serializable);
 
     public:
-        NODISCARD inline bool IsFree() const override { return Name.empty(); }
-        inline void Free() override { Name.clear(); }
+        NODISCARD inline bool IsFree() const { return Name.empty(); }
+        inline void Free() { Name.clear(); }
 
         std::string Name = DEFAULT;
         BoneReference<Bone, Skeleton> Parent = DEFAULT;
@@ -59,9 +59,9 @@ namespace gE
         glm::mat4 InverseBindMatrix = DEFAULT;
     };
 
-    struct Skeleton : public Serializable<Window*>, public Asset
+    struct Skeleton : public Asset
     {
-        SERIALIZABLE_PROTO(SKEL, 1, Skeleton, Serializable);
+        SERIALIZABLE_PROTO("SKEL", 1, Skeleton, Asset);
 
     public:
         Bone* FindBone(const std::string&, u8 suggestedLocation = -1);
@@ -74,15 +74,15 @@ namespace gE
         Array<Bone> Bones = DEFAULT;
     };
 
-    struct AnimatedBone : public Serializable<Animation&>, public Asset
+    struct AnimatedBone : public Serializable<Animation&>
     {
-        SERIALIZABLE_PROTO(ABNE, 1, AnimatedBone, Serializable);
+        SERIALIZABLE_PROTO("ABNE", 1, AnimatedBone, Serializable);
 
     public:
         bool Retarget(Skeleton*);
 
-        NODISCARD inline bool IsFree() const override { return Name.empty() && Frames.IsFree(); }
-        inline void Free() override { Name.clear(); Frames.Free(); }
+        NODISCARD inline bool IsFree() const { return Name.empty() && Frames.IsFree(); }
+        inline void Free() { Name.clear(); Frames.Free(); }
 
         std::string Name = DEFAULT;
         Bone* Target = DEFAULT;
@@ -91,9 +91,9 @@ namespace gE
         Array<Frame> Frames = DEFAULT;
     };
 
-    struct Animation : public Serializable<Window*>, public Asset
+    struct Animation : public Asset
     {
-        SERIALIZABLE_PROTO(ANIM, 1, Animation, Serializable);
+        SERIALIZABLE_PROTO("ANIM", 1, Animation, Asset);
 
     public:
         AnimatedBone* FindBone(const std::string&, u8 suggestedLocation = -1);

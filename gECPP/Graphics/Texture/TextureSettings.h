@@ -120,7 +120,7 @@ namespace GPU
 
 	struct TextureData : public Serializable<>
 	{
-		SERIALIZABLE_PROTO(TEXD, 1, TextureData, Serializable);
+		SERIALIZABLE_PROTO("TEXD", 1, TextureData, Serializable);
 
 	public:
 		TextureData(GLenum, GLenum, CompressionScheme, u8, Array<u8>&&);

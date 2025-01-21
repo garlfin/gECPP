@@ -76,7 +76,7 @@ namespace gE
 
     void PhysicsComponent::OnUpdate(float)
     {
-        GE_ASSERT(!GetOwner().GetParent(), "Physics objects must not have a parent!");
+        GE_ASSERTM(!GetOwner().GetParent(), "Physics objects must not have a parent!");
 
         glm::vec3 position;
         glm::quat rotation;

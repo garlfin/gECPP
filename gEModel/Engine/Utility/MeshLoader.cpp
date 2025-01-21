@@ -179,7 +179,7 @@ void FillBuffer(T S::* DST, F* aiMesh::* SRC, u32 aiMesh::* COUNT, GPU::Buffer<u
 		u32 count = mesh->*COUNT;
 		F* source = mesh->*SRC;
 
-		GE_ASSERT(source, "MISSING FIELD");
+		GE_ASSERTM(source, "MISSING FIELD");
 
 		for(u32 i = 0; i < count; i++)
 		{
@@ -248,7 +248,7 @@ void ConvertBones(const std::vector<aiMesh*>& src, const gE::Skeleton& skeleton,
 			const std::string boneName = std::string(bone.mName.C_Str());
 			const gE::Bone* foundBone = skeleton.FindBone(boneName);
 
-			GE_ASSERT(foundBone, "COULD NOT FIND BONE!");
+			GE_ASSERTM(foundBone, "COULD NOT FIND BONE!");
 			const u8 boneIndex = skeleton.GetIndex(*foundBone);
 
 			for(u32 w = 0; w < bone.mNumWeights; w++)
@@ -275,7 +275,7 @@ void InsertAvailableWeight(u8 boneID, float weight, gE::VertexWeight& dst)
 			return;
 		}
 
-	GE_ASSERT(false, "NUMBER OF WEIGHTS EXCEEDED 4!");
+	GE_ASSERTM(false, "NUMBER OF WEIGHTS EXCEEDED 4!");
 }
 
 void IterateNodes(const aiNode& node, gE::Bone*& bone)

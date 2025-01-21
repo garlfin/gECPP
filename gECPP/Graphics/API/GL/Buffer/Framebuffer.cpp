@@ -7,7 +7,7 @@ namespace GL
 {
 	void FrameBuffer::SetAttachment(u8 i, Texture& t)
 	{
-		GE_ASSERT(i < GL_MAX_ATTACHMENTS, "INDEX OUT OF RANGE!");
+		GE_ASSERTM(i < GL_MAX_ATTACHMENTS, "INDEX OUT OF RANGE!");
 
 		_attachmentsEnum[i] = GL_COLOR_ATTACHMENT0 + i;
 

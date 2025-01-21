@@ -116,34 +116,34 @@ namespace gE
 		virtual void OnRender(float);
 		virtual void OnDestroy() {};
 
-		SmartPointer<DefaultPipeline::Buffers> PipelineBuffers;
-		SmartPointer<VoxelPipeline::Buffers> VoxelBuffers;
+		Pointer<DefaultPipeline::Buffers> PipelineBuffers;
+		Pointer<VoxelPipeline::Buffers> VoxelBuffers;
 
-		SmartPointer<VoxelCapture> VoxelSceneCapture;
-		SmartPointer<SDFCapture> SDFSceneCapture;
+		Pointer<VoxelCapture> VoxelSceneCapture;
+		Pointer<SDFCapture> SDFSceneCapture;
 
 		std::vector<GPU::PreprocessorPair> ShaderCompilationState;
 
 		CameraManager Cameras;
 		TransformManager Transforms;
-		SmartPointer<LightManager> Lights;
-		SmartPointer<CubemapManager> Cubemaps;
-		SmartPointer<RendererManager> Renderers;
-		SmartPointer<PhysicsManager> Physics;
+		Pointer<LightManager> Lights;
+		Pointer<CubemapManager> Cubemaps;
+		Pointer<RendererManager> Renderers;
+		Pointer<PhysicsManager> Physics;
 		CullingManager CullingManager;
 		GPU::TextureSlotManager SlotManager;
 		EntityManager Entities;
 
 		ComponentManager<Behavior> Behaviors;
 
-		SmartPointer<Material> DefaultMaterial;
-		SmartPointer<API::Shader> BlitShader;
-		SmartPointer<API::Texture2D> BRDFLookup;
-		SmartPointer<API::ComputeShader> TAAShader;
-		SmartPointer<API::ComputeShader> TonemapShader;
-		SmartPointer<API::ComputeShader> BloomShader;
-		SmartPointer<API::ComputeShader> VoxelComputeShader;
-		SmartPointer<API::ComputeShader> HiZShader;
+		Pointer<Material> DefaultMaterial;
+		Pointer<API::Shader> BlitShader;
+		Pointer<API::Texture2D> BRDFLookup;
+		Pointer<API::ComputeShader> TAAShader;
+		Pointer<API::ComputeShader> TonemapShader;
+		Pointer<API::ComputeShader> BloomShader;
+		Pointer<API::ComputeShader> VoxelComputeShader;
+		Pointer<API::ComputeShader> HiZShader;
 
 	 private:
 		TextureSize2D _size;

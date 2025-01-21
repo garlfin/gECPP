@@ -23,10 +23,9 @@ namespace GPU
 	template<Dimension T>
 	u8 GetMipCount(const Size<T>& size);
 
-	class Texture : public Serializable<gE::Window*>, public gE::Asset
+	class Texture : public gE::Asset
 	{
-		SERIALIZABLE_PROTO(TEX, 1, Texture, Serializable);
-		DEFAULT_OPERATOR_CM(Texture);
+		SERIALIZABLE_PROTO("TEX", 1, Texture, Asset);
 
 	public:
 		ALWAYS_INLINE void Free() override { Data.Free(); }
@@ -45,50 +44,50 @@ namespace GPU
 
 	class Texture1D : public Texture
 	{
-		SERIALIZABLE_PROTO(TEX1, 1, Texture1D, Texture);
-		API_REFLECTABLE(Texture1D, "API::Texture2D", API::Texture1D);
+		SERIALIZABLE_PROTO("TEX1", 1, Texture1D, Texture);
+		SERIALIZABLE_REFLECTABLE(Texture1D, "API::Texture2D");
 
 	public:
 		Texture1D(const Texture& super, TextureSize1D size) : Texture(super), Size(size) {};
 		Texture1D(Texture&& super, TextureSize1D size) : Texture(move(super)), Size(size) {};
 
-		TextureSize1D Size;
+		TextureSize1D Size = DEFAULT;
 	};
 
  	class Texture2D : public Texture
 	{
- 		SERIALIZABLE_PROTO(TEX2, 1, Texture2D, Texture);
- 		API_REFLECTABLE(Texture2D, "GPU::Texture2D", API::Texture2D);
+ 		SERIALIZABLE_PROTO("TEX2", 1, Texture2D, Texture);
+ 		SERIALIZABLE_REFLECTABLE(Texture2D, "GPU::Texture2D");
 
  	public:
  		Texture2D(const Texture& super, TextureSize2D size) : Texture(super), Size(size) {};
  		Texture2D(Texture&& super, TextureSize2D size) : Texture(move(super)), Size(size) {};
 
-		TextureSize2D Size;
+		TextureSize2D Size = DEFAULT;
 	};
 
 	class Texture3D : public Texture
 	{
-		SERIALIZABLE_PROTO(TEX3, 1, Texture3D, Texture);
-		API_REFLECTABLE(Texture3D, "GPU::Texture3D", API::Texture3D);
+		SERIALIZABLE_PROTO("TEX3", 1, Texture3D, Texture);
+		SERIALIZABLE_REFLECTABLE(Texture3D, "GPU::Texture3D");
 
 	public:
 		Texture3D(const Texture& super, TextureSize3D size) : Texture(super), Size(size) {};
 		Texture3D(Texture&& super, TextureSize3D size) : Texture(move(super)), Size(size) {};
 
-		TextureSize3D Size;
+		TextureSize3D Size = DEFAULT;
 	};
 
 	class TextureCube : public Texture
 	{
-		SERIALIZABLE_PROTO(TEXC, 1, TextureCube, Texture);
-		API_REFLECTABLE(TextureCube, "GPU::TextureCube", API::TextureCube);
+		SERIALIZABLE_PROTO("TEXC", 1, TextureCube, Texture);
+		SERIALIZABLE_REFLECTABLE(TextureCube, "GPU::TextureCube");
 
 	public:
 		TextureCube(const Texture& super, TextureSize1D size) : Texture(super), Size(size) {};
 		TextureCube(Texture&& super, TextureSize1D size) : Texture(move(super)), Size(size) {};
 
-		TextureSize1D Size;
+		TextureSize1D Size = DEFAULT;
 	};
 }
 

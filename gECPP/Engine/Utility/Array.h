@@ -6,10 +6,9 @@
 
 #include <Engine/Math/Math.h>
 #include <Engine/Utility/Macro.h>
-#include <Serializable/Asset.h>
 
 template<typename T>
-class Array : public gE::Asset
+class Array
 {
  public:
 	static constexpr bool IS_VOID = std::is_same_v<T, void>;
@@ -76,15 +75,15 @@ class Array : public gE::Asset
 	NODISCARD ALWAYS_INLINE I* Data() { return _t; }
 	NODISCARD ALWAYS_INLINE const I* Data() const { return _t; }
 
-	NODISCARD ALWAYS_INLINE I& operator[](u64 i) { GE_ASSERT(_t, "ERROR: ARRAY NOT INITIALIZED"); return _t[i]; }
-	NODISCARD ALWAYS_INLINE const I& operator[](u64 i) const { GE_ASSERT(_t, "ERROR: ARRAY NOT INITIALIZED"); return _t[i]; }
+	NODISCARD ALWAYS_INLINE I& operator[](u64 i) { GE_ASSERTM(_t, "ERROR: ARRAY NOT INITIALIZED"); return _t[i]; }
+	NODISCARD ALWAYS_INLINE const I& operator[](u64 i) const { GE_ASSERTM(_t, "ERROR: ARRAY NOT INITIALIZED"); return _t[i]; }
 
-	NODISCARD ALWAYS_INLINE bool IsFree() const override { return !_t; }
-	ALWAYS_INLINE void Free() override { delete[] _t; _t = nullptr; _size = 0; }
+	NODISCARD ALWAYS_INLINE bool IsFree() const { return !_t; }
+	ALWAYS_INLINE void Free() { delete[] _t; _t = nullptr; _size = 0; }
 
 	ALWAYS_INLINE operator bool() const { return _t; }
 
-	~Array() override { Array::Free(); }
+	~Array() { Free(); }
 
  private:
 	u64 _size = 0;

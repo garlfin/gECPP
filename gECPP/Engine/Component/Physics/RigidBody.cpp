@@ -35,7 +35,7 @@ namespace gE
         const px::Shape& joltShape = _collider->GetShape().GetJoltShape();
 
         const px::ShapeSettings::ShapeResult result = joltShape.ScaleShape(Physics::ToPX(transform->Scale));
-        GE_ASSERT(result.IsValid(), "INVALID SCALED SHAPE!");
+        GE_ASSERTM(result.IsValid(), "INVALID SCALED SHAPE!");
 
         _previousScale = transform->Scale;
 
@@ -107,7 +107,7 @@ namespace gE
 
             const px::Shape& joltShape = _collider->GetShape().GetJoltShape();
             const px::ShapeSettings::ShapeResult result = joltShape.ScaleShape(Physics::ToPX(transform->Scale));
-            GE_ASSERT(result.IsValid(), "INVALID SCALED SHAPE!");
+            GE_ASSERTM(result.IsValid(), "INVALID SCALED SHAPE!");
 
             physics._interface->SetShape(_body->GetID(), result.Get(), true, JPH::EActivation::Activate);
             _previousScale = transform->Scale;

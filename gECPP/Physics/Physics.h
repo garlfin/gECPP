@@ -82,7 +82,7 @@ namespace gE
     GLOBAL px::BodyFilter DefaultBodyFilter = DEFAULT;
 
     template<class T>
-    struct ManagedPX : public Asset
+    struct ManagedPX
     {
     public:
         template<typename... ARGS>
@@ -95,7 +95,7 @@ namespace gE
         {
             if(!t) return;
 
-            GE_ASSERT(t->GetRefCount() < 0x0ebedded, "PXOBJECT ALREADY EMBEDDED");
+            GE_ASSERTM(t->GetRefCount() < 0x0ebedded, "PXOBJECT ALREADY EMBEDDED");
             t->SetEmbedded();
         }
 
@@ -122,7 +122,7 @@ namespace gE
         template<class O> requires std::is_base_of_v<O, T>
         const ManagedPX<O>& To() const { return (ManagedPX<O>&) *this; }
 
-        void Free() override
+        void Free()
         {
             if(!_t) return;
 
@@ -132,9 +132,9 @@ namespace gE
             _t = nullptr;
         }
 
-        NODISCARD bool IsFree() const override { return !_t; }
+        NODISCARD bool IsFree() const { return !_t; }
 
-        inline ~ManagedPX() override { ManagedPX::Free(); }
+        ~ManagedPX() { Free(); }
 
     private:
         T* _t = DEFAULT;

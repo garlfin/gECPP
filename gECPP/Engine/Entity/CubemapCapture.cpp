@@ -42,7 +42,7 @@ namespace gE
 		DefaultPipeline::Buffers& buffers = _window->GetPipelineBuffers();
 		GPU::Lighting& lighting = buffers.Lighting;
 
-		GE_ASSERT((bool) Skybox, "ERROR: NO SKYBOX TEXTURE");
+		GE_ASSERTM((bool) Skybox, "ERROR: NO SKYBOX TEXTURE");
 
 		lighting.Skybox = Skybox->GetHandle();
 

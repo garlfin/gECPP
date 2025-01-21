@@ -22,13 +22,13 @@ class Nullable
 
 	ALWAYS_INLINE const T* operator->() const
 	{
-		GE_ASSERT(_t, "NULL USAGE!");
+		GE_ASSERTM(_t, "NULL USAGE!");
 		return _t;
 	}
 
 	ALWAYS_INLINE T* operator->()
 	{
-		GE_ASSERT(_t, "NULL USAGE!");
+		GE_ASSERTM(_t, "NULL USAGE!");
 		return _t;
 	}
 

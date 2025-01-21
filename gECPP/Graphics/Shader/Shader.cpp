@@ -42,12 +42,12 @@ namespace GPU
 		Write(out, ComputeStage);
 	}
 
-	API_REFLECTABLE_IMPL(ShaderStage, API::ShaderStage)
+	SERIALIZABLE_REFLECTABLE_IMPL(ShaderStage, API::ShaderStage)
 
 	ShaderStage::ShaderStage(ShaderStageType type, const Path& path) : StageType(type), BasePath(path)
 	{
 		auto file = std::ifstream(path, std::ios::in | std::ios::binary | std::ios::ate);
-		GE_ASSERT(file.is_open(), "COULD NOT OPEN FILE!");
+		GE_ASSERTM(file.is_open(), "COULD NOT OPEN FILE!");
 
 		const u64 length = file.tellg();
 
@@ -57,7 +57,7 @@ namespace GPU
 		file.read(Source.data(), length);
 	};
 
-	API_REFLECTABLE_IMPL(Shader, API::Shader)
+	SERIALIZABLE_REFLECTABLE_IMPL(Shader, API::Shader)
 
 	Shader::Shader(const Path& v, const Path& f) :
 		VertexStage(ShaderStageType::Vertex, v),
@@ -65,7 +65,7 @@ namespace GPU
 	{
 	};
 
-	API_REFLECTABLE_IMPL(ComputeShader, API::ComputeShader)
+	SERIALIZABLE_REFLECTABLE_IMPL(ComputeShader, API::ComputeShader)
 
 	ComputeShader::ComputeShader(const Path& c) :
 		ComputeStage(ShaderStageType::Compute, c)

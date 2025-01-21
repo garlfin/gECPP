@@ -29,10 +29,10 @@ namespace GPU
 	ENUM_OPERATOR(BufferUsageHint, &);
 
 	template<typename T = void>
-	class Buffer : public Serializable<gE::Window*>, public gE::Asset
+	class Buffer : public gE::Asset
 	{
-		SERIALIZABLE_PROTO(SBUF, 1, Buffer, Serializable);
-		API_REFLECTABLE(Buffer, "GPU::Buffer", API::Buffer<T>);
+		SERIALIZABLE_PROTO("SBUF", 1, Buffer, Asset);
+		SERIALIZABLE_REFLECTABLE(Buffer, "GPU::Buffer");
 
 	 public:
 		static_assert(!std::is_pointer_v<T>, "Buffer data shouldn't be a pointer!");
@@ -40,8 +40,6 @@ namespace GPU
 		explicit Buffer(u32 count, const T* data = nullptr) : Stride(sizeof(typename Array<T>::I)), Data(data, count) {}
 		explicit Buffer(const Array<T>& arr) : Stride(sizeof(typename Array<T>::I)), Data(arr) {}
 		explicit Buffer(Array<T>&& arr) : Stride(sizeof(typename Array<T>::I)), Data(arr) {}
-
-		DEFAULT_OPERATOR_CM(Buffer);
 
 		GET_CONST(u8, Stride, Stride);
 		GET_CONST(const Array<T>&, Array, Data);
@@ -63,18 +61,10 @@ namespace GPU
 
 #include "Buffer.inl"
 
-#if API == GL
 #include <Graphics/API/GL/Buffer/Buffer.h>
 
 template <typename T>
-GL::Buffer<T>* GPU::Buffer<T>::BufferFACTORY(std::istream& in, SETTINGS_T t)
+GPU::Buffer<T>* GPU::Buffer<T>::BufferFACTORY(std::istream& in, SETTINGS_T t)
 {
-	return new GL::Buffer<T>(in, t);
+	return (Buffer*) new API::Buffer<T>(in, t);
 }
-#else
-template <typename T>
-GL::Buffer<T, false>* GPU::Buffer<T>::BufferFACTORY(std::istream& in, SETTINGS_T t)
-{
-	return new Buffer(in, t);
-}
-#endif

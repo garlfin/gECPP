@@ -18,7 +18,7 @@ namespace gE
 
 	void Material::Bind() const
 	{
-		RenderFlags state = GetWindow().RenderState;
+		const RenderFlags state = GetWindow().RenderState;
 
 		if((bool) _depthFunc && state.EnableDepthTest)
 		{
@@ -86,8 +86,15 @@ namespace gE
 		_shader->GetShader().SetUniform(_location, t, _shader->GetWindow().GetSlotManager().Increment(&t));
 	}
 
+#ifdef DEBUG
+	bool Shader::VerifyUniforms(u32 index) const
+	{
+		return VerifyUniforms(GetReferenceShader().GetUniformName(index));
+	}
+#endif
+
 	ForwardShader::ForwardShader(Window& window, const GPU::Shader& source) : Shader(window),
-		_shader(&window, source)
+	    _shader(&window, source)
 	{
 		_shader.Free();
 	}
@@ -115,8 +122,13 @@ namespace gE
 		}
 	}
 
-	Array<const GL::Shader*> DeferredShader::GetAllShaders() const
+#ifdef DEBUG
+	bool DeferredShader::VerifyUniforms(const std::string& name) const
 	{
-		return { &_forwardShader, &_deferredShader, &_gBufferShader };
+		const u32 a = _forwardShader.GetUniformLocation(name);
+		const u32 b = _deferredShader.GetUniformLocation(name);
+		const u32 c = _gBufferShader.GetUniformLocation(name);
+		return a == b && b == c;
 	}
+#endif
 }

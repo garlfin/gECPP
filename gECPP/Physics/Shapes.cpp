@@ -89,7 +89,7 @@ namespace Jolt
 
     API_SERIALIZABLE_IMPL(ConvexMeshShape), Jolt::ConvexShape(*this, _shape.To<px::ConvexShape>())
     {
-        GE_ASSERT(!BakedSettings.IsFree(), "MESH NOT BAKED BEFORE CREATION!");
+        GE_ASSERTM(!BakedSettings.IsFree(), "MESH NOT BAKED BEFORE CREATION!");
 
         px::BakedConvexHullShapeSettings settings;
         settings.mCenterOfMass = Physics::ToPX(BakedSettings.CenterOfMass);

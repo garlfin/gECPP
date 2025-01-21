@@ -21,7 +21,7 @@ namespace gE
         }
 
         const TypeSystem::Type* type = ReadType<Window*>(in);
-        GE_ASSERT(type, "NO TYPE INFO!");
+        GE_ASSERTM(type, "NO TYPE INFO!");
 
         // Super dumb but super works.
         Serializable* vao = type->Factory(in, s);
@@ -30,7 +30,7 @@ namespace gE
         if(Version == 2 && Read<bool>(in))
         {
             const TypeSystem::Type* shapeType = ReadType<Window*>(in);
-            GE_ASSERT(shapeType, "NO SHAPE TYPE INFO!");
+            GE_ASSERTM(shapeType, "NO SHAPE TYPE INFO!");
 
             Serializable* shape = shapeType->Factory(in, s);
             Shape = ptr_cast((Jolt::Shape*) shape->GetUnderlying());
@@ -46,7 +46,7 @@ namespace gE
         Write(out, Bounds);
 
         const TypeSystem::Type* type = GetMeshType();
-        GE_ASSERT(type, "NO TYPE INFO!");
+        GE_ASSERTM(type, "NO TYPE INFO!");
 
         WriteType<Window*>(out, *type);
         Write(out, VAO->GetSettings());
@@ -55,10 +55,24 @@ namespace gE
         if(Shape)
         {
             const TypeSystem::Type* shapeType = GetShapeType();
-            GE_ASSERT(shapeType, "NO SHAPE TYPE INFO!");
+            GE_ASSERTM(shapeType, "NO SHAPE TYPE INFO!");
 
             WriteType<Window*>(out, *shapeType);
             Write(out, Shape->GetSettings());
         }
+    }
+
+    void Mesh::Free()
+    {
+        Name.clear();
+        MaterialNames.Free();
+        VAO.Free();
+        Shape.Free();
+        BoneWeights.Free();
+    }
+
+    bool Mesh::IsFree() const
+    {
+        return Name.empty() && MaterialNames.IsFree() && VAO.IsFree() && Shape.IsFree() && BoneWeights.IsFree();
     }
 }

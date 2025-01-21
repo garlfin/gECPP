@@ -10,7 +10,7 @@ namespace gE
 	struct Header : public Serializable<const Header&>
 	{
 	 public:
-		SERIALIZABLE_PROTO(HDR, GETF_VERSION, Header, Serializable<const Header&>);
+		SERIALIZABLE_PROTO("HDR", GETF_VERSION, Header, Serializable<const Header&>);
 
 		gE::Window* Window;
 

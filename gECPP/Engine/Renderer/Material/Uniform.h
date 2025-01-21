@@ -79,5 +79,5 @@ namespace gE
     using ReferenceUniform = ValueUniform<Reference<T>>;
 
     template<class T>
-    using SmartPointerUniform = ValueUniform<SmartPointer<T>>;
+    using SmartPointerUniform = ValueUniform<Pointer<T>>;
 }

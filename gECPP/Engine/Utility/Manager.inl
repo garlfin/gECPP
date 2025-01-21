@@ -77,7 +77,7 @@ namespace gE
 		else
 			from._last = end->_previous;
 
-		if(_size) GE_ASSERT(_first && _last, "");
+		if(_size) GE_ASSERTM(_first && _last, "");
 	}
 
 	template <class T>
@@ -200,7 +200,7 @@ namespace gE
 
 		_manager->OnRemove(*this);
 	#ifdef DEBUG
-		GE_ASSERT(_init, "UNINITIALIZED MANAGED OBJECT!");
+		GE_ASSERTM(_init, "UNINITIALIZED MANAGED OBJECT!");
 	#endif
 	}
 
@@ -211,7 +211,7 @@ namespace gE
 
 		_manager->OnRegister(*this);
 	#ifdef DEBUG
-		GE_ASSERT(!_init, "DOUBLE INITIALIZED MANAGED OBJECT!");
+		GE_ASSERTM(!_init, "DOUBLE INITIALIZED MANAGED OBJECT!");
 		_init = true;
 	#endif
 	}

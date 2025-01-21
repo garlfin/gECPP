@@ -65,8 +65,8 @@ namespace GL
 	template <typename T>
 	void Buffer<T>::RetrieveData(u64 size, u64 offset)
 	{
-		GE_ASSERT(!IsFree(), "DATA MAY NOT BE FREE");
-		GE_ASSERT(SUPER::Data.MemSize() > size + offset, "DATA ARRAY NOT LARGE ENOUGH TO STORE MEMORY");
+		GE_ASSERTM(!IsFree(), "DATA MAY NOT BE FREE");
+		GE_ASSERTM(SUPER::Data.MemSize() > size + offset, "DATA ARRAY NOT LARGE ENOUGH TO STORE MEMORY");
 		RetrieveData(SUPER::Data.Data(), size, offset);
 	}
 

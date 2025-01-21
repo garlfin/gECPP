@@ -48,22 +48,3 @@ namespace gE
 		//Meshes = ReadArraySerializable<u16, Mesh>(ptr, s);
 	}
 }
-
-void IFileContainer::IDeserialize(std::ostream& out) const
-{
-	const TypeSystem::Type* type = _t->GetType();
-	GE_ASSERT(type, "NO TYPE INFO!");
-
-	Write(out, type->Name);
-	_t->Deserialize(out);
-}
-
-void IFileContainer::ISerialize(std::istream& in, gE::Window* window)
-{
-	const std::string typeName = Read<std::string>(in);
-
-	const TypeSystem::Type* type = TypeSystem::GetTypeInfo(typeName);
-	GE_ASSERT(type, "NO TYPE INFO!");
-
-	_t = type->Factory(in, window);
-}

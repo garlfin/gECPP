@@ -7,7 +7,7 @@
 #include <Engine/Utility/Macro.h>
 
 // TODO: Find better alternative to creating a copy of the settings.
-// Prevents _settings from being initialied to 0.
+// Prevents _settings from being initialized to 0.
 
 #define API_DEFAULT_CM_CONSTRUCTOR(TYPE) \
 	public: \
@@ -34,15 +34,6 @@
 		SUPER_T& GetSettings() { return *this; } \
 		TYPE(gE::Window* window, const SUPER_T& settings) : TYPE(window, move(SUPER_T(settings))) {} \
 		TYPE(gE::Window* window, SUPER_T&& INTERNAL_SETTINGS)
-
-#define API_REFLECTABLE(TYPE, NAME, ...) \
-	public: \
-		static __VA_ARGS__* TYPE##FACTORY(std::istream& in, SETTINGS_T t); \
-		static GLOBAL typename ITypeSystem<SETTINGS_T>::Type Type{ NAME, (typename ITypeSystem<SETTINGS_T>::FactoryFunction) TYPE##FACTORY }; \
-		const typename ITypeSystem<SETTINGS_T>::Type* GetType() const { return &Type; }
-
-#define API_REFLECTABLE_IMPL(TYPE, ...) \
-	inline __VA_ARGS__* TYPE::TYPE##FACTORY(std::istream& in, SETTINGS_T t) { return new __VA_ARGS__(in, t); }
 
 #define API_UNDERLYING_IMPL(UNDERLYING_T) \
 	public: \

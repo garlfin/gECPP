@@ -47,7 +47,7 @@ namespace gE
 
 		lighting.LightCount = List.GetSize();
 
-		GE_ASSERT(lighting.LightCount <= 4, "TOO MANY LIGHTS!");
+		GE_ASSERTM(lighting.LightCount <= 4, "TOO MANY LIGHTS!");
 
 		int i = 0;
 		for(ITER_T* light = List.GetFirst(); light; light = light->GetNext(), i++)

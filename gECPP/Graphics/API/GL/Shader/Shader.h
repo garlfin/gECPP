@@ -21,7 +21,10 @@ namespace GL
 		explicit IShader(gE::Window*);
 
 		ALWAYS_INLINE void Bind() const override { glUseProgram(ID); }
+
 		ALWAYS_INLINE u32 GetUniformLocation(const std::string& name) const { return glGetUniformLocation(ID, name.c_str()); }
+		std::string GetUniformName(u32 index) const;
+
 		ALWAYS_INLINE void SetUniform(u8 loc, u32 val) const { glProgramUniform1ui(ID, loc, val); }
 		ALWAYS_INLINE void SetUniform(u8 loc, i32 val) const { glProgramUniform1i(ID, loc, val); }
 		ALWAYS_INLINE void SetUniform(u8 loc, float val) const { glProgramUniform1f(ID, loc, val); }

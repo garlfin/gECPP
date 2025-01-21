@@ -30,22 +30,25 @@ namespace gE
         glm::u8vec4 Weights = glm::u8vec4(0);
     };
 
-    struct Mesh : public Serializable<Window*>
+    struct Mesh : public Asset
     {
-        SERIALIZABLE_PROTO(MESH, 2, Mesh, Serializable);
+        SERIALIZABLE_PROTO("MESH", 2, Mesh, Asset);
 
     public:
+        void Free() override;
+        NODISCARD bool IsFree() const override;
+
         std::string Name = DEFAULT;
         Array<std::string> MaterialNames = DEFAULT;
 
         AABB<Dimension::D3D> Bounds = DEFAULT;
 
         GET_CONST(const TypeSystem::Type*, MeshType, VAO->GetSettings().GetType());
-        SmartPointer<API::IVAO> VAO;
+        Pointer<API::IVAO> VAO;
 
         GET_CONST(const TypeSystem::Type*, ShapeType, Shape->GetSettings().GetType());
-        SmartPointer<Jolt::Shape> Shape;
+        Pointer<Jolt::Shape> Shape;
 
-        SmartPointer<API::Buffer<VertexWeight>> BoneWeights = DEFAULT;
+        Pointer<API::Buffer<VertexWeight>> BoneWeights = DEFAULT;
     };
 }

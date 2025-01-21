@@ -64,10 +64,10 @@ namespace gE
         BroadPhaseFilter _broadFilter;
         BroadPhase _broadPhase;
 
-        SmartPointer<px::Factory> _factory;
-        SmartPointer<px::TempAllocatorImpl> _allocator;
-        SmartPointer<px::PhysicsSystem> _physics;
-        SmartPointer<px::JobSystemThreadPool> _jobSystem;
+        Pointer<px::Factory> _factory;
+        Pointer<px::TempAllocatorImpl> _allocator;
+        Pointer<px::PhysicsSystem> _physics;
+        Pointer<px::JobSystemThreadPool> _jobSystem;
         px::BodyInterface* _interface;
     };
 }

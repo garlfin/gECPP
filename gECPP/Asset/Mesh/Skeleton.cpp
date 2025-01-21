@@ -37,7 +37,7 @@ namespace gE
 
     bool AnimatedBone::Retarget(Skeleton* skeleton)
     {
-        GE_ASSERT(skeleton, "NO SKELETON PROVIDED!");
+        GE_ASSERTM(skeleton, "NO SKELETON PROVIDED!");
 
         if(Target) Name = Target->Name;
         Target = skeleton->FindBone(Name);
@@ -58,7 +58,7 @@ namespace gE
 
     Bone* Skeleton::FindBone(const std::string& name, u8 suggestedLocation)
     {
-        GE_ASSERT(Bones.Count() <= GE_MAX_BONES, "TOO MANY BONES!");
+        GE_ASSERTM(Bones.Count() <= GE_MAX_BONES, "TOO MANY BONES!");
 
         if(suggestedLocation != -1 && Bones[suggestedLocation].Name == name)
             return &Bones[suggestedLocation];
@@ -70,7 +70,7 @@ namespace gE
 
     const Bone* Skeleton::FindBone(const std::string& name, u8 suggestedLocation) const
     {
-        GE_ASSERT(Bones.Count() <= GE_MAX_BONES, "TOO MANY BONES!");
+        GE_ASSERTM(Bones.Count() <= GE_MAX_BONES, "TOO MANY BONES!");
 
         if(suggestedLocation != -1 && Bones[suggestedLocation].Name == name)
             return &Bones[suggestedLocation];
@@ -98,7 +98,7 @@ namespace gE
 
     AnimatedBone* Animation::FindBone(const std::string& name, u8 suggestedLocation)
     {
-        GE_ASSERT(Bones.Count() <= GE_MAX_BONES, "TOO MANY BONES!");
+        GE_ASSERTM(Bones.Count() <= GE_MAX_BONES, "TOO MANY BONES!");
 
         if(suggestedLocation != -1 && Bones[suggestedLocation].Name == name)
             return &Bones[suggestedLocation];
@@ -110,7 +110,7 @@ namespace gE
 
     const AnimatedBone* Animation::FindBone(const std::string& name, u8 suggestedLocation) const
     {
-        GE_ASSERT(Bones.Count() <= GE_MAX_BONES, "TOO MANY BONES!");
+        GE_ASSERTM(Bones.Count() <= GE_MAX_BONES, "TOO MANY BONES!");
 
         if(suggestedLocation != -1 && Bones[suggestedLocation].Name == name)
             return &Bones[suggestedLocation];
@@ -122,8 +122,8 @@ namespace gE
 
     void Animation::Retarget(const Reference<gE::Skeleton>& skeleton)
     {
-        GE_ASSERT((bool) skeleton, "NO SKELETON PROVIDED!");
-        GE_ASSERT(Bones.Count() <= GE_MAX_BONES, "TOO MANY BONES!");
+        GE_ASSERTM((bool) skeleton, "NO SKELETON PROVIDED!");
+        GE_ASSERTM(Bones.Count() <= GE_MAX_BONES, "TOO MANY BONES!");
 
         if(Skeleton == skeleton) return;
 

@@ -19,7 +19,11 @@ namespace gE
 
         NODISCARD virtual const API::Shader& GetReferenceShader() const = 0;
         NODISCARD virtual const API::Shader& GetShader() const = 0;
-        NODISCARD virtual Array<const API::Shader*> GetAllShaders() const = 0;
+
+#ifdef DEBUG
+        NODISCARD virtual bool VerifyUniforms(const std::string&) const = 0;
+        NODISCARD bool VerifyUniforms(u32) const;
+#endif
 
         virtual ~Shader() = default;
 
@@ -33,9 +37,11 @@ namespace gE
         ForwardShader(Window&, const GPU::Shader& source);
 
         NODISCARD const API::Shader& GetReferenceShader() const override { return _shader; }
-        NODISCARD const API::Shader& GetShader() const override { return _shader; };
-        NODISCARD Array<const API::Shader*> GetAllShaders() const override { return {  &_shader }; }
+        NODISCARD const API::Shader& GetShader() const override { return _shader; }
 
+#ifdef DEBUG
+        NODISCARD bool VerifyUniforms(const std::string&) const override { return true; }
+#endif
         ~ForwardShader() override = default;
 
     private:
@@ -49,7 +55,10 @@ namespace gE
 
         NODISCARD const API::Shader& GetReferenceShader() const override { return _forwardShader; }
         NODISCARD const API::Shader& GetShader() const override;
-        NODISCARD Array<const API::Shader*> GetAllShaders() const override;
+
+#ifdef DEBUG
+        NODISCARD bool VerifyUniforms(const std::string&) const override;
+#endif
 
         ~DeferredShader() override = default;
 

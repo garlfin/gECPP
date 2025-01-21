@@ -21,6 +21,19 @@ namespace GL
 		ID = glCreateProgram();
 	}
 
+	std::string IShader::GetUniformName(u32 index) const
+	{
+		u32 nameLength;
+		glGetProgramiv(Get(), GL_ACTIVE_UNIFORM_MAX_LENGTH, (GLint*) &nameLength);
+
+		std::string result;
+		result.reserve(nameLength);
+
+		glGetActiveUniformName(Get(), index, nameLength, (GLsizei*) &nameLength, result.data());
+
+		return result;
+	}
+
 	void IShader::SetUniform(u8 loc, const Texture& tex, u8 slot) const
 	{
 		SetUniform(loc, tex.Use(slot));

@@ -30,7 +30,7 @@ struct MemoryPool
 	void Delete(T* t)
 	{
 		u32 i = u64(t - _page) / sizeof(T);
-		GE_ASSERT(t == &_page[i], "Pointer is not aligned!");
+		GE_ASSERTM(t == &_page[i], "Pointer is not aligned!");
 
 		if(!_pageFlags[i]) return;
 

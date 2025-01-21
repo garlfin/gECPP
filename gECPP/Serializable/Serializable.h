@@ -21,6 +21,7 @@ struct ITypeSystem
 
 	struct Type
 	{
+		Type() = default;
 		Type(const std::string& name, FactoryFunction factory) : Name(name), Factory(factory)
 		{
 			_types[name] = this;
@@ -38,7 +39,7 @@ struct ITypeSystem
 
 		if(it != _types.end()) return it->second;
 
-		ERR("NO SUCH REFLECTED TYPE!");
+		GE_FAIL("NO SUCH REFLECTED TYPE!");
 		return nullptr;
 	}
 
@@ -48,12 +49,6 @@ private:
 
 template class ITypeSystem<gE::Window*>;
 using TypeSystem = ITypeSystem<gE::Window*>;
-
-#define SERIALIZABLE_REFLECTABLE(TYPE) \
-	public: \
-		static TYPE* TYPE##FACTORY(std::istream& in, SETTINGS_T t) { return new TYPE(in, t); } \
-		static GLOBAL typename ITypeSystem<SETTINGS_T>::Type Type{ NAME, (typename ITypeSystem<SETTINGS_T>::FactoryFunction) TYPE##FACTORY }; \
-		const typename ITypeSystem<SETTINGS_T>::Type* GetType() const { return &Type; }
 
 template<class T, class S>
 concept is_serializable_in = requires(T t, S s, std::istream& i)
@@ -113,23 +108,33 @@ template<> void Write(std::ostream& out, u32 count, const std::string* t);
 #define SERIALIZABLE_CHECK_HEADER() \
 	char magic[4]; \
 	Read<char>(in, 4, magic); \
-	GE_ASSERT(strcmpb(magic, MAGIC, 4), "UNEXPECTED MAGIC!"); \
+	GE_ASSERTM(strcmpb(magic, MAGIC, 4), "UNEXPECTED MAGIC!"); \
 	Version = Read<u8>(in);
 
 // Implementation
 #define SERIALIZABLE_PROTO(MAGIC_VAL, VERSION_VAL, TYPE, SUPER_T) \
 	public: \
 		typedef SUPER_T SUPER; \
-		typedef typename SUPER::SETTINGS_T SETTINGS_T;\
-		explicit TYPE(istream& in, SETTINGS_T s) : SUPER(in, s) { SERIALIZABLE_CHECK_HEADER(); ISerialize(in, s); } \
+		typedef SUPER::SETTINGS_T SETTINGS_T;\
+		TYPE(istream& in, SETTINGS_T s) : SUPER(in, s) { SERIALIZABLE_CHECK_HEADER(); ISerialize(in, s); } \
 		TYPE() = default; \
-		static const constexpr char MAGIC[5] = #MAGIC_VAL; \
+		static const constexpr char MAGIC[5] = MAGIC_VAL; \
 		inline void Serialize(istream& in, SETTINGS_T s) override { SAFE_CONSTRUCT(*this, TYPE, in, s); } \
 		inline void Deserialize(ostream& out) const override { SUPER::Deserialize(out); Write(out, 4, MAGIC); Write<u8>(out, Version); IDeserialize(out); } \
 		u8 Version = VERSION_VAL; \
+		DEFAULT_OPERATOR_CM(TYPE); \
 	private: \
 		void ISerialize(istream& in, SETTINGS_T s); \
 		void IDeserialize(ostream& out) const;
+
+#define SERIALIZABLE_REFLECTABLE(TYPE, NAME) \
+	public: \
+		static TYPE* TYPE##FACTORY(std::istream& in, SETTINGS_T t); \
+		static GLOBAL ITypeSystem<SETTINGS_T>::Type Type{ NAME, (typename ITypeSystem<SETTINGS_T>::FactoryFunction) TYPE##FACTORY }; \
+		const ITypeSystem<SETTINGS_T>::Type* GetType() const override { return &Type; }
+
+#define SERIALIZABLE_REFLECTABLE_IMPL(TYPE, CONSTRUCTION_T) \
+	inline TYPE* TYPE::TYPE##FACTORY(std::istream& in, SETTINGS_T t) { return (TYPE*) new CONSTRUCTION_T(in, t); }
 
 template<class T>
 struct Serializable
@@ -152,57 +157,12 @@ public:
 	virtual ~Serializable() = default;
 };
 
-struct IFileContainer : public Serializable<gE::Window*>
-{
-	SERIALIZABLE_PROTO(FILE, 1, IFileContainer, Serializable<gE::Window*>);
-
- public:
-	template<class T> requires requires { T::Type; }
-	explicit IFileContainer(T& t) : _t(&t)
-	{
-		static_assert(std::is_base_of_v<IFileContainer, T>);
-	}
-
-	template<class T> requires requires { T::Type; }
-	T* Cast()
-	{
-		static_assert(std::is_base_of_v<IFileContainer, T>);
-		if(&T::Type == GetFileType())
-			return (T*) this;
-		return nullptr;
-	}
-
-	template<class T>
-	T& Cast() { T* t = Cast<T>(); GE_ASSERT(t, "NO T!"); return *t; }
-
-	GET_CONST(const TypeSystem::Type*, FileType, _t->GetType());
-	GET(Serializable<gE::Window*>&,, *_t);
-
- private:
-	Serializable* _t;
-};
-
-template<is_serializable<gE::Window*> T>
-struct FileContainer : public IFileContainer
-{
-public:
-	template<typename ... ARGS>
-	explicit FileContainer(std::string& path, ARGS&&... args) :
-		IFileContainer(Object, path),
-		Object(std::forward<ARGS>(args)...)
-	{};
-
-	explicit FileContainer(std::string& path) : IFileContainer(Object, path) {};
-
-	T Object;
-};
-
 template<is_serializable_in<gE::Window*> T>
 void ReadSerializableFromFile(gE::Window* window, const Path& path, T& t)
 {
 	std::ifstream file;
 	file.open(path, std::ios::in | std::ios::binary);
-	GE_ASSERT(file.is_open(), "COULD NOT OPEN FILE!");
+	GE_ASSERTM(file.is_open(), "COULD NOT OPEN FILE!");
 
 	t.Serialize(file, window);
 

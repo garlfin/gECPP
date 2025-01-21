@@ -62,13 +62,13 @@ namespace GPU
 	{
 		char delimiter = line.at(9);
 
-		GE_ASSERT(delimiter == '"' || delimiter == '<', "INVALID INCLUDE DELIMITER!");
+		GE_ASSERTM(delimiter == '"' || delimiter == '<', "INVALID INCLUDE DELIMITER!");
 
 		if(delimiter == '<') delimiter = '>';
 
 		const size_t end = line.find(delimiter, 10);
 
-		GE_ASSERT(end != std::string::npos, "INVALID INCLUDE!");
+		GE_ASSERTM(end != std::string::npos, "INVALID INCLUDE!");
 
 		if(delimiter == '>')
 			return std::filesystem::weakly_canonical(line.substr(10, end - 10));

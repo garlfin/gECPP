@@ -13,10 +13,15 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${COMPILE_FLAGS_DEBUG}")
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${COMPILE_FLAGS_DEBUG}")
 
 include_directories(gECPP Vendor Vendor/FBX ${CMAKE_SOURCE_DIR})
+set_property(GLOBAL PROPERTY CXX_STANDARD 20)
 
 # JOLT
 file(GLOB_RECURSE JOLT_SRC "Vendor/JOLT/*.cpp" "Vendor/JOLT/*.h")
 add_library(JOLT STATIC ${JOLT_SRC})
+
+# CityHash
+file(GLOB_RECURSE CITYHASH_SRC "Vendor/CityHash/*.cpp" "Vendor/CityHash/*.h")
+add_library(CITYHASH_SRC STATIC ${CITYHASH_SRC})
 
 # GLFW
 add_library(GLFW STATIC IMPORTED)
@@ -43,7 +48,7 @@ file(GLOB_RECURSE GECPP_SRC "gECPP/*.cpp" "gECPP/*.h" "gECPP/*.inl")
 
 add_library(gECPP STATIC ${GECPP_SRC})
 target_compile_definitions(gECPP PUBLIC API_ID=API_GL)
-target_link_libraries(gECPP GLAD GLFW JOLT)
+target_link_libraries(gECPP GLAD GLFW JOLT CITYHASH_SRC)
 
 # VOXELDEMO
 file(GLOB_RECURSE VOXELDEMO_SRC "Demo/*.cpp" "Demo/*.h" "Demo/*.inl")

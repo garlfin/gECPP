@@ -41,7 +41,7 @@ namespace gE
         void SetShape(const Physics::CapsuleShape& shape);
 
     private:
-        SmartPointer<px::CharacterVirtual> _controller;
+        Pointer<px::CharacterVirtual> _controller;
         Jolt::CapsuleShape _shape;
 
         UCollisionFilter _filter;

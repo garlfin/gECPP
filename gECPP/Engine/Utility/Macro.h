@@ -5,6 +5,7 @@
 
 #include <utility>
 #include <iostream>
+#include <cassert>
 
 using std::move;
 
@@ -61,23 +62,22 @@ using std::move;
 
 #ifdef DEBUG
 	#define LOG(MSG) std::cout << MSG << std::endl;
-	#define ERR(MSG) { TRAP(); std::cerr << MSG << std::endl; }
 #else
-#define LOG(MSG)
-#define ERR(MSG) std::cerr << MSG << std::endl
+	#define LOG(MSG)
 #endif
 
 #define assertm(exp, msg) assert(((void) msg, exp))
 
 #ifdef DEBUG
-	#define GE_ASSERT(COND, ERR) { bool cond = COND; if(!cond) __debugbreak(); assertm(cond, ERR); }
+	#define GE_ASSERTM(COND, ERR) { bool cond = COND; if(!cond) __debugbreak(); assertm(cond, ERR); }
+	#define GE_ASSERT(COND) { bool cond = COND; if(!cond) __debugbreak(); assert(cond); }
 #else
-	#define GE_ASSERT(COND, ERR) assertm(cond, ERR)
+	#define GE_ASSERTM(COND, ERR) assertm(cond, ERR)
 #endif
 
 #define UNPACK(...) __VA_ARGS__
 
-#define GE_FAIL(ERR) GE_ASSERT(false, ERR);
+#define GE_FAIL(ERR) GE_ASSERTM(false, ERR);
 
 #define BIT_FIELD(FIELD, INDEX) ((FIELD) >> (INDEX) & 1)
 #define BIT_SIZE(X) (sizeof(decltype(X)) * 8)

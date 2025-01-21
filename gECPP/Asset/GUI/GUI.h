@@ -13,7 +13,7 @@ namespace gETF::UI
 {
 	class Element : public Serializable<>
 	{
-	 	SERIALIZABLE_PROTO(ELMT, 1, Element, Serializable);
+	 	SERIALIZABLE_PROTO("ELMT", 1, Element, Serializable);
 
 	 public:
 		Element(gE::Window* w, Element* p = nullptr) : _window(w), _parent(p) {};
@@ -30,7 +30,7 @@ namespace gETF::UI
 
 	class Frame : public Element
 	{
-		SERIALIZABLE_PROTO(FRM, 1, Frame, Element);
+		SERIALIZABLE_PROTO("FRM", 1, Frame, Element);
 	public:
 		Frame(gE::Window* w, Element* p = nullptr);
 
@@ -40,7 +40,7 @@ namespace gETF::UI
 
 	class Scene : public Serializable<gE::Window*>
 	{
-		SERIALIZABLE_PROTO(SCN, 1, Scene, Serializable);
+		SERIALIZABLE_PROTO("SCN", 1, Scene, Serializable);
 
 	 public:
 		std::string Name = DEFAULT;

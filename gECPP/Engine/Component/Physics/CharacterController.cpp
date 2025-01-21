@@ -47,7 +47,7 @@ namespace gE
             manager.GetTempAllocator()
         );
 
-        GE_ASSERT(result, "COULD NOT CHANGE SHAPE!");
+        GE_ASSERTM(result, "COULD NOT CHANGE SHAPE!");
 
         _controller->SetInnerBodyShape(&newShape.GetJoltShape());
 

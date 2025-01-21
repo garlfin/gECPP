@@ -253,7 +253,7 @@ void Window::OnRender(float delta)
 	Cubemaps->OnRender(delta, nullptr);
 	Cameras.OnRender(delta);
 
-	GE_ASSERT(Cameras.CurrentCamera, "CAMERA SHOULD NOT BE NULL!");
+	GE_ASSERTM(Cameras.CurrentCamera, "CAMERA SHOULD NOT BE NULL!");
 
 	API::FrameBuffer::Reset();
 	Blit(Cameras.CurrentCamera->GetColor());

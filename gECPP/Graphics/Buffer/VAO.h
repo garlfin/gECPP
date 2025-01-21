@@ -33,14 +33,12 @@ namespace GPU
 		u8 LOD;
 	};
 
-	class VAO : public Serializable<gE::Window*>, public gE::Asset
+	class VAO : public gE::Asset
 	{
-		SERIALIZABLE_PROTO(VAO, 1, VAO, Serializable);
-		API_REFLECTABLE(VAO, "GPU::VAO", API::VAO);
+		SERIALIZABLE_PROTO("VAO", 1, VAO, Asset);
+		SERIALIZABLE_REFLECTABLE(VAO, "GPU::VAO");
 
 	public:
-		DEFAULT_OPERATOR_CM(VAO);
-
 		VAOFieldCounts Counts{};
 		MaterialSlot Materials[GE_MAX_VAO_MATERIAL];
 		VertexField Fields[GE_MAX_VAO_FIELD];
@@ -61,12 +59,10 @@ namespace GPU
 
 	class IndexedVAO : public VAO
 	{
-		SERIALIZABLE_PROTO(IVAO, 1, IndexedVAO, VAO);
-		API_REFLECTABLE(IndexedVAO, "GPU::IndexedVAO", API::IndexedVAO);
+		SERIALIZABLE_PROTO("IVAO", 1, IndexedVAO, VAO);
+		SERIALIZABLE_REFLECTABLE(IndexedVAO, "GPU::IndexedVAO");
 
 	public:
-		DEFAULT_OPERATOR_CM(IndexedVAO);
-
 		ALWAYS_INLINE void Free() override { VAO::Free(); TriangleBuffer.Free(); }
 		NODISCARD ALWAYS_INLINE bool IsFree() const override { return VAO::IsFree() && TriangleBuffer.IsFree(); }
 

@@ -57,7 +57,7 @@ namespace PVR
 		}
 		else if(header.Faces == 6)
 		{
-			GE_ASSERT(header.Size.x == header.Size.y, "Cubemap not square!");
+			GE_ASSERTM(header.Size.x == header.Size.y, "Cubemap not square!");
 
 			GPU::TextureCube settings;
 			GPU::TextureData data;
