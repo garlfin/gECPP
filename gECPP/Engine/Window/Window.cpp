@@ -120,23 +120,21 @@ bool Window::Run()
 		if(_physicsTick.ShouldTick(_time))
 			OnFixedUpdate(_physicsTick.GetDelta());
 
-		if(_renderTick.ShouldTick(_time))
+		if(_renderTick.ShouldTick(glfwGetTime()))
 		{
 		#ifdef GE_DEBUG_PERFORMANCE
 			double updateDelta = glfwGetTime();
+
+			updateDelta = _renderTick.GetTime() - updateDelta;
+
+			const bool shouldDebugTick = debugTick.ShouldTick(_renderTick.GetTime());
+			if(shouldDebugTick) timer.Start();
 		#endif
 
 			_keyboardState.Update(_window);
 			_mouseState.Update(_window);
 
 			OnUpdate(_renderTick.GetDelta());
-
-		#ifdef GE_DEBUG_PERFORMANCE
-			updateDelta = glfwGetTime() - updateDelta;
-
-			const bool shouldDebugTick = debugTick.ShouldTick(_time);
-			if(shouldDebugTick) timer.Start();
-		#endif
 
 			OnRender(_renderTick.GetDelta());
 
@@ -150,10 +148,10 @@ bool Window::Run()
 				sprintf_s(
 					WindowTitleBuf,
 					"FPS: %u (%u), UPDATE: %u, FIXEDUPDATE: %u (%u)",
-					(unsigned) ceil(1.0 / _renderTick.GetDelta()),
+					_renderTick.GetTickRate(),
 					(unsigned) ceil(1.0 / renderTime),
 					(unsigned) ceil(1.0 / updateDelta),
-					(unsigned) ceil(1.0 / _physicsTick.GetDelta()),
+					_physicsTick.GetTickRate(),
 					(unsigned) floor(_physicsTick.GetDelta() * GE_PX_MIN_TICKRATE)
 				);
 

@@ -10,16 +10,20 @@ struct TickHandler
 {
 public:
     TickHandler() = default;
-    explicit TickHandler(double requiredDelta, bool strict = true) : RequiredDelta(requiredDelta), _strict(strict) {};
-    explicit TickHandler(int hertz, bool strict = true) : RequiredDelta(1.0 / hertz), _strict(strict) {}
+    explicit TickHandler(double requiredDelta) : RequiredDelta(requiredDelta) {};
+    explicit TickHandler(int hertz) : RequiredDelta(1.0 / hertz) {}
 
     double RequiredDelta = 0.0;
 
     GET_CONST(float, LerpFactor, _lerpFactor);
     GET_CONST(double, NextTickTime, _previousTime + GetTickDelta());
     GET_CONST(double, TickDelta, RequiredDelta);
-    GET_CONST(int, TickRate, (int) (1.0 / RequiredDelta));
+    GET_CONST(u32, TargetTickRate, (u32) (1.0 / RequiredDelta));
+    GET_CONST(u32, TickRate, (u32) ceil(1.0 / _delta));
     GET_CONST(double, Delta, _delta);
+
+    // Only valid after tick.
+    GET_CONST(double, Time, _previousTime);
 
     bool ShouldTick(double time);
     bool ShouldTickDelta(double delta);
@@ -28,7 +32,6 @@ private:
     float _lerpFactor = DEFAULT;
     double _previousTime = DEFAULT;
     double _delta = DEFAULT;
-    bool _strict = true;
 };
 
 inline bool TickHandler::ShouldTickDelta(const double delta)
@@ -44,10 +47,10 @@ inline bool TickHandler::ShouldTickDelta(const double delta)
 
     _lerpFactor = _delta / RequiredDelta;
     _lerpFactor = std::min(_lerpFactor, 1.f);
-    if(_lerpFactor >= 1 - FLT_EPSILON) _lerpFactor = adjDelta / RequiredDelta;
 
-    if(_delta < RequiredDelta) return false;
+    if(adjDelta < 0.0) return false;
 
+    _lerpFactor = (float) (adjDelta / RequiredDelta);
     _previousTime += RequiredDelta + adjDelta;
     _delta = adjDelta;
 
@@ -58,19 +61,18 @@ inline bool TickHandler::ShouldTickDelta(const double delta)
 inline bool TickHandler::ShouldTick(const double time)
 {
     const double delta = time - _previousTime;
-    const double adjDelta = glm::min(delta - RequiredDelta, RequiredDelta);
+    const double adjDelta = std::fmod(delta, RequiredDelta);//::min(delta - RequiredDelta, RequiredDelta);
+    const double timePast = delta - RequiredDelta;
 
-    if(!RequiredDelta)
+    if(RequiredDelta == 0.0)
     {
         _lerpFactor = 1.0;
         return true;
     }
 
-    _lerpFactor = delta / RequiredDelta;
-    _lerpFactor = std::min(_lerpFactor, 1.f);
-    if(_lerpFactor >= 1 - FLT_EPSILON) _lerpFactor = adjDelta / RequiredDelta;
+    _lerpFactor = (float) std::min(adjDelta / RequiredDelta, 1.0);
 
-    if(delta < RequiredDelta) return false;
+    if(timePast < 0.0) return false;
 
     _previousTime = time - adjDelta;
     _delta = delta;
