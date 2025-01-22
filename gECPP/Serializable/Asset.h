@@ -44,28 +44,48 @@ namespace gE
     public:
         explicit File(const Path& path, const TypeSystem::Type* type);
         explicit File(const Path& path, const Reference<Asset>& asset);
+        explicit File(const Path& path, const WeakReference<Asset>& asset);
 
         NODISCARD ALWAYS_INLINE const TypeSystem::Type* GetFileType() const { return _type; };
+        NODISCARD ALWAYS_INLINE bool IsLoaded() const { return _weakAsset.IsValid(); }
 
-        NODISCARD Reference<Asset> Load();
-        NODISCARD ALWAYS_INLINE bool IsLoaded() const { return _asset.IsValid(); }
+        Reference<Asset> Load();
+        NODISCARD Reference<Asset> LoadWeak();
+
+        NODISCARD Reference<Asset> MakeWeak();
+        bool Lock();
+
+        GET(Reference<Asset>&, , _asset);
+        GET(WeakReference<Asset>, Weak, _weakAsset);
 
     private:
         static const TypeSystem::Type* ValidateAssetType(const Asset&);
 
         Path _path = DEFAULT;
-        Reference<std::istream> _bank = DEFAULT;
+        Reference<Bank> _bank = DEFAULT;
         const TypeSystem::Type* _type = DEFAULT;
-        WeakReference<Asset> _asset = DEFAULT;
+
+        WeakReference<Asset> _weakAsset = DEFAULT;
+        Reference<Asset> _asset = DEFAULT;
     };
 
     class Bank
     {
     public:
         Bank() = default;
+        explicit Bank(Window* window, const Path& path);
+
+        void Free() { _path.clear(); _stream.close(); }
+        bool IsFree() const { return _path.empty() && !_stream.is_open(); }
+
+        GET_CONST(const Path&, Path, _path);
+        GET(std::istream&, Stream, _stream);
+        GET_CONST(Window&, Window, *_window);
 
     private:
         Path _path;
+        std::ifstream _stream;
+        Window* _window;
     };
 
     class FileManager
@@ -73,9 +93,13 @@ namespace gE
     public:
         FileManager() = default;
 
-        Reference<Bank> LoadBank(const Path&, bool loadFiles);
-        Reference<File> LoadFile();
-        Reference<File> LoadFile(const Path&);
+        void LoadBanksInFolder(const Path& folder);
+
+        Reference<Bank> LoadBank(const Path& path);
+        Reference<Bank> FindBank(const Path& path);
+
+        File& LoadFile(const Path& path);
+        File& FindFile(const Path& path);
 
     private:
         std::set<File> _files;

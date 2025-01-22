@@ -1,6 +1,5 @@
 #include "Engine/DemoWindow.h"
 
-
 int main(int argc, char** argv)
 {
 #ifdef DEBUG

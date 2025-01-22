@@ -148,7 +148,7 @@ namespace gE
 
 		operator Reference<T>()
 		{
-			return Reference<T>(_t, GetPointer());
+			return Reference<T>(GetPointer(), IsValid() ? _counter : nullptr);
 		}
 
 		void Free()
