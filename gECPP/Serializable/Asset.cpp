@@ -37,64 +37,116 @@ namespace gE
         return type;
     }
 
-    Bank::Bank(Window* window, const Path& path, AssetLoadMode mode) : _path(path), _window(window)
+    Bank::Bank(Window* window, const Path& path, AssetLoadMode mode) :
+        _path(path),
+        _stream(_path, std::ios::in | std::ios::binary),
+        _window(window)
     {
-        _stream.open(_path, std::ios::in | std::ios::binary);
-
         GE_ASSERTM(_stream.is_open(), "COULD NOT OPEN BANK!");
-    }
-
-    const File* Bank::LoadFile(const Path& path)
-    {
-        const File* file = FindFile(path);
-
-        if(file)
-            file->Load();
-
-        return file;
     }
 
     const File* Bank::FindFile(const UUID& uuid)
     {
-        const auto it = _files.find(File(uuid));
+        const auto it = _files.find(uuid);
         return it == _files.end() ? nullptr : &*it;
-    }
-
-    const File* Bank::FindFile(const Path& path)
-    {
-        return FindFile(HashPath(path));
-    }
-
-    void Bank::UnloadFile(const File& file)
-    {
-        if((Bank*) file.GetBank() != this) return;
-        _files.erase(file);
-    }
-
-    bool Bank::UnloadFile(const Path& path)
-    {
-        return UnloadFile(HashPath(path));
-    }
-
-    bool Bank::UnloadFile(const UUID& uuid)
-    {
-        const File* file = FindFile(uuid);
-
-        if(!file) return false;
-        UnloadFile(*file);
-        return true;
     }
 
     const File* Bank::AddFile(File&& file)
     {
-        if((Bank*) file.GetBank() != this) return nullptr;
+        if(file._bank) return nullptr;
+
+        file._bank = this;
         return &*_files.insert(std::move(file)).first; // dumb
+    }
+
+    void Bank::ISerialize(istream& in, SETTINGS_T s)
+    {
+        // TODO
+    }
+
+    void Bank::IDeserialize(ostream& out) const
+    {
+        // TODO
     }
 
     void Bank::RemoveFile(const File& file)
     {
-        if((Bank*) file.GetBank() != this) return;
+        if(file.GetBank() != this) return;
         _files.erase(file);
+    }
+
+    std::istream& Bank::MoveStreamToFile(const UUID& uuid)
+    {
+        return _stream;
+    }
+
+    Bank* AssetManager::LoadBank(const Path& path, AssetLoadMode mode)
+    {
+        const auto& it = _banks.emplace(std::move(ptr_create<Bank>(_window, path, mode)));
+        return it.first->GetPointer();
+    }
+
+    void AssetManager::LoadBanksInFolder(const Path& folder, AssetLoadMode mode)
+    {
+        const std::filesystem::directory_iterator directory(folder);
+        for(const auto& entry : directory)
+            if(const Path& path = entry.path(); path.extension() == ".bnk")
+                LoadBank(path, mode);
+    }
+
+    Bank* AssetManager::FindBank(const UUID& uuid)
+    {
+        const auto it = _banks.find(uuid);
+        return it == _banks.end() ? nullptr : it->GetPointer();
+    }
+
+    const File* AssetManager::LoadFile(const Path& path, AssetLoadMode mode)
+    {
+        FileLoadArgs args(_window, nullptr, mode);
+
+        std::ifstream stream(path, std::ios::in | std::ios::binary);
+
+        if(!stream.is_open())
+        {
+            GE_FAIL("COULD NOT OPEN FILE!");
+            return nullptr;
+        }
+
+        const auto& it = _files.emplace(stream, args);
+        return &*it.first;
+    }
+
+    const File* AssetManager::AddFile(File&& file)
+    {
+        if(file.GetBank()) return nullptr;
+        return &*_files.insert(std::move(file)).first;
+    }
+
+    const File* AssetManager::FindFile(const UUID& uuid)
+    {
+        const auto& it = _files.find(uuid);
+        if(it == _files.end()) return nullptr;
+        return &*it;
+    }
+
+    bool AssetManager::RemoveBank(const UUID& uuid)
+    {
+        const auto& it = _banks.find(uuid);
+
+        if(it == _banks.end()) return false;
+
+        _banks.erase(it);
+        return true;
+    }
+
+    bool AssetManager::RemoveFile(const UUID& uuid)
+    {
+        const auto& it = _files.find(uuid);
+
+        if(it == _files.end()) return false;
+
+        _files.erase(it);
+        return true;
     }
 
     UUID HashPath(const Path& path)
@@ -115,7 +167,7 @@ namespace gE
         GE_ASSERT(_type);
 
         if((bool) (s.LoadMode & AssetLoadMode::Files))
-            _asset = ref_cast((Asset*) _type->Factory(in, &_bank->GetWindow()));
+            _asset = ref_cast((Asset*) _type->Factory(in, s.Window));
     }
 
     void File::IDeserialize(ostream& out) const
@@ -132,7 +184,7 @@ namespace gE
 
     Reference<Asset> File::Load() const
     {
-        if(!_bank) return _asset;
+        if(!_bank || _asset) return _asset;
 
         std::istream& in = _bank->MoveStreamToFile(_uuid);
 

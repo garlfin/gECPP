@@ -43,8 +43,8 @@ namespace gE
 			o._counter = nullptr;
 		);
 
-		GET(T&, , *_t);
-		GET(T*, Pointer, _t);
+		GET_CONST(T&, , *_t);
+		GET_CONST(T*, Pointer, _t);
 
 		ALWAYS_INLINE T* operator->() const { return _t; }
 		ALWAYS_INLINE T& operator*() const { return *_t; }
@@ -192,8 +192,8 @@ namespace gE
 		DELETE_OPERATOR_COPY(Pointer);
 		OPERATOR_MOVE_NOSUPER(Pointer, Free, _t = o.Release())
 
-		GET(T&, , *_t);
-		GET(T*, Pointer, _t);
+		GET_CONST(T&, , *_t);
+		GET_CONST(T*, Pointer, _t);
 
 		ALWAYS_INLINE T* operator->() const { return _t; }
 		ALWAYS_INLINE T& operator*() const { return *_t; }

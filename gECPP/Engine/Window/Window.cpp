@@ -36,7 +36,8 @@ void gE::OverrideSTDTerminate()
 Window::Window(glm::u16vec2 size, const char* name) :
 	Cameras(this), Transforms(this),
 	CullingManager(this), Behaviors(this),
-    _size(size), _name(strdup(name))
+    AssetManager(this), _size(size),
+	_name(strdup(name))
 {
 	if (!glfwInit()) GE_FAIL("Failed to initialize GLFW.");
 

@@ -160,8 +160,7 @@ public:
 template<is_serializable_in<gE::Window*> T>
 void ReadSerializableFromFile(gE::Window* window, const Path& path, T& t)
 {
-	std::ifstream file;
-	file.open(path, std::ios::in | std::ios::binary);
+	std::ifstream file(path, std::ios::in | std::ios::binary);
 	GE_ASSERTM(file.is_open(), "COULD NOT OPEN FILE!");
 
 	t.Serialize(file, window);

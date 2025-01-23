@@ -85,6 +85,7 @@ namespace gE
 		GET(GPU::TextureSlotManager&, SlotManager, SlotManager);
 		GET(PhysicsManager&, Physics, Physics);
 		GET(EntityManager&, Entities, Entities);
+		GET(AssetManager&, Assets, AssetManager);
 
 		// Engine States
 		RenderFlags RenderState = DEFAULT;
@@ -144,6 +145,8 @@ namespace gE
 		Pointer<API::ComputeShader> BloomShader;
 		Pointer<API::ComputeShader> VoxelComputeShader;
 		Pointer<API::ComputeShader> HiZShader;
+
+		AssetManager AssetManager;
 
 	 private:
 		TextureSize2D _size;
