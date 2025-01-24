@@ -33,9 +33,9 @@ const char* IncrementLine(const char* str, char d = '\n');
 template<class T> void RemoveFirstFromVec(std::vector<T>& vec, const T& t);
 
 // Binary helper functions
-u8* ReadFileBinary(const std::string& name, u32& length);
-std::string ReadFile(const std::string& name);
-inline u8* ReadFileBinary(const std::string& name);
+u8* ReadFileBinary(const Path& path, size_t& length);
+std::string ReadFile(const Path& path);
+inline u8* ReadFileBinary(const Path& name);
 
 // Implementation
 template<u32 LENGTH>
@@ -55,8 +55,8 @@ void RemoveFirstFromVec(std::vector<T>& vec, const T& t)
 	vec.pop_back();
 }
 
-ALWAYS_INLINE u8* ReadFileBinary(const std::string& name)
+ALWAYS_INLINE u8* ReadFileBinary(const Path& name)
 {
-	u32 len;
+	size_t len;
 	return ReadFileBinary(name, len);
 }

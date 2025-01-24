@@ -8,6 +8,21 @@
 
 namespace GPU
 {
+	ShaderSource::ShaderSource(const Path& path)
+	{
+		Source = ReadFile(path);
+	}
+
+	void ShaderSource::ISerialize(istream& in, SETTINGS_T s)
+	{
+		Read(in, Source);
+	}
+
+	void ShaderSource::IDeserialize(ostream& out) const
+	{
+		Write(out, Source);
+	}
+
 	void ShaderStage::ISerialize(istream& in, SETTINGS_T s)
 	{
 		StageType = Read<ShaderStageType>(in);

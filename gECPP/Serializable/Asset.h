@@ -77,6 +77,12 @@ namespace gE
         NODISCARD Reference<Asset> MakeWeak() const;
         Reference<Asset> Lock() const;
 
+        template<class T> requires std::is_base_of_v<Asset, T>
+        NODISCARD ALWAYS_INLINE T& Cast() const;
+
+        template<class T> requires std::is_base_of_v<Asset, T>
+        NODISCARD ALWAYS_INLINE T& CastSafe() const;
+
         GET_CONST(const Reference<Asset>&, , _asset);
         GET_CONST(const WeakReference<Asset>&, Weak, _weakAsset);
         GET_CONST(Bank*, Bank, _bank);

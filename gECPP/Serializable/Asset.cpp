@@ -11,11 +11,11 @@ namespace gE
         _uuid(HashPath(_path)),
         _type(type)
     {
-
     }
 
     File::File(const Path& path, const Reference<Asset>& asset) :
         _path(path),
+        _uuid(HashPath(_path)),
         _type(ValidateAssetType(asset)),
         _weakAsset(asset),
         _asset(asset)
@@ -24,6 +24,7 @@ namespace gE
 
     File::File(const Path& path, const WeakReference<Asset>& asset) :
         _path(path),
+        _uuid(HashPath(_path)),
         _type(ValidateAssetType(asset)),
         _weakAsset(asset)
     {

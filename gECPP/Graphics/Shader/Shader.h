@@ -19,6 +19,22 @@ namespace GL
 
 namespace GPU
 {
+	struct ShaderSource final : public gE::Asset
+	{
+		SERIALIZABLE_PROTO("SSRC", 0, ShaderSource, Asset);
+		SERIALIZABLE_REFLECTABLE(ShaderSource, "GPU::ShaderSource");
+
+	public:
+		explicit ShaderSource(const Path&);
+		explicit ShaderSource(const std::string& src) : Source(src) {};
+		explicit ShaderSource(std::string&& src) : Source(std::move(src)) {};
+
+		void Free() override { Source.clear(); Source.shrink_to_fit(); }
+		NODISCARD bool IsFree() const override { return Source.empty(); }
+
+		std::string Source;
+	};
+
 	struct ShaderStage : public gE::Asset
 	{
 		SERIALIZABLE_PROTO("STGE", 1, ShaderStage, Asset);
@@ -68,6 +84,8 @@ namespace GPU
 		ALWAYS_INLINE void Free() override { return ComputeStage.Free(); }
 		NODISCARD ALWAYS_INLINE bool IsFree() const override { return ComputeStage.IsFree(); }
 	};
+
+	SERIALIZABLE_REFLECTABLE_IMPL(ShaderSource, ShaderSource);
 }
 
 #if API == GL

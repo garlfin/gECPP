@@ -77,10 +77,10 @@ namespace GL
 		ID = glCreateShader((GLenum) StageType);
 
 		std::string finalSource, source, extensions;
-		std::string& includes = finalSource; // temp alias
+		std::vector<gE::UUID> includes; // temp alias
 		auto stream = std::istringstream(Source);
 
-		GPU::CompileIncludes(stream, extensions, source, includes, BasePath);
+		GPU::CompileIncludes(window, stream, extensions, source, includes, BasePath);
 
 		finalSource.clear();
 		finalSource += GL_VERSION_DIRECTIVE;

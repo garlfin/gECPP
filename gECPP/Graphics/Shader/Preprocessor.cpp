@@ -5,16 +5,16 @@
 #include "Preprocessor.h"
 
 #include <filesystem>
+#include <format>
+
+#include "Engine/Utility/AssetManager.h"
+#include "Engine/Window/Window.h"
 
 namespace GPU
 {
 	void PreprocessorPair::Write(std::string& out) const
 	{
-		out += API_DEFINE_DIRECTIVE;
-		out += Name;
-		out += ' ';
-		out += Value;
-		out += '\n';
+		out += std::format("#define {} {}\n", Name, Value);
 	}
 
 	void CompileDirectives(const std::vector<PreprocessorPair>& pairs, std::string& out)
@@ -22,7 +22,7 @@ namespace GPU
 		for(const PreprocessorPair& pair : pairs) pair.Write(out);
 	}
 
-	void CompileIncludes(std::istream& source, std::string& extensions, std::string& out, std::string& includes, const Path& path)
+	void CompileIncludes(gE::Window* window, std::istream& source, std::string& extensions, std::string& out, std::vector<gE::UUID>& includes, const Path& path)
 	{
 		// Turns out most drivers support GL_ARB_SHADER_LANGUAGE_INCLUDE
 		for(std::string line; std::getline(source, line);)
@@ -31,19 +31,26 @@ namespace GPU
 			if(strcmpb(line.c_str(), API_INCLUDE_DIRECTIVE))
 			{
 				Path includePath = GetIncludePath(line, path);
-				auto file = std::ifstream(includePath, std::ios_base::in | std::ios_base::binary);
+				gE::UUID includeUUID = gE::HashPath(includePath);
 
-				if(!file.is_open()) LOG("COULD NOT FIND FILE: " << includePath);
+				const gE::File* file = window->GetAssets().FindFile(includeUUID);
+				if(!file)
+				{
+					gE::Reference<gE::Asset> asset = gE::ref_create<ShaderSource>(path);
+					file = window->GetAssets().AddFile(std::move(gE::File(path, asset)));
+				}
 
-				if(includes.find(includePath.string()) != std::string::npos)
+				std::istringstream includeStream(file->Cast<ShaderSource>().Source);
+
+				if(std::ranges::find(includes, includeUUID) == includes.end())
 					continue;
 
 			#ifdef DEBUG
 				out += "// BEGIN " + includePath.string() + '\n';
 			#endif
 
-				includes += includePath.string();
-				CompileIncludes(file, extensions, out, includes, includePath);
+				includes.push_back(includeUUID);
+				CompileIncludes(window, includeStream, extensions, out, includes, includePath);
 
 			#ifdef DEBUG
 				out += "// END " + includePath.string() + '\n';

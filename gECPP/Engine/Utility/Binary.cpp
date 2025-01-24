@@ -3,28 +3,48 @@
 //
 
 #include "Binary.h"
-#include "iostream"
 
-u8* ReadFileBinary(const std::string& name, u32& length)
+#include <fstream>
+
+u8* ReadFileBinary(const Path& path, size_t& length)
 {
-	FILE* file = fopen(name.c_str(), "rb");
-	if(!file)
+	std::ifstream file(path, std::ios::in | std::ios::binary);
+	if(!file.is_open())
 	{
-		LOG("Could not find file: " << name);
+		LOG("Could not find file: " << path);
 		return nullptr;
 	}
 
-	fseek(file, 0, SEEK_END);
-	length = ftell(file);
+	file.seekg(0, std::ios::end);
+	length = file.tellg();
 
 	u8* bin = new u8[length];
 
-	fseek(file, 0, SEEK_SET);
-	fread(bin, length, 1, file);
-
-	fclose(file);
+	file.seekg(0, std::ios::beg);
+	file.read((char*) bin, length);
 
 	return bin;
+}
+
+std::string ReadFile(const Path& path)
+{
+	std::ifstream file(path, std::ios::in | std::ios::binary);
+	if(!file.is_open())
+	{
+		LOG("Could not find file: " << path);
+		return DEFAULT;
+	}
+
+	file.seekg(0, std::ios::end);
+	size_t length = file.tellg();
+
+	std::string result;
+	result.reserve(length);
+
+	file.seekg(0, std::ios::beg);
+	file.read(result.data(), length);
+
+	return result;
 }
 
 size_t strlenc(const char* str, char d)

@@ -9,8 +9,8 @@
 #include <Graphics/Graphics.h>
 
 #include "ShaderStageType.h"
+#include "Serializable/Asset.h"
 
-#define API_DEFINE_DIRECTIVE "#define "
 #define API_INCLUDE_DIRECTIVE "#include "
 #define API_DEFINE_DIRECTIVE_LENGTH 10
 
@@ -28,7 +28,7 @@ namespace GPU
 	};
 
 	void CompileDirectives(const std::vector<PreprocessorPair>& pairs, std::string& out);
-	void CompileIncludes(std::istream& source, std::string& extensions, std::string& out, std::string& includes, const Path& path);
+	void CompileIncludes(gE::Window*, std::istream& src, std::string& ext, std::string& out, std::vector<gE::UUID>& inc, const Path& path);
 	void CompileShaderType(ShaderStageType stage, std::string& out);
 	Path GetIncludePath(const std::string&, const Path& path = DEFAULT);
 }
