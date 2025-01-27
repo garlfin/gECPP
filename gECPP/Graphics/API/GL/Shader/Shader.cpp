@@ -14,7 +14,7 @@
 namespace GL
 {
 	template<typename T>
-	bool GetShaderStatus(const T& shader, const Path& name = DEFAULT, const char* source = DEFAULT);
+	bool GetShaderStatus(const T& shader, const Path& name = DEFAULT, const std::string& = DEFAULT);
 
 	IShader::IShader(gE::Window* window) : APIObject(window)
 	{
@@ -78,7 +78,7 @@ namespace GL
 
 		std::string finalSource, source, extensions;
 		std::vector<gE::UUID> includes; // temp alias
-		auto stream = std::istringstream(Source);
+		auto stream = std::istringstream((std::string) Source);
 
 		GPU::CompileIncludes(window, stream, extensions, source, includes, BasePath);
 
@@ -95,11 +95,11 @@ namespace GL
 		glShaderSource(ID, 1, &sourceCString, &sourceLength);
 		glCompileShader(ID);
 
-		GetShaderStatus(*this, BasePath, sourceCString);
+		GetShaderStatus(*this, BasePath, finalSource);
 	}
 
 	template<typename T>
-	bool GetShaderStatus(const T& shader, const Path& name, const char* source)
+	bool GetShaderStatus(const T& shader, const Path& name, const std::string& source)
 	{
 		u32 id = shader.Get();
 
@@ -118,20 +118,16 @@ namespace GL
 		GL_GET(glGetShaderInfoLog, glGetProgramInfoLog, id, shaderStatus - 1, nullptr, infoLog);
 
 	#ifdef DEBUG
-		if(source)
+		if(source.size())
 		{
 			std::cout << "FILE: " << name << '\n';
 
+			std::stringstream stream(source);
 			std::string debugBuffer;
-			for(u32 i = 1; *source; i++)
-			{
-				debugBuffer += "0(" + std::to_string(i) + "): ";
 
-				size_t len = strlenc(source, '\n') + 1;
-				debugBuffer.append(source, len);
-
-				source += len;
-			}
+			int row = 0;
+			for(std::string line; std::getline(stream, line); row++)
+				debugBuffer += std::format("0({}): {}\n", row, line);
 
 			std::cout << debugBuffer;
 		}

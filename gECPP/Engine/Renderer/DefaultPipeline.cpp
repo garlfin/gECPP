@@ -86,9 +86,8 @@ namespace gE
 
 		Buffers& buf = GetWindow().GetPipelineBuffers();
 
-		buf.Camera.ColorTexture = (handle) _taaBack;
-		buf.Camera.DepthTexture = (handle) _depthBack;
-		buf.UpdateCamera(sizeof(handle) * 2, offsetof(GPU::Camera, ColorTexture));
+		GetGPUCamera(buf.Camera);
+		buf.UpdateCamera();
 
 		window.GetLights().UseNearestLights(glm::vec3(0.0f));
 		window.GetCubemaps().UseNearestCubemaps(glm::vec3(0.0f));
@@ -137,6 +136,33 @@ namespace gE
 		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 		// Sync post process "backbuffer" and main color buffer
 		if(front == &*_color) front->CopyFrom(*back);
+	}
+
+	float DefaultPipeline::Target2D::EV100(float aperture, float shutter, float ISO)
+	{
+		return std::log2(aperture * aperture / shutter * 100.f / ISO);
+	}
+
+	float DefaultPipeline::Target2D::EV100(float luminance, float middleGray)
+	{
+		return std::log2(luminance * 100.f / middleGray);
+	}
+
+	float DefaultPipeline::Target2D::EV100ToExposure(float ev100)
+	{
+		return 1.0 / (1.2f * std::pow(2.0, ev100));
+	}
+
+	float DefaultPipeline::Target2D::CalculateExposure() const
+	{
+		return EV100ToExposure(EV100(_aperture, _shutterTime, _iso));
+	}
+
+	void DefaultPipeline::Target2D::GetGPUCamera(GPU::Camera& camera)
+	{
+		camera.ColorTexture = (handle) _taaBack;
+		camera.DepthTexture = (handle) _depthBack;
+		camera.PipelineParameters.x = CalculateExposure();
 	}
 
 	void DefaultPipeline::Target2D::RenderDependencies(float delta)

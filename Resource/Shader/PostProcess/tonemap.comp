@@ -1,11 +1,8 @@
 #include <Resource/Shader/Include/Math.glsl>
+#include <Resource/Shader/Include/Camera.glsl>
 
 #ifndef PIPELINE_COLOR_FORMAT
     #define PIPELINE_COLOR_FORMAT rgba16f
-#endif
-
-#ifndef GAMMA
-    #define GAMMA 2.2
 #endif
 
 // IO
@@ -15,6 +12,9 @@ layout(binding = 1, PIPELINE_COLOR_FORMAT) restrict writeonly uniform image2D Co
 // Helper Functions
 vec3 ACESNarkowicz(vec3);
 
+// https://seblagarde.wordpress.com/wp-content/uploads/2015/07/course_notes_moving_frostbite_to_pbr_v32.pdf
+vec3 LinearToSRGBFrostbite(vec3);
+
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 void main()
 {
@@ -22,8 +22,9 @@ void main()
 
     vec4 color = imageLoad(ColorIn, texel);
 
-    color.rgb = ACESNarkowicz(color.rgb * 0.6);
-    color.rgb = pow(color.rgb, vec3(1.0 / GAMMA));
+    color.rgb *= Camera.PipelineParameters.x; // Exposure
+    color.rgb = ACESNarkowicz(color.rgb);
+    color.rgb = LinearToSRGBFrostbite(color.rgb);
 
     imageStore(ColorOut, texel, color);
 }
@@ -37,6 +38,12 @@ vec3 ACESNarkowicz(vec3 x)
     float d = 0.59;
     float e = 0.14;
 
-    return saturate((x * (a * x + b)) / (x * (c * x + d) + e));
+    return (x * (a * x + b)) / (x * (c * x + d) + e);
 }
 
+vec3 LinearToSRGBFrostbite(vec3 color)
+{
+    vec3 lo = color * 12.92;
+    vec3 hi = pow(color, vec3(1.0 / 2.4)) * 1.055 - 0.055;
+    return mix(hi, lo, vec3(lessThanEqual(color, vec3(0.0031308))));
+}

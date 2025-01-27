@@ -19,7 +19,7 @@ namespace GL
 	{
 		glm::vec3 Center;
 		float Scale;
-		API_ALIGN handle Color;
+		GPU_ALIGN handle Color;
 	};
 }
 

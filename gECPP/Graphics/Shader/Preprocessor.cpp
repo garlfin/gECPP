@@ -30,19 +30,21 @@ namespace GPU
 			line += '\n';
 			if(strcmpb(line.c_str(), API_INCLUDE_DIRECTIVE))
 			{
-				Path includePath = GetIncludePath(line, path);
-				gE::UUID includeUUID = gE::HashPath(includePath);
-
+				const Path includePath = std::filesystem::relative(GetIncludePath(line, path));
+				const gE::UUID includeUUID = gE::HashPath(includePath);
 				const gE::File* file = window->GetAssets().FindFile(includeUUID);
+
 				if(!file)
 				{
-					gE::Reference<gE::Asset> asset = gE::ref_create<ShaderSource>(path);
-					file = window->GetAssets().AddFile(std::move(gE::File(path, asset)));
+					gE::Reference<gE::Asset> asset = gE::ref_create<ShaderSource>(includePath);
+					file = window->GetAssets().AddFile(std::move(gE::File(includePath, asset)));
 				}
+
+				if(!file) continue;
 
 				std::istringstream includeStream(file->Cast<ShaderSource>().Source);
 
-				if(std::ranges::find(includes, includeUUID) == includes.end())
+				if(std::ranges::find(includes, includeUUID) != includes.end())
 					continue;
 
 			#ifdef DEBUG
@@ -57,9 +59,11 @@ namespace GPU
 			#endif
 			}
 		#if API_ID == API_GL
-			else if(strcmpb(line.c_str(), GL_EXTENSION_DIRECTIVE)) extensions += line;
+			else
+				if(strcmpb(line.c_str(), GL_EXTENSION_DIRECTIVE)) extensions += line;
 		#endif
-			else out += line;
+			else
+				out += line;
 		}
 
 		out += '\n';

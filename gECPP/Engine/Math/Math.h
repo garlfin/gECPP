@@ -19,7 +19,7 @@
 #define GL_INT 0x1404
 #define GL_UNSIGNED_INT 0x1405
 #define GL_FLOAT 0x1406
-#define API_ALIGN alignas(16)
+#define GPU_ALIGN alignas(16)
 
 #define TO_RAD 0.01745329251f
 #define TO_DEG 57.2957795131f
@@ -113,5 +113,5 @@ inline void Decompose(const glm::mat4& m, glm::vec3& p, glm::quat& r, glm::vec3&
 
 struct ColorHarmonic
 {
-	API_ALIGN glm::vec4 Coefficients[9];
+	GPU_ALIGN glm::vec4 Coefficients[9];
 };

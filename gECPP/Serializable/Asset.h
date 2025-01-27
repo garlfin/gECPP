@@ -87,6 +87,7 @@ namespace gE
         GET_CONST(const WeakReference<Asset>&, Weak, _weakAsset);
         GET_CONST(Bank*, Bank, _bank);
         GET_CONST(const UUID&, UUID, _uuid);
+        GET_CONST(const Path&, Path, _path);
 
         NODISCARD ALWAYS_INLINE bool operator<(const File& o) const { return _uuid < o._uuid; }
 

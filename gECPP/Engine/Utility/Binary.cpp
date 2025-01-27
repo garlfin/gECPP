@@ -28,21 +28,19 @@ u8* ReadFileBinary(const Path& path, size_t& length)
 
 std::string ReadFile(const Path& path)
 {
-	std::ifstream file(path, std::ios::in | std::ios::binary);
+	std::ifstream file(path, std::ios::in | std::ios::binary | std::ios::ate);
 	if(!file.is_open())
 	{
 		LOG("Could not find file: " << path);
 		return DEFAULT;
 	}
 
-	file.seekg(0, std::ios::end);
 	size_t length = file.tellg();
 
-	std::string result;
-	result.reserve(length);
+	std::string result(length, ' ');
 
-	file.seekg(0, std::ios::beg);
-	file.read(result.data(), length);
+	file.seekg(0);
+	file.read(&result[0], length);
 
 	return result;
 }

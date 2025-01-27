@@ -32,6 +32,8 @@ namespace GPU
 		void Free() override { Source.clear(); Source.shrink_to_fit(); }
 		NODISCARD bool IsFree() const override { return Source.empty(); }
 
+		explicit operator const std::string&() const { return Source; }
+
 		std::string Source;
 	};
 
@@ -44,11 +46,11 @@ namespace GPU
 		ShaderStage(ShaderStageType, const Path&);
 
 		ShaderStageType StageType = DEFAULT;
-		std::string Source = DEFAULT;
+		ShaderSource Source;
 		Path BasePath = DEFAULT;
 
-		ALWAYS_INLINE void Free() override { Source.clear(); };
-		NODISCARD ALWAYS_INLINE bool IsFree() const override { return Source.empty(); }
+		ALWAYS_INLINE void Free() override { Source.Free(); };
+		NODISCARD ALWAYS_INLINE bool IsFree() const override { return Source.IsFree(); }
 
 		~ShaderStage() override
 		{

@@ -6,10 +6,8 @@
 
 
 #include <filesystem>
-#include <Graphics/Graphics.h>
-
+#include <Serializable/Asset.h>
 #include "ShaderStageType.h"
-#include "Serializable/Asset.h"
 
 #define API_INCLUDE_DIRECTIVE "#include "
 #define API_DEFINE_DIRECTIVE_LENGTH 10

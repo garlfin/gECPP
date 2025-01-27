@@ -9,6 +9,7 @@ struct CameraData
     ivec2 Size;
     vec3 Parameters;
     float FrameDelta;
+    vec4 PipelineParameters;
 
     BINDLESS_TEXTURE(sampler2D, Color);
     BINDLESS_TEXTURE(sampler2D, Depth);

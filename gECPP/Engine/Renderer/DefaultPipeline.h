@@ -29,8 +29,9 @@ namespace GPU
 		glm::ivec2 Size; // Viewport Size
 		glm::vec3 Parameters; // Up to implementation
 		float FrameDelta;
+		glm::vec3 PipelineParameters; // Up to implementation;
 
-		handle ColorTexture;
+		GPU_ALIGN handle ColorTexture;
 		handle DepthTexture;
 
 		glm::mat4 PreviousViewProjection;
@@ -71,7 +72,7 @@ namespace GPU
 		float BlendRadius;
 		glm::vec3 Scale;
 		CubemapType Type;
-		API_ALIGN handle Color;
+		GPU_ALIGN handle Color;
 	};
 
 	struct ObjectInfo
@@ -84,8 +85,8 @@ namespace GPU
 	struct Scene
 	{
 		gE::RenderFlags State;
-		API_ALIGN u32 InstanceCount[API_MAX_MULTI_DRAW];
-		API_ALIGN ObjectInfo Objects[API_MAX_INSTANCE];
+		GPU_ALIGN u32 InstanceCount[API_MAX_MULTI_DRAW];
+		GPU_ALIGN ObjectInfo Objects[API_MAX_INSTANCE];
 	};
 
 	struct Lighting
@@ -96,8 +97,8 @@ namespace GPU
 		handle Skybox;
 		ColorHarmonic SkyboxIrradiance;
 
-		API_ALIGN Light Lights[API_MAX_LIGHT];
-		API_ALIGN Cubemap Cubemaps[API_MAX_CUBEMAP];
+		GPU_ALIGN Light Lights[API_MAX_LIGHT];
+		GPU_ALIGN Cubemap Cubemaps[API_MAX_CUBEMAP];
 	};
 }
 
@@ -157,6 +158,11 @@ namespace gE::DefaultPipeline
 		GET(API::Texture2D&, Depth, _depth.Get());
 		GET(API::Texture2D&, Color, _color.Get());
 		GET(API::Texture2D&, Velocity, _velocity.Get());
+ 		GET_SET_VALUE(float, Aperature, _aperture);
+ 		GET_SET_VALUE(float, ShutterTime, _shutterTime);
+ 		GET_SET_VALUE(float, ISO, _iso);
+
+ 		void GetGPUCamera(GPU::Camera&);
 
 		void RenderDependencies(float) override;
 		void RenderPass(float, Camera*) override;
@@ -165,6 +171,12 @@ namespace gE::DefaultPipeline
 		~Target2D() override = default;
 
 	 private:
+ 		NODISCARD static float EV100(float aperture, float shutter, float ISO);
+ 		NODISCARD static float EV100(float luminance, float middleGray = 12.7f);
+ 		NODISCARD static float EV100ToExposure(float ev100);
+
+		float CalculateExposure() const;
+
 		Attachment<API::Texture2D, GL_DEPTH_ATTACHMENT> _depth;
 		Attachment<API::Texture2D, GL_COLOR_ATTACHMENT0> _color;
 		Attachment<API::Texture2D, GL_COLOR_ATTACHMENT1> _velocity;
@@ -175,6 +187,10 @@ namespace gE::DefaultPipeline
 		API::Texture2D _previousDepth;
 
 		std::vector<PostProcessEffect<Target2D>*> _effects;
+ 		float _focalLength = 0.005f;
+ 		float _aperture = 0.4f;
+ 		float _shutterTime = 1.f / 24.f;
+ 		float _iso = 200.0f;
 	};
 
 	struct Buffers

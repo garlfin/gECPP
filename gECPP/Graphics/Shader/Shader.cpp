@@ -26,7 +26,7 @@ namespace GPU
 	void ShaderStage::ISerialize(istream& in, SETTINGS_T s)
 	{
 		StageType = Read<ShaderStageType>(in);
-		Read<std::string>(in, Source);
+		ReadSerializable(in, Source, s);
 	}
 
 	void ShaderStage::IDeserialize(ostream& out) const
@@ -59,18 +59,12 @@ namespace GPU
 
 	SERIALIZABLE_REFLECTABLE_IMPL(ShaderStage, API::ShaderStage)
 
-	ShaderStage::ShaderStage(ShaderStageType type, const Path& path) : StageType(type), BasePath(path)
+	ShaderStage::ShaderStage(ShaderStageType type, const Path& path) :
+		StageType(type),
+		Source(path),
+		BasePath(path)
 	{
-		auto file = std::ifstream(path, std::ios::in | std::ios::binary | std::ios::ate);
-		GE_ASSERTM(file.is_open(), "COULD NOT OPEN FILE!");
-
-		const u64 length = file.tellg();
-
-		Source.resize(length);
-
-		file.seekg(std::ios::beg);
-		file.read(Source.data(), length);
-	};
+	}
 
 	SERIALIZABLE_REFLECTABLE_IMPL(Shader, API::Shader)
 
@@ -78,7 +72,7 @@ namespace GPU
 		VertexStage(ShaderStageType::Vertex, v),
 		FragmentStage(ShaderStageType::Fragment, f)
 	{
-	};
+	}
 
 	SERIALIZABLE_REFLECTABLE_IMPL(ComputeShader, API::ComputeShader)
 
