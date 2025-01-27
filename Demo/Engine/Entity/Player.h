@@ -42,7 +42,8 @@ namespace gE::VoxelDemo
 		PlayerCamera(Window* window, Player& player) : Entity(window, &player),
 			_camera(this, _target, {{ FlyCameraSettings, window->GetSize() }}, &window->GetCameras()),
 			_target(*this, _camera, { &_bloom, &_tonemap }),
-			_bloom(_target), _tonemap(_target)
+			_bloom(window, { &_target.GetPhysicalSettings() }),
+			_tonemap(window, &_target.GetPhysicalSettings())
 		{
 			const auto offset = glm::vec3(0.f, player.GetController().GetShape()->Height / 2.f, 0.f);
 			GetTransform().SetPosition(offset);

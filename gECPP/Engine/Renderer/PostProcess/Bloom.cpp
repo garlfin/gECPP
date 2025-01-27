@@ -10,23 +10,15 @@
 
 namespace gE::DefaultPipeline
 {
-	Bloom::Bloom(Target2D& target) : PostProcessEffect(target)
-	{
-	}
-
-	Bloom::Bloom(Target2D& target, u8, float t, float k) : Bloom(target)
-	{
-		Threshold = t;
-		Knee = k;
-	}
-
 	void Bloom::RenderPass(API::Texture2D& in, API::Texture2D& out)
 	{
-		API::ComputeShader& shader = GetTarget().GetWindow().GetBloomShader();
-		u8 mipCount = glm::min<u8>(in.GetMipCount(), Iterations);
-		glm::vec4 settings { Threshold, Knee, Intensity, 0.f }; // Mode/MIP
+		const API::ComputeShader& shader = GetWindow().GetBloomShader();
+
+		u8 mipCount = glm::min<u8>(in.GetMipCount(), GetSettings().Iterations);
+		glm::vec4 settings { GetSettings().Threshold, GetSettings().Knee, GetSettings().Intensity, 0.f }; // Mode/MIP
 
 		shader.Bind();
+		shader.SetUniform(2, GetSettings().PhysicalCamera->Exposure);
 
 		// Downsample
 		for(u8 i = 1; i < mipCount; i++)

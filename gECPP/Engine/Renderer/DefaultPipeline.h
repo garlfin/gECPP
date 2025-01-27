@@ -13,94 +13,7 @@
 #include <Graphics/Texture/Texture.h>
 #include <Graphics/Texture/TextureSettings.h>
 
-#include "Graphics/API/GL/Timer.h"
-
-#define API_MAX_INSTANCE 64
-#define API_MAX_LIGHT 4
-#define API_MAX_CUBEMAP 4
-
-namespace GPU
-{
-	struct Camera
-	{
-		glm::vec3 Position;
-		u32 Frame;
-		glm::vec2 Planes; // Near, Far
-		glm::ivec2 Size; // Viewport Size
-		glm::vec3 Parameters; // Up to implementation
-		float FrameDelta;
-		glm::vec3 PipelineParameters; // Up to implementation;
-
-		GPU_ALIGN handle ColorTexture;
-		handle DepthTexture;
-
-		glm::mat4 PreviousViewProjection;
-		glm::mat4 Projection;
-		glm::mat4 View[6];
-	};
-
-	enum class LightType : u32
-	{
-		Directional,
-		Point,
-		Spot,
-		Area
-	};
-
-	struct Light
-	{
-		glm::mat4 ViewProjection;
-		glm::vec3 Position;
-		LightType Type;
-		glm::vec3 Color;
-		u32 PackedSettings;
-		glm::vec2 Planes;
-		handle Depth;
-	};
-
-	enum class CubemapType : u32
-	{
-		Infinite,
-		AABB,
-		Sphere,
-		None = Infinite
-	};
-
-	struct Cubemap
-	{
-		glm::vec3 Position;
-		float BlendRadius;
-		glm::vec3 Scale;
-		CubemapType Type;
-		GPU_ALIGN handle Color;
-	};
-
-	struct ObjectInfo
-	{
-		glm::mat4 Model;
-		glm::mat4 PreviousModel;
-		glm::mat3x4 Normal;
-	};
-
-	struct Scene
-	{
-		gE::RenderFlags State;
-		GPU_ALIGN u32 InstanceCount[API_MAX_MULTI_DRAW];
-		GPU_ALIGN ObjectInfo Objects[API_MAX_INSTANCE];
-	};
-
-	struct Lighting
-	{
-		u32 LightCount = 1;
-		u32 CubemapCount = 1;
-
-		handle Skybox;
-		ColorHarmonic SkyboxIrradiance;
-
-		GPU_ALIGN Light Lights[API_MAX_LIGHT];
-		GPU_ALIGN Cubemap Cubemaps[API_MAX_CUBEMAP];
-	};
-}
+#include <Graphics/API/GL/Timer.h>
 
 namespace gE::DefaultPipeline
 {
@@ -149,20 +62,50 @@ namespace gE::DefaultPipeline
 		return tex;
 	}();
 
- 	class Target2D : public RenderTarget<Camera2D>, public IDepthTarget, public IColorTarget
+	enum class ExposureMode : u8
+	{
+		Physical,
+		Automatic,
+		Manual
+	};
+
+	struct PhysicalCameraSettings
+	{
+		NODISCARD static float EV100(float aperture, float shutter, float ISO);
+		NODISCARD static float EV100(float luminance, float middleGray = 12.7f);
+		NODISCARD static float EV100ToExposure(float ev100);
+
+		float CalculatePhysicalExposure() const;
+
+		ExposureMode ExposureMode = ExposureMode::Physical;
+
+		// Physical
+		float FocalLength = 0.005f;
+		float FStop = 0.4f;
+		float ShutterTime = 1.f / 24.f;
+		float ISO = 300.0f;
+
+		// Automatic
+		float TargetExposure = 1.0;
+
+		// Manual
+		float Exposure = 0.6f;
+	};
+
+ 	class Target2D final : public RenderTarget<Camera2D>, public IDepthTarget, public IColorTarget
 	{
 	 public:
-		typedef API::Texture2D TEX_T;
-		explicit Target2D(Entity&, Camera2D& camera, const std::vector<PostProcessEffect<Target2D>*>&);
+		using TEX_T = API::Texture2D;
+		using POSTPROCESS_T = IPostProcessEffect<TEX_T>;
+
+		explicit Target2D(Entity&, Camera2D& camera, const std::vector<POSTPROCESS_T*>&);
 
 		GET(API::Texture2D&, Depth, _depth.Get());
 		GET(API::Texture2D&, Color, _color.Get());
 		GET(API::Texture2D&, Velocity, _velocity.Get());
- 		GET_SET_VALUE(float, Aperature, _aperture);
- 		GET_SET_VALUE(float, ShutterTime, _shutterTime);
- 		GET_SET_VALUE(float, ISO, _iso);
+ 		GET(PhysicalCameraSettings&, PhysicalSettings, _physicalSettings);
 
- 		void GetGPUCamera(GPU::Camera&);
+ 		void GetGPUCameraOverrides(GPU::Camera&) const override;
 
 		void RenderDependencies(float) override;
 		void RenderPass(float, Camera*) override;
@@ -171,13 +114,7 @@ namespace gE::DefaultPipeline
 		~Target2D() override = default;
 
 	 private:
- 		NODISCARD static float EV100(float aperture, float shutter, float ISO);
- 		NODISCARD static float EV100(float luminance, float middleGray = 12.7f);
- 		NODISCARD static float EV100ToExposure(float ev100);
-
-		float CalculateExposure() const;
-
-		Attachment<API::Texture2D, GL_DEPTH_ATTACHMENT> _depth;
+ 		Attachment<API::Texture2D, GL_DEPTH_ATTACHMENT> _depth;
 		Attachment<API::Texture2D, GL_COLOR_ATTACHMENT0> _color;
 		Attachment<API::Texture2D, GL_COLOR_ATTACHMENT1> _velocity;
 
@@ -186,11 +123,8 @@ namespace gE::DefaultPipeline
 		API::Texture2D _postProcessBack;
 		API::Texture2D _previousDepth;
 
-		std::vector<PostProcessEffect<Target2D>*> _effects;
- 		float _focalLength = 0.005f;
- 		float _aperture = 0.4f;
- 		float _shutterTime = 1.f / 24.f;
- 		float _iso = 200.0f;
+		std::vector<POSTPROCESS_T*> _effects;
+ 		PhysicalCameraSettings _physicalSettings = DEFAULT;
 	};
 
 	struct Buffers

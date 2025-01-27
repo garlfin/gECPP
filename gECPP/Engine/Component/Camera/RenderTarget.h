@@ -5,8 +5,8 @@
 #pragma once
 
 #include <Graphics/Buffer/FrameBuffer.h>
-
-#include "Engine/Utility/RelativePointer.h"
+#include <Engine/Utility/RelativePointer.h>
+#include <Engine/Renderer/GPU.h>
 
 namespace gE
 {
@@ -61,6 +61,7 @@ namespace gE
 		virtual void RenderDependencies(float) {};
 		virtual void RenderPass(float, Camera*) = 0;
 		virtual void PostProcessPass(float) {};
+ 		virtual void GetGPUCameraOverrides(GPU::Camera&) const {};
 
 		inline void Bind() const { _frameBuffer.Bind(); }
 

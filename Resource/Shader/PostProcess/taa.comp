@@ -15,7 +15,7 @@
 #endif
 
 #ifndef TAA_WEIGHT
-    #define TAA_WEIGHT (1.0 / TAA_SAMPLE_COUNT)
+    #define TAA_WEIGHT (1.0 / TAA_SAMPLE_SQUARED)
 #endif
 
 #define SAMPLE_OFFSET(OFFSET) \
@@ -73,7 +73,7 @@ void main()
     previousColor.rgb = clamp(previousColor.rgb, boxMin, boxMax);
 #endif
 
-    float baseWeight = min(TAA_WEIGHT * Camera.FrameDelta * 100, 1.0);
+    float baseWeight = saturate(TAA_WEIGHT * Camera.FrameDelta * 100);
 
     vec2 weight;
     weight.x = (1.0 - baseWeight) / (1.0 + Luminance(previousColor.rgb));
@@ -90,9 +90,10 @@ void main()
     float blockerDepth = 0.0;
     for(int y = -1; y <= 1; y++)
         for(int x = -1; x <= 1; x++)
-            blockerDepth = max(blockerDepth, textureOffset(PreviousDepth, previousUV.xy, ivec2(x, y)).r);
+            blockerDepth += textureOffset(PreviousDepth, previousUV.xy, ivec2(x, y)).r;
+    blockerDepth /= 9;
 
-    rejectionFactor = max(rejectionFactor, saturate(previousUV.z - blockerDepth * 1.01));
+    rejectionFactor = max(rejectionFactor, saturate(previousUV.z - blockerDepth));
 #endif
 
     weight = mix(weight, vec2(0.0, 1.0), rejectionFactor);

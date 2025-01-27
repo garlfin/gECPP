@@ -23,13 +23,7 @@ namespace GL
 			glTextureParameteri(ID, GL_TEXTURE_MAX_ANISOTROPY, GE_ANISOTROPY_COUNT);
 	}
 
-	Texture::~Texture()
-	{
-		if(_handle) glMakeTextureHandleNonResidentARB(_handle);
-		glDeleteTextures(1, &ID);
-	}
-
-	handle Texture::GetHandle()
+	handle Texture::GetHandle() const
 	{
 		if(_handle)
 			return _handle;
@@ -40,6 +34,12 @@ namespace GL
 		glMakeTextureHandleResidentARB(_handle);
 
 		return _handle;
+	}
+
+	Texture::~Texture()
+	{
+		if(_handle) glMakeTextureHandleNonResidentARB(_handle);
+		glDeleteTextures(1, &ID);
 	}
 
 	API_SERIALIZABLE_IMPL(Texture2D), GL::Texture(window, GL_TEXTURE_2D, *this)

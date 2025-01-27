@@ -1,11 +1,12 @@
 #include <Resource/Shader/Include/Math.glsl>
-#include <Resource/Shader/Include/Camera.glsl>
 
 #ifndef PIPELINE_COLOR_FORMAT
     #define PIPELINE_COLOR_FORMAT rgba16f
 #endif
 
 // IO
+layout(location = 0) uniform float Exposure;
+
 layout(binding = 0, PIPELINE_COLOR_FORMAT) restrict readonly uniform image2D ColorIn;
 layout(binding = 1, PIPELINE_COLOR_FORMAT) restrict writeonly uniform image2D ColorOut;
 
@@ -22,7 +23,7 @@ void main()
 
     vec4 color = imageLoad(ColorIn, texel);
 
-    color.rgb *= Camera.PipelineParameters.x; // Exposure
+    color.rgb *= Exposure;
     color.rgb = ACESNarkowicz(color.rgb);
     color.rgb = LinearToSRGBFrostbite(color.rgb);
 

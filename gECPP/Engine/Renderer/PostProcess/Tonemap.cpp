@@ -7,19 +7,21 @@
 
 namespace gE::DefaultPipeline
 {
-	Tonemap::Tonemap(Target2D& target) : PostProcessEffect(target)
-	{
-	}
-
 	void Tonemap::RenderPass(API::Texture2D& in, API::Texture2D& out)
 	{
-		API::ComputeShader& shader = GetTarget().GetWindow().GetTonemapShader();
+		const API::ComputeShader& shader = GetWindow().GetTonemapShader();
+
+		float exposure = GetSettings()->Exposure;
+		if(GetSettings()->ExposureMode == ExposureMode::Physical)
+			exposure = GetSettings()->CalculatePhysicalExposure();
+
 		shader.Bind();
+		shader.SetUniform(0, exposure);
 
 		in.Bind(0, GL_READ_ONLY);
 		out.Bind(1, GL_WRITE_ONLY);
 
 		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-		shader.Dispatch(DIV_CEIL_T(GetTarget().GetSize(), TONEMAP_GROUP_SIZE, TextureSize2D));
+		GetWindow().GetTonemapShader().Dispatch(DIV_CEIL_T(in.GetSize(), TONEMAP_GROUP_SIZE, TextureSize2D));
 	}
 }

@@ -1,3 +1,4 @@
+
 //
 // Created by scion on 9/5/2023.
 //
@@ -64,7 +65,7 @@ namespace gE
 		void GetGPUCamera(GPU::Camera& camera) override;
 	};
 
-	class PerspectiveCamera : public Camera2D
+	class PerspectiveCamera final : public Camera2D
 	{
 	 public:
 		PerspectiveCamera(Entity*, TARGET_TYPE&, const PerspectiveCameraSettings&, ComponentManager<Camera>* = nullptr);
@@ -95,7 +96,7 @@ namespace gE
 		float _fov;
 	};
 
-	class OrthographicCamera : public Camera2D
+	class OrthographicCamera final : public Camera2D
 	{
 	 public:
 		OrthographicCamera(Entity*, TARGET_TYPE&, const OrthographicCameraSettings&, ComponentManager<Camera>* = nullptr);
@@ -109,7 +110,7 @@ namespace gE
 		glm::vec4 _orthographicScale;
 	};
 
-	class Camera3D : public Camera
+	class Camera3D final : public Camera
 	{
 	 public:
 		typedef RenderTarget<Camera3D> TARGET_TYPE;
@@ -130,7 +131,7 @@ namespace gE
 		const TextureSize1D _sizeZ;
 	};
 
-	class CameraCube : public Camera
+	class CameraCube final : public Camera
 	{
 	 public:
 		typedef RenderTarget<CameraCube> TARGET_TYPE;
@@ -147,7 +148,7 @@ namespace gE
 		void UpdateProjection() override;
 	};
 
-	class CameraManager : public ComponentManager<Camera>
+	class CameraManager final : public ComponentManager<Camera>
 	{
 	 public:
 		using ComponentManager::ComponentManager;

@@ -5,26 +5,40 @@
 #pragma once
 
 #include <Engine/Utility/Macro.h>
-#include <Engine/Utility/RelativePointer.h>
+
+#define POSTPROCESS_CONSTRUCTOR(TYPE, SETTINGS_T) TYPE(Window* window, SETTINGS_T const & settings) : PostProcessEffect(window, settings) {}
 
 namespace gE
 {
-	// Currently, post process effects don't support per-camera settings.
-	// I don't have time to work on this. I'll add it in a later version.
+	class Window;
 
-	template<class T>
-	class PostProcessEffect
+	template<class TEX_T>
+	class IPostProcessEffect
 	{
 	 public:
-		explicit PostProcessEffect(T& target) : _target(target) {};
+		explicit IPostProcessEffect(Window* window) : _window(window) {};
 
-		virtual void RenderPass(typename T::TEX_T&, typename T::TEX_T&) = 0;
+		virtual void RenderPass(TEX_T& in, TEX_T& out) = 0;
 
-		GET(T&, Target, *_target);
+		GET_CONST(Window&, Window, *_window);
 
-		virtual ~PostProcessEffect() = default;
+		virtual ~IPostProcessEffect() = default;
 
-	 private:
-		RelativePointer<T> _target;
+	private:
+		Window* _window;
+	};
+
+	template<class TEX_T, class SETTINGS_T>
+	class PostProcessEffect : public IPostProcessEffect<TEX_T>
+	{
+	public:
+		PostProcessEffect(Window* window, const SETTINGS_T& settings) : IPostProcessEffect<TEX_T>(window),
+			_settings(settings)
+		{}
+
+		GET_SET(SETTINGS_T&, Settings, _settings);
+
+	private:
+		SETTINGS_T _settings;
 	};
 }

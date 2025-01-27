@@ -72,6 +72,8 @@ namespace gE
 		_target->RenderDependencies(delta);
 
 		GetGPUCamera(buffers.Camera);
+		_target->GetGPUCameraOverrides(buffers.Camera);
+
 		buffers.UpdateCamera();
 
 		_target->Bind();

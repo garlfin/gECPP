@@ -12,17 +12,20 @@
 
 namespace gE::DefaultPipeline
 {
-	class Bloom : public PostProcessEffect<Target2D>
+	struct BloomSettings
 	{
-	 public:
-		explicit Bloom(Target2D&);
-		explicit Bloom(Target2D&, u8, float t, float k);
+		PhysicalCameraSettings* PhysicalCamera;
 
 		float Threshold = 2.f;
 		float Knee = 0.7f;
 		float Intensity = 1.f;
-
 		u8 Iterations = 7;
+	};
+
+	class Bloom final : public PostProcessEffect<API::Texture2D, BloomSettings>
+	{
+	 public:
+		POSTPROCESS_CONSTRUCTOR(Bloom, BloomSettings)
 
 		void RenderPass(API::Texture2D& in, API::Texture2D& out) override;
 	};

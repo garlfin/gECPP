@@ -28,10 +28,10 @@ namespace GL
 			return unit;
 		}
 
-		handle GetHandle();
+		NODISCARD handle GetHandle() const;
 		virtual void CopyFrom(const Texture&) = 0;
 
-		explicit ALWAYS_INLINE operator handle() { return GetHandle(); }
+		explicit ALWAYS_INLINE operator handle() const { return GetHandle(); }
 
  		GET(GPU::Texture&, Settings, *_settings);
 
@@ -42,7 +42,7 @@ namespace GL
 		~Texture() override;
 
 	 private:
-		handle _handle = NullHandle;
+		mutable handle _handle = NullHandle;
  		GPU::Texture* _settings = DEFAULT;
  		GLenum _target = DEFAULT;
 	};

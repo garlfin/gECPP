@@ -12,10 +12,11 @@
 
 namespace gE::DefaultPipeline
 {
-	class Tonemap : public PostProcessEffect<Target2D>
+	class Tonemap final : public PostProcessEffect<API::Texture2D, PhysicalCameraSettings*>
 	{
 	 public:
-		explicit Tonemap(Target2D&);
+		POSTPROCESS_CONSTRUCTOR(Tonemap, PhysicalCameraSettings*);
+
 		void RenderPass(API::Texture2D& in, API::Texture2D& out) override;
 	};
 }

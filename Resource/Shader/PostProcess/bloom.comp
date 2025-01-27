@@ -1,5 +1,3 @@
-#include <Resource/Shader/Include/Camera.glsl>
-
 #define BLOOM_STAGE_DOWNSAMPLE 1
 #define BLOOM_STAGE_UPSAMPLE -1
 
@@ -19,9 +17,12 @@
     #define EPSILON 0.001
 #endif
 
+#define BLOOM_USE_LUMINANCE
+
 // IO
 layout(location = 0) uniform sampler2D BloomIn;
 layout(location = 1) uniform vec4 Settings; // Threshold, Knee, Intensity, MODE * MIP
+layout(location = 2) uniform float Exposure;
 
 layout(binding = 0, PIPELINE_COLOR_FORMAT) restrict readonly uniform image2D ColorIn;
 layout(binding = 1, PIPELINE_COLOR_FORMAT) restrict writeonly uniform image2D ColorOut;
@@ -62,10 +63,10 @@ void main()
 
 vec3 Prefilter(vec3 color, float threshold, float knee)
 {
-    color *= Camera.PipelineParameters.x; // Exposure
+    color *= Exposure;
     color = min(color, vec3(BLOOM_MAX_BRIGHTNESS));
 
-#ifdef BLOOM_USE_LUMA
+#ifdef BLOOM_USE_LUMINANCE
     float brightness = Luminance(color);
 #else
     float brightness = max(color.r, max(color.g, color.b));

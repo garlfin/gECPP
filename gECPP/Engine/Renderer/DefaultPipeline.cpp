@@ -19,6 +19,26 @@
 
 namespace gE
 {
+	float DefaultPipeline::PhysicalCameraSettings::EV100(float aperture, float shutter, float ISO)
+	{
+		return std::log2(aperture * aperture / shutter * 100.f / ISO);
+	}
+
+	float DefaultPipeline::PhysicalCameraSettings::EV100(float luminance, float middleGray)
+	{
+		return std::log2(luminance * 100.f / middleGray);
+	}
+
+	float DefaultPipeline::PhysicalCameraSettings::EV100ToExposure(float ev100)
+	{
+		return 1.0 / (1.2f * std::pow(2.0, ev100));
+	}
+
+	float DefaultPipeline::PhysicalCameraSettings::CalculatePhysicalExposure() const
+	{
+		return EV100ToExposure(EV100(FStop, ShutterTime, ISO));
+	}
+
 	DefaultPipeline::Buffers::Buffers(Window* window) :
 		_cameraBuffer(window, 1, nullptr, GPU::BufferUsageHint::Dynamic),
 		_sceneBuffer(window, 1, nullptr, GPU::BufferUsageHint::Dynamic),
@@ -27,19 +47,6 @@ namespace gE
 		_sceneBuffer.Bind(API::BufferTarget::Uniform, 0);
 		_cameraBuffer.Bind(API::BufferTarget::Uniform, 1);
 		_lightBuffer.Bind(API::BufferTarget::Uniform, 2);
-	}
-
-	DefaultPipeline::Target2D::Target2D(Entity& owner, Camera2D& camera, const std::vector<PostProcessEffect<Target2D>*>& effects) :
-		RenderTarget(owner, camera), IDepthTarget(*_depth), IColorTarget(*_color),
-		_depth(GetFrameBuffer(), GPU::Texture2D(DepthFormat, camera.GetSize())),
-		_color(GetFrameBuffer(), GPU::Texture2D(ColorFormat, camera.GetSize())),
-		_velocity(GetFrameBuffer(), GPU::Texture2D(VelocityFormat, camera.GetSize())),
-		_taaBack(&GetWindow(), GPU::Texture2D(ColorFormat, camera.GetSize())),
-		_depthBack(&GetWindow(), GPU::Texture2D(HiZFormat, camera.GetSize())),
-		_previousDepth(&GetWindow(), GPU::Texture2D(PreviousDepthFormat, camera.GetSize())),
-		_postProcessBack(&GetWindow(), GPU::Texture2D(ColorFormat, camera.GetSize())),
-		_effects(effects)
-	{
 	}
 
 	void DefaultPipeline::Target2D::RenderPass(float delta, Camera*)
@@ -84,11 +91,6 @@ namespace gE
 
 		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
-		Buffers& buf = GetWindow().GetPipelineBuffers();
-
-		GetGPUCamera(buf.Camera);
-		buf.UpdateCamera();
-
 		window.GetLights().UseNearestLights(glm::vec3(0.0f));
 		window.GetCubemaps().UseNearestCubemaps(glm::vec3(0.0f));
 
@@ -127,7 +129,7 @@ namespace gE
 
 		// Post process loop
 		API::Texture2D* front = &*_color, *back = &_postProcessBack;
-		for(PostProcessEffect<Target2D>* effect : _effects)
+		for(POSTPROCESS_T* effect : _effects)
 		{
 			std::swap(front, back);
 			effect->RenderPass(*front, *back);
@@ -138,31 +140,23 @@ namespace gE
 		if(front == &*_color) front->CopyFrom(*back);
 	}
 
-	float DefaultPipeline::Target2D::EV100(float aperture, float shutter, float ISO)
+	DefaultPipeline::Target2D::Target2D(Entity& owner, Camera2D& camera, const std::vector<POSTPROCESS_T*>& effects) :
+		RenderTarget(owner, camera), IDepthTarget(*_depth), IColorTarget(*_color),
+		_depth(GetFrameBuffer(), GPU::Texture2D(DepthFormat, camera.GetSize())),
+		_color(GetFrameBuffer(), GPU::Texture2D(ColorFormat, camera.GetSize())),
+		_velocity(GetFrameBuffer(), GPU::Texture2D(VelocityFormat, camera.GetSize())),
+		_taaBack(&GetWindow(), GPU::Texture2D(ColorFormat, camera.GetSize())),
+		_depthBack(&GetWindow(), GPU::Texture2D(HiZFormat, camera.GetSize())),
+		_postProcessBack(&GetWindow(), GPU::Texture2D(ColorFormat, camera.GetSize())),
+		_previousDepth(&GetWindow(), GPU::Texture2D(PreviousDepthFormat, camera.GetSize())),
+		_effects(effects)
 	{
-		return std::log2(aperture * aperture / shutter * 100.f / ISO);
 	}
 
-	float DefaultPipeline::Target2D::EV100(float luminance, float middleGray)
-	{
-		return std::log2(luminance * 100.f / middleGray);
-	}
-
-	float DefaultPipeline::Target2D::EV100ToExposure(float ev100)
-	{
-		return 1.0 / (1.2f * std::pow(2.0, ev100));
-	}
-
-	float DefaultPipeline::Target2D::CalculateExposure() const
-	{
-		return EV100ToExposure(EV100(_aperture, _shutterTime, _iso));
-	}
-
-	void DefaultPipeline::Target2D::GetGPUCamera(GPU::Camera& camera)
+	void DefaultPipeline::Target2D::GetGPUCameraOverrides(GPU::Camera& camera) const
 	{
 		camera.ColorTexture = (handle) _taaBack;
 		camera.DepthTexture = (handle) _depthBack;
-		camera.PipelineParameters.x = CalculateExposure();
 	}
 
 	void DefaultPipeline::Target2D::RenderDependencies(float delta)
