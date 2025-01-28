@@ -65,13 +65,14 @@ namespace gE::DefaultPipeline
 	{
 	 public:
 		using TEX_T = API::Texture2D;
-		using POSTPROCESS_T = IPostProcessEffect<TEX_T>;
+		using POSTPROCESS_T = IPostProcessEffect<RenderTarget>;
 
 		explicit Target2D(Entity&, Camera2D& camera, const std::vector<POSTPROCESS_T*>&);
 
 		GET(API::Texture2D&, Depth, _depth.Get());
 		GET(API::Texture2D&, Color, _color.Get());
 		GET(API::Texture2D&, Velocity, _velocity.Get());
+		GET(API::Texture2D&, PreviousDepth, _previousDepth);
 
  		void GetGPUCameraOverrides(GPU::Camera&) const override;
 
@@ -87,6 +88,7 @@ namespace gE::DefaultPipeline
 		Attachment<API::Texture2D, GL_COLOR_ATTACHMENT1> _velocity;
 
 		API::Texture2D _linearDepth;
+ 		API::Texture2D _previousColor;
 		API::Texture2D _postProcessBack;
 		API::Texture2D _previousDepth;
 

@@ -53,13 +53,14 @@ namespace gE
 	class Camera2D : public Camera
 	{
 	 public:
-		typedef RenderTarget<Camera2D> TARGET_TYPE;
-		typedef TextureSize2D SIZE_TYPE;
+		using TARGET_T = RenderTarget<Camera2D>;
+		using SIZE_T = TextureSize2D;
+		using TEX_T = API::Texture2D;
 
-		Camera2D(Entity*, TARGET_TYPE&, const CameraSettings2D&, ComponentManager<Camera>* = nullptr);
+		Camera2D(Entity*, TARGET_T&, const CameraSettings2D&, ComponentManager<Camera>* = nullptr);
 
-		GET(TARGET_TYPE&, Target, (TARGET_TYPE&) Camera::GetTarget());
-		GET_CONST(SIZE_TYPE, Size, GetViewportSize());
+		GET(TARGET_T&, Target, (TARGET_T&) Camera::GetTarget());
+		GET_CONST(SIZE_T, Size, GetViewportSize());
 		GET_CONST(float, Aspect, (float) GetSize().x / GetSize().y);
 
 		void GetGPUCamera(GPU::Camera& camera) override;
@@ -68,7 +69,7 @@ namespace gE
 	class PerspectiveCamera final : public Camera2D
 	{
 	 public:
-		PerspectiveCamera(Entity*, TARGET_TYPE&, const PerspectiveCameraSettings&, ComponentManager<Camera>* = nullptr);
+		PerspectiveCamera(Entity*, TARGET_T&, const PerspectiveCameraSettings&, ComponentManager<Camera>* = nullptr);
 
 		template<AngleType T = AngleType::Degree>
 		NODISCARD ALWAYS_INLINE float GetFOV() const
@@ -99,7 +100,7 @@ namespace gE
 	class OrthographicCamera final : public Camera2D
 	{
 	 public:
-		OrthographicCamera(Entity*, TARGET_TYPE&, const OrthographicCameraSettings&, ComponentManager<Camera>* = nullptr);
+		OrthographicCamera(Entity*, TARGET_T&, const OrthographicCameraSettings&, ComponentManager<Camera>* = nullptr);
 
 		GET_CONST(const glm::vec4&, Scale, _orthographicScale);
 
@@ -113,13 +114,14 @@ namespace gE
 	class Camera3D final : public Camera
 	{
 	 public:
-		typedef RenderTarget<Camera3D> TARGET_TYPE;
-		typedef TextureSize3D SIZE_TYPE;
+		using TARGET_T = RenderTarget<Camera3D>;
+		using SIZE_T = TextureSize3D;
+		using TEX_T = API::Texture3D;
 
-		Camera3D(Entity*, TARGET_TYPE&, const CameraSettings3D&, ComponentManager<Camera>* = nullptr);
+		Camera3D(Entity*, TARGET_T&, const CameraSettings3D&, ComponentManager<Camera>* = nullptr);
 
-		GET(TARGET_TYPE&, Target, (TARGET_TYPE&) Camera::GetTarget());
-		GET_CONST(SIZE_TYPE, Size, SIZE_TYPE(GetViewportSize(), _sizeZ));
+		GET(TARGET_T&, Target, (TARGET_T&) Camera::GetTarget());
+		GET_CONST(SIZE_T, Size, SIZE_T(GetViewportSize(), _sizeZ));
 		GET_CONST(float, Scale, GetOwner().GetTransform()->Scale.x);
 
 		void GetGPUCamera(GPU::Camera&) override;
@@ -134,13 +136,14 @@ namespace gE
 	class CameraCube final : public Camera
 	{
 	 public:
-		typedef RenderTarget<CameraCube> TARGET_TYPE;
-		typedef TextureSize1D SIZE_TYPE;
+		using TARGET_T = RenderTarget<CameraCube>;
+		using SIZE_T = TextureSize1D;
+		using TEX_T = API::TextureCube;
 
-		CameraCube(Entity*, TARGET_TYPE&, const CameraSettings1D&, ComponentManager<Camera>* = nullptr);
+		CameraCube(Entity*, TARGET_T&, const CameraSettings1D&, ComponentManager<Camera>* = nullptr);
 
-		GET(TARGET_TYPE&, Target, (TARGET_TYPE&) Camera::GetTarget());
-		GET_CONST(SIZE_TYPE, Size, GetViewportSize().x);
+		GET(TARGET_T&, Target, (TARGET_T&) Camera::GetTarget());
+		GET_CONST(SIZE_T, Size, GetViewportSize().x);
 
 		void GetGPUCamera(GPU::Camera& camera) override;
 

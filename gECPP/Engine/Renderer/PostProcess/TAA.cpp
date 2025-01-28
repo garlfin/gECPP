@@ -10,8 +10,8 @@
 
 namespace gE::PostProcess
 {
-    TAA::TAA(Window* window, TAASettings const& settings) : PostProcessEffect(window, settings),
-        _taaBack(window, *settings.ColorFormat)
+    TAA::TAA(TARGET_T* target, TAASettings* settings) : PostProcessEffect(target, settings),
+        _taaBack(&target->GetWindow(), GPU::Texture2D(*settings->ColorFormat, target->GetSize()))
     {
 
     }

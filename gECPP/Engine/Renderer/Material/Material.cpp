@@ -93,13 +93,13 @@ namespace gE
 	}
 #endif
 
-	ForwardShader::ForwardShader(Window& window, const GPU::Shader& source) : Shader(window),
-	    _shader(&window, source)
+	ForwardShader::ForwardShader(Window* window, const GPU::Shader& source) : Shader(window),
+	    _shader(window, source)
 	{
 		_shader.Free();
 	}
 
-	DeferredShader::DeferredShader(Window& window, const GPU::Shader& source) : Shader(window)
+	DeferredShader::DeferredShader(Window* window, const GPU::Shader& source) : Shader(window)
 	{
 	}
 

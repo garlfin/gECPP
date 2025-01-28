@@ -15,7 +15,7 @@
 #endif
 
 #ifndef TAA_WEIGHT
-    #define TAA_WEIGHT (1.0 / TAA_SAMPLE_SQUARED)
+    #define TAA_WEIGHT (1.0 / TAA_SAMPLE_COUNT)
 #endif
 
 #define SAMPLE_OFFSET(OFFSET) \
@@ -90,8 +90,7 @@ void main()
     float blockerDepth = 0.0;
     for(int y = -1; y <= 1; y++)
         for(int x = -1; x <= 1; x++)
-            blockerDepth += textureOffset(PreviousDepth, previousUV.xy, ivec2(x, y)).r;
-    blockerDepth /= 9;
+            blockerDepth = max(blockerDepth, textureOffset(PreviousDepth, previousUV.xy, ivec2(x, y)).r);
 
     rejectionFactor = max(rejectionFactor, saturate(previousUV.z - blockerDepth));
 #endif

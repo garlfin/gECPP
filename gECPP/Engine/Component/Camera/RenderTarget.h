@@ -81,7 +81,7 @@ namespace gE
 		using IRenderTarget::IRenderTarget;
 
 		GET(T&, Camera, (T&) IRenderTarget::GetCamera());
-		GET_CONST(typename T::SIZE_TYPE, Size, GetCamera().GetSize());
+		GET_CONST(typename T::SIZE_T, Size, GetCamera().GetSize());
 	};
 
 	class IDepthTarget

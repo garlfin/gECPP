@@ -5,11 +5,12 @@
 #pragma once
 
 #include <Demo/Engine/Component/Movement.h>
-#include <gECPP/Engine/Window/Window.h>
 #include <Engine/Component/Camera/Camera.h>
-#include <Engine/Renderer/PostProcess/Bloom.h>
-#include <Engine/Renderer/PostProcess/Tonemap.h>
 #include <Engine/Component/Physics/CharacterController.h>
+#include <Engine/Renderer/PostProcess/Bloom.h>
+#include <Engine/Renderer/PostProcess/TAA.h>
+#include <Engine/Renderer/PostProcess/Tonemap.h>
+#include <gECPP/Engine/Window/Window.h>
 
 namespace gE::VoxelDemo
 {
@@ -36,14 +37,17 @@ namespace gE::VoxelDemo
 		CharacterController _controller;
 	};
 
-	class PlayerCamera : public Entity
+	class PlayerCamera final : public Entity
 	{
 	public:
 		PlayerCamera(Window* window, Player& player) : Entity(window, &player),
 			_camera(this, _target, {{ FlyCameraSettings, window->GetSize() }}, &window->GetCameras()),
-			_target(*this, _camera, { &_bloom, &_tonemap }),
-			_bloom(window, { &_target.GetPhysicalSettings() }),
-			_tonemap(window, &_target.GetPhysicalSettings())
+			_target(*this, _camera, { &_taa, &_bloom, &_tonemap }),
+			_bloomSettings{ &_physicalCamera },
+			_taaSettings{ &DefaultPipeline::ColorFormat, &_target.GetVelocity(), &_target.GetPreviousDepth() },
+			_taa(&_target, &_taaSettings),
+			_bloom(&_target, &_bloomSettings),
+			_tonemap(&_target, &_physicalCamera)
 		{
 			const auto offset = glm::vec3(0.f, player.GetController().GetShape()->Height / 2.f, 0.f);
 			GetTransform().SetPosition(offset);
@@ -54,11 +58,19 @@ namespace gE::VoxelDemo
 		GET(GL::Texture2D&, Color, _target.GetColor());
 		GET(GL::Texture2D&, Depth, _target.GetDepth());
 
+		GET(PostProcess::PhysicalCameraSettings&, PhysicalCameraSettings, _physicalCamera);
+		GET(PostProcess::BloomSettings&, BloomSettings, _bloomSettings);
+
 	private:
 		PerspectiveCamera _camera;
-
 		DefaultPipeline::Target2D _target;
-		DefaultPipeline::Bloom _bloom;
-		DefaultPipeline::Tonemap _tonemap;
+
+		PostProcess::PhysicalCameraSettings _physicalCamera = DEFAULT;
+		PostProcess::BloomSettings _bloomSettings = DEFAULT;
+		PostProcess::TAASettings _taaSettings;
+
+		PostProcess::TAA _taa;
+		PostProcess::Bloom _bloom;
+		PostProcess::Tonemap _tonemap;
 	};
 }

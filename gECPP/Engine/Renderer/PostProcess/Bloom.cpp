@@ -8,7 +8,7 @@
 #define BLOOM_STAGE_DOWNSAMPLE 1
 #define BLOOM_STAGE_UPSAMPLE (-1)
 
-namespace gE::DefaultPipeline
+namespace gE::PostProcess
 {
 	bool Bloom::RenderPass(API::Texture2D& in, API::Texture2D& out)
 	{

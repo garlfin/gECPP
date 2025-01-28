@@ -14,7 +14,7 @@ namespace gE::PostProcess
 {
     struct TAASettings
     {
-        const GPU::Texture2D* ColorFormat;
+        const GPU::Texture* ColorFormat;
         API::Texture2D* Velocity;
         API::Texture2D* PreviousDepth;
     };
@@ -22,7 +22,7 @@ namespace gE::PostProcess
     class TAA final : public PostProcessEffect<RenderTarget<Camera2D>, TAASettings>
     {
     public:
-        TAA(Window* window, TAASettings const & settings);
+        TAA(TARGET_T* target, TAASettings* settings);
 
         NODISCARD bool RenderPass(GL::Texture2D& in, GL::Texture2D& out) override;
 

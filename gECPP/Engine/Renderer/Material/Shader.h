@@ -11,7 +11,7 @@ namespace gE
     class Shader
     {
     public:
-        explicit Shader(Window& window) : _window(&window) {};
+        explicit Shader(Window* window) : _window(window) {};
 
         GET_CONST(Window&, Window, *_window);
 
@@ -34,7 +34,7 @@ namespace gE
     class ForwardShader final : public Shader
     {
     public:
-        ForwardShader(Window&, const GPU::Shader& source);
+        ForwardShader(Window*, const GPU::Shader& source);
 
         NODISCARD const API::Shader& GetReferenceShader() const override { return _shader; }
         NODISCARD const API::Shader& GetShader() const override { return _shader; }
@@ -51,7 +51,7 @@ namespace gE
     class DeferredShader final : public Shader
     {
     public:
-        DeferredShader(Window&, const GPU::Shader& source);
+        DeferredShader(Window*, const GPU::Shader& source);
 
         NODISCARD const API::Shader& GetReferenceShader() const override { return _forwardShader; }
         NODISCARD const API::Shader& GetShader() const override;

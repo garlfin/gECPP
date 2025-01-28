@@ -5,7 +5,7 @@
 #include "Tonemap.h"
 #include <Engine/Window/Window.h>
 
-namespace gE::DefaultPipeline
+namespace gE::PostProcess
 {
 	bool AutoExposure::RenderPass(GL::Texture2D& in, GL::Texture2D& out)
 	{
@@ -17,9 +17,9 @@ namespace gE::DefaultPipeline
 	{
 		const API::ComputeShader& shader = GetWindow().GetTonemapShader();
 
-		float exposure = GetSettings()->Exposure;
-		if(GetSettings()->ExposureMode == ExposureMode::Physical)
-			exposure = GetSettings()->CalculatePhysicalExposure();
+		float exposure = GetSettings().Exposure;
+		if(GetSettings().ExposureMode == ExposureMode::Physical)
+			exposure = GetSettings().CalculatePhysicalExposure();
 
 		shader.Bind();
 		shader.SetUniform(0, exposure);

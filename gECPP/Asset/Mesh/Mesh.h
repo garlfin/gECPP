@@ -12,18 +12,6 @@
 
 namespace gE
 {
-    enum class ShapeType : u8
-    {
-        None,
-        Box,
-        Sphere,
-        Cylinder,
-        Capsule,
-        Compound,
-        ConvexMesh,
-        Mesh
-    };
-
     struct VertexWeight
     {
         glm::u8vec4 IDs = glm::u8vec4(-1);

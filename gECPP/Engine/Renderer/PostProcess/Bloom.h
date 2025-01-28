@@ -27,7 +27,7 @@ namespace gE::PostProcess
 	class Bloom final : public PostProcessEffect<RenderTarget<Camera2D>, BloomSettings>
 	{
 	 public:
-		POSTPROCESS_CONSTRUCTOR(Bloom, BloomSettings)
+		POSTPROCESS_CONSTRUCTOR(Bloom);
 
 		NODISCARD bool RenderPass(API::Texture2D& in, API::Texture2D& out) override;
 	};

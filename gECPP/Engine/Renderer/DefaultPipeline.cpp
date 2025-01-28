@@ -85,6 +85,8 @@ namespace gE
 
 	void DefaultPipeline::Target2D::PostProcessPass(float)
 	{
+		_previousColor.CopyFrom(*_color);
+
 		if(!GetCamera().GetTiming().GetFrame())
 			_previousDepth.CopyFrom(_linearDepth);
 
@@ -97,7 +99,7 @@ namespace gE
 		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
 		// Sync post process "backbuffer" and main color buffer
-		if(front == &*_color) front->CopyFrom(*back);
+		if(front == &_postProcessBack) _color->CopyFrom(_postProcessBack);
 		_previousDepth.CopyFrom(_linearDepth);
 	}
 
@@ -106,8 +108,8 @@ namespace gE
 		_depth(GetFrameBuffer(), GPU::Texture2D(DepthFormat, camera.GetSize())),
 		_color(GetFrameBuffer(), GPU::Texture2D(ColorFormat, camera.GetSize())),
 		_velocity(GetFrameBuffer(), GPU::Texture2D(VelocityFormat, camera.GetSize())),
-		_taaBack(&GetWindow(), GPU::Texture2D(ColorFormat, camera.GetSize())),
 		_linearDepth(&GetWindow(), GPU::Texture2D(HiZFormat, camera.GetSize())),
+		_previousColor(&GetWindow(), GPU::Texture2D(ColorFormat, camera.GetSize())),
 		_postProcessBack(&GetWindow(), GPU::Texture2D(ColorFormat, camera.GetSize())),
 		_previousDepth(&GetWindow(), GPU::Texture2D(PreviousDepthFormat, camera.GetSize())),
 		_effects(effects)
@@ -116,7 +118,7 @@ namespace gE
 
 	void DefaultPipeline::Target2D::GetGPUCameraOverrides(GPU::Camera& camera) const
 	{
-		camera.ColorTexture = (handle) _taaBack;
+		camera.ColorTexture = (handle) _previousColor;
 		camera.DepthTexture = (handle) _linearDepth;
 	}
 

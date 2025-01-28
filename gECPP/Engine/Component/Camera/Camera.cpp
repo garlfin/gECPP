@@ -88,12 +88,12 @@ namespace gE
 		Projection = glm::perspectiveFov(_fov, (float) GetSize().x, (float) GetSize().y, GetClipPlanes().x, GetClipPlanes().y);
 	}
 
-	Camera2D::Camera2D(Entity* p, TARGET_TYPE& t, const CameraSettings2D& s, ComponentManager<Camera>* m) :
+	Camera2D::Camera2D(Entity* p, TARGET_T& t, const CameraSettings2D& s, ComponentManager<Camera>* m) :
 		Camera(p, s.Size, t, s, m)
 	{
 	}
 
-	PerspectiveCamera::PerspectiveCamera(Entity* p, TARGET_TYPE& t, const PerspectiveCameraSettings& s, ComponentManager<Camera>* m) :
+	PerspectiveCamera::PerspectiveCamera(Entity* p, TARGET_T& t, const PerspectiveCameraSettings& s, ComponentManager<Camera>* m) :
 		Camera2D(p, t, s, m)
 	{
 		SetFOV(s.FOV);
@@ -105,7 +105,7 @@ namespace gE
 		camera.Parameters.x = GetFOV<AngleType::Radian>();
 	}
 
-	OrthographicCamera::OrthographicCamera(Entity* p, TARGET_TYPE& t, const OrthographicCameraSettings& s, ComponentManager<Camera>* m) :
+	OrthographicCamera::OrthographicCamera(Entity* p, TARGET_T& t, const OrthographicCameraSettings& s, ComponentManager<Camera>* m) :
 		Camera2D(p, t, s, m), _orthographicScale(s.Scale)
 	{
 	}
@@ -121,7 +121,7 @@ namespace gE
 		camera.View[0] = inverse(GetOwner().GetTransform().Model());
 	}
 
-	Camera3D::Camera3D(Entity* p, TARGET_TYPE& t, const CameraSettings3D& s, ComponentManager<Camera>* m) :
+	Camera3D::Camera3D(Entity* p, TARGET_T& t, const CameraSettings3D& s, ComponentManager<Camera>* m) :
 		Camera(p, s.Size, t, s, m), _sizeZ(s.Size.z)
 	{
 	}
@@ -142,7 +142,7 @@ namespace gE
 			cam.View[i] = lookAt(cam.Position - scale * ForwardDirs[i * 2], cam.Position, UpDirs[i * 2]);
 	}
 
-	CameraCube::CameraCube(Entity* p, TARGET_TYPE& t, const CameraSettings1D& s, ComponentManager<Camera>* m) :
+	CameraCube::CameraCube(Entity* p, TARGET_T& t, const CameraSettings1D& s, ComponentManager<Camera>* m) :
 		Camera(p, TextureSize2D(s.Size), t, s, m)
 	{
 	}
