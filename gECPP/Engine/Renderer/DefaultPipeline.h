@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include <Engine/Window/WindowState.h>
 #include <Engine/Component/Camera/Camera.h>
 #include <Engine/Component/Camera/PostProcessEffect.h>
 #include <Engine/Component/Camera/RenderTarget.h>
@@ -62,36 +61,6 @@ namespace gE::DefaultPipeline
 		return tex;
 	}();
 
-	enum class ExposureMode : u8
-	{
-		Physical,
-		Automatic,
-		Manual
-	};
-
-	struct PhysicalCameraSettings
-	{
-		NODISCARD static float EV100(float aperture, float shutter, float ISO);
-		NODISCARD static float EV100(float luminance, float middleGray = 12.7f);
-		NODISCARD static float EV100ToExposure(float ev100);
-
-		float CalculatePhysicalExposure() const;
-
-		ExposureMode ExposureMode = ExposureMode::Physical;
-
-		// Physical
-		float FocalLength = 0.005f;
-		float FStop = 0.4f;
-		float ShutterTime = 1.f / 24.f;
-		float ISO = 300.0f;
-
-		// Automatic
-		float TargetExposure = 1.0;
-
-		// Manual
-		float Exposure = 0.6f;
-	};
-
  	class Target2D final : public RenderTarget<Camera2D>, public IDepthTarget, public IColorTarget
 	{
 	 public:
@@ -103,7 +72,6 @@ namespace gE::DefaultPipeline
 		GET(API::Texture2D&, Depth, _depth.Get());
 		GET(API::Texture2D&, Color, _color.Get());
 		GET(API::Texture2D&, Velocity, _velocity.Get());
- 		GET(PhysicalCameraSettings&, PhysicalSettings, _physicalSettings);
 
  		void GetGPUCameraOverrides(GPU::Camera&) const override;
 
@@ -118,13 +86,11 @@ namespace gE::DefaultPipeline
 		Attachment<API::Texture2D, GL_COLOR_ATTACHMENT0> _color;
 		Attachment<API::Texture2D, GL_COLOR_ATTACHMENT1> _velocity;
 
-		API::Texture2D _taaBack;
-		API::Texture2D _depthBack;
+		API::Texture2D _linearDepth;
 		API::Texture2D _postProcessBack;
 		API::Texture2D _previousDepth;
 
 		std::vector<POSTPROCESS_T*> _effects;
- 		PhysicalCameraSettings _physicalSettings = DEFAULT;
 	};
 
 	struct Buffers

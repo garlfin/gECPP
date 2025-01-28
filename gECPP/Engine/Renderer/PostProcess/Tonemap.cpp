@@ -7,7 +7,13 @@
 
 namespace gE::DefaultPipeline
 {
-	void Tonemap::RenderPass(API::Texture2D& in, API::Texture2D& out)
+	bool AutoExposure::RenderPass(GL::Texture2D& in, GL::Texture2D& out)
+	{
+
+		return false;
+	}
+
+	bool Tonemap::RenderPass(API::Texture2D& in, API::Texture2D& out)
 	{
 		const API::ComputeShader& shader = GetWindow().GetTonemapShader();
 
@@ -23,5 +29,7 @@ namespace gE::DefaultPipeline
 
 		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 		GetWindow().GetTonemapShader().Dispatch(DIV_CEIL_T(in.GetSize(), TONEMAP_GROUP_SIZE, TextureSize2D));
+
+		return true;
 	}
 }

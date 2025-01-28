@@ -12,20 +12,25 @@ namespace gE
 {
 	class Window;
 
-	template<class TEX_T>
+	template<class T>
 	class IPostProcessEffect
 	{
 	 public:
-		explicit IPostProcessEffect(Window* window) : _window(window) {};
+		using TEX_T = typename T::TEX_T;
+		using TARGET_T = T;
 
-		virtual void RenderPass(TEX_T& in, TEX_T& out) = 0;
+		explicit IPostProcessEffect(const TARGET_T* target) : _target(target) {};
 
-		GET_CONST(Window&, Window, *_window);
+		// If result placed in 'in', return false.
+		NODISCARD virtual bool RenderPass(TEX_T& in, TEX_T& out) = 0;
+
+		GET_CONST(const TARGET_T&, Target, *_target);
+		GET_CONST(Window&, Window, _target->GetWindow());
 
 		virtual ~IPostProcessEffect() = default;
 
 	private:
-		Window* _window;
+		const TARGET_T* _target;
 	};
 
 	template<class TEX_T, class SETTINGS_T>

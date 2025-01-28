@@ -10,7 +10,7 @@
 
 namespace gE::DefaultPipeline
 {
-	void Bloom::RenderPass(API::Texture2D& in, API::Texture2D& out)
+	bool Bloom::RenderPass(API::Texture2D& in, API::Texture2D& out)
 	{
 		const API::ComputeShader& shader = GetWindow().GetBloomShader();
 
@@ -47,5 +47,7 @@ namespace gE::DefaultPipeline
 			glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 			shader.Dispatch(DIV_CEIL_T(out.GetSize(mip), BLOOM_GROUP_SIZE, TextureSize2D));
 		}
+
+		return true;
 	}
 }

@@ -14,31 +14,10 @@
 #define HIZ_MODE_COPY 0
 #define HIZ_MODE_DOWNSAMPLE 1
 
-#define TAA_GROUP_SIZE 8
 #define HIZ_GROUP_SIZE 8
 
 namespace gE
 {
-	float DefaultPipeline::PhysicalCameraSettings::EV100(float aperture, float shutter, float ISO)
-	{
-		return std::log2(aperture * aperture / shutter * 100.f / ISO);
-	}
-
-	float DefaultPipeline::PhysicalCameraSettings::EV100(float luminance, float middleGray)
-	{
-		return std::log2(luminance * 100.f / middleGray);
-	}
-
-	float DefaultPipeline::PhysicalCameraSettings::EV100ToExposure(float ev100)
-	{
-		return 1.0 / (1.2f * std::pow(2.0, ev100));
-	}
-
-	float DefaultPipeline::PhysicalCameraSettings::CalculatePhysicalExposure() const
-	{
-		return EV100ToExposure(EV100(FStop, ShutterTime, ISO));
-	}
-
 	DefaultPipeline::Buffers::Buffers(Window* window) :
 		_cameraBuffer(window, 1, nullptr, GPU::BufferUsageHint::Dynamic),
 		_sceneBuffer(window, 1, nullptr, GPU::BufferUsageHint::Dynamic),
@@ -71,19 +50,19 @@ namespace gE
 
 		hiZShader.SetUniform(0, glm::vec4(HIZ_MODE_COPY, 0.0, camera.GetClipPlanes()));
 		hiZShader.SetUniform(1, *_depth, 0);
-		_depthBack.Bind(0, GL_WRITE_ONLY, 0);
+		_linearDepth.Bind(0, GL_WRITE_ONLY, 0);
 
 		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 		hiZShader.Dispatch(DIV_CEIL(_depth->GetSize(), HIZ_GROUP_SIZE));
 
-		hiZShader.SetUniform(1, _depthBack, 0);
+		hiZShader.SetUniform(1, _linearDepth, 0);
 
-		for(u8 i = 1; i < _depthBack.GetMipCount(); i++)
+		for(u8 i = 1; i < _linearDepth.GetMipCount(); i++)
 		{
-			TextureSize2D mipSize = _depthBack.GetSize(i);
+			TextureSize2D mipSize = _linearDepth.GetSize(i);
 
 			hiZShader.SetUniform(0, glm::vec4(HIZ_MODE_DOWNSAMPLE, i - 1, 0, 0));
-			_depthBack.Bind(0, GL_WRITE_ONLY, i);
+			_linearDepth.Bind(0, GL_WRITE_ONLY, i);
 
 			glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 			hiZShader.Dispatch(DIV_CEIL(mipSize, HIZ_GROUP_SIZE));
@@ -106,38 +85,20 @@ namespace gE
 
 	void DefaultPipeline::Target2D::PostProcessPass(float)
 	{
-		API::ComputeShader& taaShader = GetWindow().GetTAAShader();
-
-		taaShader.Bind();
-
 		if(!GetCamera().GetTiming().GetFrame())
-			_previousDepth.CopyFrom(_depthBack);
-
-		_postProcessBack.Bind(0, GL_WRITE_ONLY);
-		taaShader.SetUniform(0, _color->Use(0));
-		taaShader.SetUniform(1, _taaBack.Use(1));
-		taaShader.SetUniform(2, _velocity->Use(2));
-		taaShader.SetUniform(3, _previousDepth.Use(3));
-
-		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-
-		taaShader.Dispatch(DIV_CEIL(_color->GetSize(), TAA_GROUP_SIZE));
-
-		// Copy TAA result to taa "backbuffer"
-		_taaBack.CopyFrom(_postProcessBack);
-		_previousDepth.CopyFrom(_depthBack);
+			_previousDepth.CopyFrom(_linearDepth);
 
 		// Post process loop
 		API::Texture2D* front = &*_color, *back = &_postProcessBack;
 		for(POSTPROCESS_T* effect : _effects)
-		{
-			std::swap(front, back);
-			effect->RenderPass(*front, *back);
-		}
+			if(effect->RenderPass(*front, *back))
+				std::swap(front, back);
 
 		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
 		// Sync post process "backbuffer" and main color buffer
 		if(front == &*_color) front->CopyFrom(*back);
+		_previousDepth.CopyFrom(_linearDepth);
 	}
 
 	DefaultPipeline::Target2D::Target2D(Entity& owner, Camera2D& camera, const std::vector<POSTPROCESS_T*>& effects) :
@@ -146,7 +107,7 @@ namespace gE
 		_color(GetFrameBuffer(), GPU::Texture2D(ColorFormat, camera.GetSize())),
 		_velocity(GetFrameBuffer(), GPU::Texture2D(VelocityFormat, camera.GetSize())),
 		_taaBack(&GetWindow(), GPU::Texture2D(ColorFormat, camera.GetSize())),
-		_depthBack(&GetWindow(), GPU::Texture2D(HiZFormat, camera.GetSize())),
+		_linearDepth(&GetWindow(), GPU::Texture2D(HiZFormat, camera.GetSize())),
 		_postProcessBack(&GetWindow(), GPU::Texture2D(ColorFormat, camera.GetSize())),
 		_previousDepth(&GetWindow(), GPU::Texture2D(PreviousDepthFormat, camera.GetSize())),
 		_effects(effects)
@@ -156,7 +117,7 @@ namespace gE
 	void DefaultPipeline::Target2D::GetGPUCameraOverrides(GPU::Camera& camera) const
 	{
 		camera.ColorTexture = (handle) _taaBack;
-		camera.DepthTexture = (handle) _depthBack;
+		camera.DepthTexture = (handle) _linearDepth;
 	}
 
 	void DefaultPipeline::Target2D::RenderDependencies(float delta)

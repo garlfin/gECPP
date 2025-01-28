@@ -8,15 +8,25 @@
 #include <Engine/Renderer/DefaultPipeline.h>
 #include <Graphics/Shader/Shader.h>
 
+#include "PhysicalCamera.h"
+
 #define TONEMAP_GROUP_SIZE 8
 
-namespace gE::DefaultPipeline
+namespace gE::PostProcess
 {
-	class Tonemap final : public PostProcessEffect<API::Texture2D, PhysicalCameraSettings*>
+	class AutoExposure final : public PostProcessEffect<RenderTarget<Camera2D>, PhysicalCameraSettings*>
+	{
+	public:
+		POSTPROCESS_CONSTRUCTOR(AutoExposure, PhysicalCameraSettings*);
+
+		NODISCARD bool RenderPass(GL::Texture2D& in, GL::Texture2D& out) override;
+	};
+
+	class Tonemap final : public PostProcessEffect<RenderTarget<Camera2D>, PhysicalCameraSettings*>
 	{
 	 public:
 		POSTPROCESS_CONSTRUCTOR(Tonemap, PhysicalCameraSettings*);
 
-		void RenderPass(API::Texture2D& in, API::Texture2D& out) override;
+		NODISCARD bool RenderPass(API::Texture2D& in, API::Texture2D& out) override;
 	};
 }

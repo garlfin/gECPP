@@ -76,12 +76,12 @@ namespace gE
 	class RenderTarget : public IRenderTarget
 	{
 	public:
+		using CAMERA_T = T;
+		using TEX_T = typename T::TEX_T;
 		using IRenderTarget::IRenderTarget;
 
 		GET(T&, Camera, (T&) IRenderTarget::GetCamera());
 		GET_CONST(typename T::SIZE_TYPE, Size, GetCamera().GetSize());
-
-		typedef T CAMERA_TYPE;
 	};
 
 	class IDepthTarget

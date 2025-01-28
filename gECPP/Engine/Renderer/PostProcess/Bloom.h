@@ -8,9 +8,11 @@
 #include <Engine/Renderer/DefaultPipeline.h>
 #include <Graphics/Shader/Shader.h>
 
+#include "PhysicalCamera.h"
+
 #define BLOOM_GROUP_SIZE 8
 
-namespace gE::DefaultPipeline
+namespace gE::PostProcess
 {
 	struct BloomSettings
 	{
@@ -22,11 +24,11 @@ namespace gE::DefaultPipeline
 		u8 Iterations = 7;
 	};
 
-	class Bloom final : public PostProcessEffect<API::Texture2D, BloomSettings>
+	class Bloom final : public PostProcessEffect<RenderTarget<Camera2D>, BloomSettings>
 	{
 	 public:
 		POSTPROCESS_CONSTRUCTOR(Bloom, BloomSettings)
 
-		void RenderPass(API::Texture2D& in, API::Texture2D& out) override;
+		NODISCARD bool RenderPass(API::Texture2D& in, API::Texture2D& out) override;
 	};
 }
