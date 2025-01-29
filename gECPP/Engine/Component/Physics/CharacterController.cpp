@@ -70,10 +70,12 @@ namespace gE
         const px::PhysicsSystem& system = manager.GetSystem();
         const Transform& transform = GetOwner().GetTransform();
 
-        glm::vec3 velocity = _velocity;
-        velocity.y += system.GetGravity().GetY();
+        if(!GetIsGrounded() && _useGravity)
+            _velocity.y += system.GetGravity().GetY() * delta;
+        else
+            _velocity.y = std::max(_velocity.y, 0.f);
 
-        if(_controller->IsSupported() || !_useGravity) velocity.y = 0.f;
+        const glm::vec3 velocity = _velocity + _instantVelocity / delta;
 
         _controller->SetLinearVelocity(Physics::ToPX(velocity));
 
@@ -95,6 +97,8 @@ namespace gE
             DefaultShapeFilter,
             manager.GetTempAllocator()
         );
+
+        if(GetIsGrounded()) _instantVelocity = DEFAULT;
 
         PreviousPosition = Position;
         Position = Physics::ToGLM(_controller->GetPosition());

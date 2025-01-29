@@ -14,6 +14,7 @@
 #define SENSITIVITY 0.1f
 #define SPEED 2.f
 #define SPEED_MULTIPLIER 2.f
+#define JUMP_HEIGHT 1.f
 
 namespace gE::VoxelDemo
 {
@@ -39,7 +40,6 @@ namespace gE::VoxelDemo
 			const MouseState& mouse = GetWindow().GetMouse();
 
 			const KeyState crouchState = keyboard.GetKey(Key::C);
-			const bool grounded = _controller->GetIsGrounded();
 
 			_rot.y += mouse.GetDelta().x * SENSITIVITY;
 			_rot.x += mouse.GetDelta().y * SENSITIVITY;
@@ -66,7 +66,7 @@ namespace gE::VoxelDemo
 				dir *= 0.5;
 			}
 
-			if(crouchState == KeyState::Released && grounded)
+			if(crouchState == KeyState::Released && _grounded)
 			{
 				float heightDifference = (_standingHeight - _crouchingHeight) / 2.f;
 				transform.SetPosition(transform->Position + glm::vec3(0, heightDifference, 0));
@@ -77,16 +77,28 @@ namespace gE::VoxelDemo
 			_controller->SetShape(capsuleShape);
 
 			if(!IsPressed(crouchState) && IsPressed(keyboard.GetKey(Key::LShift))) dir *= SPEED_MULTIPLIER;
-			if(!grounded) dir *= 0.0;
+			if(!_grounded) dir *= 0.0;
 
-			_controller->SetVelocity(transform->Rotation * dir);
+			_controller->Move(transform->Rotation * dir * delta);
+
+			if(IsPressed(keyboard.GetKey(Key::Space)) && _grounded)
+			{
+				_controller->SetVelocity(glm::vec3(0, std::sqrt(2.f * 9.81 * JUMP_HEIGHT), 0));
+				_grounded = false;
+			}
 		}
 
-	 private:
+		void OnFixedUpdate(float d) override
+		{
+			_grounded = _controller->GetIsGrounded();
+		}
+
+	private:
 		glm::vec3 _rot = DEFAULT;
 		float _standingHeight = 1.75;
 		float _crouchingHeight = 0.875;
 		RelativePointer<CharacterController> _controller;
 		Entity* _camera;
+		bool _grounded = false;
 	};
 }

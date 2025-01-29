@@ -35,6 +35,8 @@ namespace gE
         GET_SET_VALUE(bool, UseGravity, _useGravity);
         GET_SET_VALUE(glm::vec3, Velocity, _velocity);
 
+        ALWAYS_INLINE void Move(const glm::vec3& position) { _instantVelocity += position; }
+
         GET_CONST(bool, IsGrounded, _controller->IsSupported());
         NODISCARD PhysicsComponent* GetGround() const { return (PhysicsComponent*) _controller->GetGroundUserData(); }
 
@@ -49,5 +51,6 @@ namespace gE
 
         bool _useGravity = true;
         glm::vec3 _velocity = DEFAULT;
+        glm::vec3 _instantVelocity = DEFAULT;
     };
 }
