@@ -8,59 +8,59 @@
 
 namespace Physics
 {
-    inline void Shape::ISerialize(istream& in, SETTINGS_T s)
+    inline void Shape::IDeserialize(istream& in, SETTINGS_T s)
     {
         Read(in, Transform);
     }
 
-    inline void Shape::IDeserialize(ostream& out) const
+    inline void Shape::ISerialize(ostream& out) const
     {
         Write(out, Transform);
     }
 
-    inline void ConvexShape::ISerialize(istream& in, SETTINGS_T s)
+    inline void ConvexShape::IDeserialize(istream& in, SETTINGS_T s)
     {
         Mass = Read<float>(in);
     }
 
-    inline void ConvexShape::IDeserialize(ostream& out) const
+    inline void ConvexShape::ISerialize(ostream& out) const
     {
         Write(out, Mass);
     }
 
-    inline void SphereShape::ISerialize(istream& in, SETTINGS_T s)
+    inline void SphereShape::IDeserialize(istream& in, SETTINGS_T s)
     {
         Radius = Read<float>(in);
     }
 
-    inline void SphereShape::IDeserialize(ostream& out) const
+    inline void SphereShape::ISerialize(ostream& out) const
     {
         Write(out, Radius);
     }
 
-    inline void BoxShape::ISerialize(istream& in, SETTINGS_T s)
+    inline void BoxShape::IDeserialize(istream& in, SETTINGS_T s)
     {
         Read(in, Extents);
     }
 
-    inline void BoxShape::IDeserialize(ostream& out) const
+    inline void BoxShape::ISerialize(ostream& out) const
     {
         Write(out, Extents);
     }
 
-    inline void CapsuleShape::ISerialize(istream& in, SETTINGS_T s)
+    inline void CapsuleShape::IDeserialize(istream& in, SETTINGS_T s)
     {
         Read(in, Height);
         Read(in, Radius);
     }
 
-    inline void CapsuleShape::IDeserialize(ostream& out) const
+    inline void CapsuleShape::ISerialize(ostream& out) const
     {
         Write(out, Height);
         Write(out, Radius);
     }
 
-    inline void BakedConvexMeshShape::ISerialize(istream& in, SETTINGS_T s)
+    inline void BakedConvexMeshShape::IDeserialize(istream& in, SETTINGS_T s)
     {
         Read(in, CenterOfMass);
         Read(in, Inertia);
@@ -73,7 +73,7 @@ namespace Physics
         Read(in, InnerRadius);
     }
 
-    inline void BakedConvexMeshShape::IDeserialize(ostream& out) const
+    inline void BakedConvexMeshShape::ISerialize(ostream& out) const
     {
         Write(out, CenterOfMass);
         Write(out, Inertia);
@@ -86,7 +86,7 @@ namespace Physics
         Write(out, InnerRadius);
     }
 
-    inline void ConvexMeshShape::ISerialize(istream& in, SETTINGS_T s)
+    inline void ConvexMeshShape::IDeserialize(istream& in, SETTINGS_T s)
     {
         ReadArray<u32>(in, Points);
 
@@ -96,7 +96,7 @@ namespace Physics
         BakedSettings = gE::ptr_create<BakedConvexMeshShape>(in, nullptr);
     }
 
-    inline void ConvexMeshShape::IDeserialize(ostream& out) const
+    inline void ConvexMeshShape::ISerialize(ostream& out) const
     {
         const bool hasBakedSettings = !BakedSettings.IsFree();
 
@@ -106,6 +106,11 @@ namespace Physics
         if(hasBakedSettings)
             Write(out, BakedSettings);
     }
+
+    SERIALIZABLE_REFLECTABLE_IMPL(SphereShape, Jolt::SphereShape);
+    SERIALIZABLE_REFLECTABLE_IMPL(BoxShape, Jolt::BoxShape);
+    SERIALIZABLE_REFLECTABLE_IMPL(CapsuleShape, Jolt::CapsuleShape);
+    SERIALIZABLE_REFLECTABLE_IMPL(ConvexMeshShape, Jolt::ConvexMeshShape);
 }
 
 namespace Jolt

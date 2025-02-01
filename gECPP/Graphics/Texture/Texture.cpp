@@ -12,7 +12,7 @@ namespace GPU
 	{
 	}
 
-	void TextureData::ISerialize(std::istream& in, SETTINGS_T)
+	void TextureData::IDeserialize(std::istream& in, SETTINGS_T)
 	{
 		PixelFormat = Read<GLenum>(in);
 		PixelType = Read<GLenum>(in);
@@ -20,7 +20,7 @@ namespace GPU
 		Read<u64, u8>(in, Data);
 	}
 
-	void TextureData::IDeserialize(std::ostream& out) const
+	void TextureData::ISerialize(std::ostream& out) const
 	{
 		Write(out, PixelFormat);
 		Write(out, PixelType);

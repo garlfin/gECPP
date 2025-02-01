@@ -20,7 +20,7 @@
 	public: \
 		typedef SUPER_T::SETTINGS_T SETTINGS_T; \
 		typedef SUPER_T SUPER; \
-		inline void Serialize(istream& in, gE::Window* window) override { SAFE_CONSTRUCT(*this, TYPE, in, window); } \
+		inline void Deserialize(istream& in, gE::Window* window) override { SAFE_CONSTRUCT(*this, TYPE, in, window); } \
 		TYPE() = default; \
 		using SUPER_T::Free; \
 		using SUPER_T::IsFree; \

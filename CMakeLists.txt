@@ -21,7 +21,7 @@ add_library(JOLT STATIC ${JOLT_SRC})
 
 # CityHash
 file(GLOB_RECURSE CITYHASH_SRC "Vendor/CityHash/*.cpp" "Vendor/CityHash/*.h")
-add_library(CITYHASH_SRC STATIC ${CITYHASH_SRC})
+add_library(CITYHASH STATIC ${CITYHASH_SRC})
 
 # GLFW
 add_library(GLFW STATIC IMPORTED)
@@ -48,7 +48,7 @@ file(GLOB_RECURSE GECPP_SRC "gECPP/*.cpp" "gECPP/*.h" "gECPP/*.inl")
 
 add_library(gECPP STATIC ${GECPP_SRC})
 target_compile_definitions(gECPP PUBLIC API_ID=API_GL)
-target_link_libraries(gECPP GLAD GLFW JOLT CITYHASH_SRC)
+target_link_libraries(gECPP GLAD GLFW JOLT CITYHASH)
 
 # VOXELDEMO
 file(GLOB_RECURSE VOXELDEMO_SRC "Demo/*.cpp" "Demo/*.h" "Demo/*.inl")

@@ -52,6 +52,7 @@ namespace Physics
     struct SphereShape : public ConvexShape
     {
         SERIALIZABLE_PROTO("SSHP", 1, SphereShape, ConvexShape);
+        SERIALIZABLE_REFLECTABLE(SphereShape, "Physics::SphereShape");
 
     public:
         bool operator==(const SphereShape& o) const
@@ -65,6 +66,7 @@ namespace Physics
     struct BoxShape : public ConvexShape
     {
         SERIALIZABLE_PROTO("BSHP", 1, BoxShape, ConvexShape);
+        SERIALIZABLE_REFLECTABLE(BoxShape, "Physics::BoxShape");
 
     public:
         bool operator==(const BoxShape& o) const
@@ -78,6 +80,7 @@ namespace Physics
     struct CapsuleShape : public ConvexShape
     {
         SERIALIZABLE_PROTO("CPSL", 1, CapsuleShape, ConvexShape);
+        SERIALIZABLE_REFLECTABLE(CapsuleShape, "Physics::CapsuleShape");
 
     public:
         bool operator==(const CapsuleShape& o) const
@@ -133,6 +136,7 @@ namespace Physics
     struct ConvexMeshShape : public ConvexShape
     {
         SERIALIZABLE_PROTO("CNVX", 1, ConvexMeshShape, ConvexShape);
+        SERIALIZABLE_REFLECTABLE(ConvexMeshShape, "Physics::ConvexMeshShape");
 
     public:
         Array<glm::vec3> Points = DEFAULT;
@@ -158,7 +162,7 @@ namespace Jolt
 
         GET_CONST(const Physics::ColliderTransform&, Transform, _settings->Transform);
         GET_CONST(const Physics::Shape&, Settings, _settings);
-        GET(px::Shape&, JoltShape, **_shape);
+        GET(px::Shape&, JoltShape, _shape->Get());
 
         NODISCARD operator bool() const { return _shape.GetPointer() && _shape->GetPointer(); }
 

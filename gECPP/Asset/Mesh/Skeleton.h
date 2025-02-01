@@ -115,7 +115,7 @@ namespace gE
     };
 
     template <class T, class SKELETON_T>
-    void BoneReference<T, SKELETON_T>::ISerialize(istream& in, SETTINGS_T settings)
+    void BoneReference<T, SKELETON_T>::IDeserialize(istream& in, SETTINGS_T settings)
     {
         Read(in, SuggestedLocation);
 
@@ -124,7 +124,7 @@ namespace gE
     }
 
     template <class T, class SKELETON_T>
-    void BoneReference<T, SKELETON_T>::IDeserialize(ostream& out) const
+    void BoneReference<T, SKELETON_T>::ISerialize(ostream& out) const
     {
         Write(out, SuggestedLocation);
 

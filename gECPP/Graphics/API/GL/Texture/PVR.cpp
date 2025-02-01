@@ -18,7 +18,7 @@ namespace PVR
 		size_t copySize = src.tellg();
 		src.seekg(0, std::ios::beg);
 
-		header.Serialize(src, nullptr);
+		header.Deserialize(src, nullptr);
 
 		copySize -= src.tellg();
 		Array<u8> data(copySize);
@@ -83,7 +83,7 @@ namespace PVR
 		return tex;
 	}
 
-	void Header::ISerialize(istream& in, SETTINGS_T)
+	void Header::IDeserialize(istream& in, SETTINGS_T)
 	{
 		Version = ::Read<u32>(in);
 		Flags = ::Read<PVR::Flags>(in);
@@ -100,5 +100,5 @@ namespace PVR
 		in.seekg(::Read<u32>(in), std::ios::cur); // I couldn't give two hoots about the metadata
 	}
 
-	void Header::IDeserialize(ostream&) const { }
+	void Header::ISerialize(ostream&) const { }
 }

@@ -61,11 +61,26 @@ namespace gE
             SUPER_T(owner, _shape),
             _shape(&owner->GetWindow(), settings)
         {
+            _shape.Free();
+        }
+
+        ShapeCollider(Entity* owner, const SHAPE_T& shape) :
+            SUPER_T(owner, _shape),
+            _shape(shape)
+        {
+            if(!shape.IsFree()) LOG("WARNING: SHAPE NOT FREED BEFORE BEING ASSIGNED TO COLLIDER!");
+        }
+
+        ShapeCollider(Entity* owner, SHAPE_T&& shape) :
+            SUPER_T(owner, _shape),
+            _shape(std::move(shape))
+        {
+            if(!shape.IsFree()) LOG("WARNING: SHAPE NOT FREED BEFORE BEING ASSIGNED TO COLLIDER!");
         }
 
         const SHAPE_T* operator->() { return &_shape; }
 
-        GET_CONST(const typename SHAPE_T::SUPER&, Settings, _shape.GetSettings());
+        GET_CONST(const typename SHAPE_T::SUPER&, Settings, _shape->GetSettings());
         GET_CONST(const SHAPE_T&, Shape, _shape);
 
     protected:

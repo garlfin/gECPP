@@ -108,7 +108,7 @@ namespace gE
             o._t = nullptr;
         );
 
-        GET(T&,, _t);
+        GET(T&,, *_t);
         GET(T*, Pointer, _t);
 
         ALWAYS_INLINE T* operator->() { return _t; }

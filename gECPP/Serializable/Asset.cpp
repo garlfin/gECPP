@@ -60,12 +60,12 @@ namespace gE
         return &*_files.insert(std::move(file)).first; // dumb
     }
 
-    void Bank::ISerialize(istream& in, SETTINGS_T s)
+    void Bank::IDeserialize(istream& in, SETTINGS_T s)
     {
         // TODO
     }
 
-    void Bank::IDeserialize(ostream& out) const
+    void Bank::ISerialize(ostream& out) const
     {
         // TODO
     }
@@ -156,7 +156,7 @@ namespace gE
         return std::bit_cast<__uint128_t>(CityHash::CityHash128(str.c_str(), str.length()));
     }
 
-    void File::ISerialize(istream& in, SETTINGS_T s)
+    void File::IDeserialize(istream& in, SETTINGS_T s)
     {
         _bank = s.Bank;
 
@@ -171,7 +171,7 @@ namespace gE
             _asset = ref_cast((Asset*) _type->Factory(in, s.Window));
     }
 
-    void File::IDeserialize(ostream& out) const
+    void File::ISerialize(ostream& out) const
     {
         Write(out, _path.string());
         Write(out, _uuid);

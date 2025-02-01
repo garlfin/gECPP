@@ -53,13 +53,13 @@ using TypeSystem = ITypeSystem<gE::Window*>;
 template<class T, class S>
 concept is_serializable_in = requires(T t, S s, std::istream& i)
 {
-	t.Serialize(i, s);
+	t.Deserialize(i, s);
 };
 
 template<class T>
 concept is_serializable_out = requires(T t, std::ostream& o)
 {
-	t.Deserialize(o);
+	t.Serialize(o);
 };
 
 template<class T, class S>
@@ -116,16 +116,16 @@ template<> void Write(std::ostream& out, u32 count, const std::string* t);
 	public: \
 		typedef SUPER_T SUPER; \
 		typedef SUPER::SETTINGS_T SETTINGS_T;\
-		TYPE(istream& in, SETTINGS_T s) : SUPER(in, s) { SERIALIZABLE_CHECK_HEADER(); ISerialize(in, s); } \
+		TYPE(istream& in, SETTINGS_T s) : SUPER(in, s) { SERIALIZABLE_CHECK_HEADER(); IDeserialize(in, s); } \
 		TYPE() = default; \
 		static const constexpr char MAGIC[5] = MAGIC_VAL; \
-		inline void Serialize(istream& in, SETTINGS_T s) override { SAFE_CONSTRUCT(*this, TYPE, in, s); } \
-		inline void Deserialize(ostream& out) const override { SUPER::Deserialize(out); Write(out, 4, MAGIC); Write<u8>(out, Version); IDeserialize(out); } \
+		inline void Deserialize(istream& in, SETTINGS_T s) override { SAFE_CONSTRUCT(*this, TYPE, in, s); } \
+		inline void Serialize(ostream& out) const override { SUPER::Serialize(out); Write(out, 4, MAGIC); Write<u8>(out, Version); ISerialize(out); } \
 		u8 Version = VERSION_VAL; \
 		DEFAULT_OPERATOR_CM(TYPE); \
 	private: \
-		void ISerialize(istream& in, SETTINGS_T s); \
-		void IDeserialize(ostream& out) const;
+		void IDeserialize(istream& in, SETTINGS_T s); \
+		void ISerialize(ostream& out) const;
 
 #define SERIALIZABLE_REFLECTABLE(TYPE, NAME) \
 	public: \
@@ -146,8 +146,8 @@ public:
 
 	typedef T SETTINGS_T;
 
-	virtual void Serialize(istream& in, SETTINGS_T settings) {};
-	virtual void Deserialize(ostream& out) const {};
+	virtual void Deserialize(istream& in, SETTINGS_T settings) {};
+	virtual void Serialize(ostream& out) const {};
 
 	virtual const typename ITypeSystem<T>::Type* GetType() const { return nullptr; }
 
@@ -163,7 +163,7 @@ void ReadSerializableFromFile(gE::Window* window, const Path& path, T& t)
 	std::ifstream file(path, std::ios::in | std::ios::binary);
 	GE_ASSERTM(file.is_open(), "COULD NOT OPEN FILE!");
 
-	t.Serialize(file, window);
+	t.Deserialize(file, window);
 
 	file.close();
 }
@@ -180,7 +180,7 @@ template<is_serializable_out T>
 void WriteSerializableToFile(const Path& path, const T& t)
 {
 	std::ofstream file(path, std::ios::out | std::ios::binary);
-	t.Deserialize(file);
+	t.Serialize(file);
 }
 
 template<typename UINT_T, class T>
@@ -284,7 +284,7 @@ void Write(ostream& out, u32 count, const T* t)
 	if constexpr(std::is_trivially_copyable_v<T> && !is_serializable_out<T>)
 		out.write((char*) t, sizeof(T) * count);
 	else
-		for(u32 i = 0; i < count; i++) t[i].Deserialize(out);
+		for(u32 i = 0; i < count; i++) t[i].Serialize(out);
 }
 
 template<typename UINT_T, class T>

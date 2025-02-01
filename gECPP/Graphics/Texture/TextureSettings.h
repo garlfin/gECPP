@@ -46,10 +46,10 @@ namespace PVR
 	struct Header : Serializable<>
 	{
 	public:
-		explicit Header(istream& in, SETTINGS_T s) : Serializable(in, s) { ISerialize(in, s); }
+		explicit Header(istream& in, SETTINGS_T s) : Serializable(in, s) { IDeserialize(in, s); }
 		Header() = default;
-		inline void Serialize(istream& in, SETTINGS_T s) override { SAFE_CONSTRUCT(*this, Header, in, s); }
-		inline void Deserialize(ostream& out) const override { IDeserialize(out); }
+		inline void Deserialize(istream& in, SETTINGS_T s) override { SAFE_CONSTRUCT(*this, Header, in, s); }
+		inline void Serialize(ostream& out) const override { ISerialize(out); }
 
 		uint32_t Version;
 		Flags Flags;
@@ -62,8 +62,8 @@ namespace PVR
 		uint32_t MipCount;
 
 	private:
-		void ISerialize(istream& in, SETTINGS_T s);
-		void IDeserialize(ostream& out) const;
+		void IDeserialize(istream& in, SETTINGS_T s);
+		void ISerialize(ostream& out) const;
 	};
 
 	constexpr GLenum PVRToInternalFormat(PixelFormat f)

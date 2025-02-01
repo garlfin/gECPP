@@ -6,7 +6,7 @@
 
 namespace gE
 {
-    void Bone::ISerialize(istream& in, SETTINGS_T s)
+    void Bone::IDeserialize(istream& in, SETTINGS_T s)
     {
         Read(in, Name);
         ReadSerializable(in, Parent, s);
@@ -14,21 +14,21 @@ namespace gE
         InverseBindMatrix = inverse(Transform.ToMat4());
     }
 
-    void Bone::IDeserialize(ostream& out) const
+    void Bone::ISerialize(ostream& out) const
     {
         Write(out, Name);
         Write(out, Parent);
         Write(out, Transform);
     }
 
-    void AnimatedBone::ISerialize(istream& in, SETTINGS_T s)
+    void AnimatedBone::IDeserialize(istream& in, SETTINGS_T s)
     {
         Read(in, Name);
         ReadSerializable(in, Parent, s);
         ReadArray<u16>(in, Frames);
     }
 
-    void AnimatedBone::IDeserialize(ostream& out) const
+    void AnimatedBone::ISerialize(ostream& out) const
     {
         Write(out, Name);
         Write(out, Parent);
@@ -46,12 +46,12 @@ namespace gE
         return Target;
     }
 
-    void Skeleton::ISerialize(istream& in, SETTINGS_T s)
+    void Skeleton::IDeserialize(istream& in, SETTINGS_T s)
     {
         ReadArraySerializable<u8>(in, Bones, *this);
     }
 
-    void Skeleton::IDeserialize(ostream& out) const
+    void Skeleton::ISerialize(ostream& out) const
     {
         WriteArray<u8>(out, Bones);
     }
@@ -80,7 +80,7 @@ namespace gE
         return nullptr;
     }
 
-    void Animation::ISerialize(istream& in, SETTINGS_T s)
+    void Animation::IDeserialize(istream& in, SETTINGS_T s)
     {
         Read(in, Name);
         Read(in, FPS);
@@ -88,7 +88,7 @@ namespace gE
         ReadArraySerializable<u8>(in, Bones, *this);
     }
 
-    void Animation::IDeserialize(ostream& out) const
+    void Animation::ISerialize(ostream& out) const
     {
         Write(out, Name);
         Write(out, FPS);

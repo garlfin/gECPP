@@ -37,7 +37,7 @@ namespace gE
         virtual void Free() = 0;
         NODISCARD virtual bool IsFree() const = 0;
 
-        void Deserialize(ostream& out) const override { SUPER::Deserialize(out); }
+        void Serialize(ostream& out) const override { SUPER::Serialize(out); }
 
         ~Asset() override = default;
     };

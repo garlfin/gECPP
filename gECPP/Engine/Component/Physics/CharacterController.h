@@ -34,6 +34,7 @@ namespace gE
 
         GET_SET_VALUE(bool, UseGravity, _useGravity);
         GET_SET_VALUE(glm::vec3, Velocity, _velocity);
+        ALWAYS_INLINE void AddVelocity(const glm::vec3& velocity) { _velocity += velocity; }
 
         ALWAYS_INLINE void Move(const glm::vec3& position) { _instantVelocity += position; }
 

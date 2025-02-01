@@ -6,21 +6,21 @@
 
 namespace gETF::UI
 {
-	void Element::ISerialize(istream& in, SETTINGS_T s)
+	void Element::IDeserialize(istream& in, SETTINGS_T s)
 	{
 		_window = nullptr;
 	}
 
-	void Element::IDeserialize(ostream& out) const
+	void Element::ISerialize(ostream& out) const
 	{
 
 	}
 
-	void Frame::ISerialize(istream& in, SETTINGS_T s)
+	void Frame::IDeserialize(istream& in, SETTINGS_T s)
 	{
 	}
 
-	void Frame::IDeserialize(ostream& out) const
+	void Frame::ISerialize(ostream& out) const
 	{
 
 	}

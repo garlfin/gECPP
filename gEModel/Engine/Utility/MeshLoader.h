@@ -9,5 +9,5 @@
 
 namespace gE::gEModel
 {
-    void ConvertFile(Window*, const std::string&, const std::filesystem::path& output);
+    void ConvertFile(Window*, const Path&, const std::filesystem::path& output);
 };

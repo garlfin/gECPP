@@ -13,46 +13,46 @@ namespace GPU
 		Source = ReadFile(path);
 	}
 
-	void ShaderSource::ISerialize(istream& in, SETTINGS_T s)
+	void ShaderSource::IDeserialize(istream& in, SETTINGS_T s)
 	{
 		Read(in, Source);
 	}
 
-	void ShaderSource::IDeserialize(ostream& out) const
+	void ShaderSource::ISerialize(ostream& out) const
 	{
 		Write(out, Source);
 	}
 
-	void ShaderStage::ISerialize(istream& in, SETTINGS_T s)
+	void ShaderStage::IDeserialize(istream& in, SETTINGS_T s)
 	{
 		StageType = Read<ShaderStageType>(in);
 		ReadSerializable(in, Source, s);
 	}
 
-	void ShaderStage::IDeserialize(ostream& out) const
+	void ShaderStage::ISerialize(ostream& out) const
 	{
 		Write(out, StageType);
 		Write(out, Source);
 	}
 
-	void Shader::ISerialize(istream& in, SETTINGS_T s)
+	void Shader::IDeserialize(istream& in, SETTINGS_T s)
 	{
 		ReadSerializable(in, VertexStage, s);
 		ReadSerializable(in, FragmentStage, s);
 	}
 
-	void Shader::IDeserialize(ostream& out) const
+	void Shader::ISerialize(ostream& out) const
 	{
 		Write(out, VertexStage);
 		Write(out, FragmentStage);
 	}
 
-	void ComputeShader::ISerialize(istream& in, SETTINGS_T s)
+	void ComputeShader::IDeserialize(istream& in, SETTINGS_T s)
 	{
 		ReadSerializable(in, ComputeStage, s);
 	}
 
-	void ComputeShader::IDeserialize(ostream& out) const
+	void ComputeShader::ISerialize(ostream& out) const
 	{
 		Write(out, ComputeStage);
 	}

@@ -8,8 +8,8 @@
 #include "Engine/Window/Window.h"
 
 /*
- * void Deserialize(ostream& ptr);
- * void Serialize(void*& ptr);
+ * void Serialize(ostream& ptr);
+ * void Deserialize(void*& ptr);
  *
  * 	struct Header;
  * 	struct Mesh;
@@ -19,7 +19,7 @@
 
 namespace gE
 {
-	void Header::IDeserialize(ostream& out) const
+	void Header::ISerialize(ostream& out) const
 	{
 		Write(out, 4, "gETF");
 		Write<u8>(out, GETF_VERSION);
@@ -30,7 +30,7 @@ namespace gE
 		//WriteArraySerializable<u16>(buf, Meshes, *this);
 	}
 
-	void Header::ISerialize(istream& in, const Header&)
+	void Header::IDeserialize(istream& in, const Header&)
 	{
 		char magic[4];
 		Read<char>(in, 4, magic);

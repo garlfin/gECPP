@@ -8,7 +8,7 @@
 
 namespace gE
 {
-    void Mesh::ISerialize(istream& in, SETTINGS_T s)
+    void Mesh::IDeserialize(istream& in, SETTINGS_T s)
     {
         Read(in, Name);
 
@@ -37,7 +37,7 @@ namespace gE
         }
     }
 
-    void Mesh::IDeserialize(ostream& out) const
+    void Mesh::ISerialize(ostream& out) const
     {
         Write(out, Name);
         Write(out, (u8) 0);

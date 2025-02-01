@@ -16,7 +16,6 @@
 #include <Graphics/Buffer/VAO.h>
 
 #include "Asset/Mesh/Skeleton.h"
-#include "Engine/Utility/AssetManager.h"
 
 using pp = aiPostProcessSteps;
 
@@ -47,12 +46,25 @@ void ConvertFace(u32, const aiFace&, glm::uvec3&);
 void ConvertAABB(const aiAABB&, gE::AABB<Dimension::D3D>&);
 void InsertAvailableWeight(u8 boneID, float weight, gE::VertexWeight& dst);
 
+template<class ARG_T, void(*FUNC)(const aiNode&, ARG_T&)>
+void IterateSkeleton(const aiNode& node, ARG_T& arg)
+{
+	FUNC(node, arg);
+	for(unsigned i = 0; i < node.mNumChildren; i++)
+		IterateSkeleton<ARG_T, FUNC>(*node.mChildren[i], arg);
+}
+
+inline void IterateBoneCount(const aiNode& node, size_t& size) { if(node.mParent && !node.mNumMeshes) size++;}
+inline void ConvertBone(const aiNode& node, gE::Bone*& bone);
+
 namespace gE::gEModel
 {
-	void ConvertFile(Window* window, const std::string& source, const std::filesystem::path& output)
+	void ConvertFile(Window* window, const Path& source, const std::filesystem::path& output)
 	{
+		Path out = output.empty() ? source.parent_path() : output;
+
 		Assimp::Importer importer = DEFAULT;
-		const aiScene& scene = *importer.ReadFile(source, POST_PROCESS);
+		const aiScene& scene = *importer.ReadFile(source.string(), POST_PROCESS);
 
 		aiMesh* previousMesh = nullptr;
 		std::vector<std::vector<aiMesh*>> meshes;
@@ -68,12 +80,22 @@ namespace gE::gEModel
 			previousMesh = mesh;
 		}
 
-		for(unsigned i = 0; i < scene.mNumSkeletons; i++)
-		{
-			aiNode& rootNode = *scene.mSkeletons[i]->mBones[0]->mNode;
+		Skeleton skeleton;
 
-			Skeleton skeleton;
-			//iterate
+		size_t boneCount = 0;
+		IterateSkeleton<size_t, IterateBoneCount>(*scene.mRootNode, boneCount);
+
+		if(boneCount)
+		{
+			skeleton.Bones = Array<Bone>(boneCount);
+
+			Bone* currentBone = skeleton.Bones.Data();
+			IterateSkeleton<Bone*, ConvertBone>(*scene.mRootNode, currentBone);
+
+			Path path = out / source.filename().replace_extension(".skel");
+			WriteSerializableToFile(path, skeleton);
+
+			std::cout << "Wrote skeleton to " << path << std::endl;
 		}
 
 		for(const auto& src : meshes)
@@ -101,12 +123,12 @@ namespace gE::gEModel
 			/*if(hasSkeleton)
 			{
 				GPU::Buffer<VertexWeight> weightSettings;
-				ConvertBones(src, , weightSettings);
+				ConvertBones(src, skeleton, weightSettings);
 
 				mesh.BoneWeights = ptr_create<API::Buffer<VertexWeight>>(window, move(weightSettings));
 			}*/
 
-			Path path = output / (mesh.Name + ".mesh");
+			Path path = out / (mesh.Name + ".mesh");
 			WriteSerializableToFile(path, mesh);
 
 			std::cout << "Wrote to " << path << std::endl;
@@ -278,8 +300,10 @@ void InsertAvailableWeight(u8 boneID, float weight, gE::VertexWeight& dst)
 	GE_ASSERTM(false, "NUMBER OF WEIGHTS EXCEEDED 4!");
 }
 
-void IterateNodes(const aiNode& node, gE::Bone*& bone)
+void ConvertBone(const aiNode& node, gE::Bone*& bone)
 {
+	if(!node.mParent || node.mNumMeshes) return;
+
 	bone->Name = std::string(node.mName.C_Str());
 
 	aiVector3D scale, position;

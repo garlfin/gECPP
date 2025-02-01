@@ -7,8 +7,8 @@
 #include "Texture.h"
 
 #define GPU_TEXTURE_DEFINITION(TYPE, DIMENSION) \
-	inline void TYPE::ISerialize(istream& in, SETTINGS_T s) { Read(in, Size); if(!MipCount) MipCount = GetMipCount<DIMENSION>(Size); } \
-	inline void TYPE::IDeserialize(ostream& out) const { Write(out, Size); }
+	inline void TYPE::IDeserialize(istream& in, SETTINGS_T s) { Read(in, Size); if(!MipCount) MipCount = GetMipCount<DIMENSION>(Size); } \
+	inline void TYPE::ISerialize(ostream& out) const { Write(out, Size); }
 
 namespace GPU
 {
@@ -30,7 +30,7 @@ namespace GPU
 #endif
 	}
 
-	inline void Texture::ISerialize(istream& in, SETTINGS_T s)
+	inline void Texture::IDeserialize(istream& in, SETTINGS_T s)
 	{
 		Read(in, Format);
 		Read(in, WrapMode);
@@ -39,7 +39,7 @@ namespace GPU
 		ReadSerializable(in, Data, nullptr);
 	}
 
-	inline void Texture::IDeserialize(ostream& out) const
+	inline void Texture::ISerialize(ostream& out) const
 	{
 		Write(out, Format);
 		Write(out, WrapMode);
