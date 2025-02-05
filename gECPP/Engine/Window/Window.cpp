@@ -3,13 +3,13 @@
 #include <iostream>
 #include <Engine/Component/Camera/Camera.h>
 #include <Engine/Renderer/DefaultPipeline.h>
-
+#include <Engine/Utility/TickHandler.h>
+#include <Graphics/API/GL/Timer.h>
+#include <IMGUI/imgui.h>
+#include <IMGUI/backends/imgui_impl_glfw.h>
 #include <Vendor/GLAD/glad.h>
 #include <Vendor/GLFW/glfw3.h>
 
-#include <Engine/Utility/TickHandler.h>
-
-#include "Graphics/API/GL/Timer.h"
 
 using namespace gE;
 
@@ -33,11 +33,11 @@ void gE::OverrideSTDTerminate()
 	std::set_terminate(Terminate);
 }
 
-Window::Window(glm::u16vec2 size, const char* name) :
+Window::Window(glm::u16vec2 size, const std::string& name) :
 	Cameras(this), Transforms(this),
 	CullingManager(this), Behaviors(this),
     AssetManager(this), _size(size),
-	_name(strdup(name))
+	_name(name)
 {
 	if (!glfwInit()) GE_FAIL("Failed to initialize GLFW.");
 
@@ -69,11 +69,21 @@ Window::Window(glm::u16vec2 size, const char* name) :
 
 	LOG("Vendor: " << glGetString(GL_VENDOR));
 	LOG("Renderer: " << glGetString(GL_RENDERER));
+
+#ifdef GE_ENABLE_IMGUI
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGui_ImplGlfw_InitForOther(_window, true);
+#endif
 }
 
 Window::~Window()
 {
-	delete[] _name;
+#ifdef GE_ENABLE_IMGUI
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
+#endif
+
 	glfwDestroyWindow(_window);
 	glfwTerminate();
 }
@@ -138,6 +148,8 @@ bool Window::Run()
 			OnUpdate(_renderTick.GetDelta());
 
 			OnRender(_renderTick.GetDelta());
+
+			OnGUI(_renderTick.GetDelta());
 
 			glfwSwapBuffers(_window);
 
@@ -258,6 +270,22 @@ void Window::OnRender(float delta)
 	Blit(Cameras.CurrentCamera->GetColor());
 
 	Transforms.OnRender(delta, nullptr);
+}
+
+void Window::OnGUI(float)
+{
+#ifdef GE_ENABLE_IMGUI
+	ImGui_ImplGlfw_NewFrame();
+	ImGui::NewFrame();
+#endif
+
+	// GEUI goes here
+
+#ifdef GE_ENABLE_IMGUI
+	ImGui::Render();
+#endif
+
+	Blit();
 }
 
 Camera3D* Window::GetReflectionSystem() const

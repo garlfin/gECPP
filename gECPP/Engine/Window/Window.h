@@ -31,6 +31,8 @@ struct GLFWvidmode;
 #define GE_RENDER_TARGET_TICKRATE GE_REFRESH_RATE
 #define GE_PHYSICS_TARGET_TICKRATE GE_PX_MIN_TICKRATE
 
+#define GE_ENABLE_IMGUI
+
 namespace gE
 {
 	struct Monitor
@@ -50,7 +52,7 @@ namespace gE
 	class Window
 	{
 	 public:
-		explicit Window(glm::u16vec2 size, const char* name = "gE");
+		explicit Window(glm::u16vec2 size, const std::string& name = "gE");
 
 		bool Run();
 		bool Close(bool restart = false);
@@ -115,6 +117,7 @@ namespace gE
 		virtual void OnFixedUpdate(float);
 		virtual void OnUpdate(float);
 		virtual void OnRender(float);
+		virtual void OnGUI(float);
 		virtual void OnDestroy() {};
 
 		Pointer<DefaultPipeline::Buffers> PipelineBuffers;
@@ -150,7 +153,7 @@ namespace gE
 
 	 private:
 		TextureSize2D _size;
-		const char* _name;
+		std::string _name;
 		GLFWwindow* _window;
 		Monitor _monitor;
 
