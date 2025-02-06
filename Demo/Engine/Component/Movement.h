@@ -52,7 +52,6 @@ namespace gE::VoxelDemo
 			transform.SetRotation(glm::vec3(0, _rot.y * TO_RAD, 0));
 			cameraTransform.SetRotation(glm::vec3(_rot.x * TO_RAD, 0, 0));
 
-
 			glm::vec3 dir(0.f);
 			if(IsKeyDown(keyboard.GetKey(Key::W))) dir.z -= SPEED;
 			if(IsKeyDown(keyboard.GetKey(Key::S))) dir.z += SPEED;
@@ -71,10 +70,13 @@ namespace gE::VoxelDemo
 				dir *= 0.5;
 			}
 
-			if(crouchState == KeyState::Released && _grounded)
+			if((bool)(crouchState & KeyState::StateChanged))
 			{
-				float heightDifference = (_standingHeight - _crouchingHeight) / 2.f;
-				transform.SetPosition(transform->Position + glm::vec3(0, heightDifference, 0));
+				const float heightDifference = (_standingHeight - _crouchingHeight) / 2.f;
+				if(IsKeyDown(crouchState))
+					transform.SetPosition(transform->Position - glm::vec3(0, heightDifference, 0));
+				else
+					transform.SetPosition(transform->Position + glm::vec3(0, heightDifference, 0));
 				_controller->ForceUpdateTransforms();
 			}
 

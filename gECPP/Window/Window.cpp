@@ -66,8 +66,8 @@ Window::Window(glm::u16vec2 size, const std::string& name) :
 
 	if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) GE_FAIL("Failed to initialize GLAD.");
 
-	LOG("Vendor: " << glGetString(GL_VENDOR));
-	LOG("Renderer: " << glGetString(GL_RENDERER));
+	LOG("Vendor: {}", glGetString(GL_VENDOR));
+	LOG("Renderer: {}", glGetString(GL_RENDERER));
 }
 
 Window::~Window()
@@ -102,7 +102,7 @@ bool Window::Run()
 	glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
 #ifdef GE_DEBUG_PERFORMANCE
-	LOG("INIT TOOK " << glfwGetTime());
+	LOG("INIT TOOK {} SECONDS", glfwGetTime());
 
 	GL::Timer timer(this);
 

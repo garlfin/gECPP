@@ -101,7 +101,7 @@ namespace gE
 
         DELETE_OPERATOR_COPY(ManagedPX);
         OPERATOR_MOVE_NOSUPER(ManagedPX, Free,
-            if(_t) LOG("INFO: MOVED PXOBJECT\n\tCOUNT: " << _t->GetRefCount() << "\n\tFUNCTION: " << PRETTY_FUNCTION);
+            if(_t) LOG("INFO: MOVED PXOBJECT\n\tCOUNT: {}\n\tFUNCTION: {}", _t->GetRefCount(), PRETTY_FUNCTION);
             _t = o._t;
             o._t = nullptr;
         );
@@ -124,7 +124,7 @@ namespace gE
         {
             if(!_t) return;
 
-            LOG("INFO: DELETED PXOBJECT\n\tFUNCTION: " << PRETTY_FUNCTION);
+            LOG("INFO: DELETED PXOBJECT\n\tFUNCTION: {}", PRETTY_FUNCTION);
 
             delete _t;
             _t = nullptr;

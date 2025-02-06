@@ -68,14 +68,14 @@ namespace gE
             SUPER_T(owner, _shape),
             _shape(shape)
         {
-            if(!shape.IsFree()) LOG("WARNING: SHAPE NOT FREED BEFORE BEING ASSIGNED TO COLLIDER!");
+            if(!shape.IsFree()) Log("WARNING: SHAPE NOT FREED BEFORE BEING ASSIGNED TO COLLIDER!");
         }
 
         ShapeCollider(Entity* owner, SHAPE_T&& shape) :
             SUPER_T(owner, _shape),
             _shape(std::move(shape))
         {
-            if(!shape.IsFree()) LOG("WARNING: SHAPE NOT FREED BEFORE BEING ASSIGNED TO COLLIDER!");
+            if(!shape.IsFree()) Log("WARNING: SHAPE NOT FREED BEFORE BEING ASSIGNED TO COLLIDER!");
         }
 
         const SHAPE_T* operator->() { return &_shape; }

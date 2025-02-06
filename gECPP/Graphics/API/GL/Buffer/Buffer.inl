@@ -97,7 +97,7 @@ namespace GL
 			glNamedBufferData(ID, SIZE_T * count, data, GetMutableFlags(SUPER::UsageHint));
 		else
 		{
-			LOG("Consider using Buffer<T, true> (Dynamic Buffer) when reallocating.");
+			gE::Log("Consider using Buffer<T, true> (Dynamic Buffer) when reallocating.");
 			glDeleteBuffers(1, &ID);
 			glCreateBuffers(1, &ID);
 			glNamedBufferStorage(ID, SIZE_T * count, data, GetImmutableFlags(SUPER::UsageHint));

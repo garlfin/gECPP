@@ -48,7 +48,7 @@ class Array
 	{
 		if(!o._size || !o._t) return;
 
-		LOG("WARNING: REALLOCATION! \n\tSIZE: " << o._size * sizeof(I) << " bytes\n\tFUNCTION: " << PRETTY_FUNCTION);
+		LOG("WARNING: REALLOCATION! \n\tSIZE: {} bytes\n\tFUNCTION: {}", o._size * sizeof(I), PRETTY_FUNCTION);
 
 		_size = o._size;
 		_t = new I[_size];

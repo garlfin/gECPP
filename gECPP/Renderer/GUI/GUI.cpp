@@ -8,6 +8,8 @@
 #include <Window/Window.h>
 #include <GLM/gtc/matrix_transform.hpp>
 
+#include "IMGUI/imgui_internal.h"
+
 gE::GUIManager::GUIManager(Window* window) :
     _window(window),
     _framebuffer(window),
@@ -17,6 +19,8 @@ gE::GUIManager::GUIManager(Window* window) :
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGui_ImplGlfw_InitForOther(window->GLFWWindow(), true);
+
+    ImGui::GetCurrentContext()->DebugLogFlags &= ~ImGuiDebugLogFlags_OutputToTTY;
 
     unsigned char* pixelData;
     int width, height;
@@ -47,7 +51,7 @@ void gE::GUIManager::OnRender(float delta)
         ImGui::NewFrame();
     #endif
 
-    ImGui::ShowMetricsWindow();
+    ImGui::ShowDebugLogWindow();
 
     _framebuffer.Bind();
     glClear(GL_COLOR_BUFFER_BIT);

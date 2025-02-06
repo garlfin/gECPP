@@ -32,7 +32,7 @@ namespace gE
 
 			if(!_counter) return;
 
-			LOG("INFO: COPIED REFERENCE\n\tCOUNT: " << _counter->RefCount << "\n\tFUNCTION: " << PRETTY_FUNCTION);
+			LOG("INFO: COPIED REFERENCE\n\tCOUNT: {}\n\tFUNCTION: {}", _counter->RefCount, PRETTY_FUNCTION);
 			++_counter->RefCount;
 		);
 
@@ -67,12 +67,12 @@ namespace gE
 
 			if(!--_counter->RefCount)
 			{
-				LOG("INFO: DELETED REFERENCE\n\tFunction: " << PRETTY_FUNCTION);
+				LOG("INFO: DELETED REFERENCE\n\tFunction: {}", PRETTY_FUNCTION);
 
 				delete _t;
 				if(!_counter->WeakCount)
 				{
-					LOG("INFO: DELETED COUNTER\n\tFunction: " << PRETTY_FUNCTION);
+					LOG("INFO: DELETED COUNTER\n\tFunction: {}", PRETTY_FUNCTION);
 					delete _counter;
 				}
 			}
@@ -115,7 +115,7 @@ namespace gE
 
 			if(!_t) return;
 
-			LOG("INFO: COPIED REFERENCE\n\tCOUNT: " << _counter->WeakCount << "\n\tFUNCTION: " << PRETTY_FUNCTION);
+			LOG("INFO: COPIED REFERENCE\n\tCOUNT: {}\n\tFUNCTION: {}", _counter->WeakCount, PRETTY_FUNCTION);
 			++_counter->WeakCount;
 		);
 
@@ -154,7 +154,7 @@ namespace gE
 		void Free()
 		{
 			if(!_t) return;
-			LOG("INFO: DELETED WEAK REFERENCE\n\tFunction: " << PRETTY_FUNCTION);
+			LOG("INFO: DELETED WEAK REFERENCE\n\tFunction: {}", PRETTY_FUNCTION);
 
 			if(!--_counter->WeakCount && !_counter->RefCount) delete _counter;
 
@@ -222,7 +222,7 @@ namespace gE
 
 		T* Release() { T* t = _t; _t = nullptr; return t; }
 
-		~Pointer() { Pointer::Free(); }
+		~Pointer() { Free(); }
 
 	 private:
 		T* _t = nullptr;

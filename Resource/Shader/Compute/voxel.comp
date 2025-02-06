@@ -2,7 +2,7 @@
 #include <Resource/Shader/Include/Scene.glsl>
 
 #ifndef VOXEL_TAA_SAMPLE_COUNT
-    #define VOXEL_TAA_SAMPLE_COUNT 32
+    #define VOXEL_TAA_SAMPLE_COUNT 16
 #endif
 
 #ifndef VOXEL_TAA_WEIGHT

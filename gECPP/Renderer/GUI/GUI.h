@@ -47,6 +47,7 @@ namespace gE
 
 #ifdef GE_ENABLE_IMGUI
         void OnRender(const ImDrawData*);
+        static void Log(const char*);
 #endif
 
         ~GUIManager();

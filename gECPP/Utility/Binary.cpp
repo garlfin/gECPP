@@ -3,6 +3,7 @@
 //
 
 #include "Binary.h"
+#include "Macro.h"
 
 #include <fstream>
 
@@ -11,7 +12,7 @@ u8* ReadFileBinary(const Path& path, size_t& length)
 	std::ifstream file(path, std::ios::in | std::ios::binary);
 	if(!file.is_open())
 	{
-		LOG("Could not find file: " << path);
+		LOG("Could not find file: {}", path.c_str());
 		return nullptr;
 	}
 
@@ -31,7 +32,7 @@ std::string ReadFile(const Path& path)
 	std::ifstream file(path, std::ios::in | std::ios::binary | std::ios::ate);
 	if(!file.is_open())
 	{
-		LOG("Could not find file: " << path);
+		LOG("Could not find file: {}", path);
 		return DEFAULT;
 	}
 

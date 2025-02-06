@@ -103,7 +103,7 @@ namespace gE
 
         if(_previousScale != transform->Scale)
         {
-            LOG("INFO: SHAPE SCALING");
+            Log("INFO: SHAPE SCALING");
 
             const px::Shape& joltShape = _collider->GetShape().GetJoltShape();
             const px::ShapeSettings::ShapeResult result = joltShape.ScaleShape(Physics::ToPX(transform->Scale));
