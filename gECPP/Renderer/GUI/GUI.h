@@ -47,11 +47,11 @@ namespace gE
 
 #ifdef GE_ENABLE_IMGUI
         void OnRender(const ImDrawData*);
-        static void Log(const char*);
+
+        GET_SET_VALUE(bool, ConsoleOpen, _logOpen);
 #endif
 
         ~GUIManager();
-
     private:
         Window* _window;
 
@@ -61,6 +61,7 @@ namespace gE
 #ifdef GE_ENABLE_IMGUI
         API::Shader _imShader;
         API::Texture2D _imFont;
+        bool _logOpen = true;
 #endif
     };
 }

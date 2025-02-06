@@ -208,10 +208,3 @@ using std::move;
 
 #define offsetbetween(TYPE, FIELDFROM, FIELDTO) (offsetof(TYPE, FIELDTO) - offsetof(TYPE, FIELDFROM))
 #define sizebetween(TYPE, FIELDFROM, FIELDTO) (offsetof(TYPE, FIELDTO) + sizeof(typeof(TYPE::FIELDTO)) - offsetof(TYPE, FIELDFROM))
-
-#define LOG(MSG, ...) gE::Log(std::vformat(std::string_view(MSG), std::make_format_args(__VA_ARGS__)).c_str())
-
-namespace gE
-{
-	void Log(const char* msg);
-}

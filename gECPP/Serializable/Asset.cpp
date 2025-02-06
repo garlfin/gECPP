@@ -4,6 +4,8 @@
 
 #include "Asset.h"
 
+#include "CityHash/city.h"
+
 namespace gE
 {
     File::File(const Path& path, const TypeSystem::Type* type) :

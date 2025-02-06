@@ -8,14 +8,13 @@
 
 #include <filesystem>
 #include <fstream>
-#include <Asset/Mesh/Mesh.h>
+#include <Renderer/Mesh/Mesh.h>
+#include <Renderer/Mesh/Skeleton.h>
 #include <ASSIMP/Importer.hpp>
 #include <ASSIMP/postprocess.h>
 #include <ASSIMP/scene.h>
 #include <Utility/AssetManager.h>
 #include <Graphics/Buffer/VAO.h>
-
-#include "Asset/Mesh/Skeleton.h"
 
 using pp = aiPostProcessSteps;
 

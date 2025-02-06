@@ -13,7 +13,6 @@
 #include <Math/Math.h>
 #include <Renderer/VoxelPipeline.h>
 #include <Utility/AssetManager.h>
-#include <Graphics/Shader/Shader.h>
 #include <Graphics/Texture/TextureSlotManager.h>
 #include <Utility/TickHandler.h>
 #include <Window/KeyboardState.h>
@@ -151,7 +150,6 @@ namespace gE
 		Pointer<API::ComputeShader> HiZShader;
 
 		AssetManager AssetManager;
-
 	 private:
 		TextureSize2D _size;
 		std::string _name;

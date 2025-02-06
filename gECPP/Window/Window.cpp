@@ -66,8 +66,8 @@ Window::Window(glm::u16vec2 size, const std::string& name) :
 
 	if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) GE_FAIL("Failed to initialize GLAD.");
 
-	LOG("Vendor: {}", glGetString(GL_VENDOR));
-	LOG("Renderer: {}", glGetString(GL_RENDERER));
+	Log::Write("Vendor: {}\n", (const char*) glGetString(GL_VENDOR));
+	Log::Write("Renderer: {}\n", (const char*) glGetString(GL_RENDERER));
 }
 
 Window::~Window()
@@ -80,7 +80,7 @@ Window::~Window()
 	void DebugMessage(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
 	{
 		if(severity == GL_DEBUG_SEVERITY_NOTIFICATION) return;
-		std::cout << message << std::endl;
+		Log::WriteLine(message);
 	}
 #endif
 
@@ -102,7 +102,7 @@ bool Window::Run()
 	glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
 #ifdef GE_DEBUG_PERFORMANCE
-	LOG("INIT TOOK {} SECONDS", glfwGetTime());
+	Log::Write("INIT TOOK {} SECONDS\n", glfwGetTime());
 
 	GL::Timer timer(this);
 

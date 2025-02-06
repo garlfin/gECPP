@@ -1,0 +1,40 @@
+//
+// Created by scion on 2/6/2025.
+//
+
+#pragma once
+
+#include <string>
+#include <format>
+
+#include "Macro.h"
+
+namespace gE
+{
+    class Log
+    {
+    public:
+        template<class... ARGS>
+        static void Write(const std::string_view& format, ARGS&&... args)
+        {
+            _log += std::vformat(format, std::make_format_args(args...));
+            _scrollBottom = true;
+        }
+
+        template<class... ARGS>
+        static void WriteLine(const std::string_view& format, ARGS&&... args)
+        {
+            _log += std::vformat(format, std::make_format_args(args...)) + '\n';
+            _scrollBottom = true;
+        }
+
+        static void Draw(bool* isOpen, bool first = false);
+        inline static void Clear() { _log.clear(); _log.shrink_to_fit(); }
+
+    private:
+        Log() = default;
+
+        inline static std::string _log = DEFAULT;
+        inline static bool _scrollBottom = false;
+    };
+}

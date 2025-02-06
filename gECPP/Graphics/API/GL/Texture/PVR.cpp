@@ -12,7 +12,7 @@ namespace PVR
 		std::ifstream src;
 		src.open(path, std::ios::in | std::ios::binary);
 
-		if(!src.is_open()) LOG("ERROR: COULD NOT OPEN FILE {}", path.string());
+		if(!src.is_open()) gE::Log::Write("ERROR: COULD NOT OPEN FILE {}", path.string());
 
 		src.seekg(0, std::ios::end);
 		size_t copySize = src.tellg();
@@ -78,7 +78,7 @@ namespace PVR
 			tex = new API::TextureCube(window, move(settings));
 		}
 		else
-			gE::Log("Unsupported texture format!");
+			gE::Log::Write("Unsupported texture format!");
 
 		return tex;
 	}

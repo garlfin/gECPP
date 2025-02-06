@@ -5,13 +5,12 @@
 #pragma once
 
 #include <set>
-#include <CityHash/CityCRC.h>
 #include <Utility/AssetManager.h>
 #include <Utility/Macro.h>
 #include <Serializable/Serializable.h>
 
 #ifdef DEBUG
-    #define ASSET_CHECK_FREE(TYPE) if(!TYPE::IsFree()) { gE::Log("WARNING: ASSET NOT DELETED\n\tAsset:  {}\n"); }
+    #define ASSET_CHECK_FREE(TYPE) if(!TYPE::IsFree()) { gE::Log::Write("WARNING: ASSET NOT DELETED\n\tAsset:  {}\n", (u64) this); }
 #else
     #define ASSET_CHECK_FREE(TYPE)
 #endif

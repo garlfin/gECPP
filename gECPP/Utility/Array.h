@@ -6,6 +6,7 @@
 
 #include <Math/Math.h>
 #include <Utility/Macro.h>
+#include <Utility/Log.h>
 
 template<typename T>
 class Array
@@ -48,7 +49,7 @@ class Array
 	{
 		if(!o._size || !o._t) return;
 
-		LOG("WARNING: REALLOCATION! \n\tSIZE: {} bytes\n\tFUNCTION: {}", o._size * sizeof(I), PRETTY_FUNCTION);
+		gE::Log::Write("WARNING: REALLOCATION! \n\tSIZE: {} bytes\n\tFUNCTION: {}\n", o._size * sizeof(I), PRETTY_FUNCTION);
 
 		_size = o._size;
 		_t = new I[_size];

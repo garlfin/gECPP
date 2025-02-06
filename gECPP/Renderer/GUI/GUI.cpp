@@ -9,6 +9,7 @@
 #include <GLM/gtc/matrix_transform.hpp>
 
 #include "IMGUI/imgui_internal.h"
+#include "Utility/Log.h"
 
 gE::GUIManager::GUIManager(Window* window) :
     _window(window),
@@ -20,13 +21,13 @@ gE::GUIManager::GUIManager(Window* window) :
     ImGui::CreateContext();
     ImGui_ImplGlfw_InitForOther(window->GLFWWindow(), true);
 
-    ImGui::GetCurrentContext()->DebugLogFlags &= ~ImGuiDebugLogFlags_OutputToTTY;
-
     unsigned char* pixelData;
     int width, height;
 
     ImGuiIO& io = ImGui::GetIO();
     io.Fonts->GetTexDataAsAlpha8(&pixelData, &width, &height);
+    io.IniFilename = nullptr;
+    io.LogFilename = nullptr;
 
     auto fontFormat = GPU::Texture2D(IMGUIFontFormat, TextureSize2D(width, height));
     fontFormat.Data.Data = Array(width * height, (const u8*) pixelData);
@@ -51,7 +52,11 @@ void gE::GUIManager::OnRender(float delta)
         ImGui::NewFrame();
     #endif
 
-    ImGui::ShowDebugLogWindow();
+    if(_window->GetCursorEnabled() && _window->GetKeyboard().GetKey(Key::C) == KeyState::Pressed)
+        _logOpen = true;
+
+    if(_logOpen)
+        Log::Draw(&_logOpen, _window->GetRenderTick().GetTick() == 1);
 
     _framebuffer.Bind();
     glClear(GL_COLOR_BUFFER_BIT);
@@ -66,15 +71,6 @@ void gE::GUIManager::OnRender(float delta)
 // https://github.com/ocornut/imgui/blob/master/backends/imgui_impl_opengl3.cpp
 void gE::GUIManager::OnRender(const ImDrawData* draw)
 {
-    glEnable(GL_BLEND);
-    glEnable(GL_SCISSOR_TEST);
-    glDisable(GL_CULL_FACE);
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_STENCIL_TEST);
-
-    glBlendEquation(GL_FUNC_ADD);
-    glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-
     GE_ASSERTM(draw, "NO DRAW DATA SUPPLIED.");
     GE_ASSERTM(draw->Valid, "INVALID DRAW.");
 
@@ -109,6 +105,15 @@ void gE::GUIManager::OnRender(const ImDrawData* draw)
 
     const float right = draw->DisplayPos.x + draw->DisplaySize.x;
     const float bottom = draw->DisplayPos.y + draw->DisplaySize.y;
+
+    glEnable(GL_BLEND);
+    glEnable(GL_SCISSOR_TEST);
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_STENCIL_TEST);
+
+    glBlendEquation(GL_FUNC_ADD);
+    glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
     buffers.Camera.Projection = glm::ortho(draw->DisplayPos.x, right, draw->DisplayPos.y, bottom);
     buffers.UpdateCamera(sizeof(glm::mat4), offsetof(GPU::Camera, Projection));

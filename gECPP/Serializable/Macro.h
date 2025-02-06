@@ -32,7 +32,7 @@
 		} \
 		ALWAYS_INLINE const SUPER_T* operator->() const { return this; } \
 		const SUPER_T& GetSettings() { return *this; } \
-		TYPE(gE::Window* window, const SUPER_T& settings) : TYPE(window, move(SUPER_T(settings))) { if(IsFree()) return; LOG("POSSIBLE UNINTENTIONAL COPY: {}", __PRETTY_FUNCTION__); } \
+		TYPE(gE::Window* window, const SUPER_T& settings) : TYPE(window, move(SUPER_T(settings))) { if(IsFree()) return; gE::Log::Write("POSSIBLE UNINTENTIONAL COPY: {}\n", __PRETTY_FUNCTION__); } \
 		TYPE(gE::Window* window, SUPER_T&& INTERNAL_SETTINGS)
 
 #define API_UNDERLYING_IMPL(UNDERLYING_T) \

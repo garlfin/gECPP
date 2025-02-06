@@ -21,6 +21,7 @@ public:
     GET_CONST(u32, TargetTickRate, (u32) (1.0 / RequiredDelta));
     GET_CONST(u32, TickRate, (u32) ceil(1.0 / _delta));
     GET_CONST(double, Delta, _delta);
+    GET_CONST(u64, Tick, _tick);
 
     // Only valid after tick.
     GET_CONST(double, Time, _previousTime);
@@ -32,6 +33,7 @@ private:
     float _lerpFactor = DEFAULT;
     double _previousTime = DEFAULT;
     double _delta = DEFAULT;
+    u64 _tick = 0;
 };
 
 inline bool TickHandler::ShouldTickDelta(const double delta)
@@ -50,6 +52,7 @@ inline bool TickHandler::ShouldTickDelta(const double delta)
 
     if(adjDelta < 0.0) return false;
 
+    _tick++;
     _lerpFactor = (float) (adjDelta / RequiredDelta);
     _previousTime += RequiredDelta + adjDelta;
     _delta = adjDelta;
@@ -74,6 +77,7 @@ inline bool TickHandler::ShouldTick(const double time)
 
     if(timePast < 0.0) return false;
 
+    _tick++;
     _previousTime = time - adjDelta;
     _delta = delta;
 
