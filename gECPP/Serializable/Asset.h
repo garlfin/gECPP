@@ -6,8 +6,8 @@
 
 #include <set>
 #include <CityHash/CityCRC.h>
-#include <Engine/Utility/AssetManager.h>
-#include <Engine/Utility/Macro.h>
+#include <Utility/AssetManager.h>
+#include <Utility/Macro.h>
 #include <Serializable/Serializable.h>
 
 #ifdef DEBUG

@@ -4,7 +4,7 @@
 
 #include "Shader.h"
 
-#include <Engine/Window/Window.h>
+#include <Window/Window.h>
 
 namespace GPU
 {

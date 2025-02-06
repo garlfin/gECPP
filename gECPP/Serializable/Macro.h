@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <Engine/Utility/Macro.h>
+#include <Utility/Macro.h>
 
 // TODO: Find better alternative to creating a copy of the settings.
 // Prevents _settings from being initialized to 0.
@@ -31,8 +31,8 @@
 			SUPER_T::Free(); \
 		} \
 		ALWAYS_INLINE const SUPER_T* operator->() const { return this; } \
-		SUPER_T& GetSettings() { return *this; } \
-		TYPE(gE::Window* window, const SUPER_T& settings) : TYPE(window, move(SUPER_T(settings))) {} \
+		const SUPER_T& GetSettings() { return *this; } \
+		TYPE(gE::Window* window, const SUPER_T& settings) : TYPE(window, move(SUPER_T(settings))) { if(IsFree()) return; LOG("POSSIBLE UNINTENTIONAL COPY: " << __PRETTY_FUNCTION__); } \
 		TYPE(gE::Window* window, SUPER_T&& INTERNAL_SETTINGS)
 
 #define API_UNDERLYING_IMPL(UNDERLYING_T) \

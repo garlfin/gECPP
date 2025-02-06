@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include <Asset/Prototype.h>
 #include <cstddef>
 
 namespace gE

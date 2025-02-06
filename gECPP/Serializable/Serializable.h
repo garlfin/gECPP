@@ -7,9 +7,9 @@
 #include <fstream>
 #include <Prototype.h>
 #include <unordered_map>
-#include <Engine/Utility/Array.h>
-#include <Engine/Utility/Binary.h>
-#include <Engine/Math/Math.h>
+#include <Utility/Array.h>
+#include <Utility/Binary.h>
+#include <Math/Math.h>
 #include "Macro.h"
 
 template<class T>

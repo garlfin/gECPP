@@ -6,19 +6,18 @@
 
 #include <Jolt/Jolt.h>
 #include <Jolt/Physics/Collision/Shape/BoxShape.h>
-#include <Jolt/Physics/Collision/Shape/SphereShape.h>
 #include <Jolt/Physics/Collision/Shape/CapsuleShape.h>
 #include <Jolt/Physics/Collision/Shape/ConvexHullShape.h>
+#include <Jolt/Physics/Collision/Shape/SphereShape.h>
 #include <Serializable/Serializable.h>
 
-#include "Physics.h"
-#include <Engine/Utility/RelativePointer.h>
-#include <Serializable/Macro.h>
 #include <Graphics/Graphics.h>
+#include <Math/Collision/AABB.h>
 #include <Serializable/Asset.h>
-
-#include "Engine/Math/Collision/AABB.h"
-#include "Engine/Utility/AssetManager.h"
+#include <Serializable/Macro.h>
+#include <Utility/AssetManager.h>
+#include <Utility/RelativePointer.h>
+#include "Physics.h"
 
 namespace Physics
 {

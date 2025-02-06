@@ -1,8 +1,8 @@
 #pragma once
 
-#include <Engine/Utility/Array.h>
-#include <Engine/Utility/Manager.h>
-#include <Engine/Utility/RelativePointer.h>
+#include <Utility/Array.h>
+#include <Utility/Manager.h>
+#include <Utility/RelativePointer.h>
 #include <Graphics/Buffer/VAO.h>
 #include "Buffer.h"
 
@@ -38,8 +38,15 @@ namespace GL
 		ALWAYS_INLINE void Bind() const final { glBindVertexArray(ID); }
 		virtual void Draw(u8 index, u16 instanceCount = 1) const = 0;
 		virtual void Draw(u32 count, const GPU::IndirectDraw*) const = 0;
+		virtual void DrawDirect(u32 count, u32 offset, u32 instanceCount = 1) const = 0;
 
 		NODISCARD ALWAYS_INLINE const Buffer<u8>& GetBuffer(u8 i) { return _buffers[i]; }
+
+		void UpdateBufferDirect(u8 i, const void*, size_t count, size_t offset = 0);
+		void UpdateBuffer(u8 i, GPU::Buffer<u8>&& buf);
+		ALWAYS_INLINE void UpdateBuffer(u8 i, GPU::Buffer<u8>& buf) { UpdateBuffer(i, std::move(GPU::Buffer(buf))); }
+
+		~IVAO() override;
 
 	private:
 		RelativePointer<GPU::VAO> _settings = DEFAULT;
@@ -57,8 +64,7 @@ namespace GL
 
 		void Draw(u8 index, u16 instanceCount = 1) const override;
 		void Draw(u32 count, const GPU::IndirectDraw*) const override;
-
-		~VAO() override;
+		void DrawDirect(u32 count, u32 offset, u32 instanceCount = 1) const override;
 	};
 
 	class IndexedVAO final : protected GPU::IndexedVAO, public IVAO
@@ -81,6 +87,11 @@ namespace GL
 
 		void Draw(u8 index, u16 instanceCount = 1) const override;
 		void Draw(u32 count, const GPU::IndirectDraw*) const override;
+		void DrawDirect(u32 count, u32 offset, u32 instanceCount = 1) const override;
+
+		void UpdateIndicesDirect(const void*, size_t count, size_t offset = 0);
+		void UpdateIndices(GPU::Buffer<u8>&& buf);
+		ALWAYS_INLINE void UpdateIndices(GPU::Buffer<u8>& buf) { UpdateIndices(std::move(GPU::Buffer(buf))); }
 
 	 private:
 		Buffer<u8> _triangleBuffer = DEFAULT;

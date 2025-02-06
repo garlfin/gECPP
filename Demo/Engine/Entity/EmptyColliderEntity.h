@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include <Engine/Entity/Entity.h>
-#include <Engine/Component/Physics/Collider.h>
+#include <Entity/Entity.h>
+#include <Component/Physics/Collider.h>
 
 namespace gE
 {

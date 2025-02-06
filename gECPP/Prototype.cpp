@@ -3,8 +3,8 @@
 //
 
 #include "Prototype.h"
-#include <Engine/Utility/Manager.h>
-#include <Engine/Component/Component.h>
+#include <Utility/Manager.h>
+#include <Component/Component.h>
 
 namespace gE
 {

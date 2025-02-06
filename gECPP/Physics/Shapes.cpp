@@ -4,8 +4,7 @@
 
 #include "Shapes.h"
 
-#include "Engine/Utility/AssetManager.h"
-#include "gEModel/Engine/Utility/Vertex.h"
+#include <Utility/AssetManager.h>
 
 namespace Physics
 {

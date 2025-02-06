@@ -27,7 +27,10 @@ namespace GL
 		Buffer(gE::Window* window, u32 count, const T* data = nullptr, GPU::BufferUsageHint hint = GPU::BufferUsageHint::Default);
 
 		template<typename I>
-		ALWAYS_INLINE void ReplaceData(const I* data, uint32_t count = 1, uint32_t offset = 0) const;
+		void ReplaceDataDirect(const I* data, uint32_t count = 1, uint32_t offset = 0) const;
+
+		void ReplaceData(Array<T>&&) const;
+		ALWAYS_INLINE void ReplaceData(Array<T>& data) const { ReplaceData(std::move(Array(data))); }
 
 		template<typename I>
 		void Realloc(uint32_t count, I* data = nullptr);

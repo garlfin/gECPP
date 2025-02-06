@@ -4,16 +4,14 @@
 
 #pragma once
 
-#include <gECPP/Engine/Utility/Macro.h>
-#include <gECPP/Engine/Math/Math.h>
-
+#include <Utility/Macro.h>
+#include <Math/Math.h>
 #include <Vendor/Jolt/Jolt.h>
 #include <Vendor/Jolt/Physics/PhysicsSystem.h>
 #include <Vendor/Jolt/Physics/Collision/ObjectLayer.h>
-#include <Engine/Entity/Layer.h>
-#include <Engine/Utility/Array.h>
-
-#include "Engine/Math/Collision/AABB.h"
+#include <Entity/Layer.h>
+#include <Utility/Array.h>
+#include <Math/Collision/AABB.h>
 
 #define GE_PX_ALLOCATION 10485760
 #define GE_PX_MAX_BODIES 1024
@@ -190,7 +188,7 @@ namespace Physics
             static_assert(std::is_trivially_copyable_v<OUT_T>);
             static_assert(sizeof(IN_T) == sizeof(OUT_T));
 
-            return Array<OUT_T>((OUT_T*) array.data(), array.size());
+            return Array<OUT_T>(array.size(), (const OUT_T*) array.data());
         }
 
         Array<OUT_T> arr(array.size());

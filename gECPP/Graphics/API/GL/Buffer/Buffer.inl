@@ -24,24 +24,36 @@ namespace GL
 	Buffer<T>::Buffer(gE::Window* window, u32 count, const T* data, GPU::BufferUsageHint hint) :
 		APIObject(window)
 	{
-		static constexpr size_t SIZE_T = sizeof(typename Array<T>::I);
+
+		static constexpr size_t SIZE = sizeof(typename Array<T>::I);
 
 		SUPER::UsageHint = hint;
 
+		GPU::Buffer<T>::Data = Array<T>(count, (const T*) nullptr, false);
+
 		glCreateBuffers(1, &ID);
 		if((bool)(SUPER::UsageHint & GPU::BufferUsageHint::Mutable))
-			glNamedBufferData(ID, SIZE_T * count, data, GetMutableFlags(SUPER::UsageHint));
+			glNamedBufferData(ID, SIZE * count, data, GetMutableFlags(SUPER::UsageHint));
 		else
-			glNamedBufferStorage(ID, SIZE_T * count, data, GetImmutableFlags(SUPER::UsageHint));
+			glNamedBufferStorage(ID, SIZE * count, data, GetImmutableFlags(SUPER::UsageHint));
 	}
 
 	template<typename T>
 	template<typename I>
-	void Buffer<T>::ReplaceData(const I* data, uint32_t count, uint32_t offset) const
+	void Buffer<T>::ReplaceDataDirect(const I* data, uint32_t count, uint32_t offset) const
 	{
-		static constexpr size_t SIZE_T = sizeof(typename Array<I>::I);
+		static constexpr size_t SIZE = sizeof(typename Array<I>::I);
+		GE_ASSERT(SIZE * count + offset <= GPU::Buffer<T>::GetByteCount());
+
 		if(!data || !count) return;
-		glNamedBufferSubData(ID, offset, SIZE_T * count, data);
+		glNamedBufferSubData(ID, offset, SIZE * count, data);
+	}
+
+	template <typename T>
+	void Buffer<T>::ReplaceData(Array<T>&& data) const
+	{
+		GPU::Buffer<T>::Data = std::move(data);
+		ReplaceDataDirect(GetSettings().GetData(), GetSettings().GetCount());
 	}
 
 	template<typename T>

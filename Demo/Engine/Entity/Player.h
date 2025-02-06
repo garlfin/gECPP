@@ -4,13 +4,13 @@
 
 #pragma once
 
+#include <Component/Camera/Camera.h>
+#include <Component/Physics/CharacterController.h>
 #include <Demo/Engine/Component/Movement.h>
-#include <Engine/Component/Camera/Camera.h>
-#include <Engine/Component/Physics/CharacterController.h>
-#include <Engine/Renderer/PostProcess/Bloom.h>
-#include <Engine/Renderer/PostProcess/TAA.h>
-#include <Engine/Renderer/PostProcess/Tonemap.h>
-#include <gECPP/Engine/Window/Window.h>
+#include <gECPP/Window/Window.h>
+#include <Renderer/PostProcess/Bloom.h>
+#include <Renderer/PostProcess/TAA.h>
+#include <Renderer/PostProcess/Tonemap.h>
 
 namespace gE::VoxelDemo
 {

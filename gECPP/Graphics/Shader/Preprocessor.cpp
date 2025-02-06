@@ -7,8 +7,8 @@
 #include <filesystem>
 #include <format>
 
-#include "Engine/Utility/AssetManager.h"
-#include "Engine/Window/Window.h"
+#include <Utility/AssetManager.h>
+#include <Window/Window.h>
 
 namespace GPU
 {

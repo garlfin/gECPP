@@ -3,8 +3,8 @@ project(VoxelField)
 
 set(CMAKE_CXX_STANDARD 23)
 
-set(COMPILE_FLAGS_RELEASE "-O2 -static -s")
-set(COMPILE_FLAGS_DEBUG "-O0 -DDEBUG -static")
+set(COMPILE_FLAGS_RELEASE "-O2 -static -s -static-libgcc")
+set(COMPILE_FLAGS_DEBUG "-O0 -DDEBUG -DGE_ENABLE_IMGUI -static -static-libgcc")
 
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${COMPILE_FLAGS_RELEASE}")
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} ${COMPILE_FLAGS_RELEASE}")
@@ -23,14 +23,15 @@ add_library(JOLT STATIC ${JOLT_SRC})
 file(GLOB_RECURSE CITYHASH_SRC "Vendor/CityHash/*.cpp" "Vendor/CityHash/*.h")
 add_library(CITYHASH STATIC ${CITYHASH_SRC})
 
-# IMGUI
-file(GLOB_RECURSE IMGUI_SRC "Vendor/IMGUI/*.cpp" "Vendor/IMGUI/*.h")
-add_library(IMGUI STATIC ${IMGUI_SRC})
-
 # GLFW
 add_library(GLFW STATIC IMPORTED)
 set_property(TARGET GLFW PROPERTY IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/GLFW/glfw3.dll")
 FILE(COPY "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/GLFW/glfw3.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+# IMGUI
+file(GLOB_RECURSE IMGUI_SRC "Vendor/IMGUI/*.cpp" "Vendor/IMGUI/*.h")
+add_library(IMGUI STATIC ${IMGUI_SRC})
+target_link_libraries(IMGUI)
 
 # ASSIMP
 add_library(ASSIMP STATIC IMPORTED)
@@ -42,10 +43,6 @@ add_library(GLAD STATIC Vendor/GLAD/glad.c Vendor/GLAD/glad.h)
 
 # PUGIXML
 add_library(PUGIXML STATIC Vendor/PUGIXML/pugixml.cpp Vendor/PUGIXML/pugixml.hpp Vendor/PUGIXML/pugiconfig.hpp)
-
-# GEUI
-add_executable(gEUI gEUI/main.cpp)
-target_link_libraries(gEUI PUGIXML GLAD)
 
 # GECPP
 file(GLOB_RECURSE GECPP_SRC "gECPP/*.cpp" "gECPP/*.h" "gECPP/*.inl")

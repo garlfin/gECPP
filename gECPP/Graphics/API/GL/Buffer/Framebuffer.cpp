@@ -5,7 +5,7 @@
 
 namespace GL
 {
-	void FrameBuffer::SetAttachment(u8 i, Texture& t)
+	void Framebuffer::SetAttachment(u8 i, Texture& t)
 	{
 		GE_ASSERTM(i < GL_MAX_ATTACHMENTS, "INDEX OUT OF RANGE!");
 
@@ -15,7 +15,7 @@ namespace GL
 		glNamedFramebufferDrawBuffers(ID, GL_MAX_ATTACHMENTS, _attachmentsEnum);
 	}
 
-	void FrameBuffer::SetDefaultSize(TextureSize2D size)
+	void Framebuffer::SetDefaultSize(TextureSize2D size)
 	{
 		glNamedFramebufferParameteri(ID, GL_FRAMEBUFFER_DEFAULT_WIDTH, size.x);
 		glNamedFramebufferParameteri(ID, GL_FRAMEBUFFER_DEFAULT_HEIGHT, size.y);
@@ -26,12 +26,12 @@ namespace GL
 		glNamedFramebufferDrawBuffers(ID, GL_MAX_ATTACHMENTS, _attachmentsEnum);
 	}
 
-	FrameBuffer::FrameBuffer(gE::Window* win) : APIObject(win)
+	Framebuffer::Framebuffer(gE::Window* win) : APIObject(win)
 	{
 		glCreateFramebuffers(1, &ID);
 	}
 
-	void FrameBuffer::SetDepthAttachment(Texture& h)
+	void Framebuffer::SetDepthAttachment(Texture& h)
 	{
 		glNamedFramebufferTexture(ID, GL_DEPTH_ATTACHMENT, h.Get(), 0);
 	}

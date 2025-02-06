@@ -10,8 +10,8 @@
 
 #pragma once
 
-#include <Engine/Utility/Binary.h>
-#include <Engine/Math/Math.h>
+#include <Utility/Binary.h>
+#include <Math/Math.h>
 #include <Serializable/Serializable.h>
 #include <GLAD/glad.h>
 

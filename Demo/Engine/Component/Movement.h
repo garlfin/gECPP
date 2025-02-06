@@ -4,12 +4,10 @@
 
 #pragma once
 
-#include <windows.h>
-#include <gECPP/Engine/Window/Window.h>
-#include <Engine/Component/Behavior.h>
-#include <Engine/Entity/Entity.h>
-
-#include "Engine/Component/Physics/CharacterController.h"
+#include <Component/Behavior.h>
+#include <Component/Physics/CharacterController.h>
+#include <Entity/Entity.h>
+#include <gECPP/Window/Window.h>
 
 #define SENSITIVITY 0.1f
 #define SPEED 2.f
@@ -25,6 +23,7 @@ namespace gE::VoxelDemo
 			Behavior(o),
 			_controller(controller)
 		{
+			GetWindow().SetCursorEnabled(false);
 		}
 
 		GET_SET_VALUE(Entity*, FPCamera, _camera);
@@ -41,18 +40,24 @@ namespace gE::VoxelDemo
 
 			const KeyState crouchState = keyboard.GetKey(Key::C);
 
+			if(keyboard.GetKey(Key::Escape) == KeyState::Pressed)
+				GetWindow().SetCursorEnabled(!GetWindow().GetCursorEnabled());
+
+			if(GetWindow().GetCursorEnabled()) return;
+
 			_rot.y += mouse.GetDelta().x * SENSITIVITY;
 			_rot.x += mouse.GetDelta().y * SENSITIVITY;
 			_rot.x = std::clamp(_rot.x, -89.9f, 89.9f);
 
-			transform.SetRotation(glm::vec3(0, _rot.y * TO_RAD, 0), TransformFlags::RenderInvalidated);
-			cameraTransform.SetRotation(glm::vec3(_rot.x * TO_RAD, 0, 0), TransformFlags::RenderInvalidated);
+			transform.SetRotation(glm::vec3(0, _rot.y * TO_RAD, 0));
+			cameraTransform.SetRotation(glm::vec3(_rot.x * TO_RAD, 0, 0));
+
 
 			glm::vec3 dir(0.f);
-			if(IsPressed(keyboard.GetKey(Key::W))) dir.z -= SPEED;
-			if(IsPressed(keyboard.GetKey(Key::S))) dir.z += SPEED;
-			if(IsPressed(keyboard.GetKey(Key::A))) dir.x -= SPEED;
-			if(IsPressed(keyboard.GetKey(Key::D))) dir.x += SPEED;
+			if(IsKeyDown(keyboard.GetKey(Key::W))) dir.z -= SPEED;
+			if(IsKeyDown(keyboard.GetKey(Key::S))) dir.z += SPEED;
+			if(IsKeyDown(keyboard.GetKey(Key::A))) dir.x -= SPEED;
+			if(IsKeyDown(keyboard.GetKey(Key::D))) dir.x += SPEED;
 
 			dir = normalize(dir);
 			if(glm::isnan(dir.x)) dir = DEFAULT;
@@ -60,7 +65,7 @@ namespace gE::VoxelDemo
 			Physics::CapsuleShape capsuleShape = DEFAULT;
 			capsuleShape.Height = _standingHeight;
 
-			if(IsPressed(crouchState))
+			if(IsKeyDown(crouchState))
 			{
 				capsuleShape.Height = _crouchingHeight;
 				dir *= 0.5;
@@ -76,12 +81,12 @@ namespace gE::VoxelDemo
 			cameraTransform.SetPosition(glm::vec3(0, capsuleShape.Height / 2.f, 0));
 			_controller->SetShape(capsuleShape);
 
-			if(!IsPressed(crouchState) && IsPressed(keyboard.GetKey(Key::LShift))) dir *= SPEED_MULTIPLIER;
+			if(!IsKeyDown(crouchState) && IsKeyDown(keyboard.GetKey(Key::LShift))) dir *= SPEED_MULTIPLIER;
 			if(!_grounded) dir *= 0.0;
 
 			_controller->Move(transform->Rotation * dir * delta);
 
-			if(IsPressed(keyboard.GetKey(Key::Space)) && _grounded)
+			if(IsKeyDown(keyboard.GetKey(Key::Space)) && _grounded)
 			{
 				_controller->SetVelocity(glm::vec3(0, std::sqrt(2.f * 9.81 * JUMP_HEIGHT), 0));
 				_grounded = false;

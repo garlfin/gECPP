@@ -4,7 +4,7 @@
 
 #include "VAO.h"
 
-#include "Engine/Window/Window.h"
+#include <Window/Window.h>
 
 namespace GL
 {
@@ -33,6 +33,24 @@ namespace GL
 		}
 	}
 
+	void IVAO::UpdateBufferDirect(u8 i, const void* data, size_t count, size_t offset)
+	{
+		_buffers[i].ReplaceDataDirect(data, count, offset);
+	}
+
+	void IVAO::UpdateBuffer(u8 i, GPU::Buffer<u8>&& buf)
+	{
+		Buffer<u8>& dst = _buffers[i];
+
+		dst = API::Buffer(&GetWindow(), std::move(buf));
+		glVertexArrayVertexBuffer(ID, i, dst.Get(), 0, dst->GetStride());
+	}
+
+	IVAO::~IVAO()
+	{
+		glDeleteVertexArrays(1, &ID);
+	}
+
 	API_SERIALIZABLE_IMPL(VAO), IVAO(window, *this)
 	{
 	}
@@ -43,11 +61,6 @@ namespace GL
 		Bind();
 		const GPU::MaterialSlot& material = Materials[index];
 		glDrawArraysInstanced(GL_TRIANGLES, material.Offset * 3, material.Count * 3, instanceCount);
-	}
-
-	VAO::~VAO()
-	{
-		glDeleteVertexArrays(1, &ID);
 	}
 
 	API_SERIALIZABLE_IMPL(IndexedVAO), IVAO(window, *this)
@@ -93,6 +106,13 @@ namespace GL
 		glMultiDrawArraysIndirect(GL_TRIANGLES, nullptr, count, 0);
 	}
 
+	void VAO::DrawDirect(u32 count, u32 offset, u32 instanceCount) const
+	{
+		if(!instanceCount) return;
+		Bind();
+		glDrawArraysInstanced(GL_TRIANGLES, offset * 3, count * 3, instanceCount);
+	}
+
 	void IndexedVAO::Draw(u32 count, const GPU::IndirectDraw* calls) const
 	{
 		if(!count) return;
@@ -119,5 +139,23 @@ namespace GL
 
 		Bind();
 		glMultiDrawElementsIndirect(GL_TRIANGLES, TriangleFormat, nullptr, count, 0);
+	}
+
+	void IndexedVAO::DrawDirect(u32 count, u32 offset, u32 instanceCount) const
+	{
+		if(!instanceCount) return;
+		Bind();
+		glDrawElementsInstanced(GL_TRIANGLES, count * 3, TriangleFormat, (void*) (GLSizeOf(TriangleFormat) * offset), instanceCount);
+	}
+
+	void IndexedVAO::UpdateIndicesDirect(const void* data, size_t count, size_t offset)
+	{
+		_triangleBuffer.ReplaceDataDirect(data, count, offset);
+	}
+
+	void IndexedVAO::UpdateIndices(GPU::Buffer<u8>&& buf)
+	{
+		_triangleBuffer = API::Buffer(&GetWindow(), std::move(buf));
+		glVertexArrayElementBuffer(ID, _triangleBuffer.Get());
 	}
 }

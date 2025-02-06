@@ -9,9 +9,9 @@
 
 #include <Demo/Engine/Entity/Player.h>
 #include <Demo/Engine/Entity/StaticMeshEntity.h>
-#include <Engine/Entity/Light/DirectionalLight.h>
-#include <Engine/Entity/Light/PointLight.h>
-#include <Engine/Renderer/Material/PBRMaterial.h>
+#include <Entity/Light/DirectionalLight.h>
+#include <Entity/Light/PointLight.h>
+#include <Renderer/Material/PBRMaterial.h>
 #include <Demo/Engine/Entity/EmptyColliderEntity.h>
 #include <Demo/Engine/Entity/PhysicsCube.h>
 
@@ -21,8 +21,6 @@ void DemoWindow::OnInit()
 {
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 	glDisable(GL_MULTISAMPLE);
-
-	glfwSetInputMode(GLFWWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	auto albedo = ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/cobble_col.pvr"));
 	auto amr = ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/cobble_armd.pvr"));

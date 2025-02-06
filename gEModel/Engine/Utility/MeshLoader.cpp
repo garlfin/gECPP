@@ -12,7 +12,7 @@
 #include <ASSIMP/Importer.hpp>
 #include <ASSIMP/postprocess.h>
 #include <ASSIMP/scene.h>
-#include <Engine/Utility/AssetManager.h>
+#include <Utility/AssetManager.h>
 #include <Graphics/Buffer/VAO.h>
 
 #include "Asset/Mesh/Skeleton.h"
