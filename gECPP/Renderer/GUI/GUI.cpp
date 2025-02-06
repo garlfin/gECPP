@@ -50,13 +50,14 @@ void gE::GUIManager::OnRender(float delta)
 
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-    #endif
 
-    if(_window->GetCursorEnabled() && _window->GetKeyboard().GetKey(Key::C) == KeyState::Pressed)
+    const KeyState consoleKey = _window->GetKeyboard().GetKey(Key::C);
+    if(_window->GetCursorEnabled() && consoleKey == KeyState::Pressed)
         _logOpen = true;
 
     if(_logOpen)
-        Log::Draw(&_logOpen, _window->GetRenderTick().GetTick() == 1);
+        Log::Draw(&_logOpen, consoleKey == KeyState::Pressed);
+    #endif
 
     _framebuffer.Bind();
     glClear(GL_COLOR_BUFFER_BIT);

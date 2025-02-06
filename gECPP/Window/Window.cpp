@@ -183,10 +183,10 @@ void Window::OnInit()
 
 	GPU::VAO blitVAOFormat = DEFAULT;
 	blitVAOFormat.Counts.BufferCount = 1;
-	blitVAOFormat.Buffers[0] = GPU::Buffer<u8>(1, nullptr, false);
+	blitVAOFormat.Buffers[0] = GPU::Buffer<u8>(1);
 
 	BlitShader = ptr_create<API::Shader>(this, GPU::Shader("Resource/Shader/blit.vert", "Resource/Shader/blit.frag"));
-	BlitVAO = ptr_create<API::VAO>(this, blitVAOFormat);
+	BlitVAO = ptr_create<API::VAO>(this, move(blitVAOFormat));
 
 	TAAShader = ptr_create<API::ComputeShader>(this, GPU::ComputeShader("Resource/Shader/PostProcess/taa.comp"));
 	TonemapShader = ptr_create<API::ComputeShader>(this, GPU::ComputeShader("Resource/Shader/PostProcess/tonemap.comp"));

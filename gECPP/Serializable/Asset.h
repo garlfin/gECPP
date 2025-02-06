@@ -10,7 +10,7 @@
 #include <Serializable/Serializable.h>
 
 #ifdef DEBUG
-    #define ASSET_CHECK_FREE(TYPE) if(!TYPE::IsFree()) { gE::Log::Write("WARNING: ASSET NOT DELETED\n\tAsset:  {}\n", (u64) this); }
+    #define ASSET_CHECK_FREE(TYPE) if(!TYPE::IsFree()) { gE::Log::Write("INFO: ASSET NOT DELETED BEFORE DESTRUCTOR\n\tAsset: {:x}\n", (u64) this); }
 #else
     #define ASSET_CHECK_FREE(TYPE)
 #endif

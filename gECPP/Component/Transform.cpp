@@ -26,13 +26,12 @@ namespace gE
 
 		_model = GetParentTransform() * _transform.ToMat4();
 		Decompose(_model, _globalTransform.Location, _globalTransform.Rotation, _globalTransform.Scale);
-
-		_flags &= ~(TransformFlags::Initialized | TransformFlags::RenderInvalidated);
 	}
 
 	void Transform::OnRender(float, Camera*)
 	{
 		_previousModel = _model;
+		_flags &= ~(TransformFlags::Initialized | TransformFlags::RenderInvalidated);
 	}
 
 	void Transform::OnFixedUpdate(float x)

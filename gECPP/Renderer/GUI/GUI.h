@@ -61,7 +61,7 @@ namespace gE
 #ifdef GE_ENABLE_IMGUI
         API::Shader _imShader;
         API::Texture2D _imFont;
-        bool _logOpen = true;
+        bool _logOpen = false;
 #endif
     };
 }
