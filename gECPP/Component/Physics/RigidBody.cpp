@@ -120,8 +120,6 @@ namespace gE
             Physics::ToPX(Rotation * offset.Rotation),
             JPH::EActivation::Activate
         );
-
-        ResetTransformFlag();
     }
 
     void RigidBody::SetInstantVelocity(const glm::vec3& velocity)

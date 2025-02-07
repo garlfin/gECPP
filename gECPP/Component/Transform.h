@@ -15,9 +15,8 @@ namespace gE
 
 	enum class TransformFlags : u8
 	{
-		PhysicsInvalidated = 1,
-		RenderInvalidated = 1 << 1,
-		Initialized = 1 << 2,
+		PhysicsInvalidated = 1, // Physics components must move the body
+		RenderInvalidated = 1 << 1, // Model matrix must be updated
 		None = 0,
 		All = PhysicsInvalidated | RenderInvalidated
 	};

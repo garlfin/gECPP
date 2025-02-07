@@ -11,11 +11,6 @@
 
 namespace gE
 {
-    void PhysicsComponent::ResetTransformFlag()
-    {
-        GetOwner().GetTransform()._flags &= ~TransformFlags::PhysicsInvalidated;
-    }
-
     PhysicsManager::PhysicsManager(Window* window) : ComponentManager(window)
     {
         px::RegisterDefaultAllocator();
@@ -77,6 +72,7 @@ namespace gE
     void PhysicsComponent::OnUpdate(float)
     {
         GE_ASSERTM(!GetOwner().GetParent(), "Physics objects must not have a parent!");
+        Transform& transform = GetOwner().GetTransform();
 
         glm::vec3 position;
         glm::quat rotation;
@@ -95,7 +91,6 @@ namespace gE
             rotation = slerp(PreviousRotation, Rotation, lerpFactor);
         }
 
-        Transform& transform = GetOwner().GetTransform();
         transform.SetPosition(position, TransformFlags::RenderInvalidated);
         transform.SetRotation(rotation, TransformFlags::RenderInvalidated);
     }

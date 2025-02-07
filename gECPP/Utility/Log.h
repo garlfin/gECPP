@@ -17,14 +17,23 @@ namespace gE
         template<class... ARGS>
         static void Write(const std::string_view& format, ARGS&&... args)
         {
-            _log += std::vformat(format, std::make_format_args(args...));
+            if constexpr(sizeof...(ARGS) == 0)
+                _log += format;
+            else
+                _log += std::vformat(format, std::make_format_args(args...));
+
             _scrollBottom = true;
         }
 
         template<class... ARGS>
         static void WriteLine(const std::string_view& format, ARGS&&... args)
         {
-            _log += std::vformat(format, std::make_format_args(args...)) + '\n';
+            if constexpr(sizeof...(ARGS) == 0)
+                _log += format;
+            else
+                _log += std::vformat(format, std::make_format_args(args...));
+            _log += '\n';
+
             _scrollBottom = true;
         }
 

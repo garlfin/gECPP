@@ -33,8 +33,6 @@ namespace gE
         GET_SET_VALUE(PhysicsInterpolationMode, InterpolationMode, _interpolationMode);
 
     protected:
-        void ResetTransformFlag();
-
         glm::vec3 Position, PreviousPosition;
         glm::quat Rotation, PreviousRotation;
 

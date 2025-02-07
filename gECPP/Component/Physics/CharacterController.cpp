@@ -101,14 +101,15 @@ namespace gE
         if(GetIsGrounded()) _instantVelocity = DEFAULT;
 
         PreviousPosition = Position;
+        PreviousRotation = Rotation;
+
         Position = Physics::ToGLM(_controller->GetPosition());
+        Rotation = GetOwner().GetTransform()->Rotation;
     }
 
     void CharacterController::ForceUpdateTransforms()
     {
         const Transform& transform = GetOwner().GetTransform();
-
-        ResetTransformFlag();
 
         Position = transform->Position;
         Rotation = transform->Rotation;

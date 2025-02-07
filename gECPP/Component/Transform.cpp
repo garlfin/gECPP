@@ -22,7 +22,7 @@ namespace gE
 		if(parent)
 			_flags |= parent->GetTransform()._flags & TransformFlags::RenderInvalidated;
 
-		if(!(bool)(_flags & (TransformFlags::Initialized | TransformFlags::RenderInvalidated))) return;
+		if(!(bool)(_flags & TransformFlags::RenderInvalidated)) return;
 
 		_model = GetParentTransform() * _transform.ToMat4();
 		Decompose(_model, _globalTransform.Location, _globalTransform.Rotation, _globalTransform.Scale);
@@ -31,7 +31,7 @@ namespace gE
 	void Transform::OnRender(float, Camera*)
 	{
 		_previousModel = _model;
-		_flags &= ~(TransformFlags::Initialized | TransformFlags::RenderInvalidated);
+		_flags &= ~TransformFlags::RenderInvalidated;
 	}
 
 	void Transform::OnFixedUpdate(float x)
