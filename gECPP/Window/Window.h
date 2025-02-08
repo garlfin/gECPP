@@ -10,19 +10,17 @@
 #include <Entity/SDFCapture.h>
 #include <Entity/VoxelCapture.h>
 #include <Entity/Light/Light.h>
+#include <Graphics/Texture/TextureSlotManager.h>
 #include <Math/Math.h>
 #include <Renderer/VoxelPipeline.h>
+#include <Renderer/GUI/GUI.h>
+#include <SDL3/SDL_surface.h>
 #include <Utility/AssetManager.h>
-#include <Graphics/Texture/TextureSlotManager.h>
 #include <Utility/TickHandler.h>
 #include <Window/KeyboardState.h>
 #include <Window/MouseState.h>
 
 #include "WindowState.h"
-#include "Renderer/GUI/GUI.h"
-
-struct GLFWwindow;
-struct GLFWvidmode;
 
 #define GE_REFRESH_RATE _monitor.RefreshRate
 
@@ -31,11 +29,14 @@ struct GLFWvidmode;
 #define GE_RENDER_TARGET_TICKRATE GE_REFRESH_RATE
 #define GE_PHYSICS_TARGET_TICKRATE GE_PX_MIN_TICKRATE
 
+struct SDL_Window;
+struct SDL_DisplayMode;
+
 namespace gE
 {
 	struct Monitor
 	{
-		explicit Monitor(const GLFWvidmode*);
+		explicit Monitor(const SDL_DisplayMode*);
 		Monitor() = default;
 
 		const char* Name = DEFAULT;
@@ -77,7 +78,7 @@ namespace gE
 		// Managers
 		GET(CameraManager&, Cameras, Cameras);
 		GET(TransformManager&, Transforms, Transforms);
-		GET(ComponentManager<Behavior>&, Behaviors, Behaviors);
+		GET(BehaviorManager&, Behaviors, Behaviors);
 		GET(RendererManager&, Renderers, Renderers);
 		GET(LightManager&, Lights, Lights);
 		GET(CubemapManager&, Cubemaps, Cubemaps);
@@ -107,7 +108,7 @@ namespace gE
 		GET_CONST(const MouseState&, Mouse, _mouseState);
 		GET_SET(bool, CursorEnabled, _cursorEnabled);
 
-		NODISCARD ALWAYS_INLINE GLFWwindow* GLFWWindow() const { return _window; }
+		NODISCARD ALWAYS_INLINE SDL_Window* SDLWindow() const { return _window; }
 
 		virtual ~Window();
 
@@ -136,8 +137,7 @@ namespace gE
 		GPU::TextureSlotManager SlotManager;
 		EntityManager Entities;
 		Pointer<GUIManager> GUI;
-
-		ComponentManager<Behavior> Behaviors;
+		BehaviorManager Behaviors;
 
 		Pointer<Material> DefaultMaterial;
 		Pointer<API::Shader> BlitShader;
@@ -150,10 +150,15 @@ namespace gE
 		Pointer<API::ComputeShader> HiZShader;
 
 		AssetManager AssetManager;
+
 	 private:
+		SDL_Window* _window;
+		SDL_Surface* _icon;
+		void* _grapicsContext;
+
 		TextureSize2D _size;
 		std::string _name;
-		GLFWwindow* _window;
+
 		Monitor _monitor;
 
 		double _time = DEFAULT;

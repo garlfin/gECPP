@@ -3,7 +3,6 @@
 //
 
 #include <Vendor/GLAD/glad.h>
-#include <Vendor/GLFW/glfw3.h>
 
 #include "DemoWindow.h"
 

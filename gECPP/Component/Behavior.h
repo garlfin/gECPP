@@ -15,6 +15,7 @@ namespace gE
 
 		void OnUpdate(float d) override { }
 		void OnRender(float d, Camera*) override { }
+		virtual void OnGUI(float) {}
 		void OnDestroy() override { }
 	};
 
@@ -25,5 +26,13 @@ namespace gE
 		inline explicit TypedBehavior(T* o) : Behavior(o) { };
 
 		GET_CONST(T*, Owner, (T*) Component::GetOwner());
+	};
+
+	class BehaviorManager : public ComponentManager<Behavior>
+	{
+	public:
+		using ComponentManager::ComponentManager;
+
+		void OnGUI(float delta);
 	};
 }

@@ -37,8 +37,12 @@ namespace gE
             _scrollBottom = true;
         }
 
+        GET_CONST(std::string_view, Log, _log);
+
         static void Draw(bool* isOpen, bool first = false);
         inline static void Clear() { _log.clear(); _log.shrink_to_fit(); }
+
+        static void ShowError(const std::string_view& message);
 
     private:
         Log() = default;

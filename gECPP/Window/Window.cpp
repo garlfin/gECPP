@@ -1,14 +1,14 @@
 #include "Window.h"
 
-#include <iostream>
 #include <Component/Camera/Camera.h>
 #include <Renderer/DefaultPipeline.h>
 #include <Utility/TickHandler.h>
 #include <Graphics/API/GL/Timer.h>
 #include <IMGUI/imgui.h>
-#include <IMGUI/backends/imgui_impl_glfw.h>
 #include <Vendor/GLAD/glad.h>
-#include <Vendor/GLFW/glfw3.h>
+#include <Vendor/SDL3/SDL.h>
+
+#include "IMGUI/backends/imgui_impl_sdl3.h"
 
 using namespace gE;
 
@@ -32,54 +32,74 @@ void gE::OverrideSTDTerminate()
 	std::set_terminate(Terminate);
 }
 
+double SDLGetTime(u64 initTime)
+{
+	const u64 counter = SDL_GetPerformanceCounter() - initTime;
+	return (double) counter / (double) SDL_GetPerformanceFrequency();
+}
+
 Window::Window(glm::u16vec2 size, const std::string& name) :
 	Cameras(this), Transforms(this),
 	CullingManager(this), Behaviors(this),
     AssetManager(this), _size(size),
 	_name(name)
 {
-	if (!glfwInit()) GE_FAIL("Failed to initialize GLFW.");
+	if(!SDL_WasInit(SDL_INIT_VIDEO))
+		if (!SDL_Init(SDL_INIT_VIDEO))
+			Log::ShowError("Failed to initialize SDL.");
 
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+	_monitor = Monitor(SDL_GetCurrentDisplayMode(SDL_GetPrimaryDisplay()));
+	_window = SDL_CreateWindow(_name.c_str(), size.x, size.y, SDL_WINDOW_OPENGL);
+	if(!_window)
+	{
+		Log::ShowError("Failed to create Window."); std::terminate();
+	}
+
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+
 #ifdef DEBUG
-	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, true);
 #endif
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-	glfwWindowHint(GLFW_MAXIMIZED, false);
 
-	GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
-	_monitor = Monitor(glfwGetVideoMode(primaryMonitor));
-	if ((glm::u16vec2) _monitor.Size != size) primaryMonitor = nullptr;
+	_grapicsContext = SDL_GL_CreateContext(_window);
+	if(!_grapicsContext)
+	{
+		Log::ShowError(std::format("Failed to create OpenGL context.\n\n{}", SDL_GetError()));
+		std::terminate();
+	}
 
-	_window = glfwCreateWindow(size.x, size.y, name.c_str(), primaryMonitor, nullptr);
-	if (!_window) GE_FAIL("Failed to create Window.");
-
-	glfwMakeContextCurrent(_window);
+	if(!gladLoadGLLoader((GLADloadproc) SDL_GL_GetProcAddress))
+	{
+		Log::ShowError("Failed to load OpenGL functions.");
+		std::terminate();
+	}
 
 	PVR::Header iconHeader;
 	Array<u8> iconData = PVR::Read("Resource/gE.PVR", iconHeader);
 
-	GLFWimage image{ (int) iconHeader.Size.x, (int) iconHeader.Size.y, iconData.Data() };
-	glfwSetWindowIcon(_window, 1, &image);
-
-	if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) GE_FAIL("Failed to initialize GLAD.");
+	_icon = SDL_CreateSurfaceFrom(iconHeader.Size.x, iconHeader.Size.y, SDL_PIXELFORMAT_RGBA8888, iconData.Data(), 4 * iconHeader.Size.x);
+	SDL_SetWindowIcon(_window, _icon);
 
 	Log::Write("Vendor: {}\n", (const char*) glGetString(GL_VENDOR));
 	Log::Write("Renderer: {}\n", (const char*) glGetString(GL_RENDERER));
+	Log::Write("Version: {}\n", (const char*) glGetString(GL_VERSION));
 }
 
 Window::~Window()
 {
-	glfwDestroyWindow(_window);
-	glfwTerminate();
+	SDL_DestroySurface(_icon);
+	SDL_GL_DestroyContext((SDL_GLContext) _grapicsContext);
+	SDL_DestroyWindow(_window);
+	SDL_Quit();
 }
 
 #ifdef DEBUG
 	void DebugMessage(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
 	{
 		if(severity == GL_DEBUG_SEVERITY_NOTIFICATION) return;
+		if(severity == GL_DEBUG_SEVERITY_HIGH) Log::ShowError(std::format("OpenGL critical error:\n\n{}", message));
 		Log::WriteLine(message);
 	}
 #endif
@@ -93,7 +113,7 @@ bool Window::Run()
 #endif
 
 	Window::OnInit();
-	glfwSwapInterval(0);
+	SDL_GL_SetSwapInterval(0);
 
 	OnInit();
 	glMemoryBarrier(GL_ALL_BARRIER_BITS);
@@ -102,30 +122,49 @@ bool Window::Run()
 	glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
 #ifdef GE_DEBUG_PERFORMANCE
-	Log::Write("INIT TOOK {} SECONDS\n", glfwGetTime());
-
 	GL::Timer timer(this);
-
 	auto debugTick = TickHandler(GE_DEBUG_POLL_RATE);
 #endif
 
 	_physicsTick = TickHandler(GE_PHYSICS_TARGET_TICKRATE);
 	_renderTick = TickHandler(GE_RENDER_TARGET_TICKRATE);
 
-	glfwSetTime(0.0);
-	while(!glfwWindowShouldClose(_window) && !(bool) CloseState)
-	{
-		glfwPollEvents();
+	const u64 initTime = SDL_GetPerformanceCounter();
 
-		_time = glfwGetTime();
+	while(!(bool) CloseState)
+	{
+		_time = SDLGetTime(initTime);
 
 		if(_physicsTick.ShouldTick(_time))
 			OnFixedUpdate(_physicsTick.GetDelta());
 
-		if(_renderTick.ShouldTick(glfwGetTime()))
+
+		if(_renderTick.ShouldTick(SDLGetTime(initTime)))
 		{
+			_keyboardState.ClearKeyStates();
+			_mouseState.Update(*this);
+
+			SDL_Event event;
+			while(SDL_PollEvent(&event))
+			{
+				ImGui_ImplSDL3_ProcessEvent(&event);
+
+				switch (event.type)
+				{
+				case SDL_EVENT_QUIT:
+					CloseState = CloseFlags::Close;
+					break;
+				case SDL_EVENT_KEY_DOWN:
+				case SDL_EVENT_KEY_UP:
+					_keyboardState.ProcessKey(event.key);
+						break;
+				default:
+					break;
+				}
+			}
+
 		#ifdef GE_DEBUG_PERFORMANCE
-			double updateDelta = glfwGetTime();
+			double updateDelta = SDLGetTime(initTime);
 
 			updateDelta = _renderTick.GetTime() - updateDelta;
 
@@ -133,14 +172,10 @@ bool Window::Run()
 			if(shouldDebugTick) timer.Start();
 		#endif
 
-			_keyboardState.Update(_window);
-			_mouseState.Update(*this);
-
 			OnUpdate(_renderTick.GetDelta());
-
 			OnRender(_renderTick.GetDelta());
 
-			glfwSwapBuffers(_window);
+			SDL_GL_SwapWindow(_window);
 
 		#ifdef GE_DEBUG_PERFORMANCE
 			if(shouldDebugTick)
@@ -157,7 +192,7 @@ bool Window::Run()
 					(unsigned) floor(_physicsTick.GetDelta() * GE_PX_MIN_TICKRATE)
 				);
 
-				glfwSetWindowTitle(_window, WindowTitleBuf);
+				SDL_SetWindowTitle(_window, WindowTitleBuf);
 			}
 		#endif
 		}
@@ -273,8 +308,8 @@ Camera3D* Window::GetReflectionSystem() const
 	return nullptr;
 }
 
-Monitor::Monitor(const GLFWvidmode* mode) :
-	Size(mode->width, mode->height),
-	RefreshRate(mode->refreshRate)
+Monitor::Monitor(const SDL_DisplayMode* mode) :
+	Size(mode->w, mode->h),
+	RefreshRate(mode->refresh_rate)
 {
 }

@@ -3,7 +3,7 @@ project(VoxelField)
 
 set(CMAKE_CXX_STANDARD 23)
 
-set(COMPILE_FLAGS_RELEASE "-O2 -static -s -static-libgcc")
+set(COMPILE_FLAGS_RELEASE "-O2 -DGE_ENABLE_IMGUI -static  -s -static-libgcc -mwindows")
 set(COMPILE_FLAGS_DEBUG "-O0 -DDEBUG -DGE_ENABLE_IMGUI -static -static-libgcc")
 
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${COMPILE_FLAGS_RELEASE}")
@@ -23,10 +23,10 @@ add_library(JOLT STATIC ${JOLT_SRC})
 file(GLOB_RECURSE CITYHASH_SRC "Vendor/CityHash/*.cpp" "Vendor/CityHash/*.h")
 add_library(CITYHASH STATIC ${CITYHASH_SRC})
 
-# GLFW
-add_library(GLFW STATIC IMPORTED)
-set_property(TARGET GLFW PROPERTY IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/GLFW/glfw3.dll")
-FILE(COPY "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/GLFW/glfw3.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+# SDL
+add_library(SDL STATIC IMPORTED)
+set_property(TARGET SDL PROPERTY IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/SDL3/SDL3.dll")
+FILE(COPY "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/SDL3/SDL3.dll" DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 # IMGUI
 file(GLOB_RECURSE IMGUI_SRC "Vendor/IMGUI/*.cpp" "Vendor/IMGUI/*.h")
@@ -49,7 +49,7 @@ file(GLOB_RECURSE GECPP_SRC "gECPP/*.cpp" "gECPP/*.h" "gECPP/*.inl")
 
 add_library(gECPP STATIC ${GECPP_SRC})
 target_compile_definitions(gECPP PUBLIC API_ID=API_GL)
-target_link_libraries(gECPP GLAD GLFW JOLT CITYHASH IMGUI)
+target_link_libraries(gECPP GLAD SDL JOLT CITYHASH IMGUI)
 
 # VOXELDEMO
 file(GLOB_RECURSE VOXELDEMO_SRC "Demo/*.cpp" "Demo/*.h" "Demo/*.inl")

@@ -5,6 +5,8 @@
 #include "Log.h"
 
 #include <IMGUI/imgui.h>
+#include <SDL3/SDL_messagebox.h>
+
 #include "Macro.h"
 #include "IMGUI/imgui_internal.h"
 
@@ -35,5 +37,10 @@ namespace gE
             ImGui::EndChild();
         }
         ImGui::End();
+    }
+
+    void Log::ShowError(const std::string_view& message)
+    {
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error!", message.data(), nullptr);
     }
 }

@@ -67,8 +67,9 @@ namespace gE
 
 	enum class CloseFlags : u8
 	{
-		Close,
-		Restart,
+		None = 0,
+		Close = 1,
+		Restart = 2,
 	};
 
 	namespace RenderState

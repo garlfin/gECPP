@@ -8,7 +8,6 @@
 #include <Component/Physics/CharacterController.h>
 #include <Entity/Entity.h>
 #include <gECPP/Window/Window.h>
-#include <glm/gtx/string_cast.hpp>
 
 #define SENSITIVITY 0.1f
 #define SPEED 2.f
@@ -99,6 +98,15 @@ namespace gE::VoxelDemo
 		void OnFixedUpdate(float d) override
 		{
 			_grounded = _controller->GetIsGrounded();
+		}
+
+		void OnGUI(float) override
+		{
+	#ifdef GE_ENABLE_IMGUI
+			ImGui::Begin("Awesome window test");
+			ImGui::TextUnformatted("text");
+			ImGui::End();
+	#endif
 		}
 
 	private:

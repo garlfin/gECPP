@@ -68,6 +68,7 @@ using std::move;
 	#define GE_ASSERT(COND) { bool cond = COND; if(!cond) __debugbreak(); assert(cond); }
 #else
 	#define GE_ASSERTM(COND, ERR) assertm(cond, ERR)
+	#define GE_ASSERT(COND) assert(cond)
 #endif
 
 #define UNPACK(...) __VA_ARGS__
@@ -200,7 +201,7 @@ using std::move;
 		return a = (TYPE) (std::underlying_type_t<TYPE>(a) OP std::underlying_type_t<TYPE>(b)); \
 	}
 
-#define ENUM_OPERATOR_LOGICAL(TYPE, OP) \
+#define ENUM_OPERATOR_UNARY(TYPE, OP) \
 	inline constexpr TYPE operator OP(TYPE a) \
 	{ \
 		return (TYPE) ~std::underlying_type_t<TYPE>(a); \

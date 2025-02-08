@@ -4,7 +4,7 @@
 
 #include "GUI.h"
 
-#include <IMGUI/backends/imgui_impl_glfw.h>
+#include <IMGUI/backends/imgui_impl_sdl3.h>
 #include <Window/Window.h>
 #include <GLM/gtc/matrix_transform.hpp>
 
@@ -19,7 +19,7 @@ gE::GUIManager::GUIManager(Window* window) :
 #ifdef GE_ENABLE_IMGUI
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGui_ImplGlfw_InitForOther(window->GLFWWindow(), true);
+    ImGui_ImplSDL3_InitForOther(window->SDLWindow());
 
     unsigned char* pixelData;
     int width, height;
@@ -48,7 +48,7 @@ void gE::GUIManager::OnRender(float delta)
         ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
         if(!_window->GetCursorEnabled()) ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NoMouse;
 
-        ImGui_ImplGlfw_NewFrame();
+        ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
 
     const KeyState consoleKey = _window->GetKeyboard().GetKey(Key::C);
@@ -61,6 +61,8 @@ void gE::GUIManager::OnRender(float delta)
 
     _framebuffer.Bind();
     glClear(GL_COLOR_BUFFER_BIT);
+
+    _window->GetBehaviors().OnGUI(delta);
 
     #ifdef GE_ENABLE_IMGUI
         ImGui::Render();
@@ -145,12 +147,12 @@ void gE::GUIManager::OnRender(const ImDrawData* draw)
 
     glDisable(GL_SCISSOR_TEST);
 }
+#endif
 
 gE::GUIManager::~GUIManager()
 {
 #ifdef GE_ENABLE_IMGUI
-    ImGui_ImplGlfw_Shutdown();
+    ImGui_ImplSDL3_Shutdown();
     ImGui::DestroyContext();
 #endif
 }
-#endif

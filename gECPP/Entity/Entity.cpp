@@ -121,4 +121,13 @@ namespace gE
 	{
 
 	}
+
+	void BehaviorManager::OnGUI(float delta)
+	{
+		for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())
+		{
+			Behavior* behavior = (Behavior*) &(***i);
+			behavior->OnGUI(delta);
+		}
+	}
 }

@@ -23,7 +23,7 @@ namespace gE
 
 	ENUM_OPERATOR(TransformFlags, |);
 	ENUM_OPERATOR(TransformFlags, &);
-	ENUM_OPERATOR_LOGICAL(TransformFlags, ~);
+	ENUM_OPERATOR_UNARY(TransformFlags, ~);
 
 	class Transform final : public Component
 	{
