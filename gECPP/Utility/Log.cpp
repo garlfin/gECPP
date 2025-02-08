@@ -39,8 +39,9 @@ namespace gE
         ImGui::End();
     }
 
-    void Log::ShowError(const std::string_view& message)
+    void Log::FatalError(const std::string_view& message)
     {
-        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error!", message.data(), nullptr);
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Fatal Error!", message.data(), nullptr);
+        std::terminate();
     }
 }

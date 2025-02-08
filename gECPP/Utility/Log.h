@@ -37,12 +37,18 @@ namespace gE
             _scrollBottom = true;
         }
 
+        static void FatalError(const std::string_view& message);
+
+        template<class... ARGS>
+        static void FatalError(const std::string_view& format, ARGS&&... args)
+        {
+            FatalError(std::vformat(format, std::make_format_args(args...)));
+        }
+
         GET_CONST(std::string_view, Log, _log);
 
         static void Draw(bool* isOpen, bool first = false);
         inline static void Clear() { _log.clear(); _log.shrink_to_fit(); }
-
-        static void ShowError(const std::string_view& message);
 
     private:
         Log() = default;
