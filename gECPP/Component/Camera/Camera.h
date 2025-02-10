@@ -25,7 +25,7 @@ namespace gE
 	 public:
 		Camera(Entity*, TextureSize2D, IRenderTarget&, const ICameraSettings&, ComponentManager<Camera>* = nullptr);
 
-		inline void OnUpdate(float delta) override { }
+		void OnInit() override {};
 		void OnRender(float delta, Camera* callingCamera) override;
 
 		virtual void GetGPUCamera(GPU::Camera&);

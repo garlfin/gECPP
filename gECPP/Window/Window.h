@@ -54,7 +54,6 @@ namespace gE
 		explicit Window(glm::u16vec2 size, const std::string& name = "gE");
 
 		bool Run();
-		bool Close(bool restart = false);
 
 		void Blit(const API::Texture& texture);
 
@@ -78,7 +77,7 @@ namespace gE
 		// Managers
 		GET(CameraManager&, Cameras, Cameras);
 		GET(TransformManager&, Transforms, Transforms);
-		GET(BehaviorManager&, Behaviors, Behaviors);
+		GET(ComponentManager<Behavior>&, Behaviors, Behaviors);
 		GET(RendererManager&, Renderers, Renderers);
 		GET(LightManager&, Lights, Lights);
 		GET(CubemapManager&, Cubemaps, Cubemaps);
@@ -137,7 +136,7 @@ namespace gE
 		GPU::TextureSlotManager SlotManager;
 		EntityManager Entities;
 		Pointer<GUIManager> GUI;
-		BehaviorManager Behaviors;
+		ComponentManager<Behavior> Behaviors;
 
 		Pointer<Material> DefaultMaterial;
 		Pointer<API::Shader> BlitShader;

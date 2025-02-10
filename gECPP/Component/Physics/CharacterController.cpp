@@ -61,7 +61,8 @@ namespace gE
         const Transform& transform = GetOwner().GetTransform();
         _controller->SetPosition(Physics::ToPX(transform->Position));
 
-        _velocity = glm::vec3(0.f);
+        _velocity = DEFAULT;
+        _instantVelocity = DEFAULT;
     }
 
     void CharacterController::OnEarlyFixedUpdate(float delta)
@@ -70,14 +71,17 @@ namespace gE
         const px::PhysicsSystem& system = manager.GetSystem();
         const Transform& transform = GetOwner().GetTransform();
 
-        if(!GetIsGrounded() && _useGravity)
-            _velocity.y += system.GetGravity().GetY() * delta;
-        else
-            _velocity.y = std::max(_velocity.y, 0.f);
+        _velocity += _instantVelocity / delta;
 
-        const glm::vec3 velocity = _velocity + _instantVelocity / delta;
+        if(_useGravity)
+        {
+            if(GetIsGrounded())
+                _velocity.y = std::max(_velocity.y, 0.f);
+            else
+                _velocity.y += system.GetGravity().GetY() * delta;
+        }
 
-        _controller->SetLinearVelocity(Physics::ToPX(velocity));
+        _controller->SetLinearVelocity(Physics::ToPX(_velocity));
 
         if((bool)(transform.GetFlags() & TransformFlags::PhysicsInvalidated))
             ForceUpdateTransforms();
@@ -98,7 +102,11 @@ namespace gE
             manager.GetTempAllocator()
         );
 
-        if(GetIsGrounded()) _instantVelocity = DEFAULT;
+        _grounded = _controller->GetGroundState() == JPH::CharacterBase::EGroundState::OnGround;
+
+        if(_grounded && _useGravity)
+            _velocity = DEFAULT;
+        _instantVelocity = DEFAULT;
 
         PreviousPosition = Position;
         PreviousRotation = Rotation;

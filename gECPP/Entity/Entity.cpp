@@ -95,18 +95,30 @@ namespace gE
 		}
 	}
 
-	void IComponentManager::OnFixedUpdate(float d)
+	void IComponentManager::OnFixedUpdate(float delta)
 	{
 		OnInit();
 
 		for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())
-			(**i)->OnFixedUpdate(d);
+			(**i)->OnFixedUpdate(delta);
 	}
 
-	void IComponentManager::OnRender(float d, Camera* camera)
+	void IComponentManager::OnLateFixedUpdate(float delta)
 	{
 		for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())
-			(**i)->OnRender(d, camera);
+			(**i)->OnLateFixedUpdate(delta);
+	}
+
+	void IComponentManager::OnRender(float delta, Camera* camera)
+	{
+		for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())
+			(**i)->OnRender(delta, camera);
+	}
+
+	void IComponentManager::OnGUI(float delta)
+	{
+		for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())
+			(**i)->OnGUI(delta);
 	}
 
 	void IComponentManager::OnInit()
@@ -120,14 +132,5 @@ namespace gE
 	Behavior::Behavior(Entity* o) : Component(o, &o->GetWindow().GetBehaviors())
 	{
 
-	}
-
-	void BehaviorManager::OnGUI(float delta)
-	{
-		for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())
-		{
-			Behavior* behavior = (Behavior*) &(***i);
-			behavior->OnGUI(delta);
-		}
 	}
 }

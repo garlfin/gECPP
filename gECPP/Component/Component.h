@@ -22,11 +22,15 @@ namespace gE
 		using UpdateFunction = void(Component::*)(float);
 		using RenderFunction = void(Component::*)(float, Camera*);
 
-		virtual void OnInit() { };
-		virtual void OnFixedUpdate(float d) { };
-		virtual void OnUpdate(float d) { };
-		virtual void OnRender(float d, Camera* camera) { };
-		virtual void OnDestroy() { };
+		virtual void OnInit() = 0;
+
+		virtual void OnFixedUpdate(float delta) {};
+		virtual void OnLateFixedUpdate(float delta) {};
+		virtual void OnUpdate(float delta) { };
+		virtual void OnRender(float delta, Camera* camera) {};
+		virtual void OnGUI(float delta) {};
+
+		virtual void OnDestroy() {};
 
 		~Component() override = default;
 
@@ -49,9 +53,11 @@ namespace gE
 	 public:
 		explicit IComponentManager(Window* window) : Manager(), _window(window) {};
 
-		virtual void OnUpdate(float d);
-		virtual void OnFixedUpdate(float d);
-		virtual void OnRender(float d, Camera* camera);
+		virtual void OnFixedUpdate(float delta);
+		virtual void OnLateFixedUpdate(float delta);
+		virtual void OnUpdate(float delta);
+		virtual void OnRender(float delta, Camera* camera);
+		virtual void OnGUI(float delta);
 
 		ALWAYS_INLINE void OnRender(float d) { OnRender(d, nullptr); }
 

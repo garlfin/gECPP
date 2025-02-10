@@ -30,15 +30,15 @@ namespace gE
         GET_CONST(const px::CharacterVirtual&, JoltController, *_controller);
 
         GET_CONST(float, Mass, _controller->GetMass());
-        void SetMass(float mass) { _controller->SetMass(mass); }
+        ALWAYS_INLINE void SetMass(float mass) { _controller->SetMass(mass); }
 
         GET_SET_VALUE(bool, UseGravity, _useGravity);
         GET_SET_VALUE(glm::vec3, Velocity, _velocity);
-        ALWAYS_INLINE void AddVelocity(const glm::vec3& velocity) { _velocity += velocity; }
 
+        ALWAYS_INLINE void AddVelocity(const glm::vec3& velocity) { _velocity += velocity; }
         ALWAYS_INLINE void Move(const glm::vec3& position) { _instantVelocity += position; }
 
-        GET_CONST(bool, IsGrounded, _controller->IsSupported());
+        GET_SET_VALUE(bool, IsGrounded, _grounded);
         NODISCARD PhysicsComponent* GetGround() const { return (PhysicsComponent*) _controller->GetGroundUserData(); }
 
         void SetShape(const Physics::CapsuleShape& shape);
@@ -53,5 +53,6 @@ namespace gE
         bool _useGravity = true;
         glm::vec3 _velocity = DEFAULT;
         glm::vec3 _instantVelocity = DEFAULT;
+        bool _grounded = false;
     };
 }

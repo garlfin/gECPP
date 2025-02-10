@@ -15,7 +15,7 @@
 #endif
 
 #ifndef TAA_WEIGHT
-    #define TAA_WEIGHT (0.5 / TAA_SAMPLE_COUNT)
+    #define TAA_WEIGHT (1.0 / TAA_SAMPLE_COUNT)
 #endif
 
 #define SAMPLE_OFFSET(OFFSET) \

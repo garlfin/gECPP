@@ -30,6 +30,8 @@ namespace gE::VoxelDemo
 		GET_SET_VALUE(float, StandingHeight, _standingHeight);
 		GET_SET_VALUE(float, CrouchingHeight, _crouchingHeight);
 
+		void OnInit() override {};
+
 		void OnUpdate(float delta) override
 		{
 			Transform& transform = GetOwner().GetTransform();
@@ -37,8 +39,9 @@ namespace gE::VoxelDemo
 
 			const KeyboardState& keyboard = GetWindow().GetKeyboard();
 			const MouseState& mouse = GetWindow().GetMouse();
-
 			const KeyState crouchState = keyboard.GetKey(Key::C);
+
+			const bool grounded = _controller->GetIsGrounded();
 
 			if(keyboard.GetKey(Key::Escape) == KeyState::Pressed)
 				GetWindow().SetCursorEnabled(!GetWindow().GetCursorEnabled());
@@ -58,8 +61,7 @@ namespace gE::VoxelDemo
 			if(IsKeyDown(keyboard.GetKey(Key::A))) dir.x -= SPEED;
 			if(IsKeyDown(keyboard.GetKey(Key::D))) dir.x += SPEED;
 
-			dir = normalize(dir);
-			if(glm::isnan(dir.x)) dir = DEFAULT;
+			if(glm::length2(dir) > 0) dir = normalize(dir);
 
 			Physics::CapsuleShape capsuleShape = DEFAULT;
 			capsuleShape.Height = _standingHeight;
@@ -84,20 +86,14 @@ namespace gE::VoxelDemo
 			_controller->SetShape(capsuleShape);
 
 			if(!IsKeyDown(crouchState) && IsKeyDown(keyboard.GetKey(Key::LShift))) dir *= SPEED_MULTIPLIER;
-			if(!_grounded) dir *= 0.0;
 
-			_controller->Move(transform->Rotation * dir * delta);
+			if(grounded) _controller->Move(transform->Rotation * dir * delta);
 
-			if(IsKeyDown(keyboard.GetKey(Key::Space)) && _grounded)
+			if(IsKeyDown(keyboard.GetKey(Key::Space)) && grounded)
 			{
-				_controller->SetVelocity(glm::vec3(0, std::sqrt(2.f * 9.81 * JUMP_HEIGHT), 0));
-				_grounded = false;
+				_controller->AddVelocity(glm::vec3(0, std::sqrt(2.f * 9.81 * JUMP_HEIGHT), 0));
+				_controller->SetIsGrounded(false);
 			}
-		}
-
-		void OnFixedUpdate(float d) override
-		{
-			_grounded = _controller->GetIsGrounded();
 		}
 
 		void OnGUI(float) override
@@ -115,6 +111,5 @@ namespace gE::VoxelDemo
 		float _crouchingHeight = 0.875;
 		RelativePointer<CharacterController> _controller;
 		Entity* _camera;
-		bool _grounded = false;
 	};
 }

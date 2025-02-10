@@ -134,7 +134,6 @@ bool Window::Run()
 		if(_physicsTick.ShouldTick(_time))
 			OnFixedUpdate(_physicsTick.GetDelta());
 
-
 		if(_renderTick.ShouldTick(SDLGetTime(initTime)))
 		{
 			_keyboardState.ClearKeyStates();
@@ -262,9 +261,12 @@ void Window::Blit(const API::Texture& texture)
 void Window::OnFixedUpdate(float delta)
 {
 	Physics->OnEarlyFixedUpdate(delta);
+
 	Behaviors.OnFixedUpdate(delta);
 	Physics->OnFixedUpdate(delta);
 	Transforms.OnFixedUpdate(delta);
+
+	Behaviors.OnLateFixedUpdate(delta);
 }
 
 void Window::OnUpdate(float delta)

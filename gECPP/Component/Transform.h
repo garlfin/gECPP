@@ -42,6 +42,7 @@ namespace gE
 		ALWAYS_INLINE void Set(const TransformData& d) { Set(d, TransformFlags::All); }
 		ALWAYS_INLINE void Set(const Transform& d) { Set(d._transform, TransformFlags::All); }
 
+		void OnInit() override {};
 		void OnUpdate(float) override;
 		void OnRender(float, Camera*) override;
 		void OnFixedUpdate(float) override;

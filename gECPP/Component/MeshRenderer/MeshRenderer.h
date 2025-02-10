@@ -18,7 +18,7 @@ namespace gE
 	 public:
 		MeshRenderer(Entity* o, const Reference<Mesh>& mesh);
 
-		void OnUpdate(float delta) override {};
+		void OnInit() override {};
 		void OnRender(float delta, Camera*) override;
 
 		GET_CONST(Mesh&, Mesh, *_mesh);
