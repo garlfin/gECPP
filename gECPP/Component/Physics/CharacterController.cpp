@@ -71,8 +71,6 @@ namespace gE
         const px::PhysicsSystem& system = manager.GetSystem();
         const Transform& transform = GetOwner().GetTransform();
 
-        _velocity += _instantVelocity / delta;
-
         if(_useGravity)
         {
             if(GetIsGrounded())
@@ -81,7 +79,7 @@ namespace gE
                 _velocity.y += system.GetGravity().GetY() * delta;
         }
 
-        _controller->SetLinearVelocity(Physics::ToPX(_velocity));
+        _controller->SetLinearVelocity(Physics::ToPX(_velocity + _instantVelocity / delta));
 
         if((bool)(transform.GetFlags() & TransformFlags::PhysicsInvalidated))
             ForceUpdateTransforms();

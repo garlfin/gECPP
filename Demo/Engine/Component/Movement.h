@@ -87,7 +87,9 @@ namespace gE::VoxelDemo
 
 			if(!IsKeyDown(crouchState) && IsKeyDown(keyboard.GetKey(Key::LShift))) dir *= SPEED_MULTIPLIER;
 
-			if(grounded) _controller->Move(transform->Rotation * dir * delta);
+			if(grounded) _dir = dir;
+
+			_controller->Move(transform->Rotation * _dir * delta);
 
 			if(IsKeyDown(keyboard.GetKey(Key::Space)) && grounded)
 			{
@@ -111,5 +113,6 @@ namespace gE::VoxelDemo
 		float _crouchingHeight = 0.875;
 		RelativePointer<CharacterController> _controller;
 		Entity* _camera;
+		glm::vec3 _dir = DEFAULT;
 	};
 }
