@@ -19,7 +19,7 @@ gE::GUIManager::GUIManager(Window* window) :
 #ifdef GE_ENABLE_IMGUI
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGui_ImplSDL3_InitForOther(window->SDLWindow());
+    ImGui_ImplSDL3_InitForOther(window->GetSDLWindow());
 
     unsigned char* pixelData;
     int width, height;
@@ -44,15 +44,17 @@ gE::GUIManager::GUIManager(Window* window) :
 
 void gE::GUIManager::OnRender(float delta)
 {
+    const bool active = _window->GetMouse().GetIsEnabled();
+
     #ifdef GE_ENABLE_IMGUI
         ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
-        if(!_window->GetCursorEnabled()) ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NoMouse;
+        if(!active) ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NoMouse;
 
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
 
     const KeyState consoleKey = _window->GetKeyboard().GetKey(Key::C);
-    if(_window->GetCursorEnabled() && consoleKey == KeyState::Pressed)
+    if(active && consoleKey == KeyState::Pressed)
         _logOpen = true;
 
     if(_logOpen)
@@ -123,8 +125,8 @@ void gE::GUIManager::OnRender(const ImDrawData* draw)
 
     _imShader.Bind();
 
-    const ImVec2 clip_off = draw->DisplayPos;
-    int fb_height = (int) draw->DisplaySize.y;
+    const ImVec2 clipOffset = draw->DisplayPos;
+    int height = (int) draw->DisplaySize.y;
 
     for(const ImDrawList* cmdList : draw->CmdLists)
     {
@@ -133,12 +135,12 @@ void gE::GUIManager::OnRender(const ImDrawData* draw)
 
         for(const ImDrawCmd& drawCall : cmdList->CmdBuffer)
         {
-            ImVec2 clip_min(drawCall.ClipRect.x - clip_off.x, drawCall.ClipRect.y - clip_off.y);
-            ImVec2 clip_max(drawCall.ClipRect.z - clip_off.x, drawCall.ClipRect.w - clip_off.y);
-            if (clip_max.x <= clip_min.x || clip_max.y <= clip_min.y)
+            ImVec2 clipMin(drawCall.ClipRect.x - clipOffset.x, drawCall.ClipRect.y - clipOffset.y);
+            ImVec2 clipMax(drawCall.ClipRect.z - clipOffset.x, drawCall.ClipRect.w - clipOffset.y);
+            if (clipMax.x <= clipMin.x || clipMax.y <= clipMin.y)
                 continue;
 
-            glScissor((int)clip_min.x, (int)((float)fb_height - clip_max.y), (int)(clip_max.x - clip_min.x), (int)(clip_max.y - clip_min.y));
+            glScissor((int)clipMin.x, (int)((float)height - clipMax.y), (int)(clipMax.x - clipMin.x), (int)(clipMax.y - clipMin.y));
 
             _imShader.SetUniform(1, _imFont, 0);
             vao.DrawDirect(drawCall.ElemCount / 3, drawCall.IdxOffset);

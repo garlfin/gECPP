@@ -36,7 +36,7 @@ namespace GPU
 	class VAO : public gE::Asset
 	{
 		SERIALIZABLE_PROTO("VAO", 1, VAO, Asset);
-		SERIALIZABLE_REFLECTABLE(VAO, "GPU::VAO");
+		REFLECTABLE_PROTO(VAO);
 
 	public:
 		VAOFieldCounts Counts{};
@@ -60,7 +60,7 @@ namespace GPU
 	class IndexedVAO : public VAO
 	{
 		SERIALIZABLE_PROTO("IVAO", 1, IndexedVAO, VAO);
-		SERIALIZABLE_REFLECTABLE(IndexedVAO, "GPU::IndexedVAO");
+		REFLECTABLE_PROTO(IndexedVAO);
 
 	public:
 		ALWAYS_INLINE void Free() override { VAO::Free(); TriangleBuffer.Free(); }
@@ -71,6 +71,9 @@ namespace GPU
 
 		~IndexedVAO() override { ASSET_CHECK_FREE(IndexedVAO); }
 	};
+
+	REFLECTABLE_IMPL(IndexedVAO, "GPU::IndexedVAO");
+	REFLECTABLE_IMPL(VAO, "GPU::VAO");
 }
 
 #if API == GL

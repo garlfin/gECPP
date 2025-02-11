@@ -42,6 +42,7 @@ Window::Window(glm::u16vec2 size, const std::string& name) :
 	Cameras(this), Transforms(this),
 	CullingManager(this), Behaviors(this),
     AssetManager(this), _size(size),
+	_mouseState(this),
 	_name(name)
 {
 	if(!SDL_WasInit(SDL_INIT_VIDEO))
@@ -137,7 +138,6 @@ bool Window::Run()
 		if(_renderTick.ShouldTick(SDLGetTime(initTime)))
 		{
 			_keyboardState.ClearKeyStates();
-			_mouseState.Update(*this);
 
 			SDL_Event event;
 			while(SDL_PollEvent(&event))
@@ -157,6 +157,8 @@ bool Window::Run()
 					break;
 				}
 			}
+
+			_mouseState.Update();
 
 		#ifdef GE_DEBUG_PERFORMANCE
 			double updateDelta = SDLGetTime(initTime);

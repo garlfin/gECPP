@@ -104,10 +104,9 @@ namespace gE
 		GET_CONST(const TickHandler&, PhysicsTick, _physicsTick);
 
 		GET_CONST(const KeyboardState&, Keyboard, _keyboardState);
-		GET_CONST(const MouseState&, Mouse, _mouseState);
-		GET_SET(bool, CursorEnabled, _cursorEnabled);
+		GET(MouseState&, Mouse, _mouseState);
 
-		NODISCARD ALWAYS_INLINE SDL_Window* SDLWindow() const { return _window; }
+		GET_CONST(SDL_Window*, SDLWindow, _window);
 
 		virtual ~Window();
 
@@ -158,15 +157,13 @@ namespace gE
 		TextureSize2D _size;
 		std::string _name;
 
-		Monitor _monitor;
-
 		double _time = DEFAULT;
-		KeyboardState _keyboardState;
-		MouseState _mouseState;
-		bool _cursorEnabled = true;
-
 		TickHandler _renderTick = DEFAULT;
 		TickHandler _physicsTick = DEFAULT;
+
+		Monitor _monitor;
+		KeyboardState _keyboardState;
+		MouseState _mouseState;
 	};
 }
 

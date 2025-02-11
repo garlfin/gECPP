@@ -14,6 +14,8 @@ namespace gE
         _filter(GetOwner().GetLayer()),
         _broadFilter(GetOwner().GetLayer())
     {
+        UseRotation = false;
+
         PhysicsManager& manager = GetWindow().GetPhysics();
         px::PhysicsSystem& system = manager.GetSystem();
 
@@ -107,10 +109,8 @@ namespace gE
         _instantVelocity = DEFAULT;
 
         PreviousPosition = Position;
-        PreviousRotation = Rotation;
 
         Position = Physics::ToGLM(_controller->GetPosition());
-        Rotation = GetOwner().GetTransform()->Rotation;
     }
 
     void CharacterController::ForceUpdateTransforms()
@@ -118,9 +118,7 @@ namespace gE
         const Transform& transform = GetOwner().GetTransform();
 
         Position = transform->Position;
-        Rotation = transform->Rotation;
 
         _controller->SetPosition(Physics::ToPX(Position));
-        _controller->SetRotation(Physics::ToPX(Rotation));
     }
 }

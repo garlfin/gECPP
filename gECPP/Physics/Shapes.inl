@@ -107,10 +107,10 @@ namespace Physics
             Write(out, BakedSettings);
     }
 
-    SERIALIZABLE_REFLECTABLE_IMPL(SphereShape, Jolt::SphereShape);
-    SERIALIZABLE_REFLECTABLE_IMPL(BoxShape, Jolt::BoxShape);
-    SERIALIZABLE_REFLECTABLE_IMPL(CapsuleShape, Jolt::CapsuleShape);
-    SERIALIZABLE_REFLECTABLE_IMPL(ConvexMeshShape, Jolt::ConvexMeshShape);
+    inline REFLECTABLE_FACTORY_IMPL(SphereShape, Jolt::SphereShape);
+    inline REFLECTABLE_FACTORY_IMPL(BoxShape, Jolt::BoxShape);
+    inline REFLECTABLE_FACTORY_IMPL(CapsuleShape, Jolt::CapsuleShape);
+    inline REFLECTABLE_FACTORY_IMPL(ConvexMeshShape, Jolt::ConvexMeshShape);
 }
 
 namespace Jolt

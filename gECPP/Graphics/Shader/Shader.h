@@ -22,7 +22,7 @@ namespace GPU
 	struct ShaderSource final : public gE::Asset
 	{
 		SERIALIZABLE_PROTO("SSRC", 0, ShaderSource, Asset);
-		SERIALIZABLE_REFLECTABLE(ShaderSource, "GPU::ShaderSource");
+		REFLECTABLE_PROTO(ShaderSource);
 
 	public:
 		explicit ShaderSource(const Path&);
@@ -37,10 +37,12 @@ namespace GPU
 		std::string Source;
 	};
 
+	REFLECTABLE_IMPL(ShaderSource, "GPU::ShaderSource");
+
 	struct ShaderStage : public gE::Asset
 	{
 		SERIALIZABLE_PROTO("STGE", 1, ShaderStage, Asset);
-		SERIALIZABLE_REFLECTABLE(ShaderStage, "GPU::ShaderStage");
+		REFLECTABLE_PROTO(ShaderStage);
 
 	public:
 		ShaderStage(ShaderStageType, const Path&);
@@ -58,10 +60,12 @@ namespace GPU
 		}
 	};
 
+	REFLECTABLE_IMPL(ShaderStage, "GPU::ShaderStage");
+
 	struct Shader : public gE::Asset
 	{
 		SERIALIZABLE_PROTO("SHDR", 1, Shader, Asset);
-		SERIALIZABLE_REFLECTABLE(Shader, "GPU::Shader");
+		REFLECTABLE_PROTO(Shader);
 
 	public:
 		Shader(const Path& v, const Path& f);
@@ -73,10 +77,12 @@ namespace GPU
 		NODISCARD ALWAYS_INLINE bool IsFree() const override { return VertexStage.IsFree() && FragmentStage.IsFree(); }
 	};
 
+	REFLECTABLE_IMPL(Shader, "GPU::Shader");
+
 	struct ComputeShader : public gE::Asset
 	{
 		SERIALIZABLE_PROTO("COMP", 1, ComputeShader, Asset);
-		SERIALIZABLE_REFLECTABLE(ComputeShader, "GPU::ComputeShader");
+		REFLECTABLE_PROTO(ComputeShader);
 
 	public:
 		explicit ComputeShader(const Path& c);
@@ -87,7 +93,9 @@ namespace GPU
 		NODISCARD ALWAYS_INLINE bool IsFree() const override { return ComputeStage.IsFree(); }
 	};
 
-	SERIALIZABLE_REFLECTABLE_IMPL(ShaderSource, ShaderSource);
+	REFLECTABLE_IMPL(ComputeShader, "GPU::ComputeShader");
+
+	inline REFLECTABLE_FACTORY_IMPL(ShaderSource, ShaderSource);
 }
 
 #if API == GL

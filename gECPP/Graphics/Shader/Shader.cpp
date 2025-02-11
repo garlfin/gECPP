@@ -57,7 +57,7 @@ namespace GPU
 		Write(out, ComputeStage);
 	}
 
-	SERIALIZABLE_REFLECTABLE_IMPL(ShaderStage, API::ShaderStage)
+	REFLECTABLE_FACTORY_IMPL(ShaderStage, API::ShaderStage)
 
 	ShaderStage::ShaderStage(ShaderStageType type, const Path& path) :
 		StageType(type),
@@ -66,7 +66,7 @@ namespace GPU
 	{
 	}
 
-	SERIALIZABLE_REFLECTABLE_IMPL(Shader, API::Shader)
+	REFLECTABLE_FACTORY_IMPL(Shader, API::Shader)
 
 	Shader::Shader(const Path& v, const Path& f) :
 		VertexStage(ShaderStageType::Vertex, v),
@@ -74,7 +74,7 @@ namespace GPU
 	{
 	}
 
-	SERIALIZABLE_REFLECTABLE_IMPL(ComputeShader, API::ComputeShader)
+	REFLECTABLE_FACTORY_IMPL(ComputeShader, API::ComputeShader)
 
 	ComputeShader::ComputeShader(const Path& c) :
 		ComputeStage(ShaderStageType::Compute, c)

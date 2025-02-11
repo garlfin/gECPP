@@ -45,7 +45,7 @@ namespace GPU
 	class Texture1D : public Texture
 	{
 		SERIALIZABLE_PROTO("TEX1", 1, Texture1D, Texture);
-		SERIALIZABLE_REFLECTABLE(Texture1D, "API::Texture2D");
+		REFLECTABLE_PROTO(Texture1D);
 
 	public:
 		Texture1D(const Texture& super, TextureSize1D size) : Texture(super), Size(size) {};
@@ -57,7 +57,7 @@ namespace GPU
  	class Texture2D : public Texture
 	{
  		SERIALIZABLE_PROTO("TEX2", 1, Texture2D, Texture);
- 		SERIALIZABLE_REFLECTABLE(Texture2D, "GPU::Texture2D");
+ 		REFLECTABLE_PROTO(Texture2D);
 
  	public:
  		Texture2D(const Texture& super, TextureSize2D size) : Texture(super), Size(size) {};
@@ -69,7 +69,7 @@ namespace GPU
 	class Texture3D : public Texture
 	{
 		SERIALIZABLE_PROTO("TEX3", 1, Texture3D, Texture);
-		SERIALIZABLE_REFLECTABLE(Texture3D, "GPU::Texture3D");
+		REFLECTABLE_PROTO(Texture3D);
 
 	public:
 		Texture3D(const Texture& super, TextureSize3D size) : Texture(super), Size(size) {};
@@ -81,7 +81,7 @@ namespace GPU
 	class TextureCube : public Texture
 	{
 		SERIALIZABLE_PROTO("TEXC", 1, TextureCube, Texture);
-		SERIALIZABLE_REFLECTABLE(TextureCube, "GPU::TextureCube");
+		REFLECTABLE_PROTO(TextureCube);
 
 	public:
 		TextureCube(const Texture& super, TextureSize1D size) : Texture(super), Size(size) {};
@@ -89,6 +89,11 @@ namespace GPU
 
 		TextureSize1D Size = DEFAULT;
 	};
+
+	REFLECTABLE_IMPL(Texture1D, "API::Texture1D");
+	REFLECTABLE_IMPL(Texture2D, "GPU::Texture2D");
+	REFLECTABLE_IMPL(TextureCube, "GPU::TextureCube");
+	REFLECTABLE_IMPL(Texture3D, "GPU::Texture3D");
 }
 
 #include "Texture.inl"

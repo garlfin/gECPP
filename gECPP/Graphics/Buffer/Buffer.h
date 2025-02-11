@@ -8,6 +8,8 @@
 #include <Serializable/Asset.h>
 #include <Serializable/Macro.h>
 
+#include "Window/KeyboardState.h"
+
 namespace GL
 {
 	template<class T>
@@ -28,11 +30,11 @@ namespace GPU
 	ENUM_OPERATOR(BufferUsageHint, |);
 	ENUM_OPERATOR(BufferUsageHint, &);
 
-	template<typename T = void>
+	template<typename T = u8>
 	class Buffer : public gE::Asset
 	{
 		SERIALIZABLE_PROTO("SBUF", 1, Buffer, Asset);
-		SERIALIZABLE_REFLECTABLE(Buffer, "GPU::Buffer");
+		REFLECTABLE_PROTO(Buffer);
 
 	 public:
 		static_assert(!std::is_pointer_v<T>, "Buffer data shouldn't be a pointer!");
@@ -63,8 +65,20 @@ namespace GPU
 
 #include <Graphics/API/GL/Buffer/Buffer.h>
 
-template <typename T>
-GPU::Buffer<T>* GPU::Buffer<T>::BufferFACTORY(std::istream& in, SETTINGS_T t)
+namespace GPU
 {
-	return (Buffer*) new API::Buffer<T>(in, t);
+	template <typename T>
+	Buffer<T>* Buffer<T>::BufferFACTORY(std::istream& in, SETTINGS_T t)
+	{
+		return (Buffer*) new API::Buffer<T>(in, t);
+	}
+
+	FORCE_IMPL static ITypeSystem<Buffer<>::SETTINGS_T>::Type _REFL_IMPL_TYPE_Buffer{ "GPU::Buffer", (ITypeSystem<Buffer<>::SETTINGS_T>::FactoryFunction) Buffer<>::BufferFACTORY, {  }};
+
+	template<class T>
+	const ITypeSystem<typename Buffer<T>::SETTINGS_T>::Type& Buffer<T>::SGetType()
+	{
+		return _REFL_IMPL_TYPE_Buffer;
+	};
 }
+

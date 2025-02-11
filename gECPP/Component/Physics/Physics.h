@@ -33,6 +33,8 @@ namespace gE
         GET_SET_VALUE(PhysicsInterpolationMode, InterpolationMode, _interpolationMode);
 
     protected:
+        bool UseRotation = true;
+
         glm::vec3 Position, PreviousPosition;
         glm::quat Rotation, PreviousRotation;
 

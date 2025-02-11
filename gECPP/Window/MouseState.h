@@ -25,17 +25,24 @@ namespace gE
     class MouseState
     {
     public:
-        MouseState() = default;
+        explicit MouseState(Window* window) : _window(window) {};
 
-        NODISCARD glm::vec2 GetPosition() const { return _mousePosition; }
-        NODISCARD glm::vec2 GetDelta() const { return _previousMousePosition - _mousePosition; }
+        GET_SET(bool, IsEnabled, _enabled);
+        GET_CONST(glm::vec2, Position, _mousePosition);
+        GET_CONST(glm::vec2, Delta, _previousMousePosition - _mousePosition);
+
         NODISCARD KeyState GetButton(MouseButton button) const { return _buttons[(u8) button]; }
 
-        void Update(Window& window);
+        void SetPosition(glm::vec2) const;
+
+        void Update();
 
     private:
+        Window* _window;
+
         glm::vec2 _mousePosition = DEFAULT;
         glm::vec2 _previousMousePosition = DEFAULT;
         KeyState _buttons[(u8) MouseButton::Last + 1] = DEFAULT;
+        bool _enabled = true;
     };
 };

@@ -17,7 +17,7 @@ class Array
 	
 	constexpr Array() = default;
 
-	Array(std::initializer_list<I> init) : _size(init.size())
+	Array(const std::initializer_list<I>& init) : _size(init.size())
 	{
 		if(_size) _t = new I[_size];
 		for(size_t i = 0; i < _size; i++)
@@ -85,6 +85,12 @@ class Array
 	ALWAYS_INLINE void Free() { delete[] _t; _t = nullptr; }
 
 	ALWAYS_INLINE operator bool() const { return _t; }
+
+	T* begin() { return _t; }
+	const T* begin() const { return _t; }
+
+	T* end() { return _t + _size; }
+	const T* end() const { return _t + _size; }
 
 	~Array() { Free(); }
 

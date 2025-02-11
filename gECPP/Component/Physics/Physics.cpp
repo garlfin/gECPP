@@ -92,6 +92,6 @@ namespace gE
         }
 
         transform.SetPosition(position, TransformFlags::RenderInvalidated);
-        transform.SetRotation(rotation, TransformFlags::RenderInvalidated);
+        if(UseRotation) transform.SetRotation(rotation, TransformFlags::RenderInvalidated);
     }
 }

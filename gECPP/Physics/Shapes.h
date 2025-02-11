@@ -15,7 +15,6 @@
 #include <Math/Collision/AABB.h>
 #include <Serializable/Asset.h>
 #include <Serializable/Macro.h>
-#include <Utility/AssetManager.h>
 #include <Utility/RelativePointer.h>
 #include "Physics.h"
 
@@ -51,7 +50,7 @@ namespace Physics
     struct SphereShape : public ConvexShape
     {
         SERIALIZABLE_PROTO("SSHP", 1, SphereShape, ConvexShape);
-        SERIALIZABLE_REFLECTABLE(SphereShape, "Physics::SphereShape");
+        REFLECTABLE_PROTO(SphereShape);
 
     public:
         bool operator==(const SphereShape& o) const
@@ -62,10 +61,12 @@ namespace Physics
         float Radius = 1.f;
     };
 
+    REFLECTABLE_IMPL(SphereShape, "Physics::SphereShape");
+
     struct BoxShape : public ConvexShape
     {
         SERIALIZABLE_PROTO("BSHP", 1, BoxShape, ConvexShape);
-        SERIALIZABLE_REFLECTABLE(BoxShape, "Physics::BoxShape");
+        REFLECTABLE_PROTO(BoxShape);
 
     public:
         bool operator==(const BoxShape& o) const
@@ -76,10 +77,12 @@ namespace Physics
         glm::vec3 Extents = glm::vec3(1.f);
     };
 
+    REFLECTABLE_IMPL(BoxShape, "Physics::BoxShape");
+
     struct CapsuleShape : public ConvexShape
     {
         SERIALIZABLE_PROTO("CPSL", 1, CapsuleShape, ConvexShape);
-        SERIALIZABLE_REFLECTABLE(CapsuleShape, "Physics::CapsuleShape");
+        REFLECTABLE_PROTO(CapsuleShape);
 
     public:
         bool operator==(const CapsuleShape& o) const
@@ -90,6 +93,8 @@ namespace Physics
         float Height = 1.75f;
         float Radius = 0.225f;
     };
+
+    REFLECTABLE_IMPL(CapsuleShape, "Physics::CapsuleShape");
 
     struct ConvexMeshFace
     {
@@ -135,7 +140,7 @@ namespace Physics
     struct ConvexMeshShape : public ConvexShape
     {
         SERIALIZABLE_PROTO("CNVX", 1, ConvexMeshShape, ConvexShape);
-        SERIALIZABLE_REFLECTABLE(ConvexMeshShape, "Physics::ConvexMeshShape");
+        REFLECTABLE_PROTO(ConvexMeshShape);
 
     public:
         Array<glm::vec3> Points = DEFAULT;
@@ -146,6 +151,8 @@ namespace Physics
 
         BakeConvexShapeResult Bake();
     };
+
+    REFLECTABLE_IMPL(ConvexMeshShape, "Physics::ConvexMeshShape");
 
     NODISCARD ConvexMeshPoint ToGE(const px::ConvexHullPoint&);
     NODISCARD px::ConvexHullPoint ToPX(const ConvexMeshPoint&);

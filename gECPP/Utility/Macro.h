@@ -20,6 +20,7 @@ using std::move;
 	#define PRETTY_FUNCTION __PRETTY_FUNCTION__
 	#define TRAP __builtin_trap
 	#define DEBUGBREAK __debugbreak
+	#define FORCE_IMPL __attribute__((used))
 #endif
 
 #ifdef GE_COMPILER_MSVC
