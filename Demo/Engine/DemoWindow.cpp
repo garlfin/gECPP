@@ -67,6 +67,8 @@ void DemoWindow::OnInit()
 	Cameras.CurrentCamera = &playerCamera->GetTarget();
 	player->GetMovement().SetFPCamera(playerCamera);
 
+	Editor.SetActiveObject(&player->GetMovement());
+
 	auto* cubemapCap = new CubemapCapture(this, 512);
 	cubemapCap->GetTransform().SetPosition(glm::vec3(0.0, 2.1, 0.0));
 	cubemapCap->GetTransform().SetScale(glm::vec3(2.1f));

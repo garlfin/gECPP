@@ -95,6 +95,7 @@ namespace gE::VoxelDemo
             cameraTransform.SetPosition(glm::vec3(0, capsuleShape.Height / 2.f, 0));
             _controller->SetShape(capsuleShape);
 
+            dir *= Speed;
             if (!IsKeyDown(crouchState) && IsKeyDown(keyboard.GetKey(Key::LShift))) dir *= SPEED_MULTIPLIER;
 
             if (grounded) _dir = transform->Rotation * dir;
@@ -106,16 +107,6 @@ namespace gE::VoxelDemo
                 _controller->AddVelocity(glm::vec3(0, std::sqrt(2.f * 9.81 * JUMP_HEIGHT), 0));
                 _controller->SetIsGrounded(false);
             }
-        }
-
-        void OnGUI(float) override
-        {
-#ifdef GE_ENABLE_IMGUI
-            ImGui::Begin("Awesome window test");
-            for(const Field& field : GetType()->Fields)
-                ImGui::TextUnformatted(std::format("FIELD: {}\nOFFSET: {}\nVALUE:{}\n", field.Name, field.Offset, 0).c_str());
-            ImGui::End();
-#endif
         }
 
     private:
@@ -132,5 +123,5 @@ namespace gE::VoxelDemo
         return nullptr;
     }
 
-    REFLECTABLE_IMPL(Movement, "gE::VoxelDemo::Movement", REFL_FIELD(Movement, Speed));
+    REFLECTABLE_IMPL(Movement, "gE::VoxelDemo::Movement", REFLECT_FIELD(Movement, Speed));
 }

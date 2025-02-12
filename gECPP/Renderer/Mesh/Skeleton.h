@@ -120,7 +120,7 @@ namespace gE
         Read(in, SuggestedLocation);
 
         const std::string parentName = Read<std::string>(in);
-        Parent = settings.FindBone(parentName), SuggestedLocation;
+        Parent = settings.FindBone(parentName);
     }
 
     template <class T, class SKELETON_T>

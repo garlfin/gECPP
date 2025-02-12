@@ -210,3 +210,4 @@ using std::move;
 
 #define offsetbetween(TYPE, FIELDFROM, FIELDTO) (offsetof(TYPE, FIELDTO) - offsetof(TYPE, FIELDFROM))
 #define sizebetween(TYPE, FIELDFROM, FIELDTO) (offsetof(TYPE, FIELDTO) + sizeof(typeof(TYPE::FIELDTO)) - offsetof(TYPE, FIELDFROM))
+#define offsetof_memptr(TYPE, PTR) ((size_t) &((TYPE*) nullptr->*PTR))

@@ -21,6 +21,7 @@
 #include <Window/MouseState.h>
 
 #include "WindowState.h"
+#include "Renderer/GUI/Editor.h"
 
 #define GE_REFRESH_RATE _monitor.RefreshRate
 
@@ -136,6 +137,7 @@ namespace gE
 		EntityManager Entities;
 		Pointer<GUIManager> GUI;
 		ComponentManager<Behavior> Behaviors;
+		Editor Editor;
 
 		Pointer<Material> DefaultMaterial;
 		Pointer<API::Shader> BlitShader;

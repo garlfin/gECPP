@@ -23,18 +23,16 @@ enum class FieldType : u8
 	Pointer,
 	String,
 	Reflectable,
-	Array = 1 << 7
+};
+
+enum class FieldFlags : u8
+{
+	ReadOnly = 1 << 1,
+	Array = 1 << 2
 };
 
 ENUM_OPERATOR(FieldType, &);
 ENUM_OPERATOR(FieldType, |);
-
-struct Field
-{
-	std::string_view Name;
-	FieldType Type;
-	size_t Offset;
-};
 
 template<class T>
 CONSTEXPR_GLOBAL FieldType GetFieldType();
@@ -45,6 +43,16 @@ struct ITypeSystem
 	ITypeSystem() = delete;
 
 	using FactoryFunction = Serializable<T>*(*)(std::istream&, T);
+
+	struct Field
+	{
+		std::string_view Name;
+		FieldType Type;
+		size_t Offset;
+
+		void* AtOffset(Reflectable<T>* t) const { return (u8*) t + Offset; }
+		const void* AtOffset(const Reflectable<T>* t) const { return (const u8*) t + Offset;};
+	};
 
 	struct Type
 	{
@@ -160,14 +168,24 @@ template<> void Write(std::ostream& out, u32 count, const std::string* t);
 		const ITypeSystem<SETTINGS_T>::Type* GetType() const override { return &SGetType(); }; \
 		static const ITypeSystem<SETTINGS_T>::Type& SGetType()
 
+#ifdef DEBUG
 #define REFLECTABLE_IMPL(TYPE, NAME, ...) \
-	FORCE_IMPL static typename ITypeSystem<typename TYPE::SETTINGS_T>::Type _REFL_IMPL_TYPE_##TYPE{ NAME, (typename ITypeSystem<typename TYPE::SETTINGS_T>::FactoryFunction) TYPE::TYPE##FACTORY, { __VA_ARGS__ }}; \
+	FORCE_IMPL GLOBAL ITypeSystem<TYPE::SETTINGS_T>::Type _REFL_IMPL_TYPE_##TYPE{ NAME, (ITypeSystem<TYPE::SETTINGS_T>::FactoryFunction) TYPE::TYPE##FACTORY, { __VA_ARGS__ }}; \
 	inline const ITypeSystem<TYPE::SETTINGS_T>::Type& TYPE::SGetType() { return _REFL_IMPL_TYPE_##TYPE; }
+#else
+#define REFLECTABLE_IMPL(TYPE, NAME, ...)
+	FORCE_IMPL GLOBAL ITypeSystem<TYPE::SETTINGS_T>::Type _REFL_IMPL_TYPE_##TYPE{ NAME, (ITypeSystem<TYPE::SETTINGS_T>::FactoryFunction) TYPE::TYPE##FACTORY, {}; \
+	inline const ITypeSystem<TYPE::SETTINGS_T>::Type& TYPE::SGetType() { return _REFL_IMPL_TYPE_##TYPE; }
+#endif
 
 #define REFLECTABLE_FACTORY_IMPL(TYPE, CONSTRUCTION_T) \
 	TYPE* TYPE::TYPE##FACTORY(std::istream& in, SETTINGS_T t) { return (TYPE*) new CONSTRUCTION_T(in, t); }
 
-#define REFL_FIELD(OWNER_T, FIELD) Field{ #FIELD, GetFieldType<decltype(OWNER_T::FIELD)>(), offsetof(OWNER_T, FIELD) }
+template<class BASE>
+constexpr size_t ReflectedBaseOffset();
+
+#define REFLECT_FIELD(OWNER_T, FIELD) \
+	ITypeSystem<OWNER_T::SETTINGS_T>::Field{ #FIELD, GetFieldType<decltype(OWNER_T::FIELD)>(), offsetof_memptr(OWNER_T, &OWNER_T::FIELD) - ReflectedBaseOffset<OWNER_T>()}
 
 template<class T>
 struct Reflectable
@@ -175,12 +193,26 @@ struct Reflectable
 public:
 	Reflectable() = default;
 
-	typedef T SETTINGS_T;
+	using SETTINGS_T = T;
 
 	virtual const typename ITypeSystem<T>::Type* GetType() const { return nullptr; }
 
 	virtual ~Reflectable() = default;
+
+	template<class I>
+	friend constexpr size_t ReflectedBaseOffset();
+
+private:
+	u8 _refl_baseOffset_;
 };
+
+// TODO: better way of doing this?
+template<class BASE>
+constexpr size_t ReflectedBaseOffset()
+{
+	// + size of vtable
+	return (size_t) &((BASE*) nullptr)->_refl_baseOffset_ - sizeof(u64);
+}
 
 template<class T>
 struct Serializable : public Reflectable<T>
@@ -191,13 +223,13 @@ public:
 	Serializable() = default;
 	Serializable(istream&, T) { }
 
-	typedef T SETTINGS_T;
+	using SETTINGS_T = T;
 
 	virtual void Deserialize(istream& in, SETTINGS_T settings) {};
 	virtual void Serialize(ostream& out) const {};
 
-	virtual inline void* GetUnderlying() { return nullptr; }
-	virtual inline const void* GetUnderlying() const { return nullptr; }
+	virtual void* GetUnderlying() { return nullptr; }
+	virtual const void* GetUnderlying() const { return nullptr; }
 
 	~Serializable() override = default;
 };

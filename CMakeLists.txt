@@ -3,7 +3,7 @@ project(VoxelField)
 
 set(CMAKE_CXX_STANDARD 23)
 
-set(COMPILE_FLAGS_RELEASE "-O2 -DGE_ENABLE_IMGUI -static  -s -static-libgcc -mwindows")
+set(COMPILE_FLAGS_RELEASE "-O3 -static -s -static-libgcc -mwindows")
 set(COMPILE_FLAGS_DEBUG "-O0 -DDEBUG -DGE_ENABLE_IMGUI -static -static-libgcc")
 
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${COMPILE_FLAGS_RELEASE}")

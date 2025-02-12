@@ -17,8 +17,8 @@ namespace gE
 	Light::Light(Window* w, Camera& c, IDepthTarget& d) :
 		Entity(w),
 		Managed<Light>(&GetWindow().GetLights(), *this),
-		_camera(c),
-		Depth(nullptr)
+		Depth(nullptr),
+		_camera(c)
 	{
 	}
 

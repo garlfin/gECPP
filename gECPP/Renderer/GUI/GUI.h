@@ -43,15 +43,12 @@ namespace gE
 
         GET_CONST(const API::Texture2D&, Color, *_color);
 
-        void OnRender(float delta);
-
-#ifdef GE_ENABLE_IMGUI
-        void OnRender(const ImDrawData*);
-
-        GET_SET_VALUE(bool, ConsoleOpen, _logOpen);
-#endif
+        void BeginGUI();
+        void EndGUI();
+        void OnRender(const ImDrawData*) const;
 
         ~GUIManager();
+
     private:
         Window* _window;
 
@@ -61,7 +58,6 @@ namespace gE
 #ifdef GE_ENABLE_IMGUI
         API::Shader _imShader;
         API::Texture2D _imFont;
-        bool _logOpen = false;
 #endif
     };
 }

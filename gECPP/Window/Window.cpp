@@ -39,11 +39,17 @@ double SDLGetTime(u64 initTime)
 }
 
 Window::Window(glm::u16vec2 size, const std::string& name) :
-	Cameras(this), Transforms(this),
-	CullingManager(this), Behaviors(this),
-    AssetManager(this), _size(size),
-	_mouseState(this),
-	_name(name)
+	Cameras(this),
+	Transforms(this),
+	CullingManager(this),
+	Behaviors(this),
+#ifdef GE_ENABLE_IMGUI
+	Editor(this),
+#endif
+    AssetManager(this),
+	_size(size),
+	_name(name),
+	_mouseState(this)
 {
 	if(!SDL_WasInit(SDL_INIT_VIDEO))
 		if (!SDL_Init(SDL_INIT_VIDEO))
@@ -290,7 +296,13 @@ void Window::OnRender(float delta)
 	Lights->OnRender(delta, nullptr);
 	Cubemaps->OnRender(delta, nullptr);
 	Cameras.OnRender(delta);
-	GUI->OnRender(delta);
+
+	GUI->BeginGUI();
+	Behaviors.OnGUI(delta);
+#ifdef GE_ENABLE_IMGUI
+	Editor.OnGUI();
+#endif
+	GUI->EndGUI();
 
 	GE_ASSERTM(Cameras.CurrentCamera, "CAMERA SHOULD NOT BE NULL!");
 

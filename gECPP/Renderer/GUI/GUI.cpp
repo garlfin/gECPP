@@ -42,39 +42,33 @@ gE::GUIManager::GUIManager(Window* window) :
 #endif
 }
 
-void gE::GUIManager::OnRender(float delta)
+void gE::GUIManager::BeginGUI()
 {
     const bool active = _window->GetMouse().GetIsEnabled();
 
-    #ifdef GE_ENABLE_IMGUI
-        ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
-        if(!active) ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NoMouse;
+#ifdef GE_ENABLE_IMGUI
+    ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
+    if(!active) ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NoMouse;
 
-        ImGui_ImplSDL3_NewFrame();
-        ImGui::NewFrame();
-
-    const KeyState consoleKey = _window->GetKeyboard().GetKey(Key::C);
-    if(active && consoleKey == KeyState::Pressed)
-        _logOpen = true;
-
-    if(_logOpen)
-        Log::Draw(&_logOpen, consoleKey == KeyState::Pressed);
-    #endif
+    ImGui_ImplSDL3_NewFrame();
+    ImGui::NewFrame();
+#endif
 
     _framebuffer.Bind();
     glClear(GL_COLOR_BUFFER_BIT);
+}
 
-    _window->GetBehaviors().OnGUI(delta);
-
-    #ifdef GE_ENABLE_IMGUI
-        ImGui::Render();
-        OnRender(ImGui::GetDrawData());
-    #endif
+void gE::GUIManager::EndGUI()
+{
+#ifdef GE_ENABLE_IMGUI
+    ImGui::Render();
+    OnRender(ImGui::GetDrawData());
+#endif
 }
 
 #ifdef GE_ENABLE_IMGUI
 // https://github.com/ocornut/imgui/blob/master/backends/imgui_impl_opengl3.cpp
-void gE::GUIManager::OnRender(const ImDrawData* draw)
+void gE::GUIManager::OnRender(const ImDrawData* draw) const
 {
     GE_ASSERTM(draw, "NO DRAW DATA SUPPLIED.");
     GE_ASSERTM(draw->Valid, "INVALID DRAW.");

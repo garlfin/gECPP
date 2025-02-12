@@ -12,33 +12,6 @@
 
 namespace gE
 {
-    void Log::Draw(bool* isOpen, bool first)
-    {
-        GE_ASSERTM(ImGui::GetCurrentContext(), "NO ACTIVE CONTEXT!");
-
-        if(ImGui::Begin("Debug Menu", isOpen, ImGuiWindowFlags_MenuBar))
-        {
-            if(first)
-                ImGui::SetWindowSize(ImVec2(700, 500));
-
-            if(ImGui::Button("Clear"))
-                Clear();
-
-            ImGui::BeginMenuBar();
-            ImGui::EndMenuBar();
-
-            ImGui::BeginChild("debug.log", ImVec2(0.0f, 0.0f), ImGuiChildFlags_Borders, ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_AlwaysHorizontalScrollbar);
-            {
-                ImGui::TextUnformatted(_log.c_str());
-                if(_scrollBottom)
-                    ImGui::SetScrollHereY(1.f);
-                _scrollBottom = false;
-            }
-            ImGui::EndChild();
-        }
-        ImGui::End();
-    }
-
     void Log::FatalError(const std::string_view& message)
     {
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Fatal Error!", message.data(), nullptr);

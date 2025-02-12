@@ -213,7 +213,7 @@ namespace Jolt
         GET(px::BoxShape&, JoltShape, *_shape);
 
     private:
-        gE::ManagedPX<px::BoxShape> _shape;
+        gE::ManagedPX<px::BoxShape> _shape = DEFAULT;
     };
 
     class CapsuleShape : protected Physics::CapsuleShape, public ConvexShape

@@ -21,8 +21,6 @@ namespace gE
                 _log += format;
             else
                 _log += std::vformat(format, std::make_format_args(args...));
-
-            _scrollBottom = true;
         }
 
         template<class... ARGS>
@@ -33,8 +31,6 @@ namespace gE
             else
                 _log += std::vformat(format, std::make_format_args(args...));
             _log += '\n';
-
-            _scrollBottom = true;
         }
 
         static void FatalError(const std::string_view& message);
@@ -45,15 +41,13 @@ namespace gE
             FatalError(std::vformat(format, std::make_format_args(args...)));
         }
 
-        GET_CONST(std::string_view, Log, _log);
+        NODISCARD ALWAYS_INLINE static std::string_view Get() { return _log; };
 
-        static void Draw(bool* isOpen, bool first = false);
         inline static void Clear() { _log.clear(); _log.shrink_to_fit(); }
 
     private:
         Log() = default;
 
         inline static std::string _log = DEFAULT;
-        inline static bool _scrollBottom = false;
     };
 }

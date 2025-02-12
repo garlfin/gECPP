@@ -20,7 +20,7 @@ namespace gE
         template<class T>
         ALWAYS_INLINE void Set(const T& t) const
         {
-            if(_location != -1) _shader->GetShader().SetUniform(_location, t);
+            if(_location != -1u) _shader->GetShader().SetUniform(_location, t);
         }
 
     private:
