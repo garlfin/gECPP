@@ -18,6 +18,7 @@ namespace gE
 {
 	template<class T> class Manager;
 	template<class T> class LinkedList;
+	template<class T> class LinkedNode;
 	template<class T> class LinkedIterator;
 
 	template<class A_T, class B_T>
@@ -30,7 +31,7 @@ namespace gE
 	};
 
 	template<class T>
-	class LinkedList final
+	class LinkedList
 	{
 	 public:
 		LinkedList() = default;
@@ -38,47 +39,50 @@ namespace gE
 		DEFAULT_OPERATOR_MOVE(LinkedList);
 		DELETE_OPERATOR_COPY(LinkedList);
 
-		typedef LinkedIterator<T> ITER_T;
+		typedef LinkedNode<T> ITER_T;
 
-		void Add(LinkedIterator<T>& t, Direction = Direction::Right);
-		void Insert(LinkedIterator<T>& t, LinkedIterator<T>* at, Direction = Direction::Right);
-		void Insert(LinkedIterator<T>& t, LinkedIterator<T>& at, Direction = Direction::Right);
-		void Move(LinkedIterator<T>& t, LinkedIterator<T>& to, Direction = Direction::Right);
-		void Remove(LinkedIterator<T>& t);
+		void Add(LinkedNode<T>& t, Direction = Direction::Right);
+		void Insert(LinkedNode<T>& t, LinkedNode<T>* at, Direction = Direction::Right);
+		void Insert(LinkedNode<T>& t, LinkedNode<T>& at, Direction = Direction::Right);
+		void Move(LinkedNode<T>& t, LinkedNode<T>& to, Direction = Direction::Right);
+		void Remove(LinkedNode<T>& t);
 		void MergeList(LinkedList& from, ITER_T* begin = nullptr, ITER_T* end = nullptr);
 		void EmptyUnsafe();
 		void Empty();
 
-		NODISCARD LinkedIterator<T>* At(u32 index);
-		NODISCARD ALWAYS_INLINE LinkedIterator<T>* operator[](u32 i) { return At(i); }
+		NODISCARD LinkedNode<T>* At(u32 index);
+		NODISCARD ALWAYS_INLINE LinkedNode<T>* operator[](u32 i) { return At(i); }
 
 		template<class COMP_T, CompareFunc<const COMP_T&, const T&> COMPARE_FUNC>
-		LinkedIterator<T>* FindSimilar(const COMP_T& similar, LinkedIterator<T>* start = nullptr, Direction dir = Direction::Right, LinkedIterator<T>* end = nullptr);
+		LinkedNode<T>* FindSimilar(const COMP_T& similar, LinkedNode<T>* start = nullptr, Direction dir = Direction::Right, LinkedNode<T>* end = nullptr);
 
-		GET_CONST(LinkedIterator<T>*, First, _first);
-		GET_CONST(LinkedIterator<T>*, Last, _last);
+		GET_CONST(LinkedNode<T>*, First, _first);
+		GET_CONST(LinkedNode<T>*, Last, _last);
 		GET_CONST(u32, Size, _size);
 
-		friend class LinkedIterator<T>;
+		friend class LinkedNode<T>;
+
+		LinkedIterator<T> begin() const { return _first; }
+		LinkedIterator<T> end() const { return DEFAULT; }
 
 		~LinkedList();
 
 	 private:
-		LinkedIterator<T>* _first = nullptr;
-		LinkedIterator<T>* _last = nullptr;
+		LinkedNode<T>* _first = nullptr;
+		LinkedNode<T>* _last = nullptr;
 		u32 _size = 0;
 	};
 
 	template<class T>
-	class LinkedIterator
+	class LinkedNode
 	{
 	public:
-		LinkedIterator() = default;
-		explicit LinkedIterator(T& owner) : _owner(owner) {};
-		LinkedIterator(T& owner, LinkedList<T>* l, LinkedIterator* at = nullptr, Direction direction = Direction::Right);
+		LinkedNode() = default;
+		explicit LinkedNode(T& owner) : _owner(owner) {};
+		LinkedNode(T& owner, LinkedList<T>* l, LinkedNode* at = nullptr, Direction direction = Direction::Right);
 
-		DELETE_OPERATOR_COPY(LinkedIterator);
-		OPERATOR_MOVE_NOSUPER(LinkedIterator, Free,
+		DELETE_OPERATOR_COPY(LinkedNode);
+		OPERATOR_MOVE_NOSUPER(LinkedNode, Free,
 			if(!o._list) return;
 
 			_owner = o._owner;
@@ -94,8 +98,8 @@ namespace gE
 			o._next = nullptr;
 		);
 
-		GET_CONST(LinkedIterator*, Previous, _previous);
-		GET_CONST(LinkedIterator*, Next, _next);
+		GET_CONST(LinkedNode*, Previous, _previous);
+		GET_CONST(LinkedNode*, Next, _next);
 		GET_CONST(T&,, *_owner);
 
 		NODISCARD ALWAYS_INLINE T* operator->() { return (T*) _owner; }
@@ -106,19 +110,19 @@ namespace gE
 
 		NODISCARD ALWAYS_INLINE bool IsValid() { return (_next || _previous) && _list;}
 
-		void Move(LinkedIterator& to, Direction direction = Direction::Right)
+		void Move(LinkedNode& to, Direction direction = Direction::Right)
 		{
-			SAFE_CONSTRUCT(*this, LinkedIterator, _list, _owner, &to, direction);
+			SAFE_CONSTRUCT(*this, LinkedNode, _list, _owner, &to, direction);
 		}
 
 		friend class LinkedList<T>;
 
-		~LinkedIterator() { Free(); }
+		~LinkedNode() { Free(); }
 
 	private:
 		LinkedList<T>* _list = nullptr;
-		LinkedIterator* _previous = nullptr;
-		LinkedIterator* _next = nullptr;
+		LinkedNode* _previous = nullptr;
+		LinkedNode* _next = nullptr;
 		RelativePointer<T> _owner;
 
 		void Free();
@@ -132,17 +136,36 @@ namespace gE
 
 		DELETE_OPERATOR_CM(Manager);
 
-		typedef LinkedIterator<T> ITER_T;
+		typedef LinkedNode<T> ITER_T;
+
+		GET_CONST(const LinkedList<T>&, List, List);
 
 		friend T;
 
 		virtual ~Manager() = default;
 
 	protected:
-		virtual void OnRegister(T& t) { List.Add(t.GetIterator()); };
-		virtual void OnRemove(T& t) { List.Remove(t.GetIterator()); };
+		virtual void OnRegister(T& t) { List.Add(t.GetNode()); };
+		virtual void OnRemove(T& t) { List.Remove(t.GetNode()); };
 
 		LinkedList<T> List;
+	};
+
+	template<class T>
+	class LinkedIterator
+	{
+	public:
+		LinkedIterator(LinkedNode<T>* node) : _node(node) {};
+		LinkedIterator() = default;
+
+		T* operator*() { return &**_node; }
+
+		LinkedIterator& operator++() { _node = _node->GetNext(); return *this; }
+		bool operator==(const LinkedIterator& b) { return _node == b._node; }
+		bool operator!=(const LinkedIterator& b) { return _node != b._node; }
+
+	private:
+		LinkedNode<T>* _node = nullptr;
 	};
 
 	template<class T>
@@ -150,7 +173,7 @@ namespace gE
 	{
 	 public:
 		Managed() = default;
-		Managed(Manager<Managed>* m, T& t, bool overrideRegister = false) : Iterator(*this), _t(&t), _manager(m)
+		Managed(Manager<Managed>* m, T& t, bool overrideRegister = false) : Node(*this), _t(&t), _manager(m)
 		{
 			if(!overrideRegister) Register();
 		}
@@ -158,16 +181,16 @@ namespace gE
 		DELETE_OPERATOR_COPY(Managed);
 		OPERATOR_MOVE_NOSUPER(Managed, Free,
 			_t = o._t;
-			Iterator = move(o.Iterator);
+			Node = move(o.Iterator);
 		);
 
-		typedef LinkedIterator<Managed> ITER_T;
+		typedef LinkedNode<Managed> ITER_T;
 
 		GET(Manager<Managed>, Manager, _manager);
-		GET_CONST(Managed*, Previous, Iterator._previous);
-		GET_CONST(Managed*, Next, Iterator._next);
-		GET_CONST(LinkedList<T>*, List, Iterator._list);
-		GET(ITER_T&, Iterator, Iterator);
+		GET_CONST(ITER_T*, Previous, Node.GetPrevious());
+		GET_CONST(ITER_T*, Next, Node.GetNext());
+		GET_CONST(LinkedList<T>*, List, Node._list);
+		GET(ITER_T&, Node, Node);
 		GET_CONST(T&,, *_t);
 
 		NODISCARD ALWAYS_INLINE T* operator->() { return (T*) _t; }
@@ -183,7 +206,7 @@ namespace gE
 	protected:
 		ALWAYS_INLINE void Register();
 
-		LinkedIterator<Managed> Iterator;
+		LinkedNode<Managed> Node;
 
 	private:
 		RelativePointer<T> _t;

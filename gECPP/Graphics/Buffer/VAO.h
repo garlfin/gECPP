@@ -33,6 +33,7 @@ namespace GPU
 		u8 LOD;
 	};
 
+	REFLECTABLE_BEGIN(VAO)
 	class VAO : public gE::Asset
 	{
 		SERIALIZABLE_PROTO("VAO", 1, VAO, Asset);
@@ -56,7 +57,9 @@ namespace GPU
 
 		~VAO() override { ASSET_CHECK_FREE(VAO); }
 	};
+	REFLECTABLE_END(VAO, void, "GPU::VAO");
 
+	REFLECTABLE_BEGIN(IndexedVAO);
 	class IndexedVAO : public VAO
 	{
 		SERIALIZABLE_PROTO("IVAO", 1, IndexedVAO, VAO);
@@ -71,9 +74,7 @@ namespace GPU
 
 		~IndexedVAO() override { ASSET_CHECK_FREE(IndexedVAO); }
 	};
-
-	REFLECTABLE_IMPL(IndexedVAO, "GPU::IndexedVAO");
-	REFLECTABLE_IMPL(VAO, "GPU::VAO");
+	REFLECTABLE_END(IndexedVAO, void, "GPU::IndexedVAO");
 }
 
 #if API == GL

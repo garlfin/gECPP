@@ -9,32 +9,32 @@
 namespace gE
 {
 	template<class T>
-	void LinkedList<T>::Add(LinkedIterator<T>& t, Direction dir)
+	void LinkedList<T>::Add(LinkedNode<T>& t, Direction dir)
 	{
 		SAFE_CONSTRUCT(t, ITER_T, t.Get(), this, nullptr, dir);
 	}
 
 	template<class T>
-	void LinkedList<T>::Remove(LinkedIterator<T>& t)
+	void LinkedList<T>::Remove(LinkedNode<T>& t)
 	{
 		if(t._list != this) return;
 		SAFE_CONSTRUCT(t, ITER_T, t.Get(), nullptr);
 	}
 
 	template<class T>
-	void LinkedList<T>::Move(LinkedIterator<T>& t, LinkedIterator<T>& to, Direction dir)
+	void LinkedList<T>::Move(LinkedNode<T>& t, LinkedNode<T>& to, Direction dir)
 	{
 		Insert(t, &to, dir);
 	}
 
 	template<class T>
-	void LinkedList<T>::Insert(LinkedIterator<T>& t, LinkedIterator<T>& at, Direction dir)
+	void LinkedList<T>::Insert(LinkedNode<T>& t, LinkedNode<T>& at, Direction dir)
 	{
 		Insert(t, &at, dir);
 	}
 
 	template<class T>
-	void LinkedList<T>::Insert(LinkedIterator<T>& t, LinkedIterator<T>* at, Direction dir)
+	void LinkedList<T>::Insert(LinkedNode<T>& t, LinkedNode<T>* at, Direction dir)
 	{
 		SAFE_CONSTRUCT(t, ITER_T, t.Get(), this, at, dir);
 	}
@@ -100,7 +100,7 @@ namespace gE
 	}
 
 	template<class T>
-	LinkedIterator<T>* LinkedList<T>::At(u32 index)
+	LinkedNode<T>* LinkedList<T>::At(u32 index)
 	{
 		ITER_T* t = _first;
 		for(u32 i = 0; i < index; i++)
@@ -110,7 +110,7 @@ namespace gE
 
 	template<class T>
 	template<class COMP_T, CompareFunc<const COMP_T&, const T&> COMPARE_FUNC>
-	LinkedIterator<T>* LinkedList<T>::FindSimilar(const COMP_T& similar, LinkedIterator<T>* start, Direction dir, LinkedIterator<T>* end)
+	LinkedNode<T>* LinkedList<T>::FindSimilar(const COMP_T& similar, LinkedNode<T>* start, Direction dir, LinkedNode<T>* end)
 	{
 		if(!_first) return nullptr;
 
@@ -120,7 +120,7 @@ namespace gE
 		if(start->_list != this) return nullptr;
 		if(end && end->_list != this) return nullptr;
 
-		for(LinkedIterator<T>* c = start; c && c != end; c = dir == Direction::Left ? c->GetPrevious() : c->GetNext())
+		for(LinkedNode<T>* c = start; c && c != end; c = dir == Direction::Left ? c->GetPrevious() : c->GetNext())
 			if(COMPARE_FUNC(similar, **c)) return c;
 
 		return nullptr;
@@ -129,7 +129,7 @@ namespace gE
 	template<class OWNER_T>
 	LinkedList<OWNER_T>::~LinkedList()
 	{
-		for(LinkedIterator<OWNER_T>* m = _first; m; m = m->_next)
+		for(LinkedNode<OWNER_T>* m = _first; m; m = m->_next)
 			m->_list = nullptr;
 
 		_size = 0;
@@ -137,7 +137,7 @@ namespace gE
 	}
 
 	template<class T>
-	LinkedIterator<T>::LinkedIterator(T& owner, LinkedList<T>* l, LinkedIterator* at, Direction direction):
+	LinkedNode<T>::LinkedNode(T& owner, LinkedList<T>* l, LinkedNode* at, Direction direction):
 		_list(l), _owner(owner)
 	{
 		if(!_list) return;
@@ -178,7 +178,7 @@ namespace gE
 	}
 
 	template <class T>
-	void LinkedIterator<T>::Free()
+	void LinkedNode<T>::Free()
 	{
 		if(!_list) return;
 

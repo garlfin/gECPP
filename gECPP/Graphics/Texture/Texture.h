@@ -6,7 +6,6 @@
 
 #include <Graphics/Graphics.h>
 #include <Serializable/Asset.h>
-#include <Serializable/Macro.h>
 #include "TextureSettings.h"
 
 namespace GL
@@ -42,6 +41,7 @@ namespace GPU
 		~Texture() override { ASSET_CHECK_FREE(Texture); }
 	};
 
+	REFLECTABLE_BEGIN(Texture1D);
 	class Texture1D : public Texture
 	{
 		SERIALIZABLE_PROTO("TEX1", 1, Texture1D, Texture);
@@ -53,7 +53,9 @@ namespace GPU
 
 		TextureSize1D Size = DEFAULT;
 	};
+	REFLECTABLE_END(Texture1D, void, "API::Texture1D");
 
+	REFLECTABLE_BEGIN(Texture2D);
  	class Texture2D : public Texture
 	{
  		SERIALIZABLE_PROTO("TEX2", 1, Texture2D, Texture);
@@ -65,7 +67,9 @@ namespace GPU
 
 		TextureSize2D Size = DEFAULT;
 	};
+	REFLECTABLE_END(Texture2D, void, "GPU::Texture2D");
 
+	REFLECTABLE_BEGIN(Texture3D);
 	class Texture3D : public Texture
 	{
 		SERIALIZABLE_PROTO("TEX3", 1, Texture3D, Texture);
@@ -77,7 +81,9 @@ namespace GPU
 
 		TextureSize3D Size = DEFAULT;
 	};
+	REFLECTABLE_END(Texture3D, void, "GPU::Texture3D");
 
+	REFLECTABLE_BEGIN(TextureCube);
 	class TextureCube : public Texture
 	{
 		SERIALIZABLE_PROTO("TEXC", 1, TextureCube, Texture);
@@ -89,11 +95,7 @@ namespace GPU
 
 		TextureSize1D Size = DEFAULT;
 	};
-
-	REFLECTABLE_IMPL(Texture1D, "API::Texture1D");
-	REFLECTABLE_IMPL(Texture2D, "GPU::Texture2D");
-	REFLECTABLE_IMPL(TextureCube, "GPU::TextureCube");
-	REFLECTABLE_IMPL(Texture3D, "GPU::Texture3D");
+	REFLECTABLE_END(TextureCube, void, "GPU::TextureCube");
 }
 
 #include "Texture.inl"

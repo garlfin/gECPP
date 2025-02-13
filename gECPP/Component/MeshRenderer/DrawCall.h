@@ -44,10 +44,10 @@ namespace gE
 		u8 _subMesh = 0;
 		u8 _lod = 0;
 
-		LinkedIterator<Managed> _vaoIterator;
-		LinkedIterator<Managed> _materialIterator;
-		LinkedIterator<Managed> _subMeshIterator;
-		LinkedIterator<Managed> _lodIterator;
+		LinkedNode<Managed> _vaoIterator;
+		LinkedNode<Managed> _materialIterator;
+		LinkedNode<Managed> _subMeshIterator;
+		LinkedNode<Managed> _lodIterator;
 	};
 
 	class DrawCallManager : public Manager<Managed<DrawCall>>

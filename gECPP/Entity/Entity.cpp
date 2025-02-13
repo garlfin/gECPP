@@ -50,15 +50,15 @@ namespace gE
 
 		if(destroyChildren)
 		{
-			ITER_T* end = &entity.Iterator;
+			ITER_T* end = &entity.Node;
 
-			for(ITER_T* i = &entity.Iterator; i && (**i)->_sceneTreeDepth > depth; i = i->GetNext())
+			for(ITER_T* i = &entity.Node; i && (**i)->_sceneTreeDepth > depth; i = i->GetNext())
 			{
 				(**i)->_flags.Deletion = true;
 				end = i;
 			}
 
-			_deletionList.MergeList(List, &entity.Iterator, end);
+			_deletionList.MergeList(List, &entity.Node, end);
 		}
 		else
 		{
@@ -66,10 +66,10 @@ namespace gE
 			if(entity._parent)
 				entity._parent->_children.insert(entity._parent->_children.end(), children.begin(), children.end());
 
-			for(ITER_T* i = &entity.Iterator; i && (**i)->_sceneTreeDepth > depth; i = i->GetNext())
+			for(ITER_T* i = &entity.Node; i && (**i)->_sceneTreeDepth > depth; i = i->GetNext())
 				(**i)->_parent = entity._parent;
 
-			_deletionList.Add(entity.Iterator);
+			_deletionList.Add(entity.Node);
 		}
 	}
 
@@ -131,6 +131,5 @@ namespace gE
 
 	Behavior::Behavior(Entity* o) : Component(o, &o->GetWindow().GetBehaviors())
 	{
-
 	}
 }

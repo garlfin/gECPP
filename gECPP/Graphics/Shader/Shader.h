@@ -19,6 +19,7 @@ namespace GL
 
 namespace GPU
 {
+	REFLECTABLE_BEGIN(ShaderSource)
 	struct ShaderSource final : public gE::Asset
 	{
 		SERIALIZABLE_PROTO("SSRC", 0, ShaderSource, Asset);
@@ -36,9 +37,9 @@ namespace GPU
 
 		std::string Source;
 	};
+	REFLECTABLE_END(ShaderSource, void, "GPU::ShaderSource");
 
-	REFLECTABLE_IMPL(ShaderSource, "GPU::ShaderSource");
-
+	REFLECTABLE_BEGIN(ShaderStage)
 	struct ShaderStage : public gE::Asset
 	{
 		SERIALIZABLE_PROTO("STGE", 1, ShaderStage, Asset);
@@ -59,9 +60,9 @@ namespace GPU
 			ASSET_CHECK_FREE(ShaderStage);
 		}
 	};
+	REFLECTABLE_END(ShaderStage, void, "GPU::ShaderStage");
 
-	REFLECTABLE_IMPL(ShaderStage, "GPU::ShaderStage");
-
+	REFLECTABLE_BEGIN(Shader);
 	struct Shader : public gE::Asset
 	{
 		SERIALIZABLE_PROTO("SHDR", 1, Shader, Asset);
@@ -76,9 +77,9 @@ namespace GPU
 		ALWAYS_INLINE void Free() override { VertexStage.Free(); FragmentStage.Free(); }
 		NODISCARD ALWAYS_INLINE bool IsFree() const override { return VertexStage.IsFree() && FragmentStage.IsFree(); }
 	};
+	REFLECTABLE_END(Shader, void, "GPU::Shader");
 
-	REFLECTABLE_IMPL(Shader, "GPU::Shader");
-
+	REFLECTABLE_BEGIN(ComputeShader)
 	struct ComputeShader : public gE::Asset
 	{
 		SERIALIZABLE_PROTO("COMP", 1, ComputeShader, Asset);
@@ -92,8 +93,7 @@ namespace GPU
 		ALWAYS_INLINE void Free() override { return ComputeStage.Free(); }
 		NODISCARD ALWAYS_INLINE bool IsFree() const override { return ComputeStage.IsFree(); }
 	};
-
-	REFLECTABLE_IMPL(ComputeShader, "GPU::ComputeShader");
+	REFLECTABLE_END(ComputeShader, void, "GPU::ComputeShader");
 
 	inline REFLECTABLE_FACTORY_IMPL(ShaderSource, ShaderSource);
 }

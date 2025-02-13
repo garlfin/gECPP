@@ -148,8 +148,9 @@ bool Window::Run()
 			SDL_Event event;
 			while(SDL_PollEvent(&event))
 			{
+			#ifdef GE_ENABLE_IMGUI
 				ImGui_ImplSDL3_ProcessEvent(&event);
-
+			#endif
 				switch (event.type)
 				{
 				case SDL_EVENT_QUIT:

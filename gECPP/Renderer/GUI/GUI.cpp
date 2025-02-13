@@ -26,8 +26,7 @@ gE::GUIManager::GUIManager(Window* window) :
 
     ImGuiIO& io = ImGui::GetIO();
     io.Fonts->GetTexDataAsAlpha8(&pixelData, &width, &height);
-    io.IniFilename = nullptr;
-    io.LogFilename = nullptr;
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
     auto fontFormat = GPU::Texture2D(IMGUIFontFormat, TextureSize2D(width, height));
     fontFormat.Data.Data = Array(width * height, (const u8*) pixelData);
@@ -91,10 +90,10 @@ void gE::GUIManager::OnRender(const ImDrawData* draw) const
     vaoFormat.Fields[1] = GPU::VertexField("UV", GL_FLOAT, false, 0, 1, 2, offsetof(ImDrawVert, uv));
     vaoFormat.Fields[2] = GPU::VertexField("COL", GL_UNSIGNED_BYTE, true, 0, 2, 4, offsetof(ImDrawVert, col));
 
-    vaoFormat.Buffers[0] = GPU::Buffer<u8>(sizeof(ImDrawVert) * vertSize, nullptr, sizeof(ImDrawVert), false);
+    vaoFormat.Buffers[0] = GPU::Buffer<>(sizeof(ImDrawVert) * vertSize, nullptr, sizeof(ImDrawVert), false);
     vaoFormat.Buffers[0].UsageHint = GPU::BufferUsageHint::Dynamic;
 
-    vaoFormat.TriangleBuffer = GPU::Buffer<u8>(sizeof(ImDrawIdx) * triSize, nullptr, sizeof(ImDrawIdx), false);
+    vaoFormat.TriangleBuffer = GPU::Buffer<>(sizeof(ImDrawIdx) * triSize, nullptr, sizeof(ImDrawIdx), false);
     vaoFormat.TriangleBuffer.UsageHint = GPU::BufferUsageHint::Dynamic;
     vaoFormat.TriangleFormat = GLType<ImDrawIdx>;
 

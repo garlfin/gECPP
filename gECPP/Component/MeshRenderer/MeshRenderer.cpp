@@ -16,7 +16,7 @@ namespace gE
 	inline GPU::IndirectDraw IndirectDrawArray[API_MAX_MULTI_DRAW];
 
 	typedef Managed<DrawCall> MAN_T;
-	typedef LinkedIterator<MAN_T> ITER_T;
+	typedef LinkedNode<MAN_T> ITER_T;
 	typedef LinkedList<MAN_T> LIST_T;
 
 	template<CompareFunc<MAN_T, MAN_T> FUNC, ITER_T DrawCall::* MEMBER>
@@ -107,7 +107,7 @@ namespace gE
 		else
 			_subMeshList.Insert(t->_subMeshIterator, DRAWCALL_SIMILAR_SAFE(insertLocation, _subMeshIterator), DRAWCALL_DIRECTION);
 
-		if(similar && (similar = FindSimilarSafe<CompareLOD, &DrawCall::_lodIterator>(t, _lodList, similar, next)))
+		if(similar && ((similar = FindSimilarSafe<CompareLOD, &DrawCall::_lodIterator>(t, _lodList, similar, next))))
 		{
 			next = DRAWCALL_SUBITER_SAFE(similar, _lodIterator.GetNext(), IPTR_TO_TPTR);
 			insertLocation = next;
@@ -115,7 +115,7 @@ namespace gE
 		else
 			_lodList.Insert(t->_lodIterator, DRAWCALL_SIMILAR_SAFE(insertLocation, _lodIterator), DRAWCALL_DIRECTION);
 
-		List.Insert(t.GetIterator(), DRAWCALL_SIMILAR_SAFE(insertLocation, GetIterator()), DRAWCALL_DIRECTION);
+		List.Insert(t.GetNode(), DRAWCALL_SIMILAR_SAFE(insertLocation, GetNode()), DRAWCALL_DIRECTION);
 	}
 
 	void DrawCallManager::OnRender(float d, Camera* camera)

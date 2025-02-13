@@ -34,7 +34,6 @@ namespace GPU
 	class Buffer : public gE::Asset
 	{
 		SERIALIZABLE_PROTO("SBUF", 1, Buffer, Asset);
-		REFLECTABLE_PROTO(Buffer);
 
 	 public:
 		static_assert(!std::is_pointer_v<T>, "Buffer data shouldn't be a pointer!");
@@ -64,21 +63,4 @@ namespace GPU
 #include "Buffer.inl"
 
 #include <Graphics/API/GL/Buffer/Buffer.h>
-
-namespace GPU
-{
-	template <typename T>
-	Buffer<T>* Buffer<T>::BufferFACTORY(std::istream& in, SETTINGS_T t)
-	{
-		return (Buffer*) new API::Buffer<T>(in, t);
-	}
-
-	FORCE_IMPL static ITypeSystem<Buffer<>::SETTINGS_T>::Type _REFL_IMPL_TYPE_Buffer{ "GPU::Buffer", (ITypeSystem<Buffer<>::SETTINGS_T>::FactoryFunction) Buffer<>::BufferFACTORY, {  }};
-
-	template<class T>
-	const ITypeSystem<typename Buffer<T>::SETTINGS_T>::Type& Buffer<T>::SGetType()
-	{
-		return _REFL_IMPL_TYPE_Buffer;
-	};
-}
 

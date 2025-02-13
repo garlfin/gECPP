@@ -104,10 +104,14 @@ namespace gE
 		GET_CONST(const TickHandler&, RenderTick, _renderTick);
 		GET_CONST(const TickHandler&, PhysicsTick, _physicsTick);
 
-		GET_CONST(const KeyboardState&, Keyboard, _keyboardState);
+		GET(KeyboardState&, Keyboard, _keyboardState);
 		GET(MouseState&, Mouse, _mouseState);
 
 		GET_CONST(SDL_Window*, SDLWindow, _window);
+
+#ifdef DEBUG
+		GET(Editor&, Editor, Editor);
+#endif
 
 		virtual ~Window();
 
@@ -137,7 +141,10 @@ namespace gE
 		EntityManager Entities;
 		Pointer<GUIManager> GUI;
 		ComponentManager<Behavior> Behaviors;
+
+#ifdef DEBUG
 		Editor Editor;
+#endif
 
 		Pointer<Material> DefaultMaterial;
 		Pointer<API::Shader> BlitShader;

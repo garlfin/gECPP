@@ -11,7 +11,7 @@
 
 namespace gE
 {
-#ifdef GE_ENABLE_IMGUI
+#ifdef DEBUG
     class Editor
     {
     public:
@@ -20,14 +20,14 @@ namespace gE
         void OnGUI();
 
         GET_SET_VALUE(bool, ConsoleOpen, _isConsoleOpen);
-        GET_SET_VALUE(Reflectable<Window*>*, ActiveObject, _activeObject);
+        GET_SET_VALUE(Entity*, SelectedEntity, _activeEntity);
 
     private:
-        void DrawField(const TypeSystem::Field& field) const;
+        static void DrawField(Reflectable<Window*>&, const TypeSystem::Field&);
         void DrawLog();
 
         Window* _window = nullptr;
-        Reflectable<Window*>* _activeObject = nullptr;
+        Entity* _activeEntity = nullptr;
         bool _isConsoleOpen = false;
         size_t _oldLogSize = 0;
     };

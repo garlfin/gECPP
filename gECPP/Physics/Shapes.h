@@ -47,6 +47,7 @@ namespace Physics
         float Mass = 1.0;
     };
 
+    REFLECTABLE_BEGIN(SphereShape)
     struct SphereShape : public ConvexShape
     {
         SERIALIZABLE_PROTO("SSHP", 1, SphereShape, ConvexShape);
@@ -60,9 +61,9 @@ namespace Physics
 
         float Radius = 1.f;
     };
+    REFLECTABLE_END(SphereShape, ConvexShape, "Physics::SphereShape");
 
-    REFLECTABLE_IMPL(SphereShape, "Physics::SphereShape");
-
+    REFLECTABLE_BEGIN(BoxShape)
     struct BoxShape : public ConvexShape
     {
         SERIALIZABLE_PROTO("BSHP", 1, BoxShape, ConvexShape);
@@ -76,9 +77,9 @@ namespace Physics
 
         glm::vec3 Extents = glm::vec3(1.f);
     };
+    REFLECTABLE_END(BoxShape, ConvexShape, "Physics::BoxShape");
 
-    REFLECTABLE_IMPL(BoxShape, "Physics::BoxShape");
-
+    REFLECTABLE_BEGIN(CapsuleShape)
     struct CapsuleShape : public ConvexShape
     {
         SERIALIZABLE_PROTO("CPSL", 1, CapsuleShape, ConvexShape);
@@ -93,8 +94,7 @@ namespace Physics
         float Height = 1.75f;
         float Radius = 0.225f;
     };
-
-    REFLECTABLE_IMPL(CapsuleShape, "Physics::CapsuleShape");
+    REFLECTABLE_END(CapsuleShape, ConvexShape, "Physics::CapsuleShape");
 
     struct ConvexMeshFace
     {
@@ -137,6 +137,7 @@ namespace Physics
         Degenerate
     };
 
+    REFLECTABLE_BEGIN(ConvexMeshShape)
     struct ConvexMeshShape : public ConvexShape
     {
         SERIALIZABLE_PROTO("CNVX", 1, ConvexMeshShape, ConvexShape);
@@ -151,8 +152,7 @@ namespace Physics
 
         BakeConvexShapeResult Bake();
     };
-
-    REFLECTABLE_IMPL(ConvexMeshShape, "Physics::ConvexMeshShape");
+    REFLECTABLE_END(ConvexMeshShape, ConvexShape, "Physics::ConvexMeshShape");
 
     NODISCARD ConvexMeshPoint ToGE(const px::ConvexHullPoint&);
     NODISCARD px::ConvexHullPoint ToPX(const ConvexMeshPoint&);

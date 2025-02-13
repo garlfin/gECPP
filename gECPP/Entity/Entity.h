@@ -10,13 +10,17 @@
 #include "Layer.h"
 
 #include "Prototype.h"
+#include <Serializable/Serializable.h>
 
 namespace gE
 {
 	class EntityManager;
 
- 	class Entity : public Managed<Entity>
+	REFLECTABLE_BEGIN(Entity);
+  	class Entity : public Managed<Entity>, public Reflectable<Window*>
 	{
+  		REFLECTABLE_PROTO(Entity);
+
 	 public:
 		explicit Entity(Window*, Entity* = nullptr, LayerMask layers = LayerMask::All, EntityFlags = DEFAULT);
 
@@ -28,12 +32,15 @@ namespace gE
 		GET_CONST(Entity*, Parent, _parent);
 		GET_CONST(EntityFlags, Flags, _flags);
  		GET_CONST(LayerMask, Layer, _layers);
+  		GET_CONST(u8, TreeDepth, _sceneTreeDepth);
+  		GET_SET(std::string&, Name, _name);
 
  		friend class EntityManager;
 
 	 private:
-		Window* const _window = nullptr;
+		Window* _window = nullptr;
 		Entity* _parent = nullptr;
+  		std::string _name = "Entity";
 
 		EntityFlags _flags;
 		LayerMask _layers;
@@ -43,6 +50,13 @@ namespace gE
 
 		Transform _transform;
 	};
+	REFLECTABLE_END(Entity, void, "gE::Entity",
+		REFLECT_FIELD(Entity, _name),
+		REFLECT_FIELD(Entity, _window),
+		REFLECT_FIELD(Entity, _parent)
+	);
+
+	inline REFLECTABLE_FACTORY_NO_IMPL(Entity);
 
 	typedef Entity Empty;
 

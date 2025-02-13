@@ -82,7 +82,7 @@ namespace gE
 
 			Entity* parent = (**i)->GetOwner().GetParent();
 			if(parent)
-				List.Insert(*i, parent->GetTransform().GetIterator());
+				List.Insert(*i, parent->GetTransform().GetNode());
 			else List.Add(*i);
 
 			i = next;

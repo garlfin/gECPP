@@ -16,6 +16,7 @@
 
 namespace gE::VoxelDemo
 {
+    REFLECTABLE_BEGIN(Movement);
     class Movement : public Behavior, public Reflectable<Window*>
     {
         REFLECTABLE_PROTO(Movement);
@@ -34,9 +35,7 @@ namespace gE::VoxelDemo
 
         float Speed = 2.0;
 
-        void OnInit() override
-        {
-        };
+        void OnInit() override {};
 
         void OnUpdate(float delta) override
         {
@@ -118,10 +117,6 @@ namespace gE::VoxelDemo
         glm::vec3 _dir = DEFAULT;
     };
 
-    inline Movement* Movement::MovementFACTORY(std::istream& in, SETTINGS_T t)
-    {
-        return nullptr;
-    }
-
-    REFLECTABLE_IMPL(Movement, "gE::VoxelDemo::Movement", REFLECT_FIELD(Movement, Speed));
+    REFLECTABLE_END(Movement, void, "gE::VoxelDemo::Movement", REFLECT_FIELD(Movement, Speed));
+    inline REFLECTABLE_FACTORY_NO_IMPL(Movement);
 }

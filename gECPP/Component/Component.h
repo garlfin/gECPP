@@ -69,7 +69,7 @@ namespace gE
 
 	 protected:
 		void OnInit();
-		void OnRegister(Managed<Component>& t) override { InitializationList.Add(t.GetIterator()); };
+		void OnRegister(Managed<Component>& t) override { InitializationList.Add(t.GetNode()); };
 
 		LinkedList<Managed<Component>> InitializationList;
 
