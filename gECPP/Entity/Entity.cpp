@@ -132,4 +132,10 @@ namespace gE
 	Behavior::Behavior(Entity* o) : Component(o, &o->GetWindow().GetBehaviors())
 	{
 	}
+
+	REFLECTABLE_END(Entity, void, "gE::Entity",
+		REFLECT_FIELD(Entity, _name),
+		REFLECT_FIELD(Entity, _parent),
+		REFLECT_FIELD(Entity, _transform),
+	);
 }

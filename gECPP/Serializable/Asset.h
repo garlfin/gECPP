@@ -64,11 +64,11 @@ namespace gE
         SERIALIZABLE_PROTO("FILE", 0, File, Serializable);
 
     public:
-        File(const Path& path, const TypeSystem::Type* type);
+        File(const Path& path, const Type* type);
         File(const Path& path, const Reference<Asset>& asset);
         File(const Path& path, const WeakReference<Asset>& asset);
 
-        NODISCARD ALWAYS_INLINE const TypeSystem::Type* GetFileType() const { return _type; };
+        NODISCARD ALWAYS_INLINE const Type* GetFileType() const { return _type; };
         NODISCARD ALWAYS_INLINE bool IsLoaded() const { return _weakAsset.IsValid(); }
 
         Reference<Asset> Load() const;
@@ -91,12 +91,12 @@ namespace gE
         NODISCARD ALWAYS_INLINE bool operator<(const File& o) const { return _uuid < o._uuid; }
 
     private:
-        static const TypeSystem::Type* ValidateAssetType(const Asset&);
+        static const Type* ValidateAssetType(const Asset&);
 
         Path _path = DEFAULT;
         UUID _uuid = DEFAULT;
         Bank* _bank = DEFAULT;
-        const TypeSystem::Type* _type = DEFAULT;
+        const Type* _type = DEFAULT;
 
         mutable WeakReference<Asset> _weakAsset = DEFAULT;
         mutable Reference<Asset> _asset = DEFAULT;

@@ -57,7 +57,7 @@ namespace GPU
 
 		~VAO() override { ASSET_CHECK_FREE(VAO); }
 	};
-	REFLECTABLE_END(VAO, void, "GPU::VAO");
+	inline REFLECTABLE_END(VAO, void, "GPU::VAO");
 
 	REFLECTABLE_BEGIN(IndexedVAO);
 	class IndexedVAO : public VAO
@@ -74,7 +74,7 @@ namespace GPU
 
 		~IndexedVAO() override { ASSET_CHECK_FREE(IndexedVAO); }
 	};
-	REFLECTABLE_END(IndexedVAO, void, "GPU::IndexedVAO");
+	inline REFLECTABLE_END(IndexedVAO, void, "GPU::IndexedVAO");
 }
 
 #if API == GL

@@ -53,7 +53,7 @@ namespace GPU
 
 		TextureSize1D Size = DEFAULT;
 	};
-	REFLECTABLE_END(Texture1D, void, "API::Texture1D");
+	inline REFLECTABLE_END(Texture1D, void, "API::Texture1D");
 
 	REFLECTABLE_BEGIN(Texture2D);
  	class Texture2D : public Texture
@@ -67,7 +67,7 @@ namespace GPU
 
 		TextureSize2D Size = DEFAULT;
 	};
-	REFLECTABLE_END(Texture2D, void, "GPU::Texture2D");
+	inline REFLECTABLE_END(Texture2D, void, "GPU::Texture2D");
 
 	REFLECTABLE_BEGIN(Texture3D);
 	class Texture3D : public Texture
@@ -81,7 +81,7 @@ namespace GPU
 
 		TextureSize3D Size = DEFAULT;
 	};
-	REFLECTABLE_END(Texture3D, void, "GPU::Texture3D");
+	inline REFLECTABLE_END(Texture3D, void, "GPU::Texture3D");
 
 	REFLECTABLE_BEGIN(TextureCube);
 	class TextureCube : public Texture
@@ -95,7 +95,7 @@ namespace GPU
 
 		TextureSize1D Size = DEFAULT;
 	};
-	REFLECTABLE_END(TextureCube, void, "GPU::TextureCube");
+	inline REFLECTABLE_END(TextureCube, void, "GPU::TextureCube");
 }
 
 #include "Texture.inl"
