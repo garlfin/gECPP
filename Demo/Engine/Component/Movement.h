@@ -17,7 +17,7 @@
 namespace gE::VoxelDemo
 {
     REFLECTABLE_BEGIN(Movement);
-    class Movement : public Behavior
+    class Movement : public Behavior, public Reflectable<Window*>
     {
         REFLECTABLE_PROTO(Movement);
 
@@ -116,9 +116,7 @@ namespace gE::VoxelDemo
         Entity* _camera;
         glm::vec3 _dir = DEFAULT;
     };
-    REFLECTABLE_END(Movement, void, "gE::VoxelDemo::Movement",
-        REFLECT_FIELD(Movement, Speed)
-    );
 
+    REFLECTABLE_END(Movement, void, "gE::VoxelDemo::Movement", REFLECT_FIELD(Movement, Speed));
     inline REFLECTABLE_FACTORY_NO_IMPL(Movement);
 }

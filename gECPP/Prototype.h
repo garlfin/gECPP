@@ -37,6 +37,5 @@ namespace gE
 
 }
 
-struct Reflectable;
-
 template<class T = std::nullptr_t> struct Serializable;
+template<class T = std::nullptr_t> struct Reflectable;

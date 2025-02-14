@@ -20,15 +20,14 @@ namespace gE
         void OnGUI();
 
         GET_SET_VALUE(bool, ConsoleOpen, _isConsoleOpen);
-        GET_SET_VALUE(Reflectable*, SelectedEntity, _activeEntity);
+        GET_SET_VALUE(Entity*, SelectedEntity, _activeEntity);
 
     private:
-        static void DrawField(Reflectable&, const Field&, u8 depth);
-        static void DrawReflectable(Reflectable&, u8 depth);
+        static void DrawField(Reflectable<Window*>&, const TypeSystem::Field&);
         void DrawLog();
 
         Window* _window = nullptr;
-        Reflectable* _activeEntity = nullptr;
+        Entity* _activeEntity = nullptr;
         bool _isConsoleOpen = false;
         size_t _oldLogSize = 0;
     };

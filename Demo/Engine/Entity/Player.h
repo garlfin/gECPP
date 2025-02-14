@@ -20,11 +20,8 @@ namespace gE::VoxelDemo
 		DefaultCameraTiming,
 	};
 
-	REFLECTABLE_BEGIN(Player)
 	class Player : public Entity
 	{
-		REFLECTABLE_PROTO(Player)
-
 	 public:
 		explicit Player(Window* window) : Entity(window),
 			_movement(this, _controller),
@@ -39,10 +36,6 @@ namespace gE::VoxelDemo
 		Movement _movement;
 		CharacterController _controller;
 	};
-	REFLECTABLE_END(Player, Entity, "gE::Player",
-		REFLECT_FIELD(Player, _movement)
-	)
-	inline REFLECTABLE_FACTORY_NO_IMPL(Player);
 
 	class PlayerCamera final : public Entity
 	{

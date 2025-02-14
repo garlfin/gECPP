@@ -17,7 +17,7 @@ namespace gE
 	class EntityManager;
 
 	REFLECTABLE_BEGIN(Entity);
-  	class Entity : public Reflectable, public Managed<Entity>
+  	class Entity : public Managed<Entity>, public Reflectable<Window*>
 	{
   		REFLECTABLE_PROTO(Entity);
 
@@ -25,10 +25,6 @@ namespace gE
 		explicit Entity(Window*, Entity* = nullptr, LayerMask layers = LayerMask::All, EntityFlags = DEFAULT);
 
 		void Destroy(bool flagChildren = true);
-
-#ifdef DEBUG
-  		virtual void OnEditorGUI() {};
-#endif
 
 		GET(Transform&, Transform, _transform);
 		GET_CONST(const std::vector<Entity*>&, Children, _children);
@@ -54,6 +50,12 @@ namespace gE
 
 		Transform _transform;
 	};
+	REFLECTABLE_END(Entity, void, "gE::Entity",
+		REFLECT_FIELD(Entity, _name),
+		REFLECT_FIELD(Entity, _window),
+		REFLECT_FIELD(Entity, _parent)
+	);
+
 	inline REFLECTABLE_FACTORY_NO_IMPL(Entity);
 
 	typedef Entity Empty;

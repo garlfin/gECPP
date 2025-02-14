@@ -20,7 +20,7 @@ namespace gE
             Read(in, Bounds);
         }
 
-        const Type* type = ReadType(in);
+        const TypeSystem::Type* type = ReadType<Window*>(in);
         GE_ASSERTM(type, "NO TYPE INFO!");
 
         // Super dumb but super works.
@@ -29,7 +29,7 @@ namespace gE
 
         if(Version == 2 && Read<bool>(in))
         {
-            const Type* shapeType = ReadType(in);
+            const TypeSystem::Type* shapeType = ReadType<Window*>(in);
             GE_ASSERTM(shapeType, "NO SHAPE TYPE INFO!");
 
             Serializable* shape = shapeType->Factory(in, s);
@@ -45,19 +45,19 @@ namespace gE
 
         Write(out, Bounds);
 
-        const Type* type = GetMeshType();
+        const TypeSystem::Type* type = GetMeshType();
         GE_ASSERTM(type, "NO TYPE INFO!");
 
-        WriteType(out, *type);
+        WriteType<Window*>(out, *type);
         Write(out, VAO->GetSettings());
 
         Write(out, (bool) Shape);
         if(Shape)
         {
-            const Type* shapeType = GetShapeType();
+            const TypeSystem::Type* shapeType = GetShapeType();
             GE_ASSERTM(shapeType, "NO SHAPE TYPE INFO!");
 
-            WriteType(out, *shapeType);
+            WriteType<Window*>(out, *shapeType);
             Write(out, Shape->GetSettings());
         }
     }

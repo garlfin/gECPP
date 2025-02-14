@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include "Reflectable.h"
-
 #include <fstream>
 #include <Prototype.h>
 #include <unordered_map>
@@ -14,8 +12,128 @@
 #include <Utility/Macro.h>
 #include <Math/Math.h>
 
+enum class FieldType : u8
+{
+	None,
+	Bool,
+	I32,
+	U32,
+	Float,
+	Pointer,
+	String,
+	Reflectable,
+};
+
+enum class FieldFlags : u8
+{
+	ReadOnly = 1 << 1,
+	Array = 1 << 2
+};
+
+ENUM_OPERATOR(FieldType, &);
+ENUM_OPERATOR(FieldType, |);
+
 template<class T>
-struct Serializable : public Reflectable
+CONSTEXPR_GLOBAL FieldType GetFieldType();
+
+template<class T>
+struct ITypeSystem
+{
+	ITypeSystem() = delete;
+
+	using FactoryFunction = Serializable<T>*(*)(std::istream&, T);
+
+	struct Field
+	{
+		std::string_view Name;
+		FieldType Type;
+		size_t Offset;
+
+		void* AtOffset(Reflectable<T>* t) const { return (u8*) t + Offset; }
+		const void* AtOffset(const Reflectable<T>* t) const { return (const u8*) t + Offset;};
+	};
+
+	struct Type
+	{
+		Type() = default;
+		Type(const std::string_view& name, FactoryFunction factory, const Type* parentType, const std::initializer_list<Field>& fields) :
+			Name(name),
+			Factory(factory)
+#ifdef DEBUG
+			, Fields(fields)
+#endif
+		{
+#ifdef DEBUG
+			if(parentType)
+				Fields.insert(Fields.begin(), parentType->Fields.begin(), parentType->Fields.end());
+#endif
+			_types[Name] = this;
+		}
+
+		template<class PARENT_T = void>
+		static constexpr const Type* GetParentType()
+		{
+			if constexpr(requires() { { PARENT_T::SGetType() } -> std::same_as<const Type&>; })
+				return &PARENT_T::SGetType();
+
+			return nullptr;
+		}
+
+		std::string_view Name;
+		FactoryFunction Factory;
+
+#ifdef DEBUG
+		std::vector<Field> Fields;
+#endif
+	};
+
+	using MAP_T = std::unordered_map<std::string_view, Type*>;
+
+	static const Type* GetTypeInfo(const std::string& type)
+	{
+		typename MAP_T::const_iterator it = _types.find(type);
+
+		if(it != _types.end()) return it->second;
+
+		GE_FAIL("NO SUCH REFLECTED TYPE!");
+		return nullptr;
+	}
+
+private:
+	static inline MAP_T _types {};
+};
+
+template<class T>
+struct Reflectable
+{
+public:
+	Reflectable() = default;
+
+	using SETTINGS_T = T;
+	using TSYSTEM_T = ITypeSystem<T>;
+	using TYPE_T = typename TSYSTEM_T::Type;
+
+	virtual const TYPE_T* GetType() const { return nullptr; }
+
+	virtual ~Reflectable() = default;
+
+	template<class I>
+	friend constexpr size_t ReflectedBaseOffset();
+
+private:
+	u8 _refl_baseOffset_;
+};
+
+// TODO: better way of doing this?
+template<class BASE>
+constexpr size_t ReflectedBaseOffset()
+{
+	// + size of vtable
+	return (size_t) &((BASE*) nullptr)->_refl_baseOffset_ - sizeof(u64);
+}
+
+template<class T>
+struct Serializable : public Reflectable<T>
 {
 	DEFAULT_OPERATOR_CM(Serializable);
 
@@ -34,27 +152,8 @@ public:
 	~Serializable() override = default;
 };
 
-#define SERIALIZABLE_CHECK_HEADER() \
-	char magic[4]; \
-	Read<char>(in, 4, magic); \
-	GE_ASSERTM(strcmpb(magic, MAGIC, 4), "UNEXPECTED MAGIC!"); \
-	Version = Read<u8>(in);
-
-// Implementation
-#define SERIALIZABLE_PROTO(MAGIC_VAL, VERSION_VAL, TYPE, SUPER_T) \
-	public: \
-		typedef SUPER_T SUPER; \
-		typedef SUPER::SETTINGS_T SETTINGS_T;\
-		TYPE(istream& in, SETTINGS_T s) : SUPER(in, s) { SERIALIZABLE_CHECK_HEADER(); IDeserialize(in, s); } \
-		TYPE() = default; \
-		static const constexpr char MAGIC[5] = MAGIC_VAL; \
-		inline void Deserialize(istream& in, SETTINGS_T s) override { SAFE_CONSTRUCT(*this, TYPE, in, s); } \
-		inline void Serialize(ostream& out) const override { SUPER::Serialize(out); Write(out, 4, MAGIC); Write<u8>(out, Version); ISerialize(out); } \
-		u8 Version = VERSION_VAL; \
-		DEFAULT_OPERATOR_CM(TYPE); \
-	private: \
-		void IDeserialize(istream& in, SETTINGS_T s); \
-		void ISerialize(ostream& out) const;
+template class ITypeSystem<gE::Window*>;
+using TypeSystem = ITypeSystem<gE::Window*>;
 
 template<class T, class S>
 concept is_serializable_in = requires(T t, S s, std::istream& i)
@@ -85,6 +184,9 @@ template<class T> T Read(std::istream& in) { T t; Read(in, t); return t; }
 template<class T> void Write(std::ostream& out, u32 count, const T* t);
 template<class T> void Write(std::ostream& out, const T& t) { Write(out, 1, &t); }
 
+template<class T> const typename ITypeSystem<T>::Type* ReadType(std::istream& in);
+template<class T> void WriteType(std::ostream& out, const typename ITypeSystem<T>::Type& type);
+
 template<typename UINT_T, class T> void Read(std::istream& in, u32 count, Array<T>* t);
 template<typename UINT_T, class T> void Read(std::istream& in, Array<T>& t) { Read<UINT_T>(in, 1, &t); }
 
@@ -97,18 +199,60 @@ template<typename UINT_T, class T> void ReadArraySerializable(std::istream& in, 
 template<class T> void ReadSerializable(std::istream& in, u32 count, T* t, typename T::SETTINGS_T s);
 template<class T> void ReadSerializable(std::istream& in, T& t, typename T::SETTINGS_T s) { ReadSerializable<T>(in, 1, &t, s); }
 
-inline const Type* ReadType(std::istream& in)
-{
-	return TypeSystem::GetTypeInfo(Read<std::string>(in));
-}
-
-inline void WriteType(std::ostream& out, const Type& type)
-{
-	Write(out, type.Name);
-}
-
 template<> void Read(std::istream& in, u32 count, std::string* t);
 template<> void Write(std::ostream& out, u32 count, const std::string* t);
+
+#define SERIALIZABLE_CHECK_HEADER() \
+	char magic[4]; \
+	Read<char>(in, 4, magic); \
+	GE_ASSERTM(strcmpb(magic, MAGIC, 4), "UNEXPECTED MAGIC!"); \
+	Version = Read<u8>(in);
+
+// Implementation
+#define SERIALIZABLE_PROTO(MAGIC_VAL, VERSION_VAL, TYPE, SUPER_T) \
+	public: \
+		typedef SUPER_T SUPER; \
+		typedef SUPER::SETTINGS_T SETTINGS_T;\
+		TYPE(istream& in, SETTINGS_T s) : SUPER(in, s) { SERIALIZABLE_CHECK_HEADER(); IDeserialize(in, s); } \
+		TYPE() = default; \
+		static const constexpr char MAGIC[5] = MAGIC_VAL; \
+		inline void Deserialize(istream& in, SETTINGS_T s) override { SAFE_CONSTRUCT(*this, TYPE, in, s); } \
+		inline void Serialize(ostream& out) const override { SUPER::Serialize(out); Write(out, 4, MAGIC); Write<u8>(out, Version); ISerialize(out); } \
+		u8 Version = VERSION_VAL; \
+		DEFAULT_OPERATOR_CM(TYPE); \
+	private: \
+		void IDeserialize(istream& in, SETTINGS_T s); \
+		void ISerialize(ostream& out) const;
+
+#define REFLECTABLE_BEGIN(TYPE) \
+	FORCE_IMPL GLOBAL TypeSystem::Type& _REFL_IMPL_TYPE_##TYPE();
+
+#define REFLECTABLE_PROTO(TYPE) \
+	public: \
+		using THIS_T = TYPE; \
+		static TYPE* TYPE##FACTORY(std::istream& in, SETTINGS_T t); \
+		const ITypeSystem<SETTINGS_T>::Type* GetType() const override { return &_REFL_IMPL_TYPE_##TYPE(); }; \
+		static const TYPE_T& SGetType() { return _REFL_IMPL_TYPE_##TYPE(); } \
+		friend const ITypeSystem<SETTINGS_T>::Type& _REFL_IMPL_TYPE_##TYPE();
+
+#ifdef DEBUG
+	#define REFLECTABLE_END(TYPE, PARENT_T, NAME, ...) \
+		FORCE_IMPL GLOBAL TypeSystem::Type& _REFL_IMPL_TYPE_##TYPE() { static const TYPE::TYPE_T type(NAME, (TYPE::TSYSTEM_T::FactoryFunction) TYPE::TYPE##FACTORY, TYPE::TYPE_T::GetParentType<PARENT_T>(), { __VA_ARGS__ }); return type; } \
+		FORCE_IMPL GLOBAL TypeSystem::Type& _REFL_TYPE_##TYPE = _REFL_IMPL_TYPE_##TYPE();
+#else
+	#define REFLECTABLE_END(TYPE, PARENT_T, NAME, ...) \
+		FORCE_IMPL GLOBAL TypeSystem::Type& _REFL_IMPL_TYPE_##TYPE() { static const TYPE::TYPE_T type(NAME, (TYPE::TSYSTEM_T::FactoryFunction) TYPE::TYPE##FACTORY, nullptr, {}); return type; } \
+		FORCE_IMPL GLOBAL TypeSystem::Type& _REFL_TYPE_##TYPE = _REFL_IMPL_TYPE_##TYPE();
+#endif
+
+#define REFLECTABLE_FACTORY_IMPL(TYPE, CONSTRUCTION_T) \
+	TYPE* TYPE::TYPE##FACTORY(std::istream& in, SETTINGS_T t) { return (TYPE*) new CONSTRUCTION_T(in, t); }
+
+#define REFLECTABLE_FACTORY_NO_IMPL(TYPE) \
+	TYPE* TYPE::TYPE##FACTORY(std::istream& in, SETTINGS_T t) { return nullptr; }
+
+#define REFLECT_FIELD(OWNER_T, FIELD) \
+	TypeSystem::Field{ #FIELD, GetFieldType<decltype(OWNER_T::FIELD)>(), offsetof_memptr(OWNER_T, &OWNER_T::FIELD) - ReflectedBaseOffset<OWNER_T>()}
 
 template<is_serializable_in<gE::Window*> T>
 void ReadSerializableFromFile(gE::Window* window, const Path& path, T& t)
@@ -182,6 +326,29 @@ Array<T> ReadArray(std::istream& in)
 	return array;
 }
 
+template <class T>
+constexpr FieldType GetFieldType()
+{
+	if constexpr(std::is_same_v<T, bool>)
+		return FieldType::Bool;
+	else if constexpr(std::is_same_v<T, std::string>)
+		return FieldType::String;
+	else if constexpr(std::is_same_v<T, float>)
+		return FieldType::Float;
+	else if constexpr(std::is_same_v<T, i32>)
+		return FieldType::I32;
+	else if constexpr(std::is_same_v<T, u32>)
+		return FieldType::U32;
+
+	else if constexpr(std::is_pointer_v<T>)
+		return FieldType::Pointer;
+	else if constexpr(is_serializable_out<T>)
+		return FieldType::Reflectable;
+
+	else static_assert(false);
+	return FieldType::None;
+}
+
 template<>
 inline void Read(std::istream& in, u32 count, std::string* t)
 {
@@ -194,6 +361,18 @@ inline void Read(std::istream& in, u32 count, std::string* t)
 		str = std::string(length, 0);
 		Read(in, length, str.data());
 	}
+}
+
+template<class T>
+const typename ITypeSystem<T>::Type* ReadType(std::istream& in)
+{
+	return ITypeSystem<T>::GetTypeInfo(Read<std::string>(in));
+}
+
+template<class T>
+void WriteType(std::ostream& out, const typename ITypeSystem<T>::Type& type)
+{
+	Write(out, type.Name);
 }
 
 template<>

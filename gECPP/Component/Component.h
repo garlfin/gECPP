@@ -8,11 +8,10 @@
 
 #include <Utility/Manager.h>
 #include <Utility/RelativePointer.h>
-#include <Serializable/Reflectable.h>
 
 namespace gE
 {
-	class Component : public Reflectable, public Managed<Component>
+	class Component : public Managed<Component>
 	{
 	 public:
 		explicit Component(Entity* o, IComponentManager* = nullptr);

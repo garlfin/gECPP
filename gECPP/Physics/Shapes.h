@@ -11,6 +11,7 @@
 #include <Jolt/Physics/Collision/Shape/SphereShape.h>
 #include <Serializable/Serializable.h>
 
+#include <Graphics/Graphics.h>
 #include <Math/Collision/AABB.h>
 #include <Serializable/Asset.h>
 #include <Serializable/Macro.h>
@@ -60,7 +61,7 @@ namespace Physics
 
         float Radius = 1.f;
     };
-    inline REFLECTABLE_END(SphereShape, ConvexShape, "Physics::SphereShape");
+    REFLECTABLE_END(SphereShape, ConvexShape, "Physics::SphereShape");
 
     REFLECTABLE_BEGIN(BoxShape)
     struct BoxShape : public ConvexShape
@@ -76,7 +77,7 @@ namespace Physics
 
         glm::vec3 Extents = glm::vec3(1.f);
     };
-    inline REFLECTABLE_END(BoxShape, ConvexShape, "Physics::BoxShape");
+    REFLECTABLE_END(BoxShape, ConvexShape, "Physics::BoxShape");
 
     REFLECTABLE_BEGIN(CapsuleShape)
     struct CapsuleShape : public ConvexShape
@@ -93,7 +94,7 @@ namespace Physics
         float Height = 1.75f;
         float Radius = 0.225f;
     };
-    inline REFLECTABLE_END(CapsuleShape, ConvexShape, "Physics::CapsuleShape");
+    REFLECTABLE_END(CapsuleShape, ConvexShape, "Physics::CapsuleShape");
 
     struct ConvexMeshFace
     {
@@ -151,7 +152,7 @@ namespace Physics
 
         BakeConvexShapeResult Bake();
     };
-    inline REFLECTABLE_END(ConvexMeshShape, ConvexShape, "Physics::ConvexMeshShape");
+    REFLECTABLE_END(ConvexMeshShape, ConvexShape, "Physics::ConvexMeshShape");
 
     NODISCARD ConvexMeshPoint ToGE(const px::ConvexHullPoint&);
     NODISCARD px::ConvexHullPoint ToPX(const ConvexMeshPoint&);
