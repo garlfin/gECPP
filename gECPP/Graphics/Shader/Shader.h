@@ -19,11 +19,10 @@ namespace GL
 
 namespace GPU
 {
-	REFLECTABLE_BEGIN(ShaderSource)
 	struct ShaderSource final : public gE::Asset
 	{
 		SERIALIZABLE_PROTO("SSRC", 0, ShaderSource, Asset);
-		REFLECTABLE_PROTO(ShaderSource);
+		REFLECTABLE_PROTO(ShaderSource, gE::Asset, "GPU::ShaderSource") {};
 
 	public:
 		explicit ShaderSource(const Path&);
@@ -37,13 +36,11 @@ namespace GPU
 
 		std::string Source;
 	};
-	inline REFLECTABLE_END(ShaderSource, void, "GPU::ShaderSource");
 
-	REFLECTABLE_BEGIN(ShaderStage)
 	struct ShaderStage : public gE::Asset
 	{
 		SERIALIZABLE_PROTO("STGE", 1, ShaderStage, Asset);
-		REFLECTABLE_PROTO(ShaderStage);
+		REFLECTABLE_PROTO(ShaderStage, gE::Asset, "GPU::ShaderStage") {};
 
 	public:
 		ShaderStage(ShaderStageType, const Path&);
@@ -60,13 +57,11 @@ namespace GPU
 			ASSET_CHECK_FREE(ShaderStage);
 		}
 	};
-	inline REFLECTABLE_END(ShaderStage, void, "GPU::ShaderStage");
 
-	REFLECTABLE_BEGIN(Shader);
 	struct Shader : public gE::Asset
 	{
 		SERIALIZABLE_PROTO("SHDR", 1, Shader, Asset);
-		REFLECTABLE_PROTO(Shader);
+		REFLECTABLE_PROTO(Shader, gE::Asset, "GPU::Shader") {};
 
 	public:
 		Shader(const Path& v, const Path& f);
@@ -77,13 +72,11 @@ namespace GPU
 		ALWAYS_INLINE void Free() override { VertexStage.Free(); FragmentStage.Free(); }
 		NODISCARD ALWAYS_INLINE bool IsFree() const override { return VertexStage.IsFree() && FragmentStage.IsFree(); }
 	};
-	inline REFLECTABLE_END(Shader, void, "GPU::Shader");
 
-	REFLECTABLE_BEGIN(ComputeShader)
 	struct ComputeShader : public gE::Asset
 	{
 		SERIALIZABLE_PROTO("COMP", 1, ComputeShader, Asset);
-		REFLECTABLE_PROTO(ComputeShader);
+		REFLECTABLE_PROTO(ComputeShader, gE::Asset, "GPU::ComputeShader") {};
 
 	public:
 		explicit ComputeShader(const Path& c);
@@ -93,7 +86,6 @@ namespace GPU
 		ALWAYS_INLINE void Free() override { return ComputeStage.Free(); }
 		NODISCARD ALWAYS_INLINE bool IsFree() const override { return ComputeStage.IsFree(); }
 	};
-	inline REFLECTABLE_END(ComputeShader, void, "GPU::ComputeShader");
 	inline REFLECTABLE_FACTORY_IMPL(ShaderSource, ShaderSource);
 }
 

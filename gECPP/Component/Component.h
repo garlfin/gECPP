@@ -10,10 +10,14 @@
 #include <Utility/RelativePointer.h>
 #include <Serializable/Reflectable.h>
 
+template struct TypeSystem<gE::Entity*>;
+
 namespace gE
 {
-	class Component : public Reflectable, public Managed<Component>
+	class Component : public Reflectable<Entity*>, public Managed<Component>
 	{
+		REFLECTABLE_PROTO_NOIMPL(Reflectable);
+
 	 public:
 		explicit Component(Entity* o, IComponentManager* = nullptr);
 

@@ -8,7 +8,7 @@
 
 namespace gE
 {
-    File::File(const Path& path, const Type* type) :
+    File::File(const Path& path, const Type<Window*>* type) :
         _path(path),
         _uuid(HashPath(_path)),
         _type(type)
@@ -32,9 +32,9 @@ namespace gE
     {
     }
 
-    const Type* File::ValidateAssetType(const Asset& asset)
+    const Type<Window*>* File::ValidateAssetType(const Asset& asset)
     {
-        const Type* type = asset.GetType();
+        const Type<Window*>* type = asset.GetType();
 
         GE_ASSERT(type);
         return type;
@@ -166,7 +166,7 @@ namespace gE
 
         _path = Read<std::string>(in);
         _uuid = Read<UUID>(in);
-        _type = ReadType(in);
+        _type = ReadType<Window*>(in);
         GE_ASSERT(_type);
 
         if((bool) (s.LoadMode & AssetLoadMode::Files))
@@ -193,7 +193,7 @@ namespace gE
 
         Read<std::string>(in);
         Read<UUID>(in);
-        ReadType(in);
+        ReadType<Window*>(in);
 
         _asset = ref_cast((Asset*) _type->Factory(in, &_bank->GetWindow()));
         _weakAsset = _asset;

@@ -9,6 +9,8 @@
 #include <format>
 
 using std::move;
+using namespace std::string_literals;
+using namespace std::string_view_literals;
 
 #if defined(__GNUC__) || defined(__clang__)
 	#define GE_COMPILER_GCC

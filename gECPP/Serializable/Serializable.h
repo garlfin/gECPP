@@ -15,9 +15,10 @@
 #include <Math/Math.h>
 
 template<class T>
-struct Serializable : public Reflectable
+struct Serializable : public Reflectable<T>
 {
 	DEFAULT_OPERATOR_CM(Serializable);
+	REFLECTABLE_PROTO_NOIMPL(Reflectable<T>);
 
 public:
 	Serializable() = default;
@@ -97,12 +98,14 @@ template<typename UINT_T, class T> void ReadArraySerializable(std::istream& in, 
 template<class T> void ReadSerializable(std::istream& in, u32 count, T* t, typename T::SETTINGS_T s);
 template<class T> void ReadSerializable(std::istream& in, T& t, typename T::SETTINGS_T s) { ReadSerializable<T>(in, 1, &t, s); }
 
-inline const Type* ReadType(std::istream& in)
+template<class T>
+const Type<T>* ReadType(std::istream& in)
 {
-	return TypeSystem::GetTypeInfo(Read<std::string>(in));
+	return TypeSystem<T>::GetTypeInfo(Read<std::string>(in));
 }
 
-inline void WriteType(std::ostream& out, const Type& type)
+template<class T>
+void WriteType(std::ostream& out, const Type<T>& type)
 {
 	Write(out, type.Name);
 }

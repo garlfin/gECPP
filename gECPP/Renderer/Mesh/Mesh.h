@@ -31,10 +31,10 @@ namespace gE
 
         AABB<Dimension::D3D> Bounds = DEFAULT;
 
-        GET_CONST(const Type*, MeshType, VAO->GetSettings().GetType());
+        GET_CONST(const Type<gE::Window*>*, MeshType, VAO->GetSettings().GetType());
         Pointer<API::IVAO> VAO;
 
-        GET_CONST(const Type*, ShapeType, Shape->GetSettings().GetType());
+        GET_CONST(const Type<gE::Window*>*, ShapeType, Shape->GetSettings().GetType());
         Pointer<Jolt::Shape> Shape;
 
         Pointer<API::Buffer<VertexWeight>> BoneWeights = DEFAULT;

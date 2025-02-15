@@ -25,6 +25,7 @@ namespace GPU
 	class Texture : public gE::Asset
 	{
 		SERIALIZABLE_PROTO("TEX", 1, Texture, Asset);
+		REFLECTABLE_PROTO_NOIMPL(gE::Asset);
 
 	public:
 		ALWAYS_INLINE void Free() override { Data.Free(); }
@@ -41,11 +42,10 @@ namespace GPU
 		~Texture() override { ASSET_CHECK_FREE(Texture); }
 	};
 
-	REFLECTABLE_BEGIN(Texture1D);
 	class Texture1D : public Texture
 	{
 		SERIALIZABLE_PROTO("TEX1", 1, Texture1D, Texture);
-		REFLECTABLE_PROTO(Texture1D);
+		REFLECTABLE_PROTO(Texture1D, Texture, "API::Texture1D") {};
 
 	public:
 		Texture1D(const Texture& super, TextureSize1D size) : Texture(super), Size(size) {};
@@ -53,13 +53,11 @@ namespace GPU
 
 		TextureSize1D Size = DEFAULT;
 	};
-	inline REFLECTABLE_END(Texture1D, void, "API::Texture1D");
 
-	REFLECTABLE_BEGIN(Texture2D);
  	class Texture2D : public Texture
 	{
  		SERIALIZABLE_PROTO("TEX2", 1, Texture2D, Texture);
- 		REFLECTABLE_PROTO(Texture2D);
+ 		REFLECTABLE_PROTO(Texture2D, Texture, "GPU::Texture2D") {};
 
  	public:
  		Texture2D(const Texture& super, TextureSize2D size) : Texture(super), Size(size) {};
@@ -67,13 +65,11 @@ namespace GPU
 
 		TextureSize2D Size = DEFAULT;
 	};
-	inline REFLECTABLE_END(Texture2D, void, "GPU::Texture2D");
 
-	REFLECTABLE_BEGIN(Texture3D);
 	class Texture3D : public Texture
 	{
 		SERIALIZABLE_PROTO("TEX3", 1, Texture3D, Texture);
-		REFLECTABLE_PROTO(Texture3D);
+		REFLECTABLE_PROTO(Texture3D, Texture, "GPU::Texture3D") {};
 
 	public:
 		Texture3D(const Texture& super, TextureSize3D size) : Texture(super), Size(size) {};
@@ -81,13 +77,11 @@ namespace GPU
 
 		TextureSize3D Size = DEFAULT;
 	};
-	inline REFLECTABLE_END(Texture3D, void, "GPU::Texture3D");
 
-	REFLECTABLE_BEGIN(TextureCube);
 	class TextureCube : public Texture
 	{
 		SERIALIZABLE_PROTO("TEXC", 1, TextureCube, Texture);
-		REFLECTABLE_PROTO(TextureCube);
+		REFLECTABLE_PROTO(TextureCube, Texture, "GPU::TextureCube") {};
 
 	public:
 		TextureCube(const Texture& super, TextureSize1D size) : Texture(super), Size(size) {};
@@ -95,7 +89,6 @@ namespace GPU
 
 		TextureSize1D Size = DEFAULT;
 	};
-	inline REFLECTABLE_END(TextureCube, void, "GPU::TextureCube");
 }
 
 #include "Texture.inl"

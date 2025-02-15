@@ -10,6 +10,8 @@ namespace gE
 {
 	class Behavior : public Component
 	{
+		REFLECTABLE_PROTO_NOIMPL(Component);
+
 	 public:
 		explicit Behavior(Entity* o);
 	};

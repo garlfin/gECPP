@@ -33,11 +33,10 @@ namespace GPU
 		u8 LOD;
 	};
 
-	REFLECTABLE_BEGIN(VAO)
 	class VAO : public gE::Asset
 	{
 		SERIALIZABLE_PROTO("VAO", 1, VAO, Asset);
-		REFLECTABLE_PROTO(VAO);
+		REFLECTABLE_PROTO(VAO, gE::Asset, "GPU::VAO") {};
 
 	public:
 		VAOFieldCounts Counts{};
@@ -57,13 +56,11 @@ namespace GPU
 
 		~VAO() override { ASSET_CHECK_FREE(VAO); }
 	};
-	inline REFLECTABLE_END(VAO, void, "GPU::VAO");
 
-	REFLECTABLE_BEGIN(IndexedVAO);
 	class IndexedVAO : public VAO
 	{
 		SERIALIZABLE_PROTO("IVAO", 1, IndexedVAO, VAO);
-		REFLECTABLE_PROTO(IndexedVAO);
+		REFLECTABLE_PROTO(IndexedVAO, gE::Asset, "GPU::IndexedVAO") {};
 
 	public:
 		ALWAYS_INLINE void Free() override { VAO::Free(); TriangleBuffer.Free(); }
@@ -74,7 +71,6 @@ namespace GPU
 
 		~IndexedVAO() override { ASSET_CHECK_FREE(IndexedVAO); }
 	};
-	inline REFLECTABLE_END(IndexedVAO, void, "GPU::IndexedVAO");
 }
 
 #if API == GL

@@ -22,6 +22,12 @@ namespace gE
 		parent->_children.push_back(this);
 	}
 
+	void Entity::IOnEditorGUI(u8 depth)
+	{
+		REFLECT_FIELD(_name);
+		REFLECT_FIELD(_parent);
+	}
+
 	void Entity::Destroy(bool flagChildren)
 	{
 		GetWindow().GetEntities().DestroyEntity(*this, flagChildren);
@@ -132,10 +138,4 @@ namespace gE
 	Behavior::Behavior(Entity* o) : Component(o, &o->GetWindow().GetBehaviors())
 	{
 	}
-
-	REFLECTABLE_END(Entity, void, "gE::Entity",
-		REFLECT_FIELD(Entity, _name),
-		REFLECT_FIELD(Entity, _parent),
-		REFLECT_FIELD(Entity, _transform),
-	);
 }

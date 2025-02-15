@@ -16,10 +16,9 @@
 
 namespace gE::VoxelDemo
 {
-    REFLECTABLE_BEGIN(Movement);
     class Movement : public Behavior
     {
-        REFLECTABLE_PROTO(Movement);
+        REFLECTABLE_PROTO(Movement, Behavior, "gE::Movement");
 
     public:
         explicit Movement(Entity* o, CharacterController& controller) :
@@ -30,10 +29,10 @@ namespace gE::VoxelDemo
         }
 
         GET_SET_VALUE(Entity*, FPCamera, _camera);
-        GET_SET_VALUE(float, StandingHeight, _standingHeight);
-        GET_SET_VALUE(float, CrouchingHeight, _crouchingHeight);
 
         float Speed = 2.0;
+        float StandingHeight = 1.75;
+        float CrouchingHeight = 0.875;
 
         void OnInit() override {};
 
@@ -73,17 +72,17 @@ namespace gE::VoxelDemo
             if (glm::length2(dir) > 0) dir = normalize(dir);
 
             Physics::CapsuleShape capsuleShape = DEFAULT;
-            capsuleShape.Height = _standingHeight;
+            capsuleShape.Height = StandingHeight;
 
             if (IsKeyDown(crouchState))
             {
-                capsuleShape.Height = _crouchingHeight;
+                capsuleShape.Height = CrouchingHeight;
                 dir *= 0.5;
             }
 
             if ((bool)(crouchState & KeyState::StateChanged))
             {
-                const float heightDifference = (_standingHeight - _crouchingHeight) / 2.f;
+                const float heightDifference = (StandingHeight - CrouchingHeight) / 2.f;
                 if (IsKeyDown(crouchState))
                     transform.SetPosition(transform->Position - glm::vec3(0, heightDifference, 0));
                 else
@@ -110,15 +109,17 @@ namespace gE::VoxelDemo
 
     private:
         glm::vec3 _rot = DEFAULT;
-        float _standingHeight = 1.75;
-        float _crouchingHeight = 0.875;
         RelativePointer<CharacterController> _controller;
         Entity* _camera;
         glm::vec3 _dir = DEFAULT;
     };
-    REFLECTABLE_END(Movement, void, "gE::VoxelDemo::Movement",
-        REFLECT_FIELD(Movement, Speed)
-    );
 
     inline REFLECTABLE_FACTORY_NO_IMPL(Movement);
+
+    inline void Movement::IOnEditorGUI(u8 depth)
+    {
+        REFLECT_FIELD(Speed);
+        REFLECT_FIELD(StandingHeight);
+        REFLECT_FIELD(CrouchingHeight);
+    }
 }

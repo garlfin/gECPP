@@ -25,10 +25,9 @@ namespace gE
 	ENUM_OPERATOR(TransformFlags, &);
 	ENUM_OPERATOR_UNARY(TransformFlags, ~);
 
-	REFLECTABLE_BEGIN(Transform);
 	class Transform final : public Component
 	{
-		REFLECTABLE_PROTO(Transform);
+		REFLECTABLE_PROTO(Transform, Component, "gE::Transform") {};
 
 	 public:
 		Transform(Entity* o, const TransformData& d);
@@ -71,10 +70,9 @@ namespace gE
 		glm::mat4 _model, _previousModel = glm::mat4(1.0);
 		TransformFlags _flags;
 	};
-	inline REFLECTABLE_END(Transform, Component, "gE::Transform");
 	inline REFLECTABLE_FACTORY_NO_IMPL(Transform);
 
-	class TransformManager : public ComponentManager<Transform>
+	class TransformManager final : public ComponentManager<Transform>
 	{
 	 public:
 		using ComponentManager::ComponentManager;
