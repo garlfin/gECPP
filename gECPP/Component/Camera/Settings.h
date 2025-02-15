@@ -21,7 +21,7 @@ namespace gE
 	struct ICameraSettings
 	{
 		ClipPlanes ClipPlanes = { 0.1, 1000 };
-		CameraTiming Timing = DefaultCameraTiming;
+		CameraTiming Timing = DEFAULT;
 	};
 
 	template<Dimension DIMENSION>

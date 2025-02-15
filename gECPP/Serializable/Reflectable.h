@@ -42,7 +42,7 @@ template<class T>
 struct Type
 {
 	Type() = default;
-	Type(const std::string_view& name, FactoryFunction<T> factory) :
+	Type(const std::string_view name, FactoryFunction<T> factory) :
 		Name(name),
 		Factory(factory)
 	{
@@ -56,7 +56,9 @@ struct Type
 
 struct IReflectable
 {
+	IReflectable() = default;
 	virtual void OnEditorGUI(u8 depth) {};
+	virtual ~IReflectable() = default;
 };
 
 template<class T>
@@ -75,24 +77,26 @@ public:
 	virtual ~Reflectable() = default;
 };
 
+#define REFLECTABLE_TYPE_PROTO(TYPE, NAME) \
+	public: \
+		using THIS_T = TYPE; \
+		static TYPE* TYPE##FACTORY(std::istream& in, SETTINGS_T t); \
+		const TYPE_T* GetType() const override { return &Type; }; \
+		FORCE_IMPL static inline const TYPE_T Type{ NAME, (FactoryFunction<SETTINGS_T>) TYPE##FACTORY }; \
+
 #ifdef DEBUG
-	#define REFLECTABLE_PROTO(TYPE, SUPER, NAME) \
+	#define REFLECTABLE_ONGUI_PROTO(SUPER) \
 		public: \
-			using THIS_T = TYPE; \
-			static TYPE* TYPE##FACTORY(std::istream& in, SETTINGS_T t); \
-			const TYPE_T* GetType() const override { return &Type; }; \
-			FORCE_IMPL static inline const TYPE_T Type{ NAME, (FactoryFunction<SETTINGS_T>) TYPE##FACTORY }; \
 			void OnEditorGUI(u8 depth) override { SUPER::OnEditorGUI(depth); IOnEditorGUI(depth); } \
 		private: \
 			void IOnEditorGUI(u8 depth)
 #else
-	#define REFLECTABLE_PROTO(TYPE, NAME) \
-		public: \
-			using THIS_T = TYPE; \
-			static TYPE* TYPE##FACTORY(std::istream& in, SETTINGS_T t); \
-			const TYPE_T* GetType() const override { return &Type; }; \
-			FORCE_IMPL static inline const TYPE_T Type{ NAME, (FactoryFunction<SETTINGS_T>) TYPE##FACTORY };
+	#define REFLECTABLE_ONGUI_PROTO(SUPER)
 #endif
+
+#define REFLECTABLE_PROTO(TYPE, SUPER, NAME) \
+	REFLECTABLE_TYPE_PROTO(TYPE, NAME); \
+	REFLECTABLE_ONGUI_PROTO(SUPER)
 
 #define REFLECTABLE_PROTO_NOIMPL(SUPER) \
 	public: \
@@ -106,9 +110,6 @@ public:
 
 #define REFLECTABLE_ONEDITOR_NO_IMPL(TYPE, SUPER) \
 	void TYPE::OnEditorGUI(u8 depth) { SUPER::OnEditorGUI(depth); }
-
-#define REFLECT_FIELD(NAME) \
-	gE::Editor::DrawField((BaseFieldSettings) #NAME ##sv, NAME, depth)
 
 // Typesystem must be explicity instantiated.
 template struct TypeSystem<gE::Window*>;

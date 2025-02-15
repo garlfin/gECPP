@@ -11,6 +11,7 @@
 
 #define GE_EDITOR_HIERARCHY_FLAGS ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth
 #define GE_EDITOR_TABLE_FLAGS ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_NoHostExtendX | ImGuiTableFlags_Resizable
+#define GE_EDITOR_TOOLTIP_FLAGS ImGuiHoveredFlags_Stationary | ImGuiHoveredFlags_DelayShort | ImGuiHoveredFlags_AllowWhenDisabled
 
 namespace gE
 {
@@ -21,14 +22,44 @@ namespace gE
     template<class T, class OWNER_T>
     using SetterFunction = void (OWNER_T::*)(T t);
 
-    struct BaseFieldSettings
+    struct Field
     {
-    public:
-        BaseFieldSettings() = default;
-        BaseFieldSettings(const std::string_view& name) : Name(name) {};
-
         std::string_view Name = DEFAULT;
         std::string_view Tooltip = DEFAULT;
+    };
+
+    enum class ScalarViewMode : u8
+    {
+        Input,
+        Drag,
+        Slider
+    };
+
+    template<class T>
+    struct ScalarField : public Field
+    {
+        T Minimum = std::numeric_limits<T>::lowest();
+        T Maximum = std::numeric_limits<T>::max();
+        T Step = T(1);
+        ScalarViewMode ViewMode = ScalarViewMode::Drag;
+    };
+
+    template<>
+    struct ScalarField<float> : public Field
+    {
+        float Minimum = std::numeric_limits<float>::lowest();
+        float Maximum = std::numeric_limits<float>::max();
+        float Step = 0.01f;
+        ScalarViewMode ViewMode = ScalarViewMode::Drag;
+    };
+
+    template<>
+    struct ScalarField<double> : public Field
+    {
+        double Minimum = std::numeric_limits<double>::lowest();
+        double Maximum = std::numeric_limits<double>::max();
+        float Step = 0.01;
+        ScalarViewMode ViewMode = ScalarViewMode::Drag;
     };
 
     class Editor
@@ -44,8 +75,8 @@ namespace gE
         template<class T, class SETTINGS_T>
         static bool DrawField(const SETTINGS_T&, T&, u8 depth);
 
-        template<class T, class SETTINGS_T, class OWNER_T>
-        static bool DrawField(const SETTINGS_T&, OWNER_T&, u8 depth, GetterFunction<T, OWNER_T>, SetterFunction<T, OWNER_T>);
+        template<class SETTINGS_T, class OWNER_T, class OUT_T, class IN_T>
+        static bool DrawField(const SETTINGS_T&, OWNER_T&, u8 depth, GetterFunction<OUT_T, OWNER_T>, SetterFunction<IN_T, OWNER_T>);
 
     private:
         void DrawLog();

@@ -31,13 +31,14 @@ namespace gE
 
         DrawLog();
 
-        if(ImGui::Begin("Entity Info", &_isConsoleOpen, ImGuiWindowFlags_AlwaysHorizontalScrollbar | ImGuiWindowFlags_HorizontalScrollbar))
+        if(ImGui::Begin("Inspector", nullptr, ImGuiWindowFlags_HorizontalScrollbar))
         {
             if (_activeEntity)
             {
-                GE_ASSERT(_activeEntity->GetType());
-                ImGui::TextUnformatted(std::format("{} ({})", _activeEntity->GetType()->Name, (void*) _activeEntity).c_str());
-                ImGui::NewLine();
+                const std::string_view type = _activeEntity->GetType() ? _activeEntity->GetType()->Name : "gE::Entity?";
+
+                ImGui::TextUnformatted(std::format("{} ({})", type, (void*) _activeEntity).c_str());
+                ImGui::Separator();
                 _activeEntity->OnEditorGUI(0);
             }
             else
@@ -45,48 +46,44 @@ namespace gE
             ImGui::End();
         }
 
-        if(ImGui::Begin("Entity Browser", &_isConsoleOpen))
+        if(ImGui::Begin("Scene"))
         {
-            if(ImGui::TreeNodeEx("Scene", GE_EDITOR_HIERARCHY_FLAGS | ImGuiTreeNodeFlags_Leaf))
+            u8 reverseDepth = -1;
+            for(const auto it : _window->GetEntities().GetList())
             {
-                u8 reverseDepth = -1;
-                for(const auto it : _window->GetEntities().GetList())
+                Entity& entity = **it;
+
+                const u8 curDepth = entity.GetTreeDepth();
+                const u8 nextDepth = it->GetNext() ? (**it->GetNext())->GetTreeDepth() : -1;
+
+                if(curDepth > reverseDepth && reverseDepth != -1)
+                    continue;
+
+                if(curDepth <= reverseDepth) reverseDepth = -1;
+
+                ImGuiTreeNodeFlags flag = GE_EDITOR_HIERARCHY_FLAGS | ImGuiTreeNodeFlags_Selected;
+                if(curDepth >= nextDepth || !it->GetNext()) flag |= ImGuiTreeNodeFlags_Leaf;
+
+                std::string name = std::format("{}##{}", entity.GetName(), (size_t) it);
+                if(!ImGui::TreeNodeEx(name.c_str(), flag))
                 {
-                    Entity& entity = **it;
-
-                    const u8 curDepth = entity.GetTreeDepth();
-                    const u8 nextDepth = it->GetNext() ? (**it->GetNext())->GetTreeDepth() : -1;
-
-                    if(curDepth > reverseDepth && reverseDepth != -1)
-                        continue;
-
-                    if(curDepth <= reverseDepth) reverseDepth = -1;
-
-                    ImGuiTreeNodeFlags flag = GE_EDITOR_HIERARCHY_FLAGS | ImGuiTreeNodeFlags_Selected;
-                    if(curDepth >= nextDepth || !it->GetNext()) flag |= ImGuiTreeNodeFlags_Leaf;
-
-                    std::string name = std::format("{}##{}", entity.GetName(), (size_t) it);
-                    if(!ImGui::TreeNodeEx(name.c_str(), flag))
-                    {
-                        reverseDepth = curDepth;
-                        continue;
-                    }
-
-                    if(ImGui::IsItemClicked()) _activeEntity = &entity;
-
-                    if(it->GetNext())
-                    {
-                        if (curDepth < nextDepth) continue;
-
-                        ImGui::TreePop(); // Pop this
-                        for (int i = 0; i < curDepth - nextDepth; i++)
-                            ImGui::TreePop(); // How many steps back in the tree
-                    }
-                    else
-                        for (int i = 0; i <= curDepth; i++)
-                            ImGui::TreePop();
+                    reverseDepth = curDepth;
+                    continue;
                 }
-                ImGui::TreePop();
+
+                if(ImGui::IsItemClicked()) _activeEntity = &entity;
+
+                if(it->GetNext())
+                {
+                    if (curDepth < nextDepth) continue;
+
+                    ImGui::TreePop(); // Pop this
+                    for (int i = 0; i < curDepth - nextDepth; i++)
+                        ImGui::TreePop(); // How many steps back in the tree
+                }
+                else
+                    for (int i = 0; i <= curDepth; i++)
+                        ImGui::TreePop();
             }
             ImGui::End();
         }
@@ -97,7 +94,7 @@ namespace gE
         GE_ASSERTM(ImGui::GetCurrentContext(), "NO ACTIVE CONTEXT!");
 
         if(!_isConsoleOpen) return;
-        if(ImGui::Begin("Console:", &_isConsoleOpen, ImGuiWindowFlags_MenuBar))
+        if(ImGui::Begin("Console", nullptr, ImGuiWindowFlags_MenuBar))
         {
             if(ImGui::Button("Clear"))
                 Log::Clear();

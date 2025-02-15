@@ -15,7 +15,7 @@ namespace gE
 	CONSTEXPR_GLOBAL ICameraSettings CubemapCameraSettings
 	{
 		ClipPlanes(0.1, 100),
-		DefaultCameraTiming
+		DEFAULT
 	};
 
 	CubemapCapture::CubemapCapture(Window* w, u16 size) :

@@ -29,9 +29,9 @@ namespace gE
     {
         GPU::Texture tex;
         tex.Format = GL_R8;
-        tex.WrapMode = GPU::WrapMode::Clamp;
+        tex.WrapMode = GPU::WrapMode::Border;
         tex.MipCount = 1;
-        tex.Filter = GPU::FilterMode::Nearest;
+        tex.Filter = GPU::FilterMode::Linear;
         return tex;
     }();
 #endif
@@ -58,6 +58,8 @@ namespace gE
 #ifdef GE_ENABLE_IMGUI
         API::Shader _imShader;
         API::Texture2D _imFont;
+
+        static void SetStyle();
 #endif
     };
 }

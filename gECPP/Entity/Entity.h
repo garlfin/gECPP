@@ -18,7 +18,7 @@ namespace gE
 
   	class Entity : public Reflectable<Window*>, public Managed<Entity>
 	{
-  		REFLECTABLE_PROTO(Entity, Reflectable, "gE::Entity");
+  		REFLECTABLE_ONGUI_PROTO(Reflectable);
 
 	 public:
 		explicit Entity(Window*, Entity* = nullptr, LayerMask layers = LayerMask::All, EntityFlags = DEFAULT);
@@ -49,8 +49,6 @@ namespace gE
 
 		Transform _transform;
 	};
-
-	inline REFLECTABLE_FACTORY_NO_IMPL(Entity);
 
 	typedef Entity Empty;
 

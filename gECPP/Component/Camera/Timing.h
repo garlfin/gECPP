@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <Utility/Binary.h>
+#include "Renderer/GUI/Editor.h"
 
 namespace gE
 {
@@ -18,13 +18,13 @@ namespace gE
 		GET_CONST(bool, IsFirst, !_frame);
 
 		u8 TickOffset = 0;
-		u8 TickSkip = 1;
+		u8 TickSkip = 0;
 
-		NODISCARD bool Tick(float delta)
+		NODISCARD bool Tick()
 		{
-			bool tick = !_frame || !TickSkip || // first frame or no skip
+			bool tick = !_frame || // first frame
 						(_frame >= TickOffset &&
-						(_frame - TickOffset) % TickSkip == 0); // equal to tick
+						(_frame - TickOffset) % (TickSkip + 1) == 0); // equal to tick
 			_frame++;
 			return tick;
 		}
@@ -32,6 +32,4 @@ namespace gE
 	 private:
 		u64 _frame = 0;
 	};
-
-	CONSTEXPR_GLOBAL CameraTiming DefaultCameraTiming(0, 1);
 }

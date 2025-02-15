@@ -24,8 +24,9 @@ namespace gE
 
 	void Entity::IOnEditorGUI(u8 depth)
 	{
-		REFLECT_FIELD(_name);
-		REFLECT_FIELD(_parent);
+		Editor::DrawField(Field{ "Name"sv }, _name, depth);
+		Editor::DrawField(Field{ "Parent"sv }, _parent, depth);
+		Editor::DrawField(Field{ "Transform"sv }, _transform, depth);
 	}
 
 	void Entity::Destroy(bool flagChildren)

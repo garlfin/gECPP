@@ -16,7 +16,7 @@
 
 namespace gE::VoxelDemo
 {
-    class Movement : public Behavior
+    class Movement final : public Behavior
     {
         REFLECTABLE_PROTO(Movement, Behavior, "gE::Movement");
 
@@ -31,8 +31,11 @@ namespace gE::VoxelDemo
         GET_SET_VALUE(Entity*, FPCamera, _camera);
 
         float Speed = 2.0;
+        float SpeedMultiplier = 2.f;
         float StandingHeight = 1.75;
         float CrouchingHeight = 0.875;
+        float JumpHeight = 1.f;
+        float Sensitivity = 0.1f;
 
         void OnInit() override {};
 
@@ -118,8 +121,11 @@ namespace gE::VoxelDemo
 
     inline void Movement::IOnEditorGUI(u8 depth)
     {
-        REFLECT_FIELD(Speed);
-        REFLECT_FIELD(StandingHeight);
-        REFLECT_FIELD(CrouchingHeight);
+        Editor::DrawField(ScalarField{ "Speed"sv, ""sv, 0.f, 10.f, 0.01f }, Speed, depth);
+        Editor::DrawField(ScalarField{ "Speed Multiplier"sv, ""sv, 0.f, 10.f, 0.01f }, SpeedMultiplier, depth);
+        Editor::DrawField(ScalarField{ "Height"sv, ""sv, 0.f, 10.f, 0.01f }, StandingHeight, depth);
+        Editor::DrawField(ScalarField{ "Crouching Height"sv, ""sv, 0.f, 10.f, 0.01f }, CrouchingHeight, depth);
+        Editor::DrawField(ScalarField{ "Jump Height"sv, ""sv, 0.f, 10.f, 0.01f }, JumpHeight, depth);
+        Editor::DrawField(ScalarField{ "Sensitivity"sv, "Mouse sensitivity"sv, 0.01f, 10.f, 0.001f }, Sensitivity, depth);
     }
 }

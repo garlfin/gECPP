@@ -30,7 +30,7 @@ namespace gE
 	{
 		return
 		{
-			ICameraSettings{ ClipPlanes(0.f, size), DefaultCameraTiming },
+			ICameraSettings{ ClipPlanes(0.f, size), DEFAULT },
 			glm::ivec3(resolution)
 		};
 	}

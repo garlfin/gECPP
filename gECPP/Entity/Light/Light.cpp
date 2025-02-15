@@ -164,7 +164,7 @@ namespace gE
 		static constexpr ICameraSettings DirectionalSettings
 		{
 			ClipPlanes(0.1, 25),
-			DefaultCameraTiming,
+			DEFAULT,
 		};
 
 		scale *= 0.5f;
@@ -181,7 +181,7 @@ namespace gE
 		static constexpr ICameraSettings PointSettings
 		{
 			ClipPlanes(0.1, 5.f),
-			DefaultCameraTiming,
+			DEFAULT,
 		};
 
 		return CameraSettings1D

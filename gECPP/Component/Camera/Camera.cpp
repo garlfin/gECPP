@@ -63,7 +63,7 @@ namespace gE
 		DefaultPipeline::Buffers& buffers = GetWindow().GetPipelineBuffers();
 
 		bool isFirst = _settings.Timing.GetIsFirst();
-		bool shouldTick = _settings.Timing.Tick(delta);
+		bool shouldTick = _settings.Timing.Tick();
 
 		if(!isFirst && (!shouldTick || GetOwner().GetFlags().Static)) return;
 
@@ -83,6 +83,14 @@ namespace gE
 		Frame++;
 	}
 
+	void Camera::IOnEditorGUI(u8 depth)
+	{
+		Editor::DrawField(ScalarField{ "Clip Planes"sv, ""sv, 0.01f, 1000.f, 0.1f }, _settings.ClipPlanes, depth);
+		Editor::DrawField(ScalarField<u8>{ "Tick Offset"sv, "First frame that renders."sv }, _settings.Timing.TickOffset, depth);
+		Editor::DrawField(ScalarField<u8>{ "Tick Skip"sv, "ie. 0 = every frame, 1 = every other"sv }, _settings.Timing.TickSkip, depth);
+		Editor::DrawField<const u32>(ScalarField<u32>{ "Frame"sv }, Frame, depth);
+	}
+
 	void PerspectiveCamera::UpdateProjection()
 	{
 		Projection = glm::perspectiveFov(_fov, (float) GetSize().x, (float) GetSize().y, GetClipPlanes().x, GetClipPlanes().y);
@@ -91,6 +99,11 @@ namespace gE
 	Camera2D::Camera2D(Entity* p, TARGET_T& t, const CameraSettings2D& s, ComponentManager<Camera>* m) :
 		Camera(p, s.Size, t, s, m)
 	{
+	}
+
+	void Camera2D::IOnEditorGUI(u8 depth)
+	{
+		Editor::DrawField<const float>(ScalarField<float>{ "Aspect"sv }, GetAspect(), depth);
 	}
 
 	PerspectiveCamera::PerspectiveCamera(Entity* p, TARGET_T& t, const PerspectiveCameraSettings& s, ComponentManager<Camera>* m) :
@@ -105,6 +118,13 @@ namespace gE
 		camera.Parameters.x = GetFOV<AngleType::Radian>();
 	}
 
+	void PerspectiveCamera::IOnEditorGUI(u8 depth)
+	{
+		float fovDeg = GetFOV();
+		if(Editor::DrawField(ScalarField{ "FOV"sv, "Vertical FOV in Degrees", 1.f, 120.f, 1.f }, fovDeg, depth))
+			SetFOV(fovDeg);
+	}
+
 	OrthographicCamera::OrthographicCamera(Entity* p, TARGET_T& t, const OrthographicCameraSettings& s, ComponentManager<Camera>* m) :
 		Camera2D(p, t, s, m), _orthographicScale(s.Scale)
 	{
@@ -113,6 +133,11 @@ namespace gE
 	void OrthographicCamera::UpdateProjection()
 	{
 		Projection = glm::ortho(_orthographicScale.x, _orthographicScale.y, _orthographicScale.z, _orthographicScale.w, GetClipPlanes().x, GetClipPlanes().y);
+	}
+
+	void OrthographicCamera::IOnEditorGUI(u8 depth)
+	{
+		Editor::DrawField(ScalarField{ "Orthographic Scale"sv, ""sv, 0.01f }, _orthographicScale, depth);
 	}
 
 	void Camera2D::GetGPUCamera(GPU::Camera& camera)
@@ -130,6 +155,10 @@ namespace gE
 	{
 		glm::vec3 scale = GetOwner().GetTransform()->Scale;
 		Projection = glm::ortho(-scale.x, scale.x, -scale.z, scale.z, 0.01f, scale.y * 2.f);
+	}
+
+	void Camera3D::IOnEditorGUI(u8 depth)
+	{
 	}
 
 	void Camera3D::GetGPUCamera(GPU::Camera& cam)

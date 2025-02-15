@@ -15,7 +15,7 @@ namespace gE
     {
     public:
         template<class... ARGS>
-        static void Write(const std::string_view& format, ARGS&&... args)
+        static void Write(const std::string_view format, ARGS&&... args)
         {
             if constexpr(sizeof...(ARGS) == 0)
                 _log += format;
@@ -24,7 +24,7 @@ namespace gE
         }
 
         template<class... ARGS>
-        static void WriteLine(const std::string_view& format, ARGS&&... args)
+        static void WriteLine(const std::string_view format, ARGS&&... args)
         {
             if constexpr(sizeof...(ARGS) == 0)
                 _log += format;
@@ -33,10 +33,10 @@ namespace gE
             _log += '\n';
         }
 
-        static void FatalError(const std::string_view& message);
+        static void FatalError(const std::string_view message);
 
         template<class... ARGS>
-        static void FatalError(const std::string_view& format, ARGS&&... args)
+        static void FatalError(const std::string_view format, ARGS&&... args)
         {
             FatalError(std::vformat(format, std::make_format_args(args...)));
         }

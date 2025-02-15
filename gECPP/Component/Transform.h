@@ -27,7 +27,7 @@ namespace gE
 
 	class Transform final : public Component
 	{
-		REFLECTABLE_PROTO(Transform, Component, "gE::Transform") {};
+		REFLECTABLE_PROTO(Transform, Component, "gE::Transform");
 
 	 public:
 		Transform(Entity* o, const TransformData& d);
@@ -36,10 +36,10 @@ namespace gE
 
 		NODISCARD glm::mat4 GetParentTransform() const;
 
-		inline void SetPosition(const glm::vec3& pos, TransformFlags flags = TransformFlags::All) { _flags |= flags; _transform.Position = pos; }
-		inline void SetLocation(const glm::vec3& pos, TransformFlags flags = TransformFlags::All) { _flags |= flags; _transform.Position = pos; }
-		inline void SetRotation(const glm::quat& rot, TransformFlags flags = TransformFlags::All) { _flags |= flags; _transform.Rotation = rot; }
-		inline void SetScale(const glm::vec3& scale, TransformFlags flags = TransformFlags::All) { _flags |= flags; _transform.Scale = scale; }
+		void SetPosition(const glm::vec3& pos, TransformFlags flags = TransformFlags::All) { _flags |= flags; _transform.Position = pos; }
+		void SetLocation(const glm::vec3& pos, TransformFlags flags = TransformFlags::All) { _flags |= flags; _transform.Position = pos; }
+		void SetRotation(const glm::quat& rot, TransformFlags flags = TransformFlags::All) { _flags |= flags; _transform.Rotation = rot; }
+		void SetScale(const glm::vec3& scale, TransformFlags flags = TransformFlags::All) { _flags |= flags; _transform.Scale = scale; }
 
 		ALWAYS_INLINE void Set(const TransformData& d) { Set(d, TransformFlags::All); }
 		ALWAYS_INLINE void Set(const Transform& d) { Set(d._transform, TransformFlags::All); }
@@ -64,6 +64,14 @@ namespace gE
 	protected:
 		inline void Set(const TransformData& d, TransformFlags flags) { _flags |= flags; _transform = d; };
 		inline void Set(const Transform& d, TransformFlags flags) { _flags |= flags; _transform = d._transform; };
+
+		void SetPosition_(const glm::vec3& pos) { SetPosition(pos); }
+		void SetRotation_(const glm::vec3& rot) { SetRotation(glm::radians(rot)); }
+		void SetScale_(const glm::vec3& scale) { SetScale(scale); }
+
+		GET_CONST(const glm::vec3&, Position_, _transform.Position);
+		GET_CONST(glm::vec3, Rotation_, glm::degrees(glm::eulerAngles(_transform.Rotation)));
+		GET_CONST(const glm::vec3&, Scale_, _transform.Scale);
 
 	private:
 		TransformData _transform, _globalTransform;

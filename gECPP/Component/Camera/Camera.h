@@ -22,6 +22,8 @@ namespace gE
 {
 	class Camera : public Component
 	{
+		REFLECTABLE_ONGUI_PROTO(Component);
+
 	 public:
 		Camera(Entity*, TextureSize2D, IRenderTarget&, const ICameraSettings&, ComponentManager<Camera>* = nullptr);
 
@@ -52,6 +54,8 @@ namespace gE
 
 	class Camera2D : public Camera
 	{
+		REFLECTABLE_ONGUI_PROTO(Camera);
+
 	 public:
 		using TARGET_T = RenderTarget<Camera2D>;
 		using SIZE_T = TextureSize2D;
@@ -68,6 +72,8 @@ namespace gE
 
 	class PerspectiveCamera final : public Camera2D
 	{
+		REFLECTABLE_PROTO(PerspectiveCamera, Camera2D, "gE::PerspectiveCamera");
+
 	 public:
 		PerspectiveCamera(Entity*, TARGET_T&, const PerspectiveCameraSettings&, ComponentManager<Camera>* = nullptr);
 
@@ -96,9 +102,12 @@ namespace gE
 	 private:
 		float _fov;
 	};
+	inline REFLECTABLE_FACTORY_NO_IMPL(PerspectiveCamera);
 
 	class OrthographicCamera final : public Camera2D
 	{
+		REFLECTABLE_PROTO(OrthographicCamera, Camera2D, "gE::OrthographicCamera");
+
 	 public:
 		OrthographicCamera(Entity*, TARGET_T&, const OrthographicCameraSettings&, ComponentManager<Camera>* = nullptr);
 
@@ -110,9 +119,12 @@ namespace gE
 	 private:
 		glm::vec4 _orthographicScale;
 	};
+	inline REFLECTABLE_FACTORY_NO_IMPL(OrthographicCamera);
 
 	class Camera3D final : public Camera
 	{
+		REFLECTABLE_PROTO(Camera3D, Camera, "gE::Camera3D");
+
 	 public:
 		using TARGET_T = RenderTarget<Camera3D>;
 		using SIZE_T = TextureSize3D;
@@ -132,9 +144,12 @@ namespace gE
 	 private:
 		const TextureSize1D _sizeZ;
 	};
+	inline REFLECTABLE_FACTORY_NO_IMPL(Camera3D);
 
 	class CameraCube final : public Camera
 	{
+		REFLECTABLE_PROTO(CameraCube, Camera, "gE::CameraCube") {};
+
 	 public:
 		using TARGET_T = RenderTarget<CameraCube>;
 		using SIZE_T = TextureSize1D;
@@ -150,6 +165,7 @@ namespace gE
 	 protected:
 		void UpdateProjection() override;
 	};
+	inline REFLECTABLE_FACTORY_NO_IMPL(CameraCube);
 
 	class CameraManager final : public ComponentManager<Camera>
 	{

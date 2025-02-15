@@ -56,7 +56,7 @@ Window::Window(glm::u16vec2 size, const std::string& name) :
 			Log::FatalError("Failed to initialize SDL.");
 
 	_monitor = Monitor(SDL_GetCurrentDisplayMode(SDL_GetPrimaryDisplay()));
-	_window = SDL_CreateWindow(_name.c_str(), size.x, size.y, SDL_WINDOW_OPENGL);
+	_window = SDL_CreateWindow(_name.c_str(), size.x, size.y, SDL_WINDOW_OPENGL | SDL_WINDOW_HIGH_PIXEL_DENSITY);
 	if(!_window)
 		Log::FatalError("Failed to create Window.");
 

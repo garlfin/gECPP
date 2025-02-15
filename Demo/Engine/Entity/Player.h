@@ -17,7 +17,7 @@ namespace gE::VoxelDemo
 	inline ICameraSettings FlyCameraSettings
 	{
 		ClipPlanes(0.1, 100),
-		DefaultCameraTiming,
+		DEFAULT,
 	};
 
 	class Player : public Entity
@@ -42,12 +42,14 @@ namespace gE::VoxelDemo
 
 	inline void Player::IOnEditorGUI(u8 depth)
 	{
-		REFLECT_FIELD(_movement);
-		REFLECT_FIELD(_controller);
+		Editor::DrawField(Field{ "Movement"sv }, _movement, depth);
+		Editor::DrawField(Field{ "Character Controller"sv }, _controller, depth);
 	}
 
 	class PlayerCamera final : public Entity
 	{
+		REFLECTABLE_PROTO(PlayerCamera, Entity, "gE::PlayerCamera");
+
 	public:
 		PlayerCamera(Window* window, Player& player) : Entity(window, &player),
 			_camera(this, _target, {{ FlyCameraSettings, window->GetSize() }}, &window->GetCameras()),
@@ -82,4 +84,10 @@ namespace gE::VoxelDemo
 		PostProcess::Bloom _bloom;
 		PostProcess::Tonemap _tonemap;
 	};
+	inline REFLECTABLE_FACTORY_NO_IMPL(PlayerCamera);
+
+	inline void PlayerCamera::IOnEditorGUI(u8 depth)
+	{
+		Editor::DrawField(Field{ "Camera"sv, ""}, _camera, depth);
+	}
 }
