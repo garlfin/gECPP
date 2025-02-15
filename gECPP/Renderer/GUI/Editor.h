@@ -12,6 +12,8 @@
 #define GE_EDITOR_HIERARCHY_FLAGS ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth
 #define GE_EDITOR_TABLE_FLAGS ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_NoHostExtendX | ImGuiTableFlags_Resizable
 #define GE_EDITOR_TOOLTIP_FLAGS ImGuiHoveredFlags_Stationary | ImGuiHoveredFlags_DelayShort | ImGuiHoveredFlags_AllowWhenDisabled
+#define GE_EDITOR_INPUT_FLAGS ImGuiSliderFlags_AlwaysClamp
+#define GE_EDITOR_COLOR_PICKER_FLAGS ImGuiColorEditFlags_Float | ImGuiColorEditFlags_InputRGB | ImGuiColorEditFlags_NoOptions | ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_AlphaPreviewHalf
 
 namespace gE
 {
@@ -32,7 +34,8 @@ namespace gE
     {
         Input,
         Drag,
-        Slider
+        Slider,
+        ColorPicker // ONLY COMPATIBLE WITH VEC3 AND VEC4
     };
 
     template<class T>
@@ -71,6 +74,7 @@ namespace gE
 
         GET_SET_VALUE(bool, ConsoleOpen, _isConsoleOpen);
         GET_SET_VALUE(Entity*, SelectedEntity, _activeEntity);
+        GET_SET_VALUE(bool, IsRunning, _running);
 
         template<class T, class SETTINGS_T>
         static bool DrawField(const SETTINGS_T&, T&, u8 depth);
@@ -84,6 +88,7 @@ namespace gE
         Window* _window = nullptr;
         Entity* _activeEntity = nullptr;
         bool _isConsoleOpen = false;
+        bool _running = true;
         size_t _oldLogSize = 0;
     };
 #endif

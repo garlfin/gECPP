@@ -35,7 +35,7 @@ namespace gE
         {
             if (_activeEntity)
             {
-                const std::string_view type = _activeEntity->GetType() ? _activeEntity->GetType()->Name : "gE::Entity?";
+                const std::string_view type = _activeEntity->GetType() ? _activeEntity->GetType()->Name : "gE::Entity (NO TYPE INFO)";
 
                 ImGui::TextUnformatted(std::format("{} ({})", type, (void*) _activeEntity).c_str());
                 ImGui::Separator();

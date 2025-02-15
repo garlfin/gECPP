@@ -26,6 +26,8 @@ namespace gE
 
 	class DirectionalLight : public Light
 	{
+		REFLECTABLE_TYPE_PROTO(DirectionalLight, "gE::DirectionalLight");
+
 	public:
 		DirectionalLight(Window*, u16 size, float scale, const glm::quat& = glm::identity<glm::quat>());
 
@@ -41,4 +43,5 @@ namespace gE
 		OrthographicCamera _camera;
 		DirectionalLightTarget _target;
 	};
+	inline REFLECTABLE_FACTORY_NO_IMPL(DirectionalLight);
 }

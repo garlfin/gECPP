@@ -52,7 +52,7 @@ namespace gE
 
 	struct OrthographicCameraSettings : public CameraSettings2D
 	{
-		OrthographicCameraSettings(const CameraSettings2D& s, const glm::vec4& scale) : CameraSettings2D(s), Scale(scale) {};
-		glm::vec4 Scale;
+		OrthographicCameraSettings(const CameraSettings2D& s, const glm::vec2& scale) : CameraSettings2D(s), Scale(scale) {};
+		glm::vec2 Scale;
 	};
 }

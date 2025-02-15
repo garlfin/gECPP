@@ -138,6 +138,9 @@ bool Window::Run()
 	{
 		_time = SDLGetTime(initTime);
 
+#ifdef DEBUG
+		if(Editor.GetIsRunning())
+#endif
 		if(_physicsTick.ShouldTick(_time))
 			OnFixedUpdate(_physicsTick.GetDelta());
 
@@ -176,6 +179,9 @@ bool Window::Run()
 			if(shouldDebugTick) timer.Start();
 		#endif
 
+		#ifdef DEBUG
+			if(Editor.GetIsRunning())
+		#endif
 			OnUpdate(_renderTick.GetDelta());
 			OnRender(_renderTick.GetDelta());
 

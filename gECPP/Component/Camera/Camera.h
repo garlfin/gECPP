@@ -111,13 +111,13 @@ namespace gE
 	 public:
 		OrthographicCamera(Entity*, TARGET_T&, const OrthographicCameraSettings&, ComponentManager<Camera>* = nullptr);
 
-		GET_CONST(const glm::vec4&, Scale, _orthographicScale);
+		GET_CONST(const glm::vec2&, Scale, _orthographicScale);
 
 	 protected:
 		void UpdateProjection() override;
 
 	 private:
-		glm::vec4 _orthographicScale;
+		glm::vec2 _orthographicScale;
 	};
 	inline REFLECTABLE_FACTORY_NO_IMPL(OrthographicCamera);
 

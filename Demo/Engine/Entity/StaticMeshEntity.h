@@ -11,6 +11,8 @@ namespace gE::VoxelDemo
 {
  	class StaticMeshEntity : public Entity
 	{
+ 		REFLECTABLE_PROTO(StaticMeshEntity, Entity, "gE::VoxelDemo::StaticMeshEntity");
+
 	 public:
 		StaticMeshEntity(Window* window, const Reference<Mesh>& mesh) :
 			Entity(window),
@@ -22,4 +24,10 @@ namespace gE::VoxelDemo
 	 private:
 		MeshRenderer _renderer;
 	};
+	inline REFLECTABLE_FACTORY_NO_IMPL(StaticMeshEntity);
+
+	inline void StaticMeshEntity::IOnEditorGUI(u8 depth)
+	{
+		Editor::DrawField(Field{ "Renderer"sv }, _renderer, depth);
+	}
 }

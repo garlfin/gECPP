@@ -26,6 +26,8 @@ namespace gE
 
 	class PointLight : public Light
 	{
+		REFLECTABLE_TYPE_PROTO(PointLight, "gE::PointLight");
+
 	public:
 		PointLight(Window*, u16 resolution);
 
@@ -39,4 +41,5 @@ namespace gE
 		CameraCube _camera;
 		PointLightTarget _target;
 	};
+	inline REFLECTABLE_FACTORY_NO_IMPL(PointLight);
 }

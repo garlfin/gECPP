@@ -17,7 +17,6 @@ namespace gE
 	Light::Light(Window* w, Camera& c, IDepthTarget& d) :
 		Entity(w),
 		Managed<Light>(&GetWindow().GetLights(), *this),
-		Depth(nullptr),
 		_camera(c)
 	{
 	}
@@ -32,6 +31,12 @@ namespace gE
 		light.Position = transform->Position;
 		light.Color = GetColor();
 		light.Planes = camera.GetClipPlanes();
+	}
+
+	void Light::IOnEditorGUI(u8 depth)
+	{
+		Editor::DrawField(Field{ "Camera"sv }, *_camera, depth);
+		Editor::DrawField(ScalarField{ "Color"sv, ""sv, 0.01f, FLT_MAX, FLT_EPSILON, ScalarViewMode::ColorPicker }, _color, depth);
 	}
 
 	void LightManager::OnRender(float delta, Camera* camera)
@@ -167,12 +172,10 @@ namespace gE
 			DEFAULT,
 		};
 
-		scale *= 0.5f;
-
 		return OrthographicCameraSettings
 		{
 			CameraSettings2D(DirectionalSettings, glm::ivec2(size)),
-			glm::vec4(-scale, scale, -scale, scale)
+			glm::vec2(scale)
 		};
 	}
 

@@ -103,7 +103,7 @@ namespace gE
 
         if(_previousScale != transform->Scale)
         {
-            Log::Write("INFO: SHAPE SCALING");
+            Log::Write("INFO: SHAPE SCALING\n");
 
             const px::Shape& joltShape = _collider->GetShape().GetJoltShape();
             const px::ShapeSettings::ShapeResult result = joltShape.ScaleShape(Physics::ToPX(transform->Scale));
@@ -112,6 +112,9 @@ namespace gE
             physics._interface->SetShape(_body->GetID(), result.Get(), true, JPH::EActivation::Activate);
             _previousScale = transform->Scale;
         }
+
+        PreviousPosition = Position = transform->Position;
+        Rotation = PreviousRotation = transform->Rotation;
 
         physics._interface->SetPositionAndRotation
         (

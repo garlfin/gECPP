@@ -126,13 +126,15 @@ namespace gE
 	}
 
 	OrthographicCamera::OrthographicCamera(Entity* p, TARGET_T& t, const OrthographicCameraSettings& s, ComponentManager<Camera>* m) :
-		Camera2D(p, t, s, m), _orthographicScale(s.Scale)
+		Camera2D(p, t, s, m),
+		_orthographicScale(s.Scale)
 	{
 	}
 
 	void OrthographicCamera::UpdateProjection()
 	{
-		Projection = glm::ortho(_orthographicScale.x, _orthographicScale.y, _orthographicScale.z, _orthographicScale.w, GetClipPlanes().x, GetClipPlanes().y);
+		const glm::vec4 scale = glm::vec4(-_orthographicScale, _orthographicScale) / 2.f;
+		Projection = glm::ortho(scale.x, scale.z, scale.y, scale.w, GetClipPlanes().x, GetClipPlanes().y);
 	}
 
 	void OrthographicCamera::IOnEditorGUI(u8 depth)
