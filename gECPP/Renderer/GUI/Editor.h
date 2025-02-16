@@ -69,6 +69,8 @@ namespace gE
     {
     public:
         explicit Editor(Window* window);
+        void DrawInspector();
+        void DrawHierarchy();
 
         void OnGUI();
 

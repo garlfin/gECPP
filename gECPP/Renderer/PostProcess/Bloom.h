@@ -18,7 +18,7 @@ namespace gE::PostProcess
 	{
 		PhysicalCameraSettings* PhysicalCamera;
 
-		float Threshold = 2.f;
+		float Threshold = 1.f;
 		float Knee = 0.7f;
 		float Intensity = 1.f;
 		u8 Iterations = 7;

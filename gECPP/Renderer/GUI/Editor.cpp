@@ -17,6 +17,8 @@ namespace gE
     {
     }
 
+
+
     void Editor::OnGUI()
     {
         KeyboardState& keyboard = _window->GetKeyboard();
@@ -30,7 +32,12 @@ namespace gE
         ImGui::DockSpaceOverViewport(0, nullptr, ImGuiDockNodeFlags_PassthruCentralNode);
 
         DrawLog();
+        DrawInspector();
+        DrawHierarchy();
+    }
 
+    void Editor::DrawInspector()
+    {
         if(ImGui::Begin("Inspector", nullptr, ImGuiWindowFlags_HorizontalScrollbar))
         {
             if (_activeEntity)
@@ -45,7 +52,10 @@ namespace gE
                 ImGui::TextUnformatted("No entity selected.");
             ImGui::End();
         }
+    }
 
+    void Editor::DrawHierarchy()
+    {
         if(ImGui::Begin("Scene"))
         {
             u8 reverseDepth = -1;
@@ -65,7 +75,19 @@ namespace gE
                 if(curDepth >= nextDepth || !it->GetNext()) flag |= ImGuiTreeNodeFlags_Leaf;
 
                 std::string name = std::format("{}##{}", entity.GetName(), (size_t) it);
-                if(!ImGui::TreeNodeEx(name.c_str(), flag))
+
+                const bool open = ImGui::TreeNodeEx(name.c_str(), flag);
+                if(ImGui::BeginPopupContextItem())
+                {
+                    if(ImGui::Button("Delete"))
+                    {
+                        entity.Destroy();
+                        if(&entity == _activeEntity) _activeEntity = nullptr;
+                    }
+
+                    ImGui::EndPopup();
+                }
+                if(!open)
                 {
                     reverseDepth = curDepth;
                     continue;

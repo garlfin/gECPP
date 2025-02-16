@@ -56,8 +56,7 @@ namespace gE
 			if(i == end) break;
 		}
 
-		begin->_previous = _last;
-		end->_next = nullptr;
+		ITER_T* prevLast = _last;
 
 		if(previousSize)
 			_last->_next = begin;
@@ -76,6 +75,9 @@ namespace gE
 			end->_next->_previous = begin->_previous;
 		else
 			from._last = end->_previous;
+
+		begin->_previous = prevLast;
+		end->_next = nullptr;
 
 		if(_size) GE_ASSERTM(_first && _last, "");
 	}

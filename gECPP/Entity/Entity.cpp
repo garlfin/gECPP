@@ -58,7 +58,6 @@ namespace gE
 		if(destroyChildren)
 		{
 			ITER_T* end = &entity.Node;
-
 			for(ITER_T* i = &entity.Node; i && (**i)->_sceneTreeDepth > depth; i = i->GetNext())
 			{
 				(**i)->_flags.Deletion = true;

@@ -26,7 +26,7 @@ namespace gE
 
 	class PointLight : public Light
 	{
-		REFLECTABLE_TYPE_PROTO(PointLight, "gE::PointLight");
+		REFLECTABLE_PROTO(PointLight, Light, "gE::PointLight");
 
 	public:
 		PointLight(Window*, u16 resolution);
@@ -36,10 +36,12 @@ namespace gE
 		GET(CameraCube&, Camera, _camera);
 		GET(PointLightTarget&, Target, _target);
 		GET(API::TextureCube&, Depth, _target.GetDepth());
+		GET_SET_VALUE(float, Radius, _radius);
 
 	private:
 		CameraCube _camera;
 		PointLightTarget _target;
+		float _radius = 0.1;
 	};
 	inline REFLECTABLE_FACTORY_NO_IMPL(PointLight);
 }

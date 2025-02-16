@@ -161,7 +161,12 @@ namespace gE
 		Light::GetGPULight(light);
 
 		light.Type = GPU::LightType::Point;
-		light.PackedSettings = std::bit_cast<u32, float>(0.1);
+		light.PackedSettings = *(u32*) &_radius;
+	}
+
+	void PointLight::IOnEditorGUI(u8 depth)
+	{
+		Editor::DrawField(ScalarField{ "Radius"sv, ""sv, 0.01f }, _radius, depth);
 	}
 
 	OrthographicCameraSettings CreateDirectionalSettings(u16 size, float scale)

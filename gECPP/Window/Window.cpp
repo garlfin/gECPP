@@ -303,6 +303,7 @@ void Window::OnRender(float delta)
 	Lights->OnRender(delta, nullptr);
 	Cubemaps->OnRender(delta, nullptr);
 	Cameras.OnRender(delta);
+	Transforms.OnRender(delta, nullptr);
 
 	GUI->BeginGUI();
 	Behaviors.OnGUI(delta);
@@ -316,8 +317,6 @@ void Window::OnRender(float delta)
 	API::Framebuffer::Reset();
 	Blit(Cameras.CurrentCamera->GetColor());
 	Blit(GUI->GetColor());
-
-	Transforms.OnRender(delta, nullptr);
 }
 
 Camera3D* Window::GetReflectionSystem() const
