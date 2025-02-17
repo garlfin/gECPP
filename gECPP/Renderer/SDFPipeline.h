@@ -109,8 +109,9 @@ namespace gE::SDFPipeline
 		bool Setup(float d, Camera* camera) override;
 		void RenderPass(float, Camera*) override;
 		void PostProcessPass(float d) override;
+		void Resize() override;
 
-	 private:
+	private:
 		API::Texture3D _color;
 		API::Texture3D _sdf, _sdfBack;
 	};

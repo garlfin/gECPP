@@ -41,7 +41,7 @@ namespace gE
 		Monitor() = default;
 
 		const char* Name = DEFAULT;
-		TextureSize2D Size = TextureSize2D(0);
+		Size2D Size = Size2D(0);
 		u16 RefreshRate = 0;
 
 		~Monitor() { delete[] Name; }
@@ -92,7 +92,8 @@ namespace gE
 		RenderFlags RenderState = DEFAULT;
 		CloseFlags CloseState = DEFAULT;
 
-		GET_CONST(TextureSize2D, Size, _size);
+		GET_CONST(Size2D, Size, _size);
+		GET_SET(Viewport&, Viewport, _viewport);
 		GET_CONST(const Monitor&, Monitor, _monitor);
 		GET_CONST(VoxelPipeline::Buffers&, VoxelBuffers, VoxelBuffers);
 		GET_CONST(DefaultPipeline::Buffers&, PipelineBuffers, PipelineBuffers);
@@ -163,7 +164,8 @@ namespace gE
 		SDL_Surface* _icon;
 		void* _grapicsContext;
 
-		TextureSize2D _size;
+		Size2D _size;
+		Viewport _viewport;
 		std::string _name;
 
 		double _time = DEFAULT;

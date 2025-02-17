@@ -11,14 +11,14 @@ namespace gE
 	template<class T>
 	void LinkedList<T>::Add(LinkedNode<T>& t, Direction dir)
 	{
-		SAFE_CONSTRUCT(t, ITER_T, t.Get(), this, nullptr, dir);
+		PlacementNew(t, t.Get(), this, nullptr, dir);
 	}
 
 	template<class T>
 	void LinkedList<T>::Remove(LinkedNode<T>& t)
 	{
 		if(t._list != this) return;
-		SAFE_CONSTRUCT(t, ITER_T, t.Get(), nullptr);
+		PlacementNew(t, t.Get(), nullptr);
 	}
 
 	template<class T>
@@ -36,7 +36,7 @@ namespace gE
 	template<class T>
 	void LinkedList<T>::Insert(LinkedNode<T>& t, LinkedNode<T>* at, Direction dir)
 	{
-		SAFE_CONSTRUCT(t, ITER_T, t.Get(), this, at, dir);
+		PlacementNew(t, t.Get(), this, at, dir);
 	}
 
 	template<class T>
@@ -96,7 +96,7 @@ namespace gE
 		{
 			ITER_T& toBeDeleted = *i;
 			i = i->GetNext();
-			SAFE_CONSTRUCT(toBeDeleted, ITER_T);
+			PlacementNew(toBeDeleted);
 		}
 		_size = 0;
 	}

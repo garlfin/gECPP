@@ -69,7 +69,7 @@ void DemoWindow::OnInit()
 
 	auto* playerCamera = new PlayerCamera(this, *player);
 	playerCamera->SetName("Camera");
-	Cameras.CurrentCamera = &playerCamera->GetTarget();
+	Cameras.SetCurrentCamera(&playerCamera->GetTarget());
 
 	player->GetMovement().SetFPCamera(playerCamera);
 

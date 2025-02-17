@@ -9,9 +9,21 @@
 #include <IMGUI/imgui_stdlib.h>
 
 #define GE_SWITCH_TYPE(TYPE) if constexpr(std::is_same_v<RAW_T, TYPE>)
+#define IM_TYPE_(TYPE, ENUM) template<> CONSTEXPR_GLOBAL ImGuiDataType IMType<TYPE> = ENUM;
 
 namespace gE
 {
+    IM_TYPE_(i8, ImGuiDataType_S8);
+    IM_TYPE_(u8, ImGuiDataType_U8);
+    IM_TYPE_(i16, ImGuiDataType_S16);
+    IM_TYPE_(u16, ImGuiDataType_U16);
+    IM_TYPE_(i32, ImGuiDataType_S32);
+    IM_TYPE_(u32, ImGuiDataType_U32);
+    IM_TYPE_(i64, ImGuiDataType_S64);
+    IM_TYPE_(u64, ImGuiDataType_U64);
+    IM_TYPE_(float, ImGuiDataType_Float);
+    IM_TYPE_(double, ImGuiDataType_Double);
+
     template <class T, class SETTINGS_T>
     bool Editor::DrawField(const SETTINGS_T& settings, T& t_, u8 depth)
     {
@@ -46,18 +58,7 @@ namespace gE
         if constexpr(std::is_scalar_v<RAW_T> && !isPointer && !std::is_same_v<RAW_T, bool>)
         {
             static_assert(std::is_same_v<SETTINGS_T, ScalarField<RAW_T>>);
-            ImGuiDataType type;
-
-            GE_SWITCH_TYPE(i8) type = ImGuiDataType_S8;
-            GE_SWITCH_TYPE(u8) type = ImGuiDataType_U8;
-            GE_SWITCH_TYPE(i16) type = ImGuiDataType_S16;
-            GE_SWITCH_TYPE(u16) type = ImGuiDataType_U16;
-            GE_SWITCH_TYPE(i32) type = ImGuiDataType_S32;
-            GE_SWITCH_TYPE(u32) type = ImGuiDataType_U32;
-            GE_SWITCH_TYPE(i64) type = ImGuiDataType_S64;
-            GE_SWITCH_TYPE(u64) type = ImGuiDataType_U64;
-            GE_SWITCH_TYPE(float) type = ImGuiDataType_Float;
-            GE_SWITCH_TYPE(double) type = ImGuiDataType_Double;
+            constexpr ImGuiDataType type = IMType<RAW_T>;
 
             switch(settings.ViewMode)
             {
@@ -77,67 +78,6 @@ namespace gE
 
             if(!settings.Tooltip.empty() && ImGui::IsItemHovered(GE_EDITOR_TOOLTIP_FLAGS))
                 ImGui::SetTooltip(settings.Tooltip.data());
-        }
-        else GE_SWITCH_TYPE(glm::vec2)
-        {
-            static_assert(std::is_same_v<SETTINGS_T, ScalarField<float>>);
-            switch(settings.ViewMode)
-            {
-            case ScalarViewMode::Slider:
-                changed = ImGui::SliderFloat2(label.c_str(), (float*) t, settings.Minimum, settings.Maximum, nullptr, GE_EDITOR_INPUT_FLAGS);
-                break;
-            case ScalarViewMode::Input:
-                changed = ImGui::InputFloat2(label.c_str(), (float*) t, nullptr, GE_EDITOR_INPUT_FLAGS);
-                break;
-            case ScalarViewMode::Drag:
-            default:
-            changed = ImGui::DragFloat2(label.c_str(), (float*) t, settings.Step, settings.Minimum, settings.Maximum, nullptr, GE_EDITOR_INPUT_FLAGS);
-            }
-            if constexpr(!isConst)
-                *t = glm::clamp(*t, RAW_T(settings.Minimum), RAW_T(settings.Maximum));
-        }
-        else GE_SWITCH_TYPE(glm::vec3)
-        {
-            static_assert(std::is_same_v<SETTINGS_T, ScalarField<float>>);
-            switch(settings.ViewMode)
-            {
-            case ScalarViewMode::Slider:
-                changed = ImGui::SliderFloat3(label.c_str(), (float*) t, settings.Minimum, settings.Maximum, nullptr, GE_EDITOR_INPUT_FLAGS);
-                break;
-            case ScalarViewMode::Input:
-                changed = ImGui::InputFloat3(label.c_str(), (float*) t, nullptr, GE_EDITOR_INPUT_FLAGS);
-                break;
-            case ScalarViewMode::ColorPicker:
-                changed = ImGui::ColorEdit3(label.c_str(), (float*) t, GE_EDITOR_COLOR_PICKER_FLAGS);
-                break;
-            case ScalarViewMode::Drag:
-            default:
-            changed = ImGui::DragFloat3(label.c_str(), (float*) t, settings.Step, settings.Minimum, settings.Maximum, nullptr, GE_EDITOR_INPUT_FLAGS);
-            }
-            if constexpr(!isConst)
-                *t = glm::clamp(*t, RAW_T(settings.Minimum), RAW_T(settings.Maximum));
-        }
-        else GE_SWITCH_TYPE(glm::vec4)
-        {
-            static_assert(std::is_same_v<SETTINGS_T, ScalarField<float>>);
-
-            switch(settings.ViewMode)
-            {
-            case ScalarViewMode::Slider:
-                changed = ImGui::SliderFloat4(label.c_str(), (float*) t, settings.Minimum, settings.Maximum, nullptr, GE_EDITOR_INPUT_FLAGS);
-                break;
-            case ScalarViewMode::Input:
-                changed = ImGui::InputFloat4(label.c_str(), (float*) t, nullptr, GE_EDITOR_INPUT_FLAGS);
-                break;
-            case ScalarViewMode::ColorPicker:
-                changed = ImGui::ColorEdit4(label.c_str(), (float*) t, GE_EDITOR_COLOR_PICKER_FLAGS);
-                break;
-            case ScalarViewMode::Drag:
-            default:
-            changed = ImGui::DragFloat4(label.c_str(), (float*) t, settings.Step, settings.Minimum, settings.Maximum, nullptr, GE_EDITOR_INPUT_FLAGS);
-            }
-            if constexpr(!isConst)
-                *t = glm::clamp(*t, RAW_T(settings.Minimum), RAW_T(settings.Maximum));
         }
         else GE_SWITCH_TYPE(bool)
         {
@@ -177,6 +117,55 @@ namespace gE
 
         ImGui::PopItemWidth();
         return changed;
+    }
+
+    template <class T, glm::length_t COMPONENT_COUNT>
+    bool Editor::DrawField(const ScalarField<T>& settings, glm::vec<COMPONENT_COUNT, T, glm::packed_highp>& t, u8 depth)
+    {
+        constexpr ImGuiDataType type = IMType<T>;
+
+        const std::string label = std::format("##{}", settings.Name);
+
+        ImGui::TextUnformatted(settings.Name.data());
+        ImGui::SameLine();
+
+        /*if(isConst)
+            ImGui::BeginDisabled();*/
+
+        ImGui::PushItemWidth(-1);
+
+        bool changed = false;
+        switch(settings.ViewMode)
+        {
+        case ScalarViewMode::Slider:
+            changed = ImGui::SliderScalarN(label.c_str(), type, &t, COMPONENT_COUNT, &settings.Minimum, &settings.Maximum, nullptr, GE_EDITOR_INPUT_FLAGS);
+            break;
+        case ScalarViewMode::Input:
+            changed = ImGui::InputScalarN(label.c_str(), type, &t, COMPONENT_COUNT, &settings.Step, nullptr, nullptr, GE_EDITOR_INPUT_FLAGS);
+            break;
+        case ScalarViewMode::Drag:
+        default:
+            changed = ImGui::DragScalarN(label.c_str(), type, &t, COMPONENT_COUNT, (float) settings.Step, &settings.Minimum, &settings.Maximum, nullptr, GE_EDITOR_INPUT_FLAGS);
+        }
+
+        /*if constexpr(!isConst)*/
+            t = glm::clamp(t, settings.Minimum, settings.Maximum);
+
+        if(!settings.Tooltip.empty() && ImGui::IsItemHovered(GE_EDITOR_TOOLTIP_FLAGS))
+            ImGui::SetTooltip(settings.Tooltip.data());
+
+        /*if(isConst)
+            ImGui::EndDisabled();*/
+
+        ImGui::PopItemWidth();
+
+        return changed;
+    }
+
+    template <class T, glm::length_t COMPONENT_COUNT>
+    bool Editor::DrawField(const ScalarField<T>& settings, glm::vec<COMPONENT_COUNT, T, glm::packed_highp>* t, u8 depth)
+    {
+        return DrawField(settings, *t, depth);
     }
 
     template<class SETTINGS_T, class OWNER_T, class OUT_T, class IN_T>

@@ -82,8 +82,9 @@ namespace gE::VoxelPipeline
 		GET(ProbeSettings&, ProbeSettings, _probeSettings);
 
 		bool Setup(float d, Camera* camera) override;
-		void RenderPass(float, Camera*) override;
+		void RenderPass(float, Camera* callingCamera) override;
 		void PostProcessPass(float d) override;
+		void Resize() override;
 
 	private:
 		API::Texture3D _color, _colorBack;

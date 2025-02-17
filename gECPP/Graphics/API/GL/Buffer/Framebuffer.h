@@ -26,7 +26,7 @@ namespace GL
 	 public:
 		explicit Framebuffer(gE::Window* win);
 
-		void SetDefaultSize(TextureSize2D);
+		void SetDefaultSize(Size2D);
 		inline void Bind() const override { glBindFramebuffer(GL_FRAMEBUFFER, ID); }
 
 		void SetDepthAttachment(Texture& h);

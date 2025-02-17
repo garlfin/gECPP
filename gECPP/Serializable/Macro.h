@@ -20,14 +20,14 @@
 	public: \
 		typedef SUPER_T::SETTINGS_T SETTINGS_T; \
 		typedef SUPER_T SUPER; \
-		inline void Deserialize(istream& in, gE::Window* window) override { SAFE_CONSTRUCT(*this, TYPE, in, window); } \
+		inline void Deserialize(istream& in, gE::Window* window) override { PlacementNew(*this, in, window); } \
 		TYPE() = default; \
 		using SUPER_T::Free; \
 		using SUPER_T::IsFree; \
 		TYPE(istream& in, gE::Window* window) \
 		{ \
 			SUPER_T tmp(in, window); \
-			SAFE_CONSTRUCT(*this, TYPE, window, move(tmp)); \
+			PlacementNew(*this, window, move(tmp)); \
 			SUPER_T::Free(); \
 		} \
 		ALWAYS_INLINE const SUPER_T* operator->() const { return this; } \

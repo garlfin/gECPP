@@ -245,7 +245,7 @@ void Window::OnInit()
 		GPU::Texture2D brdfTextureSettings;
 		brdfTextureSettings.Format = GL_RG16F;
 		brdfTextureSettings.WrapMode = GPU::WrapMode::Clamp;
-		brdfTextureSettings.Size = TextureSize2D(BRDF_SIZE);
+		brdfTextureSettings.Size = Size2D(BRDF_SIZE);
 
 		BRDFLookup = ptr_create<API::Texture2D>(this, brdfTextureSettings);
 
@@ -312,10 +312,11 @@ void Window::OnRender(float delta)
 #endif
 	GUI->EndGUI();
 
-	GE_ASSERTM(Cameras.CurrentCamera, "CAMERA SHOULD NOT BE NULL!");
+	GE_ASSERTM(Cameras.GetCurrentCamera(), "CAMERA SHOULD NOT BE NULL!");
 
 	API::Framebuffer::Reset();
-	Blit(Cameras.CurrentCamera->GetColor());
+	glViewport(0, 0, _size.x, _size.y);
+	Blit(Cameras.GetCurrentCamera()->GetColor());
 	Blit(GUI->GetColor());
 }
 

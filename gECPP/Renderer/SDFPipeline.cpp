@@ -18,7 +18,7 @@ namespace gE::SDFPipeline
 	}
 
 	Target3D::Target3D(SDFCapture& capture, Camera3D& camera) :
-		RenderTarget<Camera3D>(capture, camera),
+		RenderTarget(capture, camera),
 		_color(&camera.GetWindow(), { ColorFormat, camera.GetSize() }),
 		_sdf(&camera.GetWindow(), { SDFFormat, camera.GetSize() }),
 		_sdfBack(&camera.GetWindow(), { SDFFormat, camera.GetSize() })
@@ -38,6 +38,10 @@ namespace gE::SDFPipeline
 	}
 
 	void Target3D::PostProcessPass(float d)
+	{
+	}
+
+	void Target3D::Resize()
 	{
 	}
 }

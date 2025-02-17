@@ -49,7 +49,7 @@ public:
 		TYPE(istream& in, SETTINGS_T s) : SUPER(in, s) { SERIALIZABLE_CHECK_HEADER(); IDeserialize(in, s); } \
 		TYPE() = default; \
 		static const constexpr char MAGIC[5] = MAGIC_VAL; \
-		inline void Deserialize(istream& in, SETTINGS_T s) override { SAFE_CONSTRUCT(*this, TYPE, in, s); } \
+		inline void Deserialize(istream& in, SETTINGS_T s) override { PlacementNew(*this, in, s); } \
 		inline void Serialize(ostream& out) const override { SUPER::Serialize(out); Write(out, 4, MAGIC); Write<u8>(out, Version); ISerialize(out); } \
 		u8 Version = VERSION_VAL; \
 		DEFAULT_OPERATOR_CM(TYPE); \

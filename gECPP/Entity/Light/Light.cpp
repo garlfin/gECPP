@@ -71,27 +71,33 @@ namespace gE
 		Depth = &_target.GetDepth();
 	}
 
-	DirectionalLightTarget::DirectionalLightTarget(Light& l, OrthographicCamera& c) :
-		RenderTarget(l, c),
-		IDepthTarget((API::Texture&) _depth),
-		_depth(GetFrameBuffer(), GPU::Texture2D(ShadowMapFormat, c.GetSize()))
+	DirectionalLightTarget::DirectionalLightTarget(Light& light, OrthographicCamera& camera) :
+		RenderTarget(light, camera),
+		DepthTarget(camera, *_depth)
 	{
+		DirectionalLightTarget::Resize();
 	}
 
 	void DirectionalLightTarget::RenderPass(float, Camera* callingCamera)
 	{
 		OrthographicCamera& camera = GetCamera();
 		Window& window = camera.GetWindow();
-		TextureSize2D size = camera.GetViewportSize();
 
 		window.RenderState = RenderState::Shadow;
 
 		glDepthMask(1);
 		glColorMask(0, 0, 0, 0);
 		glClear(GL_DEPTH_BUFFER_BIT);
-		glViewport(0, 0, size.x, size.y);
+		GetCamera().SetViewport();
 
 		window.GetRenderers().OnRender(0.f, &camera);
+	}
+
+	void DirectionalLightTarget::Resize()
+	{
+		if(_depth->GetSize() == GetCamera().GetSize()) return;
+
+		PlacementNew(_depth, GetFrameBuffer(), GPU::Texture2D(ShadowMapFormat, GetCamera().GetSize()));
 	}
 
 	bool DirectionalLightTarget::Setup(float, Camera* callingCamera)
@@ -127,31 +133,34 @@ namespace gE
 
 	PointLightTarget::PointLightTarget(Light& light, CameraCube& camera) :
 		RenderTarget(light, camera),
-		IDepthTarget((GL::TextureCube&) _depth),
-		_depth(GetFrameBuffer(), GPU::TextureCube(ShadowMapFormat, camera.GetSize()))
+		IDepthTarget(camera, *_depth)
 	{
-
+		PointLightTarget::Resize();
 	}
 
 	void PointLightTarget::RenderPass(float, Camera* callingCamera)
 	{
 		CameraCube& camera = GetCamera();
 		Window& window = camera->GetWindow();
-		TextureSize2D size = camera.GetViewportSize();
 
 		window.RenderState = RenderState::ShadowCube;
 
 		glDepthMask(1);
 		glColorMask(0, 0, 0, 0);
 		glClear(GL_DEPTH_BUFFER_BIT);
-		glViewport(0, 0, size.x, size.y);
+		GetCamera().SetViewport();
 
 		window.GetRenderers().OnRender(0.f, &camera);
 	}
 
-    PointLight::PointLight(Window* window, u16 resolution) : Light(window, _camera, _target),
-		_camera(this, _target, CreatePointSettings(resolution)),
-		_target(*this, _camera)
+	void PointLightTarget::Resize()
+	{
+		PlacementNew(_depth, GetFrameBuffer(), GPU::TextureCube(ShadowMapFormat, GetCamera().GetSize()));
+	}
+
+	PointLight::PointLight(Window* window, u16 resolution) : Light(window, _camera, _target),
+         _camera(this, _target, CreatePointSettings(resolution)),
+         _target(*this, _camera)
     {
 		Depth = &_target.GetDepth();
     }

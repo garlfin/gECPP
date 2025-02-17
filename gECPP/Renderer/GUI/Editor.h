@@ -6,6 +6,7 @@
 
 #include <Prototype.h>
 
+#include "IMGUI/imgui.h"
 #include "Serializable/Serializable.h"
 #include "Utility/Macro.h"
 
@@ -65,10 +66,15 @@ namespace gE
         ScalarViewMode ViewMode = ScalarViewMode::Drag;
     };
 
+    template<class T>
+    CONSTEXPR_GLOBAL ImGuiDataType IMType = 0;
+
     class Editor
     {
     public:
         explicit Editor(Window* window);
+
+        static void DrawEntityDrawer();
         void DrawInspector();
         void DrawHierarchy();
 
@@ -80,6 +86,12 @@ namespace gE
 
         template<class T, class SETTINGS_T>
         static bool DrawField(const SETTINGS_T&, T&, u8 depth);
+
+        template<class T, glm::length_t COMPONENT_COUNT>
+        static bool DrawField(const ScalarField<T>&, glm::vec<COMPONENT_COUNT, T>&, u8 depth);
+
+        template<class T, glm::length_t COMPONENT_COUNT>
+        static bool DrawField(const ScalarField<T>&, glm::vec<COMPONENT_COUNT, T>*, u8 depth);
 
         template<class SETTINGS_T, class OWNER_T, class OUT_T, class IN_T>
         static bool DrawField(const SETTINGS_T&, OWNER_T&, u8 depth, GetterFunction<OUT_T, OWNER_T>, SetterFunction<IN_T, OWNER_T>);

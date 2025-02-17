@@ -8,7 +8,7 @@
 
 namespace gE
 {
-	class DirectionalLightTarget : public RenderTarget<Camera2D>, public IDepthTarget
+	class DirectionalLightTarget : public RenderTarget<Camera2D>, public DepthTarget<Camera2D>
 	{
 	public:
 		explicit DirectionalLightTarget(Light&, OrthographicCamera&);
@@ -19,6 +19,7 @@ namespace gE
 
 		bool Setup(float, Camera*) override;
 		void RenderPass(float, Camera*) override;
+		void Resize() override;
 
 	private:
 		Attachment<API::Texture2D, GL_DEPTH_ATTACHMENT> _depth;

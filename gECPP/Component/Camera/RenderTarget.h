@@ -10,98 +10,134 @@
 
 namespace gE
 {
-	class Camera;
+    class Camera;
 
-	template<class T, GLenum TARGET>
-	class Attachment
-	{
-	 public:
-		template<typename... ARGS>
-		explicit Attachment(API::Framebuffer& f, ARGS&&... args) : _texture(&f.GetWindow(), std::forward<ARGS>(args)...)
-		{
-			if constexpr(TARGET == GL_DEPTH_ATTACHMENT || TARGET == GL_DEPTH_STENCIL_ATTACHMENT)
-				f.SetDepthAttachment(_texture);
-			else
-				f.SetAttachment(TARGET - GL_COLOR_ATTACHMENT0, _texture);
-		}
+    template <class T, GLenum TARGET>
+    class Attachment
+    {
+    public:
+        template <typename... ARGS>
+        explicit Attachment(API::Framebuffer& f, ARGS&&... args) : _texture(&f.GetWindow(), std::forward<ARGS>(args)...)
+        {
+            if constexpr (TARGET == GL_DEPTH_ATTACHMENT || TARGET == GL_DEPTH_STENCIL_ATTACHMENT)
+                f.SetDepthAttachment(_texture);
+            else
+                f.SetAttachment(TARGET - GL_COLOR_ATTACHMENT0, _texture);
+        }
 
-		Attachment(const Attachment&) = delete;
-		Attachment(Attachment&&) = delete;
+        Attachment() = default;
 
-		ALWAYS_INLINE T* operator->() { return &_texture; }
-		ALWAYS_INLINE const T* operator->() const { return &_texture; }
+        Attachment(const Attachment&) = delete;
+        Attachment(Attachment&&) = delete;
 
-		ALWAYS_INLINE T& operator*() { return _texture; }
-		ALWAYS_INLINE const T& operator*() const { return _texture; }
+        ALWAYS_INLINE T* operator->() { return &_texture; }
+        ALWAYS_INLINE const T* operator->() const { return &_texture; }
 
-		ALWAYS_INLINE explicit operator T&() { return _texture; }
-		ALWAYS_INLINE explicit operator const T&() const { return _texture; }
-		ALWAYS_INLINE explicit operator T*() { return &_texture; }
-		ALWAYS_INLINE explicit operator const T*() { return &_texture; }
+        ALWAYS_INLINE T& operator*() { return _texture; }
+        ALWAYS_INLINE const T& operator*() const { return _texture; }
 
-		GET(T&, , _texture)
+        ALWAYS_INLINE explicit operator T&() { return _texture; }
+        ALWAYS_INLINE explicit operator const T&() const { return _texture; }
+        ALWAYS_INLINE explicit operator T*() { return &_texture; }
+        ALWAYS_INLINE explicit operator const T*() { return &_texture; }
 
-	 private:
-		T _texture;
-	};
+        GET(T&, , _texture)
 
- 	class IRenderTarget
-	{
-	 public:
-		virtual ~IRenderTarget() = default;
+    private:
+        T _texture = DEFAULT;
+    };
 
-		explicit IRenderTarget(Entity& owner, Camera& camera);
+    class IRenderTarget
+    {
+    public:
+        virtual ~IRenderTarget() = default;
 
-		GET(Camera&, Camera, *_camera);
-		GET(Entity&, Owner, *_owner);
-		GET(API::Framebuffer&, FrameBuffer, _frameBuffer);
- 		GET(Window&, Window, *_window);
+        explicit IRenderTarget(Entity& owner, Camera& camera);
 
-		virtual bool Setup(float, Camera*) { return true; }
-		virtual void RenderDependencies(float) {};
-		virtual void RenderPass(float, Camera*) = 0;
-		virtual void PostProcessPass(float) {};
- 		virtual void GetGPUCameraOverrides(GPU::Camera&) const {};
+        GET(Camera&, Camera, *_camera);
+        GET(Entity&, Owner, *_owner);
+        GET(API::Framebuffer&, FrameBuffer, _frameBuffer);
+        GET(Window&, Window, *_window);
 
-		inline void Bind() const { _frameBuffer.Bind(); }
+        virtual bool Setup(float, Camera*) { return true; }
 
-	 private:
-		RelativePointer<Camera> _camera;
-		RelativePointer<Entity> _owner;
-		API::Framebuffer _frameBuffer;
- 		Window* _window;
-	};
+        virtual void RenderDependencies(float) {};
+        virtual void RenderPass(float, Camera*) = 0;
+        virtual void PostProcessPass(float) {};
+        virtual void GetGPUCameraOverrides(GPU::Camera&) const {};
+        // Matches textures to camera's size. (WILL NOT CHANGE THE CAMERA'S RESOLUTION)
+        virtual void Resize() = 0;
 
-	template<class T>
-	class RenderTarget : public IRenderTarget
-	{
-	public:
-		using CAMERA_T = T;
-		using TEX_T = typename T::TEX_T;
-		using IRenderTarget::IRenderTarget;
+        inline void Bind() const { _frameBuffer.Bind(); }
 
-		GET(T&, Camera, (T&) IRenderTarget::GetCamera());
-		GET_CONST(typename T::SIZE_T, Size, GetCamera().GetSize());
-	};
+    private:
+        RelativePointer<Camera> _camera;
+        RelativePointer<Entity> _owner;
+        API::Framebuffer _frameBuffer;
+        Window* _window;
+    };
 
-	class IDepthTarget
-	{
-	 public:
-		explicit IDepthTarget(API::Texture& d) : _depth(d) {};
+    template <class T>
+    class RenderTarget : public IRenderTarget
+    {
+    public:
+        using CAMERA_T = T;
+        using TEX_T = typename T::TEX_T;
+        using IRenderTarget::IRenderTarget;
 
-		GET(API::Texture&, Depth, *_depth);
+        GET(T&, Camera, (T&) IRenderTarget::GetCamera());
+        GET_CONST(typename T::SIZE_T, Size, GetCamera().GetSize());
+    };
 
-	 private:
-		RelativePointer<API::Texture> _depth;
-	};
+    class IDepthTarget
+    {
+    public:
+        IDepthTarget(Camera& camera, API::Texture& depth) : _camera(camera), _depth(depth) {};
 
-	class IColorTarget
-	{
-	 public:
-		explicit IColorTarget(API::Texture& col) : _color(col) {};
+        GET(API::Texture&, Depth, *_depth);
+        GET(Camera&, Camera, *_camera);
 
-		GET(API::Texture&, Color, *_color);
-	 private:
-		RelativePointer<API::Texture> _color;
-	};
+    private:
+        RelativePointer<Camera> _camera;
+        RelativePointer<API::Texture> _depth;
+    };
+
+    template<class T>
+    class DepthTarget : public IDepthTarget
+    {
+    public:
+        using CAMERA_T = T;
+        using TEX_T = typename T::TEX_T;
+
+        DepthTarget(CAMERA_T& camera, TEX_T& depth) : IDepthTarget(camera, depth) {};
+
+        GET(TEX_T&, Depth, (TEX_T&) IDepthTarget::GetDepth());
+        GET(CAMERA_T&, Camera, (CAMERA_T&) IDepthTarget::GetCamera());
+    };
+
+    class IColorTarget
+    {
+    public:
+        IColorTarget(Camera& camera, API::Texture& col) : _camera(camera), _color(col) {};
+
+        GET(API::Texture&, Color, *_color);
+        GET(Camera&, Camera, *_camera);
+
+    private:
+        RelativePointer<Camera> _camera;
+        RelativePointer<API::Texture> _color;
+    };
+
+    template<class T>
+    class ColorTarget : public IColorTarget
+    {
+    public:
+        using CAMERA_T = T;
+        using TEX_T = typename T::TEX_T;
+
+        ColorTarget(CAMERA_T& camera, TEX_T& color) : IColorTarget(camera, color) {};
+
+        GET(TEX_T&, Color, (TEX_T&) IColorTarget::GetColor());
+        GET(CAMERA_T&, Camera, (CAMERA_T&) IColorTarget::GetCamera());
+    };
 }

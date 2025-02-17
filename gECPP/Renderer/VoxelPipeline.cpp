@@ -27,17 +27,23 @@ namespace gE::VoxelPipeline
 
 	Target3D::Target3D(VoxelCapture& capture, Camera3D& camera, ProbeSettings probeSettings) :
 		RenderTarget(capture, camera),
-		_color(&camera.GetWindow(), { ColorFormat, camera.GetSize() }),
-		_colorBack(&camera.GetWindow(), { ColorBackFormat, camera.GetSize() }),
 		_probeSettings(probeSettings)
 	{
 		GetFrameBuffer().SetDefaultSize(camera.GetSize());
+		Target3D::Resize();
 	}
 
-	void Target3D::RenderPass(float d, Camera* camera)
+	void Target3D::Resize()
+	{
+		if(_color.GetSize() == GetCamera().GetSize()) return;
+
+		PlacementNew(_color, &GetCamera().GetWindow(), GPU::Texture3D(ColorFormat, GetCamera().GetSize()));
+		PlacementNew(_colorBack, &GetCamera().GetWindow(), GPU::Texture3D(ColorBackFormat, GetCamera().GetSize()));
+	}
+
+	void Target3D::RenderPass(float d, Camera* callingCamera)
 	{
 		Window& window = GetWindow();
-		TextureSize2D size = GetSize();
 
 		window.GetLights().UseNearestLights(glm::vec3(0.0f));
 
@@ -45,7 +51,7 @@ namespace gE::VoxelPipeline
 
 		glDepthMask(0);
 		glColorMask(1, 1, 1, 1);
-		glViewport(0, 0, size.x, size.y);
+		GetCamera().SetViewport();
 
 		_colorBack.Bind(0, GL_READ_WRITE, 0);
 

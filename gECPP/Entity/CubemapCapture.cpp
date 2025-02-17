@@ -96,7 +96,8 @@ namespace gE
 		buf.RetrieveData(&lighting.SkyboxIrradiance);
 	}
 
-	CubemapManager::CubemapManager(Window* window): Manager(), _window(window)
+	CubemapManager::CubemapManager(Window* window) : Manager(),
+		_window(window)
 	{
 		ReadSerializableFromFile(_window, "Resource/Model/skybox.vao", _skyboxVAO);
 
@@ -127,31 +128,32 @@ namespace gE
 
 		glDepthMask(1);
 		glColorMask(1, 1, 1, 1);
-		glViewport(0, 0, GetSize(), GetSize());
+		GetCamera().SetViewport();
+
 		glClear(GL_DEPTH_BUFFER_BIT);
 
 		window.GetRenderers().OnRender(0.f, &camera);
 		window.GetCubemaps().DrawSkybox();
 	}
 
-	GLOBAL GPU::Texture CubemapColorFormat = []
+	void CubemapTarget::Resize()
 	{
-		GPU::Texture tex;
-		tex.Format = GL_R11F_G11F_B10F;
-		tex.WrapMode = GPU::WrapMode::Clamp;
-		return tex;
-	}();
+		if(_depth->GetSize() == GetCamera().GetSize()) return;
+
+		PlacementNew(_depth, GetFrameBuffer(), GPU::TextureCube{ DefaultPipeline::DepthFormat, GetCamera().GetSize() });
+		PlacementNew(_color, GetFrameBuffer(), GPU::TextureCube{ CubemapColorFormat, GetCamera().GetSize() });
+	}
 
 	CubemapTarget::CubemapTarget(CameraCube& camera) :
-		RenderTarget(camera.GetOwner(), camera), IDepthTarget(_depth.Get()),
-		_depth(GetFrameBuffer(), GPU::TextureCube{ DefaultPipeline::DepthFormat, camera.GetSize() }),
-		_color(GetFrameBuffer(), GPU::TextureCube{ CubemapColorFormat, camera.GetSize() })
+		RenderTarget(camera.GetOwner(), camera),
+		DepthTarget(camera, _depth.Get())
 	{
+		CubemapTarget::Resize();
 	}
 
 	void CubemapTarget::RenderDependencies(float d)
 	{
 		LightManager& lights = GetOwner().GetWindow().GetLights();
-		lights.Sun->GetCamera().OnRender(d, &GetCamera());
+		lights.Sun->GetCamera().OnRender(d, &RenderTarget::GetCamera());
 	}
 }

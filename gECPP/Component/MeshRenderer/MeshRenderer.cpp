@@ -35,7 +35,7 @@ namespace gE
 	#ifdef DEBUG
 		DrawCallManager& manager = GetWindow().GetRenderers().GetDrawCallManager();
 		for(u8 i = 0; i < _drawCalls.Count(); i++)
-			SAFE_CONSTRUCT(_drawCalls[i], DrawCall, manager, *this, Reference<gE::Material>(), i);
+			PlacementNew(_drawCalls[i], manager, *this, Reference<Material>(), i);
 	#endif
 	}
 
@@ -50,7 +50,7 @@ namespace gE
 		if(mat.GetPointer() == _drawCalls[i].GetMaterial()) return;
 
 		DrawCallManager& manager = GetWindow().GetRenderers().GetDrawCallManager();
-		SAFE_CONSTRUCT(_drawCalls[i], DrawCall, manager, *this, COPY_MOVE(mat), i);
+		PlacementNew(_drawCalls[i], manager, *this, COPY_MOVE(mat), i);
 	}
 
 	void MeshRenderer::SetMaterial(u8 i, Reference<Material>&& mat)
@@ -59,7 +59,7 @@ namespace gE
 		if(mat.GetPointer() == _drawCalls[i].GetMaterial()) return;
 
 		DrawCallManager& manager = GetWindow().GetRenderers().GetDrawCallManager();
-		SAFE_CONSTRUCT(_drawCalls[i], DrawCall, manager, *this, move(mat), i);
+		PlacementNew(_drawCalls[i], manager, *this, move(mat), i);
 	}
 
 	void MeshRenderer::SetNullMaterial(u8 i)
@@ -68,7 +68,7 @@ namespace gE
 		if(!_drawCalls[i].GetMaterial()) return;
 
 		DrawCallManager& manager = GetWindow().GetRenderers().GetDrawCallManager();
-		SAFE_CONSTRUCT(_drawCalls[i], DrawCall, manager, *this, Reference<Material>(nullptr), i);
+		PlacementNew(_drawCalls[i], manager, *this, Reference<Material>(nullptr), i);
 	}
 
 	void RendererManager::OnRender(float d, Camera* camera)

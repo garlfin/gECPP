@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <unordered_map>
+#include <set>
 #include <Math/Math.h>
 #include <Utility/Macro.h>
 #include <Prototype.h>
@@ -16,26 +16,40 @@ template<class T>
 using FactoryFunction = Serializable<gE::Window*>*(*)(std::istream&, T);
 
 template<class T>
+struct TypeCompare
+{
+	using is_transparent = void;
+	using TYPE_T = Type<T>*;
+	using KEY_T = std::string_view;
+
+	NODISCARD ALWAYS_INLINE bool operator()(const TYPE_T& a, const TYPE_T& b) const;
+	NODISCARD ALWAYS_INLINE bool operator()(const TYPE_T& a, const KEY_T& b) const;
+	NODISCARD ALWAYS_INLINE bool operator()(const KEY_T& a, const TYPE_T& b) const;
+};
+
+template<class T>
 struct TypeSystem
 {
 	TypeSystem() = delete;
 
-	using MAP_T = std::unordered_map<std::string_view, Type<T>*>;
+	using SET_T = std::set<Type<T>*, TypeCompare<T>>;
 
-	static const Type<T>* GetTypeInfo(const std::string& type)
+	static const Type<T>* GetTypeInfo(const std::string_view& type)
 	{
-		typename MAP_T::const_iterator it = _types.find(type);
+		typename SET_T::const_iterator it = _types.find(type);
 
-		if(it != _types.end()) return it->second;
+		if(it != _types.end()) return *it;
 
 		GE_FAIL("NO SUCH REFLECTED TYPE!");
 		return nullptr;
 	}
 
+	NODISCARD static ALWAYS_INLINE const SET_T& GetTypes() { return _types; };
+
 	friend struct Type<T>;
 
 private:
-	static inline MAP_T _types = DEFAULT;
+	static inline SET_T _types = DEFAULT;
 };
 
 template<class T>
@@ -46,7 +60,7 @@ struct Type
 		Name(name),
 		Factory(factory)
 	{
-		TypeSystem<T>::_types[Name] = this;
+		TypeSystem<T>::_types.insert(this);
 	}
 
 	std::string_view Name;
@@ -74,7 +88,7 @@ public:
 	virtual const Type<T>* GetType() const { return nullptr; }
 	void OnEditorGUI(u8 depth) override { IReflectable::OnEditorGUI(depth); }
 
-	virtual ~Reflectable() = default;
+	~Reflectable() override = default;
 };
 
 #define REFLECTABLE_TYPE_PROTO(TYPE, NAME) \
@@ -113,3 +127,21 @@ public:
 
 // Typesystem must be explicity instantiated.
 template struct TypeSystem<gE::Window*>;
+
+template <class T>
+bool TypeCompare<T>::operator()(const TYPE_T& a, const TYPE_T& b) const
+{
+	return a->Name < b->Name;
+}
+
+template <class T>
+bool TypeCompare<T>::operator()(const TYPE_T& a, const KEY_T& b) const
+{
+	return a->Name < b;
+}
+
+template <class T>
+bool TypeCompare<T>::operator()(const KEY_T& a, const TYPE_T& b) const
+{
+	return a < b->Name;
+}

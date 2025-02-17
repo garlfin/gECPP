@@ -14,6 +14,9 @@
 
 #pragma once
 
+#include <GLM/vec2.hpp>
+#include <GLM/vec4.hpp>
+
 //---- Define assertion handler. Defaults to calling assert().
 // If your macro uses multiple statements, make sure is enclosed in a 'do { .. } while (0)' block so it can be used as a single statement.
 //#define IM_ASSERT(_EXPR)  MyAssert(_EXPR)
@@ -140,3 +143,15 @@ namespace ImGui
     void MyFunction(const char* name, MyMatrix44* mtx);
 }
 */
+
+#define IM_VEC2_CLASS_EXTRA \
+    constexpr ImVec2(const glm::vec2& f) : x(f.x), y(f.y) {} \
+    operator glm::vec2() const { return glm::vec2(x,y); } \
+    explicit constexpr ImVec2(const glm::uvec2& f) : x(f.x), y(f.y) {} \
+    explicit operator glm::uvec2() const { return glm::uvec2(x,y); }
+
+#define IM_VEC4_CLASS_EXTRA \
+    constexpr ImVec4(const glm::vec4& f) : x(f.x), y(f.y), z(f.z), w(f.w) {} \
+    operator glm::vec4() const { return glm::vec4(x,y,z,w); } \
+    explicit constexpr ImVec4(const glm::uvec4& f) : x(f.x), y(f.y), z(f.z), w(f.w) {} \
+    explicit operator glm::uvec4() const { return glm::uvec4(x,y,z,w); }

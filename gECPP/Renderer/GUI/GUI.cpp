@@ -30,14 +30,14 @@ gE::GUIManager::GUIManager(Window* window) :
 
     SetStyle();
 
-    auto fontFormat = GPU::Texture2D(IMGUIFontFormat, TextureSize2D(width, height));
+    auto fontFormat = GPU::Texture2D(IMGUIFontFormat, Size2D(width, height));
     fontFormat.Data.Data = Array(width * height, (const u8*) pixelData);
     fontFormat.Data.MipCount = 1;
     fontFormat.Data.PixelFormat = GL_RED;
     fontFormat.Data.PixelType = GL_UNSIGNED_BYTE;
 
-    SAFE_CONSTRUCT_NAMESPACE(_imFont, API, Texture2D, window, move(fontFormat))
-    SAFE_CONSTRUCT_NAMESPACE(_imShader, API, Shader, window, GPU::Shader("Resource/Shader/GUI/IMGUI.vert", "Resource/Shader/GUI/IMGUI.frag"));
+    PlacementNew(_imFont, window, move(fontFormat));
+    PlacementNew(_imShader, window, GPU::Shader("Resource/Shader/GUI/IMGUI.vert", "Resource/Shader/GUI/IMGUI.frag"));
 #endif
 }
 
@@ -54,6 +54,7 @@ void gE::GUIManager::BeginGUI()
 #endif
 
     _framebuffer.Bind();
+    glViewport(0, 0, _color->GetSize().x, _color->GetSize().y);
     glClear(GL_COLOR_BUFFER_BIT);
 }
 

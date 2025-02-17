@@ -32,17 +32,13 @@ using namespace std::string_view_literals;
 
 #define COPY_MOVE(x) std::move(std::remove_cvref_t<decltype(x)>(x))
 
-#define SAFE_CONSTRUCT_NAMESPACE(TO, NAMESPACE, TYPE, ...) \
-	{ \
-		(TO).~TYPE(); \
-		new(&(TO)) NAMESPACE::TYPE(__VA_ARGS__); \
-	}
-
-#define SAFE_CONSTRUCT(TO, TYPE, ...) \
-	{ \
-		(TO).~TYPE(); \
-		new(&(TO)) TYPE(__VA_ARGS__); \
-	}
+template<class T, typename... ARGS>
+T& PlacementNew(T& to, ARGS&&... args)
+{
+	to.~T();
+	new(&to) T(std::forward<ARGS>(args)...);
+	return to;
+}
 
 #define NODISCARD [[nodiscard]]
 
@@ -109,7 +105,7 @@ using namespace std::string_view_literals;
 #define SET_XVAL(TYPE, ACCESSOR, FIELD) ALWAYS_INLINE void Set##ACCESSOR(TYPE&& FIELD##_) { FIELD = std::move(FIELD##_); }
 
 #define GET_SET(TYPE, ACCESSOR, FIELD) \
-    GET(TYPE, ACCESSOR, FIELD)    \
+    GET_CONST(const TYPE, ACCESSOR, FIELD)    \
     SET(const TYPE, ACCESSOR, FIELD)
 
 #define GET_SET_VALUE(TYPE, ACCESSOR, FIELD) \

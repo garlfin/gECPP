@@ -17,7 +17,7 @@ namespace GL
 			GPU::Buffer<u8>& bufSettings = _settings->Buffers[i];
 			Buffer<u8>& buffer = _buffers[i];
 
-			SAFE_CONSTRUCT(buffer, Buffer, window, move(bufSettings));
+			PlacementNew(buffer, window, move(bufSettings));
 			bufSettings = move(buffer.GetSettings());
 
 			glVertexArrayVertexBuffer(ID, i, buffer.Get(), 0, bufSettings.Stride);
@@ -65,7 +65,7 @@ namespace GL
 
 	API_SERIALIZABLE_IMPL(IndexedVAO), IVAO(window, *this)
 	{
-		SAFE_CONSTRUCT(_triangleBuffer, Buffer, window, move(TriangleBuffer));
+		PlacementNew(_triangleBuffer, window, move(TriangleBuffer));
 		TriangleBuffer = move(_triangleBuffer.GetSettings());
 
 		glVertexArrayElementBuffer(ID, _triangleBuffer.Get());

@@ -19,6 +19,7 @@ namespace gE
 
 		bool Setup(float, Camera* callingCamera) override { return !callingCamera; };
 		void RenderPass(float, Camera*) override;
+		void Resize() override;
 
 	private:
 		Attachment<API::TextureCube, GL_DEPTH_ATTACHMENT> _depth;

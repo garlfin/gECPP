@@ -48,10 +48,10 @@ namespace GPU
 		REFLECTABLE_PROTO(Texture1D, Texture, "API::Texture1D") {};
 
 	public:
-		Texture1D(const Texture& super, TextureSize1D size) : Texture(super), Size(size) {};
-		Texture1D(Texture&& super, TextureSize1D size) : Texture(move(super)), Size(size) {};
+		Texture1D(const Texture& super, Size1D size) : Texture(super), Size(size) {};
+		Texture1D(Texture&& super, Size1D size) : Texture(move(super)), Size(size) {};
 
-		TextureSize1D Size = DEFAULT;
+		Size1D Size = DEFAULT;
 	};
 
  	class Texture2D : public Texture
@@ -60,10 +60,10 @@ namespace GPU
  		REFLECTABLE_PROTO(Texture2D, Texture, "GPU::Texture2D") {};
 
  	public:
- 		Texture2D(const Texture& super, TextureSize2D size) : Texture(super), Size(size) {};
- 		Texture2D(Texture&& super, TextureSize2D size) : Texture(move(super)), Size(size) {};
+ 		Texture2D(const Texture& super, Size2D size) : Texture(super), Size(size) {};
+ 		Texture2D(Texture&& super, Size2D size) : Texture(move(super)), Size(size) {};
 
-		TextureSize2D Size = DEFAULT;
+		Size2D Size = DEFAULT;
 	};
 
 	class Texture3D : public Texture
@@ -72,10 +72,10 @@ namespace GPU
 		REFLECTABLE_PROTO(Texture3D, Texture, "GPU::Texture3D") {};
 
 	public:
-		Texture3D(const Texture& super, TextureSize3D size) : Texture(super), Size(size) {};
-		Texture3D(Texture&& super, TextureSize3D size) : Texture(move(super)), Size(size) {};
+		Texture3D(const Texture& super, Size3D size) : Texture(super), Size(size) {};
+		Texture3D(Texture&& super, Size3D size) : Texture(move(super)), Size(size) {};
 
-		TextureSize3D Size = DEFAULT;
+		Size3D Size = DEFAULT;
 	};
 
 	class TextureCube : public Texture
@@ -84,10 +84,10 @@ namespace GPU
 		REFLECTABLE_PROTO(TextureCube, Texture, "GPU::TextureCube") {};
 
 	public:
-		TextureCube(const Texture& super, TextureSize1D size) : Texture(super), Size(size) {};
-		TextureCube(Texture&& super, TextureSize1D size) : Texture(move(super)), Size(size) {};
+		TextureCube(const Texture& super, Size1D size) : Texture(super), Size(size) {};
+		TextureCube(Texture&& super, Size1D size) : Texture(move(super)), Size(size) {};
 
-		TextureSize1D Size = DEFAULT;
+		Size1D Size = DEFAULT;
 	};
 }
 

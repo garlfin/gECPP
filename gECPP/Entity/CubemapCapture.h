@@ -16,10 +16,12 @@ namespace gE
 {
 	class CubemapCapture;
 
-	class CubemapTarget : public RenderTarget<CameraCube>, public IDepthTarget
+	class CubemapTarget : public RenderTarget<CameraCube>, public DepthTarget<CameraCube>
 	{
 	 public:
 		explicit CubemapTarget(CameraCube&);
+
+		using RenderTarget::GetCamera;
 
 		GET(API::TextureCube&, Color, _color.Get());
 		GET(API::TextureCube&, Depth, _depth.Get());
@@ -27,8 +29,9 @@ namespace gE
 
 		void RenderDependencies(float d) override;
 		void RenderPass(float, Camera*) override;
+		void Resize() override;
 
-	 private:
+	private:
 		Attachment<API::TextureCube, GL_DEPTH_ATTACHMENT> _depth;
 		Attachment<API::TextureCube, GL_COLOR_ATTACHMENT0> _color;
 	};
@@ -69,4 +72,12 @@ namespace gE
 		API::VAO _skyboxVAO = DEFAULT;
 		API::Shader _skyboxShader = DEFAULT;
 	};
+
+	GLOBAL GPU::Texture CubemapColorFormat = []
+	{
+		GPU::Texture tex;
+		tex.Format = GL_R11F_G11F_B10F;
+		tex.WrapMode = GPU::WrapMode::Clamp;
+		return tex;
+	}();
 }

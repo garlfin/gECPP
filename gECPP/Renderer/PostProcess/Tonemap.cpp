@@ -28,7 +28,7 @@ namespace gE::PostProcess
 		out.Bind(1, GL_WRITE_ONLY);
 
 		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-		GetWindow().GetTonemapShader().Dispatch(DIV_CEIL_T(in.GetSize(), TONEMAP_GROUP_SIZE, TextureSize2D));
+		GetWindow().GetTonemapShader().Dispatch(DIV_CEIL_T(in.GetSize(), TONEMAP_GROUP_SIZE, Size2D));
 
 		return true;
 	}

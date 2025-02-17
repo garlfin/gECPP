@@ -11,6 +11,7 @@
 #include "GLM/vec2.hpp"
 #include "GLM/vec3.hpp"
 #include "GLM/gtx/quaternion.hpp"
+#include "Utility/Macro.h"
 
 #define GL_BYTE 0x1400
 #define GL_UNSIGNED_BYTE 0x1401
@@ -63,9 +64,9 @@ namespace glm
 	typedef quat quaternion;
 }
 
-typedef Size<Dimension::D1D> TextureSize1D;
-typedef Size<Dimension::D2D> TextureSize2D;
-typedef Size<Dimension::D3D> TextureSize3D;
+typedef Size<Dimension::D1D> Size1D;
+typedef Size<Dimension::D2D> Size2D;
+typedef Size<Dimension::D3D> Size3D;
 
 enum class FOVType : u8
 {
@@ -80,7 +81,7 @@ enum class AngleType : u8
 };
 
 template<FOVType TO, AngleType UNIT = AngleType::Radian>
-float constexpr fov_cast(float in, const TextureSize2D& size)
+float constexpr fov_cast(float in, const Size2D& size)
 {
 	float aspect;
 	if constexpr(TO == FOVType::Horizontal) aspect = (float) size.x / size.y;
@@ -99,9 +100,9 @@ inline void Decompose(const glm::mat4& m, glm::vec3& p, glm::quat& r, glm::vec3&
 
 	s = glm::vec3
 	{
-		length((glm::vec3) m[0]),
-		length((glm::vec3) m[1]),
-		length((glm::vec3) m[3])
+		length(*(glm::vec3*) &m[0]),
+		length(*(glm::vec3*) &m[1]),
+		length(*(glm::vec3*) &m[3])
 	};
 
 	r.w = glm::sqrt(m[0][0] + m[1][1] + m[2][2] + 1.0) * 0.5f;
@@ -114,4 +115,10 @@ inline void Decompose(const glm::mat4& m, glm::vec3& p, glm::quat& r, glm::vec3&
 struct ColorHarmonic
 {
 	GPU_ALIGN glm::vec4 Coefficients[9];
+};
+
+struct Viewport
+{
+	Size2D Size = DEFAULT;
+	Size2D Offset = DEFAULT;
 };

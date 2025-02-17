@@ -54,7 +54,7 @@ namespace GL
 		API_UNDERLYING_IMPL(GL::Texture);
 
 	public:
-		NODISCARD ALWAYS_INLINE TextureSize1D GetSize(u8 mip = 0) const { return std::max<TextureSize1D>(Size >> mip, 1); }
+		NODISCARD ALWAYS_INLINE Size1D GetSize(u8 mip = 0) const { return std::max<Size1D>(Size >> mip, 1); }
 
 		void CopyFrom(const GL::Texture&) override;
 	};
@@ -66,7 +66,7 @@ namespace GL
 		API_UNDERLYING_IMPL(GL::Texture);
 
 	 public:
-		NODISCARD ALWAYS_INLINE TextureSize2D GetSize(u8 mip = 0) const { return max(Size >> glm::u32vec2(mip), glm::u32vec2(1)); }
+		NODISCARD ALWAYS_INLINE Size2D GetSize(u8 mip = 0) const { return max(Size >> glm::u32vec2(mip), glm::u32vec2(1)); }
 
 		void CopyFrom(const GL::Texture&) override;
 	};
@@ -78,7 +78,7 @@ namespace GL
 		API_UNDERLYING_IMPL(GL::Texture);
 
 	 public:
-		NODISCARD ALWAYS_INLINE TextureSize3D GetSize(u8 mip = 0) const { return max(Size >> glm::u32vec3(mip), glm::u32vec3(1)); }
+		NODISCARD ALWAYS_INLINE Size3D GetSize(u8 mip = 0) const { return max(Size >> glm::u32vec3(mip), glm::u32vec3(1)); }
 
 		void CopyFrom(const GL::Texture&) override;
 	};
@@ -90,7 +90,7 @@ namespace GL
 		API_UNDERLYING_IMPL(GL::Texture);
 
 	 public:
-		NODISCARD ALWAYS_INLINE TextureSize1D GetSize(u8 mip = 0) const { return MAX(Size >> mip, 1); }
+		NODISCARD ALWAYS_INLINE Size1D GetSize(u8 mip = 0) const { return MAX(Size >> mip, 1); }
 
 		void CopyFrom(const GL::Texture&) override;
 	};

@@ -112,7 +112,7 @@ namespace gE
 
 		void Move(LinkedNode& to, Direction direction = Direction::Right)
 		{
-			SAFE_CONSTRUCT(*this, LinkedNode, _list, _owner, &to, direction);
+			PlacementNew(*this, _list, _owner, &to, direction);
 		}
 
 		friend class LinkedList<T>;

@@ -61,11 +61,12 @@ namespace gE::DefaultPipeline
 		return tex;
 	}();
 
- 	class Target2D final : public RenderTarget<Camera2D>, public IDepthTarget, public IColorTarget
+ 	class Target2D final : public RenderTarget<Camera2D>, public DepthTarget<Camera2D>, public ColorTarget<Camera2D>
 	{
 	 public:
 		using TEX_T = API::Texture2D;
 		using POSTPROCESS_T = IPostProcessEffect<RenderTarget>;
+ 		using RenderTarget::GetCamera;
 
 		explicit Target2D(Entity&, Camera2D& camera, const std::vector<POSTPROCESS_T*>&);
 
@@ -79,6 +80,7 @@ namespace gE::DefaultPipeline
 		void RenderDependencies(float) override;
 		void RenderPass(float, Camera*) override;
 		void PostProcessPass(float) override;
+		void Resize() override;
 
 		~Target2D() override = default;
 

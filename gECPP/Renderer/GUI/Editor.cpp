@@ -17,23 +17,30 @@ namespace gE
     {
     }
 
-
-
     void Editor::OnGUI()
     {
+        Camera& camera = _window->GetCameras().GetCurrentCamera()->GetCamera();
         KeyboardState& keyboard = _window->GetKeyboard();
         if(_window->GetMouse().GetIsEnabled() && !keyboard.GetIsFocused() && keyboard.GetKey(Key::C) == KeyState::Pressed)
             _isConsoleOpen = !_isConsoleOpen;
+
+        _window->SetViewport(Viewport(_window->GetSize(), DEFAULT));
 
         if(!_isConsoleOpen) return;
 
         keyboard.SetIsFocused(ImGui::GetIO().WantCaptureKeyboard);
 
-        ImGui::DockSpaceOverViewport(0, nullptr, ImGuiDockNodeFlags_PassthruCentralNode);
+        ImGuiID centralNodeID = ImGui::DockSpaceOverViewport(0, nullptr, ImGuiDockNodeFlags_PassthruCentralNode | ImGuiDockNodeFlags_NoDockingInCentralNode);
+        ImGuiDockNode* centralNode = ImGui::DockBuilderGetCentralNode(centralNodeID);
+
+        const Size2D offset = (Size2D) centralNode->Pos;
+        const Size2D size = (Size2D) centralNode->Size;
+        _window->SetViewport(Viewport(size, offset));
 
         DrawLog();
         DrawInspector();
         DrawHierarchy();
+        DrawEntityDrawer();
     }
 
     void Editor::DrawInspector()
@@ -50,8 +57,8 @@ namespace gE
             }
             else
                 ImGui::TextUnformatted("No entity selected.");
-            ImGui::End();
         }
+        ImGui::End();
     }
 
     void Editor::DrawHierarchy()
@@ -84,7 +91,6 @@ namespace gE
                         entity.Destroy();
                         if(&entity == _activeEntity) _activeEntity = nullptr;
                     }
-
                     ImGui::EndPopup();
                 }
                 if(!open)
@@ -107,8 +113,8 @@ namespace gE
                     for (int i = 0; i <= curDepth; i++)
                         ImGui::TreePop();
             }
-            ImGui::End();
         }
+        ImGui::End();
     }
 
     void Editor::DrawLog()
@@ -133,7 +139,18 @@ namespace gE
             }
             ImGui::EndChild();
         }
+        ImGui::End();
+    }
 
+    void Editor::DrawEntityDrawer()
+    {
+        if(ImGui::Begin("Entity Drawer", nullptr, ImGuiWindowFlags_AlwaysVerticalScrollbar))
+        {
+            for(auto& type : TypeSystem<const EntityCreationSettings&>::GetTypes())
+            {
+                ImGui::TextUnformatted(type->Name.data());
+            }
+        }
         ImGui::End();
     }
 #endif

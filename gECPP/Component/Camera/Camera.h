@@ -1,4 +1,3 @@
-
 //
 // Created by scion on 9/5/2023.
 //
@@ -15,165 +14,183 @@
 
 namespace GPU
 {
-	struct Camera;
+    struct Camera;
 }
 
 namespace gE
 {
-	class Camera : public Component
-	{
-		REFLECTABLE_ONGUI_PROTO(Component);
+    class Camera : public Component
+    {
+        REFLECTABLE_ONGUI_PROTO(Component);
 
-	 public:
-		Camera(Entity*, TextureSize2D, IRenderTarget&, const ICameraSettings&, ComponentManager<Camera>* = nullptr);
+    public:
+        Camera(Entity*, IRenderTarget&, const ICameraSettings&, ComponentManager<Camera>* = nullptr);
 
-		void OnInit() override {};
-		void OnRender(float delta, Camera* callingCamera) override;
+        void SetViewport() const;
+        void OnInit() override {};
+        void OnRender(float delta, Camera* callingCamera) override;
 
-		virtual void GetGPUCamera(GPU::Camera&);
+        virtual void GetGPUCamera(GPU::Camera&);
+        virtual Size2D GetViewportSize() const = 0;
 
-		GET(IRenderTarget&, Target, *_target);
+        GET(IRenderTarget&, Target, *_target);
+        GET_CONST(CameraTiming, Timing, _settings.Timing);
+        GET_CONST(gE::ClipPlanes, ClipPlanes, _settings.ClipPlanes);
+        GET_CONST(const ICameraSettings&, Settings, _settings);
+        GET_CONST(const glm::mat4&, Projection, Projection);
 
-		GET_CONST(CameraTiming, Timing, _settings.Timing);
-		GET_CONST(gE::ClipPlanes, ClipPlanes, _settings.ClipPlanes);
-		GET_CONST(const ICameraSettings&, Settings, _settings);
-		GET_CONST(const glm::mat4&, Projection, Projection);
-		GET_CONST(TextureSize2D, ViewportSize, _viewportSize);
+    protected:
+        virtual void UpdateProjection() = 0;
 
-	 protected:
-		virtual void UpdateProjection() = 0;
+        glm::mat4 Projection;
+        u32 Frame = 0;
 
-		glm::mat4 Projection;
-		u32 Frame = 0;
+    private:
+        ICameraSettings _settings;
+        RelativePointer<IRenderTarget> _target;
+    };
 
-	 private:
-		ICameraSettings _settings;
-		RelativePointer<IRenderTarget> _target;
-		TextureSize2D _viewportSize;
-	};
+    class Camera2D : public Camera
+    {
+        REFLECTABLE_ONGUI_PROTO(Camera);
 
-	class Camera2D : public Camera
-	{
-		REFLECTABLE_ONGUI_PROTO(Camera);
+    public:
+        using TARGET_T = RenderTarget<Camera2D>;
+        using SIZE_T = Size2D;
+        using TEX_T = API::Texture2D;
 
-	 public:
-		using TARGET_T = RenderTarget<Camera2D>;
-		using SIZE_T = TextureSize2D;
-		using TEX_T = API::Texture2D;
+        Camera2D(Entity*, TARGET_T&, const CameraSettings2D&, ComponentManager<Camera>* = nullptr);
 
-		Camera2D(Entity*, TARGET_T&, const CameraSettings2D&, ComponentManager<Camera>* = nullptr);
+        GET(TARGET_T&, Target, (TARGET_T&) Camera::GetTarget());
+        GET_CONST(SIZE_T, Size, _size);
+        GET_CONST(float, Aspect, (float) GetSize().x / GetSize().y);
 
-		GET(TARGET_T&, Target, (TARGET_T&) Camera::GetTarget());
-		GET_CONST(SIZE_T, Size, GetViewportSize());
-		GET_CONST(float, Aspect, (float) GetSize().x / GetSize().y);
+        void GetGPUCamera(GPU::Camera& camera) override;
+        void Resize(Size2D);
+        Size2D GetViewportSize() const override { return _size; }
 
-		void GetGPUCamera(GPU::Camera& camera) override;
-	};
+    private:
+        Size2D _size;
+    };
 
-	class PerspectiveCamera final : public Camera2D
-	{
-		REFLECTABLE_PROTO(PerspectiveCamera, Camera2D, "gE::PerspectiveCamera");
+    class PerspectiveCamera final : public Camera2D
+    {
+        REFLECTABLE_PROTO(PerspectiveCamera, Camera2D, "gE::PerspectiveCamera");
 
-	 public:
-		PerspectiveCamera(Entity*, TARGET_T&, const PerspectiveCameraSettings&, ComponentManager<Camera>* = nullptr);
+    public:
+        PerspectiveCamera(Entity*, TARGET_T&, const PerspectiveCameraSettings&, ComponentManager<Camera>* = nullptr);
 
-		template<AngleType T = AngleType::Degree>
-		NODISCARD ALWAYS_INLINE float GetFOV() const
-		{
-			if constexpr(T == AngleType::Radian)
-				return _fov;
-			return glm::degrees(_fov);
-		}
+        template <AngleType T = AngleType::Degree>
+        NODISCARD ALWAYS_INLINE float GetFOV() const
+        {
+            if constexpr (T == AngleType::Radian)
+                return _fov;
+            return glm::degrees(_fov);
+        }
 
-		template<AngleType T = AngleType::Degree>
-		ALWAYS_INLINE void SetFOV(float fov)
-		{
-			if constexpr(T == AngleType::Radian)
-				_fov = fov;
-			else
-				_fov = glm::radians(fov);
-		}
+        template <AngleType T = AngleType::Degree>
+        ALWAYS_INLINE void SetFOV(float fov)
+        {
+            if constexpr (T == AngleType::Radian)
+                _fov = fov;
+            else
+                _fov = glm::radians(fov);
+        }
 
-		void GetGPUCamera(GPU::Camera& camera) override;
+        void GetGPUCamera(GPU::Camera& camera) override;
 
-	 protected:
-		void UpdateProjection() override;
+    protected:
+        void UpdateProjection() override;
 
-	 private:
-		float _fov;
-	};
-	inline REFLECTABLE_FACTORY_NO_IMPL(PerspectiveCamera);
+    private:
+        float _fov;
+    };
 
-	class OrthographicCamera final : public Camera2D
-	{
-		REFLECTABLE_PROTO(OrthographicCamera, Camera2D, "gE::OrthographicCamera");
+    inline REFLECTABLE_FACTORY_NO_IMPL(PerspectiveCamera);
 
-	 public:
-		OrthographicCamera(Entity*, TARGET_T&, const OrthographicCameraSettings&, ComponentManager<Camera>* = nullptr);
+    class OrthographicCamera final : public Camera2D
+    {
+        REFLECTABLE_PROTO(OrthographicCamera, Camera2D, "gE::OrthographicCamera");
 
-		GET_CONST(const glm::vec2&, Scale, _orthographicScale);
+    public:
+        OrthographicCamera(Entity*, TARGET_T&, const OrthographicCameraSettings&, ComponentManager<Camera>* = nullptr);
 
-	 protected:
-		void UpdateProjection() override;
+        GET_CONST(const glm::vec2&, Scale, _orthographicScale);
 
-	 private:
-		glm::vec2 _orthographicScale;
-	};
-	inline REFLECTABLE_FACTORY_NO_IMPL(OrthographicCamera);
+    protected:
+        void UpdateProjection() override;
 
-	class Camera3D final : public Camera
-	{
-		REFLECTABLE_PROTO(Camera3D, Camera, "gE::Camera3D");
+    private:
+        glm::vec2 _orthographicScale;
+    };
 
-	 public:
-		using TARGET_T = RenderTarget<Camera3D>;
-		using SIZE_T = TextureSize3D;
-		using TEX_T = API::Texture3D;
+    inline REFLECTABLE_FACTORY_NO_IMPL(OrthographicCamera);
 
-		Camera3D(Entity*, TARGET_T&, const CameraSettings3D&, ComponentManager<Camera>* = nullptr);
+    class Camera3D final : public Camera
+    {
+        REFLECTABLE_PROTO(Camera3D, Camera, "gE::Camera3D");
 
-		GET(TARGET_T&, Target, (TARGET_T&) Camera::GetTarget());
-		GET_CONST(SIZE_T, Size, SIZE_T(GetViewportSize(), _sizeZ));
-		GET_CONST(float, Scale, GetOwner().GetTransform()->Scale.x);
+    public:
+        using TARGET_T = RenderTarget<Camera3D>;
+        using SIZE_T = Size3D;
+        using TEX_T = API::Texture3D;
 
-		void GetGPUCamera(GPU::Camera&) override;
+        Camera3D(Entity*, TARGET_T&, const CameraSettings3D&, ComponentManager<Camera>* = nullptr);
 
-	 protected:
-		void UpdateProjection() override;
+        GET(TARGET_T&, Target, (TARGET_T&) Camera::GetTarget());
+        GET_CONST(SIZE_T, Size, _size);
+        GET_CONST(float, Scale, GetOwner().GetTransform()->Scale.x);
 
-	 private:
-		const TextureSize1D _sizeZ;
-	};
-	inline REFLECTABLE_FACTORY_NO_IMPL(Camera3D);
+        void GetGPUCamera(GPU::Camera&) override;
+        void Resize(Size3D);
+        Size2D GetViewportSize() const override { return _size; }
 
-	class CameraCube final : public Camera
-	{
-		REFLECTABLE_PROTO(CameraCube, Camera, "gE::CameraCube") {};
+    protected:
+        void UpdateProjection() override;
 
-	 public:
-		using TARGET_T = RenderTarget<CameraCube>;
-		using SIZE_T = TextureSize1D;
-		using TEX_T = API::TextureCube;
+    private:
+        Size3D _size;
+    };
 
-		CameraCube(Entity*, TARGET_T&, const CameraSettings1D&, ComponentManager<Camera>* = nullptr);
+    inline REFLECTABLE_FACTORY_NO_IMPL(Camera3D);
 
-		GET(TARGET_T&, Target, (TARGET_T&) Camera::GetTarget());
-		GET_CONST(SIZE_T, Size, GetViewportSize().x);
+    class CameraCube final : public Camera
+    {
+        REFLECTABLE_PROTO(CameraCube, Camera, "gE::CameraCube");
 
-		void GetGPUCamera(GPU::Camera& camera) override;
+    public:
+        using TARGET_T = RenderTarget<CameraCube>;
+        using SIZE_T = Size1D;
+        using TEX_T = API::TextureCube;
 
-	 protected:
-		void UpdateProjection() override;
-	};
-	inline REFLECTABLE_FACTORY_NO_IMPL(CameraCube);
+        CameraCube(Entity*, TARGET_T&, const CameraSettings1D&, ComponentManager<Camera>* = nullptr);
 
-	class CameraManager final : public ComponentManager<Camera>
-	{
-	 public:
-		using ComponentManager::ComponentManager;
+        GET(TARGET_T&, Target, (TARGET_T&) Camera::GetTarget());
+        GET_CONST(SIZE_T, Size, _size);
 
-		IColorTarget* CurrentCamera = nullptr;
+        void GetGPUCamera(GPU::Camera& camera) override;
+        void Resize(Size1D);
+        Size2D GetViewportSize() const override { return Size2D(_size); }
 
-		~CameraManager() override = default;
-	};
+    protected:
+        void UpdateProjection() override;
+
+    private:
+        Size1D _size;
+    };
+
+    inline REFLECTABLE_FACTORY_NO_IMPL(CameraCube);
+
+    class CameraManager final : public ComponentManager<Camera>
+    {
+    public:
+        using ComponentManager::ComponentManager;
+
+        GET_SET_VALUE(ColorTarget<Camera2D>*, CurrentCamera, _currentCamera);
+
+        ~CameraManager() override = default;
+
+    private:
+        ColorTarget<Camera2D>* _currentCamera = DEFAULT;
+    };
 }

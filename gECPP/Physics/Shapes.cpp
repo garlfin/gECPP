@@ -71,19 +71,19 @@ namespace Jolt
 {
     API_SERIALIZABLE_IMPL(SphereShape), Jolt::ConvexShape(*this, _shape.To<px::ConvexShape>())
     {
-        SAFE_CONSTRUCT_NAMESPACE(_shape, gE, ManagedPX<px::SphereShape>, Radius);
+        PlacementNew(_shape, Radius);
     }
 
     API_SERIALIZABLE_IMPL(BoxShape), Jolt::ConvexShape(*this, _shape.To<px::ConvexShape>())
     {
-        SAFE_CONSTRUCT_NAMESPACE(_shape, gE, ManagedPX<px::BoxShape>, Physics::ToPX(Extents));
+        PlacementNew(_shape, Physics::ToPX(Extents));
     }
 
     API_SERIALIZABLE_IMPL(CapsuleShape), Jolt::ConvexShape(*this, _shape.To<px::ConvexShape>())
     {
         const float height = Height * 0.5f - Radius;
 
-        SAFE_CONSTRUCT_NAMESPACE(_shape, gE, ManagedPX<px::CapsuleShape>, height, Radius);
+        PlacementNew(_shape, height, Radius);
     }
 
     API_SERIALIZABLE_IMPL(ConvexMeshShape), Jolt::ConvexShape(*this, _shape.To<px::ConvexShape>())
@@ -101,7 +101,7 @@ namespace Jolt
         settings.mVolume = BakedSettings.Volume;
         settings.mInnerRadius = BakedSettings.InnerRadius;
 
-        SAFE_CONSTRUCT_NAMESPACE(_shape, gE, ManagedPX<px::ConvexHullShape>, move(settings));
+        PlacementNew(_shape, move(settings));
 
         Free();
     }

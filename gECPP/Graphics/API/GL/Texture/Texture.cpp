@@ -52,9 +52,9 @@ namespace GL
 		glm::u32vec2 size = Size;
 		u8* dataPtr = Data.Data.Data();
 
-		for(u8 i = 0; i < Data.MipCount; i++, size >>= TextureSize2D(1))
+		for(u8 i = 0; i < Data.MipCount; i++, size >>= Size2D(1))
 		{
-			size = max(size, TextureSize2D(1));
+			size = max(size, Size2D(1));
 			u64 dataSize = Data.Scheme.Size<Dimension::D2D>(size);
 
 			if(Data.Scheme.IsCompressed())
@@ -83,9 +83,9 @@ namespace GL
 		glm::u32vec3 size = Size;
 		u8* dataPtr = Data.Data.Data();
 
-		for(u8 i = 0; i < Data.MipCount; i++, size >>= TextureSize3D(1))
+		for(u8 i = 0; i < Data.MipCount; i++, size >>= Size3D(1))
 		{
-			size = max(size, TextureSize3D(1));
+			size = max(size, Size3D(1));
 			u64 dataSize = Data.Scheme.Size<Dimension::D3D>(size);
 
 			if(Data.Scheme.IsCompressed())
@@ -117,7 +117,7 @@ namespace GL
 		for(u8 i = 0; i < Data.MipCount; i++, size >>= 1)
 		{
 			size = glm::max(size, 1u);
-			u64 dataSize = Data.Scheme.Size<Dimension::D3D>(TextureSize3D(size, size, 6));
+			u64 dataSize = Data.Scheme.Size<Dimension::D3D>(Size3D(size, size, 6));
 
 			if(Data.Scheme.IsCompressed())
 				glCompressedTextureSubImage3D(ID, i, 0, 0, 0, size, size, 6, Format, dataSize, dataPtr);

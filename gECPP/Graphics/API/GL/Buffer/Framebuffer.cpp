@@ -15,7 +15,7 @@ namespace GL
 		glNamedFramebufferDrawBuffers(ID, GL_MAX_ATTACHMENTS, _attachmentsEnum);
 	}
 
-	void Framebuffer::SetDefaultSize(TextureSize2D size)
+	void Framebuffer::SetDefaultSize(Size2D size)
 	{
 		glNamedFramebufferParameteri(ID, GL_FRAMEBUFFER_DEFAULT_WIDTH, size.x);
 		glNamedFramebufferParameteri(ID, GL_FRAMEBUFFER_DEFAULT_HEIGHT, size.y);

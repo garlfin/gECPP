@@ -30,8 +30,7 @@ namespace gE
 
 	void DefaultPipeline::Target2D::RenderPass(float delta, Camera*)
 	{
-		Camera2D& camera = GetCamera();
-		glm::u32vec2 size = camera.GetSize();
+		Camera2D& camera = RenderTarget::GetCamera();
 		Window& window = camera.GetWindow();
 
 		// PRE-Z
@@ -40,7 +39,7 @@ namespace gE
 		glDepthMask(1);
 		glColorMask(0, 0, 0, 0);
 		glClear(GL_DEPTH_BUFFER_BIT);
-		glViewport(0, 0, size.x, size.y);
+		RenderTarget::GetCamera().SetViewport();
 
 		window.GetRenderers().OnRender(0.f, &camera);
 
@@ -59,7 +58,7 @@ namespace gE
 
 		for(u8 i = 1; i < _linearDepth.GetMipCount(); i++)
 		{
-			TextureSize2D mipSize = _linearDepth.GetSize(i);
+			Size2D mipSize = _linearDepth.GetSize(i);
 
 			hiZShader.SetUniform(0, glm::vec4(HIZ_MODE_DOWNSAMPLE, i - 1, 0, 0));
 			_linearDepth.Bind(0, GL_WRITE_ONLY, i);
@@ -87,7 +86,7 @@ namespace gE
 	{
 		_previousColor.CopyFrom(*_color);
 
-		if(!GetCamera().GetTiming().GetFrame())
+		if(!RenderTarget::GetCamera().GetTiming().GetFrame())
 			_previousDepth.CopyFrom(_linearDepth);
 
 		// Post process loop
@@ -104,16 +103,23 @@ namespace gE
 	}
 
 	DefaultPipeline::Target2D::Target2D(Entity& owner, Camera2D& camera, const std::vector<POSTPROCESS_T*>& effects) :
-		RenderTarget(owner, camera), IDepthTarget(*_depth), IColorTarget(*_color),
-		_depth(GetFrameBuffer(), GPU::Texture2D(DepthFormat, camera.GetSize())),
-		_color(GetFrameBuffer(), GPU::Texture2D(ColorFormat, camera.GetSize())),
-		_velocity(GetFrameBuffer(), GPU::Texture2D(VelocityFormat, camera.GetSize())),
-		_linearDepth(&GetWindow(), GPU::Texture2D(HiZFormat, camera.GetSize())),
-		_previousColor(&GetWindow(), GPU::Texture2D(ColorFormat, camera.GetSize())),
-		_postProcessBack(&GetWindow(), GPU::Texture2D(ColorFormat, camera.GetSize())),
-		_previousDepth(&GetWindow(), GPU::Texture2D(PreviousDepthFormat, camera.GetSize())),
+		RenderTarget(owner, camera),
+		DepthTarget(camera, *_depth),
+		ColorTarget(camera, *_color),
 		_effects(effects)
 	{
+		Target2D::Resize();
+	}
+
+	void DefaultPipeline::Target2D::Resize()
+	{
+		PlacementNew(_depth, GetFrameBuffer(), GPU::Texture2D(DepthFormat, GetCamera().GetSize()));
+		PlacementNew(_color, GetFrameBuffer(), GPU::Texture2D(ColorFormat, GetCamera().GetSize()));
+		PlacementNew(_velocity, GetFrameBuffer(), GPU::Texture2D(VelocityFormat, GetCamera().GetSize()));
+		PlacementNew(_linearDepth, &GetWindow(), GPU::Texture2D(HiZFormat, GetCamera().GetSize()));
+		PlacementNew(_previousColor, &GetWindow(), GPU::Texture2D(ColorFormat, GetCamera().GetSize()));
+		PlacementNew(_postProcessBack, &GetWindow(), GPU::Texture2D(ColorFormat, GetCamera().GetSize()));
+		PlacementNew(_previousDepth, &GetWindow(), GPU::Texture2D(PreviousDepthFormat, GetCamera().GetSize()));
 	}
 
 	void DefaultPipeline::Target2D::GetGPUCameraOverrides(GPU::Camera& camera) const
@@ -127,7 +133,7 @@ namespace gE
 		Camera3D* reflectionSystem = GetWindow().GetReflectionSystem();
 		LightManager& lightManager = GetWindow().GetLights();
 
-		if(reflectionSystem) reflectionSystem->OnRender(delta, &GetCamera());
-		lightManager.Sun->GetCamera().OnRender(delta, &GetCamera());
+		if(reflectionSystem) reflectionSystem->OnRender(delta, &RenderTarget::GetCamera());
+		lightManager.Sun->GetCamera().OnRender(delta, &RenderTarget::GetCamera());
 	}
 }

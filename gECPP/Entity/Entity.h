@@ -5,18 +5,24 @@
 #pragma once
 
 #include <vector>
-#include <Utility/Binary.h>
 #include <Component/Transform.h>
-#include "Layer.h"
-
-#include "Prototype.h"
 #include <Serializable/Serializable.h>
+#include <Utility/Binary.h>
+#include "Layer.h"
+#include "Prototype.h"
 
 namespace gE
 {
 	class EntityManager;
 
-  	class Entity : public Reflectable<Window*>, public Managed<Entity>
+	struct EntityCreationSettings
+	{
+		Window* Window;
+		Entity* Parent;
+		std::string NameOverride;
+	};
+
+  	class Entity : public Reflectable<const EntityCreationSettings&>, public Managed<Entity>
 	{
   		REFLECTABLE_ONGUI_PROTO(Reflectable);
 
@@ -65,3 +71,5 @@ namespace gE
 		LinkedList<Managed<Entity>> _deletionList;
 	};
 }
+
+template class TypeSystem<const gE::EntityCreationSettings&>;
