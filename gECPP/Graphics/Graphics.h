@@ -43,7 +43,7 @@ namespace GPU
 		GET_CONST(T,, ID);
 		GET_CONST(gE::Window&, Window, *_window);
 
-		virtual ~APIObject() = default;
+		virtual ~APIObject() { ID = DEFAULT; }
 
 	 protected:
 		T ID = DEFAULT;

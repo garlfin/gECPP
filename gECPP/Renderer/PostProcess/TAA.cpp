@@ -10,10 +10,9 @@
 
 namespace gE::PostProcess
 {
-    TAA::TAA(TARGET_T* target, TAASettings* settings) : PostProcessEffect(target, settings),
-        _taaBack(&target->GetWindow(), GPU::Texture2D(*settings->ColorFormat, target->GetSize()))
+    TAA::TAA(TARGET_T* target, TAASettings* settings) : PostProcessEffect(target, settings)
     {
-
+        TAA::Resize();
     }
 
     bool TAA::RenderPass(GL::Texture2D& in, GL::Texture2D& out)
@@ -35,5 +34,11 @@ namespace gE::PostProcess
         _taaBack.CopyFrom(out);
 
         return true;
+    }
+
+    void TAA::Resize()
+    {
+        if(_taaBack.GetSize() == GetTarget().GetSize()) return;
+        PlacementNew(_taaBack, &GetTarget().GetWindow(), GPU::Texture2D(*GetSettings().ColorFormat, GetTarget().GetSize()));
     }
 }

@@ -14,19 +14,21 @@
 
 namespace gE::PostProcess
 {
-	class AutoExposure final : public PostProcessEffect<RenderTarget<Camera2D>, PhysicalCameraSettings>
-	{
-	public:
-		POSTPROCESS_CONSTRUCTOR(AutoExposure);
+    class AutoExposure final : public PostProcessEffect<RenderTarget<Camera2D>, PhysicalCameraSettings>
+    {
+        POSTPROCESS_CONSTRUCTOR(AutoExposure);
 
-		NODISCARD bool RenderPass(GL::Texture2D& in, GL::Texture2D& out) override;
-	};
+    public:
+        NODISCARD bool RenderPass(GL::Texture2D& in, GL::Texture2D& out) override;
+        void Resize() override {};
+    };
 
-	class Tonemap final : public PostProcessEffect<RenderTarget<Camera2D>, PhysicalCameraSettings>
-	{
-	 public:
-		POSTPROCESS_CONSTRUCTOR(Tonemap);
+    class Tonemap final : public PostProcessEffect<RenderTarget<Camera2D>, PhysicalCameraSettings>
+    {
+        POSTPROCESS_CONSTRUCTOR(Tonemap);
 
-		NODISCARD bool RenderPass(API::Texture2D& in, API::Texture2D& out) override;
-	};
+    public:
+        NODISCARD bool RenderPass(API::Texture2D& in, API::Texture2D& out) override;
+        void Resize() override {};
+    };
 }

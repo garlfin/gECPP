@@ -25,6 +25,7 @@ namespace gE::PostProcess
         TAA(TARGET_T* target, TAASettings* settings);
 
         NODISCARD bool RenderPass(GL::Texture2D& in, GL::Texture2D& out) override;
+        void Resize() override;
 
     private:
         API::Texture2D _taaBack;

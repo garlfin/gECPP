@@ -32,6 +32,12 @@ using namespace std::string_view_literals;
 
 #define COPY_MOVE(x) std::move(std::remove_cvref_t<decltype(x)>(x))
 
+template<class T>
+using add_const_pointer = std::conditional_t<std::is_pointer_v<T>, std::add_const_t<std::remove_pointer_t<T>>*, std::add_const_t<T>>;
+
+template<class T, bool CONST>
+using add_const_conditional = std::conditional_t<CONST, add_const_pointer<T>, T>;
+
 template<class T, typename... ARGS>
 T& PlacementNew(T& to, ARGS&&... args)
 {

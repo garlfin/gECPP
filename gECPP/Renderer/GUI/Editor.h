@@ -87,10 +87,10 @@ namespace gE
         template<class T, class SETTINGS_T>
         static bool DrawField(const SETTINGS_T&, T&, u8 depth);
 
-        template<class T, glm::length_t COMPONENT_COUNT>
+        template <class T, glm::length_t COMPONENT_COUNT>
         static bool DrawField(const ScalarField<T>&, glm::vec<COMPONENT_COUNT, T>&, u8 depth);
 
-        template<class T, glm::length_t COMPONENT_COUNT>
+        template <class T, glm::length_t COMPONENT_COUNT>
         static bool DrawField(const ScalarField<T>&, glm::vec<COMPONENT_COUNT, T>*, u8 depth);
 
         template<class SETTINGS_T, class OWNER_T, class OUT_T, class IN_T>

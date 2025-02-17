@@ -7,7 +7,9 @@
 #include <Utility/Macro.h>
 #include <Utility/RelativePointer.h>
 
-#define POSTPROCESS_CONSTRUCTOR(TYPE) TYPE(TARGET_T* target, SETTINGS_T* settings) : PostProcessEffect(target, settings) {}
+#define POSTPROCESS_CONSTRUCTOR(TYPE) \
+	public: \
+		TYPE(TARGET_T* target, SETTINGS_T* settings) : PostProcessEffect(target, settings) {}
 
 namespace gE
 {
@@ -24,6 +26,7 @@ namespace gE
 
 		// If result placed in 'in', return false.
 		NODISCARD virtual bool RenderPass(TEX_T& in, TEX_T& out) = 0;
+		virtual void Resize() = 0;
 
 		GET_CONST(const TARGET_T&, Target, *_target);
 		GET_CONST(Window&, Window, _target->GetWindow());

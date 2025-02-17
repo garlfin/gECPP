@@ -49,7 +49,7 @@ namespace gE
             return false;
         }
 
-        if(isConst)
+        if constexpr (isConst)
             ImGui::BeginDisabled();
 
         ImGui::PushItemWidth(-1);
@@ -112,7 +112,7 @@ namespace gE
         else
             static_assert(false);
 
-        if(isConst)
+        if constexpr (isConst)
             ImGui::EndDisabled();
 
         ImGui::PopItemWidth();
@@ -120,7 +120,7 @@ namespace gE
     }
 
     template <class T, glm::length_t COMPONENT_COUNT>
-    bool Editor::DrawField(const ScalarField<T>& settings, glm::vec<COMPONENT_COUNT, T, glm::packed_highp>& t, u8 depth)
+    bool Editor::DrawField(const ScalarField<T>& settings, glm::vec<COMPONENT_COUNT, T>& t, u8 depth)
     {
         constexpr ImGuiDataType type = IMType<T>;
 
@@ -129,12 +129,12 @@ namespace gE
         ImGui::TextUnformatted(settings.Name.data());
         ImGui::SameLine();
 
-        /*if(isConst)
+        /*if constexpr (CONST)
             ImGui::BeginDisabled();*/
 
         ImGui::PushItemWidth(-1);
 
-        bool changed = false;
+        bool changed;
         switch(settings.ViewMode)
         {
         case ScalarViewMode::Slider:
@@ -148,13 +148,13 @@ namespace gE
             changed = ImGui::DragScalarN(label.c_str(), type, &t, COMPONENT_COUNT, (float) settings.Step, &settings.Minimum, &settings.Maximum, nullptr, GE_EDITOR_INPUT_FLAGS);
         }
 
-        /*if constexpr(!isConst)*/
-            t = glm::clamp(t, settings.Minimum, settings.Maximum);
+        /*if constexpr(!CONST)
+            t = glm::clamp(t, settings.Minimum, settings.Maximum);*/
 
         if(!settings.Tooltip.empty() && ImGui::IsItemHovered(GE_EDITOR_TOOLTIP_FLAGS))
             ImGui::SetTooltip(settings.Tooltip.data());
 
-        /*if(isConst)
+        /*if constexpr (CONST)
             ImGui::EndDisabled();*/
 
         ImGui::PopItemWidth();
@@ -163,7 +163,7 @@ namespace gE
     }
 
     template <class T, glm::length_t COMPONENT_COUNT>
-    bool Editor::DrawField(const ScalarField<T>& settings, glm::vec<COMPONENT_COUNT, T, glm::packed_highp>* t, u8 depth)
+    bool Editor::DrawField(const ScalarField<T>& settings, glm::vec<COMPONENT_COUNT, T>* t, u8 depth)
     {
         return DrawField(settings, *t, depth);
     }

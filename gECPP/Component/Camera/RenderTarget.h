@@ -57,7 +57,7 @@ namespace gE
         GET(Camera&, Camera, *_camera);
         GET(Entity&, Owner, *_owner);
         GET(API::Framebuffer&, FrameBuffer, _frameBuffer);
-        GET(Window&, Window, *_window);
+        GET_CONST(Window&, Window, *_window);
 
         virtual bool Setup(float, Camera*) { return true; }
 

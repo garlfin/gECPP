@@ -120,6 +120,10 @@ namespace gE
 		PlacementNew(_previousColor, &GetWindow(), GPU::Texture2D(ColorFormat, GetCamera().GetSize()));
 		PlacementNew(_postProcessBack, &GetWindow(), GPU::Texture2D(ColorFormat, GetCamera().GetSize()));
 		PlacementNew(_previousDepth, &GetWindow(), GPU::Texture2D(PreviousDepthFormat, GetCamera().GetSize()));
+
+		if(!GetCamera().GetTiming().GetIsFirst())
+			for(POSTPROCESS_T* effect : _effects)
+				effect->Resize();
 	}
 
 	void DefaultPipeline::Target2D::GetGPUCameraOverrides(GPU::Camera& camera) const

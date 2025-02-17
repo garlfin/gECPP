@@ -14,21 +14,22 @@
 
 namespace gE::PostProcess
 {
-	struct BloomSettings
-	{
-		PhysicalCameraSettings* PhysicalCamera;
+    struct BloomSettings
+    {
+        PhysicalCameraSettings* PhysicalCamera;
 
-		float Threshold = 1.f;
-		float Knee = 0.7f;
-		float Intensity = 1.f;
-		u8 Iterations = 7;
-	};
+        float Threshold = 1.f;
+        float Knee = 0.7f;
+        float Intensity = 1.f;
+        u8 Iterations = 7;
+    };
 
-	class Bloom final : public PostProcessEffect<RenderTarget<Camera2D>, BloomSettings>
-	{
-	 public:
-		POSTPROCESS_CONSTRUCTOR(Bloom);
+    class Bloom final : public PostProcessEffect<RenderTarget<Camera2D>, BloomSettings>
+    {
+        POSTPROCESS_CONSTRUCTOR(Bloom);
 
-		NODISCARD bool RenderPass(API::Texture2D& in, API::Texture2D& out) override;
-	};
+    public:
+        NODISCARD bool RenderPass(API::Texture2D& in, API::Texture2D& out) override;
+        void Resize() override {};
+    };
 }
