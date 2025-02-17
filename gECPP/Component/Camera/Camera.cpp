@@ -85,17 +85,14 @@ namespace gE
     void Camera::IOnEditorGUI(u8 depth)
     {
         Editor::DrawField(ScalarField{"Clip Planes"sv, ""sv, 0.01f, 1000.f, 0.1f}, _settings.ClipPlanes, depth);
-        Editor::DrawField(ScalarField<u8>{"Tick Offset"sv, "First frame that renders."sv}, _settings.Timing.TickOffset,
-                          depth);
-        Editor::DrawField(ScalarField<u8>{"Tick Skip"sv, "ie. 0 = every frame, 1 = every other"sv},
-                          _settings.Timing.TickSkip, depth);
+        Editor::DrawField(ScalarField<u8>{"Tick Offset"sv, "First frame that renders."sv}, _settings.Timing.TickOffset, depth);
+        Editor::DrawField(ScalarField<u8>{"Tick Skip"sv, "ie. 0 = every frame, 1 = every other"sv}, _settings.Timing.TickSkip, depth);
         Editor::DrawField<const u32>(ScalarField<u32>{"Frame"sv}, Frame, depth);
     }
 
     void PerspectiveCamera::UpdateProjection()
     {
-        Projection = glm::perspectiveFov(_fov, (float)GetSize().x, (float)GetSize().y, GetClipPlanes().x,
-                                         GetClipPlanes().y);
+        Projection = glm::perspectiveFov(_fov, (float)GetSize().x, (float)GetSize().y, GetClipPlanes().x,GetClipPlanes().y);
     }
 
     Camera2D::Camera2D(Entity* p, TARGET_T& t, const CameraSettings2D& s, ComponentManager<Camera>* m) :
@@ -128,8 +125,7 @@ namespace gE
         GetTarget().Resize();
     }
 
-    PerspectiveCamera::PerspectiveCamera(Entity* p, TARGET_T& t, const PerspectiveCameraSettings& s,
-                                         ComponentManager<Camera>* m) :
+    PerspectiveCamera::PerspectiveCamera(Entity* p, TARGET_T& t, const PerspectiveCameraSettings& s, ComponentManager<Camera>* m) :
         Camera2D(p, t, s, m)
     {
         SetFOV(s.FOV);
@@ -148,8 +144,7 @@ namespace gE
             SetFOV(fovDeg);
     }
 
-    OrthographicCamera::OrthographicCamera(Entity* p, TARGET_T& t, const OrthographicCameraSettings& s,
-                                           ComponentManager<Camera>* m) :
+    OrthographicCamera::OrthographicCamera(Entity* p, TARGET_T& t, const OrthographicCameraSettings& s, ComponentManager<Camera>* m) :
         Camera2D(p, t, s, m),
         _orthographicScale(s.Scale)
     {

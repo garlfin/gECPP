@@ -315,9 +315,14 @@ void Window::OnRender(float delta)
 	GE_ASSERTM(Cameras.GetCurrentCamera(), "CAMERA SHOULD NOT BE NULL!");
 
 	API::Framebuffer::Reset();
-	glViewport(0, 0, _size.x, _size.y);
+
+	glViewport(0, _size.y - _viewport.Size.y, _viewport.Size.x, _viewport.Size.y);
 	Blit(Cameras.GetCurrentCamera()->GetColor());
+
+	glViewport(0, 0, _size.x, _size.y);
 	Blit(GUI->GetColor());
+
+	Cameras.GetCurrentCamera()->GetCamera().Resize(_viewport.Size);
 }
 
 Camera3D* Window::GetReflectionSystem() const

@@ -80,7 +80,7 @@ namespace gE
 
         void OnGUI();
 
-        GET_SET_VALUE(bool, ConsoleOpen, _isConsoleOpen);
+        GET_SET_VALUE(bool, EditorOpen, _isEditorOpen);
         GET_SET_VALUE(Entity*, SelectedEntity, _activeEntity);
         GET_SET_VALUE(bool, IsRunning, _running);
 
@@ -101,7 +101,7 @@ namespace gE
 
         Window* _window = nullptr;
         Entity* _activeEntity = nullptr;
-        bool _isConsoleOpen = false;
+        bool _isEditorOpen = false;
         bool _running = true;
         size_t _oldLogSize = 0;
     };

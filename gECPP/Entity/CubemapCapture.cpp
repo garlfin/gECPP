@@ -138,10 +138,10 @@ namespace gE
 
 	void CubemapTarget::Resize()
 	{
-		if(_depth->GetSize() == GetCamera().GetSize()) return;
+		if(_depth->GetSize() == GetSize()) return;
 
-		PlacementNew(_depth, GetFrameBuffer(), GPU::TextureCube{ DefaultPipeline::DepthFormat, GetCamera().GetSize() });
-		PlacementNew(_color, GetFrameBuffer(), GPU::TextureCube{ CubemapColorFormat, GetCamera().GetSize() });
+		PlacementNew(_depth, GetFrameBuffer(), GPU::TextureCube{ DefaultPipeline::DepthFormat, GetSize() });
+		PlacementNew(_color, GetFrameBuffer(), GPU::TextureCube{ CubemapColorFormat, GetSize() });
 	}
 
 	CubemapTarget::CubemapTarget(CameraCube& camera) :

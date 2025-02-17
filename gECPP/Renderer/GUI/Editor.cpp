@@ -19,14 +19,13 @@ namespace gE
 
     void Editor::OnGUI()
     {
-        Camera& camera = _window->GetCameras().GetCurrentCamera()->GetCamera();
         KeyboardState& keyboard = _window->GetKeyboard();
         if(_window->GetMouse().GetIsEnabled() && !keyboard.GetIsFocused() && keyboard.GetKey(Key::C) == KeyState::Pressed)
-            _isConsoleOpen = !_isConsoleOpen;
+            _isEditorOpen = !_isEditorOpen;
 
         _window->SetViewport(Viewport(_window->GetSize(), DEFAULT));
 
-        if(!_isConsoleOpen) return;
+        if(!_isEditorOpen) return;
 
         keyboard.SetIsFocused(ImGui::GetIO().WantCaptureKeyboard);
 
@@ -121,7 +120,6 @@ namespace gE
     {
         GE_ASSERTM(ImGui::GetCurrentContext(), "NO ACTIVE CONTEXT!");
 
-        if(!_isConsoleOpen) return;
         if(ImGui::Begin("Console", nullptr, ImGuiWindowFlags_MenuBar))
         {
             if(ImGui::Button("Clear"))

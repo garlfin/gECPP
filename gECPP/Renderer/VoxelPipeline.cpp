@@ -35,10 +35,10 @@ namespace gE::VoxelPipeline
 
 	void Target3D::Resize()
 	{
-		if(_color.GetSize() == GetCamera().GetSize()) return;
+		if(_color.GetSize() == GetSize()) return;
 
-		PlacementNew(_color, &GetCamera().GetWindow(), GPU::Texture3D(ColorFormat, GetCamera().GetSize()));
-		PlacementNew(_colorBack, &GetCamera().GetWindow(), GPU::Texture3D(ColorBackFormat, GetCamera().GetSize()));
+		PlacementNew(_color, &GetCamera().GetWindow(), GPU::Texture3D(ColorFormat, GetSize()));
+		PlacementNew(_colorBack, &GetCamera().GetWindow(), GPU::Texture3D(ColorBackFormat, GetSize()));
 	}
 
 	void Target3D::RenderPass(float d, Camera* callingCamera)

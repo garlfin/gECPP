@@ -113,13 +113,15 @@ namespace gE
 
 	void DefaultPipeline::Target2D::Resize()
 	{
-		PlacementNew(_depth, GetFrameBuffer(), GPU::Texture2D(DepthFormat, GetCamera().GetSize()));
-		PlacementNew(_color, GetFrameBuffer(), GPU::Texture2D(ColorFormat, GetCamera().GetSize()));
-		PlacementNew(_velocity, GetFrameBuffer(), GPU::Texture2D(VelocityFormat, GetCamera().GetSize()));
-		PlacementNew(_linearDepth, &GetWindow(), GPU::Texture2D(HiZFormat, GetCamera().GetSize()));
-		PlacementNew(_previousColor, &GetWindow(), GPU::Texture2D(ColorFormat, GetCamera().GetSize()));
-		PlacementNew(_postProcessBack, &GetWindow(), GPU::Texture2D(ColorFormat, GetCamera().GetSize()));
-		PlacementNew(_previousDepth, &GetWindow(), GPU::Texture2D(PreviousDepthFormat, GetCamera().GetSize()));
+		if(_depth->GetSize() == GetSize()) return;
+
+		PlacementNew(_depth, GetFrameBuffer(), GPU::Texture2D(DepthFormat, GetSize()));
+		PlacementNew(_color, GetFrameBuffer(), GPU::Texture2D(ColorFormat, GetSize()));
+		PlacementNew(_velocity, GetFrameBuffer(), GPU::Texture2D(VelocityFormat, GetSize()));
+		PlacementNew(_linearDepth, &GetWindow(), GPU::Texture2D(HiZFormat, GetSize()));
+		PlacementNew(_previousColor, &GetWindow(), GPU::Texture2D(ColorFormat, GetSize()));
+		PlacementNew(_postProcessBack, &GetWindow(), GPU::Texture2D(ColorFormat, GetSize()));
+		PlacementNew(_previousDepth, &GetWindow(), GPU::Texture2D(PreviousDepthFormat, GetSize()));
 
 		if(!GetCamera().GetTiming().GetIsFirst())
 			for(POSTPROCESS_T* effect : _effects)

@@ -95,9 +95,9 @@ namespace gE
 
 	void DirectionalLightTarget::Resize()
 	{
-		if(_depth->GetSize() == GetCamera().GetSize()) return;
+		if(_depth->GetSize() == GetSize()) return;
 
-		PlacementNew(_depth, GetFrameBuffer(), GPU::Texture2D(ShadowMapFormat, GetCamera().GetSize()));
+		PlacementNew(_depth, GetFrameBuffer(), GPU::Texture2D(ShadowMapFormat, GetSize()));
 	}
 
 	bool DirectionalLightTarget::Setup(float, Camera* callingCamera)
