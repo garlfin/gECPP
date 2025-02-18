@@ -4,10 +4,9 @@
 
 #pragma once
 
-#include <Window/Window.h>
-
+#include <gEModel/Engine/gEModelWindow.h>
 
 namespace gE::gEModel
 {
-    void ConvertFile(Window*, const Path&, const std::filesystem::path& output);
+    void ConvertFile(gEModelWindow*, const std::string&);
 };

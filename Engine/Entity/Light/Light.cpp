@@ -36,8 +36,8 @@ namespace gE
 
 	REFLECTABLE_ONGUI_IMPL(Light,
 	{
-		Editor::DrawField(Field{ "Camera"sv }, *_camera, depth);
-		Editor::DrawField(ScalarField{ "Color"sv, ""sv, 0.01f, FLT_MAX, FLT_EPSILON, ScalarViewMode::ColorPicker }, _color, depth);
+		DrawField(Field{ "Camera"sv }, *_camera, depth);
+		DrawField(ScalarField{ "Color"sv, ""sv, 0.01f, FLT_MAX, FLT_EPSILON, ScalarViewMode::ColorPicker }, _color, depth);
 	});
 
 	void LightManager::OnRender(float delta, Camera* camera)
@@ -176,7 +176,7 @@ namespace gE
 
 	REFLECTABLE_ONGUI_IMPL(PointLight,
 	{
-		Editor::DrawField(ScalarField{ "Radius"sv, ""sv, 0.01f }, _radius, depth);
+		DrawField(ScalarField{ "Radius"sv, ""sv, 0.01f }, _radius, depth);
 	});
 
 	OrthographicCameraSettings CreateDirectionalSettings(u16 size, float scale)

@@ -5,6 +5,7 @@
 
 #include <cassert>
 #include <iostream>
+#include <memory>
 #include <utility>
 
 using std::move;
@@ -18,6 +19,7 @@ using namespace std::string_view_literals;
 #endif
 
 #ifdef GE_COMPILER_GCC
+#include <cxxabi.h>
 	#define PRETTY_FUNCTION __PRETTY_FUNCTION__
 	#define TRAP __builtin_trap
 	#define DEBUGBREAK __debugbreak
@@ -37,6 +39,25 @@ using add_const_pointer = std::conditional_t<std::is_pointer_v<T>, std::add_cons
 
 template<class T, bool CONST>
 using add_const_conditional = std::conditional_t<CONST, add_const_pointer<T>, T>;
+
+#ifdef GE_COMPILER_GCC
+inline std::string demangle(const char* name)
+{
+	int status = -1;
+	const std::unique_ptr<char, void(*)(void*)> res
+	{
+		abi::__cxa_demangle(name, nullptr, nullptr, &status),
+		std::free
+	};
+
+	return !status ? res.get() : name;
+}
+#else
+inline std::string demangle(const char* name)
+{
+	return std::string(name);
+}
+#endif
 
 template<class T, typename... ARGS>
 T& PlacementNew(T& to, ARGS&&... args)

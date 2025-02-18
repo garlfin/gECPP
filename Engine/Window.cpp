@@ -42,7 +42,7 @@ Window::Window(glm::u16vec2 size, const std::string& name) :
 	Transforms(this),
 	CullingManager(this),
 	Behaviors(this),
-#ifdef GE_ENABLE_IMGUI
+#ifdef GE_ENABLE_EDITOR
 	Editor(this),
 #endif
     AssetManager(this),
@@ -114,7 +114,6 @@ bool Window::Run()
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 #endif
 
-	Window::OnInit();
 	SDL_GL_SetSwapInterval(0);
 
 	OnInit();
@@ -122,6 +121,8 @@ bool Window::Run()
 
 	glBlendEquation(GL_FUNC_ADD);
 	glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+	glDisable(GL_MULTISAMPLE);
 
 #ifdef GE_DEBUG_PERFORMANCE
 	GL::Timer timer(this);
@@ -138,7 +139,7 @@ bool Window::Run()
 	{
 		_time = SDLGetTime(initTime);
 
-#ifdef DEBUG
+#ifdef GE_ENABLE_EDITOR
 		if(Editor.GetIsRunning())
 #endif
 		if(_physicsTick.ShouldTick(_time))
@@ -179,7 +180,7 @@ bool Window::Run()
 			if(shouldDebugTick) timer.Start();
 		#endif
 
-		#ifdef DEBUG
+		#ifdef GE_ENABLE_EDITOR
 			if(Editor.GetIsRunning())
 		#endif
 			OnUpdate(_renderTick.GetDelta());
@@ -307,7 +308,7 @@ void Window::OnRender(float delta)
 
 	GUI->BeginGUI();
 	Behaviors.OnGUI(delta);
-#ifdef GE_ENABLE_IMGUI
+#ifdef GE_ENABLE_EDITOR
 	Editor.OnGUI();
 #endif
 	GUI->EndGUI();

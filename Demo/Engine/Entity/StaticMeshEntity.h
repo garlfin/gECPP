@@ -28,6 +28,6 @@ namespace gE::VoxelDemo
 
     inline REFLECTABLE_ONGUI_IMPL(StaticMeshEntity,
     {
-        Editor::DrawField(Field{ "Renderer"sv }, _renderer, depth);
+        DrawField(Field{ "Renderer"sv }, _renderer, depth);
     });
 }

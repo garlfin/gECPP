@@ -17,7 +17,34 @@
 
 namespace gE
 {
-#ifdef DEBUG
+#ifdef GE_ENABLE_EDITOR
+    class Editor
+    {
+    public:
+        explicit Editor(Window* window);
+
+        static void DrawEntityDrawer();
+        void DrawInspector();
+        void DrawHierarchy();
+
+        void OnGUI();
+
+        GET_SET_VALUE(bool, EditorOpen, _isEditorOpen);
+        GET_SET_VALUE(Entity*, SelectedEntity, _activeEntity);
+        GET_SET_VALUE(bool, IsRunning, _running);
+
+    private:
+        void DrawLog();
+
+        Window* _window = nullptr;
+        Entity* _activeEntity = nullptr;
+        bool _isEditorOpen = false;
+        bool _running = true;
+        size_t _oldLogSize = 0;
+    };
+#endif
+
+#ifdef GE_ENABLE_IMGUI
     template<class T, class OWNER_T>
     using GetterFunction = T (OWNER_T::*)() const;
 
@@ -28,6 +55,21 @@ namespace gE
     {
         std::string_view Name = DEFAULT;
         std::string_view Tooltip = DEFAULT;
+    };
+
+    enum class ArrayViewMode : u8
+    {
+        Stats = 1,
+        Elements = 1 << 1
+    };
+
+    ENUM_OPERATOR(ArrayViewMode, &);
+    ENUM_OPERATOR(ArrayViewMode, |);
+
+    template<class T>
+    struct ArrayField : T
+    {
+        ArrayViewMode ViewMode = ArrayViewMode::Stats | ArrayViewMode::Elements;
     };
 
     enum class ScalarViewMode : u8
@@ -68,42 +110,17 @@ namespace gE
     template<class T>
     CONSTEXPR_GLOBAL ImGuiDataType IMType = 0;
 
-    class Editor
-    {
-    public:
-        explicit Editor(Window* window);
+    template<class T, class SETTINGS_T>
+    bool DrawField(const SETTINGS_T&, T&, u8 depth);
 
-        static void DrawEntityDrawer();
-        void DrawInspector();
-        void DrawHierarchy();
+    template <class T, glm::length_t COMPONENT_COUNT>
+    bool DrawField(const ScalarField<T>&, glm::vec<COMPONENT_COUNT, T>&, u8 depth);
 
-        void OnGUI();
+    template<class T, class SETTINGS_T>
+    bool DrawField(const ArrayField<SETTINGS_T>&, Array<T>&, u8 depth);
 
-        GET_SET_VALUE(bool, EditorOpen, _isEditorOpen);
-        GET_SET_VALUE(Entity*, SelectedEntity, _activeEntity);
-        GET_SET_VALUE(bool, IsRunning, _running);
-
-        template<class T, class SETTINGS_T>
-        static bool DrawField(const SETTINGS_T&, T&, u8 depth);
-
-        template <class T, glm::length_t COMPONENT_COUNT>
-        static bool DrawField(const ScalarField<T>&, glm::vec<COMPONENT_COUNT, T>&, u8 depth);
-
-        template <class T, glm::length_t COMPONENT_COUNT>
-        static bool DrawField(const ScalarField<T>&, glm::vec<COMPONENT_COUNT, T>*, u8 depth);
-
-        template<class SETTINGS_T, class OWNER_T, class OUT_T, class IN_T>
-        static bool DrawField(const SETTINGS_T&, OWNER_T&, u8 depth, GetterFunction<OUT_T, OWNER_T>, SetterFunction<IN_T, OWNER_T>);
-
-    private:
-        void DrawLog();
-
-        Window* _window = nullptr;
-        Entity* _activeEntity = nullptr;
-        bool _isEditorOpen = false;
-        bool _running = true;
-        size_t _oldLogSize = 0;
-    };
+    template<class SETTINGS_T, class OWNER_T, class OUT_T, class IN_T>
+    bool DrawField(const SETTINGS_T&, OWNER_T&, u8 depth, GetterFunction<OUT_T, OWNER_T>, SetterFunction<IN_T, OWNER_T>);
 #endif
 }
 

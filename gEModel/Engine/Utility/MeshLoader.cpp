@@ -8,12 +8,12 @@
 
 #include <filesystem>
 #include <fstream>
-#include <Renderer/Mesh/Mesh.h>
-#include <Renderer/Mesh/Skeleton.h>
 #include <ASSIMP/Importer.hpp>
 #include <ASSIMP/postprocess.h>
 #include <ASSIMP/scene.h>
 #include <Core/AssetManager.h>
+#include <Core/Mesh/Mesh.h>
+#include <Core/Mesh/Skeleton.h>
 #include <Graphics/Buffer/VAO.h>
 
 using pp = aiPostProcessSteps;
@@ -58,12 +58,12 @@ inline void ConvertBone(const aiNode& node, gE::Bone*& bone);
 
 namespace gE::gEModel
 {
-	void ConvertFile(Window* window, const Path& source, const std::filesystem::path& output)
+	void ConvertFile(gEModelWindow* window, const std::string& source)
 	{
-		Path out = output.empty() ? source.parent_path() : output;
+		GE_ASSERT(window);
 
 		Assimp::Importer importer = DEFAULT;
-		const aiScene& scene = *importer.ReadFile(source.string(), POST_PROCESS);
+		const aiScene& scene = *importer.ReadFile(source, POST_PROCESS);
 
 		aiMesh* previousMesh = nullptr;
 		std::vector<std::vector<aiMesh*>> meshes;
@@ -91,18 +91,22 @@ namespace gE::gEModel
 			Bone* currentBone = skeleton.Bones.Data();
 			IterateSkeleton<Bone*, ConvertBone>(*scene.mRootNode, currentBone);
 
-			Path path = out / source.filename().replace_extension(".skel");
+			/*Path path = out / source.filename().replace_extension(".skel");
 			WriteSerializableToFile(path, skeleton);
 
-			std::cout << "Wrote skeleton to " << path << std::endl;
+			std::cout << "Wrote skeleton to " << path << std::endl;*/
 		}
 
-		for(const auto& src : meshes)
+		window->GetMeshes() = Array<Mesh>(meshes.size());
+
+		for(size_t i = 0; i < meshes.size(); i++)
 		{
+			Mesh& mesh = window->GetMeshes()[i];
+			const std::vector<aiMesh*>& src = meshes[i];
+
 			GPU::IndexedVAO meshSettings;
 			ConvertMesh(src, meshSettings);
 
-			Mesh mesh;
 			mesh.Name = std::string(src[0]->mName.data);
 			mesh.Bounds = AABB<Dimension::D3D>(glm::vec3(FP_PINF), glm::vec3(FP_NINF));
 
@@ -126,11 +130,6 @@ namespace gE::gEModel
 
 				mesh.BoneWeights = ptr_create<API::Buffer<VertexWeight>>(window, move(weightSettings));
 			}*/
-
-			Path path = out / (mesh.Name + ".mesh");
-			WriteSerializableToFile(path, mesh);
-
-			std::cout << "Wrote to " << path << std::endl;
 		}
 	}
 }

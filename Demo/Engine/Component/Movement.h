@@ -121,11 +121,11 @@ namespace gE::VoxelDemo
 
     inline REFLECTABLE_ONGUI_IMPL(Movement,
     {
-        Editor::DrawField(ScalarField{ "Speed"sv, ""sv, 0.f, 10.f, 0.01f }, Speed, depth);
-        Editor::DrawField(ScalarField{ "Speed Multiplier"sv, ""sv, 0.f, 10.f, 0.01f }, SpeedMultiplier, depth);
-        Editor::DrawField(ScalarField{ "Height"sv, ""sv, 0.f, 10.f, 0.01f }, StandingHeight, depth);
-        Editor::DrawField(ScalarField{ "Crouching Height"sv, ""sv, 0.f, 10.f, 0.01f }, CrouchingHeight, depth);
-        Editor::DrawField(ScalarField{ "Jump Height"sv, ""sv, 0.f, 10.f, 0.01f }, JumpHeight, depth);
-        Editor::DrawField(ScalarField{ "Sensitivity"sv, "Mouse sensitivity"sv, 0.01f, 10.f, 0.001f }, Sensitivity, depth);
+        DrawField(ScalarField{ "Speed"sv, ""sv, 0.f, 10.f, 0.01f }, Speed, depth);
+        DrawField(ScalarField{ "Speed Multiplier"sv, ""sv, 0.f, 10.f, 0.01f }, SpeedMultiplier, depth);
+        DrawField(ScalarField{ "Height"sv, ""sv, 0.f, 10.f, 0.01f }, StandingHeight, depth);
+        DrawField(ScalarField{ "Crouching Height"sv, ""sv, 0.f, 10.f, 0.01f }, CrouchingHeight, depth);
+        DrawField(ScalarField{ "Jump Height"sv, ""sv, 0.f, 10.f, 0.01f }, JumpHeight, depth);
+        DrawField(ScalarField{ "Sensitivity"sv, "Mouse sensitivity"sv, 0.01f, 10.f, 0.001f }, Sensitivity, depth);
     });
 }

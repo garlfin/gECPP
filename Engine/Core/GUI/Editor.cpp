@@ -8,9 +8,14 @@
 #include <IMGUI/imgui_internal.h>
 #include "GUI.h"
 
+#ifdef GE_ENABLE_EDITOR
+
+#ifndef GE_ENABLE_IMGUI
+    #error IMGUI not enabled.
+#endif
+
 namespace gE
 {
-#ifdef DEBUG
     Editor::Editor(Window* window) : _window(window)
     {
     }
@@ -149,5 +154,5 @@ namespace gE
         }
         ImGui::End();
     }
-#endif
 }
+#endif

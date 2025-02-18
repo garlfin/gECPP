@@ -98,7 +98,7 @@ public:
 		const TYPE_T* GetType() const override { return &Type; }; \
 		FORCE_IMPL static inline const TYPE_T Type{ NAME, (FactoryFunction<SETTINGS_T>) TYPE##FACTORY }; \
 
-#ifdef DEBUG
+#ifdef GE_ENABLE_EDITOR
 	#define REFLECTABLE_ONGUI_PROTO(SUPER) \
 		public: \
 			void OnEditorGUI(u8 depth) override { SUPER::OnEditorGUI(depth); IOnEditorGUI(depth); } \

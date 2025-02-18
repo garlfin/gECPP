@@ -9,10 +9,10 @@
 
 #include "Editor.h"
 
-#ifdef DEBUG
 #define GE_SWITCH_TYPE(TYPE) if constexpr(std::is_same_v<RAW_T, TYPE>)
 #define IM_TYPE_(TYPE, ENUM) template<> CONSTEXPR_GLOBAL ImGuiDataType IMType<TYPE> = ENUM;
 
+#ifdef GE_ENABLE_IMGUI
 namespace gE
 {
     IM_TYPE_(i8, ImGuiDataType_S8);
@@ -27,7 +27,7 @@ namespace gE
     IM_TYPE_(double, ImGuiDataType_Double);
 
     template <class T, class SETTINGS_T>
-    bool Editor::DrawField(const SETTINGS_T& settings, T& t_, u8 depth)
+    bool DrawField(const SETTINGS_T& settings, T& t_, u8 depth)
     {
         using RAW_T = std::remove_cvref_t<std::remove_pointer_t<T>>;
         constexpr bool isPointer = std::is_pointer_v<std::remove_cvref_t<T>>;
@@ -122,7 +122,7 @@ namespace gE
     }
 
     template <class T, glm::length_t COMPONENT_COUNT>
-    bool Editor::DrawField(const ScalarField<T>& settings, glm::vec<COMPONENT_COUNT, T>& t, u8 depth)
+    bool DrawField(const ScalarField<T>& settings, glm::vec<COMPONENT_COUNT, T>& t, u8 depth)
     {
         constexpr ImGuiDataType type = IMType<T>;
 
@@ -164,14 +164,44 @@ namespace gE
         return changed;
     }
 
-    template <class T, glm::length_t COMPONENT_COUNT>
-    bool Editor::DrawField(const ScalarField<T>& settings, glm::vec<COMPONENT_COUNT, T>* t, u8 depth)
+    template <class T, class SETTINGS_T>
+    bool DrawField(const ArrayField<SETTINGS_T>& settings, Array<T>& ts, u8 depth)
     {
-        return DrawField(settings, *t, depth);
+        if((bool)(settings.ViewMode & ArrayViewMode::Stats))
+        {
+            ImGui::TextUnformatted(std::format("Array of {}\nSize: {}\nByte Count: {}\nPointer: {}",
+                demangle(typeid(T).name()),
+                ts.Count(),
+                ts.ByteCount(),
+                (void*) ts.Data()
+            ).c_str());
+        }
+
+        bool changed = false;
+        if((bool)(settings.ViewMode & ArrayViewMode::Elements))
+        {
+            ImGui::BeginTable("table", 2, ImGuiTableFlags_SizingFixedSame | ImGuiTableFlags_BordersOuterH);
+            ImGui::TableSetupColumn("Index");
+            ImGui::TableSetupColumn("Value");
+            ImGui::TableHeader("");
+
+            for(size_t i = 0; i < ts.Count(); i++)
+            {
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0);
+                ImGui::TextUnformatted(std::to_string(i).c_str());
+                ImGui::TableSetColumnIndex(1);
+
+                changed |= DrawField(settings, ts[i], depth + 1);
+            }
+            ImGui::EndTable();
+        }
+
+        return changed;
     }
 
     template<class SETTINGS_T, class OWNER_T, class OUT_T, class IN_T>
-    bool Editor::DrawField(const SETTINGS_T& settings, OWNER_T& owner, u8 depth, GetterFunction<OUT_T, OWNER_T> get, SetterFunction<IN_T, OWNER_T> set)
+    bool DrawField(const SETTINGS_T& settings, OWNER_T& owner, u8 depth, GetterFunction<OUT_T, OWNER_T> get, SetterFunction<IN_T, OWNER_T> set)
     {
         using T = std::remove_cvref_t<IN_T>;
         static_assert(std::is_same_v<T, std::remove_cvref_t<OUT_T>>);
@@ -189,6 +219,7 @@ namespace gE
     }
 
 }
+#endif
+
 #undef GE_SWITCH_TYPE
 #undef IM_TYPE_
-#endif

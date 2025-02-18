@@ -73,9 +73,9 @@ namespace gE
 
 	REFLECTABLE_ONGUI_IMPL(Transform,
 	{
-		Editor::DrawField(ScalarField<float>{ "Position"sv }, *this, depth, &Transform::GetPosition_, &Transform::SetPosition_);
-		Editor::DrawField(ScalarField<float>{ "Rotation"sv }, *this, depth, &Transform::GetRotation_, &Transform::SetRotation_);
-		Editor::DrawField(ScalarField{ "Scale"sv, ""sv, FLT_EPSILON }, *this, depth, &Transform::GetScale_, &Transform::SetScale_);
+		DrawField(ScalarField<float>{ "Position"sv }, *this, depth, &Transform::GetPosition_, &Transform::SetPosition_);
+		DrawField(ScalarField<float>{ "Rotation"sv }, *this, depth, &Transform::GetRotation_, &Transform::SetRotation_);
+		DrawField(ScalarField{ "Scale"sv, ""sv, FLT_EPSILON }, *this, depth, &Transform::GetScale_, &Transform::SetScale_);
 	});
 
 	void TransformManager::OnUpdate(float delta)

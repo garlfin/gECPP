@@ -109,7 +109,7 @@ namespace gE
 
 		GET_CONST(SDL_Window*, SDLWindow, _window);
 
-#ifdef DEBUG
+#ifdef GE_ENABLE_EDITOR
 		GET(Editor&, Editor, Editor);
 #endif
 
@@ -142,7 +142,7 @@ namespace gE
 		Pointer<GUIManager> GUI;
 		ComponentManager<Behavior> Behaviors;
 
-#ifdef DEBUG
+#ifdef GE_ENABLE_EDITOR
 		Editor Editor;
 #endif
 

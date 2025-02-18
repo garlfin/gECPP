@@ -17,9 +17,6 @@ using namespace gE::VoxelDemo;
 
 void DemoWindow::OnInit()
 {
-	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-	glDisable(GL_MULTISAMPLE);
-
 	auto albedo = ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/cobble_col.pvr"));
 	auto amr = ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/cobble_armd.pvr"));
 	auto normal = ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/cobble_nor.pvr"));
