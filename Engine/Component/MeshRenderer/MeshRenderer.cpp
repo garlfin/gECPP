@@ -186,8 +186,13 @@ namespace gE
 
 	DrawCall::DrawCall(DrawCallManager& manager, const MeshRenderer& r, Reference<Material>&& mat, u8 mesh) :
 		Managed(&manager, *this, true),
-		_vao(r.GetMesh().VAO), _transform(&r.GetOwner().GetTransform()), _material(move(mat)), _subMesh(mesh),
-		_lod(0), _vaoIterator(*this), _materialIterator(*this), _subMeshIterator(*this), _lodIterator(*this)
+		_vao(r.GetMesh().VAO),
+		_transform(&r.GetOwner().GetTransform()),
+		_material(move(mat)), _subMesh(mesh),
+		_vaoIterator(*this),
+		_materialIterator(*this),
+		_subMeshIterator(*this),
+		_lodIterator(*this)
 	{
 		Register();
 	}
