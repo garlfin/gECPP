@@ -23,6 +23,7 @@ using namespace std::string_view_literals;
 	#define TRAP __builtin_trap
 	#define DEBUGBREAK __debugbreak
 	#define FORCE_IMPL __attribute__((used))
+	#define NO_IMPL __attribute__((unused))
 #endif
 
 #ifdef GE_COMPILER_MSVC

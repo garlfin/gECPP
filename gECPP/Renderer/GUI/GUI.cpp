@@ -143,15 +143,6 @@ void gE::GUIManager::OnRender(const ImDrawData* draw) const
 
     glDisable(GL_SCISSOR_TEST);
 }
-#endif
-
-gE::GUIManager::~GUIManager()
-{
-#ifdef GE_ENABLE_IMGUI
-    ImGui_ImplSDL3_Shutdown();
-    ImGui::DestroyContext();
-#endif
-}
 
 // https://github.com/adia-dev
 void gE::GUIManager::SetStyle()
@@ -267,4 +258,14 @@ void gE::GUIManager::SetStyle()
     style.FramePadding = ImVec2(4.0f, 3.0f);
     style.ItemSpacing = ImVec2(6.0f, 4.0f);
     style.ItemInnerSpacing = ImVec2(4.0f, 4.0f);
+}
+
+#endif
+
+gE::GUIManager::~GUIManager()
+{
+#ifdef GE_ENABLE_IMGUI
+    ImGui_ImplSDL3_Shutdown();
+    ImGui::DestroyContext();
+#endif
 }

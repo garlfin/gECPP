@@ -40,11 +40,11 @@ namespace gE::VoxelDemo
 	};
 	inline REFLECTABLE_FACTORY_NO_IMPL(Player);
 
-	inline void Player::IOnEditorGUI(u8 depth)
+	inline REFLECTABLE_ONGUI_IMPL(Player,
 	{
 		Editor::DrawField(Field{ "Movement"sv }, _movement, depth);
 		Editor::DrawField(Field{ "Character Controller"sv }, _controller, depth);
-	}
+	});
 
 	class PlayerCamera final : public Entity
 	{
@@ -86,8 +86,8 @@ namespace gE::VoxelDemo
 	};
 	inline REFLECTABLE_FACTORY_NO_IMPL(PlayerCamera);
 
-	inline void PlayerCamera::IOnEditorGUI(u8 depth)
+	inline REFLECTABLE_ONGUI_IMPL(PlayerCamera,
 	{
 		Editor::DrawField(Field{ "Camera"sv, ""}, _camera, depth);
-	}
+	});
 }

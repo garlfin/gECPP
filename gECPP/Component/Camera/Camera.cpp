@@ -82,13 +82,13 @@ namespace gE
         Frame++;
     }
 
-    void Camera::IOnEditorGUI(u8 depth)
+    REFLECTABLE_ONGUI_IMPL(Camera,
     {
         Editor::DrawField(ScalarField{"Clip Planes"sv, ""sv, 0.01f, 1000.f, 0.1f}, _settings.ClipPlanes, depth);
         Editor::DrawField(ScalarField<u8>{"Tick Offset"sv, "First frame that renders."sv}, _settings.Timing.TickOffset, depth);
         Editor::DrawField(ScalarField<u8>{"Tick Skip"sv, "ie. 0 = every frame, 1 = every other"sv}, _settings.Timing.TickSkip, depth);
         Editor::DrawField<const u32>(ScalarField<u32>{"Frame"sv}, Frame, depth);
-    }
+    });
 
     void PerspectiveCamera::UpdateProjection()
     {
@@ -107,11 +107,11 @@ namespace gE
         glViewport(0, 0, size.x, size.y);
     }
 
-    void Camera2D::IOnEditorGUI(u8 depth)
+    REFLECTABLE_ONGUI_IMPL(Camera2D,
     {
         Editor::DrawField<const float>(ScalarField<float>{"Aspect"sv}, GetAspect(), depth);
         Editor::DrawField(ScalarField{ "Resolution"sv, ""sv, 1u }, *this, depth, &Camera2D::GetSize, &Camera2D::Resize);
-    }
+    });
 
     void Camera2D::GetGPUCamera(GPU::Camera& camera)
     {
@@ -137,12 +137,12 @@ namespace gE
         camera.Parameters.x = GetFOV<AngleType::Radian>();
     }
 
-    void PerspectiveCamera::IOnEditorGUI(u8 depth)
+    REFLECTABLE_ONGUI_IMPL(PerspectiveCamera,
     {
         float fovDeg = GetFOV();
         if (Editor::DrawField(ScalarField{"FOV"sv, "Vertical FOV in Degrees", 1.f, 120.f, 1.f}, fovDeg, depth))
             SetFOV(fovDeg);
-    }
+    });
 
     OrthographicCamera::OrthographicCamera(Entity* p, TARGET_T& t, const OrthographicCameraSettings& s, ComponentManager<Camera>* m) :
         Camera2D(p, t, s, m),
@@ -156,10 +156,10 @@ namespace gE
         Projection = glm::ortho(scale.x, scale.z, scale.y, scale.w, GetClipPlanes().x, GetClipPlanes().y);
     }
 
-    void OrthographicCamera::IOnEditorGUI(u8 depth)
+    REFLECTABLE_ONGUI_IMPL(OrthographicCamera,
     {
         Editor::DrawField(ScalarField{"Orthographic Scale"sv, ""sv, 0.01f}, _orthographicScale, depth);
-    }
+    });
 
     void CameraCube::Resize(Size1D size)
     {
@@ -185,10 +185,10 @@ namespace gE
         Projection = glm::ortho(-scale.x, scale.x, -scale.z, scale.z, 0.01f, scale.y * 2.f);
     }
 
-    void Camera3D::IOnEditorGUI(u8 depth)
+    REFLECTABLE_ONGUI_IMPL(Camera3D,
     {
         Editor::DrawField(ScalarField{ "Resolution"sv, ""sv, 1u }, *this, depth, &Camera3D::GetSize, &Camera3D::Resize);
-    }
+    });
 
     void Camera3D::GetGPUCamera(GPU::Camera& cam)
     {
@@ -206,10 +206,10 @@ namespace gE
     {
     }
 
-    void CameraCube::IOnEditorGUI(u8 depth)
+    REFLECTABLE_ONGUI_IMPL(CameraCube,
     {
         Editor::DrawField(ScalarField{ "Resolution"sv, ""sv, 1u }, *this, depth, &CameraCube::GetSize, &CameraCube::Resize);
-    }
+    });
 
     void CameraCube::UpdateProjection()
     {

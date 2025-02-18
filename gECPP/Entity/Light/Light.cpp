@@ -33,11 +33,11 @@ namespace gE
 		light.Planes = camera.GetClipPlanes();
 	}
 
-	void Light::IOnEditorGUI(u8 depth)
+	REFLECTABLE_ONGUI_IMPL(Light,
 	{
 		Editor::DrawField(Field{ "Camera"sv }, *_camera, depth);
 		Editor::DrawField(ScalarField{ "Color"sv, ""sv, 0.01f, FLT_MAX, FLT_EPSILON, ScalarViewMode::ColorPicker }, _color, depth);
-	}
+	});
 
 	void LightManager::OnRender(float delta, Camera* camera)
 	{
@@ -173,10 +173,10 @@ namespace gE
 		light.PackedSettings = *(u32*) &_radius;
 	}
 
-	void PointLight::IOnEditorGUI(u8 depth)
+	REFLECTABLE_ONGUI_IMPL(PointLight,
 	{
 		Editor::DrawField(ScalarField{ "Radius"sv, ""sv, 0.01f }, _radius, depth);
-	}
+	});
 
 	OrthographicCameraSettings CreateDirectionalSettings(u16 size, float scale)
 	{

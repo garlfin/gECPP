@@ -51,7 +51,7 @@ namespace Physics
     struct SphereShape : public ConvexShape
     {
         SERIALIZABLE_PROTO("SSHP", 1, SphereShape, ConvexShape);
-        REFLECTABLE_PROTO(SphereShape, ConvexShape, "Physics::SphereShape") {};
+        REFLECTABLE_TYPE_PROTO(SphereShape, "Physics::SphereShape");
 
     public:
         bool operator==(const SphereShape& o) const
@@ -65,7 +65,7 @@ namespace Physics
     struct BoxShape : public ConvexShape
     {
         SERIALIZABLE_PROTO("BSHP", 1, BoxShape, ConvexShape);
-        REFLECTABLE_PROTO(BoxShape, ConvexShape, "Physics::BoxShape") {};
+        REFLECTABLE_TYPE_PROTO(BoxShape, "Physics::BoxShape");
 
     public:
         bool operator==(const BoxShape& o) const
@@ -79,7 +79,7 @@ namespace Physics
     struct CapsuleShape : public ConvexShape
     {
         SERIALIZABLE_PROTO("CPSL", 1, CapsuleShape, ConvexShape);
-        REFLECTABLE_PROTO(CapsuleShape, ConvexShape, "Physics::CapsuleShape") {};
+        REFLECTABLE_TYPE_PROTO(CapsuleShape, "Physics::CapsuleShape");
 
     public:
         bool operator==(const CapsuleShape& o) const
@@ -135,7 +135,7 @@ namespace Physics
     struct ConvexMeshShape : public ConvexShape
     {
         SERIALIZABLE_PROTO("CNVX", 1, ConvexMeshShape, ConvexShape);
-        REFLECTABLE_PROTO(ConvexMeshShape, ConvexShape, "gE::ConvexMeshShape") {};
+        REFLECTABLE_TYPE_PROTO(ConvexMeshShape, "gE::ConvexMeshShape");
 
     public:
         Array<glm::vec3> Points = DEFAULT;

@@ -119,7 +119,7 @@ namespace gE::VoxelDemo
 
     inline REFLECTABLE_FACTORY_NO_IMPL(Movement);
 
-    inline void Movement::IOnEditorGUI(u8 depth)
+    inline REFLECTABLE_ONGUI_IMPL(Movement,
     {
         Editor::DrawField(ScalarField{ "Speed"sv, ""sv, 0.f, 10.f, 0.01f }, Speed, depth);
         Editor::DrawField(ScalarField{ "Speed Multiplier"sv, ""sv, 0.f, 10.f, 0.01f }, SpeedMultiplier, depth);
@@ -127,5 +127,5 @@ namespace gE::VoxelDemo
         Editor::DrawField(ScalarField{ "Crouching Height"sv, ""sv, 0.f, 10.f, 0.01f }, CrouchingHeight, depth);
         Editor::DrawField(ScalarField{ "Jump Height"sv, ""sv, 0.f, 10.f, 0.01f }, JumpHeight, depth);
         Editor::DrawField(ScalarField{ "Sensitivity"sv, "Mouse sensitivity"sv, 0.01f, 10.f, 0.001f }, Sensitivity, depth);
-    }
+    });
 }

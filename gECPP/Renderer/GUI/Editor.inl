@@ -8,6 +8,7 @@
 #include <IMGUI/imgui.h>
 #include <IMGUI/imgui_stdlib.h>
 
+#ifdef DEBUG
 #define GE_SWITCH_TYPE(TYPE) if constexpr(std::is_same_v<RAW_T, TYPE>)
 #define IM_TYPE_(TYPE, ENUM) template<> CONSTEXPR_GLOBAL ImGuiDataType IMType<TYPE> = ENUM;
 
@@ -187,5 +188,6 @@ namespace gE
     }
 
 }
-
 #undef GE_SWITCH_TYPE
+#undef IM_TYPE_
+#endif

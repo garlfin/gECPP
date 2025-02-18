@@ -22,12 +22,12 @@ namespace gE
 		parent->_children.push_back(this);
 	}
 
-	void Entity::IOnEditorGUI(u8 depth)
+	REFLECTABLE_ONGUI_IMPL(Entity,
 	{
 		Editor::DrawField(Field{ "Name"sv }, _name, depth);
 		Editor::DrawField(Field{ "Parent"sv }, _parent, depth);
 		Editor::DrawField(Field{ "Transform"sv }, _transform, depth);
-	}
+	});
 
 	void Entity::Destroy(bool flagChildren)
 	{

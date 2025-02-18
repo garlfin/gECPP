@@ -131,6 +131,7 @@ bool Window::Run()
 
 	_physicsTick = TickHandler(GE_PHYSICS_TARGET_TICKRATE);
 	_renderTick = TickHandler(GE_RENDER_TARGET_TICKRATE);
+	_viewport = Viewport(_size, DEFAULT);
 
 	const u64 initTime = SDL_GetPerformanceCounter();
 

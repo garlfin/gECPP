@@ -104,8 +104,12 @@ public:
 			void OnEditorGUI(u8 depth) override { SUPER::OnEditorGUI(depth); IOnEditorGUI(depth); } \
 		private: \
 			void IOnEditorGUI(u8 depth)
+	#define REFLECTABLE_ONGUI_IMPL(TYPE, CODE) \
+		void TYPE::IOnEditorGUI(u8 depth) { CODE }
 #else
 	#define REFLECTABLE_ONGUI_PROTO(SUPER)
+	#define REFLECTABLE_ONGUI_IMPL(TYPE, CODE) \
+		NO_IMPL void TYPE##REFL_ONGUI_NOIMPL() {};
 #endif
 
 #define REFLECTABLE_PROTO(TYPE, SUPER, NAME) \

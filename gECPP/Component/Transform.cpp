@@ -71,12 +71,12 @@ namespace gE
 		Set(d);
 	}
 
-	void Transform::IOnEditorGUI(u8 depth)
+	REFLECTABLE_ONGUI_IMPL(Transform,
 	{
 		Editor::DrawField(ScalarField<float>{ "Position"sv }, *this, depth, &Transform::GetPosition_, &Transform::SetPosition_);
 		Editor::DrawField(ScalarField<float>{ "Rotation"sv }, *this, depth, &Transform::GetRotation_, &Transform::SetRotation_);
 		Editor::DrawField(ScalarField{ "Scale"sv, ""sv, FLT_EPSILON }, *this, depth, &Transform::GetScale_, &Transform::SetScale_);
-	}
+	});
 
 	void TransformManager::OnUpdate(float delta)
 	{
