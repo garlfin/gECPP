@@ -12,7 +12,7 @@ set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} ${COMPILE_FLAGS_RELEASE}")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${COMPILE_FLAGS_DEBUG}")
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${COMPILE_FLAGS_DEBUG}")
 
-include_directories(gECPP Vendor Vendor/FBX ${CMAKE_SOURCE_DIR})
+include_directories(Engine Vendor ${CMAKE_SOURCE_DIR})
 set_property(GLOBAL PROPERTY CXX_STANDARD 20)
 
 # JOLT
@@ -45,7 +45,7 @@ add_library(GLAD STATIC Vendor/GLAD/glad.c Vendor/GLAD/glad.h)
 add_library(PUGIXML STATIC Vendor/PUGIXML/pugixml.cpp Vendor/PUGIXML/pugixml.hpp Vendor/PUGIXML/pugiconfig.hpp)
 
 # GECPP
-file(GLOB_RECURSE GECPP_SRC "gECPP/*.cpp" "gECPP/*.h" "gECPP/*.inl")
+file(GLOB_RECURSE GECPP_SRC "Engine/*.cpp" "Engine/*.h" "Engine/*.inl")
 
 add_library(gECPP STATIC ${GECPP_SRC})
 target_compile_definitions(gECPP PUBLIC API_ID=API_GL)

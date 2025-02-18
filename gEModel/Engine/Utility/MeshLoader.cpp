@@ -13,7 +13,7 @@
 #include <ASSIMP/Importer.hpp>
 #include <ASSIMP/postprocess.h>
 #include <ASSIMP/scene.h>
-#include <Utility/AssetManager.h>
+#include <Core/AssetManager.h>
 #include <Graphics/Buffer/VAO.h>
 
 using pp = aiPostProcessSteps;

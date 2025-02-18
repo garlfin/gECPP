@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <gECPP/Utility/Binary.h>
+#include <gECPP/Core/Binary.h>
 
 struct Vertex
 {

@@ -3,7 +3,7 @@
 //
 
 #include "gEModelWindow.h"
-#include "Utility/MeshLoader.h"
+#include <Core/MeshLoader.h>
 
 namespace gE::gEModel
 {

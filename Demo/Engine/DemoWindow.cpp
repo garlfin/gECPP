@@ -2,17 +2,16 @@
 // Created by scion on 8/9/2023.
 //
 
-#include <Vendor/GLAD/glad.h>
-
 #include "DemoWindow.h"
 
+#include <Core/Material/PBRMaterial.h>
+#include <Demo/Engine/Entity/EmptyColliderEntity.h>
+#include <Demo/Engine/Entity/PhysicsCube.h>
 #include <Demo/Engine/Entity/Player.h>
 #include <Demo/Engine/Entity/StaticMeshEntity.h>
 #include <Entity/Light/DirectionalLight.h>
 #include <Entity/Light/PointLight.h>
-#include <Renderer/Material/PBRMaterial.h>
-#include <Demo/Engine/Entity/EmptyColliderEntity.h>
-#include <Demo/Engine/Entity/PhysicsCube.h>
+#include <Vendor/GLAD/glad.h>
 
 using namespace gE::VoxelDemo;
 
