@@ -33,7 +33,7 @@ namespace GL
 
 		DEFAULT_OPERATOR_CM(IVAO);
 
-		GET_CONST(const GPU::VAO&, Settings, *_settings);
+		GET(GPU::VAO&, Settings, *_settings);
 
 		ALWAYS_INLINE void Bind() const final { glBindVertexArray(ID); }
 		virtual void Draw(u8 index, u16 instanceCount = 1) const = 0;

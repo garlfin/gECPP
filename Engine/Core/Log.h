@@ -33,13 +33,9 @@ namespace gE
             _log += '\n';
         }
 
-        static void FatalError(const std::string_view message);
-
-        template<class... ARGS>
-        static void FatalError(const std::string_view format, ARGS&&... args)
-        {
-            FatalError(std::vformat(format, std::make_format_args(args...)));
-        }
+        static void Error(std::string_view message, bool fatal);
+        static void Warning(std::string_view message);
+        static void Info(std::string_view message);
 
         NODISCARD ALWAYS_INLINE static std::string_view Get() { return _log; };
 

@@ -11,9 +11,19 @@
 
 namespace gE
 {
-    void Log::FatalError(const std::string_view message)
+    void Log::Error(std::string_view message, bool fatal)
     {
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Fatal Error!", message.data(), nullptr);
-        std::terminate();
+        if(fatal) std::terminate();
+    }
+
+    void Log::Warning(std::string_view message)
+    {
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_WARNING, "Warning!", message.data(), nullptr);
+    }
+
+    void Log::Info(std::string_view message)
+    {
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Info", message.data(), nullptr);
     }
 }

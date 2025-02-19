@@ -14,6 +14,7 @@ namespace GPU
 	struct MaterialSlot : public Serializable<>
 	{
 		SERIALIZABLE_PROTO("MAT", 1, MaterialSlot, Serializable);
+		REFLECTABLE_PROTO(MaterialSlot, Serializable, "GPU::MaterialSlot");
 
 	public:
 		MaterialSlot(std::string&& name, u32 offset, u32 count) : Name(move(name)), Offset(offset), Count(count) {}

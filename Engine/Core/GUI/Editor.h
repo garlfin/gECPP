@@ -67,7 +67,7 @@ namespace gE
     ENUM_OPERATOR(ArrayViewMode, |);
 
     template<class T>
-    struct ArrayField : T
+    struct ArrayField : public T
     {
         ArrayViewMode ViewMode = ArrayViewMode::Stats | ArrayViewMode::Elements;
     };
@@ -118,6 +118,9 @@ namespace gE
 
     template<class T, class SETTINGS_T>
     bool DrawField(const ArrayField<SETTINGS_T>&, Array<T>&, u8 depth);
+
+    template<class T, class SETTINGS_T>
+    bool DrawField(const ArrayField<SETTINGS_T>&, T*, size_t, u8 depth);
 
     template<class SETTINGS_T, class OWNER_T, class OUT_T, class IN_T>
     bool DrawField(const SETTINGS_T&, OWNER_T&, u8 depth, GetterFunction<OUT_T, OWNER_T>, SetterFunction<IN_T, OWNER_T>);

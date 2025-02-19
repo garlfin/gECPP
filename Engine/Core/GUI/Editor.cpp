@@ -131,7 +131,7 @@ namespace gE
             ImGui::BeginMenuBar();
             ImGui::EndMenuBar();
 
-            ImGui::BeginChild("debug.log", ImVec2(0.0f, 0.0f), ImGuiChildFlags_Borders, ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_AlwaysHorizontalScrollbar);
+            ImGui::BeginChild("log", ImVec2(0.0f, 0.0f), ImGuiChildFlags_Borders, ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_AlwaysHorizontalScrollbar);
             {
                 ImGui::TextUnformatted(Log::Get().data());
                 if(Log::Get().size() != _oldLogSize)

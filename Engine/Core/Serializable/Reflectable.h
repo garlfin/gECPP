@@ -98,7 +98,7 @@ public:
 		const TYPE_T* GetType() const override { return &Type; }; \
 		FORCE_IMPL static inline const TYPE_T Type{ NAME, (FactoryFunction<SETTINGS_T>) TYPE##FACTORY }; \
 
-#ifdef GE_ENABLE_EDITOR
+#ifdef GE_ENABLE_IMGUI
 	#define REFLECTABLE_ONGUI_PROTO(SUPER) \
 		public: \
 			void OnEditorGUI(u8 depth) override { SUPER::OnEditorGUI(depth); IOnEditorGUI(depth); } \
@@ -121,7 +121,7 @@ public:
 		void OnEditorGUI(u8 depth) override { SUPER::OnEditorGUI(depth); }
 
 #define REFLECTABLE_FACTORY_IMPL(TYPE, CONSTRUCTION_T) \
-	TYPE* TYPE::TYPE##FACTORY(std::istream& in, gE::Window* t) { return (TYPE*) new CONSTRUCTION_T(in, t); }
+	TYPE* TYPE::TYPE##FACTORY(std::istream& in, TYPE::SETTINGS_T t) { return (TYPE*) new CONSTRUCTION_T(in, t); }
 
 #define REFLECTABLE_FACTORY_NO_IMPL(TYPE) \
 	TYPE* TYPE::TYPE##FACTORY(std::istream& in, TYPE::SETTINGS_T t) { return nullptr; }
@@ -131,6 +131,7 @@ public:
 
 // Typesystem must be explicity instantiated.
 template struct TypeSystem<gE::Window*>;
+template struct TypeSystem<std::nullptr_t>;
 
 template <class T>
 bool TypeCompare<T>::operator()(const TYPE_T& a, const TYPE_T& b) const

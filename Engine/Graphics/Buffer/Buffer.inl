@@ -5,6 +5,7 @@
 #pragma once
 
 #include "Buffer.h"
+#include <Core/GUI/Editor.inl>
 
 namespace GPU
 {
@@ -28,4 +29,21 @@ namespace GPU
 	{
 
 	}
+
+	template<class T>
+	REFLECTABLE_ONGUI_IMPL(Buffer<T>,
+	{
+		ImGui::TextUnformatted(std::format("Array of {}:\n\tSize: {}\n\tByte Count: {}\n\tPointer: {}",
+			demangle(typeid(T).name()),
+			Data.Count(),
+			Data.ByteCount(),
+			(void*) Data.Data()
+		).c_str());
+	});
+
+	template<class T>
+	Buffer<T>* Buffer<T>::BufferFACTORY(std::istream& in, SETTINGS_T t)
+	{
+		return new Buffer(in, t);
+	};
 }

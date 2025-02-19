@@ -162,6 +162,9 @@ void ConvertMesh(const std::vector<aiMesh*>& src, GPU::IndexedVAO& dst)
 	dst.Fields[2] = CreateField(&Vertex::Normal, "NOR\0", 2, 0);
 	FillBuffer(&Vertex::Normal, &aiMesh::mNormals, &aiMesh::mNumVertices, dst.Buffers[0], src, ConvertVec);
 
+	if(!src[0]->mTangents)
+		gE::Log::Warning(std::format("Mesh {} has no tangents!", dst.Materials[0].Name));
+
 	dst.Fields[3] = CreateField(&Vertex::Tangent, "TAN\0", 3, 0);
 	FillBuffer(&Vertex::Tangent, &aiMesh::mTangents, &aiMesh::mNumVertices, dst.Buffers[0], src, ConvertVec);
 
@@ -199,9 +202,7 @@ void FillBuffer(T S::* DST, F* aiMesh::* SRC, u32 aiMesh::* COUNT, GPU::Buffer<u
 		u32 count = mesh->*COUNT;
 		F* source = mesh->*SRC;
 
-		GE_ASSERTM(source, "MISSING FIELD");
-
-		for(u32 i = 0; i < count; i++)
+		for(u32 i = 0; source && i < count; i++)
 		{
 			if(FUNC) FUNC(offset, source[i], dst->*DST);
 			else dst->*DST = *(T*) &source[i];

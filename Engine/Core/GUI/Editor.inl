@@ -32,6 +32,7 @@ namespace gE
         using RAW_T = std::remove_cvref_t<std::remove_pointer_t<T>>;
         constexpr bool isPointer = std::is_pointer_v<std::remove_cvref_t<T>>;
         constexpr bool isConst = std::is_const_v<std::remove_pointer_t<T>>;
+        constexpr bool isReflectable = std::is_base_of_v<IReflectable, RAW_T>;
 
         RAW_T* t = nullptr;
 
@@ -51,7 +52,7 @@ namespace gE
             return false;
         }
 
-        if constexpr (isConst)
+        if constexpr (isConst && !isReflectable)
             ImGui::BeginDisabled();
 
         ImGui::PushItemWidth(-1);
@@ -68,7 +69,7 @@ namespace gE
                 changed = ImGui::SliderScalar(label.c_str(), type, t, &settings.Minimum, &settings.Maximum, nullptr, GE_EDITOR_INPUT_FLAGS);
                 break;
             case ScalarViewMode::Input:
-                changed = ImGui::InputScalar(label.c_str(), type, t, &settings.Step, nullptr, nullptr, GE_EDITOR_INPUT_FLAGS);
+                changed = ImGui::InputScalar(label.c_str(), type, t, &settings.Step, &settings.Step, nullptr, GE_EDITOR_INPUT_FLAGS);
                 break;
             case ScalarViewMode::Drag:
             default:
@@ -96,7 +97,7 @@ namespace gE
         {
             changed = ImGui::InputText(label.c_str(), t);
         }
-        else if constexpr(std::is_base_of_v<IReflectable, RAW_T>)
+        else if constexpr(isReflectable)
         {
             const std::string_view type = t->GetType() ? t->GetType()->Name : "IReflectable (NO TYPE INFO)";
 
@@ -105,7 +106,15 @@ namespace gE
 
             if(ImGui::TreeNodeEx(std::format("{} ({})", type, (void*) t).c_str(), nodeFlags))
             {
+                if constexpr (isConst)
+                    ImGui::BeginDisabled();
+
+                // not good if const, runs non-const function on const object
                 t->OnEditorGUI(depth + 1);
+
+                if constexpr (isConst)
+                    ImGui::EndDisabled();
+
                 ImGui::TreePop();
             }
         }
@@ -114,7 +123,7 @@ namespace gE
         else
             static_assert(false);
 
-        if constexpr (isConst)
+        if constexpr (isConst && !isReflectable)
             ImGui::EndDisabled();
 
         ImGui::PopItemWidth();
@@ -134,7 +143,7 @@ namespace gE
         /*if constexpr (CONST)
             ImGui::BeginDisabled();*/
 
-        ImGui::PushItemWidth(-1);
+        ImGui::PushItemWidth(-std::numeric_limits<float>::infinity());
 
         bool changed;
         switch(settings.ViewMode)
@@ -167,25 +176,31 @@ namespace gE
     template <class T, class SETTINGS_T>
     bool DrawField(const ArrayField<SETTINGS_T>& settings, Array<T>& ts, u8 depth)
     {
+        return DrawField(settings, ts.Data(), ts.Count(), depth);
+    }
+
+    template <class T, class SETTINGS_T>
+    bool DrawField(const ArrayField<SETTINGS_T>& settings, T* ts, size_t count, u8 depth)
+    {
         if((bool)(settings.ViewMode & ArrayViewMode::Stats))
         {
-            ImGui::TextUnformatted(std::format("Array of {}\nSize: {}\nByte Count: {}\nPointer: {}",
+            ImGui::TextUnformatted(std::format("Array of {}:\n\tSize: {}\n\tByte Count: {}\n\tPointer: {}",
                 demangle(typeid(T).name()),
-                ts.Count(),
-                ts.ByteCount(),
-                (void*) ts.Data()
+                count,
+                sizeof(T) * count,
+                (void*) ts
             ).c_str());
         }
 
         bool changed = false;
-        if((bool)(settings.ViewMode & ArrayViewMode::Elements))
+        if((bool)(settings.ViewMode & ArrayViewMode::Elements) && ts)
         {
-            ImGui::BeginTable("table", 2, ImGuiTableFlags_SizingFixedSame | ImGuiTableFlags_BordersOuterH);
+            ImGui::BeginTable("table", 2, GE_EDITOR_TABLE_FLAGS & ~ImGuiTableFlags_Resizable);
             ImGui::TableSetupColumn("Index");
             ImGui::TableSetupColumn("Value");
-            ImGui::TableHeader("");
+            ImGui::TableHeadersRow();
 
-            for(size_t i = 0; i < ts.Count(); i++)
+            for(size_t i = 0; i < count; i++)
             {
                 ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(0);

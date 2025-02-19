@@ -48,15 +48,8 @@ add_library(PUGIXML STATIC Vendor/PUGIXML/pugixml.cpp Vendor/PUGIXML/pugixml.hpp
 file(GLOB_RECURSE GECPP_SRC "Engine/*.cpp" "Engine/*.h" "Engine/*.inl")
 
 add_library(gECPP STATIC ${GECPP_SRC})
-target_compile_definitions(gECPP PUBLIC API_ID=API_GL)
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_compile_definitions(gECPP PUBLIC GE_ENABLE_EDITOR GE_ENABLE_IMGUI)
-endif()
+target_compile_definitions(gECPP PUBLIC API_ID=API_GL GE_ENABLE_EDITOR GE_ENABLE_IMGUI)
 target_link_libraries(gECPP GLAD SDL JOLT CITYHASH IMGUI)
-
-add_library(gECPP_NOEDITOR STATIC ${GECPP_SRC})
-target_compile_definitions(gECPP_NOEDITOR PUBLIC API_ID=API_GL GE_ENABLE_IMGUI)
-target_link_libraries(gECPP_NOEDITOR GLAD SDL JOLT CITYHASH IMGUI)
 
 # VOXELDEMO
 file(GLOB_RECURSE VOXELDEMO_SRC "Demo/*.cpp" "Demo/*.h" "Demo/*.inl")
@@ -66,4 +59,4 @@ target_link_libraries(VoxelDemo gECPP)
 # GEMODEL
 file(GLOB_RECURSE GEMODEL_SRC "gEModel/*.cpp" "gEModel/*.h" "gEModel/*.inl")
 add_executable(gEModel ${GEMODEL_SRC})
-target_link_libraries(gEModel gECPP_NOEDITOR ASSIMP)
+target_link_libraries(gEModel gECPP ASSIMP)

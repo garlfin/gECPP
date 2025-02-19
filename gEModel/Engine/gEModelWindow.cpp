@@ -13,7 +13,6 @@
 namespace gE::gEModel
 {
     CONSTEXPR_GLOBAL SDL_DialogFileFilter MODEL_FILTER { "3D Models", "dae;fbx;obj;gltf;glb" };
-    CONSTEXPR_GLOBAL SDL_DialogFileFilter MODEL_OUTPUT_FILTER { "gEMesh", "mesh" };
 
     void FileCallbackInput(gEModelWindow* out, const char* const* files, int);
     void FileCallbackOutput(gEModelWindow* out, const char* const* files, int);
@@ -30,26 +29,38 @@ namespace gE::gEModel
         // Input
         ImGui::TextUnformatted("Input");
         ImGui::SameLine();
-        ImGui::SetCursorPosX(100.f);
+        ImGui::SetCursorPosX(128.f);
         ImGui::InputText("##input_input", &_input);
         ImGui::SameLine();
         if(ImGui::Button("Browse##input"))
             SDL_ShowOpenFileDialog((SDL_DialogFileCallback) FileCallbackInput, this, nullptr, &MODEL_FILTER, 1, _input.c_str(), false);
 
         // Output
-        /*ImGui::TextUnformatted("Output");
+        ImGui::TextUnformatted("Output Folder");
         ImGui::SameLine();
-        ImGui::SetCursorPosX(100.f);
+        ImGui::SetCursorPosX(128.f);
         ImGui::InputText("##input_output", &_output);
         ImGui::SameLine();
         if(ImGui::Button("Browse##output"))
-            SDL_ShowSaveFileDialog((SDL_DialogFileCallback) FileCallbackOutput, this, nullptr, &MODEL_OUTPUT_FILTER, 1, _output.c_str());*/
+            SDL_ShowOpenFolderDialog((SDL_DialogFileCallback) FileCallbackOutput, this, nullptr, _output.c_str(), false);
 
         if(!_input.empty() && ImGui::Button("Initial Conversion"))
             ConvertFile(this, _input);
 
         if(_meshes)
+        {
+            ImGui::SameLine();
+            if(ImGui::Button("Save"))
+            {
+                for(Mesh& mesh : _meshes)
+                {
+                    Path path = Path(_output) / Path(mesh.Name).replace_extension(".mesh");
+                    WriteSerializableToFile(path, mesh);
+                }
+                Log::Info("Files saved.");
+            }
             DrawField(ArrayField<Field>{}, _meshes, 0);
+        }
 
         ImGui::End();
         GUI->EndGUI();
@@ -65,7 +76,7 @@ namespace gE::gEModel
         if(!files[0]) return;
 
         std::string path = std::string(files[0]);
-        out->SetOutput(Path(path).replace_extension(".mesh").string());
+        out->SetOutput(Path(path).parent_path().string());
         out->SetInput(move(path));
     }
 

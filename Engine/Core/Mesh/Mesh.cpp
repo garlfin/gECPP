@@ -20,7 +20,7 @@ namespace gE
             Read(in, Bounds);
         }
 
-        const Type<Window*>* type = ReadType<Window*>(in);
+        const TYPE_T* type = ReadType<Window*>(in);
         GE_ASSERTM(type, "NO TYPE INFO!");
 
         // Super dumb but super works.
@@ -29,7 +29,7 @@ namespace gE
 
         if(Version == 2 && Read<bool>(in))
         {
-            const Type<Window*>* shapeType = ReadType<Window*>(in);
+            const TYPE_T* shapeType = ReadType<Window*>(in);
             GE_ASSERTM(shapeType, "NO SHAPE TYPE INFO!");
 
             Serializable* shape = shapeType->Factory(in, s);
@@ -45,7 +45,7 @@ namespace gE
 
         Write(out, Bounds);
 
-        const Type<Window*>* type = GetMeshType();
+        const TYPE_T* type = GetMeshType();
         GE_ASSERTM(type, "NO TYPE INFO!");
 
         WriteType(out, *type);
@@ -54,7 +54,7 @@ namespace gE
         Write(out, (bool) Shape);
         if(Shape)
         {
-            const Type<Window*>* shapeType = GetShapeType();
+            const TYPE_T* shapeType = GetShapeType();
             GE_ASSERTM(shapeType, "NO SHAPE TYPE INFO!");
 
             WriteType(out, *shapeType);
@@ -75,4 +75,15 @@ namespace gE
     {
         return Name.empty() && MaterialNames.IsFree() && VAO.IsFree() && Shape.IsFree() && BoneWeights.IsFree();
     }
+
+    REFLECTABLE_ONGUI_IMPL(Mesh,
+    {
+        DrawField(Field{ "Name"sv }, Name, depth);
+        DrawField(Field{ "VAO"sv }, VAO->GetSettings(), depth);
+
+        if(Shape)
+            DrawField(Field{ "Shape"sv }, Shape->GetSettings(), depth);
+    });
+
+    REFLECTABLE_FACTORY_IMPL(Mesh, Mesh);
 }
