@@ -20,6 +20,7 @@ namespace gE
 	inline bool CompareSubMesh(const Managed<DrawCall>&, const Managed<DrawCall>&);
 	inline bool CompareLOD(const Managed<DrawCall>&, const Managed<DrawCall>&);
 
+	// TODO: Change?
 	struct DrawCall final : public Managed<DrawCall>
 	{
 	public:
@@ -50,7 +51,7 @@ namespace gE
 		LinkedNode<Managed> _lodIterator;
 	};
 
-	class DrawCallManager : public Manager<Managed<DrawCall>>
+	class DrawCallManager final : public Manager<Managed<DrawCall>>
 	{
 	public:
 		explicit DrawCallManager(Window* window) :
@@ -59,14 +60,14 @@ namespace gE
 			_indirectDrawBuffer.Bind(API::BufferTarget::IndirectDrawBuffer);
 		}
 
-		void OnRender(float d, Camera* camera);
+		void OnRender(float delta, const Camera* camera) const;
 
 		ALWAYS_INLINE void UpdateDrawCalls(u64 size = sizeof(API::IndirectDrawIndexed) * API_MAX_MULTI_DRAW, u64 offset = 0) const
 		{
 			_indirectDrawBuffer.ReplaceDataDirect((u8*) IndirectDraws + offset, size, offset);
 		}
 
-		API::IndirectDrawIndexed IndirectDraws[API_MAX_MULTI_DRAW];
+		API::IndirectDrawIndexed IndirectDraws[API_MAX_MULTI_DRAW] DEFAULT;
 
 	protected:
 		void OnRegister(Managed<DrawCall>& t) override;

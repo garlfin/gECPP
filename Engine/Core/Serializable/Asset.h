@@ -82,7 +82,7 @@ namespace gE
         NODISCARD ALWAYS_INLINE T& Cast() const;
 
         template<class T> requires std::is_base_of_v<Asset, T>
-        NODISCARD ALWAYS_INLINE T& CastSafe() const;
+        NODISCARD ALWAYS_INLINE T* CastSafe() const;
 
         GET_CONST(const Reference<Asset>&, , _asset);
         GET_CONST(const WeakReference<Asset>&, Weak, _weakAsset);
@@ -132,6 +132,8 @@ namespace gE
         SERIALIZABLE_PROTO("BANK", 0, Bank, Serializable);
 
     public:
+        using FILE_SET_T = std::set<File, AssetCompare>;
+
         Bank(Window* window, const Path& path, AssetLoadMode);
 
         void Free() { _path.clear(); _stream.close(); }
@@ -141,12 +143,16 @@ namespace gE
         GET(std::istream&, Stream, _stream);
         GET_CONST(Window&, Window, *_window);
         GET_CONST(const UUID&, UUID, _uuid);
+        GET(FILE_SET_T, Files, _files);
 
         const File* FindFile(const Path& path) { return FindFile(HashPath(path)); }
         const File* FindFile(const UUID& uuid);
 
         const File* AddFile(File&&);
         void RemoveFile(const File&);
+
+        template<class SERIALIZABLE_T>
+        const File* AddSerializableFromFile(const Path&);
 
         NODISCARD ALWAYS_INLINE bool operator<(const Bank& o) const { return _uuid < o._uuid; }
 
@@ -157,7 +163,7 @@ namespace gE
         UUID _uuid = DEFAULT;
         std::ifstream _stream = DEFAULT;
 
-        std::set<File, AssetCompare> _files = DEFAULT;
+        FILE_SET_T _files = DEFAULT;
         Window* _window = DEFAULT;
 
         friend class File;
@@ -176,6 +182,9 @@ namespace gE
     class AssetManager
     {
     public:
+        using FILE_SET_T = std::set<File, AssetCompare>;
+        using BANK_SET_T = std::set<Pointer<Bank>, AssetCompare>;
+
         explicit AssetManager(Window* window) : _window(window) {}
 
         void LoadBanksInFolder(const Path& folder, AssetLoadMode mode = AssetLoadMode::Paths);
@@ -186,6 +195,9 @@ namespace gE
 
         const File* LoadFile(const Path& path, AssetLoadMode = AssetLoadMode::Paths);
         const File* AddFile(File&&);
+
+        template<class SERIALIZABLE_T>
+        const File* AddSerializableFromFile(const Path&);
 
         NODISCARD const File* FindFile(const Path& path) { return FindFile(HashPath(path)); }
         NODISCARD const File* FindFile(const UUID& uuid);
@@ -198,11 +210,14 @@ namespace gE
         bool RemoveFile(const Path& path) { return RemoveFile(HashPath(path)); }
         bool RemoveFile(const UUID& uuid);
 
+        GET(FILE_SET_T&, Files, _files);
+        GET(BANK_SET_T&, Banks, _banks);
+
     private:
         Window* _window;
 
-        std::set<File, AssetCompare> _files = DEFAULT;
-        std::set<Pointer<Bank>, AssetCompare> _banks = DEFAULT;
+        FILE_SET_T _files = DEFAULT;
+        BANK_SET_T _banks = DEFAULT;
     };
 }
 

@@ -19,7 +19,7 @@ namespace gE
 		REFLECTABLE_PROTO_NOIMPL(Reflectable);
 
 	 public:
-		explicit Component(Entity* o, IComponentManager* = nullptr);
+		explicit Component(Entity* owner, IComponentManager* = nullptr);
 
 		GET_CONST(Entity&, Owner, *_owner);
 		GET_CONST(Window&, Window, _window);

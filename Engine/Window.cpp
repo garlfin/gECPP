@@ -42,10 +42,11 @@ Window::Window(glm::u16vec2 size, const std::string& name) :
 	Transforms(this),
 	CullingManager(this),
 	Behaviors(this),
+	Sounds(this),
 #ifdef GE_ENABLE_EDITOR
 	Editor(this),
 #endif
-    AssetManager(this),
+    Assets(this),
 	_size(size),
 	_name(name),
 	_mouseState(this)
@@ -293,6 +294,7 @@ void Window::OnUpdate(float delta)
 	Cameras.OnUpdate(delta);
 	Behaviors.OnUpdate(delta);
 	Transforms.OnUpdate(delta);
+	Sounds.OnUpdate(delta);
 
 	Entities.FinalizeDeletions();
 }

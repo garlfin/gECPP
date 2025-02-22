@@ -9,11 +9,16 @@
 #include <Core/Serializable/Serializable.h>
 #include <IMGUI/imgui.h>
 
+#include "Core/AssetManager.h"
+
 #define GE_EDITOR_HIERARCHY_FLAGS ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth
 #define GE_EDITOR_TABLE_FLAGS ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_NoHostExtendX | ImGuiTableFlags_Resizable
 #define GE_EDITOR_TOOLTIP_FLAGS ImGuiHoveredFlags_Stationary | ImGuiHoveredFlags_DelayShort | ImGuiHoveredFlags_AllowWhenDisabled
 #define GE_EDITOR_INPUT_FLAGS ImGuiSliderFlags_AlwaysClamp
 #define GE_EDITOR_COLOR_PICKER_FLAGS ImGuiColorEditFlags_Float | ImGuiColorEditFlags_InputRGB | ImGuiColorEditFlags_NoOptions | ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_AlphaPreviewHalf
+#define GE_EDITOR_ICON_PADDING 16
+
+CONSTEXPR_GLOBAL const char* GE_EDITOR_RELFECTABLE_PAYLOAD = "RELFECTABLE";
 
 namespace gE
 {
@@ -23,24 +28,29 @@ namespace gE
     public:
         explicit Editor(Window* window);
 
-        static void DrawEntityDrawer();
-        void DrawInspector();
-        void DrawHierarchy();
-
         void OnGUI();
 
         GET_SET_VALUE(bool, EditorOpen, _isEditorOpen);
         GET_SET_VALUE(Entity*, SelectedEntity, _activeEntity);
         GET_SET_VALUE(bool, IsRunning, _running);
 
+        GET_SET(Path&, AssetPath, _assetPath);
+        SET_XVAL(Path, AssetPath, _assetPath);
+
     private:
+        static void DrawEntityDrawer();
         void DrawLog();
+        void DrawInspector();
+        void DrawHierarchy();
+        void DrawAssetManager();
 
         Window* _window = nullptr;
         Entity* _activeEntity = nullptr;
         bool _isEditorOpen = false;
         bool _running = true;
         size_t _oldLogSize = 0;
+        Path _assetPath = "";
+        u16 _assetScale = 64;
     };
 #endif
 
@@ -113,6 +123,9 @@ namespace gE
     template<class T, class SETTINGS_T>
     bool DrawField(const SETTINGS_T&, T&, u8 depth);
 
+    template<class T, class SETTINGS_T>
+    bool DrawField(const SETTINGS_T&, T*, u8 depth);
+
     template <class T, glm::length_t COMPONENT_COUNT>
     bool DrawField(const ScalarField<T>&, glm::vec<COMPONENT_COUNT, T>&, u8 depth);
 
@@ -121,6 +134,9 @@ namespace gE
 
     template<class T, class SETTINGS_T>
     bool DrawField(const ArrayField<SETTINGS_T>&, T*, size_t, u8 depth);
+
+    template<class T> requires std::is_base_of_v<Reflectable<Window*>, T>
+    bool DrawField(const Field& settings, Reference<T>&, u8 depth);
 
     template<class SETTINGS_T, class OWNER_T, class OUT_T, class IN_T>
     bool DrawField(const SETTINGS_T&, OWNER_T&, u8 depth, GetterFunction<OUT_T, OWNER_T>, SetterFunction<IN_T, OWNER_T>);

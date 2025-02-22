@@ -6,6 +6,7 @@
 #include <Component/Camera/Camera.h>
 #include <Component/MeshRenderer/MeshRenderer.h>
 #include <Component/Physics/RigidBody.h>
+#include <Component/Sound/Sound.h>
 #include <Core/AssetManager.h>
 #include <Core/KeyboardState.h>
 #include <Core/MouseState.h>
@@ -85,7 +86,8 @@ namespace gE
 		GET(GPU::TextureSlotManager&, SlotManager, SlotManager);
 		GET(PhysicsManager&, Physics, Physics);
 		GET(EntityManager&, Entities, Entities);
-		GET(AssetManager&, Assets, AssetManager);
+		GET(AssetManager&, Assets, Assets);
+		GET(SoundManager&, Sounds, Sounds);
 
 		// Engine States
 		RenderFlags RenderState = DEFAULT;
@@ -141,6 +143,7 @@ namespace gE
 		EntityManager Entities;
 		Pointer<GUIManager> GUI;
 		ComponentManager<Behavior> Behaviors;
+		SoundManager Sounds;
 
 #ifdef GE_ENABLE_EDITOR
 		Editor Editor;
@@ -156,7 +159,7 @@ namespace gE
 		Pointer<API::ComputeShader> VoxelComputeShader;
 		Pointer<API::ComputeShader> HiZShader;
 
-		AssetManager AssetManager;
+		AssetManager Assets;
 
 	 private:
 		SDL_Window* _window;

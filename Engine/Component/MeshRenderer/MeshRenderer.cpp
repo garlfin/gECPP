@@ -72,6 +72,13 @@ namespace gE
 		PlacementNew(_drawCalls[i], manager, *this, Reference<Material>(nullptr), i);
 	}
 
+	REFLECTABLE_FACTORY_NO_IMPL(MeshRenderer);
+
+	void MeshRenderer::IOnEditorGUI(u8 depth)
+	{
+		DrawField(Field{ "Mesh"sv }, _mesh, depth);
+	};
+
 	void RendererManager::OnRender(float d, Camera* camera)
 	{
 		IComponentManager::OnRender(d, camera);
@@ -84,7 +91,7 @@ namespace gE
 		DrawCall* next = nullptr;
 		DrawCall* insertLocation = nullptr;
 
-		if(similar = FindSimilarSafe<CompareVAO, &DrawCall::_vaoIterator>(t, _vaoList, nullptr, nullptr))
+		if((similar = FindSimilarSafe<CompareVAO, &DrawCall::_vaoIterator>(t, _vaoList, nullptr, nullptr)))
 		{
 			next = DRAWCALL_SUBITER_SAFE(similar, _vaoIterator.GetNext(), IPTR_TO_TPTR);
 			insertLocation = next;
@@ -92,7 +99,7 @@ namespace gE
 		else
 			_vaoList.Add(t->_vaoIterator);
 
-		if(similar && (similar = FindSimilarSafe<CompareMaterial, &DrawCall::_materialIterator>(t, _materialList, similar, next)))
+		if(similar && ((similar = FindSimilarSafe<CompareMaterial, &DrawCall::_materialIterator>(t, _materialList, similar, next))))
 		{
 			next = DRAWCALL_SUBITER_SAFE(similar, _materialIterator.GetNext(), IPTR_TO_TPTR);
 			insertLocation = next;
@@ -100,7 +107,7 @@ namespace gE
 		else
 			_materialList.Insert(t->_materialIterator, DRAWCALL_SIMILAR_SAFE(insertLocation, _materialIterator), DRAWCALL_DIRECTION);
 
-		if(similar && (similar = FindSimilarSafe<CompareSubMesh, &DrawCall::_subMeshIterator>(t, _subMeshList, similar, next)))
+		if(similar && ((similar = FindSimilarSafe<CompareSubMesh, &DrawCall::_subMeshIterator>(t, _subMeshList, similar, next))))
 		{
 			next = DRAWCALL_SUBITER_SAFE(similar, _subMeshIterator.GetNext(), IPTR_TO_TPTR);
 			insertLocation = next;
@@ -119,7 +126,7 @@ namespace gE
 		List.Insert(t.GetNode(), DRAWCALL_SIMILAR_SAFE(insertLocation, GetNode()), DRAWCALL_DIRECTION);
 	}
 
-	void DrawCallManager::OnRender(float d, Camera* camera)
+	void DrawCallManager::OnRender(float delta, const Camera* camera) const
 	{
 		Window& window = camera->GetWindow();
 		DefaultPipeline::Buffers& buffers = window.GetPipelineBuffers();

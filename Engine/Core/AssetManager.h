@@ -25,7 +25,7 @@ namespace gE
 	class Reference
 	{
 	 public:
-		explicit inline Reference(T* t) : _t(t) { if(t) _counter = new RefCounter(1, 0); }
+		explicit Reference(T* t) : _t(t) { if(t) _counter = new RefCounter(1, 0); }
 		Reference() = default;
 
 		OPERATOR_COPY_NOSUPER(Reference, Free,

@@ -38,6 +38,8 @@ gE::GUIManager::GUIManager(Window* window) :
 
     PlacementNew(_imFont, window, move(fontFormat));
     PlacementNew(_imShader, window, GPU::Shader("Resource/Shader/GUI/IMGUI.vert", "Resource/Shader/GUI/IMGUI.frag"));
+
+    io.Fonts->SetTexID((ImTextureID) &_imFont);
 #endif
 }
 
@@ -135,8 +137,8 @@ void gE::GUIManager::OnRender(const ImDrawData* draw) const
                 continue;
 
             glScissor((int)clipMin.x, (int)((float)height - clipMax.y), (int)(clipMax.x - clipMin.x), (int)(clipMax.y - clipMin.y));
+            _imShader.SetUniform(1, *(API::Texture2D*) drawCall.GetTexID(), 0);
 
-            _imShader.SetUniform(1, _imFont, 0);
             vao.DrawDirect(drawCall.ElemCount / 3, drawCall.IdxOffset);
         }
     }

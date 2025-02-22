@@ -13,42 +13,44 @@
 
 namespace gE
 {
-	class MeshRenderer : public Component
-	{
-	 public:
-		MeshRenderer(Entity* o, const Reference<Mesh>& mesh);
+    class MeshRenderer : public Component
+    {
+        REFLECTABLE_PROTO(MeshRenderer, Component, "gE::MeshRenderer");
 
-		void OnInit() override {};
-		void OnRender(float delta, Camera*) override;
+    public:
+        MeshRenderer(Entity* o, const Reference<Mesh>& mesh);
 
-		GET_CONST(Mesh&, Mesh, *_mesh);
+        void OnInit() override {};
+        void OnRender(float delta, Camera*) override;
 
-		NODISCARD ALWAYS_INLINE Material& GetMaterial(u8 i) { return *_drawCalls[i].GetMaterial(); }
-		NODISCARD ALWAYS_INLINE const Material& GetMaterial(u8 i) const { return *_drawCalls[i].GetMaterial(); }
+        GET_CONST(Mesh&, Mesh, *_mesh);
 
-		void SetMaterial(u8 i, const Reference<Material>& mat);
-		void SetMaterial(u8 i, Reference<Material>&& mat);
-		void SetNullMaterial(u8 i);
+        NODISCARD ALWAYS_INLINE Material& GetMaterial(u8 i) { return *_drawCalls[i].GetMaterial(); }
+        NODISCARD ALWAYS_INLINE const Material& GetMaterial(u8 i) const { return *_drawCalls[i].GetMaterial(); }
 
-		friend class RendererManager;
+        void SetMaterial(u8 i, const Reference<Material>& mat);
+        void SetMaterial(u8 i, Reference<Material>&& mat);
+        void SetNullMaterial(u8 i);
 
-	 private:
-		Reference<Mesh> _mesh;
-		Array<DrawCall> _drawCalls;
-	};
+        friend class RendererManager;
 
-	class RendererManager : public ComponentManager<MeshRenderer>
-	{
-	 public:
-		explicit RendererManager(Window* window) : ComponentManager(window), _drawCallManager(window) {};
+    private:
+        Reference<Mesh> _mesh;
+        Array<DrawCall> _drawCalls;
+    };
 
-		void OnRender(float d, Camera* camera) override;
+    class RendererManager : public ComponentManager<MeshRenderer>
+    {
+    public:
+        explicit RendererManager(Window* window) : ComponentManager(window), _drawCallManager(window) {};
 
-		GET(DrawCallManager&, DrawCallManager, _drawCallManager);
+        void OnRender(float d, Camera* camera) override;
 
-	private:
-		DrawCallManager _drawCallManager;
-	};
+        GET(DrawCallManager&, DrawCallManager, _drawCallManager);
+
+    private:
+        DrawCallManager _drawCallManager;
+    };
 }
 
 #include "MeshRenderer.inl"

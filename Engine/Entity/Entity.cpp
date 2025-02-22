@@ -79,11 +79,11 @@ namespace gE
 		}
 	}
 
-	Component::Component(Entity* o, IComponentManager* m) :
-		Managed(m, *this),
-		_window(o->GetWindow()), _owner(o)
+	Component::Component(Entity* owner, IComponentManager* manager) :
+		Managed(manager, *this),
+		_window(owner->GetWindow()), _owner(owner)
 	{
-
+		GE_ASSERT(owner);
 	}
 
 	void IComponentManager::OnUpdate(float delta)

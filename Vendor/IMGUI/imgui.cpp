@@ -14917,6 +14917,48 @@ const ImGuiPayload* ImGui::AcceptDragDropPayload(const char* type, ImGuiDragDrop
     return &payload;
 }
 
+const ImGuiPayload* ImGui::AcceptDragDropPayload(IMGUI_ACCEPT_PAYLOAD_FUNC func, ImGuiDragDropFlags flags)
+{
+    ImGuiContext& g = *GImGui;
+    ImGuiPayload& payload = g.DragDropPayload;
+    IM_ASSERT(g.DragDropActive);                        // Not called between BeginDragDropTarget() and EndDragDropTarget() ?
+    IM_ASSERT(payload.DataFrameCount != -1);            // Forgot to call EndDragDropTarget() ?
+    IM_ASSERT(func);
+    if (!func(payload))
+        return NULL;
+
+    // Accept smallest drag target bounding box, this allows us to nest drag targets conveniently without ordering constraints.
+    // NB: We currently accept NULL id as target. However, overlapping targets requires a unique ID to function!
+    const bool was_accepted_previously = (g.DragDropAcceptIdPrev == g.DragDropTargetId);
+    ImRect r = g.DragDropTargetRect;
+    float r_surface = r.GetWidth() * r.GetHeight();
+    if (r_surface > g.DragDropAcceptIdCurrRectSurface)
+        return NULL;
+
+    g.DragDropAcceptFlags = flags;
+    g.DragDropAcceptIdCurr = g.DragDropTargetId;
+    g.DragDropAcceptIdCurrRectSurface = r_surface;
+    //IMGUI_DEBUG_LOG("AcceptDragDropPayload(): %08X: accept\n", g.DragDropTargetId);
+
+    // Render default drop visuals
+    payload.Preview = was_accepted_previously;
+    flags |= (g.DragDropSourceFlags & ImGuiDragDropFlags_AcceptNoDrawDefaultRect); // Source can also inhibit the preview (useful for external sources that live for 1 frame)
+    if (!(flags & ImGuiDragDropFlags_AcceptNoDrawDefaultRect) && payload.Preview)
+        RenderDragDropTargetRect(r, g.DragDropTargetClipRect);
+
+    g.DragDropAcceptFrameCount = g.FrameCount;
+    if ((g.DragDropSourceFlags & ImGuiDragDropFlags_SourceExtern) && g.DragDropMouseButton == -1)
+        payload.Delivery = was_accepted_previously && (g.DragDropSourceFrameCount < g.FrameCount);
+    else
+        payload.Delivery = was_accepted_previously && !IsMouseDown(g.DragDropMouseButton); // For extern drag sources affecting OS window focus, it's easier to just test !IsMouseDown() instead of IsMouseReleased()
+    if (!payload.Delivery && !(flags & ImGuiDragDropFlags_AcceptBeforeDelivery))
+        return NULL;
+
+    if (payload.Delivery)
+        IMGUI_DEBUG_LOG_ACTIVEID("[dragdrop] AcceptDragDropPayload(): 0x%08X: payload delivery\n", g.DragDropTargetId);
+    return &payload;
+}
+
 // FIXME-STYLE FIXME-DRAGDROP: Settle on a proper default visuals for drop target.
 void ImGui::RenderDragDropTargetRect(const ImRect& bb, const ImRect& item_clip_rect)
 {

@@ -20,9 +20,21 @@ namespace gE
     }
 
     template <class T> requires std::is_base_of_v<Asset, T>
-    T& File::CastSafe() const
+    T* File::CastSafe() const
     {
         GE_ASSERT(_weakAsset.IsValid());
         return dynamic_cast<T*>(_asset.GetPointer());
+    }
+
+    template <class SERIALIZABLE_T>
+    const File* Bank::AddSerializableFromFile(const Path& path)
+    {
+        return AddFile(File(path, ref_cast(ReadSerializableFromFile<SERIALIZABLE_T>(_window, path))));
+    }
+
+    template <class SERIALIZABLE_T>
+    const File* AssetManager::AddSerializableFromFile(const Path& path)
+    {
+        return AddFile(File(path, ref_cast(ReadSerializableFromFile<SERIALIZABLE_T>(_window, path))));
     }
 }

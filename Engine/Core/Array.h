@@ -8,6 +8,9 @@
 #include <Core/Macro.h>
 #include <Core/Math/Math.h>
 
+template<class T>
+using Range = std::ranges::subrange<T>;
+
 template<typename T>
 class Array
 {

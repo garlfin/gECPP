@@ -27,30 +27,16 @@ namespace gE
     IM_TYPE_(double, ImGuiDataType_Double);
 
     template <class T, class SETTINGS_T>
-    bool DrawField(const SETTINGS_T& settings, T& t_, u8 depth)
+    bool DrawField(const SETTINGS_T& settings, T& t, u8 depth)
     {
-        using RAW_T = std::remove_cvref_t<std::remove_pointer_t<T>>;
-        constexpr bool isPointer = std::is_pointer_v<std::remove_cvref_t<T>>;
-        constexpr bool isConst = std::is_const_v<std::remove_pointer_t<T>>;
+        using RAW_T = std::remove_cvref_t<T>;
+        constexpr bool isConst = std::is_const_v<T>;
         constexpr bool isReflectable = std::is_base_of_v<IReflectable, RAW_T>;
-
-        RAW_T* t = nullptr;
-
-        if constexpr(!isPointer)
-            t = (RAW_T*) &t_;
-        else
-            t = (RAW_T*) t_;
 
         const std::string label = std::format("##{}", settings.Name);
 
         ImGui::TextUnformatted(settings.Name.data());
         ImGui::SameLine();
-
-        if(!t)
-        {
-            ImGui::TextUnformatted(std::format("{}", (void*) t).c_str());
-            return false;
-        }
 
         if constexpr (isConst && !isReflectable)
             ImGui::BeginDisabled();
@@ -58,7 +44,7 @@ namespace gE
         ImGui::PushItemWidth(-1);
 
         bool changed = false;
-        if constexpr(std::is_scalar_v<RAW_T> && !isPointer && !std::is_same_v<RAW_T, bool>)
+        if constexpr(std::is_scalar_v<RAW_T> && !std::is_same_v<RAW_T, bool>)
         {
             static_assert(std::is_same_v<SETTINGS_T, ScalarField<RAW_T>>);
             constexpr ImGuiDataType type = IMType<RAW_T>;
@@ -66,51 +52,51 @@ namespace gE
             switch(settings.ViewMode)
             {
             case ScalarViewMode::Slider:
-                changed = ImGui::SliderScalar(label.c_str(), type, t, &settings.Minimum, &settings.Maximum, nullptr, GE_EDITOR_INPUT_FLAGS);
+                changed = ImGui::SliderScalar(label.c_str(), type, (void*) &t, &settings.Minimum, &settings.Maximum, nullptr, GE_EDITOR_INPUT_FLAGS);
                 break;
             case ScalarViewMode::Input:
-                changed = ImGui::InputScalar(label.c_str(), type, t, &settings.Step, &settings.Step, nullptr, GE_EDITOR_INPUT_FLAGS);
+                changed = ImGui::InputScalar(label.c_str(), type, (void*) &t, &settings.Step);
                 break;
             case ScalarViewMode::Drag:
             default:
-                changed = ImGui::DragScalar(label.c_str(), type, t, (float) settings.Step, &settings.Minimum, &settings.Maximum, nullptr, GE_EDITOR_INPUT_FLAGS);
+                changed = ImGui::DragScalar(label.c_str(), type, (void*) &t, (float) settings.Step, &settings.Minimum, &settings.Maximum, nullptr, GE_EDITOR_INPUT_FLAGS);
             }
 
             if constexpr(!isConst)
-                *t = glm::clamp(*t, settings.Minimum, settings.Maximum);
+                t = glm::clamp(t, settings.Minimum, settings.Maximum);
 
             if(!settings.Tooltip.empty() && ImGui::IsItemHovered(GE_EDITOR_TOOLTIP_FLAGS))
                 ImGui::SetTooltip(settings.Tooltip.data());
         }
         else GE_SWITCH_TYPE(bool)
         {
-            T temp = *t;
+            T temp = t;
             if constexpr(isConst)
                 ImGui::Checkbox(label.c_str(), &temp);
             else
             {
-                ImGui::Checkbox(label.c_str(), t);
-                changed = temp == *t;
+                ImGui::Checkbox(label.c_str(), &t);
+                changed = temp == t;
             }
         }
         else GE_SWITCH_TYPE(std::string)
         {
-            changed = ImGui::InputText(label.c_str(), t);
+            changed = ImGui::InputText(label.c_str(), &t);
         }
         else if constexpr(isReflectable)
         {
-            const std::string_view type = t->GetType() ? t->GetType()->Name : "IReflectable (NO TYPE INFO)";
+            const std::string_view type = t.GetType() ? t.GetType()->Name : "IReflectable (NO TYPE INFO)";
 
             ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
             if(depth < 1) nodeFlags |= ImGuiTreeNodeFlags_DefaultOpen;
 
-            if(ImGui::TreeNodeEx(std::format("{} ({})", type, (void*) t).c_str(), nodeFlags))
+            if(ImGui::TreeNodeEx(std::format("{} ({})", type, (void*) &t).c_str(), nodeFlags))
             {
                 if constexpr (isConst)
                     ImGui::BeginDisabled();
 
                 // not good if const, runs non-const function on const object
-                t->OnEditorGUI(depth + 1);
+                ((RAW_T&) t).OnEditorGUI(depth + 1);
 
                 if constexpr (isConst)
                     ImGui::EndDisabled();
@@ -118,8 +104,6 @@ namespace gE
                 ImGui::TreePop();
             }
         }
-        else if constexpr(isPointer)
-            ImGui::TextUnformatted(std::format("{}", (void*) t_).c_str());
         else
             static_assert(false);
 
@@ -130,10 +114,27 @@ namespace gE
         return changed;
     }
 
+    template <class T, class SETTINGS_T>
+    bool DrawField(const SETTINGS_T& settings, T* t, u8 depth)
+    {
+        const std::string label = std::format("##{}", settings.Name);
+        std::string ptr = std::format("{}", (void*) t);
+
+        ImGui::TextUnformatted(settings.Name.data());
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(-1);
+        ImGui::InputText(label.c_str(), &ptr, ImGuiInputTextFlags_ReadOnly);
+
+        if(t)
+            return DrawField(settings, *t, depth);
+        return false;
+    }
+
     template <class T, glm::length_t COMPONENT_COUNT>
-    bool DrawField(const ScalarField<T>& settings, glm::vec<COMPONENT_COUNT, T>& t, u8 depth)
+    bool DrawField(const ScalarField<T>& settings, glm::vec<COMPONENT_COUNT, T>& vec, u8 depth)
     {
         constexpr ImGuiDataType type = IMType<T>;
+        using RAW_T = glm::vec<COMPONENT_COUNT, T>;
 
         const std::string label = std::format("##{}", settings.Name);
 
@@ -143,24 +144,36 @@ namespace gE
         /*if constexpr (CONST)
             ImGui::BeginDisabled();*/
 
-        ImGui::PushItemWidth(-std::numeric_limits<float>::infinity());
+        ImGui::PushItemWidth(-1);
 
-        bool changed;
-        switch(settings.ViewMode)
+        bool changed = false;
+        if(settings.ViewMode == ScalarViewMode::ColorPicker)
         {
-        case ScalarViewMode::Slider:
-            changed = ImGui::SliderScalarN(label.c_str(), type, &t, COMPONENT_COUNT, &settings.Minimum, &settings.Maximum, nullptr, GE_EDITOR_INPUT_FLAGS);
-            break;
-        case ScalarViewMode::Input:
-            changed = ImGui::InputScalarN(label.c_str(), type, &t, COMPONENT_COUNT, &settings.Step, nullptr, nullptr, GE_EDITOR_INPUT_FLAGS);
-            break;
-        case ScalarViewMode::Drag:
-        default:
-            changed = ImGui::DragScalarN(label.c_str(), type, &t, COMPONENT_COUNT, (float) settings.Step, &settings.Minimum, &settings.Maximum, nullptr, GE_EDITOR_INPUT_FLAGS);
+            GE_SWITCH_TYPE(glm::vec3)
+                changed = ImGui::ColorEdit3(label.c_str(), (float*) &vec, GE_EDITOR_COLOR_PICKER_FLAGS);
+            else GE_SWITCH_TYPE(glm::vec4)
+                changed = ImGui::ColorEdit4(label.c_str(), (float*) &vec, GE_EDITOR_COLOR_PICKER_FLAGS);
+        #ifdef DEBUG
+            else
+                Log::Write("Color Picker used on type other than glm::vec3 or glm::vec4.\n");
+        #endif
         }
+        else
+            switch(settings.ViewMode)
+            {
+            case ScalarViewMode::Slider:
+                changed = ImGui::SliderScalarN(label.c_str(), type, &vec, COMPONENT_COUNT, &settings.Minimum, &settings.Maximum, nullptr, GE_EDITOR_INPUT_FLAGS);
+                break;
+            case ScalarViewMode::Input:
+                changed = ImGui::InputScalarN(label.c_str(), type, &vec, COMPONENT_COUNT, &settings.Step, nullptr, nullptr, GE_EDITOR_INPUT_FLAGS);
+                break;
+            case ScalarViewMode::Drag:
+            default:
+                changed = ImGui::DragScalarN(label.c_str(), type, &vec, COMPONENT_COUNT, (float) settings.Step, &settings.Minimum, &settings.Maximum, nullptr, GE_EDITOR_INPUT_FLAGS);
+            }
 
-        /*if constexpr(!CONST)
-            t = glm::clamp(t, settings.Minimum, settings.Maximum);*/
+        /*if constexpr(!CONST)*/
+        vec = glm::clamp(vec, settings.Minimum, settings.Maximum);
 
         if(!settings.Tooltip.empty() && ImGui::IsItemHovered(GE_EDITOR_TOOLTIP_FLAGS))
             ImGui::SetTooltip(settings.Tooltip.data());
@@ -211,6 +224,44 @@ namespace gE
             }
             ImGui::EndTable();
         }
+
+        return changed;
+    }
+
+    template<class T>
+    bool DragDropCompare(ImGuiPayload& payload)
+    {
+        return payload.IsDataType("REFLECTABLE") && dynamic_cast<T*>((*(Reference<Reflectable<Window*>>**) payload.Data)->GetPointer());
+    }
+
+    template <class T> requires std::is_base_of_v<Reflectable<Window*>, T>
+    bool DrawField(const Field& settings, Reference<T>& ref, u8 depth)
+    {
+        const std::string label = std::format("##{}", settings.Name);
+        std::string ptr = std::format("{}", (void*) ref.GetPointer());
+
+        ImGui::TextUnformatted(settings.Name.data());
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(-1);
+        ImGui::InputText(label.c_str(), &ptr, ImGuiInputTextFlags_ReadOnly);
+
+        bool changed = false;
+        if(ImGui::BeginDragDropTarget())
+        {
+            if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(DragDropCompare<T>))
+            {
+                Reference<T>& newReference = **(Reference<T>**) payload->Data;
+                if(ref != newReference)
+                {
+                    changed = true;
+                    ref = newReference;
+                }
+            }
+            ImGui::EndDragDropTarget();
+        }
+
+        if(ref)
+            DrawField(settings, *ref, depth);
 
         return changed;
     }

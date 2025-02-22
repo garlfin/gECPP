@@ -3,9 +3,11 @@
 //
 
 #include "Editor.h"
+
 #include <Window.h>
 #include <windows.h>
 #include <IMGUI/imgui_internal.h>
+
 #include "GUI.h"
 
 #ifdef GE_ENABLE_EDITOR
@@ -43,6 +45,7 @@ namespace gE
         DrawInspector();
         DrawHierarchy();
         DrawEntityDrawer();
+        DrawAssetManager();
     }
 
     void Editor::DrawInspector()
@@ -115,6 +118,54 @@ namespace gE
                     for (int i = 0; i <= curDepth; i++)
                         ImGui::TreePop();
             }
+        }
+        ImGui::End();
+    }
+
+    void Editor::DrawAssetManager()
+    {
+        constexpr static u16 minScale = 16;
+        constexpr static u16 maxScale = 512;
+
+        if(ImGui::Begin("Assets", nullptr, ImGuiWindowFlags_MenuBar))
+        {
+            ImGui::BeginMenuBar();
+            if(ImGui::BeginMenu("View"))
+            {
+                ImGui::SetNextItemWidth(128.f);
+                ImGui::SliderScalar("Icon Size", ImGuiDataType_U16, &_assetScale, &minScale, &maxScale, nullptr, ImGuiSliderFlags_AlwaysClamp);
+                ImGui::EndMenu();
+            }
+            ImGui::EndMenuBar();
+
+            const u32 windowSize = ImGui::GetContentRegionAvail().x - ImGui::GetCursorPos().x;
+            const u16 width = _assetScale + GE_EDITOR_ICON_PADDING * 2;
+            const u8 columns = std::max<u8>(windowSize / width, 1);
+            const AssetManager::FILE_SET_T& assets = _window->GetAssets().GetFiles();
+
+            ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(GE_EDITOR_ICON_PADDING, GE_EDITOR_ICON_PADDING));
+            ImGui::BeginTable("##assets", columns, ImGuiTableFlags_SizingStretchSame | ImGuiTableFlags_BordersV);
+            for(size_t i = 0; auto& file : assets)
+            {
+                const u8 column = i % columns;
+                if(!column) ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(column);
+
+                std::string fileName = file.GetPath().filename().string();
+
+                ImGui::TextWrapped(fileName.c_str());
+
+                if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+                {
+                    ImGui::SetDragDropPayload(GE_EDITOR_RELFECTABLE_PAYLOAD, &file.Get(), sizeof(void*));
+                    ImGui::TextUnformatted(fileName.c_str());
+                    ImGui::EndDragDropSource();
+                }
+
+                i++;
+            }
+            ImGui::EndTable();
+            ImGui::PopStyleVar();
         }
         ImGui::End();
     }
