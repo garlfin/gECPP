@@ -23,10 +23,10 @@ namespace gE
         void OnInit() override {};
         void OnRender(float delta, Camera*) override;
 
-        GET_CONST(Mesh&, Mesh, *_mesh);
+        GET_CONST(const Reference<Mesh>&, Mesh, _mesh);
+        void SetMesh(const Reference<Mesh>& mesh);
 
-        NODISCARD ALWAYS_INLINE Material& GetMaterial(u8 i) { return *_drawCalls[i].GetMaterial(); }
-        NODISCARD ALWAYS_INLINE const Material& GetMaterial(u8 i) const { return *_drawCalls[i].GetMaterial(); }
+        NODISCARD ALWAYS_INLINE Material* GetMaterial(u8 i) const { return _materials[i].GetPointer(); }
 
         void SetMaterial(u8 i, const Reference<Material>& mat);
         void SetMaterial(u8 i, Reference<Material>&& mat);
@@ -37,6 +37,7 @@ namespace gE
     private:
         Reference<Mesh> _mesh;
         Array<DrawCall> _drawCalls;
+        Array<Reference<Material>> _materials;
     };
 
     class RendererManager : public ComponentManager<MeshRenderer>
@@ -52,5 +53,3 @@ namespace gE
         DrawCallManager _drawCallManager;
     };
 }
-
-#include "MeshRenderer.inl"

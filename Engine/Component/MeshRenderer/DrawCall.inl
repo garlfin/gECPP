@@ -8,23 +8,27 @@
 
 namespace gE
 {
-	inline bool CompareVAO(const Managed<DrawCall>& a, const Managed<DrawCall>& b)
-	{
-		return &a->GetVAO() == &b->GetVAO();
-	}
+    inline bool DrawCallCompare::operator()(const DrawCall* a, const DrawCall* b) const
+    {
+        return *a < *b;
+    }
 
-	inline bool CompareMaterial(const Managed<DrawCall>& a, const Managed<DrawCall>& b)
-	{
-		return a->GetMaterial() == b->GetMaterial();
-	}
+    inline bool DrawCall::operator<(const DrawCall& b) const
+    {
+        return _vao < b._vao &&
+               _material < b._material &&
+               _materialIndex < b._materialIndex &&
+               _lod < b._lod;
+    }
 
-	inline bool CompareSubMesh(const Managed<DrawCall>& a, const Managed<DrawCall>& b)
-	{
-		return a->GetMaterialIndex() == b->GetMaterialIndex();
-	}
+    inline DrawCallManager::SET_T::iterator DrawCallManager::Register(const DrawCall* draw)
+    {
+        GE_ASSERT(draw);
+        return _draws.insert(draw).first;
+    }
 
-	inline bool CompareLOD(const  Managed<DrawCall>& a, const Managed<DrawCall>& b)
-	{
-		return a->GetLOD() == b->GetLOD();
-	}
+    inline void DrawCallManager::Remove(const DrawCall* draw)
+    {
+        _draws.erase(draw->GetIterator());
+    }
 }

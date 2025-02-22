@@ -32,7 +32,8 @@ using namespace std::string_view_literals;
 	#define TRAP __debugbreak
 #endif
 
-#define COPY_MOVE(x) std::move(std::remove_cvref_t<decltype(x)>(x))
+#define COPY(x) std::remove_cvref_t<decltype(x)>(x)
+#define COPY_MOVE(x) std::move(COPY(x))
 
 template<class T>
 using add_const_pointer = std::conditional_t<std::is_pointer_v<T>, std::add_const_t<std::remove_pointer_t<T>>*, std::add_const_t<T>>;

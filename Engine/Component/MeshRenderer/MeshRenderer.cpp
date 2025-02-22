@@ -14,30 +14,16 @@
 
 namespace gE
 {
-	inline GPU::IndirectDraw IndirectDrawArray[API_MAX_MULTI_DRAW];
-
-	typedef Managed<DrawCall> MAN_T;
-	typedef LinkedNode<MAN_T> ITER_T;
-	typedef LinkedList<MAN_T> LIST_T;
-
-	template<CompareFunc<MAN_T, MAN_T> FUNC, ITER_T DrawCall::* MEMBER>
-	DrawCall* FindSimilarSafe(MAN_T& t, LIST_T& list, DrawCall* similar, DrawCall* next)
-	{
-		ITER_T* searchFrom = similar ? &(similar->*MEMBER) : nullptr;
-		ITER_T* searchTo = next ? &(next->*MEMBER) : nullptr;
-		ITER_T* found = list.FindSimilar<MAN_T, FUNC>(t, searchFrom, Direction::Right, searchTo);
-		return found ? IPTR_TO_TPTR(found) : nullptr;
-	}
-
 	MeshRenderer::MeshRenderer(Entity* o, const Reference<Mesh>& mesh) :
 		Component(o, &o->GetWindow().GetRenderers()), _mesh(mesh),
-		_drawCalls(mesh->VAO->GetSettings().Counts.MaterialCount)
+		_drawCalls(mesh->VAO->GetSettings().Counts.MaterialCount),
+		_materials(GE_MAX_VAO_MATERIAL)
 	{
-	#ifdef DEBUG
-		DrawCallManager& manager = GetWindow().GetRenderers().GetDrawCallManager();
 		for(u8 i = 0; i < _drawCalls.Count(); i++)
-			PlacementNew(_drawCalls[i], manager, *this, Reference<Material>(), i);
-	#endif
+		{
+			_materials[i] = DEFAULT;
+			PlacementNew(_drawCalls[i], *this, i);
+		}
 	}
 
 	void MeshRenderer::OnRender(float delta, Camera*)
@@ -45,31 +31,37 @@ namespace gE
 		// DefaultPipeline::Buffers& buffers = GetWindow().GetPipelineBuffers();
 	}
 
+	void MeshRenderer::SetMesh(const Reference<Mesh>& mesh)
+	{
+		_mesh = mesh;
+		for(u8 i = 0; i < _drawCalls.Count(); i++)
+			PlacementNew(_drawCalls[i], *this, i);
+	}
+
 	void MeshRenderer::SetMaterial(u8 i, const Reference<Material>& mat)
 	{
 		GE_ASSERTM(i < _drawCalls.Count(), "MATERIAL OUT OF RANGE");
-		if(mat.GetPointer() == _drawCalls[i].GetMaterial()) return;
+		if(mat.GetPointer() == _materials[i].GetPointer()) return;
 
-		DrawCallManager& manager = GetWindow().GetRenderers().GetDrawCallManager();
-		PlacementNew(_drawCalls[i], manager, *this, COPY_MOVE(mat), i);
+		_materials[i] = mat;
+		PlacementNew(_drawCalls[i], *this, i);
 	}
 
 	void MeshRenderer::SetMaterial(u8 i, Reference<Material>&& mat)
 	{
 		GE_ASSERTM(i < _drawCalls.Count(), "MATERIAL OUT OF RANGE");
-		if(mat.GetPointer() == _drawCalls[i].GetMaterial()) return;
-
-		DrawCallManager& manager = GetWindow().GetRenderers().GetDrawCallManager();
-		PlacementNew(_drawCalls[i], manager, *this, move(mat), i);
+		if(mat.GetPointer() == _materials[i].GetPointer()) return;
+		_materials[i] = move(mat);
+		PlacementNew(_drawCalls[i], *this, i);
 	}
 
 	void MeshRenderer::SetNullMaterial(u8 i)
 	{
 		GE_ASSERTM(i < _drawCalls.Count(), "MATERIAL OUT OF RANGE");
-		if(!_drawCalls[i].GetMaterial()) return;
+		if(!_materials[i]) return;
 
-		DrawCallManager& manager = GetWindow().GetRenderers().GetDrawCallManager();
-		PlacementNew(_drawCalls[i], manager, *this, Reference<Material>(nullptr), i);
+		_materials[i] = DEFAULT;
+		PlacementNew(_drawCalls[i], *this, i);
 	}
 
 	REFLECTABLE_FACTORY_NO_IMPL(MeshRenderer);
@@ -85,122 +77,65 @@ namespace gE
 		_drawCallManager.OnRender(d, camera);
 	}
 
-	void DrawCallManager::OnRegister(Managed<DrawCall>& t)
+	DrawCall::DrawCall(const MeshRenderer& renderer, u8 i) :
+		_transform(&renderer.GetOwner().GetTransform()),
+		_vao(renderer.GetMesh()->VAO.GetPointer()),
+		_material(renderer.GetMaterial(i)),
+		_materialIndex(i),
+		_lod(0)
 	{
-		DrawCall* similar;
-		DrawCall* next = nullptr;
-		DrawCall* insertLocation = nullptr;
-
-		if((similar = FindSimilarSafe<CompareVAO, &DrawCall::_vaoIterator>(t, _vaoList, nullptr, nullptr)))
-		{
-			next = DRAWCALL_SUBITER_SAFE(similar, _vaoIterator.GetNext(), IPTR_TO_TPTR);
-			insertLocation = next;
-		}
-		else
-			_vaoList.Add(t->_vaoIterator);
-
-		if(similar && ((similar = FindSimilarSafe<CompareMaterial, &DrawCall::_materialIterator>(t, _materialList, similar, next))))
-		{
-			next = DRAWCALL_SUBITER_SAFE(similar, _materialIterator.GetNext(), IPTR_TO_TPTR);
-			insertLocation = next;
-		}
-		else
-			_materialList.Insert(t->_materialIterator, DRAWCALL_SIMILAR_SAFE(insertLocation, _materialIterator), DRAWCALL_DIRECTION);
-
-		if(similar && ((similar = FindSimilarSafe<CompareSubMesh, &DrawCall::_subMeshIterator>(t, _subMeshList, similar, next))))
-		{
-			next = DRAWCALL_SUBITER_SAFE(similar, _subMeshIterator.GetNext(), IPTR_TO_TPTR);
-			insertLocation = next;
-		}
-		else
-			_subMeshList.Insert(t->_subMeshIterator, DRAWCALL_SIMILAR_SAFE(insertLocation, _subMeshIterator), DRAWCALL_DIRECTION);
-
-		if(similar && ((similar = FindSimilarSafe<CompareLOD, &DrawCall::_lodIterator>(t, _lodList, similar, next))))
-		{
-			next = DRAWCALL_SUBITER_SAFE(similar, _lodIterator.GetNext(), IPTR_TO_TPTR);
-			insertLocation = next;
-		}
-		else
-			_lodList.Insert(t->_lodIterator, DRAWCALL_SIMILAR_SAFE(insertLocation, _lodIterator), DRAWCALL_DIRECTION);
-
-		List.Insert(t.GetNode(), DRAWCALL_SIMILAR_SAFE(insertLocation, GetNode()), DRAWCALL_DIRECTION);
+		_it = renderer.GetWindow().GetRenderers().GetDrawCallManager().Register(this);
 	}
 
-	void DrawCallManager::OnRender(float delta, const Camera* camera) const
+	DrawCall::~DrawCall()
+	{
+		if(!_transform) return;
+		_transform->GetWindow().GetRenderers().GetDrawCallManager().Remove(this);
+	}
+
+	void DrawCallManager::OnRender(float delta, const Camera* camera)
 	{
 		Window& window = camera->GetWindow();
 		DefaultPipeline::Buffers& buffers = window.GetPipelineBuffers();
 
-		u32 instanceCount = 0, totalInstanceCount = 0, batchCount = 0;
-
 		buffers.Scene.State = window.RenderState;
 
-		for(ITER_T* m = List.GetFirst(); m; m = m->GetNext())
+		u32 instanceCount = 0, batchInstanceCount = 0, commandCount = 0;
+		for(const DrawCall* draw : _draws)
 		{
-			DrawCall& call = ***m; // this is so stupid
-			DrawCall* nextCall = m->GetNext() ? &***m->GetNext() : nullptr;
-			GPU::ObjectInfo& object = buffers.Scene.Objects[totalInstanceCount];
-
-			object.Model = call.GetTransform().Model();
-			object.PreviousModel = call.GetTransform().PreviousRenderModel();
-			object.Normal = transpose(inverse(call.GetTransform().Model()));
-
-		#ifdef GE_ENABLE_BATCHING
-			totalInstanceCount++;
+			const DrawCall* nextDraw = *++COPY(draw->GetIterator());
 			instanceCount++;
+			batchInstanceCount++;
 
-			bool flush, flushBatch;
-			if(nextCall)
+			bool flush = true;
+			bool flushBatch = true;
+			if(nextDraw)
 			{
-				flush = nextCall->_materialIterator.IsValid() || nextCall->_vaoIterator.IsValid();
-				flushBatch = nextCall->_subMeshIterator.IsValid() || nextCall->_lodIterator.IsValid();
-				// flush = call._material != nextCall->_material || call._vao != nextCall->_vao;
-				// flushBatch = call._subMesh != nextCall->_subMesh || call._lod != nextCall->_lod;
+				flush = &draw->GetVAO() != &nextDraw->GetVAO() || draw->GetMaterial() != nextDraw->GetMaterial();
+				flushBatch = draw->GetMaterialIndex() != nextDraw->GetMaterialIndex() || draw->GetLOD() != nextDraw->GetMaterialIndex();
 			}
-			else flush = flushBatch = true;
-
-			flush |= totalInstanceCount == API_MAX_INSTANCE || batchCount == API_MAX_MULTI_DRAW;
 
 			if(flushBatch)
 			{
-				buffers.Scene.InstanceCount[batchCount] = instanceCount;
-				IndirectDrawArray[batchCount] = GPU::IndirectDraw(instanceCount, call.GetMaterialIndex(), 0);
+				buffers.Scene.InstanceCount[commandCount] = batchInstanceCount;
+				batches[commandCount] = GPU::IndirectDraw{ batchInstanceCount, draw->GetMaterialIndex(), draw->GetLOD() };
 
-				instanceCount = 0;
-				batchCount++;
+				commandCount++;
+				batchInstanceCount = 0;
 			}
+
+			flush |= instanceCount == API_MAX_INSTANCE || commandCount == API_MAX_MULTI_DRAW;
 
 			if(!flush) continue;
 
-			u32 updateTo = offsetof(GPU::Scene, Objects) + sizeof(GPU::ObjectInfo) * totalInstanceCount;
+			const u32 updateTo = offsetof(GPU::Scene, Objects) + sizeof(GPU::ObjectInfo) * instanceCount;
+			const Material* material = draw->GetMaterial() ? draw->GetMaterial() : &window.GetDefaultMaterial();
+
 			buffers.UpdateScene(updateTo);
-
-			const Material* material = call.GetMaterial() ? call.GetMaterial() : &window.GetDefaultMaterial();
-
 			material->Bind();
-			call.GetVAO().Draw(batchCount, IndirectDrawArray);
+			draw->GetVAO().Draw(commandCount, batches);
 
-			batchCount = totalInstanceCount = instanceCount = 0;
-		#else
-			buffers.Scene.InstanceCount[0] = instanceCount;
-			buffers.UpdateScene(offsetof(GPU::Scene, Objects[1]));
-
-			(call.GetMaterial() ?: &window.GetDefaultMaterial())->Bind();
-			call.GetVAO().Draw(call._subMesh, window.State.InstanceMultiplier);
-		#endif
+			instanceCount = batchInstanceCount = 0;
 		}
-	}
-
-	DrawCall::DrawCall(DrawCallManager& manager, const MeshRenderer& r, Reference<Material>&& mat, u8 mesh) :
-		Managed(&manager, *this, true),
-		_vao(r.GetMesh().VAO),
-		_transform(&r.GetOwner().GetTransform()),
-		_material(move(mat)), _subMesh(mesh),
-		_vaoIterator(*this),
-		_materialIterator(*this),
-		_subMeshIterator(*this),
-		_lodIterator(*this)
-	{
-		Register();
 	}
 }

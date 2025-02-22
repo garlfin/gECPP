@@ -274,14 +274,12 @@ namespace gE
 
         GE_ASSERTM(get && set, "CANNOT HAVE NULL GETTER SETTER!");
 
-        T old = (owner.*get)();
-        T result = old;
+        T result = (owner.*get)();
+        const bool changed = DrawField(settings, result, depth);
+        if(changed)
+            (owner.*set)(std::move(result));
 
-        const bool edited = DrawField(settings, result, depth);
-        if(edited)
-            (owner.*set)(result);
-
-        return edited;
+        return changed;
     }
 
 }

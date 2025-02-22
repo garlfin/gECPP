@@ -15,52 +15,58 @@ namespace gE
 	class DrawCallManager;
 	struct DrawCall;
 
-	inline bool CompareVAO(const Managed<DrawCall>&, const Managed<DrawCall>&);
-	inline bool CompareMaterial(const Managed<DrawCall>&, const Managed<DrawCall>&);
-	inline bool CompareSubMesh(const Managed<DrawCall>&, const Managed<DrawCall>&);
-	inline bool CompareLOD(const Managed<DrawCall>&, const Managed<DrawCall>&);
-
-	// TODO: Change?
-	struct DrawCall final : public Managed<DrawCall>
+	struct DrawCallCompare
 	{
-	public:
-		DrawCall() = default;
-		DrawCall(DrawCallManager& manager, const MeshRenderer&, Reference<Material>&&, u8);
+		using is_transparent = void;
 
-		DELETE_OPERATOR_COPY(DrawCall);
-		DEFAULT_OPERATOR_MOVE(DrawCall);
+		// Less
+		NODISCARD ALWAYS_INLINE bool operator()(const DrawCall* a, const DrawCall* b) const;
+	};
+
+	struct DrawCall final
+	{
+		DELETE_OPERATOR_CM(DrawCall);
+	public:
+		DrawCall(const MeshRenderer&, u8 i);
+		DrawCall() = default;
+
+		GET(auto, Iterator, _it);
 
 		GET_CONST(API::IVAO&, VAO, *_vao);
 		GET_CONST(const Transform&, Transform, *_transform);
-		GET(Material*, Material, _material.GetPointer());
-		GET_CONST(u8, MaterialIndex, _subMesh);
+		GET_CONST(Material*, Material, _material);
+		GET_CONST(u8, MaterialIndex, _materialIndex);
 		GET_CONST(u8, LOD, _lod);
 
-		friend class DrawCallManager;
+		bool operator<(const DrawCall& b) const;
+
+		~DrawCall();
 
 	private:
-		API::IVAO* _vao;
-		const Transform* _transform;
-		Reference<Material> _material;
-		u8 _subMesh = 0;
-		u8 _lod = 0;
+		std::set<const DrawCall*, DrawCallCompare>::iterator _it = DEFAULT;
 
-		LinkedNode<Managed> _vaoIterator;
-		LinkedNode<Managed> _materialIterator;
-		LinkedNode<Managed> _subMeshIterator;
-		LinkedNode<Managed> _lodIterator;
+		const Transform* _transform = nullptr;
+		API::IVAO* _vao = nullptr;
+		Material* _material = nullptr;
+		u8 _materialIndex = 0;
+		u8 _lod = 0;
 	};
 
-	class DrawCallManager final : public Manager<Managed<DrawCall>>
+	class DrawCallManager final
 	{
 	public:
+		using SET_T = std::set<const DrawCall*, DrawCallCompare>;
+
 		explicit DrawCallManager(Window* window) :
 			_indirectDrawBuffer(window, API_MAX_MULTI_DRAW, nullptr, GPU::BufferUsageHint::Dynamic)
 		{
 			_indirectDrawBuffer.Bind(API::BufferTarget::IndirectDrawBuffer);
 		}
 
-		void OnRender(float delta, const Camera* camera) const;
+		void OnRender(float delta, const Camera* camera);
+
+		SET_T::iterator Register(const DrawCall*);
+		void Remove(const DrawCall*);
 
 		ALWAYS_INLINE void UpdateDrawCalls(u64 size = sizeof(API::IndirectDrawIndexed) * API_MAX_MULTI_DRAW, u64 offset = 0) const
 		{
@@ -69,16 +75,10 @@ namespace gE
 
 		API::IndirectDrawIndexed IndirectDraws[API_MAX_MULTI_DRAW] DEFAULT;
 
-	protected:
-		void OnRegister(Managed<DrawCall>& t) override;
-
 	private:
 		API::Buffer<API::IndirectDrawIndexed> _indirectDrawBuffer;
-
-		LinkedList<Managed<DrawCall>> _vaoList;
-		LinkedList<Managed<DrawCall>> _materialList;
-		LinkedList<Managed<DrawCall>> _subMeshList;
-		LinkedList<Managed<DrawCall>> _lodList;
+		GPU::IndirectDraw batches[API_MAX_MULTI_DRAW] DEFAULT;
+		SET_T _draws = DEFAULT;
 	};
 }
 
