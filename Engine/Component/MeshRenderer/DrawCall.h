@@ -65,7 +65,7 @@ namespace gE
 
 		void OnRender(float delta, const Camera* camera);
 
-		SET_T::iterator Register(const DrawCall*);
+		void Register(const DrawCall*);
 		void Remove(const DrawCall*);
 
 		ALWAYS_INLINE void UpdateDrawCalls(u64 size = sizeof(API::IndirectDrawIndexed) * API_MAX_MULTI_DRAW, u64 offset = 0) const

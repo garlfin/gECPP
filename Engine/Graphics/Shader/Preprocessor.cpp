@@ -41,7 +41,7 @@ namespace GPU
 
 				if(!file) continue;
 
-				std::istringstream includeStream(file->Cast<ShaderSource>().Source);
+				std::istringstream includeStream(file->Cast<ShaderSource, false>()->Source);
 
 				if(std::ranges::find(includes, includeUUID) != includes.end())
 					continue;

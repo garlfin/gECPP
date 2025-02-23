@@ -78,11 +78,16 @@ namespace gE
 		
 		NODISCARD ALWAYS_INLINE bool IsFree() const { return !_t; }
 
-		template<class I>
-		ALWAYS_INLINE operator Reference<I>()
+		template<class I> requires std::is_base_of_v<I, T>
+		ALWAYS_INLINE operator Reference<I>() const
 		{
-			static_assert(std::is_base_of_v<I, T>);
 			return Reference<I>(_t, _counter);
+		}
+
+		template<class I> requires std::is_base_of_v<T, I>
+		ALWAYS_INLINE explicit operator Reference<I>() const
+		{
+			return Reference<I>((I*) _t, _counter);
 		}
 
 		~Reference() { Free(); }
@@ -140,9 +145,23 @@ namespace gE
 
 		bool IsValid() const { return _counter && _counter->RefCount; }
 
-		operator Reference<T>()
+		explicit operator Reference<T>()
 		{
-			return Reference<T>(GetPointer(), IsValid() ? _counter : nullptr);
+			if(IsValid())
+				return Reference<T>(_t, _counter);
+			return Reference<T>();
+		}
+
+		template<class I> requires std::is_base_of_v<I, T>
+		ALWAYS_INLINE operator WeakReference<I>() const
+		{
+			return WeakReference<I>(_t, _counter);
+		}
+
+		template<class I> requires std::is_base_of_v<T, I>
+		ALWAYS_INLINE explicit operator WeakReference<I>() const
+		{
+			return WeakReference<I>((I*) _t, _counter);
 		}
 
 		void Free()

@@ -157,7 +157,8 @@ namespace gE
 
                 if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
                 {
-                    ImGui::SetDragDropPayload(GE_EDITOR_RELFECTABLE_PAYLOAD, &file.Get(), sizeof(void*));
+                    const Reference<Asset>* ptr = &file.Get();
+                    ImGui::SetDragDropPayload(GE_EDITOR_ASSET_PAYLOAD, &ptr, sizeof(ptr));
                     ImGui::TextUnformatted(fileName.c_str());
                     ImGui::EndDragDropSource();
                 }

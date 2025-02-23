@@ -12,7 +12,5 @@ int main(int argc, char** argv)
 
     auto window = gE::gEModel::gEModelWindow();
     window.Run();
-
-    return 0;
 }
 

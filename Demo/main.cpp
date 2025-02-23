@@ -12,6 +12,4 @@ int main(int argc, char** argv)
 		gE::VoxelDemo::DemoWindow window(glm::u16vec2(1920, 1080));
 		restart = window.Run();
 	}
-
-	return 0;
 }

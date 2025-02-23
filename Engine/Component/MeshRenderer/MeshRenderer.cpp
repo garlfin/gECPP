@@ -16,10 +16,10 @@ namespace gE
 {
 	MeshRenderer::MeshRenderer(Entity* o, const Reference<Mesh>& mesh) :
 		Component(o, &o->GetWindow().GetRenderers()), _mesh(mesh),
-		_drawCalls(mesh->VAO->GetSettings().Counts.MaterialCount),
+		_drawCalls(GE_MAX_VAO_MATERIAL),
 		_materials(GE_MAX_VAO_MATERIAL)
 	{
-		for(u8 i = 0; i < _drawCalls.Count(); i++)
+		for(u8 i = 0; i < GE_MAX_VAO_MATERIAL; i++)
 		{
 			_materials[i] = DEFAULT;
 			PlacementNew(_drawCalls[i], *this, i);
@@ -34,7 +34,7 @@ namespace gE
 	void MeshRenderer::SetMesh(const Reference<Mesh>& mesh)
 	{
 		_mesh = mesh;
-		for(u8 i = 0; i < _drawCalls.Count(); i++)
+		for(u8 i = 0; i < GE_MAX_VAO_MATERIAL; i++)
 			PlacementNew(_drawCalls[i], *this, i);
 	}
 
@@ -68,7 +68,7 @@ namespace gE
 
 	void MeshRenderer::IOnEditorGUI(u8 depth)
 	{
-		DrawField(Field{ "Mesh"sv }, _mesh, depth);
+		DrawField(Field{ "Mesh"sv }, *this, depth, GetMesh, SetMesh);
 	};
 
 	void RendererManager::OnRender(float d, Camera* camera)
@@ -79,17 +79,20 @@ namespace gE
 
 	DrawCall::DrawCall(const MeshRenderer& renderer, u8 i) :
 		_transform(&renderer.GetOwner().GetTransform()),
-		_vao(renderer.GetMesh()->VAO.GetPointer()),
 		_material(renderer.GetMaterial(i)),
 		_materialIndex(i),
 		_lod(0)
 	{
-		_it = renderer.GetWindow().GetRenderers().GetDrawCallManager().Register(this);
+		if(i >= renderer.GetMesh()->VAO->GetSettings().Counts.MaterialCount) return;
+
+		_vao = renderer.GetMesh()->VAO.GetPointer();
+		renderer.GetWindow().GetRenderers().GetDrawCallManager().Register(this);
 	}
 
 	DrawCall::~DrawCall()
 	{
-		if(!_transform) return;
+		if(!_vao) return;
+
 		_transform->GetWindow().GetRenderers().GetDrawCallManager().Remove(this);
 	}
 
@@ -105,8 +108,8 @@ namespace gE
 		u32 instanceCount = 0, batchInstanceCount = 0, batchCount = 0;
 		for(ITER_T iter = _draws.begin(), nextIter; iter != _draws.end(); iter = nextIter)
 		{
-			const DrawCall* draw = *iter;
 			GPU::ObjectInfo& object = buffers.Scene.Objects[instanceCount];
+			const DrawCall* draw = *iter;
 			bool flush = true;
 			bool flushBatch = true;
 
@@ -146,7 +149,7 @@ namespace gE
 			material->Bind();
 			draw->GetVAO().Draw(batchCount, batches);
 
-			instanceCount = batchInstanceCount = 0;
+			batchCount = instanceCount = 0;
 		}
 	}
 }

@@ -18,7 +18,7 @@
 #define GE_EDITOR_COLOR_PICKER_FLAGS ImGuiColorEditFlags_Float | ImGuiColorEditFlags_InputRGB | ImGuiColorEditFlags_NoOptions | ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_AlphaPreviewHalf
 #define GE_EDITOR_ICON_PADDING 16
 
-CONSTEXPR_GLOBAL const char* GE_EDITOR_RELFECTABLE_PAYLOAD = "RELFECTABLE";
+CONSTEXPR_GLOBAL const char* GE_EDITOR_ASSET_PAYLOAD = "ASSET";
 
 namespace gE
 {

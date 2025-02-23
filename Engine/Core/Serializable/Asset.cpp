@@ -216,6 +216,6 @@ namespace gE
 
     Reference<Asset> File::Lock() const
     {
-        return _asset = _weakAsset;
+        return _asset = (Reference<Asset>) _weakAsset;
     }
 }

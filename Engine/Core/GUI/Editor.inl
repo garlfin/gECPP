@@ -8,6 +8,7 @@
 #include <IMGUI/imgui_stdlib.h>
 
 #include "Editor.h"
+#include "Core/Serializable/Asset.h"
 
 #define GE_SWITCH_TYPE(TYPE) if constexpr(std::is_same_v<RAW_T, TYPE>)
 #define IM_TYPE_(TYPE, ENUM) template<> CONSTEXPR_GLOBAL ImGuiDataType IMType<TYPE> = ENUM;
@@ -231,7 +232,9 @@ namespace gE
     template<class T>
     bool DragDropCompare(ImGuiPayload& payload)
     {
-        return payload.IsDataType("REFLECTABLE") && dynamic_cast<T*>((*(Reference<Reflectable<Window*>>**) payload.Data)->GetPointer());
+        bool isReflectable = payload.IsDataType(GE_EDITOR_ASSET_PAYLOAD);
+        const Reference<Asset>& data = **(const Reference<Asset>**) payload.Data;
+        return isReflectable && dynamic_cast<T*>(data.GetPointer());
     }
 
     template <class T> requires std::is_base_of_v<Reflectable<Window*>, T>
@@ -250,7 +253,7 @@ namespace gE
         {
             if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(DragDropCompare<T>))
             {
-                Reference<T>& newReference = **(Reference<T>**) payload->Data;
+                const Reference<T>& newReference = **(const Reference<T>**) payload->Data;
                 if(ref != newReference)
                 {
                     changed = true;

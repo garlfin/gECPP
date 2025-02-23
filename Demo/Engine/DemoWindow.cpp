@@ -38,13 +38,11 @@ void DemoWindow::OnInit()
 	auto tileMaterial = gE::ref_create<PBRMaterial>(this, rasterShader, tileSettings);
 	auto grassMaterial = gE::ref_create<PBRMaterial>(this, rasterShader, grassSettings);
 
-	Reference<Mesh> sceneMesh = ref_create<Mesh>();
-	ReadSerializableFromFile(this, "Resource/Model/Plane.001.mesh", *sceneMesh);
-
-	Reference<Mesh> cubeMesh = ref_create<Mesh>();
-	ReadSerializableFromFile(this, "Resource/Model/Cube.mesh", *cubeMesh);
+	Reference<Mesh> sceneMesh = Assets.AddSerializableFromFile<Mesh>("Resource/Model/Plane.001.mesh")->Cast<Mesh, false>();
+	Reference<Mesh> cubeMesh = Assets.AddSerializableFromFile<Mesh>("Resource/Model/Cube.mesh")->Cast<Mesh, false>();
 
 	auto* mesh = new StaticMeshEntity(this, sceneMesh);
+
 	mesh->SetName("Room");
 	mesh->GetTransform().SetScale(glm::vec3(0.5));
 	mesh->GetRenderer().SetMaterial(0, cobbleMaterial);

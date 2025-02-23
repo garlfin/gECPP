@@ -22,14 +22,14 @@ namespace gE
         return false;
     }
 
-    inline DrawCallManager::SET_T::iterator DrawCallManager::Register(const DrawCall* draw)
+    inline void DrawCallManager::Register(const DrawCall* draw)
     {
         GE_ASSERT(draw);
-        return _draws.insert(draw).first;
+        _draws.insert(draw);
     }
 
     inline void DrawCallManager::Remove(const DrawCall* draw)
     {
-        _draws.erase(draw->GetIterator());
+        _draws.erase(draw);
     }
 }
