@@ -95,36 +95,47 @@ namespace gE
 
 	void DrawCallManager::OnRender(float delta, const Camera* camera)
 	{
+		using ITER_T = SET_T::iterator;
+
 		Window& window = camera->GetWindow();
 		DefaultPipeline::Buffers& buffers = window.GetPipelineBuffers();
 
 		buffers.Scene.State = window.RenderState;
 
-		u32 instanceCount = 0, batchInstanceCount = 0, commandCount = 0;
-		for(const DrawCall* draw : _draws)
+		u32 instanceCount = 0, batchInstanceCount = 0, batchCount = 0;
+		for(ITER_T iter = _draws.begin(), nextIter; iter != _draws.end(); iter = nextIter)
 		{
-			const DrawCall* nextDraw = *++COPY(draw->GetIterator());
-			instanceCount++;
-			batchInstanceCount++;
-
+			const DrawCall* draw = *iter;
+			GPU::ObjectInfo& object = buffers.Scene.Objects[instanceCount];
 			bool flush = true;
 			bool flushBatch = true;
-			if(nextDraw)
+
+			nextIter = ++COPY(iter);
+			if(nextIter != _draws.end())
 			{
+				const DrawCall* nextDraw = *nextIter;
+
 				flush = &draw->GetVAO() != &nextDraw->GetVAO() || draw->GetMaterial() != nextDraw->GetMaterial();
 				flushBatch = draw->GetMaterialIndex() != nextDraw->GetMaterialIndex() || draw->GetLOD() != nextDraw->GetMaterialIndex();
 			}
 
-			if(flushBatch)
-			{
-				buffers.Scene.InstanceCount[commandCount] = batchInstanceCount;
-				batches[commandCount] = GPU::IndirectDraw{ batchInstanceCount, draw->GetMaterialIndex(), draw->GetLOD() };
+			object.Model = draw->GetTransform().Model();
+			object.PreviousModel = draw->GetTransform().PreviousRenderModel();
+			object.Normal = glm::transpose(glm::inverse(draw->GetTransform().Model()));
 
-				commandCount++;
+			instanceCount++;
+			batchInstanceCount++;
+
+			if(flushBatch || flush)
+			{
+				buffers.Scene.InstanceCount[batchCount] = batchInstanceCount;
+				batches[batchCount] = GPU::IndirectDraw{ batchInstanceCount, draw->GetMaterialIndex(), draw->GetLOD() };
+
+				batchCount++;
 				batchInstanceCount = 0;
 			}
 
-			flush |= instanceCount == API_MAX_INSTANCE || commandCount == API_MAX_MULTI_DRAW;
+			flush |= instanceCount == API_MAX_INSTANCE || batchCount == API_MAX_MULTI_DRAW;
 
 			if(!flush) continue;
 
@@ -133,7 +144,7 @@ namespace gE
 
 			buffers.UpdateScene(updateTo);
 			material->Bind();
-			draw->GetVAO().Draw(commandCount, batches);
+			draw->GetVAO().Draw(batchCount, batches);
 
 			instanceCount = batchInstanceCount = 0;
 		}

@@ -15,10 +15,11 @@ namespace gE
 
     inline bool DrawCall::operator<(const DrawCall& b) const
     {
-        return _vao < b._vao &&
-               _material < b._material &&
-               _materialIndex < b._materialIndex &&
-               _lod < b._lod;
+        if(_vao != b._vao) return _vao < b._vao;
+        if(_material != b._material) return _material < b._material;
+        if(_materialIndex != b._materialIndex) return _materialIndex < b._materialIndex;
+        if(_lod != b._lod) return _lod < b._lod;
+        return false;
     }
 
     inline DrawCallManager::SET_T::iterator DrawCallManager::Register(const DrawCall* draw)

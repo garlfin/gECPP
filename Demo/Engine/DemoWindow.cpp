@@ -11,7 +11,6 @@
 #include <Demo/Engine/Entity/StaticMeshEntity.h>
 #include <Entity/Light/DirectionalLight.h>
 #include <Entity/Light/PointLight.h>
-#include <Vendor/GLAD/glad.h>
 
 using namespace gE::VoxelDemo;
 
