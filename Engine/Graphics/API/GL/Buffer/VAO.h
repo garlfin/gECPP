@@ -59,7 +59,7 @@ namespace GL
 		API_DEFAULT_CM_CONSTRUCTOR(VAO);
 		API_UNDERLYING_IMPL(IVAO);
 
-	 public:
+	public:
 		GET_CONST(const GPU::VAO&, Data, *this);
 
 		void Draw(u8 index, u16 instanceCount = 1) const override;
@@ -73,7 +73,7 @@ namespace GL
 		API_DEFAULT_CM_CONSTRUCTOR(IndexedVAO);
 		API_UNDERLYING_IMPL(IVAO);
 
-	 public:
+	public:
 		GET_CONST(u8, MaterialCount, Counts.MaterialCount);
 		GET_CONST(u8, BufferCount, Counts.BufferCount);
 		GET_CONST(u8, FieldCount, Counts.FieldCount);
@@ -93,7 +93,7 @@ namespace GL
 		void UpdateIndices(GPU::Buffer<u8>&& buf);
 		ALWAYS_INLINE void UpdateIndices(GPU::Buffer<u8>& buf) { UpdateIndices(std::move(GPU::Buffer(buf))); }
 
-	 private:
+	private:
 		Buffer<u8> _triangleBuffer = DEFAULT;
 	};
 }

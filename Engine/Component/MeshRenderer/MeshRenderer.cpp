@@ -33,6 +33,8 @@ namespace gE
 
 	void MeshRenderer::SetMesh(const Reference<Mesh>& mesh)
 	{
+		if(_mesh == mesh) return;
+
 		_mesh = mesh;
 		for(u8 i = 0; i < GE_MAX_VAO_MATERIAL; i++)
 			PlacementNew(_drawCalls[i], *this, i);

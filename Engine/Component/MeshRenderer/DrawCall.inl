@@ -19,6 +19,7 @@ namespace gE
         if(_material != b._material) return _material < b._material;
         if(_materialIndex != b._materialIndex) return _materialIndex < b._materialIndex;
         if(_lod != b._lod) return _lod < b._lod;
+        if(this != &b) return this < &b;
         return false;
     }
 
