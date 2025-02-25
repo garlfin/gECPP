@@ -242,7 +242,8 @@ namespace gE
         size_t changed = count;
         if((bool)(settings.ViewMode & ArrayViewMode::Elements) && ts)
         {
-            ImGui::BeginTable("table", 2, GE_EDITOR_TABLE_FLAGS & ~ImGuiTableFlags_Resizable);
+            ImGui::SetNextItemWidth(-1);
+            ImGui::BeginTable("table", 2, ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_BordersInnerV);
             ImGui::TableSetupColumn("Index");
             ImGui::TableSetupColumn("Value");
             ImGui::TableHeadersRow();

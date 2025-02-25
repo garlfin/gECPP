@@ -56,10 +56,10 @@ namespace gE
 
 	REFLECTABLE_ONGUI_IMPL(Material,
 	{
-		DrawField(Field{ "Shader"sv }, _shader, depth);
-		DrawField(EnumField{ "Depth Function", ""sv, EDepthFunction }, _depthFunc, depth);
-		DrawField(EnumField{ "Cull Mode", ""sv, ECullMode }, _cullMode, depth);
-		DrawField(EnumField{ "Blend Mode", ""sv, EBlendMode }, _blendMode, depth);
+		DrawField(Field{ "Shader" }, _shader, depth);
+		DrawField(EnumField{ "Depth Function", "", EDepthFunction }, _depthFunc, depth);
+		DrawField(EnumField{ "Cull Mode", "", ECullMode }, _cullMode, depth);
+		DrawField(EnumField{ "Blend Mode", "", EBlendMode }, _blendMode, depth);
 	});
 
 	REFLECTABLE_FACTORY_NO_IMPL(Material);
@@ -67,7 +67,7 @@ namespace gE
 	PBRMaterial::PBRMaterial(Window* w, const Reference<Shader>& s, const PBRMaterialSettings& settings) :
 		Material(w, s),
 		_albedo(GetShader(), "AlbedoTex", settings.Albedo),
-		_amr(GetShader(), "ARMDTex", settings.AMR),
+		_armd(GetShader(), "ARMDTex", settings.ARMD),
 		_normal(GetShader(), "NormalTex", settings.Normal),
 		_brdfLUT(GetShader(), "BRDFLutTex")
 	{
@@ -78,12 +78,21 @@ namespace gE
 		GetWindow().GetSlotManager().Reset();
 
 		_albedo.Set();
-		_amr.Set();
+		_armd.Set();
 		_normal.Set();
 		_brdfLUT.Set(GetWindow().GetBRDFLookupTexture());
 
 		Material::Bind();
 	}
+
+	REFLECTABLE_ONGUI_IMPL(PBRMaterial,
+	{
+		DrawField(Field{ "Albedo" }, *_albedo, depth);
+		DrawField(Field{ "ARMD", "AO, Roughness, Metallic, _" }, *_armd, depth);
+		DrawField(Field{ "Normal" }, *_normal, depth);
+	});
+
+	REFLECTABLE_FACTORY_NO_IMPL(PBRMaterial);
 
 	DynamicUniform::DynamicUniform(const Shader& shader, u32 location) :
 		_shader(&shader), _location(location)

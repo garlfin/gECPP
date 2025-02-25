@@ -77,8 +77,8 @@ namespace gE
 	{
 		const size_t materialCount = _mesh->VAO->GetSettings().Counts.MaterialCount;
 
-		DrawField(Field{ "Mesh"sv }, *this, depth, GetMesh, SetMesh);
-		const size_t changed = DrawField(ArrayField<Field>{ "Materials"sv }, _materials.Data(), materialCount, depth);
+		DrawField(Field{ "Mesh" }, *this, depth, GetMesh, SetMesh);
+		const size_t changed = DrawField(ArrayField<Field>{ "Materials" }, _materials.Data(), materialCount, depth);
 
 		if(changed != materialCount)
 			UpdateDrawCall(changed);

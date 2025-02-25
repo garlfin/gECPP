@@ -16,6 +16,16 @@ namespace gE::PostProcess
 		Manual
 	};
 
+	CONSTEXPR_GLOBAL EnumData<ExposureMode, 3> EExposureMode
+	{
+		EnumType::Normal,
+		{
+			ENUM_DEF(ExposureMode, Physical),
+			ENUM_DEF(ExposureMode, Automatic),
+			ENUM_DEF(ExposureMode, Manual),
+		}
+	};
+
     struct PhysicalCameraSettings : public IReflectable
     {
     	REFLECTABLE_ONGUI_PROTO(IReflectable);
@@ -66,21 +76,23 @@ namespace gE::PostProcess
 
 	inline REFLECTABLE_ONGUI_IMPL(PhysicalCameraSettings,
 	{
+		DrawField(EnumField{ "Exposure Mode", "", EExposureMode }, ExposureMode, depth);
+
 		if(ExposureMode == ExposureMode::Manual)
 		{
-			DrawField(ScalarField{ "Exposure"sv, ""sv, 0.f, 10.f, FLT_EPSILON, ScalarViewMode::Slider }, Exposure, depth);
+			DrawField(ScalarField{ "Exposure", "", 0.f, 10.f, FLT_EPSILON, ScalarViewMode::Slider }, Exposure, depth);
 			return;
 		}
 
 		if(ExposureMode == ExposureMode::Physical)
 		{
-			DrawField(ScalarField{ "F-Stop"sv, ""sv, 0.f, 10.f, FLT_EPSILON, ScalarViewMode::Slider }, FStop, depth);
+			DrawField(ScalarField{ "F-Stop", "", 0.f, 10.f, FLT_EPSILON, ScalarViewMode::Slider }, FStop, depth);
 			float shutter = 1.0 / ShutterTime;
-			DrawField(ScalarField{ "Shutter Time"sv, "Frames per Second"sv, 1.f, FLT_MAX, 1.f }, shutter, depth);
+			DrawField(ScalarField{ "Shutter Time", "Frames per Second", 1.f, FLT_MAX, 1.f }, shutter, depth);
 			ShutterTime = 1.0 / shutter;
-			DrawField(ScalarField{ "ISO"sv, ""sv, 1.f, FLT_MAX, 1.f }, ISO, depth);
+			DrawField(ScalarField{ "ISO", "", 1.f, FLT_MAX, 1.f }, ISO, depth);
 		}
 
-		DrawField<const float>(ScalarField<float>{ "Exposure"sv }, Exposure, depth);
+		DrawField<const float>(ScalarField<float>{ "Exposure" }, Exposure, depth);
 	});
 };

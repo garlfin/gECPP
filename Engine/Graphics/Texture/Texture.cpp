@@ -4,6 +4,7 @@
 
 #include "Texture.h"
 #include "TextureSlotManager.h"
+#include "Core/GUI/Editor.h"
 
 namespace GPU
 {
@@ -44,8 +45,34 @@ namespace GPU
 		return _index - 1;
 	}
 
+	REFLECTABLE_ONGUI_IMPL(Texture,
+		gE::DrawField<const GLenum>(gE::ScalarField<GLenum>{ "Format" }, Format, depth);
+		gE::DrawField<const u8>(gE::ScalarField<u8>{ "Mip Count" }, MipCount, depth);
+		gE::DrawField(gE::EnumField{ "Wrap Mode", "", EWrapMode }, WrapMode, depth);
+		gE::DrawField(gE::EnumField{ "Filter", "", EFilterMode }, Filter, depth);
+	);
+
+	REFLECTABLE_ONGUI_IMPL(Texture1D,
+		gE::DrawField(gE::ScalarField<u32>{ "Size" }, Size, depth);
+	);
 	REFLECTABLE_FACTORY_IMPL(Texture1D, API::Texture1D);
+
+	REFLECTABLE_ONGUI_IMPL(Texture2D,
+		gE::DrawField(gE::ScalarField<u32>{ "Size" }, Size, depth);
+
+		const float size = ImGui::GetContentRegionAvail().x;
+		if(GetGUITexture())
+			ImGui::Image((ImTextureID) GetGUITexture(), ImVec2(size, size));
+	);
 	REFLECTABLE_FACTORY_IMPL(Texture2D, API::Texture2D);
+
+	REFLECTABLE_ONGUI_IMPL(Texture3D,
+		gE::DrawField(gE::ScalarField<u32>{ "Size" }, Size, depth);
+	);
 	REFLECTABLE_FACTORY_IMPL(Texture3D, API::Texture3D);
+
+	REFLECTABLE_ONGUI_IMPL(TextureCube,
+		gE::DrawField(gE::ScalarField<u32>{ "Size" }, Size, depth);
+	);
 	REFLECTABLE_FACTORY_IMPL(TextureCube, API::TextureCube);
 }

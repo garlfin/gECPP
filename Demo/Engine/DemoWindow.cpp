@@ -19,19 +19,24 @@ void DemoWindow::OnInit()
 	Window::OnInit();
 
 	auto albedo = ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/cobble_col.pvr"));
-	auto amr = ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/cobble_armd.pvr"));
+	auto armd = ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/cobble_armd.pvr"));
 	auto normal = ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/cobble_nor.pvr"));
-	PBRMaterialSettings cobbleSettings { albedo, amr, normal };
+	PBRMaterialSettings cobbleSettings
+	{
+		albedo,
+		armd,
+		normal
+	};
 
 	albedo = ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/tile_col.pvr"));
-	amr = ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/tile_armd.pvr"));
+	armd = ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/tile_armd.pvr"));
 	normal = ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/tile_nor.pvr"));
-	PBRMaterialSettings tileSettings { albedo, amr, normal };
+	PBRMaterialSettings tileSettings { albedo, armd, normal };
 
 	albedo = ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/grass_col.pvr"));
-	amr = ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/grass_armd.pvr"));
+	armd = ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/grass_armd.pvr"));
 	normal = ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/grass_nor.pvr"));
-	PBRMaterialSettings grassSettings { albedo, amr, normal };
+	PBRMaterialSettings grassSettings { albedo, armd, normal };
 
 	auto rasterShader = gE::ref_create<ForwardShader>(this, GPU::Shader("Resource/Shader/uber.vert", "Resource/Shader/uber.frag"));
 

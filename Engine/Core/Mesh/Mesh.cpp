@@ -78,11 +78,11 @@ namespace gE
 
     REFLECTABLE_ONGUI_IMPL(Mesh,
     {
-        DrawField(Field{ "Name"sv }, Name, depth);
-        DrawField(Field{ "VAO"sv }, VAO->GetSettings(), depth);
+        DrawField(Field{ "Name" }, Name, depth);
+        DrawField(Field{ "VAO" }, VAO->GetSettings(), depth);
 
         if(Shape)
-            DrawField(Field{ "Shape"sv }, Shape->GetSettings(), depth);
+            DrawField(Field{ "Shape" }, Shape->GetSettings(), depth);
     });
 
     REFLECTABLE_FACTORY_IMPL(Mesh, Mesh);

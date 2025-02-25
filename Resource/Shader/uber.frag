@@ -62,7 +62,7 @@ void main()
     vec2 uv = ParallaxMapping(viewDir, ARMDTex, vert, parallaxSettings);
 
     vec3 albedo = texture(AlbedoTex, uv).rgb;
-    vec3 arm = texture(ARMDTex, uv * vec2(1, -1)).rgb;
+    vec3 armd = texture(ARMDTex, uv * vec2(1, -1)).rgb;
     vec3 normal = texture(NormalTex, uv).rgb;
 
 	normal = normal * 2.0 - 1.0;
@@ -71,9 +71,9 @@ void main()
     PBRFragment frag = PBRFragment
     (
         normal,
-        arm.y, // roughness
+        armd.g, // roughness
         albedo,
-        arm.z,
+        armd.b, // metallic
         vec3(0.04),
         Scene_EnableSpecular ? 1.0 : 0.0
     );
@@ -85,7 +85,7 @@ void main()
     ambient = SampleLighting(vert, pbrSample.Diffuse, true);
 #endif
 
-    FragColor.rgb = albedo * ambient;
+    FragColor.rgb = albedo * ambient;// * armd.r;
 
     for(int i = 0; i < Lighting.LightCount; i++)
         FragColor.rgb += GetLighting(vert, frag, Lighting.Lights[i], VertexIn.FragPosLightSpace[i]);

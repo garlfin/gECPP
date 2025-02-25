@@ -48,23 +48,24 @@ namespace gE
     {
     public:
         ValueUniform(const Shader& mat, const char* n, const T& t) : Uniform<T>(mat, n), _t(t) { };
-        ValueUniform(const Shader& mat, const char* n, T&& t) : Uniform<T>(mat, n), _t(t) { };
+        ValueUniform(const Shader& mat, const char* n, T&& t) : Uniform<T>(mat, n), _t(move(t)) { };
         ValueUniform(const Shader& mat, u32 l, const T& t) : Uniform<T>(mat, l), _t(t) { };
-        ValueUniform(const Shader& mat, u32 l, T&& t) : Uniform<T>(mat, l), _t(t) { };
+        ValueUniform(const Shader& mat, u32 l, T&& t) : Uniform<T>(mat, l), _t(move(t)) { };
 
         ValueUniform(const ValueUniform&) = default;
         ValueUniform(ValueUniform&&) = default;
 
         ALWAYS_INLINE ValueUniform& operator=(const T& t) { _t = t; return *this; }
-        ALWAYS_INLINE ValueUniform& operator=(T&& t) { _t = t; return *this; }
+        ALWAYS_INLINE ValueUniform& operator=(T&& t) { _t = move(t); return *this; }
 
         ALWAYS_INLINE ValueUniform& operator=(ValueUniform&&) = default;
         ALWAYS_INLINE ValueUniform& operator=(const ValueUniform&) = default;
-        ALWAYS_INLINE T* operator->() const { return _t; }
-        ALWAYS_INLINE T& operator*() const { return *_t; }
-        ALWAYS_INLINE operator bool() const { return (bool) _t; } // NOLINT
-        ALWAYS_INLINE operator T*() const { return _t; } // NOLINT
-        ALWAYS_INLINE operator T&() const { return *_t; } // NOLINT
+        ALWAYS_INLINE T* operator->() { return &_t; }
+        ALWAYS_INLINE const T* operator->() const { return &_t; }
+        ALWAYS_INLINE T& operator*() { return _t; }
+        ALWAYS_INLINE const T& operator*() const { return _t; }
+        ALWAYS_INLINE operator T*() const { return &_t; } // NOLINT
+        ALWAYS_INLINE operator T&() const { return _t; } // NOLINT
 
         ALWAYS_INLINE void Set() const { Uniform<T>::Set(_t); }
 

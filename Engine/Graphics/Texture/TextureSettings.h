@@ -84,11 +84,30 @@ namespace GPU
 		Linear = GL_LINEAR
 	};
 
+	CONSTEXPR_GLOBAL EnumData<FilterMode, 2> EFilterMode
+	{
+		EnumType::Normal,
+		{
+			ENUM_DEF(FilterMode, Nearest),
+			ENUM_DEF(FilterMode, Linear)
+		}
+	};
+
 	enum class WrapMode : GLenum
 	{
 		Clamp = GL_CLAMP_TO_EDGE,
 		Repeat = GL_REPEAT,
 		Border = GL_CLAMP_TO_BORDER
+	};
+
+	CONSTEXPR_GLOBAL EnumData<WrapMode, 3> EWrapMode
+	{
+		EnumType::Normal,
+		{
+			ENUM_DEF(WrapMode, Clamp),
+			ENUM_DEF(WrapMode, Repeat),
+			ENUM_DEF(WrapMode, Border)
+		}
 	};
 
 	struct CompressionScheme

@@ -149,7 +149,7 @@ struct EnumData
 #define REFLECTABLE_ONEDITOR_NO_IMPL(TYPE, SUPER) \
 	void TYPE::OnEditorGUI(u8 depth) { SUPER::OnEditorGUI(depth); }
 
-#define ENUM_DEF(E_TYPE, E_VAL) ENUM_PAIR(E_TYPE::E_VAL, ###E_VAL)
+#define ENUM_DEF(E_TYPE, E_VAL) ENUM_PAIR(E_TYPE::E_VAL, #E_VAL)
 #define ENUM_PAIR(E_VAL, E_NAME) std::make_pair(E_VAL, E_NAME##sv)
 
 // Typesystem must be explicity instantiated.

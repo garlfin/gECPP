@@ -24,6 +24,7 @@
 		TYPE() = default; \
 		using SUPER_T::Free; \
 		using SUPER_T::IsFree; \
+		using SUPER_T::OnEditorGUI; \
 		TYPE(istream& in, gE::Window* window) \
 		{ \
 			SUPER_T tmp(in, window); \

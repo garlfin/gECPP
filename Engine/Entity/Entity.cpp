@@ -24,9 +24,9 @@ namespace gE
 
 	REFLECTABLE_ONGUI_IMPL(Entity,
 	{
-		DrawField(Field{ "Name"sv }, _name, depth);
-		DrawField(Field{ "Parent"sv }, _parent, depth);
-		DrawField(Field{ "Transform"sv }, _transform, depth);
+		DrawField(Field{ "Name" }, _name, depth);
+		DrawField(Field{ "Parent" }, _parent, depth);
+		DrawField(Field{ "Transform" }, _transform, depth);
 	});
 
 	void Entity::Destroy(bool flagChildren)

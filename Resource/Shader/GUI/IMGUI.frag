@@ -12,5 +12,5 @@ out vec4 Color;
 
 void main()
 {
-    Color = VertexIn.Color * texture(ColorTexture, VertexIn.UV).rrrr;
+    Color = VertexIn.Color * texture(ColorTexture, VertexIn.UV);
 }

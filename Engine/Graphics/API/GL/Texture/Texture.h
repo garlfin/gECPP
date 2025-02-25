@@ -64,8 +64,9 @@ namespace GL
 		API_SERIALIZABLE(Texture2D, GPU::Texture2D);
 		API_DEFAULT_CM_CONSTRUCTOR(Texture2D);
 		API_UNDERLYING_IMPL(GL::Texture);
+		TEXTURE_ONGUI_IMPL(API_GL);
 
-	 public:
+	public:
 		NODISCARD ALWAYS_INLINE Size2D GetSize(u8 mip = 0) const { return max(Size >> glm::u32vec2(mip), glm::u32vec2(1)); }
 
 		void CopyFrom(const GL::Texture&) override;
@@ -77,7 +78,7 @@ namespace GL
 		API_DEFAULT_CM_CONSTRUCTOR(Texture3D);
 		API_UNDERLYING_IMPL(GL::Texture);
 
-	 public:
+	public:
 		NODISCARD ALWAYS_INLINE Size3D GetSize(u8 mip = 0) const { return max(Size >> glm::u32vec3(mip), glm::u32vec3(1)); }
 
 		void CopyFrom(const GL::Texture&) override;
@@ -89,7 +90,7 @@ namespace GL
 		API_DEFAULT_CM_CONSTRUCTOR(TextureCube);
 		API_UNDERLYING_IMPL(GL::Texture);
 
-	 public:
+	public:
 		NODISCARD ALWAYS_INLINE Size1D GetSize(u8 mip = 0) const { return MAX(Size >> mip, 1); }
 
 		void CopyFrom(const GL::Texture&) override;

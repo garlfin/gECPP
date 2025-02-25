@@ -53,9 +53,9 @@ namespace GPU
 
 	REFLECTABLE_ONGUI_IMPL(MaterialSlot,
 	{
-		DrawField(gE::Field{ "Name"sv }, Name, depth);
-		DrawField(gE::ScalarField<u32>{ "Offset", "Tri offset"sv }, Offset, depth);
-		DrawField(gE::ScalarField{ "Count"sv, "Number of tris"sv, 1u }, Count, depth);
+		DrawField(gE::Field{ "Name" }, Name, depth);
+		DrawField(gE::ScalarField<u32>{ "Offset", "Tri offset" }, Offset, depth);
+		DrawField(gE::ScalarField{ "Count", "Number of tris", 1u }, Count, depth);
 	});
 
 	REFLECTABLE_ONGUI_IMPL(VAO,
@@ -64,16 +64,16 @@ namespace GPU
 		u8 bufCount = Counts.BufferCount;
 		u8 fieldCount = Counts.FieldCount;
 
-		DrawField(gE::ScalarField<u8>{ "Material Count"sv, ""sv, 1, GE_MAX_VAO_MATERIAL, 1, gE::ScalarViewMode::Input }, matCount, depth);
-		DrawField(gE::ScalarField<u8>{ "Buffer Count"sv, ""sv, 1, GE_MAX_VAO_BUFFER, 1, gE::ScalarViewMode::Input }, bufCount, depth);
-		DrawField(gE::ScalarField<u8>{ "Field Count"sv, ""sv, 1, GE_MAX_VAO_FIELD, 1, gE::ScalarViewMode::Input }, fieldCount, depth);
+		DrawField(gE::ScalarField<u8>{ "Material Count", "", 1, GE_MAX_VAO_MATERIAL, 1, gE::ScalarViewMode::Input }, matCount, depth);
+		DrawField(gE::ScalarField<u8>{ "Buffer Count", "", 1, GE_MAX_VAO_BUFFER, 1, gE::ScalarViewMode::Input }, bufCount, depth);
+		DrawField(gE::ScalarField<u8>{ "Field Count", "", 1, GE_MAX_VAO_FIELD, 1, gE::ScalarViewMode::Input }, fieldCount, depth);
 
 		Counts.MaterialCount = matCount;
 		Counts.BufferCount = bufCount;
 		Counts.FieldCount = fieldCount;
 
-		DrawField(gE::ArrayField<gE::Field>{ "Materials"sv }, Materials, Counts.MaterialCount, depth);
-		DrawField(gE::ArrayField<gE::Field>{ "Buffers"sv }, Buffers, Counts.BufferCount, depth);
+		DrawField(gE::ArrayField<gE::Field>{ "Materials" }, Materials, Counts.MaterialCount, depth);
+		DrawField(gE::ArrayField<gE::Field>{ "Buffers" }, Buffers, Counts.BufferCount, depth);
 	});
 
 	REFLECTABLE_ONGUI_IMPL(IndexedVAO,
