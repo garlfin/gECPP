@@ -12,7 +12,7 @@ namespace GL
 {
 	CONSTEXPR_GLOBAL handle NullHandle = 0;
 
- 	class Texture : public GLObject
+ 	class Texture : public GLObject, public Underlying
 	{
 	 public:
 		Texture(gE::Window* window, GLenum target, GPU::Texture& settings);
@@ -51,7 +51,7 @@ namespace GL
 	{
 		API_SERIALIZABLE(Texture1D, GPU::Texture1D);
 		API_DEFAULT_CM_CONSTRUCTOR(Texture1D);
-		API_UNDERLYING_IMPL(GL::Texture);
+		API_UNDERLYING_IMPL();
 
 	public:
 		NODISCARD ALWAYS_INLINE Size1D GetSize(u8 mip = 0) const { return std::max<Size1D>(Size >> mip, 1); }
@@ -63,8 +63,9 @@ namespace GL
 	{
 		API_SERIALIZABLE(Texture2D, GPU::Texture2D);
 		API_DEFAULT_CM_CONSTRUCTOR(Texture2D);
-		API_UNDERLYING_IMPL(GL::Texture);
-		TEXTURE_ONGUI_IMPL(API_GL);
+		API_UNDERLYING_IMPL();
+		REFLECTABLE_ONGUI_PROTO(GPU::Texture2D);
+		REFLECTABLE_ICON_PROTO();
 
 	public:
 		NODISCARD ALWAYS_INLINE Size2D GetSize(u8 mip = 0) const { return max(Size >> glm::u32vec2(mip), glm::u32vec2(1)); }
@@ -76,7 +77,7 @@ namespace GL
 	{
 		API_SERIALIZABLE(Texture3D, GPU::Texture3D);
 		API_DEFAULT_CM_CONSTRUCTOR(Texture3D);
-		API_UNDERLYING_IMPL(GL::Texture);
+		API_UNDERLYING_IMPL();
 
 	public:
 		NODISCARD ALWAYS_INLINE Size3D GetSize(u8 mip = 0) const { return max(Size >> glm::u32vec3(mip), glm::u32vec3(1)); }
@@ -88,7 +89,7 @@ namespace GL
 	{
 		API_SERIALIZABLE(TextureCube, GPU::TextureCube);
 		API_DEFAULT_CM_CONSTRUCTOR(TextureCube);
-		API_UNDERLYING_IMPL(GL::Texture);
+		API_UNDERLYING_IMPL();
 
 	public:
 		NODISCARD ALWAYS_INLINE Size1D GetSize(u8 mip = 0) const { return MAX(Size >> mip, 1); }
@@ -100,5 +101,6 @@ namespace GL
 namespace PVR
 {
 	NODISCARD API::Texture* Read(gE::Window*, const Path&, GPU::WrapMode = GPU::WrapMode::Repeat, GPU::FilterMode = GPU::FilterMode::Linear);
+	NODISCARD gE::File ReadAsFile(gE::Window*, const Path&, GPU::WrapMode = GPU::WrapMode::Repeat, GPU::FilterMode = GPU::FilterMode::Linear);
 	NODISCARD Array<u8> Read(const Path& path, Header& header);
 }

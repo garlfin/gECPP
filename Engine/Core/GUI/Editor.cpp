@@ -133,13 +133,13 @@ namespace gE
             if(ImGui::BeginMenu("View"))
             {
                 ImGui::SetNextItemWidth(128.f);
-                ImGui::SliderScalar("Icon Size", ImGuiDataType_U16, &_assetScale, &minScale, &maxScale, nullptr, ImGuiSliderFlags_AlwaysClamp);
+                ImGui::SliderScalar("Icon Size", ImGuiDataType_U16, &_iconSize, &minScale, &maxScale, nullptr, ImGuiSliderFlags_AlwaysClamp);
                 ImGui::EndMenu();
             }
             ImGui::EndMenuBar();
 
             const u32 windowSize = ImGui::GetContentRegionAvail().x - ImGui::GetCursorPos().x;
-            const u16 width = _assetScale + GE_EDITOR_ICON_PADDING * 2;
+            const u16 width = _iconSize + GE_EDITOR_ICON_PADDING * 2;
             const u8 columns = std::max<u8>(windowSize / width, 1);
             const AssetManager::FILE_SET_T& assets = _window->GetAssets().GetFiles();
 
@@ -151,9 +151,18 @@ namespace gE
                 if(!column) ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(column);
 
-                std::string fileName = file.GetPath().filename().replace_extension().string();
+                float top = ImGui::GetCursorPosY();
 
+                const std::string fileName = file.GetPath().filename().replace_extension().string();
+
+                if(file.IsLoaded())
+                    file.Get()->OnEditorIcon(_iconSize);
                 ImGui::TextWrapped(fileName.c_str());
+
+                float bottom = ImGui::GetCursorPosY();
+
+                ImGui::SetCursorPosY(top);
+                ImGui::Dummy(ImVec2(_iconSize, bottom - top));
 
                 if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
                 {

@@ -71,7 +71,10 @@ struct Type
 struct IReflectable
 {
 	IReflectable() = default;
+#ifdef GE_ENABLE_EDITOR
 	virtual void OnEditorGUI(u8 depth) {};
+	virtual void OnEditorIcon(Size1D size) {};
+#endif
 	virtual ~IReflectable() = default;
 };
 
@@ -127,9 +130,15 @@ struct EnumData
 			void IOnEditorGUI(u8 depth)
 	#define REFLECTABLE_ONGUI_IMPL(TYPE, CODE) \
 		void TYPE::IOnEditorGUI(u8 depth) { CODE }
+	#define REFLECTABLE_ICON_PROTO() \
+		void OnEditorIcon(Size1D size) override
+	#define REFLECTABLE_ICON_IMPL(TYPE, CODE) \
+		void TYPE::OnEditorIcon(Size1D size) { CODE }
 #else
 	#define REFLECTABLE_ONGUI_PROTO(SUPER)
 	#define REFLECTABLE_ONGUI_IMPL(TYPE, CODE)
+	#define REFLECTABLE_ICON_PROTO
+	#define REFLECTABLE_ICON_IMPL(TYPE, CODE)
 #endif
 
 #define REFLECTABLE_PROTO(TYPE, SUPER, NAME) \

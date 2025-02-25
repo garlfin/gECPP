@@ -59,10 +59,6 @@ namespace GPU
 
 	REFLECTABLE_ONGUI_IMPL(Texture2D,
 		gE::DrawField(gE::ScalarField<u32>{ "Size" }, Size, depth);
-
-		const float size = ImGui::GetContentRegionAvail().x;
-		if(GetGUITexture())
-			ImGui::Image((ImTextureID) GetGUITexture(), ImVec2(size, size));
 	);
 	REFLECTABLE_FACTORY_IMPL(Texture2D, API::Texture2D);
 

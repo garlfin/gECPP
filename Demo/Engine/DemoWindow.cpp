@@ -18,27 +18,27 @@ void DemoWindow::OnInit()
 {
 	Window::OnInit();
 
-	auto albedo = ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/cobble_col.pvr"));
-	auto armd = ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/cobble_armd.pvr"));
-	auto normal = ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/cobble_nor.pvr"));
 	PBRMaterialSettings cobbleSettings
 	{
-		albedo,
-		armd,
-		normal
+		 Assets.AddFile(PVR::ReadAsFile(this, "Resource/Texture/cobble_col.pvr"))->Cast<API::Texture2D, false>(),
+		 Assets.AddFile(PVR::ReadAsFile(this, "Resource/Texture/cobble_armd.pvr"))->Cast<API::Texture2D, false>(),
+		 Assets.AddFile(PVR::ReadAsFile(this, "Resource/Texture/cobble_nor.pvr"))->Cast<API::Texture2D, false>(),
 	};
 
-	albedo = ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/tile_col.pvr"));
-	armd = ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/tile_armd.pvr"));
-	normal = ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/tile_nor.pvr"));
-	PBRMaterialSettings tileSettings { albedo, armd, normal };
+	PBRMaterialSettings tileSettings
+	{
+		Assets.AddFile(PVR::ReadAsFile(this, "Resource/Texture/tile_col.pvr"))->Cast<API::Texture2D, false>(),
+		Assets.AddFile(PVR::ReadAsFile(this, "Resource/Texture/tile_armd.pvr"))->Cast<API::Texture2D, false>(),
+		Assets.AddFile(PVR::ReadAsFile(this, "Resource/Texture/tile_nor.pvr"))->Cast<API::Texture2D, false>(),
+	};
+	PBRMaterialSettings grassSettings
+	{
+		Assets.AddFile(PVR::ReadAsFile(this, "Resource/Texture/grass_col.pvr"))->Cast<API::Texture2D, false>(),
+		Assets.AddFile(PVR::ReadAsFile(this, "Resource/Texture/grass_armd.pvr"))->Cast<API::Texture2D, false>(),
+		Assets.AddFile(PVR::ReadAsFile(this, "Resource/Texture/grass_nor.pvr"))->Cast<API::Texture2D, false>(),
+	};
 
-	albedo = ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/grass_col.pvr"));
-	armd = ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/grass_armd.pvr"));
-	normal = ref_cast((GL::Texture2D*) PVR::Read(this, "Resource/Texture/grass_nor.pvr"));
-	PBRMaterialSettings grassSettings { albedo, armd, normal };
-
-	auto rasterShader = gE::ref_create<ForwardShader>(this, GPU::Shader("Resource/Shader/uber.vert", "Resource/Shader/uber.frag"));
+	auto rasterShader = ref_create<ForwardShader>(this, GPU::Shader("Resource/Shader/uber.vert", "Resource/Shader/uber.frag"));
 
 	auto cobbleMaterial = Assets.AddFile(File("Cobble", PBRMaterial(this, rasterShader, cobbleSettings)))->Cast<PBRMaterial, false>();
 	auto tileMaterial = Assets.AddFile(File("Tile", PBRMaterial(this, rasterShader, tileSettings)))->Cast<PBRMaterial, false>();
@@ -100,6 +100,6 @@ void DemoWindow::OnInit()
 	Cubemaps->CreateHarmonic();
 
 	VoxelCaptureSettings voxelSettings(128, 8.4f, VoxelPipeline::ProbeSettings(glm::u8vec3(8)));
-	VoxelSceneCapture = gE::ptr_create<VoxelCapture>(this, voxelSettings);
+	VoxelSceneCapture = ptr_create<VoxelCapture>(this, voxelSettings);
 	VoxelSceneCapture->SetName("Voxel Capture");
 }

@@ -18,14 +18,6 @@ namespace GL
 	class TextureCube;
 }
 
-#if defined(GE_ENABLE_EDITOR) && API_ID == API_GL
-	#define TEXTURE_ONGUI_IMPL(API_T) \
-		protected: \
-			const API::Texture* GetGUITexture() const override { if constexpr(API_ID == API_T) return this; else return nullptr; }
-#else
-	#define TEXTURE_ONGUI_IMPL(API_T, TYPE)
-#endif
-
 namespace GPU
 {
 	template<Dimension T>
@@ -49,11 +41,6 @@ namespace GPU
 		TextureData Data = DEFAULT;
 
 		~Texture() override { ASSET_CHECK_FREE(Texture); }
-
-#ifdef GE_ENABLE_EDITOR
-	protected:
-		virtual const API::Texture* GetGUITexture() const { return nullptr; }
-#endif
 	};
 
 	class Texture1D : public Texture

@@ -25,7 +25,7 @@ namespace GL
 		u32 BaseInstance;
 	};
 
-	class IVAO : public GLObject
+	class IVAO : public GLObject, public Underlying
 	{
 	public:
 		IVAO() = default;
@@ -57,7 +57,7 @@ namespace GL
 	{
 		API_SERIALIZABLE(VAO, GPU::VAO);
 		API_DEFAULT_CM_CONSTRUCTOR(VAO);
-		API_UNDERLYING_IMPL(IVAO);
+		API_UNDERLYING_IMPL();
 
 	public:
 		GET_CONST(const GPU::VAO&, Data, *this);
@@ -71,7 +71,7 @@ namespace GL
 	{
 		API_SERIALIZABLE(IndexedVAO, GPU::IndexedVAO);
 		API_DEFAULT_CM_CONSTRUCTOR(IndexedVAO);
-		API_UNDERLYING_IMPL(IVAO);
+		API_UNDERLYING_IMPL();
 
 	public:
 		GET_CONST(u8, MaterialCount, Counts.MaterialCount);

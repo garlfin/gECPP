@@ -12,7 +12,7 @@ namespace GL
 	class Shader;
 	class ShaderStage;
 
-	class IShader : public APIObject
+	class IShader : public APIObject, public Underlying
 	{
 		API_DEFAULT_CM_CONSTRUCTOR(IShader);
 
@@ -48,14 +48,14 @@ namespace GL
 	{
 		API_SERIALIZABLE(Shader, GPU::Shader);
 		API_DEFAULT_CM_CONSTRUCTOR(Shader);
-		API_UNDERLYING_IMPL(IShader);
+		API_UNDERLYING_IMPL();
 	};
 
 	class ComputeShader final : protected GPU::ComputeShader, public IShader
 	{
 		API_SERIALIZABLE(ComputeShader, GPU::ComputeShader);
 		API_DEFAULT_CM_CONSTRUCTOR(ComputeShader);
-		API_UNDERLYING_IMPL(IShader);
+		API_UNDERLYING_IMPL();
 
 	 public:
 		ALWAYS_INLINE void Dispatch(u16 x, u16 y, u16 z) const { Bind(); glDispatchCompute(x, y, z); }

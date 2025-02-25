@@ -84,6 +84,11 @@ namespace PVR
 		return tex;
 	}
 
+	gE::File ReadAsFile(gE::Window* window, const Path& path, GPU::WrapMode wrapMode, GPU::FilterMode filterMode)
+	{
+		return gE::File(path, ref_cast(&Read(window, path, wrapMode, filterMode)->GetSettings()));
+	}
+
 	void Header::IDeserialize(istream& in, SETTINGS_T)
 	{
 		Version = ::Read<u32>(in);

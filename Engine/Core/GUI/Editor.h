@@ -50,7 +50,7 @@ namespace gE
         bool _running = true;
         size_t _oldLogSize = 0;
         Path _assetPath = "";
-        u16 _assetScale = 64;
+        u16 _iconSize = 64;
     };
 #endif
 
@@ -71,8 +71,7 @@ namespace gE
     {
         Stats = 1,
         Elements = 1 << 1,
-        Name = 1 << 2,
-        Default = Stats | Elements
+        Name = 1 << 2
     };
 
     ENUM_OPERATOR(ArrayViewMode, &);
@@ -81,7 +80,7 @@ namespace gE
     template<class T>
     struct ArrayField : public T
     {
-        ArrayViewMode ViewMode = ArrayViewMode::Default;
+        ArrayViewMode ViewMode = ArrayViewMode::Elements | ArrayViewMode::Name;
     };
 
     enum class ScalarViewMode : u8

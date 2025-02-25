@@ -121,7 +121,7 @@ namespace gE::gEModel
 				hasSkeleton |= subMesh->HasBones();
 			}
 
-			mesh.VAO = gE::ptr_cast<API::IVAO>(new API::IndexedVAO(window, move(meshSettings)));
+			mesh.VAO = ptr_cast<API::IVAO>(new API::IndexedVAO(window, move(meshSettings)));
 
 			/*if(hasSkeleton)
 			{

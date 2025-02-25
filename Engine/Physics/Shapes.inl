@@ -93,7 +93,7 @@ namespace Physics
         // HasBakedSettings
         if(!Read<bool>(in)) return;
 
-        BakedSettings = gE::ptr_create<BakedConvexMeshShape>(in, nullptr);
+        BakedSettings = ptr_create<BakedConvexMeshShape>(in, nullptr);
     }
 
     inline void ConvexMeshShape::ISerialize(ostream& out) const

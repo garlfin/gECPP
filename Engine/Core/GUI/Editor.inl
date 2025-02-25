@@ -42,7 +42,7 @@ namespace gE
         if constexpr (isConst && !isReflectable)
             ImGui::BeginDisabled();
 
-        ImGui::PushItemWidth(-1);
+        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x + ImGui::GetScrollX());
 
         bool changed = false;
         if constexpr(std::is_enum_v<RAW_T>)
@@ -139,7 +139,6 @@ namespace gE
         if constexpr (isConst && !isReflectable)
             ImGui::EndDisabled();
 
-        ImGui::PopItemWidth();
         return changed;
     }
 
@@ -149,13 +148,16 @@ namespace gE
         const std::string label = std::format("##{}", settings.Name);
         std::string ptr = std::format("{}", (void*) t);
 
-        ImGui::TextUnformatted(settings.Name.data());
-        ImGui::SameLine();
-        ImGui::SetNextItemWidth(-1);
-        ImGui::InputText(label.c_str(), &ptr, ImGuiInputTextFlags_ReadOnly);
-
         if(t)
             return DrawField(settings, *t, depth);
+
+        ImGui::TextUnformatted(settings.Name.data());
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x + ImGui::GetScrollX());
+
+        ImGui::BeginDisabled();
+        ImGui::InputText(label.c_str(), &ptr, ImGuiInputTextFlags_ReadOnly);
+        ImGui::EndDisabled();
         return false;
     }
 
@@ -173,7 +175,7 @@ namespace gE
         /*if constexpr (CONST)
             ImGui::BeginDisabled();*/
 
-        ImGui::PushItemWidth(-1);
+        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x + ImGui::GetScrollX());
 
         bool changed = false;
         if(settings.ViewMode == ScalarViewMode::ColorPicker)
@@ -210,8 +212,6 @@ namespace gE
         /*if constexpr (CONST)
             ImGui::EndDisabled();*/
 
-        ImGui::PopItemWidth();
-
         return changed;
     }
 
@@ -224,6 +224,7 @@ namespace gE
     template <class T, class SETTINGS_T>
     size_t DrawField(const ArrayField<SETTINGS_T>& settings, T* ts, size_t count, u8 depth)
     {
+        const bool viewName = (bool)(settings.ViewMode & ArrayViewMode::Name);
         if((bool)(settings.ViewMode & ArrayViewMode::Stats))
         {
             ImGui::TextUnformatted(std::format("{}:\n\tType: {}\n\tSize: {}\n\tByte Count: {}\n\tPointer: {}",
@@ -236,16 +237,21 @@ namespace gE
         }
 
         Field tempField = settings;
-        if(!(bool)(settings.ViewMode & ArrayViewMode::Name))
-            tempField.Name = DEFAULT;
+        tempField.Name = DEFAULT;
+
+        if(viewName)
+        {
+            ImGui::TextUnformatted(settings.Name.data());
+            ImGui::SameLine();
+        }
 
         size_t changed = count;
         if((bool)(settings.ViewMode & ArrayViewMode::Elements) && ts)
         {
-            ImGui::SetNextItemWidth(-1);
+            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x + ImGui::GetScrollX());
             ImGui::BeginTable("table", 2, ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_BordersInnerV);
             ImGui::TableSetupColumn("Index");
-            ImGui::TableSetupColumn("Value");
+            ImGui::TableSetupColumn(viewName ? "Value" : settings.Name.data());
             ImGui::TableHeadersRow();
 
             for(size_t i = 0; i < count; i++)
@@ -272,21 +278,33 @@ namespace gE
     template<class T>
     bool DragDropCompare(ImGuiPayload& payload)
     {
-        bool isReflectable = payload.IsDataType(GE_EDITOR_ASSET_PAYLOAD);
+        const bool isReflectable = payload.IsDataType(GE_EDITOR_ASSET_PAYLOAD);
         const Reference<Asset>& data = **(const Reference<Asset>**) payload.Data;
-        return isReflectable && dynamic_cast<T*>(data.GetPointer());
+        Underlying* underlying = data->GetUnderlying();
+
+        if(!isReflectable) return false;
+        return dynamic_cast<T*>(data.GetPointer()) || dynamic_cast<T*>(underlying);
     }
 
     template <class T> requires std::is_base_of_v<Reflectable<Window*>, T>
     bool DrawField(const Field& settings, Reference<T>& ref, u8 depth)
     {
-        const std::string label = std::format("##{}", settings.Name);
-        std::string ptr = std::format("{}", (void*) ref.GetPointer());
+        using RAW_T = std::remove_const_t<T>;
+        constexpr bool isConst = std::is_const_v<T>;
 
         ImGui::TextUnformatted(settings.Name.data());
         ImGui::SameLine();
-        ImGui::SetNextItemWidth(-1);
-        ImGui::InputText(label.c_str(), &ptr, ImGuiInputTextFlags_ReadOnly);
+
+        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x + ImGui::GetScrollX());
+        std::string_view type = "IReflectable (NO TYPE INFO)";
+        if constexpr(requires(RAW_T e) { e.GetType(); })
+            if(ref && ref->GetType())
+                type = ref->GetType()->Name;
+
+        ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
+        if(depth < 1) nodeFlags |= ImGuiTreeNodeFlags_DefaultOpen;
+
+        const bool open = ImGui::TreeNodeEx(std::format("{} ({})##{}", type, (void*) ref.GetPointer(), settings.Name).c_str(), nodeFlags);
 
         bool changed = false;
         if(ImGui::BeginDragDropTarget())
@@ -303,8 +321,19 @@ namespace gE
             ImGui::EndDragDropTarget();
         }
 
-        if(ref)
-            DrawField(settings, *ref, depth);
+        if(open)
+        {
+            if constexpr (isConst)
+                ImGui::BeginDisabled();
+
+            // not good if const, runs non-const function on const object
+            if(ref) ((RAW_T&) *ref).OnEditorGUI(depth + 1);
+
+            if constexpr (isConst)
+                ImGui::EndDisabled();
+
+            ImGui::TreePop();
+        }
 
         return changed;
     }

@@ -9,250 +9,246 @@
 #include "Binary.h"
 #include "Log.h"
 
-namespace gE
+template<class T>
+class WeakReference;
+
+struct RefCounter
 {
-	template<class T>
-	class WeakReference;
+public:
+	u32 RefCount = 0;
+	u32 WeakCount = 0;
+};
 
-	struct RefCounter
+template<class T>
+class Reference
+{
+ public:
+	explicit Reference(T* t) : _t(t) { if(t) _counter = new RefCounter(1, 0); }
+	Reference() = default;
+
+	OPERATOR_COPY_NOSUPER(Reference, Free,
+		_t = o._t;
+		_counter = o._counter;
+
+		if(!_counter) return;
+		++_counter->RefCount;
+	);
+
+	OPERATOR_MOVE_NOSUPER(Reference, Free,
+		_t = o._t;
+		_counter = o._counter;
+		o._t = nullptr;
+		o._counter = nullptr;
+	);
+
+	GET_CONST(T&, , *_t);
+	GET_CONST(T*, Pointer, _t);
+
+	ALWAYS_INLINE T* operator->() const { return _t; }
+	ALWAYS_INLINE T& operator*() const { return *_t; }
+	ALWAYS_INLINE operator T&() const { return *_t; } // NOLINT
+	explicit ALWAYS_INLINE operator T*() const { return _t; } // NOLINT
+
+	ALWAYS_INLINE const T& operator||(const T& t) const { return _t ? *_t : t; };
+	ALWAYS_INLINE T& operator||(T& t) const { return _t ? *_t : t; }
+	ALWAYS_INLINE const T* operator||(const T* t) const { return _t ? _t : t; };
+	ALWAYS_INLINE T* operator||(T* t) const { return _t ? _t : t; }
+
+	ALWAYS_INLINE bool operator ==(const Reference& o) const { return _t == o._t; }
+	ALWAYS_INLINE bool operator !=(const Reference& o) const { return _t != o._t; }
+
+	explicit ALWAYS_INLINE operator bool() const { return _t; }
+
+	void Free()
 	{
-	public:
-		u32 RefCount = 0;
-		u32 WeakCount = 0;
-	};
+		if(!_t) return;
 
-	template<class T>
-	class Reference
-	{
-	 public:
-		explicit Reference(T* t) : _t(t) { if(t) _counter = new RefCounter(1, 0); }
-		Reference() = default;
-
-		OPERATOR_COPY_NOSUPER(Reference, Free,
-			_t = o._t;
-			_counter = o._counter;
-
-			if(!_counter) return;
-			++_counter->RefCount;
-		);
-
-		OPERATOR_MOVE_NOSUPER(Reference, Free,
-			_t = o._t;
-			_counter = o._counter;
-			o._t = nullptr;
-			o._counter = nullptr;
-		);
-
-		GET_CONST(T&, , *_t);
-		GET_CONST(T*, Pointer, _t);
-
-		ALWAYS_INLINE T* operator->() const { return _t; }
-		ALWAYS_INLINE T& operator*() const { return *_t; }
-		ALWAYS_INLINE operator T&() const { return *_t; } // NOLINT
-		explicit ALWAYS_INLINE operator T*() const { return _t; } // NOLINT
-
-		ALWAYS_INLINE const T& operator||(const T& t) const { return _t ? *_t : t; };
-		ALWAYS_INLINE T& operator||(T& t) const { return _t ? *_t : t; }
-		ALWAYS_INLINE const T* operator||(const T* t) const { return _t ? _t : t; };
-		ALWAYS_INLINE T* operator||(T* t) const { return _t ? _t : t; }
-
-		ALWAYS_INLINE bool operator ==(const Reference& o) const { return _t == o._t; }
-		ALWAYS_INLINE bool operator !=(const Reference& o) const { return _t != o._t; }
-
-		explicit ALWAYS_INLINE operator bool() const { return _t; }
-
-		void Free()
+		if(!--_counter->RefCount)
 		{
-			if(!_t) return;
-
-			if(!--_counter->RefCount)
-			{
-				delete _t;
-				if(!_counter->WeakCount)
-					delete _counter;
-			}
-
-			_t = nullptr;
-			_counter = nullptr;
-		}
-		
-		NODISCARD ALWAYS_INLINE bool IsFree() const { return !_t; }
-
-		template<class I> requires std::is_base_of_v<I, T>
-		ALWAYS_INLINE operator Reference<I>() const
-		{
-			return Reference<I>(_t, _counter);
+			delete _t;
+			if(!_counter->WeakCount)
+				delete _counter;
 		}
 
-		template<class I> requires std::is_base_of_v<T, I>
-		ALWAYS_INLINE explicit operator Reference<I>() const
-		{
-			return Reference<I>((I*) _t, _counter);
-		}
-
-		~Reference() { Free(); }
-
-	 private:
-		Reference(T* t, RefCounter* c) : _t(t), _counter(c) { if(_counter) ++_counter->RefCount; }
-
-		T* _t = nullptr;
-		RefCounter* _counter = nullptr;
-
-		friend class WeakReference<T>;
-		template<class I> friend class Reference;
-	};
-
-	template<class T>
-	class WeakReference
-	{
-	public:
-		WeakReference() = default;
-		WeakReference(const Reference<T>& ref) : _t(ref._t), _counter(ref._counter) { if(_counter) _counter->WeakCount++; }
-
-		OPERATOR_COPY_NOSUPER(WeakReference, Free,
-			_t = o._t;
-			_counter = o._counter;
-
-			if(!_t) return;
-
-			++_counter->WeakCount;
-		);
-
-		OPERATOR_MOVE_NOSUPER(WeakReference, Free,
-			_t = o._t;
-			_counter = o._counter;
-			o._t = nullptr;
-			o._counter = nullptr;
-		);
-
-		NODISCARD ALWAYS_INLINE T& Get() { GE_ASSERT(_counter->RefCount); return *_t; }
-		NODISCARD ALWAYS_INLINE const T& Get() const { GE_ASSERT(_counter->RefCount); return *_t; };
-
-		GET(T*, Pointer, _counter->RefCount ? _t : nullptr);
-
-		ALWAYS_INLINE T* operator->() const { return _counter->RefCount ? _t : nullptr; }
-		ALWAYS_INLINE T& operator*() const { GE_ASSERT(_counter->RefCount); return *_t; }
-		ALWAYS_INLINE operator T&() const { GE_ASSERT(_counter->RefCount); return *_t; } // NOLINT
-		explicit ALWAYS_INLINE operator T*() const { return _counter->RefCount ? _t : nullptr; } // NOLINT
-
-		ALWAYS_INLINE const T& operator||(const T& t) const { return _t && _counter->RefCount ? *_t : t; };
-		ALWAYS_INLINE T& operator||(T& t) const { return _t && _counter->RefCount ? *_t : t; }
-		ALWAYS_INLINE const T* operator||(const T* t) const { return _t && _counter->RefCount ? _t : t; };
-		ALWAYS_INLINE T* operator||(T* t) const { return _t && _counter->RefCount ? _t : t; }
-
-		ALWAYS_INLINE bool operator ==(const WeakReference& o) const { return _t == o._t; }
-		ALWAYS_INLINE bool operator !=(const WeakReference& o) const { return _t != o._t; }
-
-		bool IsValid() const { return _counter && _counter->RefCount; }
-
-		explicit operator Reference<T>()
-		{
-			if(IsValid())
-				return Reference<T>(_t, _counter);
-			return Reference<T>();
-		}
-
-		template<class I> requires std::is_base_of_v<I, T>
-		ALWAYS_INLINE operator WeakReference<I>() const
-		{
-			return WeakReference<I>(_t, _counter);
-		}
-
-		template<class I> requires std::is_base_of_v<T, I>
-		ALWAYS_INLINE explicit operator WeakReference<I>() const
-		{
-			return WeakReference<I>((I*) _t, _counter);
-		}
-
-		void Free()
-		{
-			if(!_t) return;
-			Log::Write("INFO: DELETED WEAK REFERENCE\n\tFunction: {}", PRETTY_FUNCTION);
-
-			if(!--_counter->WeakCount && !_counter->RefCount) delete _counter;
-
-			_t = nullptr;
-			_counter = nullptr;
-		}
-
-		NODISCARD ALWAYS_INLINE bool IsFree() const { return _t; }
-
-	private:
-		T* _t = nullptr;
-		RefCounter* _counter = nullptr;
-	};
-
-	template<class T, typename... ARGS>
-	ALWAYS_INLINE Reference<T> ref_create(ARGS&& ... args)
-	{
-		return Reference<T>(new T(std::forward<ARGS>(args)...));
+		_t = nullptr;
+		_counter = nullptr;
 	}
 
-	/// Gives ownership of the pointer to the Reference.
-	template<class T>
-	ALWAYS_INLINE Reference<T> ref_cast(T* t)
+	NODISCARD ALWAYS_INLINE bool IsFree() const { return !_t; }
+
+	template<class I> requires std::is_base_of_v<I, T>
+	ALWAYS_INLINE operator Reference<I>() const
 	{
-		return Reference<T>(t);
+		return Reference<I>(_t, _counter);
 	}
 
-	template<class T>
-	class Pointer
+	template<class I> requires std::is_base_of_v<T, I>
+	ALWAYS_INLINE explicit operator Reference<I>() const
 	{
-	 public:
-		ALWAYS_INLINE explicit Pointer(T* t) : _t(t) { };
-
-		template<class I> requires std::is_base_of_v<T, I>
-		Pointer(Pointer<I>&& o) : Pointer(o.Release()) {}
-
-		template<class I> requires std::is_base_of_v<I, T>
-		explicit Pointer(Pointer<I>&& o) : Pointer((T*) o.Release()) {}
-
-		Pointer() = default;
-
-		DELETE_OPERATOR_COPY(Pointer);
-		OPERATOR_MOVE_NOSUPER(Pointer, Free, _t = o.Release())
-
-		GET_CONST(T&, , *_t);
-		GET_CONST(T*, Pointer, _t);
-
-		ALWAYS_INLINE T* operator->() const { return _t; }
-		ALWAYS_INLINE T& operator*() const { return *_t; }
-		ALWAYS_INLINE operator T&() const { return *_t; } // NOLINT
-		explicit ALWAYS_INLINE operator T*() const { return _t; } // NOLINT
-
-		ALWAYS_INLINE const T& operator||(const T& t) const { return _t ? *_t : t; };
-		ALWAYS_INLINE T& operator||(T& t) const { return _t ? *_t : t; }
-		ALWAYS_INLINE const T* operator||(const T* t) const { return _t ? _t : t; };
-		ALWAYS_INLINE T* operator||(T* t) const { return _t ? _t : t; }
-
-		ALWAYS_INLINE bool operator ==(const Pointer& o) const { return _t == o._t; }
-		ALWAYS_INLINE bool operator !=(const Pointer& o) const { return _t != o._t; }
-
-		explicit ALWAYS_INLINE operator bool() const { return _t; }
-
-		void Free() { delete _t; _t = nullptr; }
-		NODISCARD bool IsFree() const { return !_t; }
-
-		T* Release() { T* t = _t; _t = nullptr; return t; }
-
-		~Pointer() { Free(); }
-
-	 private:
-		T* _t = nullptr;
-
-		template<class I> friend class Pointer;
-	};
-
-	template<typename T, typename... ARGS>
-	ALWAYS_INLINE Pointer<T> ptr_create(ARGS&&... args)
-	{
-		return Pointer<T>(new T(std::forward<ARGS>(args)...));
+		return Reference<I>((I*) _t, _counter);
 	}
 
-	/// Gives ownership of the pointer to the SmartPointer.
-	template<typename T>
-	ALWAYS_INLINE Pointer<T> ptr_cast(T* t)
+	~Reference() { Free(); }
+
+ private:
+	Reference(T* t, RefCounter* c) : _t(t), _counter(c) { if(_counter) ++_counter->RefCount; }
+
+	T* _t = nullptr;
+	RefCounter* _counter = nullptr;
+
+	friend class WeakReference<T>;
+	template<class I> friend class Reference;
+};
+
+template<class T>
+class WeakReference
+{
+public:
+	WeakReference() = default;
+	WeakReference(const Reference<T>& ref) : _t(ref._t), _counter(ref._counter) { if(_counter) _counter->WeakCount++; }
+
+	OPERATOR_COPY_NOSUPER(WeakReference, Free,
+		_t = o._t;
+		_counter = o._counter;
+
+		if(!_t) return;
+
+		++_counter->WeakCount;
+	);
+
+	OPERATOR_MOVE_NOSUPER(WeakReference, Free,
+		_t = o._t;
+		_counter = o._counter;
+		o._t = nullptr;
+		o._counter = nullptr;
+	);
+
+	NODISCARD ALWAYS_INLINE T& Get() { GE_ASSERT(_counter->RefCount); return *_t; }
+	NODISCARD ALWAYS_INLINE const T& Get() const { GE_ASSERT(_counter->RefCount); return *_t; };
+
+	GET(T*, Pointer, _counter->RefCount ? _t : nullptr);
+
+	ALWAYS_INLINE T* operator->() const { return _counter->RefCount ? _t : nullptr; }
+	ALWAYS_INLINE T& operator*() const { GE_ASSERT(_counter->RefCount); return *_t; }
+	ALWAYS_INLINE operator T&() const { GE_ASSERT(_counter->RefCount); return *_t; } // NOLINT
+	explicit ALWAYS_INLINE operator T*() const { return _counter->RefCount ? _t : nullptr; } // NOLINT
+
+	ALWAYS_INLINE const T& operator||(const T& t) const { return _t && _counter->RefCount ? *_t : t; };
+	ALWAYS_INLINE T& operator||(T& t) const { return _t && _counter->RefCount ? *_t : t; }
+	ALWAYS_INLINE const T* operator||(const T* t) const { return _t && _counter->RefCount ? _t : t; };
+	ALWAYS_INLINE T* operator||(T* t) const { return _t && _counter->RefCount ? _t : t; }
+
+	ALWAYS_INLINE bool operator ==(const WeakReference& o) const { return _t == o._t; }
+	ALWAYS_INLINE bool operator !=(const WeakReference& o) const { return _t != o._t; }
+
+	bool IsValid() const { return _counter && _counter->RefCount; }
+
+	explicit operator Reference<T>()
 	{
-		return Pointer<T>(t);
+		if(IsValid())
+			return Reference<T>(_t, _counter);
+		return Reference<T>();
 	}
+
+	template<class I> requires std::is_base_of_v<I, T>
+	ALWAYS_INLINE operator WeakReference<I>() const
+	{
+		return WeakReference<I>(_t, _counter);
+	}
+
+	template<class I> requires std::is_base_of_v<T, I>
+	ALWAYS_INLINE explicit operator WeakReference<I>() const
+	{
+		return WeakReference<I>((I*) _t, _counter);
+	}
+
+	void Free()
+	{
+		if(!_t) return;
+
+		if(!--_counter->WeakCount && !_counter->RefCount) delete _counter;
+
+		_t = nullptr;
+		_counter = nullptr;
+	}
+
+	NODISCARD ALWAYS_INLINE bool IsFree() const { return _t; }
+
+private:
+	T* _t = nullptr;
+	RefCounter* _counter = nullptr;
+};
+
+template<class T, typename... ARGS>
+ALWAYS_INLINE Reference<T> ref_create(ARGS&& ... args)
+{
+	return Reference<T>(new T(std::forward<ARGS>(args)...));
+}
+
+/// Gives ownership of the pointer to the Reference.
+template<class T>
+ALWAYS_INLINE Reference<T> ref_cast(T* t)
+{
+	return Reference<T>(t);
+}
+
+template<class T>
+class Pointer
+{
+ public:
+	ALWAYS_INLINE explicit Pointer(T* t) : _t(t) { };
+
+	template<class I> requires std::is_base_of_v<T, I>
+	Pointer(Pointer<I>&& o) : Pointer(o.Release()) {}
+
+	template<class I> requires std::is_base_of_v<I, T>
+	explicit Pointer(Pointer<I>&& o) : Pointer((T*) o.Release()) {}
+
+	Pointer() = default;
+
+	DELETE_OPERATOR_COPY(Pointer);
+	OPERATOR_MOVE_NOSUPER(Pointer, Free, _t = o.Release())
+
+	GET_CONST(T&, , *_t);
+	GET_CONST(T*, Pointer, _t);
+
+	ALWAYS_INLINE T* operator->() const { return _t; }
+	ALWAYS_INLINE T& operator*() const { return *_t; }
+	ALWAYS_INLINE operator T&() const { return *_t; } // NOLINT
+	explicit ALWAYS_INLINE operator T*() const { return _t; } // NOLINT
+
+	ALWAYS_INLINE const T& operator||(const T& t) const { return _t ? *_t : t; };
+	ALWAYS_INLINE T& operator||(T& t) const { return _t ? *_t : t; }
+	ALWAYS_INLINE const T* operator||(const T* t) const { return _t ? _t : t; };
+	ALWAYS_INLINE T* operator||(T* t) const { return _t ? _t : t; }
+
+	ALWAYS_INLINE bool operator ==(const Pointer& o) const { return _t == o._t; }
+	ALWAYS_INLINE bool operator !=(const Pointer& o) const { return _t != o._t; }
+
+	explicit ALWAYS_INLINE operator bool() const { return _t; }
+
+	void Free() { delete _t; _t = nullptr; }
+	NODISCARD bool IsFree() const { return !_t; }
+
+	T* Release() { T* t = _t; _t = nullptr; return t; }
+
+	~Pointer() { Free(); }
+
+ private:
+	T* _t = nullptr;
+
+	template<class I> friend class Pointer;
+};
+
+template<typename T, typename... ARGS>
+ALWAYS_INLINE Pointer<T> ptr_create(ARGS&&... args)
+{
+	return Pointer<T>(new T(std::forward<ARGS>(args)...));
+}
+
+/// Gives ownership of the pointer to the SmartPointer.
+template<typename T>
+ALWAYS_INLINE Pointer<T> ptr_cast(T* t)
+{
+	return Pointer<T>(t);
 }

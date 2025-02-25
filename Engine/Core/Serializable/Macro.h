@@ -25,6 +25,7 @@
 		using SUPER_T::Free; \
 		using SUPER_T::IsFree; \
 		using SUPER_T::OnEditorGUI; \
+		using SUPER_T::GetType; \
 		TYPE(istream& in, gE::Window* window) \
 		{ \
 			SUPER_T tmp(in, window); \
@@ -37,10 +38,10 @@
 		TYPE(gE::Window* window, const SUPER_T& settings) : TYPE(window, move(SUPER_T(settings))) { if(IsFree()) return; gE::Log::Write("POSSIBLE UNINTENTIONAL COPY: {}\n", __PRETTY_FUNCTION__); } \
 		TYPE(gE::Window* window, SUPER_T&& INTERNAL_SETTINGS)
 
-#define API_UNDERLYING_IMPL(UNDERLYING_T) \
+#define API_UNDERLYING_IMPL() \
 	public: \
-		inline void* GetUnderlying() override { return (UNDERLYING_T*) this; } \
-		inline const void* GetUnderlying() const override { return (const UNDERLYING_T*) this; }
+		inline Underlying* GetUnderlying() override { return this; } \
+		inline const Underlying* GetUnderlying() const override { return this; }
 
 #define API_SERIALIZABLE_IMPL_NAMESPACE(NAMESPACE, ...) \
 	NAMESPACE##__VA_ARGS__::__VA_ARGS__(gE::Window* window, SUPER&& INTERNAL_SETTINGS) : SUPER(move(INTERNAL_SETTINGS))

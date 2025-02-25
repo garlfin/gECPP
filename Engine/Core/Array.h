@@ -14,7 +14,7 @@ using Range = std::ranges::subrange<T>;
 template<typename T>
 class Array
 {
- public:
+public:
 	static constexpr bool IS_VOID = std::is_same_v<T, void>;
 	using I = std::conditional_t<IS_VOID, u8, T>;
 	
@@ -97,7 +97,7 @@ class Array
 
 	~Array() { Free(); }
 
- private:
+private:
 	u64 _size = 0;
 	I* _t = nullptr;
 };

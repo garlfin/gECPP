@@ -3,6 +3,8 @@
 #include <GLAD/glad.h>
 #include <Graphics/Texture/Texture.h>
 
+#include "IMGUI/imgui.h"
+
 namespace GL
 {
 	Texture::Texture(gE::Window* window, GLenum target, GPU::Texture& settings) :
@@ -73,6 +75,14 @@ namespace GL
 	{
 		glCopyImageSubData(o.Get(), o.GetTarget(), 0, 0, 0, 0, ID, GL_TEXTURE_2D, 0, 0, 0, 0, GetSize().x, GetSize().y, 1);
 	}
+
+	REFLECTABLE_ONGUI_IMPL(Texture2D,
+		OnEditorIcon(ImGui::GetContentRegionAvail().x);
+	);
+
+	REFLECTABLE_ICON_IMPL(Texture2D,
+		ImGui::Image((ImTextureID) (API::Texture*) this, ImVec2(size, size));
+	);
 
 	API_SERIALIZABLE_IMPL(Texture3D), GL::Texture(window, GL_TEXTURE_3D, *this)
 	{

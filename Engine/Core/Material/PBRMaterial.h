@@ -14,9 +14,9 @@ namespace gE
 {
 	struct PBRMaterialSettings
 	{
-		gE::Reference<API::Texture2D> Albedo;
-		gE::Reference<API::Texture2D> ARMD;
-		gE::Reference<API::Texture2D> Normal;
+		Reference<API::Texture2D> Albedo;
+		Reference<API::Texture2D> ARMD;
+		Reference<API::Texture2D> Normal;
 	};
 
 	class PBRMaterial : public Material

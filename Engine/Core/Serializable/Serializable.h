@@ -14,6 +14,11 @@
 
 #include "Reflectable.h"
 
+struct Underlying
+{
+	virtual ~Underlying() = default;
+};
+
 template<class T>
 struct Serializable : public Reflectable<T>
 {
@@ -29,8 +34,8 @@ public:
 	virtual void Deserialize(istream& in, SETTINGS_T settings) {};
 	virtual void Serialize(ostream& out) const {};
 
-	virtual void* GetUnderlying() { return nullptr; }
-	virtual const void* GetUnderlying() const { return nullptr; }
+	virtual Underlying* GetUnderlying() { return nullptr; }
+	virtual const Underlying* GetUnderlying() const { return nullptr; }
 
 	~Serializable() override = default;
 };

@@ -11,7 +11,7 @@ namespace Physics
     BakeConvexShapeResult ConvexMeshShape::Bake()
     {
         // I hate the unnecessary memory copies, but oh wells
-    	BakedSettings = gE::ptr_create<BakedConvexMeshShape>();
+    	BakedSettings = ptr_create<BakedConvexMeshShape>();
 
         px::ConvexHullShapeSettings settings = DEFAULT;
         settings.mPoints = ToPX<glm::vec3, px::Vec3, ToPX>(Points);
