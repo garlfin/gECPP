@@ -185,7 +185,7 @@ namespace gE
     public:
         using ComponentManager::ComponentManager;
 
-        GET_SET_VALUE(ColorTarget<Camera2D>*, CurrentCamera, _currentCamera);
+        GET_SET(ColorTarget<Camera2D>*, CurrentCamera, _currentCamera);
 
         ~CameraManager() override = default;
 

@@ -258,8 +258,7 @@ void Window::OnInit()
 		brdfShader.Dispatch(brdfGroupSize);
 	}
 
-	auto defaultShader = ref_create<ForwardShader>(this, GPU::Shader("Resource/Shader/uber.vert", "Resource/Shader/missing.frag"));
-	DefaultMaterial = ptr_create<Material>(this, defaultShader);
+	DefaultMaterial = ptr_create<Material>(this, ref_create<ForwardShader>(this, GPU::Shader("Resource/Shader/uber.vert", "Resource/Shader/missing.frag")));
 }
 
 void Window::Blit(const API::Texture& texture)

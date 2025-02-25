@@ -36,10 +36,13 @@ using namespace std::string_view_literals;
 #define COPY_MOVE(x) std::move(COPY(x))
 
 template<class T>
-using add_const_pointer = std::conditional_t<std::is_pointer_v<T>, std::add_const_t<std::remove_pointer_t<T>>*, std::add_const_t<T>>;
+using add_const_before_pointer = std::conditional_t<std::is_pointer_v<T>, const std::remove_pointer_t<T>*, const T>;
+
+template<class T>
+using add_const_before_ref = std::conditional_t<std::is_reference_v<T>, const std::remove_reference_t<T>&, const T>;
 
 template<class T, bool CONST>
-using add_const_conditional = std::conditional_t<CONST, add_const_pointer<T>, T>;
+using add_const_conditional = std::conditional_t<CONST, add_const_before_pointer<T>, T>;
 
 #ifdef GE_COMPILER_GCC
 inline std::string demangle(const char* name)
@@ -134,12 +137,8 @@ T& PlacementNew(T& to, ARGS&&... args)
 #define SET_XVAL(TYPE, ACCESSOR, FIELD) ALWAYS_INLINE void Set##ACCESSOR(TYPE&& FIELD##_) { FIELD = std::move(FIELD##_); }
 
 #define GET_SET(TYPE, ACCESSOR, FIELD) \
-    GET_CONST(const TYPE, ACCESSOR, FIELD)    \
-    SET(const TYPE, ACCESSOR, FIELD)
-
-#define GET_SET_VALUE(TYPE, ACCESSOR, FIELD) \
-	GET_CONST(TYPE, ACCESSOR, FIELD)    \
-	SET(TYPE, ACCESSOR, FIELD)
+    GET_CONST(add_const_before_ref<TYPE>, ACCESSOR, FIELD) \
+    SET(add_const_before_ref<TYPE>, ACCESSOR, FIELD)
 
 #define OPERATOR_MOVE_PROTO(TYPE) \
     TYPE(TYPE&&); \

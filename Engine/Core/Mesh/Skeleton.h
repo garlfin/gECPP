@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <Core/AssetManager.h>
+#include <Core/Pointer.h>
 #include <Core/Math/Math.h>
 #include <Core/Math/Transform.h>
 #include <Core/Serializable/Asset.h>

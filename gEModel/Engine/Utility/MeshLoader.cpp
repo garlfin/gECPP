@@ -11,7 +11,7 @@
 #include <ASSIMP/Importer.hpp>
 #include <ASSIMP/postprocess.h>
 #include <ASSIMP/scene.h>
-#include <Core/AssetManager.h>
+#include <Core/Pointer.h>
 #include <Core/Mesh/Mesh.h>
 #include <Core/Mesh/Skeleton.h>
 #include <Graphics/Buffer/VAO.h>

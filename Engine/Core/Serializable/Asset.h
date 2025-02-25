@@ -5,7 +5,7 @@
 #pragma once
 
 #include <set>
-#include <Core/AssetManager.h>
+#include <Core/Pointer.h>
 #include <Core/Macro.h>
 #include <Core/Serializable/Serializable.h>
 
@@ -69,6 +69,9 @@ namespace gE
         File(const Path& path, const Type<Window*>* type);
         File(const Path& path, const Reference<Asset>& asset);
         File(const Path& path, const WeakReference<Asset>& asset);
+
+        template<class T> requires std::is_base_of_v<Asset, T>
+        File(const Path& path, T&& t);
 
         NODISCARD ALWAYS_INLINE const Type<Window*>* GetFileType() const { return _type; };
         NODISCARD ALWAYS_INLINE bool IsLoaded() const { return _weakAsset.IsValid(); }

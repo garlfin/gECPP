@@ -37,7 +37,7 @@ namespace gE
 		GET(CameraCube&, Camera, _camera);
 		GET(PointLightTarget&, Target, _target);
 		GET(API::TextureCube&, Depth, _target.GetDepth());
-		GET_SET_VALUE(float, Radius, _radius);
+		GET_SET(float, Radius, _radius);
 
 	private:
 		CameraCube _camera;

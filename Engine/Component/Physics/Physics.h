@@ -6,7 +6,7 @@
 #pragma once
 
 #include <Component/Component.h>
-#include <Core/AssetManager.h>
+#include <Core/Pointer.h>
 #include <Jolt/Jolt.h>
 #include <Jolt/Core/JobSystemThreadPool.h>
 #include <Physics/Physics.h>
@@ -31,7 +31,7 @@ namespace gE
         virtual void ForceUpdateTransforms() = 0;
         virtual void OnEarlyFixedUpdate(float d) = 0;
 
-        GET_SET_VALUE(PhysicsInterpolationMode, InterpolationMode, _interpolationMode);
+        GET_SET(PhysicsInterpolationMode, InterpolationMode, _interpolationMode);
 
     protected:
         bool UseRotation = true;

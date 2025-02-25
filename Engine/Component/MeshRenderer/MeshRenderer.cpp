@@ -66,11 +66,22 @@ namespace gE
 		PlacementNew(_drawCalls[i], *this, i);
 	}
 
+	void MeshRenderer::UpdateDrawCall(size_t i)
+	{
+		PlacementNew(_drawCalls[i], *this, i);
+	}
+
 	REFLECTABLE_FACTORY_NO_IMPL(MeshRenderer);
 
 	void MeshRenderer::IOnEditorGUI(u8 depth)
 	{
+		const size_t materialCount = _mesh->VAO->GetSettings().Counts.MaterialCount;
+
 		DrawField(Field{ "Mesh"sv }, *this, depth, GetMesh, SetMesh);
+		const size_t changed = DrawField(ArrayField<Field>{ "Materials"sv }, _materials.Data(), materialCount, depth);
+
+		if(changed != materialCount)
+			UpdateDrawCall(changed);
 	};
 
 	void RendererManager::OnRender(float d, Camera* camera)

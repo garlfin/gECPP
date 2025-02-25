@@ -151,7 +151,7 @@ namespace gE
                 if(!column) ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(column);
 
-                std::string fileName = file.GetPath().filename().string();
+                std::string fileName = file.GetPath().filename().replace_extension().string();
 
                 ImGui::TextWrapped(fileName.c_str());
 

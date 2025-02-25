@@ -91,6 +91,27 @@ public:
 	~Reflectable() override = default;
 };
 
+enum class EnumType : u8
+{
+	Normal,
+	Bitfield
+};
+
+template<class T, size_t SIZE>
+struct EnumData
+{
+	static_assert(std::is_enum_v<T>);
+	using PAIR_T = std::pair<T, std::string_view>;
+	using ARR_T = std::array<PAIR_T, SIZE>;
+	using INT_T = std::underlying_type_t<T>;
+
+	EnumType Type = EnumType::Normal;
+	ARR_T Enums = DEFAULT;
+
+	NODISCARD std::string ToString(T t) const;
+	NODISCARD typename ARR_T::const_iterator At(T t) const;
+};
+
 #define REFLECTABLE_TYPE_PROTO(TYPE, NAME) \
 	public: \
 		using THIS_T = TYPE; \
@@ -108,8 +129,7 @@ public:
 		void TYPE::IOnEditorGUI(u8 depth) { CODE }
 #else
 	#define REFLECTABLE_ONGUI_PROTO(SUPER)
-	#define REFLECTABLE_ONGUI_IMPL(TYPE, CODE) \
-		NO_IMPL void TYPE##REFL_ONGUI_NOIMPL() {};
+	#define REFLECTABLE_ONGUI_IMPL(TYPE, CODE)
 #endif
 
 #define REFLECTABLE_PROTO(TYPE, SUPER, NAME) \
@@ -128,6 +148,9 @@ public:
 
 #define REFLECTABLE_ONEDITOR_NO_IMPL(TYPE, SUPER) \
 	void TYPE::OnEditorGUI(u8 depth) { SUPER::OnEditorGUI(depth); }
+
+#define ENUM_DEF(E_TYPE, E_VAL) ENUM_PAIR(E_TYPE::E_VAL, ###E_VAL)
+#define ENUM_PAIR(E_VAL, E_NAME) std::make_pair(E_VAL, E_NAME##sv)
 
 // Typesystem must be explicity instantiated.
 template struct TypeSystem<gE::Window*>;
@@ -150,3 +173,5 @@ bool TypeCompare<T>::operator()(const KEY_T& a, const TYPE_T& b) const
 {
 	return a < b->Name;
 }
+
+#include "Reflectable.inl"

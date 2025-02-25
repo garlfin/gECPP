@@ -8,8 +8,10 @@
 
 namespace gE
 {
-    class Shader
+    class Shader : public Asset
     {
+        REFLECTABLE_PROTO(Shader, Asset, "gE::Shader");
+
     public:
         explicit Shader(Window* window) : _window(window) {};
 
@@ -25,7 +27,7 @@ namespace gE
         NODISCARD bool VerifyUniforms(u32) const;
 #endif
 
-        virtual ~Shader() = default;
+        ~Shader() override = default;
 
     private:
         Window* _window = DEFAULT;
@@ -38,6 +40,9 @@ namespace gE
 
         NODISCARD const API::Shader& GetReferenceShader() const override { return _shader; }
         NODISCARD const API::Shader& GetShader() const override { return _shader; }
+
+        void Free() override { _shader.Free(); }
+        NODISCARD bool IsFree() const override { return _shader.IsFree(); }
 
 #ifdef DEBUG
         NODISCARD bool VerifyUniforms(const std::string&) const override { return true; }
@@ -55,6 +60,9 @@ namespace gE
 
         NODISCARD const API::Shader& GetReferenceShader() const override { return _forwardShader; }
         NODISCARD const API::Shader& GetShader() const override;
+
+        void Free() override;
+        NODISCARD bool IsFree() const override;
 
 #ifdef DEBUG
         NODISCARD bool VerifyUniforms(const std::string&) const override;

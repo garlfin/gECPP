@@ -32,7 +32,7 @@ namespace gE
 
 		GET(Camera&, Camera, _camera);
 		GET(GL::Texture&, Depth, *Depth);
-		GET_SET_VALUE(glm::vec3, Color, _color);
+		GET_SET(glm::vec3, Color, _color);
 
 	protected:
 		// Temporary workaround to bizzare bug.

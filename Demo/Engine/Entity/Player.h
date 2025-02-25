@@ -12,7 +12,7 @@
 #include <Core/Pipeline/PostProcess/Tonemap.h>
 #include <Demo/Engine/Component/Movement.h>
 
-namespace gE::VoxelDemo
+namespace gE
 {
 	inline ICameraSettings FlyCameraSettings
 	{
@@ -89,5 +89,6 @@ namespace gE::VoxelDemo
 	inline REFLECTABLE_ONGUI_IMPL(PlayerCamera,
 	{
 		DrawField(Field{ "Camera"sv, ""}, _camera, depth);
+		DrawField(Field{ "PhysicalCamera"sv, ""}, _physicalCamera, depth);
 	});
 }

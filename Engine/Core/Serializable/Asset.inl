@@ -12,6 +12,9 @@ namespace gE
     NODISCARD ALWAYS_INLINE bool AssetCompare::operator()(const File& a, const UUID& b) const { return a.GetUUID() < b; }
     NODISCARD ALWAYS_INLINE bool AssetCompare::operator()(const UUID& a, const File& b) const { return a < b.GetUUID(); }
 
+    template <class T> requires std::is_base_of_v<Asset, T>
+    File::File(const Path& path, T&& t) : File(path, ref_create<T>(std::move(t))) {}
+
     template <class T, bool SAFE> requires std::is_base_of_v<Asset, T>
     Reference<T> File::Cast() const
     {

@@ -6,7 +6,7 @@
 
 #include <Component/Component.h>
 
-#include <Core/AssetManager.h>
+#include <Core/Pointer.h>
 #include <Jolt/Jolt.h>
 #include <Jolt/Physics/Character/CharacterVirtual.h>
 #include <Physics/Physics.h>
@@ -33,13 +33,13 @@ namespace gE
         GET_CONST(float, Mass, _controller->GetMass());
         ALWAYS_INLINE void SetMass(float mass) { _controller->SetMass(mass); }
 
-        GET_SET_VALUE(bool, UseGravity, _useGravity);
-        GET_SET_VALUE(glm::vec3, Velocity, _velocity);
+        GET_SET(bool, UseGravity, _useGravity);
+        GET_SET(glm::vec3, Velocity, _velocity);
 
         ALWAYS_INLINE void AddVelocity(const glm::vec3& velocity) { _velocity += velocity; }
         ALWAYS_INLINE void Move(const glm::vec3& position) { _instantVelocity += position; }
 
-        GET_SET_VALUE(bool, IsGrounded, _grounded);
+        GET_SET(bool, IsGrounded, _grounded);
         NODISCARD PhysicsComponent* GetGround() const { return (PhysicsComponent*) _controller->GetGroundUserData(); }
 
         void SetShape(const Physics::CapsuleShape& shape);

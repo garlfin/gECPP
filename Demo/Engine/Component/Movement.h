@@ -14,7 +14,7 @@
 #define SPEED_MULTIPLIER 2.f
 #define JUMP_HEIGHT 1.f
 
-namespace gE::VoxelDemo
+namespace gE
 {
     class Movement final : public Behavior
     {
@@ -28,7 +28,7 @@ namespace gE::VoxelDemo
             GetWindow().GetMouse().SetIsEnabled(false);
         }
 
-        GET_SET_VALUE(Entity*, FPCamera, _camera);
+        GET_SET(Entity*, FPCamera, _camera);
 
         float Speed = 2.0;
         float SpeedMultiplier = 2.f;

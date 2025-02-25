@@ -35,6 +35,8 @@ namespace gE
         friend class RendererManager;
 
     private:
+        void UpdateDrawCall(size_t i);
+
         Reference<Mesh> _mesh;
         Array<DrawCall> _drawCalls;
         Array<Reference<Material>> _materials;

@@ -13,6 +13,8 @@ namespace gE
 
     class PhysicsCubeEntity final : public Entity
     {
+        REFLECTABLE_PROTO(PhysicsCubeEntity, Entity, "gE::PhysicsCubeEntity");
+
     public:
         PhysicsCubeEntity(Window* window, const Reference<Mesh>& mesh, glm::vec3 size, EntityFlags flags = DEFAULT) :
             Entity(window, nullptr, LayerMask::All, flags),
@@ -31,4 +33,12 @@ namespace gE
         RigidBody _rigidBody;
         BoxCollider _collider;
     };
+
+    inline REFLECTABLE_FACTORY_NO_IMPL(PhysicsCubeEntity);
+    inline REFLECTABLE_ONGUI_IMPL(PhysicsCubeEntity,
+    {
+        DrawField(Field{ "Mesh Renderer"sv }, _renderer, depth);
+        DrawField(Field{ "Rigid Body"sv }, _rigidBody, depth);
+        DrawField(Field{ "Box Collider"sv }, _collider, depth);
+    });
 }

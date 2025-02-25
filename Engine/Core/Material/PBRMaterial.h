@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <Core/AssetManager.h>
+#include <Core/Pointer.h>
 #include <Core/Material/Material.h>
 #include <Graphics/Texture/Texture.h>
 

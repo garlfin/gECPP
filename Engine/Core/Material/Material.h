@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <Core/AssetManager.h>
+#include <Core/Pointer.h>
 #include <Graphics/Shader/Shader.h>
 
 #include "Shader.h"
@@ -20,11 +20,33 @@ namespace gE
 		GreaterEqual = GL_GEQUAL
 	};
 
+	CONSTEXPR_GLOBAL EnumData<DepthFunction, 5> EDepthFunction
+	{
+		EnumType::Normal,
+		{
+			ENUM_PAIR(DepthFunction::Disable, "Disable"),
+			ENUM_PAIR(DepthFunction::Less, "Less"),
+			ENUM_PAIR(DepthFunction::LessEqual, "Less-Equal"),
+			ENUM_PAIR(DepthFunction::Greater, "Greater"),
+			ENUM_PAIR(DepthFunction::GreaterEqual, "Greater-Equal")
+		}
+	};
+
 	enum class CullMode : GLenum
 	{
 		Disable,
 		Back = GL_BACK,
 		Front = GL_FRONT,
+	};
+
+	CONSTEXPR_GLOBAL EnumData<CullMode, 3> ECullMode
+	{
+		EnumType::Normal,
+		{
+			ENUM_PAIR(CullMode::Disable, "Disable"),
+			ENUM_PAIR(CullMode::Back, "Back"),
+			ENUM_PAIR(CullMode::Front, "Front")
+		}
 	};
 
 	enum class BlendMode : GLenum
@@ -34,22 +56,43 @@ namespace gE
 		Blend
 	};
 
-	class Material
+	CONSTEXPR_GLOBAL EnumData<BlendMode, 3> EBlendMode
 	{
-	 public:
+		EnumType::Normal,
+		{
+			ENUM_PAIR(BlendMode::Disable, "Disable"),
+			ENUM_PAIR(BlendMode::Dither, "Dither"),
+			ENUM_PAIR(BlendMode::Blend, "Blend")
+		}
+	};
+
+	class Material : public Asset
+	{
+		REFLECTABLE_PROTO(Material, Asset, "gE::Material");
+
+	public:
 		Material(Window* window, const Reference<Shader>& shader, DepthFunction depthFunc = DepthFunction::Less, CullMode cullMode = CullMode::Back);
 
 		virtual void Bind() const;
 
+		void Free() override {};
+		NODISCARD bool IsFree() const override { return true; }
+
 		GET_CONST(Window&, Window, *_window);
 		GET(Shader&, Shader, _shader);
 
-		virtual ~Material() = default;
+		GET_SET(DepthFunction, DepthFunction, _depthFunc);
+		GET_SET(CullMode, CullMode, _cullMode);
+		GET_SET(BlendMode, BlendMode, _blendMode);
 
-	 private:
-		Reference<Shader> _shader;
-		const DepthFunction _depthFunc;
-		const CullMode _cullMode;
+		~Material() override = default;
+
+	private:
 		Window* _window;
+		Reference<Shader> _shader;
+
+		DepthFunction _depthFunc = DepthFunction::Less;
+		CullMode _cullMode = CullMode::Back;
+		BlendMode _blendMode = BlendMode::Dither;
 	};
 }

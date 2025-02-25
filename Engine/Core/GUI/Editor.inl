@@ -45,7 +45,32 @@ namespace gE
         ImGui::PushItemWidth(-1);
 
         bool changed = false;
-        if constexpr(std::is_scalar_v<RAW_T> && !std::is_same_v<RAW_T, bool>)
+        if constexpr(std::is_enum_v<RAW_T>)
+        {
+            const auto& eType = settings.Type;
+            const std::string preview = eType.ToString(t);
+
+            if(eType.Type == EnumType::Normal)
+            {
+                if(ImGui::BeginCombo(label.c_str(), preview.c_str()))
+                {
+                    for(const auto& e : eType.Enums)
+                    {
+                        const bool selected = t == e.first;
+                        if(ImGui::Selectable(e.second.data(), selected))
+                            t = e.first;
+                        if(selected)
+                            ImGui::SetItemDefaultFocus();
+                    }
+                    ImGui::EndCombo();
+                }
+            }
+            else
+            {
+
+            }
+        }
+        else if constexpr(std::is_scalar_v<RAW_T> && !std::is_same_v<RAW_T, bool>)
         {
             static_assert(std::is_same_v<SETTINGS_T, ScalarField<RAW_T>>);
             constexpr ImGuiDataType type = IMType<RAW_T>;
@@ -86,7 +111,10 @@ namespace gE
         }
         else if constexpr(isReflectable)
         {
-            const std::string_view type = t.GetType() ? t.GetType()->Name : "IReflectable (NO TYPE INFO)";
+            std::string_view type = "IReflectable (NO TYPE INFO)";
+            if constexpr(requires(RAW_T e) { e.GetType(); })
+                if(const auto* reflectedType = t.GetType())
+                    type = reflectedType->Name;
 
             ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
             if(depth < 1) nodeFlags |= ImGuiTreeNodeFlags_DefaultOpen;
@@ -188,17 +216,18 @@ namespace gE
     }
 
     template <class T, class SETTINGS_T>
-    bool DrawField(const ArrayField<SETTINGS_T>& settings, Array<T>& ts, u8 depth)
+    T* DrawField(const ArrayField<SETTINGS_T>& settings, Array<T>& ts, u8 depth)
     {
-        return DrawField(settings, ts.Data(), ts.Count(), depth);
+        return ts.begin() + DrawField(settings, ts.Data(), ts.Count(), depth);
     }
 
     template <class T, class SETTINGS_T>
-    bool DrawField(const ArrayField<SETTINGS_T>& settings, T* ts, size_t count, u8 depth)
+    size_t DrawField(const ArrayField<SETTINGS_T>& settings, T* ts, size_t count, u8 depth)
     {
         if((bool)(settings.ViewMode & ArrayViewMode::Stats))
         {
-            ImGui::TextUnformatted(std::format("Array of {}:\n\tSize: {}\n\tByte Count: {}\n\tPointer: {}",
+            ImGui::TextUnformatted(std::format("{}:\n\tType: {}\n\tSize: {}\n\tByte Count: {}\n\tPointer: {}",
+                settings.Name,
                 demangle(typeid(T).name()),
                 count,
                 sizeof(T) * count,
@@ -206,7 +235,11 @@ namespace gE
             ).c_str());
         }
 
-        bool changed = false;
+        Field tempField = settings;
+        if(!(bool)(settings.ViewMode & ArrayViewMode::Name))
+            tempField.Name = DEFAULT;
+
+        size_t changed = count;
         if((bool)(settings.ViewMode & ArrayViewMode::Elements) && ts)
         {
             ImGui::BeginTable("table", 2, GE_EDITOR_TABLE_FLAGS & ~ImGuiTableFlags_Resizable);
@@ -221,7 +254,13 @@ namespace gE
                 ImGui::TextUnformatted(std::to_string(i).c_str());
                 ImGui::TableSetColumnIndex(1);
 
-                changed |= DrawField(settings, ts[i], depth + 1);
+                ImGui::PushID(i);
+                if(DrawField(tempField, ts[i], depth + 1))
+                {
+                    GE_ASSERT(changed == count); // multiple fields happened to get updated in one go
+                    changed = i;
+                }
+                ImGui::PopID();
             }
             ImGui::EndTable();
         }

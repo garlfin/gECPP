@@ -9,7 +9,7 @@
 #include <Core/Serializable/Serializable.h>
 #include <IMGUI/imgui.h>
 
-#include "Core/AssetManager.h"
+#include "Core/Pointer.h"
 
 #define GE_EDITOR_HIERARCHY_FLAGS ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth
 #define GE_EDITOR_TABLE_FLAGS ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_NoHostExtendX | ImGuiTableFlags_Resizable
@@ -30,9 +30,9 @@ namespace gE
 
         void OnGUI();
 
-        GET_SET_VALUE(bool, EditorOpen, _isEditorOpen);
-        GET_SET_VALUE(Entity*, SelectedEntity, _activeEntity);
-        GET_SET_VALUE(bool, IsRunning, _running);
+        GET_SET(bool, EditorOpen, _isEditorOpen);
+        GET_SET(Entity*, SelectedEntity, _activeEntity);
+        GET_SET(bool, IsRunning, _running);
 
         GET_SET(Path&, AssetPath, _assetPath);
         SET_XVAL(Path, AssetPath, _assetPath);
@@ -70,7 +70,9 @@ namespace gE
     enum class ArrayViewMode : u8
     {
         Stats = 1,
-        Elements = 1 << 1
+        Elements = 1 << 1,
+        Name = 1 << 2,
+        Default = Stats | Elements
     };
 
     ENUM_OPERATOR(ArrayViewMode, &);
@@ -79,7 +81,7 @@ namespace gE
     template<class T>
     struct ArrayField : public T
     {
-        ArrayViewMode ViewMode = ArrayViewMode::Stats | ArrayViewMode::Elements;
+        ArrayViewMode ViewMode = ArrayViewMode::Default;
     };
 
     enum class ScalarViewMode : u8
@@ -95,26 +97,14 @@ namespace gE
     {
         T Minimum = std::numeric_limits<T>::lowest();
         T Maximum = std::numeric_limits<T>::max();
-        T Step = T(1);
+        T Step = std::is_floating_point_v<T> ? T(0.01) : T(1);
         ScalarViewMode ViewMode = ScalarViewMode::Drag;
     };
 
-    template<>
-    struct ScalarField<float> : public Field
+    template<class T, size_t SIZE>
+    struct EnumField : public Field
     {
-        float Minimum = std::numeric_limits<float>::lowest();
-        float Maximum = std::numeric_limits<float>::max();
-        float Step = 0.01f;
-        ScalarViewMode ViewMode = ScalarViewMode::Drag;
-    };
-
-    template<>
-    struct ScalarField<double> : public Field
-    {
-        double Minimum = std::numeric_limits<double>::lowest();
-        double Maximum = std::numeric_limits<double>::max();
-        float Step = 0.01;
-        ScalarViewMode ViewMode = ScalarViewMode::Drag;
+        const EnumData<T, SIZE>& Type;
     };
 
     template<class T>
@@ -130,10 +120,10 @@ namespace gE
     bool DrawField(const ScalarField<T>&, glm::vec<COMPONENT_COUNT, T>&, u8 depth);
 
     template<class T, class SETTINGS_T>
-    bool DrawField(const ArrayField<SETTINGS_T>&, Array<T>&, u8 depth);
+    T* DrawField(const ArrayField<SETTINGS_T>&, Array<T>&, u8 depth);
 
     template<class T, class SETTINGS_T>
-    bool DrawField(const ArrayField<SETTINGS_T>&, T*, size_t, u8 depth);
+    size_t DrawField(const ArrayField<SETTINGS_T>&, T*, size_t, u8 depth);
 
     template<class T> requires std::is_base_of_v<Reflectable<Window*>, T>
     bool DrawField(const Field& settings, Reference<T>&, u8 depth);

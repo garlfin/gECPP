@@ -56,8 +56,8 @@ namespace gE
 		ALWAYS_INLINE const T* operator||(const T* t) const { return _t ? _t : t; };
 		ALWAYS_INLINE T* operator||(T* t) const { return _t ? _t : t; }
 
-		ALWAYS_INLINE bool operator == (const Reference& o) const { return _t == o._t; }
-		ALWAYS_INLINE bool operator != (const Reference& o) const { return _t != o._t; }
+		ALWAYS_INLINE bool operator ==(const Reference& o) const { return _t == o._t; }
+		ALWAYS_INLINE bool operator !=(const Reference& o) const { return _t != o._t; }
 
 		explicit ALWAYS_INLINE operator bool() const { return _t; }
 
@@ -140,8 +140,8 @@ namespace gE
 		ALWAYS_INLINE const T* operator||(const T* t) const { return _t && _counter->RefCount ? _t : t; };
 		ALWAYS_INLINE T* operator||(T* t) const { return _t && _counter->RefCount ? _t : t; }
 
-		ALWAYS_INLINE bool operator == (const WeakReference& o) const { return _t == o._t; }
-		ALWAYS_INLINE bool operator != (const WeakReference& o) const { return _t != o._t; }
+		ALWAYS_INLINE bool operator ==(const WeakReference& o) const { return _t == o._t; }
+		ALWAYS_INLINE bool operator !=(const WeakReference& o) const { return _t != o._t; }
 
 		bool IsValid() const { return _counter && _counter->RefCount; }
 
@@ -182,7 +182,7 @@ namespace gE
 		RefCounter* _counter = nullptr;
 	};
 
-	template<class T, typename... ARGS> requires requires(ARGS&&... a) { T(std::forward<ARGS>(a)...); }
+	template<class T, typename... ARGS>
 	ALWAYS_INLINE Reference<T> ref_create(ARGS&& ... args)
 	{
 		return Reference<T>(new T(std::forward<ARGS>(args)...));
@@ -200,6 +200,13 @@ namespace gE
 	{
 	 public:
 		ALWAYS_INLINE explicit Pointer(T* t) : _t(t) { };
+
+		template<class I> requires std::is_base_of_v<T, I>
+		Pointer(Pointer<I>&& o) : Pointer(o.Release()) {}
+
+		template<class I> requires std::is_base_of_v<I, T>
+		explicit Pointer(Pointer<I>&& o) : Pointer((T*) o.Release()) {}
+
 		Pointer() = default;
 
 		DELETE_OPERATOR_COPY(Pointer);
@@ -218,20 +225,13 @@ namespace gE
 		ALWAYS_INLINE const T* operator||(const T* t) const { return _t ? _t : t; };
 		ALWAYS_INLINE T* operator||(T* t) const { return _t ? _t : t; }
 
-		ALWAYS_INLINE bool operator == (const Pointer& o) const { return _t == o._t; }
-		ALWAYS_INLINE bool operator != (const Pointer& o) const { return _t != o._t; }
+		ALWAYS_INLINE bool operator ==(const Pointer& o) const { return _t == o._t; }
+		ALWAYS_INLINE bool operator !=(const Pointer& o) const { return _t != o._t; }
 
 		explicit ALWAYS_INLINE operator bool() const { return _t; }
 
 		void Free() { delete _t; _t = nullptr; }
 		NODISCARD bool IsFree() const { return !_t; }
-
-		template<class O>
-		ALWAYS_INLINE Pointer<O> Move()
-		{
-			static_assert(std::is_base_of_v<O, T>);
-			return Pointer<O>(Release());
-		}
 
 		T* Release() { T* t = _t; _t = nullptr; return t; }
 
@@ -243,7 +243,7 @@ namespace gE
 		template<class I> friend class Pointer;
 	};
 
-	template<typename T, typename... ARGS> requires requires(ARGS&&... a) { T(std::forward<ARGS>(a)...); }
+	template<typename T, typename... ARGS>
 	ALWAYS_INLINE Pointer<T> ptr_create(ARGS&&... args)
 	{
 		return Pointer<T>(new T(std::forward<ARGS>(args)...));

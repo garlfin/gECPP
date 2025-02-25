@@ -7,7 +7,7 @@
 #include <Component/MeshRenderer/MeshRenderer.h>
 #include <Component/Physics/RigidBody.h>
 #include <Component/Sound/Sound.h>
-#include <Core/AssetManager.h>
+#include <Core/Pointer.h>
 #include <Core/KeyboardState.h>
 #include <Core/MouseState.h>
 #include <Core/TickHandler.h>

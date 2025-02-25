@@ -4,7 +4,7 @@
 
 #include "Shapes.h"
 
-#include <Core/AssetManager.h>
+#include <Core/Pointer.h>
 
 namespace Physics
 {

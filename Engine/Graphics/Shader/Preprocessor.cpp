@@ -7,7 +7,7 @@
 #include <filesystem>
 #include <format>
 #include <Window.h>
-#include <Core/AssetManager.h>
+#include <Core/Pointer.h>
 
 namespace GPU
 {

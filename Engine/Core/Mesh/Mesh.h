@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <Core/AssetManager.h>
+#include <Core/Pointer.h>
 #include <Core/Math/Collision/AABB.h>
 #include <Core/Serializable/Serializable.h>
 #include <Graphics/Buffer/VAO.h>

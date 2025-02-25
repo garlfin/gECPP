@@ -166,7 +166,7 @@ namespace gE
         void ProcessKey(const SDL_KeyboardEvent&);
         void ClearKeyStates();
 
-        GET_SET_VALUE(bool, IsFocused, _focused);
+        GET_SET(bool, IsFocused, _focused);
 
     private:
         KeyState _keys[(u16) Key::Size] = DEFAULT;

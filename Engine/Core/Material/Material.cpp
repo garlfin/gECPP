@@ -54,6 +54,16 @@ namespace gE
 		_shader->Bind();
 	}
 
+	REFLECTABLE_ONGUI_IMPL(Material,
+	{
+		DrawField(Field{ "Shader"sv }, _shader, depth);
+		DrawField(EnumField{ "Depth Function", ""sv, EDepthFunction }, _depthFunc, depth);
+		DrawField(EnumField{ "Cull Mode", ""sv, ECullMode }, _cullMode, depth);
+		DrawField(EnumField{ "Blend Mode", ""sv, EBlendMode }, _blendMode, depth);
+	});
+
+	REFLECTABLE_FACTORY_NO_IMPL(Material);
+
 	PBRMaterial::PBRMaterial(Window* w, const Reference<Shader>& s, const PBRMaterialSettings& settings) :
 		Material(w, s),
 		_albedo(GetShader(), "AlbedoTex", settings.Albedo),
@@ -125,6 +135,18 @@ namespace gE
 		}
 	}
 
+	void DeferredShader::Free()
+	{
+		_forwardShader.Free();
+		_deferredShader.Free();
+		_gBufferShader.Free();
+	}
+
+	bool DeferredShader::IsFree() const
+	{
+		return _forwardShader.IsFree() && _deferredShader.IsFree() && _gBufferShader.IsFree();
+	}
+
 #ifdef DEBUG
 	bool DeferredShader::VerifyUniforms(const std::string& name) const
 	{
@@ -134,4 +156,7 @@ namespace gE
 		return a == b && b == c;
 	}
 #endif
+
+	REFLECTABLE_FACTORY_NO_IMPL(Shader);
+	REFLECTABLE_ONGUI_IMPL(Shader, {});
 }

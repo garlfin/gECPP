@@ -16,8 +16,13 @@ namespace gE::PostProcess
 		Manual
 	};
 
-    struct PhysicalCameraSettings
+    struct PhysicalCameraSettings : public IReflectable
     {
+    	REFLECTABLE_ONGUI_PROTO(IReflectable);
+
+    public:
+    	PhysicalCameraSettings() = default;
+
         NODISCARD static float EV100(float aperture, float shutter, float ISO);
         NODISCARD static float EV100(float luminance, float middleGray = 12.7f);
         NODISCARD static float EV100ToExposure(float ev100);
@@ -58,4 +63,24 @@ namespace gE::PostProcess
 	{
 		return EV100ToExposure(EV100(FStop, ShutterTime, ISO));
 	}
+
+	inline REFLECTABLE_ONGUI_IMPL(PhysicalCameraSettings,
+	{
+		if(ExposureMode == ExposureMode::Manual)
+		{
+			DrawField(ScalarField{ "Exposure"sv, ""sv, 0.f, 10.f, FLT_EPSILON, ScalarViewMode::Slider }, Exposure, depth);
+			return;
+		}
+
+		if(ExposureMode == ExposureMode::Physical)
+		{
+			DrawField(ScalarField{ "F-Stop"sv, ""sv, 0.f, 10.f, FLT_EPSILON, ScalarViewMode::Slider }, FStop, depth);
+			float shutter = 1.0 / ShutterTime;
+			DrawField(ScalarField{ "Shutter Time"sv, "Frames per Second"sv, 1.f, FLT_MAX, 1.f }, shutter, depth);
+			ShutterTime = 1.0 / shutter;
+			DrawField(ScalarField{ "ISO"sv, ""sv, 1.f, FLT_MAX, 1.f }, ISO, depth);
+		}
+
+		DrawField<const float>(ScalarField<float>{ "Exposure"sv }, Exposure, depth);
+	});
 };

@@ -7,7 +7,7 @@
 #include <Component/MeshRenderer/MeshRenderer.h>
 #include <Entity/Entity.h>
 
-namespace gE::VoxelDemo
+namespace gE
 {
     class StaticMeshEntity : public Entity
     {
