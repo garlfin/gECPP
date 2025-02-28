@@ -65,6 +65,11 @@ namespace Physics
 
         return point;
     }
+
+    REFLECTABLE_FACTORY_IMPL(SphereShape, Jolt::SphereShape);
+    REFLECTABLE_FACTORY_IMPL(BoxShape, Jolt::BoxShape);
+    REFLECTABLE_FACTORY_IMPL(CapsuleShape, Jolt::CapsuleShape);
+    REFLECTABLE_FACTORY_IMPL(ConvexMeshShape, Jolt::ConvexMeshShape);
 }
 
 namespace Jolt

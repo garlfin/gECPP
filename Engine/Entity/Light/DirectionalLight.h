@@ -27,6 +27,7 @@ namespace gE
 
 	class DirectionalLight : public Light
 	{
+		REFLECTABLE_MAGIC_IMPL("DLIT"); // Die lit reference?!
 		REFLECTABLE_TYPE_PROTO(DirectionalLight, "gE::DirectionalLight");
 
 	public:
@@ -44,5 +45,4 @@ namespace gE
 		OrthographicCamera _camera;
 		DirectionalLightTarget _target;
 	};
-	inline REFLECTABLE_FACTORY_NO_IMPL(DirectionalLight);
 }

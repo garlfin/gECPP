@@ -132,6 +132,8 @@ namespace gE
 		light.PackedSettings = u32(camera.GetScale().y * 2);
 	}
 
+	REFLECTABLE_FACTORY_NO_IMPL(DirectionalLight);
+
 	PointLightTarget::PointLightTarget(Light& light, CameraCube& camera) :
 		RenderTarget(light, camera),
 		IDepthTarget(camera, *_depth)
@@ -178,6 +180,8 @@ namespace gE
 	{
 		DrawField(ScalarField{ "Radius", "", 0.01f }, _radius, depth);
 	});
+
+	REFLECTABLE_FACTORY_NO_IMPL(PointLight);
 
 	OrthographicCameraSettings CreateDirectionalSettings(u16 size, float scale)
 	{

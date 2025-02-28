@@ -215,6 +215,19 @@ namespace gE
         return changed;
     }
 
+    template <class T, glm::length_t COMPONENT_COUNT>
+    bool DrawField(const ScalarField<T>& settings, const glm::vec<COMPONENT_COUNT, T>& vec, u8 depth)
+    {
+        using RAW_T = glm::vec<COMPONENT_COUNT, T>;
+        RAW_T temp = vec;
+
+        ImGui::BeginDisabled(true);
+            const bool changed = DrawField(settings, temp, depth);
+        ImGui::EndDisabled();
+
+        return changed;
+    }
+
     template <class T, class SETTINGS_T>
     T* DrawField(const ArrayField<SETTINGS_T>& settings, Array<T>& ts, u8 depth)
     {
@@ -280,10 +293,9 @@ namespace gE
     {
         const bool isReflectable = payload.IsDataType(GE_EDITOR_ASSET_PAYLOAD);
         const Reference<Asset>& data = **(const Reference<Asset>**) payload.Data;
-        Underlying* underlying = data->GetUnderlying();
 
         if(!isReflectable) return false;
-        return dynamic_cast<T*>(data.GetPointer()) || dynamic_cast<T*>(underlying);
+        return data->IsCastable<T>();
     }
 
     template <class T> requires std::is_base_of_v<Reflectable<Window*>, T>

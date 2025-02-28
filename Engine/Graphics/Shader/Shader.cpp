@@ -23,6 +23,11 @@ namespace GPU
 		Write(out, Source);
 	}
 
+	REFLECTABLE_FACTORY_IMPL(ShaderSource, ShaderSource);
+	REFLECTABLE_ONGUI_IMPL(ShaderSource,
+		ImGui::TextWrapped(Source.c_str());
+	);
+
 	void ShaderStage::IDeserialize(istream& in, SETTINGS_T s)
 	{
 		StageType = Read<ShaderStageType>(in);
@@ -57,8 +62,6 @@ namespace GPU
 		Write(out, ComputeStage);
 	}
 
-	REFLECTABLE_FACTORY_IMPL(ShaderStage, API::ShaderStage)
-
 	ShaderStage::ShaderStage(ShaderStageType type, const Path& path) :
 		StageType(type),
 		Source(path),
@@ -66,7 +69,7 @@ namespace GPU
 	{
 	}
 
-	REFLECTABLE_FACTORY_IMPL(Shader, API::Shader)
+	REFLECTABLE_FACTORY_IMPL(ShaderStage, API::ShaderStage)
 
 	Shader::Shader(const Path& v, const Path& f) :
 		VertexStage(ShaderStageType::Vertex, v),
@@ -74,10 +77,12 @@ namespace GPU
 	{
 	}
 
-	REFLECTABLE_FACTORY_IMPL(ComputeShader, API::ComputeShader)
+	REFLECTABLE_FACTORY_IMPL(Shader, API::Shader)
 
 	ComputeShader::ComputeShader(const Path& c) :
 		ComputeStage(ShaderStageType::Compute, c)
 	{
 	};
+
+	REFLECTABLE_FACTORY_IMPL(ComputeShader, API::ComputeShader)
 }

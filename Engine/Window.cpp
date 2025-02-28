@@ -53,12 +53,12 @@ Window::Window(glm::u16vec2 size, const std::string& name) :
 {
 	if(!SDL_WasInit(SDL_INIT_VIDEO))
 		if (!SDL_Init(SDL_INIT_VIDEO))
-			Log::Error("Failed to initialize SDL.", true);
+			Log::FatalError("Failed to initialize SDL.");
 
 	_monitor = Monitor(SDL_GetCurrentDisplayMode(SDL_GetPrimaryDisplay()));
 	_window = SDL_CreateWindow(_name.c_str(), size.x, size.y, SDL_WINDOW_OPENGL | SDL_WINDOW_HIGH_PIXEL_DENSITY);
 	if(!_window)
-		Log::Error("Failed to create Window.", true);
+		Log::FatalError("Failed to create Window.");
 
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
@@ -70,10 +70,10 @@ Window::Window(glm::u16vec2 size, const std::string& name) :
 
 	_grapicsContext = SDL_GL_CreateContext(_window);
 	if(!_grapicsContext)
-		Log::Error(std::format("Failed to create OpenGL context.\n\n{}", SDL_GetError()), true);
+		Log::FatalError(std::format("Failed to create OpenGL context.\n\n{}", SDL_GetError()));
 
 	if(!gladLoadGLLoader((GLADloadproc) SDL_GL_GetProcAddress))
-		Log::Error("Failed to load OpenGL functions.", true);
+		Log::FatalError("Failed to load OpenGL functions.");
 
 	PVR::Header iconHeader;
 	Array<u8> iconData = PVR::Read("Resource/gE.PVR", iconHeader);
@@ -101,7 +101,7 @@ Window::~Window()
 			return;
 
 		if(severity == GL_DEBUG_SEVERITY_HIGH)
-			Log::Error(std::format("OpenGL critical error:\n\n{}", message), true);
+			Log::FatalError(std::format("OpenGL critical error:\n\n{}", message));
 
 		Log::WriteLine(message);
 	}

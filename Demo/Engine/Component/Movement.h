@@ -18,6 +18,7 @@ namespace gE
 {
     class Movement final : public Behavior
     {
+        REFLECTABLE_MAGIC_IMPL("MOV");
         REFLECTABLE_PROTO(Movement, Behavior, "gE::Movement");
 
     public:

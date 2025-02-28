@@ -10,6 +10,7 @@ namespace gE
 {
     class Shader : public Asset
     {
+        REFLECTABLE_MAGIC_IMPL("SHDR");
         REFLECTABLE_PROTO(Shader, Asset, "gE::Shader");
 
     public:

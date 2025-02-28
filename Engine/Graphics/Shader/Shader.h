@@ -22,7 +22,7 @@ namespace GPU
 	struct ShaderSource final : public gE::Asset
 	{
 		SERIALIZABLE_PROTO("SSRC", 0, ShaderSource, Asset);
-		REFLECTABLE_TYPE_PROTO(ShaderSource, "GPU::ShaderSource");
+		REFLECTABLE_PROTO(ShaderSource, Asset, "GPU::ShaderSource");
 
 	public:
 		explicit ShaderSource(const Path&);
@@ -86,7 +86,6 @@ namespace GPU
 		ALWAYS_INLINE void Free() override { return ComputeStage.Free(); }
 		NODISCARD ALWAYS_INLINE bool IsFree() const override { return ComputeStage.IsFree(); }
 	};
-	inline REFLECTABLE_FACTORY_IMPL(ShaderSource, ShaderSource);
 }
 
 #if API == GL

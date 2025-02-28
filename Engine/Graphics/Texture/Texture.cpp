@@ -53,22 +53,22 @@ namespace GPU
 	);
 
 	REFLECTABLE_ONGUI_IMPL(Texture1D,
-		gE::DrawField(gE::ScalarField<u32>{ "Size" }, Size, depth);
+		gE::DrawField(gE::ScalarField<u32>{ "Size" }, (const Size1D&) Size, depth);
 	);
 	REFLECTABLE_FACTORY_IMPL(Texture1D, API::Texture1D);
 
 	REFLECTABLE_ONGUI_IMPL(Texture2D,
-		gE::DrawField(gE::ScalarField<u32>{ "Size" }, Size, depth);
+		gE::DrawField(gE::ScalarField<u32>{ "Size" }, (const Size2D&) Size, depth);
 	);
 	REFLECTABLE_FACTORY_IMPL(Texture2D, API::Texture2D);
 
 	REFLECTABLE_ONGUI_IMPL(Texture3D,
-		gE::DrawField(gE::ScalarField<u32>{ "Size" }, Size, depth);
+		gE::DrawField(gE::ScalarField<u32>{ "Size" }, (const Size3D&) Size, depth);
 	);
 	REFLECTABLE_FACTORY_IMPL(Texture3D, API::Texture3D);
 
 	REFLECTABLE_ONGUI_IMPL(TextureCube,
-		gE::DrawField(gE::ScalarField<u32>{ "Size" }, Size, depth);
+		gE::DrawField(gE::ScalarField<u32>{ "Size" }, (const Size1D&) Size, depth);
 	);
 	REFLECTABLE_FACTORY_IMPL(TextureCube, API::TextureCube);
 }

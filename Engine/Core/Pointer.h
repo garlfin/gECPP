@@ -142,6 +142,7 @@ public:
 	ALWAYS_INLINE bool operator !=(const WeakReference& o) const { return _t != o._t; }
 
 	bool IsValid() const { return _counter && _counter->RefCount; }
+	operator bool() const { return IsValid(); }
 
 	explicit operator Reference<T>()
 	{

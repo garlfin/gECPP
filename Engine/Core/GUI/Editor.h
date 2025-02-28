@@ -6,10 +6,11 @@
 
 #include <Prototype.h>
 #include <Core/Macro.h>
+#include <Core/Pointer.h>
+#include <Core/Serializable/Asset.h>
 #include <Core/Serializable/Serializable.h>
 #include <IMGUI/imgui.h>
-
-#include "Core/Pointer.h"
+#include <SDL3/SDL_dialog.h>
 
 #define GE_EDITOR_HIERARCHY_FLAGS ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth
 #define GE_EDITOR_TABLE_FLAGS ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_NoHostExtendX | ImGuiTableFlags_Resizable
@@ -17,6 +18,9 @@
 #define GE_EDITOR_INPUT_FLAGS ImGuiSliderFlags_AlwaysClamp
 #define GE_EDITOR_COLOR_PICKER_FLAGS ImGuiColorEditFlags_Float | ImGuiColorEditFlags_InputRGB | ImGuiColorEditFlags_NoOptions | ImGuiColorEditFlags_HDR | ImGuiColorEditFlags_AlphaPreviewHalf
 #define GE_EDITOR_ICON_PADDING 16
+
+#define GE_EDITOR_FILTER_TEXTURE 0
+#define GE_EDITOR_FILTER_MODEL 0
 
 CONSTEXPR_GLOBAL const char* GE_EDITOR_ASSET_PAYLOAD = "ASSET";
 
@@ -44,13 +48,21 @@ namespace gE
         void DrawHierarchy();
         void DrawAssetManager();
 
+        static void ImportFileCallback(Window* userData, const char* const* files, int filter);
+        constexpr static std::array<SDL_DialogFileFilter, 2> Filters
+        {
+            SDL_DialogFileFilter("Textures", "pvr"),
+            SDL_DialogFileFilter("3D Models", "dae;fbx;obj;gltf;glb")
+        };
+
         Window* _window = nullptr;
         Entity* _activeEntity = nullptr;
+        const File* _activeAsset = DEFAULT;
         bool _isEditorOpen = false;
         bool _running = true;
         size_t _oldLogSize = 0;
         Path _assetPath = "";
-        u16 _iconSize = 64;
+        u16 _iconSize = 128;
     };
 #endif
 
@@ -80,7 +92,7 @@ namespace gE
     template<class T>
     struct ArrayField : public T
     {
-        ArrayViewMode ViewMode = ArrayViewMode::Elements | ArrayViewMode::Name;
+        ArrayViewMode ViewMode = ArrayViewMode::Elements;
     };
 
     enum class ScalarViewMode : u8
@@ -117,6 +129,9 @@ namespace gE
 
     template <class T, glm::length_t COMPONENT_COUNT>
     bool DrawField(const ScalarField<T>&, glm::vec<COMPONENT_COUNT, T>&, u8 depth);
+
+    template <class T, glm::length_t COMPONENT_COUNT>
+    bool DrawField(const ScalarField<T>&, const glm::vec<COMPONENT_COUNT, T>&, u8 depth);
 
     template<class T, class SETTINGS_T>
     T* DrawField(const ArrayField<SETTINGS_T>&, Array<T>&, u8 depth);

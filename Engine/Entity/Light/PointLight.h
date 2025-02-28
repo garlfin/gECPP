@@ -27,6 +27,7 @@ namespace gE
 
 	class PointLight : public Light
 	{
+		REFLECTABLE_MAGIC_IMPL("PLIT"); // P Litty?!
 		REFLECTABLE_PROTO(PointLight, Light, "gE::PointLight");
 
 	public:
@@ -44,5 +45,4 @@ namespace gE
 		PointLightTarget _target;
 		float _radius = 0.1;
 	};
-	inline REFLECTABLE_FACTORY_NO_IMPL(PointLight);
 }

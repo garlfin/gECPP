@@ -106,11 +106,6 @@ namespace Physics
         if(hasBakedSettings)
             Write(out, BakedSettings);
     }
-
-    inline REFLECTABLE_FACTORY_IMPL(SphereShape, Jolt::SphereShape);
-    inline REFLECTABLE_FACTORY_IMPL(BoxShape, Jolt::BoxShape);
-    inline REFLECTABLE_FACTORY_IMPL(CapsuleShape, Jolt::CapsuleShape);
-    inline REFLECTABLE_FACTORY_IMPL(ConvexMeshShape, Jolt::ConvexMeshShape);
 }
 
 namespace Jolt

@@ -15,7 +15,7 @@ namespace gE
     {
         FMOD_RESULT result = FMOD_Studio_System_Create(&_system, FMOD_VERSION);
         if(result != FMOD_OK)
-            Log::Error("Failed to create FMOD Studio System.", true);
+            Log::FatalError("Failed to create FMOD Studio System.");
 
         result = FMOD_Studio_System_Initialize(
             _system,
@@ -25,7 +25,7 @@ namespace gE
             nullptr
         );
         if(result != FMOD_OK)
-            Log::Error("Failed to initialize FMOD Studio System.", true);
+            Log::FatalError("Failed to initialize FMOD Studio System.");
     }
 
     void SoundManager::OnUpdate(float delta)

@@ -37,6 +37,12 @@ public:
 	virtual Underlying* GetUnderlying() { return nullptr; }
 	virtual const Underlying* GetUnderlying() const { return nullptr; }
 
+	template<class I>
+	NODISCARD bool IsCastable() const
+	{
+		return dynamic_cast<const I*>(this) || dynamic_cast<const I*>(GetUnderlying());
+	}
+
 	~Serializable() override = default;
 };
 
@@ -46,14 +52,13 @@ public:
 	GE_ASSERTM(strcmpb(magic, MAGIC, 4), "UNEXPECTED MAGIC!"); \
 	Version = Read<u8>(in);
 
-// Implementation
 #define SERIALIZABLE_PROTO(MAGIC_VAL, VERSION_VAL, TYPE, SUPER_T) \
 	public: \
 		typedef SUPER_T SUPER; \
 		typedef SUPER::SETTINGS_T SETTINGS_T;\
 		TYPE(istream& in, SETTINGS_T s) : SUPER(in, s) { SERIALIZABLE_CHECK_HEADER(); IDeserialize(in, s); } \
 		TYPE() = default; \
-		static const constexpr char MAGIC[5] = MAGIC_VAL; \
+		REFLECTABLE_MAGIC_IMPL(MAGIC_VAL); \
 		inline void Deserialize(istream& in, SETTINGS_T s) override { PlacementNew(*this, in, s); } \
 		inline void Serialize(ostream& out) const override { SUPER::Serialize(out); Write(out, 4, MAGIC); Write<u8>(out, Version); ISerialize(out); } \
 		u8 Version = VERSION_VAL; \

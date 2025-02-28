@@ -7,6 +7,7 @@
 #include <Window.h>
 #include <windows.h>
 #include <IMGUI/imgui_internal.h>
+#include <SDL3/SDL_dialog.h>
 
 #include "GUI.h"
 
@@ -124,18 +125,19 @@ namespace gE
 
     void Editor::DrawAssetManager()
     {
-        constexpr static u16 minScale = 16;
+        constexpr static u16 minScale = 64;
         constexpr static u16 maxScale = 512;
 
         if(ImGui::Begin("Assets", nullptr, ImGuiWindowFlags_MenuBar))
         {
             ImGui::BeginMenuBar();
-            if(ImGui::BeginMenu("View"))
-            {
-                ImGui::SetNextItemWidth(128.f);
-                ImGui::SliderScalar("Icon Size", ImGuiDataType_U16, &_iconSize, &minScale, &maxScale, nullptr, ImGuiSliderFlags_AlwaysClamp);
-                ImGui::EndMenu();
-            }
+
+            if(ImGui::Button("Import"))
+                SDL_ShowOpenFileDialog((SDL_DialogFileCallback) ImportFileCallback, _window, nullptr, Filters.data(), Filters.size(), nullptr, false);
+
+            ImGui::SetNextItemWidth(128.f);
+            ImGui::SliderScalar("Icon Size", ImGuiDataType_U16, &_iconSize, &minScale, &maxScale, nullptr, ImGuiSliderFlags_AlwaysClamp);
+
             ImGui::EndMenuBar();
 
             const u32 windowSize = ImGui::GetContentRegionAvail().x - ImGui::GetCursorPos().x;
@@ -143,26 +145,37 @@ namespace gE
             const u8 columns = std::max<u8>(windowSize / width, 1);
             const AssetManager::FILE_SET_T& assets = _window->GetAssets().GetFiles();
 
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + GE_EDITOR_ICON_PADDING);
             ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(GE_EDITOR_ICON_PADDING, GE_EDITOR_ICON_PADDING));
-            ImGui::BeginTable("##assets", columns, ImGuiTableFlags_SizingStretchSame | ImGuiTableFlags_BordersV);
+            ImGui::BeginTable("##assets", columns, ImGuiTableFlags_SizingStretchSame);
             for(size_t i = 0; auto& file : assets)
             {
                 const u8 column = i % columns;
                 if(!column) ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(column);
 
-                float top = ImGui::GetCursorPosY();
-
                 const std::string fileName = file.GetPath().filename().replace_extension().string();
+                const ImVec2 top = ImGui::GetCursorPos();
+                const ImVec2 buttonSize = ImVec2(_iconSize + GE_EDITOR_ICON_PADDING, _iconSize + ImGui::GetFont()->FontSize + GE_EDITOR_ICON_PADDING / 2);
+
+                ImGui::SetCursorPosX(top.x - GE_EDITOR_ICON_PADDING / 2);
+                std::string buttonLabel = std::format("##{}", fileName);
+
+                ImGui::BeginGroup();
+                if(ImGui::ButtonEx(buttonLabel.c_str(), buttonSize, ImGuiButtonFlags_PressedOnDoubleClick | ImGuiButtonFlags_AllowOverlap))
+                    _activeAsset = &file;
+
+                ImGui::SetCursorPosX(top.x);
+                ImGui::SetCursorPosY(top.y + GE_EDITOR_ICON_PADDING / 2);
 
                 if(file.IsLoaded())
                     file.Get()->OnEditorIcon(_iconSize);
-                ImGui::TextWrapped(fileName.c_str());
 
-                float bottom = ImGui::GetCursorPosY();
+                float textWidth = ImGui::CalcTextSize(fileName.c_str()).x;
 
-                ImGui::SetCursorPosY(top);
-                ImGui::Dummy(ImVec2(_iconSize, bottom - top));
+                ImGui::SetCursorPosX(top.x + std::max((_iconSize - textWidth) / 2.f, 0.f));
+                ImGui::TextUnformatted(fileName.c_str());
+                ImGui::EndGroup();
 
                 if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
                 {
@@ -178,6 +191,65 @@ namespace gE
             ImGui::PopStyleVar();
         }
         ImGui::End();
+
+        if(ImGui::Begin("Asset Inspector"))
+        {
+            if(_activeAsset)
+            {
+                const std::string_view type = _activeAsset->GetFileType() ? _activeAsset->GetFileType()->Name : "gE::Asset (NO TYPE INFO)";
+
+                ImGui::TextUnformatted(std::format("{}\n\t{}", _activeAsset->GetPath().string(), type).c_str());
+                if(_activeAsset->IsLoaded())
+                {
+                    Asset& asset = _activeAsset->Get();
+
+                    if(ImGui::Button("Reload File"))
+                        _activeAsset->ForceLoad();
+                    ImGui::SameLine();
+                    if(ImGui::Button("Save File"))
+                    {
+                        if(asset.IsFree())
+                            Log::Warning(std::format("Could not write to file because {} was freed.", _activeAsset->GetPath().string()));
+                        else
+                        {
+                            WriteSerializableToFile(_activeAsset->GetPath(), asset);
+                            Log::Info(std::format("Wrote file to {}", _activeAsset->GetPath().string()));
+                        }
+                    }
+                    if(!asset.IsFree())
+                    {
+                        ImGui::SameLine();
+                        if(ImGui::Button("Free CPU-Side Data"))
+                            asset.Free();
+                    }
+
+                    ImGui::Separator();
+                    _activeAsset->Get()->OnEditorGUI(0);
+                }
+                else
+                {
+                    if(ImGui::Button("Load File"))
+                        _activeAsset->Load();
+                    ImGui::SameLine();
+                    ImGui::TextUnformatted("Asset is not loaded.");
+                    ImGui::Separator();
+                }
+            }
+            else
+                ImGui::TextUnformatted("No asset selected.");
+        }
+        ImGui::End();
+    }
+
+    void Editor::ImportFileCallback(Window* window, const char* const* files, int filter)
+    {
+        AssetManager& assetManager = window->GetAssets();
+        const Path path = *files;
+
+        if(filter == GE_EDITOR_FILTER_TEXTURE)
+            assetManager.AddFile(PVR::ReadAsFile(window, path));
+        else if(filter == GE_EDITOR_FILTER_MODEL)
+            return;
     }
 
     void Editor::DrawLog()

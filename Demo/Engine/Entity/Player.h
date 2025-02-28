@@ -22,6 +22,7 @@ namespace gE
 
 	class Player : public Entity
 	{
+		REFLECTABLE_MAGIC_IMPL("PLYR");
 		REFLECTABLE_PROTO(Player, Entity, "gE::Player");
 
 	 public:
@@ -48,6 +49,7 @@ namespace gE
 
 	class PlayerCamera final : public Entity
 	{
+		REFLECTABLE_MAGIC_IMPL("PCAM");
 		REFLECTABLE_PROTO(PlayerCamera, Entity, "gE::PlayerCamera");
 
 	public:

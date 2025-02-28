@@ -68,6 +68,7 @@ namespace gE
 
 	class Material : public Asset
 	{
+		REFLECTABLE_MAGIC_IMPL("MAT");
 		REFLECTABLE_PROTO(Material, Asset, "gE::Material");
 
 	public:

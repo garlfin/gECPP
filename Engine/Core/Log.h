@@ -33,9 +33,10 @@ namespace gE
             _log += '\n';
         }
 
-        static void Error(std::string_view message, bool fatal);
-        static void Warning(std::string_view message);
-        static void Info(std::string_view message);
+        static void FatalError(std::string_view message, std::string_view title = "Error!");
+        static void Error(std::string_view message, std::string_view title = "Error!");
+        static void Warning(std::string_view message, std::string_view title = "Warning!");
+        static void Info(std::string_view message, std::string_view title = "Information");
 
         NODISCARD ALWAYS_INLINE static std::string_view Get() { return _log; };
 

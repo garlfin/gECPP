@@ -78,6 +78,8 @@ namespace gE
 		DrawField(ScalarField{ "Scale", "", FLT_EPSILON }, *this, depth, &Transform::GetScale_, &Transform::SetScale_);
 	});
 
+	REFLECTABLE_FACTORY_NO_IMPL(Transform);
+
 	void TransformManager::OnUpdate(float delta)
 	{
 		for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())

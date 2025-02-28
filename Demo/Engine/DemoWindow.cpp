@@ -40,9 +40,9 @@ void DemoWindow::OnInit()
 
 	auto rasterShader = ref_create<ForwardShader>(this, GPU::Shader("Resource/Shader/uber.vert", "Resource/Shader/uber.frag"));
 
-	auto cobbleMaterial = Assets.AddFile(File("Cobble", PBRMaterial(this, rasterShader, cobbleSettings)))->Cast<PBRMaterial, false>();
-	auto tileMaterial = Assets.AddFile(File("Tile", PBRMaterial(this, rasterShader, tileSettings)))->Cast<PBRMaterial, false>();
-	auto grassMaterial = Assets.AddFile(File("Grass", PBRMaterial(this, rasterShader, grassSettings)))->Cast<PBRMaterial, false>();
+	auto cobbleMaterial = Assets.AddFile(File(this, "Cobble", PBRMaterial(this, rasterShader, cobbleSettings)))->Cast<PBRMaterial, false>();
+	auto tileMaterial = Assets.AddFile(File(this, "Tile", PBRMaterial(this, rasterShader, tileSettings)))->Cast<PBRMaterial, false>();
+	auto grassMaterial = Assets.AddFile(File(this, "Grass", PBRMaterial(this, rasterShader, grassSettings)))->Cast<PBRMaterial, false>();
 
 	Reference<Mesh> sceneMesh = Assets.AddSerializableFromFile<Mesh>("Resource/Model/Plane.001.mesh")->Cast<Mesh, false>();
 	Reference<Mesh> cubeMesh = Assets.AddSerializableFromFile<Mesh>("Resource/Model/Cube.mesh")->Cast<Mesh, false>();

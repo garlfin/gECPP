@@ -27,9 +27,10 @@ namespace gE
 
 	class Transform final : public Component
 	{
+		REFLECTABLE_MAGIC_IMPL("TRFM");
 		REFLECTABLE_PROTO(Transform, Component, "gE::Transform");
 
-	 public:
+	public:
 		Transform(Entity* o, const TransformData& d);
 
 		explicit Transform(Entity* o);
@@ -78,7 +79,6 @@ namespace gE
 		glm::mat4 _model, _previousModel = glm::mat4(1.0);
 		TransformFlags _flags;
 	};
-	inline REFLECTABLE_FACTORY_NO_IMPL(Transform);
 
 	class TransformManager final : public ComponentManager<Transform>
 	{

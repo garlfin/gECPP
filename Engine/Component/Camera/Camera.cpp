@@ -145,6 +145,8 @@ namespace gE
             SetFOV(fovDeg);
     });
 
+    REFLECTABLE_FACTORY_NO_IMPL(PerspectiveCamera);
+
     OrthographicCamera::OrthographicCamera(Entity* p, TARGET_T& t, const OrthographicCameraSettings& s, ComponentManager<Camera>* m) :
         Camera2D(p, t, s, m),
         _orthographicScale(s.Scale)
@@ -161,6 +163,8 @@ namespace gE
     {
         DrawField(ScalarField{"Orthographic Scale", "", 0.01f}, _orthographicScale, depth);
     });
+
+    REFLECTABLE_FACTORY_NO_IMPL(OrthographicCamera);
 
     void CameraCube::Resize(Size1D size)
     {
@@ -191,6 +195,8 @@ namespace gE
         DrawField(ScalarField{ "Resolution", "", 1u }, *this, depth, &Camera3D::GetSize, &Camera3D::Resize);
     });
 
+    REFLECTABLE_FACTORY_NO_IMPL(Camera3D);
+
     void Camera3D::GetGPUCamera(GPU::Camera& cam)
     {
         Camera::GetGPUCamera(cam);
@@ -211,6 +217,8 @@ namespace gE
     {
         DrawField(ScalarField{ "Resolution", "", 1u }, *this, depth, &CameraCube::GetSize, &CameraCube::Resize);
     });
+
+    REFLECTABLE_FACTORY_NO_IMPL(CameraCube);
 
     void CameraCube::UpdateProjection()
     {

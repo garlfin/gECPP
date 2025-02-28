@@ -66,17 +66,18 @@ namespace gE
         SERIALIZABLE_PROTO("FILE", 0, File, Serializable);
 
     public:
-        File(const Path& path, const Type<Window*>* type);
-        File(const Path& path, const Reference<Asset>& asset);
-        File(const Path& path, const WeakReference<Asset>& asset);
+        File(Window* window, const Path& path, const Type<Window*>* type);
+        File(Window* window, const Path& path, const Reference<Asset>& asset);
+        File(Window* window, const Path& path, const WeakReference<Asset>& asset);
 
         template<class T> requires std::is_base_of_v<Asset, T>
-        File(const Path& path, T&& t);
+        File(Window* window, const Path& path, T&& t);
 
         NODISCARD ALWAYS_INLINE const Type<Window*>* GetFileType() const { return _type; };
         NODISCARD ALWAYS_INLINE bool IsLoaded() const { return _weakAsset.IsValid(); }
 
         Reference<Asset> Load() const;
+        Reference<Asset> ForceLoad() const;
         NODISCARD Reference<Asset> LoadWeak() const;
         NODISCARD Reference<Asset> MakeWeak() const;
         Reference<Asset> Lock() const;
@@ -84,28 +85,33 @@ namespace gE
         template<class T, bool SAFE> requires std::is_base_of_v<Asset, T>
         NODISCARD ALWAYS_INLINE Reference<T> Cast() const;
 
-        template<class T, bool SAFE> requires std::is_base_of_v<Asset, T>
-        NODISCARD ALWAYS_INLINE WeakReference<T> CastWeak() const;
-
-
         GET_CONST(const Reference<Asset>&, , _asset);
         GET_CONST(const WeakReference<Asset>&, Weak, _weakAsset);
         GET_CONST(Bank*, Bank, _bank);
         GET_CONST(const UUID&, UUID, _uuid);
         GET_CONST(const Path&, Path, _path);
+        GET_CONST(Window&, Window, *_window);
 
         NODISCARD ALWAYS_INLINE bool operator<(const File& o) const { return _uuid < o._uuid; }
 
     private:
         static const Type<Window*>* ValidateAssetType(const Asset&);
 
+        NODISCARD Reference<Asset> Load(std::istream&) const;
+
+        Window* _window = DEFAULT;
+        const Type<Window*>* _type = DEFAULT;
         Path _path = DEFAULT;
         UUID _uuid = DEFAULT;
         Bank* _bank = DEFAULT;
-        const Type<Window*>* _type = DEFAULT;
 
         mutable WeakReference<Asset> _weakAsset = DEFAULT;
         mutable Reference<Asset> _asset = DEFAULT;
+
+        using Serializable::GetType;
+        using Serializable::GetUnderlying;
+        using Serializable::OnEditorGUI;
+        using Serializable::OnEditorIcon;
 
         friend class Bank;
     };
@@ -161,7 +167,7 @@ namespace gE
         NODISCARD ALWAYS_INLINE bool operator<(const Bank& o) const { return _uuid < o._uuid; }
 
     private:
-        std::istream& MoveStreamToFile(const UUID& uuid);
+        std::ifstream& MoveStreamToFile(const UUID& uuid);
 
         Path _path = DEFAULT;
         UUID _uuid = DEFAULT;
@@ -200,7 +206,7 @@ namespace gE
         const File* LoadFile(const Path& path, AssetLoadMode = AssetLoadMode::Paths);
         const File* AddFile(File&&);
 
-        template<class SERIALIZABLE_T>
+        template<class SERIALIZABLE_T> requires ReflConstructible<SERIALIZABLE_T>
         const File* AddSerializableFromFile(const Path&);
 
         NODISCARD const File* FindFile(const Path& path) { return FindFile(HashPath(path)); }

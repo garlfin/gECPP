@@ -8,26 +8,31 @@
 
 namespace gE
 {
-    File::File(const Path& path, const Type<Window*>* type) :
-        _path(path),
-        _uuid(HashPath(_path)),
-        _type(type)
+    Path FixPath(const Path& path, const Type<Window*>& type);
+
+    File::File(Window* window, const Path& path, const Type<Window*>* type) :
+        _window(window),
+        _type(type),
+        _path(FixPath(path, *_type)),
+        _uuid(HashPath(_path))
     {
     }
 
-    File::File(const Path& path, const Reference<Asset>& asset) :
-        _path(path),
-        _uuid(HashPath(_path)),
+    File::File(Window* window, const Path& path, const Reference<Asset>& asset) :
+        _window(window),
         _type(ValidateAssetType(asset)),
+        _path(FixPath(path, *_type)),
+        _uuid(HashPath(_path)),
         _weakAsset(asset),
         _asset(asset)
     {
     }
 
-    File::File(const Path& path, const WeakReference<Asset>& asset) :
-        _path(path),
-        _uuid(HashPath(_path)),
+    File::File(Window* window, const Path& path, const WeakReference<Asset>& asset) :
+        _window(window),
         _type(ValidateAssetType(asset)),
+        _path(FixPath(path, *_type)),
+        _uuid(HashPath(_path)),
         _weakAsset(asset)
     {
     }
@@ -78,7 +83,7 @@ namespace gE
         _files.erase(file);
     }
 
-    std::istream& Bank::MoveStreamToFile(const UUID& uuid)
+    std::ifstream& Bank::MoveStreamToFile(const UUID& uuid)
     {
         return _stream;
     }
@@ -111,7 +116,7 @@ namespace gE
 
         if(!stream.is_open())
         {
-            GE_FAIL("COULD NOT OPEN FILE!");
+            Log::FatalError(std::format("Could not open \"{}\"", path.string()));
             return nullptr;
         }
 
@@ -187,15 +192,46 @@ namespace gE
 
     Reference<Asset> File::Load() const
     {
-        if(!_bank || _asset) return _asset;
+        if(_asset) return _asset;
+        return ForceLoad();
+    }
 
-        std::istream& in = _bank->MoveStreamToFile(_uuid);
+    Reference<Asset> File::ForceLoad() const
+    {
+        GE_ASSERT(!_path.empty())
+        GE_ASSERT(_type);
 
-        Read<std::string>(in);
-        Read<UUID>(in);
-        ReadType<Window*>(in);
+        if(_bank)
+            return Load(_bank->MoveStreamToFile(_uuid));
 
-        _asset = ref_cast((Asset*) _type->Factory(in, &_bank->GetWindow()));
+        std::ifstream stream(_path, std::ios::in | std::ios::binary);
+
+        if(!stream.is_open())
+        {
+            Log::Warning(std::format("Could not open \"{}\".", _path.string()));
+            return DEFAULT;
+        }
+
+        return Load(stream);
+    }
+
+    Reference<Asset> File::Load(std::istream& in) const
+    {
+        GE_ASSERT(_type);
+        GE_ASSERT(!_path.empty());
+
+        if(_path.extension() == "FILE")
+        {
+            Read<std::string>(in);
+            Read<UUID>(in);
+            ReadType<Window*>(in);
+        }
+
+        if(_asset)
+            _type->UFactory(in, _window, *_asset);
+        else
+            _asset = ref_cast((Asset*) _type->Factory(in, _window));
+
         _weakAsset = _asset;
 
         return _asset;
@@ -217,5 +253,10 @@ namespace gE
     Reference<Asset> File::Lock() const
     {
         return _asset = (Reference<Asset>) _weakAsset;
+    }
+
+    Path FixPath(const Path& path, const Type<Window*>& type)
+    {
+        return type.Extension.empty() ? path : COPY(path).replace_extension(type.Extension);
     }
 }

@@ -13,6 +13,7 @@ namespace gE
 
     class PhysicsCubeEntity final : public Entity
     {
+        REFLECTABLE_MAGIC_IMPL("PCUB");
         REFLECTABLE_PROTO(PhysicsCubeEntity, Entity, "gE::PhysicsCubeEntity");
 
     public:

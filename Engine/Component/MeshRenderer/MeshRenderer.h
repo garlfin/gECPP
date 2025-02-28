@@ -15,6 +15,7 @@ namespace gE
 {
     class MeshRenderer : public Component
     {
+        REFLECTABLE_MAGIC_IMPL("MREN");
         REFLECTABLE_PROTO(MeshRenderer, Component, "gE::MeshRenderer");
 
     public:

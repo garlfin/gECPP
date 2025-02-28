@@ -13,26 +13,17 @@ namespace gE
     NODISCARD ALWAYS_INLINE bool AssetCompare::operator()(const UUID& a, const File& b) const { return a < b.GetUUID(); }
 
     template <class T> requires std::is_base_of_v<Asset, T>
-    File::File(const Path& path, T&& t) : File(path, ref_create<T>(std::move(t))) {}
+    File::File(Window* window, const Path& path, T&& t) : File(window, path, ref_create<T>(std::move(t))) {}
 
     template <class T, bool SAFE> requires std::is_base_of_v<Asset, T>
     Reference<T> File::Cast() const
     {
-        GE_ASSERT(_weakAsset.IsValid());
+        if(!_weakAsset.IsValid()) return DEFAULT;
 
         if constexpr(SAFE)
-            return dynamic_cast<T*>(_asset.GetPointer()) ? (Reference<T>) _asset : Reference<T>();
+            return _asset->IsCastable<T>() ? (Reference<T>) _asset : Reference<T>();
         else
             return (Reference<T>) _asset;
-    }
-
-    template <class T, bool SAFE> requires std::is_base_of_v<Asset, T>
-    WeakReference<T> File::CastWeak() const
-    {
-        if constexpr(SAFE)
-            return _weakAsset.IsValid() && dynamic_cast<T*>(_weakAsset.GetPointer()) ? (WeakReference<T>) _weakAsset : WeakReference<T>();
-        else
-            return (WeakReference<T>) _weakAsset;
     }
 
     template <class SERIALIZABLE_T>
@@ -41,9 +32,11 @@ namespace gE
         return AddFile(File(path, ref_cast(ReadSerializableFromFile<SERIALIZABLE_T>(_window, path))));
     }
 
-    template <class SERIALIZABLE_T>
+    template <class SERIALIZABLE_T> requires ReflConstructible<SERIALIZABLE_T>
     const File* AssetManager::AddSerializableFromFile(const Path& path)
     {
-        return AddFile(File(path, ref_cast(ReadSerializableFromFile<SERIALIZABLE_T>(_window, path))));
+        const File* file = AddFile(File(_window, path, &SERIALIZABLE_T::Type));
+        file->Load();
+        return file;
     }
 }

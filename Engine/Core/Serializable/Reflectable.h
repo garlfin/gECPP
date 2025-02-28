@@ -16,6 +16,15 @@ template<class T>
 using FactoryFunction = Serializable<gE::Window*>*(*)(std::istream&, T);
 
 template<class T>
+using UFactoryFunction = void(*)(std::istream&, T, Serializable<gE::Window*>&);
+
+template<class SERIALIZABLE_T>
+concept ReflConstructible = requires
+{
+	SERIALIZABLE_T::Type;
+};
+
+template<class T>
 struct TypeCompare
 {
 	using is_transparent = void;
@@ -55,17 +64,22 @@ private:
 template<class T>
 struct Type
 {
-	Type() = default;
-	Type(const std::string_view name, FactoryFunction<T> factory) :
+	Type() = delete;
+	explicit Type(std::string_view name, FactoryFunction<T> factory, UFactoryFunction<T> uFactory, std::string_view extension, const Type* baseType = nullptr) :
 		Name(name),
-		Factory(factory)
+		Extension(extension),
+		Factory(factory),
+		UFactory(uFactory),
+		BaseType(baseType)
 	{
 		TypeSystem<T>::_types.insert(this);
 	}
 
 	std::string_view Name;
-	size_t Offset;
+	std::string_view Extension;
 	FactoryFunction<T> Factory;
+	UFactoryFunction<T> UFactory;
+	const Type* BaseType;
 };
 
 struct IReflectable
@@ -115,12 +129,13 @@ struct EnumData
 	NODISCARD typename ARR_T::const_iterator At(T t) const;
 };
 
-#define REFLECTABLE_TYPE_PROTO(TYPE, NAME) \
+#define REFLECTABLE_TYPE_PROTO(TYPE, NAME, ...) \
 	public: \
 		using THIS_T = TYPE; \
-		static TYPE* TYPE##FACTORY(std::istream& in, SETTINGS_T t); \
+		static TYPE* Factory(std::istream& in, SETTINGS_T t); \
+		static void UFactory(std::istream& in, SETTINGS_T t, TYPE& result); \
 		const TYPE_T* GetType() const override { return &Type; }; \
-		FORCE_IMPL static inline const TYPE_T Type{ NAME, (FactoryFunction<SETTINGS_T>) TYPE##FACTORY }; \
+		FORCE_IMPL static inline const TYPE_T Type{ NAME, (FactoryFunction<SETTINGS_T>) Factory, (UFactoryFunction<SETTINGS_T>) UFactory, MAGIC, __VA_ARGS__ }; \
 
 #ifdef GE_ENABLE_IMGUI
 	#define REFLECTABLE_ONGUI_PROTO(SUPER) \
@@ -141,19 +156,25 @@ struct EnumData
 	#define REFLECTABLE_ICON_IMPL(TYPE, CODE)
 #endif
 
-#define REFLECTABLE_PROTO(TYPE, SUPER, NAME) \
-	REFLECTABLE_TYPE_PROTO(TYPE, NAME); \
+#define REFLECTABLE_MAGIC_IMPL(MAGIC_VAL) \
+	public: \
+		static const constexpr char MAGIC[5] = MAGIC_VAL
+
+#define REFLECTABLE_PROTO(TYPE, SUPER, NAME, ...) \
+	REFLECTABLE_TYPE_PROTO(TYPE, NAME, __VA_ARGS__); \
 	REFLECTABLE_ONGUI_PROTO(SUPER)
 
 #define REFLECTABLE_PROTO_NOIMPL(SUPER) \
 	public: \
 		void OnEditorGUI(u8 depth) override { SUPER::OnEditorGUI(depth); }
 
-#define REFLECTABLE_FACTORY_IMPL(TYPE, CONSTRUCTION_T) \
-	TYPE* TYPE::TYPE##FACTORY(std::istream& in, TYPE::SETTINGS_T t) { return (TYPE*) new CONSTRUCTION_T(in, t); }
+#define REFLECTABLE_FACTORY_IMPL(TYPE, CONSTRUCTION_T, ...) \
+	__VA_ARGS__ TYPE* TYPE::Factory(std::istream& in, TYPE::SETTINGS_T t) { return (TYPE*) new CONSTRUCTION_T(in, t); } \
+	__VA_ARGS__ void TYPE::UFactory(std::istream& in, TYPE::SETTINGS_T t, TYPE& result) { PlacementNew((CONSTRUCTION_T&) result, in, t); }
 
-#define REFLECTABLE_FACTORY_NO_IMPL(TYPE) \
-	TYPE* TYPE::TYPE##FACTORY(std::istream& in, TYPE::SETTINGS_T t) { return nullptr; }
+#define REFLECTABLE_FACTORY_NO_IMPL(TYPE, ...) \
+	__VA_ARGS__ TYPE* TYPE::Factory(std::istream&, TYPE::SETTINGS_T) { return nullptr; } \
+	__VA_ARGS__ void TYPE::UFactory(std::istream&, TYPE::SETTINGS_T, TYPE&) { }
 
 #define REFLECTABLE_ONEDITOR_NO_IMPL(TYPE, SUPER) \
 	void TYPE::OnEditorGUI(u8 depth) { SUPER::OnEditorGUI(depth); }

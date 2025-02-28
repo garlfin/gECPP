@@ -36,7 +36,7 @@ namespace GPU
 				if(!file)
 				{
 					Reference<gE::Asset> asset = ref_create<ShaderSource>(includePath);
-					file = window->GetAssets().AddFile(std::move(gE::File(includePath, asset)));
+					file = window->GetAssets().AddFile(std::move(gE::File(window, includePath, asset)));
 				}
 
 				if(!file) continue;

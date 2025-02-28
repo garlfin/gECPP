@@ -74,6 +74,7 @@ namespace gE
 
     class PerspectiveCamera final : public Camera2D
     {
+        REFLECTABLE_MAGIC_IMPL("PCAM");
         REFLECTABLE_PROTO(PerspectiveCamera, Camera2D, "gE::PerspectiveCamera");
 
     public:
@@ -105,10 +106,9 @@ namespace gE
         float _fov;
     };
 
-    inline REFLECTABLE_FACTORY_NO_IMPL(PerspectiveCamera);
-
     class OrthographicCamera final : public Camera2D
     {
+        REFLECTABLE_MAGIC_IMPL("OCAM");
         REFLECTABLE_PROTO(OrthographicCamera, Camera2D, "gE::OrthographicCamera");
 
     public:
@@ -123,10 +123,9 @@ namespace gE
         glm::vec2 _orthographicScale;
     };
 
-    inline REFLECTABLE_FACTORY_NO_IMPL(OrthographicCamera);
-
     class Camera3D final : public Camera
     {
+        REFLECTABLE_MAGIC_IMPL("3CAM");
         REFLECTABLE_PROTO(Camera3D, Camera, "gE::Camera3D");
 
     public:
@@ -151,10 +150,9 @@ namespace gE
         Size3D _size;
     };
 
-    inline REFLECTABLE_FACTORY_NO_IMPL(Camera3D);
-
     class CameraCube final : public Camera
     {
+        REFLECTABLE_MAGIC_IMPL("CCAM");
         REFLECTABLE_PROTO(CameraCube, Camera, "gE::CameraCube");
 
     public:
@@ -177,8 +175,6 @@ namespace gE
     private:
         Size1D _size;
     };
-
-    inline REFLECTABLE_FACTORY_NO_IMPL(CameraCube);
 
     class CameraManager final : public ComponentManager<Camera>
     {
