@@ -67,16 +67,16 @@ struct Type
 	Type() = delete;
 	explicit Type(std::string_view name, FactoryFunction<T> factory, UFactoryFunction<T> uFactory, std::string_view extension, const Type* baseType = nullptr) :
 		Name(name),
-		Extension(extension),
 		Factory(factory),
 		UFactory(uFactory),
 		BaseType(baseType)
 	{
+		Extension.replace_extension(extension);
 		TypeSystem<T>::_types.insert(this);
 	}
 
 	std::string_view Name;
-	std::string_view Extension;
+	Path Extension;
 	FactoryFunction<T> Factory;
 	UFactoryFunction<T> UFactory;
 	const Type* BaseType;

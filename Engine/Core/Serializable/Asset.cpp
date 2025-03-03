@@ -220,7 +220,7 @@ namespace gE
         GE_ASSERT(_type);
         GE_ASSERT(!_path.empty());
 
-        if(_path.extension() == "FILE")
+        if(_path.extension() == Extension)
         {
             Read<std::string>(in);
             Read<UUID>(in);

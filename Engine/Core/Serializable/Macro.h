@@ -26,6 +26,7 @@
 		using SUPER_T::IsFree; \
 		using SUPER_T::OnEditorGUI; \
 		using SUPER_T::GetType; \
+		using SUPER_T::Type; \
 		TYPE(istream& in, gE::Window* window) \
 		{ \
 			SUPER_T tmp(in, window); \

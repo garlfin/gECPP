@@ -20,7 +20,8 @@
 #define GE_EDITOR_ICON_PADDING 16
 
 #define GE_EDITOR_FILTER_TEXTURE 0
-#define GE_EDITOR_FILTER_MODEL 0
+#define GE_EDITOR_FILTER_MODEL 1
+#define GE_EDITOR_FILTER_FILE 2
 
 CONSTEXPR_GLOBAL const char* GE_EDITOR_ASSET_PAYLOAD = "ASSET";
 
@@ -48,20 +49,28 @@ namespace gE
         void DrawHierarchy();
         void DrawAssetManager();
 
-        static void ImportFileCallback(Window* userData, const char* const* files, int filter);
+        static void LoadFileCallback(Editor* editor, const char* const* paths, int filter);
+        static void ImportFileCallback(Editor* editor, const char* const* paths, int filter);
+
         constexpr static std::array<SDL_DialogFileFilter, 2> Filters
         {
-            SDL_DialogFileFilter("Textures", "pvr"),
-            SDL_DialogFileFilter("3D Models", "dae;fbx;obj;gltf;glb")
+            SDL_DialogFileFilter("Textures: .pvr", "pvr"),
+            SDL_DialogFileFilter("3D Models: .dae, .fbx, .obj, .gltf, .glb", "dae;fbx;obj;gltf;glb")
         };
 
         Window* _window = nullptr;
         Entity* _activeEntity = nullptr;
         const File* _activeAsset = DEFAULT;
+        Path _assetPath = "";
+
+        std::mutex _loadingMutex = DEFAULT;
+        Path _loadingPath = DEFAULT;
+        u8 _loadingFilter = -1;
+        const Type<Window*>* _loadingType = nullptr;
+
         bool _isEditorOpen = false;
         bool _running = true;
         size_t _oldLogSize = 0;
-        Path _assetPath = "";
         u16 _iconSize = 128;
     };
 #endif

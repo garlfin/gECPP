@@ -2,6 +2,7 @@
 
 #include <Component/Camera/Camera.h>
 #include <Core/TickHandler.h>
+#include <Core/Converter/PVR.h>
 #include <Core/Pipeline/DefaultPipeline.h>
 #include <Graphics/API/GL/Timer.h>
 #include <IMGUI/imgui.h>
@@ -76,7 +77,7 @@ Window::Window(glm::u16vec2 size, const std::string& name) :
 		Log::FatalError("Failed to load OpenGL functions.");
 
 	PVR::Header iconHeader;
-	Array<u8> iconData = PVR::Read("Resource/gE.PVR", iconHeader);
+	Array<u8> iconData = PVR::ReadRaw("Resource/gE.PVR", iconHeader);
 
 	_icon = SDL_CreateSurfaceFrom(iconHeader.Size.x, iconHeader.Size.y, SDL_PIXELFORMAT_RGBA8888, iconData.Data(), 4 * iconHeader.Size.x);
 	SDL_SetWindowIcon(_window, _icon);

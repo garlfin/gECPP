@@ -6,10 +6,10 @@
 
 #include <Window.h>
 #include <windows.h>
+#include <Core/Converter/MeshLoader.h>
+#include <Core/Converter/PVR.h>
 #include <IMGUI/imgui_internal.h>
 #include <SDL3/SDL_dialog.h>
-
-#include "GUI.h"
 
 #ifdef GE_ENABLE_EDITOR
 
@@ -125,6 +125,37 @@ namespace gE
 
     void Editor::DrawAssetManager()
     {
+        AssetManager& assetManager = _window->GetAssets();
+
+        _loadingMutex.lock();
+        if(_loadingFilter == GE_EDITOR_FILTER_TEXTURE)
+            assetManager.AddFile(PVR::ReadAsFile(_window, _loadingPath));
+        else if(_loadingFilter == GE_EDITOR_FILTER_MODEL)
+        {
+            Array<File> files;
+            Model::ReadAsFile(_window, _loadingPath, files);
+
+            for(File& file : files) assetManager.AddFile(std::move(file));
+        }
+        else if(_loadingFilter == GE_EDITOR_FILTER_FILE)
+        {
+            const Path extension = _loadingPath.extension();
+            if(extension == File::Extension)
+                assetManager.LoadFile(_loadingPath, AssetLoadMode::PathsAndFiles);
+            else
+            {
+                auto it = std::ranges::find_if(TypeSystem<Window*>::GetTypes(), [&extension](const Type<Window*>* type)
+                {
+                    return extension == type->Extension;
+                });
+
+                if(it != TypeSystem<Window*>::GetTypes().end())
+                    assetManager.AddFile(File(_window, _loadingPath, *it))->Load();
+            }
+        }
+        _loadingFilter = -1;
+        _loadingMutex.unlock();
+
         constexpr static u16 minScale = 64;
         constexpr static u16 maxScale = 512;
 
@@ -132,8 +163,12 @@ namespace gE
         {
             ImGui::BeginMenuBar();
 
+            if(ImGui::Button("Load"))
+                SDL_ShowOpenFileDialog((SDL_DialogFileCallback) LoadFileCallback, this, nullptr, nullptr, 0, nullptr, false);
             if(ImGui::Button("Import"))
-                SDL_ShowOpenFileDialog((SDL_DialogFileCallback) ImportFileCallback, _window, nullptr, Filters.data(), Filters.size(), nullptr, false);
+                SDL_ShowOpenFileDialog((SDL_DialogFileCallback) ImportFileCallback, this, nullptr, Filters.data(), Filters.size(), nullptr, false);
+
+            //if(ImGui::BeginPopupModal(55))
 
             ImGui::SetNextItemWidth(128.f);
             ImGui::SliderScalar("Icon Size", ImGuiDataType_U16, &_iconSize, &minScale, &maxScale, nullptr, ImGuiSliderFlags_AlwaysClamp);
@@ -143,7 +178,7 @@ namespace gE
             const u32 windowSize = ImGui::GetContentRegionAvail().x - ImGui::GetCursorPos().x;
             const u16 width = _iconSize + GE_EDITOR_ICON_PADDING * 2;
             const u8 columns = std::max<u8>(windowSize / width, 1);
-            const AssetManager::FILE_SET_T& assets = _window->GetAssets().GetFiles();
+            const AssetManager::FILE_SET_T& assets = assetManager.GetFiles();
 
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + GE_EDITOR_ICON_PADDING);
             ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(GE_EDITOR_ICON_PADDING, GE_EDITOR_ICON_PADDING));
@@ -241,15 +276,24 @@ namespace gE
         ImGui::End();
     }
 
-    void Editor::ImportFileCallback(Window* window, const char* const* files, int filter)
+    void Editor::LoadFileCallback(Editor* editor, const char* const* paths, int filter)
     {
-        AssetManager& assetManager = window->GetAssets();
-        const Path path = *files;
+        if(!paths) return;
 
-        if(filter == GE_EDITOR_FILTER_TEXTURE)
-            assetManager.AddFile(PVR::ReadAsFile(window, path));
-        else if(filter == GE_EDITOR_FILTER_MODEL)
-            return;
+        editor->_loadingMutex.lock();
+        editor->_loadingPath = std::filesystem::relative(*paths);
+        editor->_loadingFilter = GE_EDITOR_FILTER_FILE;
+        editor->_loadingMutex.unlock();
+    }
+
+    void Editor::ImportFileCallback(Editor* editor, const char* const* paths, int filter)
+    {
+        if(!paths) return;
+
+        editor->_loadingMutex.lock();
+        editor->_loadingPath = std::filesystem::relative(*paths);
+        editor->_loadingFilter = filter;
+        editor->_loadingMutex.unlock();
     }
 
     void Editor::DrawLog()

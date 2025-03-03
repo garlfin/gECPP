@@ -2,18 +2,17 @@
 // Created by scion on 10/25/2023.
 //
 
+#include "PVR.h"
 #include <fstream>
 
-#include "Texture.h"
-
-namespace PVR
+namespace gE::PVR
 {
-	Array<u8> Read(const Path& path, Header& header)
+	Array<u8> ReadRaw(const Path& path, Header& header)
 	{
 		std::ifstream src;
 		src.open(path, std::ios::in | std::ios::binary);
 
-		if(!src.is_open()) gE::Log::Write("ERROR: COULD NOT OPEN FILE {}", path.string());
+		if(!src.is_open()) Log::Write("ERROR: COULD NOT OPEN FILE {}", path.string());
 
 		src.seekg(0, std::ios::end);
 		size_t copySize = src.tellg();
@@ -28,13 +27,13 @@ namespace PVR
 		return data;
 	}
 
-	API::Texture* Read(gE::Window* window, const Path& path, GPU::WrapMode wrapMode, GPU::FilterMode filterMode)
+	API::Texture* Read(Window* window, const Path& path, GPU::WrapMode wrapMode, GPU::FilterMode filterMode)
 	{
 		Header header;
-		Array<u8> imageData = Read(path, header);
+		Array<u8> imageData = ReadRaw(path, header);
 		if(!imageData) return nullptr;
 
-		GL::Texture* tex = nullptr;
+		API::Texture* tex = nullptr;
 
 		if(header.Faces == 1)
 		{
@@ -50,7 +49,7 @@ namespace PVR
 			settings.Format = PVRToInternalFormat(header.Format);
 			settings.WrapMode = wrapMode;
 			settings.Filter = filterMode;
-			settings.MipCount = 0;
+			settings.MipCount = 1;
 			settings.Data = move(data);
 			settings.Size = header.Size;
 
@@ -72,21 +71,21 @@ namespace PVR
 			settings.Format = PVRToInternalFormat(header.Format);
 			settings.WrapMode = wrapMode;
 			settings.Filter = filterMode;
-			settings.MipCount = 0;
+			settings.MipCount = 1;
 			settings.Data = move(data);
 			settings.Size = header.Size.x;
 
 			tex = new API::TextureCube(window, move(settings));
 		}
 		else
-			gE::Log::Write("Unsupported texture format!");
+			Log::Write("Unsupported texture format!");
 
 		return tex;
 	}
 
-	gE::File ReadAsFile(gE::Window* window, const Path& path, GPU::WrapMode wrapMode, GPU::FilterMode filterMode)
+	File ReadAsFile(Window* window, const Path& path, GPU::WrapMode wrapMode, GPU::FilterMode filterMode)
 	{
-		return gE::File(window, path, ref_cast(&Read(window, path, wrapMode, filterMode)->GetSettings()));
+		return File(window, path, ref_cast(&Read(window, path, wrapMode, filterMode)->GetSettings()));
 	}
 
 	void Header::IDeserialize(istream& in, SETTINGS_T)

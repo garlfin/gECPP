@@ -36,5 +36,5 @@ std::string EnumData<T, SIZE>::ToString(T t) const
 template <class T, size_t SIZE>
 typename std::array<std::pair<T, std::string_view>, SIZE>::const_iterator EnumData<T, SIZE>::At(T t) const
 {
-   return std::find_if(Enums.begin(), Enums.end(), [t](const PAIR_T& pair){ return t == pair.first; });
+   return std::ranges::find_if(Enums, [t](const PAIR_T& pair){ return t == pair.first; });
 }

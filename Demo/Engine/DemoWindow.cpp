@@ -4,6 +4,7 @@
 
 #include "DemoWindow.h"
 
+#include <Core/Converter/PVR.h>
 #include <Core/Material/PBRMaterial.h>
 #include <Demo/Engine/Entity/EmptyColliderEntity.h>
 #include <Demo/Engine/Entity/PhysicsCube.h>
@@ -20,7 +21,7 @@ void DemoWindow::OnInit()
 
 	PBRMaterialSettings cobbleSettings
 	{
-		 Assets.AddFile(PVR::ReadAsFile(this, "Resource/Texture/cobble_col.pvr"))->Cast<API::Texture2D, false>(),
+		 Assets.AddSerializableFromFile<GL::Texture2D>("Resource/Texture/cobble_col.tex2")->Cast<API::Texture2D, false>(),
 		 Assets.AddFile(PVR::ReadAsFile(this, "Resource/Texture/cobble_armd.pvr"))->Cast<API::Texture2D, false>(),
 		 Assets.AddFile(PVR::ReadAsFile(this, "Resource/Texture/cobble_nor.pvr"))->Cast<API::Texture2D, false>(),
 	};
@@ -31,6 +32,7 @@ void DemoWindow::OnInit()
 		Assets.AddFile(PVR::ReadAsFile(this, "Resource/Texture/tile_armd.pvr"))->Cast<API::Texture2D, false>(),
 		Assets.AddFile(PVR::ReadAsFile(this, "Resource/Texture/tile_nor.pvr"))->Cast<API::Texture2D, false>(),
 	};
+
 	PBRMaterialSettings grassSettings
 	{
 		Assets.AddFile(PVR::ReadAsFile(this, "Resource/Texture/grass_col.pvr"))->Cast<API::Texture2D, false>(),

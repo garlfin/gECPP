@@ -97,10 +97,3 @@ namespace GL
 		void CopyFrom(const GL::Texture&) override;
 	};
 }
-
-namespace PVR
-{
-	NODISCARD API::Texture* Read(gE::Window*, const Path&, GPU::WrapMode = GPU::WrapMode::Repeat, GPU::FilterMode = GPU::FilterMode::Linear);
-	NODISCARD gE::File ReadAsFile(gE::Window*, const Path&, GPU::WrapMode = GPU::WrapMode::Repeat, GPU::FilterMode = GPU::FilterMode::Linear);
-	NODISCARD Array<u8> Read(const Path& path, Header& header);
-}

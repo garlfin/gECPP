@@ -54,14 +54,9 @@ add_library(GLAD STATIC Vendor/GLAD/glad.c Vendor/GLAD/glad.h)
 file(GLOB_RECURSE GECPP_SRC "Engine/*.cpp" "Engine/*.h" "Engine/*.inl")
 add_library(gECPP STATIC ${GECPP_SRC})
 target_compile_definitions(gECPP PUBLIC API_ID=API_GL GE_ENABLE_EDITOR GE_ENABLE_IMGUI)
-target_link_libraries(gECPP PUBLIC FMOD FMOD_STUDIO GLAD SDL JOLT CITYHASH IMGUI)
+target_link_libraries(gECPP PUBLIC FMOD FMOD_STUDIO GLAD SDL JOLT CITYHASH IMGUI ASSIMP)
 
 # VOXELDEMO
 file(GLOB_RECURSE VOXELDEMO_SRC "Demo/*.cpp" "Demo/*.h" "Demo/*.inl")
 add_executable(VoxelDemo ${VOXELDEMO_SRC})
 target_link_libraries(VoxelDemo gECPP)
-
-# GEMODEL
-file(GLOB_RECURSE GEMODEL_SRC "gEModel/*.cpp" "gEModel/*.h" "gEModel/*.inl")
-add_executable(gEModel ${GEMODEL_SRC})
-target_link_libraries(gEModel gECPP ASSIMP)

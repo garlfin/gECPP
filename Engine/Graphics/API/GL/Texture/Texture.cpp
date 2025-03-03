@@ -68,7 +68,7 @@ namespace GL
 			dataPtr += dataSize;
 		}
 
-		if(MipCount != 1 && Data.MipCount == 1) glGenerateTextureMipmap(ID);
+		if(Data.MipCount != MipCount) glGenerateTextureMipmap(ID);
 	}
 
 	void Texture2D::CopyFrom(const GL::Texture& o)
@@ -107,7 +107,7 @@ namespace GL
 			dataPtr += dataSize;
 		}
 
-		if(MipCount != 1 && Data.MipCount == 1) glGenerateTextureMipmap(ID);
+		if(Data.MipCount != MipCount) glGenerateTextureMipmap(ID);
 	}
 
 	void Texture3D::CopyFrom(const GL::Texture& o)
@@ -138,7 +138,7 @@ namespace GL
 			dataPtr += dataSize;
 		}
 
-		if(MipCount != 1 && Data.MipCount == 1) glGenerateTextureMipmap(ID);
+		if(Data.MipCount != MipCount) glGenerateTextureMipmap(ID);
 	}
 
 	void TextureCube::CopyFrom(const GL::Texture& o)
@@ -169,7 +169,7 @@ namespace GL
 			dataPtr += dataSize;
 		}
 
-		if(MipCount != 1 && Data.MipCount == 1) glGenerateTextureMipmap(ID);
+		if(Data.MipCount != MipCount) glGenerateTextureMipmap(ID);
 	}
 
 	void Texture1D::CopyFrom(const GL::Texture& o)

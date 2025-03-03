@@ -94,6 +94,8 @@ namespace gE
 
         NODISCARD ALWAYS_INLINE bool operator<(const File& o) const { return _uuid < o._uuid; }
 
+        FORCE_IMPL static inline const Path Extension = ".file";
+
     private:
         static const Type<Window*>* ValidateAssetType(const Asset&);
 
