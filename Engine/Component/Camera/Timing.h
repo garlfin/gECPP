@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <Core/GUI/Editor.h>
+#include <Core/GUI/Editor/Editor.h>
 
 namespace gE
 {

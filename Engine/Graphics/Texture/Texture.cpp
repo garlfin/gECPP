@@ -4,8 +4,7 @@
 
 #include "Texture.h"
 #include "TextureSlotManager.h"
-#include "Core/GUI/Editor.h"
-
+#include <Core/GUI/Field.h>
 
 #define GPU_TEXTURE_DEFINITION(TYPE, DIMENSION) \
 	void TYPE::IDeserialize(istream& in, SETTINGS_T s) { Read(in, Size); if(!MipCount) MipCount = GetMipCount<DIMENSION>(Size); } \

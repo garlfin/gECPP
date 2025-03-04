@@ -5,7 +5,7 @@
 #include "VAO.h"
 #include "VAOSettings.h"
 
-#include <Core/GUI/Editor.h>
+#include <Core/GUI/Editor/Editor.h>
 
 namespace GPU
 {

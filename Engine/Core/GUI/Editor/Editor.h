@@ -1,0 +1,46 @@
+//
+// Created by scion on 2/11/2025.
+//
+
+#pragma once
+
+#include <Prototype.h>
+#include <Core/Macro.h>
+#include <Core/Serializable/Asset.h>
+#include <Core/Serializable/Serializable.h>
+#include <Vendor/SDL3/SDL_dialog.h>
+
+#include "Asset.h"
+
+namespace gE::Editor
+{
+#ifdef GE_ENABLE_EDITOR
+    class Editor
+    {
+    public:
+        explicit Editor(gE::Window* window);
+
+        void OnGUI();
+
+        GET_SET(bool, IsOpen, _isOpen);
+        GET_SET(bool, IsRunning, _isRunning);
+        GET_CONST(gE::Window&, Window, *_window);
+
+    private:
+        static void DrawEntityDrawer();
+        void DrawLog();
+        void DrawInspector();
+        void DrawHierarchy();
+
+        gE::Window* _window = nullptr;
+        Entity* _activeEntity = nullptr;
+
+        AssetInspector _assetInspector;
+        AssetManager _assetManager;
+
+        bool _isOpen = false;
+        bool _isRunning = true;
+        size_t _oldLogSize = 0;
+    };
+#endif
+}

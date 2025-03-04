@@ -5,7 +5,7 @@
 #pragma once
 
 #include "Buffer.h"
-#include <Core/GUI/Editor.inl>
+#include <Core/GUI/Field.h>
 
 namespace GPU
 {
