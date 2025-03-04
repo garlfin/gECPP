@@ -112,7 +112,7 @@ namespace gE
 		GET_CONST(SDL_Window*, SDLWindow, _window);
 
 #ifdef GE_ENABLE_EDITOR
-		GET(Editor::Editor&, Editor, Editor);
+		GET(Editor::Editor&, Editor, *Editor);
 #endif
 
 		virtual ~Window();
@@ -146,7 +146,7 @@ namespace gE
 		SoundManager Sounds;
 
 #ifdef GE_ENABLE_EDITOR
-		Editor::Editor Editor;
+		Pointer<Editor::Editor> Editor;
 #endif
 
 		Pointer<Material> DefaultMaterial;

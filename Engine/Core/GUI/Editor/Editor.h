@@ -6,11 +6,10 @@
 
 #include <Prototype.h>
 #include <Core/Macro.h>
-#include <Core/Serializable/Asset.h>
 #include <Core/Serializable/Serializable.h>
-#include <Vendor/SDL3/SDL_dialog.h>
 
-#include "Asset.h"
+#include "AssetInspector.h"
+#include "EntityInspector.h"
 
 namespace gE::Editor
 {
@@ -29,14 +28,15 @@ namespace gE::Editor
     private:
         static void DrawEntityDrawer();
         void DrawLog();
-        void DrawInspector();
-        void DrawHierarchy();
 
         gE::Window* _window = nullptr;
         Entity* _activeEntity = nullptr;
 
         AssetInspector _assetInspector;
         AssetManager _assetManager;
+
+        EntityInspector _entityInspector;
+        EntityHierarchy _entityHierarchy;
 
         bool _isOpen = false;
         bool _isRunning = true;

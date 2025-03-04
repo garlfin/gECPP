@@ -45,10 +45,10 @@ namespace GPU
 
 		virtual ~APIObject() { ID = DEFAULT; }
 
-	 protected:
+	protected:
 		T ID = DEFAULT;
 
-	 private:
+	private:
 		gE::Window* _window = DEFAULT;
 	};
 }

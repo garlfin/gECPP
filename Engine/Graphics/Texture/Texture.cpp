@@ -72,8 +72,10 @@ namespace GPU
 	REFLECTABLE_ONGUI_IMPL(Texture,
 		gE::DrawField<const GLenum>(gE::ScalarField<GLenum>{ "Format" }, Format, depth);
 		gE::DrawField<const u8>(gE::ScalarField<u8>{ "Mip Count" }, MipCount, depth);
-		gE::DrawField(gE::EnumField{ "Wrap Mode", "", EWrapMode }, WrapMode, depth);
-		gE::DrawField(gE::EnumField{ "Filter", "", EFilterMode }, Filter, depth);
+
+		bool update = gE::DrawField(gE::EnumField{ "Wrap Mode", "", EWrapMode }, WrapMode, depth);
+		update |= gE::DrawField(gE::EnumField{ "Filter", "", EFilterMode }, Filter, depth);
+		if(update) UpdateParameters();
 	);
 
 	GPU_TEXTURE_DEFINITION(Texture1D, Dimension::D1D);

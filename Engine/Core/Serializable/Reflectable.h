@@ -75,6 +75,8 @@ struct Type
 		TypeSystem<T>::_types.insert(this);
 	}
 
+	NODISCARD const Type* GetBaseType() const { return BaseType ? BaseType : this; }
+
 	std::string_view Name;
 	Path Extension;
 	FactoryFunction<T> Factory;
@@ -87,7 +89,7 @@ struct IReflectable
 	IReflectable() = default;
 #ifdef GE_ENABLE_EDITOR
 	virtual void OnEditorGUI(u8 depth) {};
-	virtual void OnEditorIcon(Size1D size) {};
+	virtual bool OnEditorIcon(Size1D size) { return false; }
 #endif
 	virtual ~IReflectable() = default;
 };
@@ -146,9 +148,9 @@ struct EnumData
 	#define REFLECTABLE_ONGUI_IMPL(TYPE, CODE) \
 		void TYPE::IOnEditorGUI(u8 depth) { CODE }
 	#define REFLECTABLE_ICON_PROTO() \
-		void OnEditorIcon(Size1D size) override
+		bool OnEditorIcon(Size1D size) override
 	#define REFLECTABLE_ICON_IMPL(TYPE, CODE) \
-		void TYPE::OnEditorIcon(Size1D size) { CODE }
+		bool TYPE::OnEditorIcon(Size1D size) { CODE; return true; }
 #else
 	#define REFLECTABLE_ONGUI_PROTO(SUPER)
 	#define REFLECTABLE_ONGUI_IMPL(TYPE, CODE)

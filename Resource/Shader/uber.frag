@@ -2,7 +2,7 @@
 //#define ENABLE_SS_TRACE
 #define ENABLE_SMRT
 //#define ENABLE_SMRT_CONTACT_SHADOW
-#define ENABLE_GI
+//#define ENABLE_GI
 
 #define HIZ_MAX_ITER 128
 

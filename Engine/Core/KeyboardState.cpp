@@ -76,4 +76,17 @@ namespace gE
         for(u16 i = 0; i < (u16) Key::Size; i++)
             _keys[i] &= KeyState::Down;
     }
+
+    bool Shortcut::IsPressed(const KeyboardState& keyboard) const
+    {
+        const bool noFirst = First == Key::None;
+        const bool noSecond = Second == Key::None;
+        const bool noThird = Third == Key::None;
+
+        if(noFirst && noSecond && noThird) return false;
+
+        return (noFirst || IsKeyDown(keyboard.GetKey(First))) &&
+               (noSecond || IsKeyDown(keyboard.GetKey(Second))) &&
+               (noThird || IsKeyDown(keyboard.GetKey(Third)));
+    }
 }

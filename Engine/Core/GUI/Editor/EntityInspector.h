@@ -13,6 +13,8 @@ namespace gE::Editor
     public:
         explicit EntityInspector(Editor*);
 
+        GET_SET(Entity*, Selected, _selected);
+
     protected:
         void IOnEditorGUI() override;
 
@@ -20,10 +22,10 @@ namespace gE::Editor
         Entity* _selected = DEFAULT;
     };
 
-    class Hierarchy : public Window
+    class EntityHierarchy : public Window
     {
     public:
-        Hierarchy(Editor*, EntityInspector*);
+        EntityHierarchy(Editor*, EntityInspector*);
 
     protected:
         void IOnEditorGUI() override;

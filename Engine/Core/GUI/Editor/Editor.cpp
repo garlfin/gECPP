@@ -33,7 +33,7 @@ namespace gE::Editor
 
     void Window::OnEditorGUI()
     {
-        if(CheckShortcut()) _isOpen = !_isOpen;
+        if(_shortcut.IsPressed(GetWindow().GetKeyboard())) _isOpen = true;
 
         if(!_isOpen) return;
 
@@ -42,33 +42,19 @@ namespace gE::Editor
         ImGui::End();
     }
 
-    bool Window::CheckShortcut() const
-    {
-        const KeyboardState& keyboard = GetWindow().GetKeyboard();
-
-        u8 nullCount = 0;
-        for(Key key : _shortcut)
-            if((bool) key)
-            {
-                if(keyboard.GetKey(key) != KeyState::Pressed)
-                    return false;
-            }
-            else nullCount++;
-
-        return nullCount != _shortcut.size();
-    }
-
     Editor::Editor(gE::Window* window) :
         _window(window),
         _assetInspector(this),
-        _assetManager(this, &_assetInspector)
+        _assetManager(this, &_assetInspector),
+        _entityInspector(this),
+        _entityHierarchy(this, &_entityInspector)
     {
     }
 
     void Editor::OnGUI()
     {
         KeyboardState& keyboard = _window->GetKeyboard();
-        if(_window->GetMouse().GetIsEnabled() && !keyboard.GetIsFocused() && keyboard.GetKey(Key::C) == KeyState::Pressed)
+        if(!keyboard.GetIsFocused() && keyboard.GetKey(Key::F1) == KeyState::Pressed)
             _isOpen = !_isOpen;
 
         _window->SetViewport(Viewport(_window->GetSize(), DEFAULT));
@@ -85,86 +71,13 @@ namespace gE::Editor
         _window->SetViewport(Viewport(size, offset));
 
         DrawLog();
-        DrawInspector();
-        DrawHierarchy();
         DrawEntityDrawer();
 
-        _assetInspector.OnEditorGUI();
+        _entityHierarchy.OnEditorGUI();
+        _entityInspector.OnEditorGUI();
+
         _assetManager.OnEditorGUI();
-    }
-
-    void Editor::DrawInspector()
-    {
-        if(ImGui::Begin("Inspector", nullptr, ImGuiWindowFlags_HorizontalScrollbar))
-        {
-            if (_activeEntity)
-            {
-                const std::string_view type = _activeEntity->GetType() ? _activeEntity->GetType()->Name : "gE::Entity (NO TYPE INFO)";
-
-                ImGui::TextUnformatted(std::format("{} ({})", type, (void*) _activeEntity).c_str());
-                ImGui::Separator();
-                _activeEntity->OnEditorGUI(0);
-            }
-            else
-                ImGui::TextUnformatted("No entity selected.");
-        }
-        ImGui::End();
-    }
-
-    void Editor::DrawHierarchy()
-    {
-        if(ImGui::Begin("Scene"))
-        {
-            u8 reverseDepth = -1;
-            for(const auto it : _window->GetEntities().GetList())
-            {
-                Entity& entity = **it;
-
-                const u8 curDepth = entity.GetTreeDepth();
-                const u8 nextDepth = it->GetNext() ? (**it->GetNext())->GetTreeDepth() : -1;
-
-                if(curDepth > reverseDepth && reverseDepth != -1)
-                    continue;
-
-                if(curDepth <= reverseDepth) reverseDepth = -1;
-
-                ImGuiTreeNodeFlags flag = GE_EDITOR_HIERARCHY_FLAGS | ImGuiTreeNodeFlags_Selected;
-                if(curDepth >= nextDepth || !it->GetNext()) flag |= ImGuiTreeNodeFlags_Leaf;
-
-                std::string name = std::format("{}##{}", entity.GetName(), (size_t) it);
-
-                const bool open = ImGui::TreeNodeEx(name.c_str(), flag);
-                if(ImGui::BeginPopupContextItem())
-                {
-                    if(ImGui::Button("Delete"))
-                    {
-                        entity.Destroy();
-                        if(&entity == _activeEntity) _activeEntity = nullptr;
-                    }
-                    ImGui::EndPopup();
-                }
-                if(!open)
-                {
-                    reverseDepth = curDepth;
-                    continue;
-                }
-
-                if(ImGui::IsItemClicked()) _activeEntity = &entity;
-
-                if(it->GetNext())
-                {
-                    if (curDepth < nextDepth) continue;
-
-                    ImGui::TreePop(); // Pop this
-                    for (int i = 0; i < curDepth - nextDepth; i++)
-                        ImGui::TreePop(); // How many steps back in the tree
-                }
-                else
-                    for (int i = 0; i <= curDepth; i++)
-                        ImGui::TreePop();
-            }
-        }
-        ImGui::End();
+        _assetInspector.OnEditorGUI();
     }
 
     void Editor::DrawLog()

@@ -21,7 +21,7 @@ namespace gE
 
 	class PBRMaterial : public Material
 	{
-		REFLECTABLE_PROTO(PBRMaterial, Material, "gE::PBRMaterial");
+		REFLECTABLE_PROTO(PBRMaterial, Material, "gE::PBRMaterial", &Material::Type);
 
 	public:
 		PBRMaterial(Window* w, const Reference<Shader>& s, const PBRMaterialSettings& settings);

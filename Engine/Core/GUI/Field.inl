@@ -59,7 +59,11 @@ namespace gE
                     {
                         const bool selected = t == e.first;
                         if(ImGui::Selectable(e.second.data(), selected))
+                        {
+                            if(!selected)
+                                changed = true;
                             t = e.first;
+                        }
                         if(selected)
                             ImGui::SetItemDefaultFocus();
                     }

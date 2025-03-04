@@ -172,4 +172,14 @@ namespace gE
         KeyState _keys[(u16) Key::Size] = DEFAULT;
         bool _focused = false;
     };
+
+    struct Shortcut
+    {
+    public:
+        bool IsPressed(const KeyboardState&) const;
+
+        Key First = Key::None;
+        Key Second = Key::None;
+        Key Third = Key::None;
+    };
 }

@@ -40,6 +40,8 @@ namespace GPU
 
 		TextureData Data = DEFAULT;
 
+		virtual void UpdateParameters() {};
+
 		~Texture() override { ASSET_CHECK_FREE(Texture); }
 	};
 

@@ -2,7 +2,7 @@
 // Created by scion on 3/3/2025.
 //
 
-#include "Asset.h"
+#include "AssetInspector.h"
 
 #include <Core/Converter/MeshLoader.h>
 #include <Core/Converter/PVR.h>
@@ -66,7 +66,15 @@ namespace gE::Editor
     AssetManager::AssetManager(Editor* editor, AssetInspector* inspector) : Window(editor, "Assets", ImGuiWindowFlags_MenuBar),
         _inspector(inspector)
     {
+        API::Texture2D* sheetTex = (API::Texture2D*) PVR::Read(&GetWindow(), "Resource/Texture/editor_icons.pvr");
+        _iconSpriteSheet = ref_create<SpriteSheet>(move(*sheetTex), glm::u16vec2(16));
+        _defaultIcon = Sprite(_iconSpriteSheet, glm::u16vec2(0));
         SetShortcut({ Key::LControl, Key::A });
+
+        AddIcon(GPU::ShaderSource::Type, Sprite(_iconSpriteSheet, glm::u16vec2(3, 0)));
+        AddIcon(Material::Type, Sprite(_iconSpriteSheet, glm::u16vec2(1, 0)));
+
+        delete sheetTex;
     }
 
     void AssetManager::LoadFileCallback(LoadingAsset* asset, const char* const* paths, int filter)
@@ -89,11 +97,9 @@ namespace gE::Editor
         asset->Mutex.unlock();
     }
 
-    void AssetManager::IOnEditorGUI()
+    void AssetManager::LoadPendingFile()
     {
         gE::AssetManager& assetManager = GetWindow().GetAssets();
-        constexpr static u16 minScale = GE_EDITOR_ASSET_MIN_SCALE;
-        constexpr static u16 maxScale = GE_EDITOR_ASSET_MAX_SCALE;
 
         _loading.Mutex.lock();
         if(_loading.Mode == LoadAssetMode::ImportTexture)
@@ -123,13 +129,27 @@ namespace gE::Editor
         }
         _loading.Mode = LoadAssetMode::None;
         _loading.Mutex.unlock();
+    }
+
+    void AssetManager::AddIcon(const Type<gE::Window*>& type, const Sprite& sprite)
+    {
+        _icons[&type] = sprite;
+    }
+
+    void AssetManager::IOnEditorGUI()
+    {
+        gE::AssetManager& assetManager = GetWindow().GetAssets();
+        constexpr static u16 minScale = GE_EDITOR_ASSET_MIN_SCALE;
+        constexpr static u16 maxScale = GE_EDITOR_ASSET_MAX_SCALE;
+
+        LoadPendingFile();
 
         ImGui::BeginMenuBar();
 
             if(ImGui::Button("Load"))
-                SDL_ShowOpenFileDialog((SDL_DialogFileCallback) LoadFileCallback, this, nullptr, nullptr, 0, nullptr, false);
+                SDL_ShowOpenFileDialog((SDL_DialogFileCallback) LoadFileCallback, &_loading, nullptr, nullptr, 0, nullptr, false);
             if(ImGui::Button("Import"))
-                SDL_ShowOpenFileDialog((SDL_DialogFileCallback) ImportFileCallback, this, nullptr, Filters.data(), Filters.size(), nullptr, false);
+                SDL_ShowOpenFileDialog((SDL_DialogFileCallback) ImportFileCallback, &_loading, nullptr, Filters.data(), Filters.size(), nullptr, false);
 
             //if(ImGui::BeginPopupModal(55))
 
@@ -145,7 +165,7 @@ namespace gE::Editor
 
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + GE_EDITOR_ASSET_PADDING);
         ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(GE_EDITOR_ASSET_PADDING, GE_EDITOR_ASSET_PADDING));
-        ImGui::BeginTable("##assets", columns, ImGuiTableFlags_SizingStretchSame);
+        ImGui::BeginTable("##assets", columns, ImGuiTableFlags_SizingStretchSame | ImGuiTableFlags_NoClip);
         for(size_t i = 0; auto& file : assets)
         {
             const u8 column = i % columns;
@@ -166,8 +186,14 @@ namespace gE::Editor
             ImGui::SetCursorPosX(top.x);
             ImGui::SetCursorPosY(top.y + GE_EDITOR_ASSET_PADDING / 2);
 
-            if(file.IsLoaded())
-                file.Get()->OnEditorIcon(_iconSize);
+            if (!(file.IsLoaded() && file.Get()->OnEditorIcon(_iconSize)))
+                if(auto it = _icons.find(file.GetFileType()->GetBaseType()); it != _icons.end())
+                {
+                    const Sprite& icon = it->second;
+                    ImGui::Image((ImTextureID) (API::Texture*) &icon.SpriteSheet->Texture, ImVec2(_iconSize, _iconSize), icon.GetBottomUV(), icon.GetTopUV());
+                }
+                else
+                    ImGui::Image((ImTextureID) (API::Texture*) &_defaultIcon.SpriteSheet->Texture, ImVec2(_iconSize, _iconSize), _defaultIcon.GetBottomUV(), _defaultIcon.GetTopUV());
 
             float textWidth = ImGui::CalcTextSize(fileName.c_str()).x;
 

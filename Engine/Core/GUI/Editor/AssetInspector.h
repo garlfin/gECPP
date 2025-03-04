@@ -4,7 +4,10 @@
 
 #pragma once
 
+#include <map>
+
 #include "Window.h"
+#include "Icon.h"
 
 #include <Core/Serializable/Asset.h>
 #include <SDL3/SDL_dialog.h>
@@ -52,6 +55,9 @@ namespace gE::Editor
         AssetManager(Editor*, AssetInspector*);
 
         GET(LoadingAsset&, Loading, _loading);
+        GET_SET(Reference<SpriteSheet>, IconSheet, _iconSpriteSheet);
+
+        void AddIcon(const Type<gE::Window*>& type, const Sprite& sprite);
 
     protected:
         void IOnEditorGUI() override;
@@ -60,8 +66,14 @@ namespace gE::Editor
         static void LoadFileCallback(LoadingAsset*, const char* const* paths, int filter);
         static void ImportFileCallback(LoadingAsset*, const char* const* paths, int filter);
 
+        void LoadPendingFile();
+
         AssetInspector* _inspector = DEFAULT;
         u16 _iconSize = 128;
         LoadingAsset _loading = DEFAULT;
+
+        Reference<SpriteSheet> _iconSpriteSheet;
+        std::map<const Type<gE::Window*>*, Sprite> _icons;
+        Sprite _defaultIcon;
     };
 }

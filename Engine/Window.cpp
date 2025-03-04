@@ -44,9 +44,6 @@ Window::Window(glm::u16vec2 size, const std::string& name) :
 	CullingManager(this),
 	Behaviors(this),
 	Sounds(this),
-#ifdef GE_ENABLE_EDITOR
-	Editor(this),
-#endif
     Assets(this),
 	_size(size),
 	_name(name),
@@ -81,6 +78,10 @@ Window::Window(glm::u16vec2 size, const std::string& name) :
 
 	_icon = SDL_CreateSurfaceFrom(iconHeader.Size.x, iconHeader.Size.y, SDL_PIXELFORMAT_RGBA8888, iconData.Data(), 4 * iconHeader.Size.x);
 	SDL_SetWindowIcon(_window, _icon);
+
+#ifdef GE_ENABLE_EDITOR
+	Editor = ptr_create<Editor::Editor>(this);
+#endif
 
 	Log::Write("Vendor: {}\n", (const char*) glGetString(GL_VENDOR));
 	Log::Write("Renderer: {}\n", (const char*) glGetString(GL_RENDERER));
@@ -142,7 +143,7 @@ bool Window::Run()
 		_time = SDLGetTime(initTime);
 
 #ifdef GE_ENABLE_EDITOR
-		if(Editor.GetIsRunning())
+		if(Editor->GetIsRunning())
 #endif
 		if(_physicsTick.ShouldTick(_time))
 			OnFixedUpdate(_physicsTick.GetDelta());
@@ -183,7 +184,7 @@ bool Window::Run()
 		#endif
 
 		#ifdef GE_ENABLE_EDITOR
-			if(Editor.GetIsRunning())
+			if(Editor->GetIsRunning())
 		#endif
 			OnUpdate(_renderTick.GetDelta());
 			OnRender(_renderTick.GetDelta());
@@ -311,7 +312,7 @@ void Window::OnRender(float delta)
 	GUI->BeginGUI();
 	Behaviors.OnGUI(delta);
 #ifdef GE_ENABLE_EDITOR
-	Editor.OnGUI();
+	Editor->OnGUI();
 #endif
 	GUI->EndGUI();
 
