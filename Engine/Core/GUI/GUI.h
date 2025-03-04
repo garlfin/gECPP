@@ -55,7 +55,7 @@ namespace gE
 
 #ifdef GE_ENABLE_IMGUI
         API::Shader _imShader;
-        API::Texture2D _imFont;
+        API::Texture2D _imFontTex;
 
         static void SetStyle();
 #endif

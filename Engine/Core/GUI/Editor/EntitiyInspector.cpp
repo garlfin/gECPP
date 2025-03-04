@@ -10,7 +10,7 @@ namespace gE::Editor
 {
     EntityInspector::EntityInspector(Editor* editor) : Window(editor, "Entity Inspector")
     {
-
+        SetShortcut({ Key::LControl, Key::LShift, Key::E });
     }
 
     void EntityInspector::IOnEditorGUI()
@@ -30,7 +30,7 @@ namespace gE::Editor
     EntityHierarchy::EntityHierarchy(Editor* editor, EntityInspector* inspector) : Window(editor, "Scene"),
         _inspector(inspector)
     {
-
+        SetShortcut({ Key::LControl, Key::E });
     }
 
     void EntityHierarchy::IOnEditorGUI()

@@ -60,7 +60,7 @@ namespace GPU
 	class IndexedVAO : public VAO
 	{
 		SERIALIZABLE_PROTO("IVAO", 1, IndexedVAO, VAO);
-		REFLECTABLE_PROTO(IndexedVAO, VAO, "GPU::IndexedVAO");
+		REFLECTABLE_PROTO(IndexedVAO, VAO, "GPU::IndexedVAO", &GPU::VAO::Type);
 
 	public:
 		ALWAYS_INLINE void Free() override { VAO::Free(); TriangleBuffer.Free(); }

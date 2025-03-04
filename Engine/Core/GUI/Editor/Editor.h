@@ -13,6 +13,18 @@
 
 namespace gE::Editor
 {
+    class EditorLog final : public Window
+    {
+    public:
+         EditorLog(Editor*);
+
+    protected:
+         void IOnEditorGUI() override;
+
+    private:
+        size_t _oldLogSize = 0;
+    };
+
 #ifdef GE_ENABLE_EDITOR
     class Editor
     {
@@ -27,10 +39,11 @@ namespace gE::Editor
 
     private:
         static void DrawEntityDrawer();
-        void DrawLog();
 
         gE::Window* _window = nullptr;
         Entity* _activeEntity = nullptr;
+
+        EditorLog _log;
 
         AssetInspector _assetInspector;
         AssetManager _assetManager;
@@ -40,7 +53,6 @@ namespace gE::Editor
 
         bool _isOpen = false;
         bool _isRunning = true;
-        size_t _oldLogSize = 0;
     };
 #endif
 }

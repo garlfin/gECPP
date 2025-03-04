@@ -13,7 +13,7 @@ namespace gE::Editor
 {
     AssetInspector::AssetInspector(Editor* editor) : Window(editor, "Asset Inspector")
     {
-
+        SetShortcut({ Key::LControl, Key::LShift, Key::A });
     }
 
     void AssetInspector::IOnEditorGUI()
@@ -67,14 +67,18 @@ namespace gE::Editor
         _inspector(inspector)
     {
         API::Texture2D* sheetTex = (API::Texture2D*) PVR::Read(&GetWindow(), "Resource/Texture/editor_icons.pvr");
-        _iconSpriteSheet = ref_create<SpriteSheet>(move(*sheetTex), glm::u16vec2(16));
+        _iconSpriteSheet = ref_create<SpriteSheet>(move(*sheetTex), glm::u16vec2(8, 1));
         _defaultIcon = Sprite(_iconSpriteSheet, glm::u16vec2(0));
+        delete sheetTex;
+
         SetShortcut({ Key::LControl, Key::A });
 
-        AddIcon(GPU::ShaderSource::Type, Sprite(_iconSpriteSheet, glm::u16vec2(3, 0)));
         AddIcon(Material::Type, Sprite(_iconSpriteSheet, glm::u16vec2(1, 0)));
-
-        delete sheetTex;
+        AddIcon(GPU::Shader::Type, Sprite(_iconSpriteSheet, glm::u16vec2(2, 0)));
+        AddIcon(GPU::ShaderSource::Type, Sprite(_iconSpriteSheet, glm::u16vec2(3, 0)));
+        AddIcon(GPU::ComputeShader::Type, Sprite(_iconSpriteSheet, glm::u16vec2(4, 0)));
+        AddIcon(GPU::VAO::Type, Sprite(_iconSpriteSheet, glm::u16vec2(5, 0)));
+        AddIcon(Mesh::Type, Sprite(_iconSpriteSheet, glm::u16vec2(5, 0)));
     }
 
     void AssetManager::LoadFileCallback(LoadingAsset* asset, const char* const* paths, int filter)
@@ -187,13 +191,13 @@ namespace gE::Editor
             ImGui::SetCursorPosY(top.y + GE_EDITOR_ASSET_PADDING / 2);
 
             if (!(file.IsLoaded() && file.Get()->OnEditorIcon(_iconSize)))
+            {
+                const Sprite* icon = &_defaultIcon;
                 if(auto it = _icons.find(file.GetFileType()->GetBaseType()); it != _icons.end())
-                {
-                    const Sprite& icon = it->second;
-                    ImGui::Image((ImTextureID) (API::Texture*) &icon.SpriteSheet->Texture, ImVec2(_iconSize, _iconSize), icon.GetBottomUV(), icon.GetTopUV());
-                }
-                else
-                    ImGui::Image((ImTextureID) (API::Texture*) &_defaultIcon.SpriteSheet->Texture, ImVec2(_iconSize, _iconSize), _defaultIcon.GetBottomUV(), _defaultIcon.GetTopUV());
+                    icon = &it->second;
+
+                ImGui::Image((ImTextureID) (API::Texture*) &icon->SpriteSheet->Texture, ImVec2(_iconSize, _iconSize), icon->GetBottomUV(), icon->GetTopUV(), ImGui::GetStyle().Colors[ImGuiCol_Text]);
+            }
 
             float textWidth = ImGui::CalcTextSize(fileName.c_str()).x;
 

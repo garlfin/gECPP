@@ -36,15 +36,15 @@ gE::GUIManager::GUIManager(Window* window) :
     fontFormat.Data.PixelFormat = GL_RED;
     fontFormat.Data.PixelType = GL_UNSIGNED_BYTE;
 
-    PlacementNew(_imFont, window, move(fontFormat));
+    PlacementNew(_imFontTex, window, move(fontFormat));
     PlacementNew(_imShader, window, GPU::Shader("Resource/Shader/GUI/IMGUI.vert", "Resource/Shader/GUI/IMGUI.frag"));
 
-    glTextureParameteri(_imFont.Get(), GL_TEXTURE_SWIZZLE_R, GL_RED);
-    glTextureParameteri(_imFont.Get(), GL_TEXTURE_SWIZZLE_G, GL_RED);
-    glTextureParameteri(_imFont.Get(), GL_TEXTURE_SWIZZLE_B, GL_RED);
-    glTextureParameteri(_imFont.Get(), GL_TEXTURE_SWIZZLE_A, GL_RED);
+    glTextureParameteri(_imFontTex.Get(), GL_TEXTURE_SWIZZLE_R, GL_RED);
+    glTextureParameteri(_imFontTex.Get(), GL_TEXTURE_SWIZZLE_G, GL_RED);
+    glTextureParameteri(_imFontTex.Get(), GL_TEXTURE_SWIZZLE_B, GL_RED);
+    glTextureParameteri(_imFontTex.Get(), GL_TEXTURE_SWIZZLE_A, GL_RED);
 
-    io.Fonts->SetTexID((ImTextureID) (API::Texture*) &_imFont);
+    io.Fonts->SetTexID((ImTextureID) (API::Texture*) &_imFontTex);
 #endif
 }
 

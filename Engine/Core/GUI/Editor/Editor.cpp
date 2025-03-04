@@ -42,8 +42,38 @@ namespace gE::Editor
         ImGui::End();
     }
 
+    EditorLog::EditorLog(Editor* editor) : Window(editor, "Console", ImGuiWindowFlags_MenuBar)
+    {
+        SetShortcut({ Key::LControl, Key::L });
+    }
+
+    void EditorLog::IOnEditorGUI()
+    {
+        GE_ASSERTM(ImGui::GetCurrentContext(), "NO ACTIVE CONTEXT!");
+
+        if(ImGui::Begin("Console", nullptr, ImGuiWindowFlags_MenuBar))
+        {
+            if(ImGui::Button("Clear"))
+                Log::Clear();
+
+            ImGui::BeginMenuBar();
+            ImGui::EndMenuBar();
+
+            ImGui::BeginChild("log", ImVec2(0.0f, 0.0f), ImGuiChildFlags_Borders, ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_AlwaysHorizontalScrollbar);
+            {
+                ImGui::TextUnformatted(Log::Get().data());
+                if(Log::Get().size() != _oldLogSize)
+                    ImGui::SetScrollHereY(1.f);
+                _oldLogSize = Log::Get().size();
+            }
+            ImGui::EndChild();
+        }
+        ImGui::End();
+    }
+
     Editor::Editor(gE::Window* window) :
         _window(window),
+        _log(this),
         _assetInspector(this),
         _assetManager(this, &_assetInspector),
         _entityInspector(this),
@@ -70,7 +100,7 @@ namespace gE::Editor
         const Size2D size = (Size2D) centralNode->Size;
         _window->SetViewport(Viewport(size, offset));
 
-        DrawLog();
+        _log.OnEditorGUI();
         DrawEntityDrawer();
 
         _entityHierarchy.OnEditorGUI();
@@ -78,30 +108,6 @@ namespace gE::Editor
 
         _assetManager.OnEditorGUI();
         _assetInspector.OnEditorGUI();
-    }
-
-    void Editor::DrawLog()
-    {
-        GE_ASSERTM(ImGui::GetCurrentContext(), "NO ACTIVE CONTEXT!");
-
-        if(ImGui::Begin("Console", nullptr, ImGuiWindowFlags_MenuBar))
-        {
-            if(ImGui::Button("Clear"))
-                Log::Clear();
-
-            ImGui::BeginMenuBar();
-            ImGui::EndMenuBar();
-
-            ImGui::BeginChild("log", ImVec2(0.0f, 0.0f), ImGuiChildFlags_Borders, ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_AlwaysHorizontalScrollbar);
-            {
-                ImGui::TextUnformatted(Log::Get().data());
-                if(Log::Get().size() != _oldLogSize)
-                    ImGui::SetScrollHereY(1.f);
-                _oldLogSize = Log::Get().size();
-            }
-            ImGui::EndChild();
-        }
-        ImGui::End();
     }
 
     void Editor::DrawEntityDrawer()
