@@ -33,6 +33,11 @@ file(GLOB_RECURSE IMGUI_SRC "Vendor/IMGUI/*.cpp" "Vendor/IMGUI/*.h")
 add_library(IMGUI STATIC ${IMGUI_SRC})
 target_link_libraries(IMGUI)
 
+# FastGLTF
+file(GLOB_RECURSE FASTGLTF_SRC "Vendor/FastGLTF/*.cpp" "Vendor/FastGLTF/*.h")
+add_library(FASTGLTF STATIC ${FASTGLTF_SRC})
+target_link_libraries(FASTGLTF)
+
 # ASSIMP
 add_library(ASSIMP STATIC IMPORTED)
 set_property(TARGET ASSIMP PROPERTY IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/ASSIMP/bin/libassimp-5.dll")
@@ -54,7 +59,7 @@ add_library(GLAD STATIC Vendor/GLAD/glad.c Vendor/GLAD/glad.h)
 file(GLOB_RECURSE GECPP_SRC "Engine/*.cpp" "Engine/*.h" "Engine/*.inl")
 add_library(gECPP STATIC ${GECPP_SRC})
 target_compile_definitions(gECPP PUBLIC API_ID=API_GL GE_ENABLE_EDITOR GE_ENABLE_IMGUI)
-target_link_libraries(gECPP PUBLIC FMOD FMOD_STUDIO GLAD SDL JOLT CITYHASH IMGUI ASSIMP)
+target_link_libraries(gECPP PUBLIC FMOD FMOD_STUDIO GLAD SDL JOLT CITYHASH IMGUI ASSIMP FASTGLTF)
 
 # VOXELDEMO
 file(GLOB_RECURSE VOXELDEMO_SRC "Demo/*.cpp" "Demo/*.h" "Demo/*.inl")

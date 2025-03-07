@@ -38,16 +38,12 @@ namespace gE::Editor
         GET_CONST(gE::Window&, Window, *_window);
 
     private:
-        static void DrawEntityDrawer();
-
         gE::Window* _window = nullptr;
         Entity* _activeEntity = nullptr;
 
         EditorLog _log;
-
         AssetInspector _assetInspector;
         AssetManager _assetManager;
-
         EntityInspector _entityInspector;
         EntityHierarchy _entityHierarchy;
 

@@ -101,25 +101,12 @@ namespace gE::Editor
         _window->SetViewport(Viewport(size, offset));
 
         _log.OnEditorGUI();
-        DrawEntityDrawer();
 
         _entityHierarchy.OnEditorGUI();
         _entityInspector.OnEditorGUI();
 
         _assetManager.OnEditorGUI();
         _assetInspector.OnEditorGUI();
-    }
-
-    void Editor::DrawEntityDrawer()
-    {
-        if(ImGui::Begin("Entity Drawer", nullptr, ImGuiWindowFlags_AlwaysVerticalScrollbar))
-        {
-            for(auto& type : TypeSystem<const EntityCreationSettings&>::GetTypes())
-            {
-                ImGui::TextUnformatted(type->Name.data());
-            }
-        }
-        ImGui::End();
     }
 }
 #endif

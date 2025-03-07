@@ -13,6 +13,7 @@
 #include <Vendor/ASSIMP/Importer.hpp>
 #include <Vendor/ASSIMP/postprocess.h>
 #include <Vendor/ASSIMP/scene.h>
+#include <Vendor/FastGLTF/core.hpp>
 
 using pp = aiPostProcessSteps;
 
