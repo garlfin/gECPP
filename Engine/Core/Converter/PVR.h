@@ -74,5 +74,5 @@ namespace gE::PVR
     }
     NODISCARD API::Texture* Read(Window*, const Path&, GPU::WrapMode = GPU::WrapMode::Repeat, GPU::FilterMode = GPU::FilterMode::Linear);
     NODISCARD File ReadAsFile(Window*, const Path&, GPU::WrapMode = GPU::WrapMode::Repeat, GPU::FilterMode = GPU::FilterMode::Linear);
-    NODISCARD Array<u8> ReadRaw(const Path& path, Header& header);
+    NODISCARD Array<std::byte> ReadRaw(const Path& path, Header& header);
 }

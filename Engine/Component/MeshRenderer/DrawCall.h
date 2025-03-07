@@ -70,7 +70,7 @@ namespace gE
 
 		ALWAYS_INLINE void UpdateDrawCalls(u64 size = sizeof(API::IndirectDrawIndexed) * API_MAX_MULTI_DRAW, u64 offset = 0) const
 		{
-			_indirectDrawBuffer.ReplaceDataDirect((u8*) IndirectDraws + offset, size, offset);
+			_indirectDrawBuffer.ReplaceDataDirect((std::byte*) IndirectDraws + offset, size, offset);
 		}
 
 		API::IndirectDrawIndexed IndirectDraws[API_MAX_MULTI_DRAW] DEFAULT;

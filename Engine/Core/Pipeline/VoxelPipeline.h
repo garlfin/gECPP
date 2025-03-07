@@ -37,7 +37,7 @@ namespace gE::VoxelPipeline
 
 		ALWAYS_INLINE void UpdateScene(u64 size = sizeof(GPU::VoxelScene), u64 offset = 0) const
 		{
-			_voxelBuffer.ReplaceDataDirect((u8*) &Scene + offset, size, offset);
+			_voxelBuffer.ReplaceDataDirect((std::byte*) &Scene + offset, size, offset);
 		}
 
 		GPU::VoxelScene Scene;

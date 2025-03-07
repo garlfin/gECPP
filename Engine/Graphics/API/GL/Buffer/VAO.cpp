@@ -14,8 +14,8 @@ namespace GL
 
 		for(u8 i = 0; i < _settings->Counts.BufferCount; i++)
 		{
-			GPU::Buffer<u8>& bufSettings = _settings->Buffers[i];
-			Buffer<u8>& buffer = _buffers[i];
+			GPU::Buffer<std::byte>& bufSettings = _settings->Buffers[i];
+			Buffer<std::byte>& buffer = _buffers[i];
 
 			PlacementNew(buffer, window, move(bufSettings));
 			bufSettings = move(buffer.GetSettings());
@@ -38,9 +38,9 @@ namespace GL
 		_buffers[i].ReplaceDataDirect(data, count, offset);
 	}
 
-	void IVAO::UpdateBuffer(u8 i, GPU::Buffer<u8>&& buf)
+	void IVAO::UpdateBuffer(u8 i, GPU::Buffer<std::byte>&& buf)
 	{
-		Buffer<u8>& dst = _buffers[i];
+		Buffer<std::byte>& dst = _buffers[i];
 
 		dst = API::Buffer(&GetWindow(), std::move(buf));
 		glVertexArrayVertexBuffer(ID, i, dst.Get(), 0, dst->GetStride());
@@ -153,7 +153,7 @@ namespace GL
 		_triangleBuffer.ReplaceDataDirect(data, count, offset);
 	}
 
-	void IndexedVAO::UpdateIndices(GPU::Buffer<u8>&& buf)
+	void IndexedVAO::UpdateIndices(GPU::Buffer<std::byte>&& buf)
 	{
 		_triangleBuffer = API::Buffer(&GetWindow(), std::move(buf));
 		glVertexArrayElementBuffer(ID, _triangleBuffer.Get());

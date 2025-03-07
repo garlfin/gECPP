@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2024 spnda
+ * Copyright (C) 2022 - 2025 Sean Apeler
  * This file is part of fastgltf <https://github.com/spnda/fastgltf>.
  *
  * Permission is hereby granted, free of charge, to any person
@@ -212,6 +212,9 @@ namespace fastgltf {
 
 		// See https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_accessor_float64
 		KHR_accessor_float64 = 1 << 25,
+
+		// See https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_draco_mesh_compression
+		KHR_draco_mesh_compression = 1 << 26,
     };
     // clang-format on
 
@@ -315,6 +318,7 @@ namespace fastgltf {
         constexpr std::string_view EXT_meshopt_compression = "EXT_meshopt_compression";
         constexpr std::string_view EXT_texture_webp = "EXT_texture_webp";
 		constexpr std::string_view KHR_accessor_float64 = "KHR_accessor_float64";
+		constexpr std::string_view KHR_draco_mesh_compression = "KHR_draco_mesh_compression";
         constexpr std::string_view KHR_lights_punctual = "KHR_lights_punctual";
 		constexpr std::string_view KHR_materials_anisotropy = "KHR_materials_anisotropy";
         constexpr std::string_view KHR_materials_clearcoat = "KHR_materials_clearcoat";
@@ -345,15 +349,16 @@ namespace fastgltf {
 	// value used for enabling/disabling the loading of it. This also represents all extensions that
 	// fastgltf supports and understands.
 #if FASTGLTF_ENABLE_DEPRECATED_EXT
-	static constexpr std::size_t SUPPORTED_EXTENSION_COUNT = 24;
+	static constexpr std::size_t SUPPORTED_EXTENSION_COUNT = 25;
 #else
-	static constexpr std::size_t SUPPORTED_EXTENSION_COUNT = 23;
+	static constexpr std::size_t SUPPORTED_EXTENSION_COUNT = 24;
 #endif
 	static constexpr std::array<std::pair<std::string_view, Extensions>, SUPPORTED_EXTENSION_COUNT> extensionStrings = {{
 		{ extensions::EXT_mesh_gpu_instancing,                  Extensions::EXT_mesh_gpu_instancing },
 		{ extensions::EXT_meshopt_compression,                  Extensions::EXT_meshopt_compression },
 		{ extensions::EXT_texture_webp,                         Extensions::EXT_texture_webp },
 		{ extensions::KHR_accessor_float64,                     Extensions::KHR_accessor_float64 },
+		{ extensions::KHR_draco_mesh_compression,               Extensions::KHR_draco_mesh_compression },
 		{ extensions::KHR_lights_punctual,                      Extensions::KHR_lights_punctual },
 		{ extensions::KHR_materials_anisotropy,                 Extensions::KHR_materials_anisotropy },
 		{ extensions::KHR_materials_clearcoat,                  Extensions::KHR_materials_clearcoat },
@@ -423,69 +428,6 @@ namespace fastgltf {
 		}
 		return stringified;
 	}
-
-#if !FASTGLTF_DISABLE_CUSTOM_MEMORY_POOL
-	class ChunkMemoryResource : public std::pmr::memory_resource {
-		/**
-		 * The default size of the individual blocks we allocate.
-		 */
-		constexpr static std::size_t blockSize = 2048;
-
-		struct Block {
-			std::unique_ptr<std::byte[]> data;
-			std::size_t size;
-
-			std::byte* dataPointer;
-		};
-		SmallVector<Block, 4> blocks;
-		std::size_t blockIdx = 0;
-
-	public:
-		explicit ChunkMemoryResource() {
-			allocateNewBlock();
-		}
-
-		void allocateNewBlock() {
-			auto& block = blocks.emplace_back();
-			block.data = std::unique_ptr<std::byte[]>(new std::byte[blockSize]);
-			block.dataPointer = block.data.get();
-			block.size = blockSize;
-		}
-
-		[[nodiscard]] void* do_allocate(std::size_t bytes, std::size_t alignment) override {
-			auto& block = blocks[blockIdx];
-			auto availableSize = static_cast<std::size_t>(block.dataPointer - block.data.get());
-			if ((availableSize + bytes) > block.size) {
-				// The block can't fit the new allocation. We'll just create a new block and use that.
-				allocateNewBlock();
-				++blockIdx;
-				return do_allocate(bytes, alignment);
-			}
-
-			void* alloc = block.dataPointer;
-			std::size_t space = availableSize;
-			if (std::align(alignment, availableSize, alloc, space) == nullptr) {
-				// Not enough space after alignment
-				allocateNewBlock();
-				++blockIdx;
-				return do_allocate(bytes, alignment);
-			}
-
-			// Get the number of bytes used for padding, and calculate the new offset using that
-			block.dataPointer = block.dataPointer + (availableSize - space) + bytes;
-			return alloc;
-		}
-
-		void do_deallocate([[maybe_unused]] void* p, [[maybe_unused]] std::size_t bytes, [[maybe_unused]] std::size_t alignment) override {
-			// We currently do nothing, as we don't keep track of what portions of the blocks are still used.
-			// Therefore, we keep all blocks alive until the destruction of this resource (parser).
-		}
-
-		[[nodiscard]] bool do_is_equal(const std::pmr::memory_resource& other) const noexcept override {
-			return this == std::addressof(other);
-		}
-	};
-#endif
 
 	/**
 	 * A type that stores an error together with an expected value.
@@ -687,7 +629,11 @@ namespace fastgltf {
 		}
 	};
 
-#if defined(__APPLE__) || defined(__linux__) || defined(_WIN32)
+#if defined(_WIN32)
+#include <winapifamily.h>
+#endif
+
+#if defined(__APPLE__) || defined(__linux__) || (defined(_WIN32) && !(defined(WINAPI_FAMILY) && (WINAPI_FAMILY == WINAPI_FAMILY_APP)))
 #define FASTGLTF_HAS_MEMORY_MAPPED_FILE 1
 	/**
 	 * Memory-maps a file. This uses mmap on macOS and Linux, and MapViewOfFile on Windows, and is not available elsewhere.
@@ -845,7 +791,7 @@ namespace fastgltf {
 		ParserInternalConfig config = {};
 		DataSource glbBuffer;
 #if !FASTGLTF_DISABLE_CUSTOM_MEMORY_POOL
-		std::shared_ptr<ChunkMemoryResource> resourceAllocator;
+		std::shared_ptr<std::pmr::monotonic_buffer_resource> resourceAllocator;
 #endif
 		std::filesystem::path directory;
 		Options options = Options::None;
@@ -874,6 +820,7 @@ namespace fastgltf {
 		Error parseLights(simdjson::dom::array& array, Asset& asset);
 		Error parseMaterialExtensions(simdjson::dom::object& object, Material& material);
 		Error parseMaterials(simdjson::dom::array& array, Asset& asset);
+		Error parsePrimitiveExtensions(simdjson::dom::object& object, Primitive& primitive);
 		Error parseMeshes(simdjson::dom::array& array, Asset& asset);
 		Error parseNodes(simdjson::dom::array& array, Asset& asset);
 		Error parseSamplers(simdjson::dom::array& array, Asset& asset);

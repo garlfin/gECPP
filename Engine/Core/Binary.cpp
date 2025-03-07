@@ -9,7 +9,7 @@
 #include "Log.h"
 #include "Macro.h"
 
-u8* ReadFileBinary(const Path& path, size_t& length)
+std::byte* ReadFileBinary(const Path& path, size_t& length)
 {
 	std::ifstream file(path, std::ios::in | std::ios::binary);
 	if(!file.is_open())
@@ -21,7 +21,7 @@ u8* ReadFileBinary(const Path& path, size_t& length)
 	file.seekg(0, std::ios::end);
 	length = file.tellg();
 
-	u8* bin = new u8[length];
+	std::byte* bin = new std::byte[length];
 
 	file.seekg(0, std::ios::beg);
 	file.read((char*) bin, length);

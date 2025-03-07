@@ -23,7 +23,7 @@ namespace GPU
 		PixelType = Read<GLenum>(in);
 		Scheme = Read<CompressionScheme>(in);
 		MipCount = Read<u8>(in);
-		Read<u64, u8>(in, Data);
+		Read<u64, std::byte>(in, Data);
 	}
 
 	void TextureData::ISerialize(std::ostream& out) const

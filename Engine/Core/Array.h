@@ -16,7 +16,7 @@ class Array
 {
 public:
 	static constexpr bool IS_VOID = std::is_same_v<T, void>;
-	using I = std::conditional_t<IS_VOID, u8, T>;
+	using I = std::conditional_t<IS_VOID, std::byte, T>;
 	
 	constexpr Array() = default;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2024 spnda
+ * Copyright (C) 2022 - 2025 Sean Apeler
  * This file is part of fastgltf <https://github.com/spnda/fastgltf>.
  *
  * Permission is hereby granted, free of charge, to any person
@@ -39,7 +39,7 @@
  * The fastgltf::math namespace contains all math functions and types which are needed for working with glTF assets.
  */
 namespace fastgltf::math {
-	FASTGLTF_EXPORT inline constexpr long double pi = 3.141592653589793116;
+	FASTGLTF_EXPORT inline constexpr long double pi = 3.1415926535897932385;
 
 	/** Value clamp using std::less */
 	FASTGLTF_EXPORT template <typename T>
@@ -93,11 +93,8 @@ namespace fastgltf::math {
 			return ret;
 		}
 
-		constexpr vec(const vec<T, N>& other) noexcept : _data(other._data) {}
-		constexpr vec<T, N>& operator=(const vec<T, N>& other) noexcept {
-			_data = other._data;
-			return *this;
-		}
+		constexpr vec(const vec&) noexcept = default;
+		constexpr vec& operator=(const vec& other) noexcept = default;
 
 		template <typename U, std::enable_if_t<!std::is_same_v<T, U>, bool> = true>
 		constexpr explicit vec(const vec<U, N>& other) noexcept {
@@ -480,10 +477,10 @@ namespace fastgltf::math {
 			return (*this)[3];
 		}
 
-		[[nodiscard]] constexpr auto value_ptr() noexcept {
+		[[nodiscard]] constexpr auto data() noexcept {
 			return _data.data();
 		}
-		[[nodiscard]] constexpr auto value_ptr() const noexcept {
+		[[nodiscard]] constexpr auto data() const noexcept {
 			return _data.data();
 		}
 
@@ -643,6 +640,8 @@ namespace fastgltf::math {
 			copy_values(tuple, std::make_integer_sequence<std::size_t, sizeof...(Args)>());
 		}
 
+		constexpr mat(const mat& other) = default;
+
 		/** Truncates the matrix to a smaller one, discarding the additional rows and/or colums  */
 		template <std::size_t Q, std::size_t P, std::enable_if_t<N < Q && M < P, bool> = true>
 		constexpr explicit mat(const mat<T, Q, P>& other) noexcept {
@@ -752,6 +751,11 @@ namespace fastgltf::math {
 			return ret;
 		}
 	};
+
+	static_assert(std::is_trivially_copyable_v<mat<float, 4, 4>>);
+	static_assert(std::is_trivially_copyable_v<vec<float, 4>>);
+	static_assert(std::is_trivially_copyable_v<std::array<vec<float, 4>, 4>>);
+	static_assert(std::is_trivially_copyable_v<std::array<float, 4>>);
 
 	/** Transposes the given matrix */
 	FASTGLTF_EXPORT template <typename T, std::size_t N, std::size_t M>

@@ -13,8 +13,6 @@
 
 namespace gE::Model
 {
-    void Read(Window*, const std::filesystem::path&, Array<Mesh>& meshesOut, Array<Skeleton>& skeletons);
-    void ReadAsFile(Window*, const std::filesystem::path&, Array<File>& files);
-
     void ReadGLTF(Window*, const Path&, Array<Mesh>& meshesOut, Array<Skeleton>& skeletons);
+    void ReadGLTFAsFile(Window*, const std::filesystem::path&, Array<File>& files);
 };

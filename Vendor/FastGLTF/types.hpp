@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2024 spnda
+ * Copyright (C) 2022 - 2025 Sean Apeler
  * This file is part of fastgltf <https://github.com/spnda/fastgltf>.
  *
  * Permission is hereby granted, free of charge, to any person
@@ -28,13 +28,10 @@
 
 #if !defined(FASTGLTF_USE_STD_MODULE) || !FASTGLTF_USE_STD_MODULE
 #include <cassert>
-#include <cstddef>
-#include <cstring>
 #include <filesystem>
 #include <optional>
 #include <string>
 #include <utility>
-#include <variant>
 #include <vector>
 #endif
 
@@ -210,6 +207,7 @@ namespace fastgltf {
         DDS = 4,
         GltfBuffer = 5,
         OctetStream = 6,
+        WEBP = 7,
     };
 
     FASTGLTF_EXPORT enum class AnimationInterpolation : std::uint8_t {
@@ -458,6 +456,7 @@ namespace fastgltf {
 	constexpr std::string_view mimeTypeDds = "image/vnd-ms.dds";
 	constexpr std::string_view mimeTypeGltfBuffer = "application/gltf-buffer";
 	constexpr std::string_view mimeTypeOctetStream = "application/octet-stream";
+	constexpr std::string_view mimeTypeWebp = "image/webp";
 
 	constexpr std::string_view getMimeTypeString(MimeType mimeType) noexcept {
 		switch (mimeType) {
@@ -473,6 +472,8 @@ namespace fastgltf {
 				return mimeTypeGltfBuffer;
 			case MimeType::OctetStream:
 				return mimeTypeOctetStream;
+			case MimeType::WEBP:
+				return mimeTypeWebp;
 			default:
 				return "";
 		}
@@ -1020,6 +1021,19 @@ namespace fastgltf {
 		static constexpr auto missing_value = static_cast<BufferTarget>(std::numeric_limits<std::underlying_type_t<BufferTarget>>::max());
 	};
 
+	FASTGLTF_EXPORT template<typename T>
+	class OptionalWithFlagValue;
+
+	/**
+	 * A type alias which checks if there is a specialization of OptionalFlagValue for T and "switches"
+	 * between fastgltf::OptionalWithFlagValue and std::optional.
+	 */
+	FASTGLTF_EXPORT template <typename T>
+	using Optional = std::conditional_t<
+		!std::is_same_v<std::nullopt_t, std::remove_const_t<decltype(OptionalFlagValue<T>::missing_value)>>,
+		OptionalWithFlagValue<T>,
+		std::optional<T>>;
+
 	/**
 	 * A custom optional class for fastgltf,
 	 * which uses so-called "flag values" which are specific values of T that will never be present as an actual value.
@@ -1030,7 +1044,7 @@ namespace fastgltf {
 	 * If no specialization for T of OptionalFlagValue is provided, a static assert will be triggered.
 	 * In those cases, use std::optional or fastgltf::Optional instead.
 	 */
-	FASTGLTF_EXPORT template<typename T>
+	template<typename T>
 	class OptionalWithFlagValue final {
 		static_assert(!std::is_same_v<std::nullopt_t, std::remove_const_t<decltype(OptionalFlagValue<T>::missing_value)>>,
 			"OptionalWithFlagValue can only be used when there is an appropriate specialization of OptionalFlagValue<T>.");
@@ -1170,41 +1184,77 @@ namespace fastgltf {
 		}
 
 		template <typename F>
-		[[nodiscard]] OptionalWithFlagValue<T> and_then(F&& func)& {
+		[[nodiscard]] auto and_then(F&& func)& {
+			using U = remove_cvref_t<std::invoke_result_t<F, T&>>;
 			if (!has_value())
-				return std::nullopt;
-			return func(value());
+				return U(std::nullopt);
+			return std::invoke(std::forward<F>(func), **this);
 		}
 
 		template <typename F>
-		[[nodiscard]] OptionalWithFlagValue<T> and_then(F&& func)&& {
+		[[nodiscard]] auto and_then(F&& func) const& {
+			using U = remove_cvref_t<std::invoke_result_t<F, const T&>>;
 			if (!has_value())
-				return std::nullopt;
-			return func(std::move(value()));
+				return U(std::nullopt);
+			return std::invoke(std::forward<F>(func), **this);
 		}
 
 		template <typename F>
-		[[nodiscard]] OptionalWithFlagValue<T> transform(F&& func)& {
+		[[nodiscard]] auto and_then(F&& func)&& {
+			using U = remove_cvref_t<std::invoke_result_t<F, T>>;
 			if (!has_value())
-				return std::nullopt;
-			return OptionalWithFlagValue<T>(func(value()));
+				return U(std::nullopt);
+			return std::invoke(std::forward<F>(func), std::move(**this));
 		}
 
 		template <typename F>
-		[[nodiscard]] OptionalWithFlagValue<T> transform(F&& func)&& {
+		[[nodiscard]] auto and_then(F&& func) const&& {
+			using U = remove_cvref_t<std::invoke_result_t<F, const T>>;
 			if (!has_value())
-				return std::nullopt;
-			return OptionalWithFlagValue<T>(func(std::move(value())));
+				return U(std::nullopt);
+			return std::invoke(std::forward<F>(func), std::move(**this));
+		}
+
+		template <typename F>
+		[[nodiscard]] auto transform(F&& func)& {
+			using U = std::remove_cv_t<std::invoke_result_t<F, T&>>;
+			if (!has_value())
+				return Optional<U>(std::nullopt);
+			return Optional<U>(std::invoke(std::forward<F>(func), **this));
+		}
+
+		template <typename F>
+		[[nodiscard]] auto transform(F&& func) const& {
+			using U = std::remove_cv_t<std::invoke_result_t<F, const T&>>;
+			if (!has_value())
+				return Optional<U>(std::nullopt);
+			return Optional<U>(std::invoke(std::forward<F>(func), **this));
+		}
+
+		template <typename F>
+		[[nodiscard]] auto transform(F&& func)&& {
+			using U = std::remove_cv_t<std::invoke_result_t<F, T>>;
+			if (!has_value())
+				return Optional<U>(std::nullopt);
+			return Optional<U>(std::invoke(std::forward<F>(func), std::move(**this)));
+		}
+
+		template <typename F>
+		[[nodiscard]] auto transform(F&& func) const&& {
+			using U = std::remove_cv_t<std::invoke_result_t<F, const T>>;
+			if (!has_value())
+				return Optional<U>(std::nullopt);
+			return Optional<U>(std::invoke(std::forward<F>(func), std::move(**this)));
 		}
 
 		template <typename F>
 		[[nodiscard]] T or_else(F&& func) const& {
-			return *this ? *this : std::forward<F>(func)();
+			return *this ? *this : std::invoke(std::forward<F>(func));
 		}
 
 		template <typename F>
 		[[nodiscard]] T or_else(F&& func)&& {
-			return *this ? std::move(*this) : std::forward<F>(func)();
+			return *this ? std::move(*this) : std::invoke(std::forward<F>(func));
 		}
 
 		void swap(OptionalWithFlagValue<T>& other) noexcept(std::is_nothrow_move_constructible_v<T> &&
@@ -1263,6 +1313,14 @@ namespace fastgltf {
 		const T&& operator*() const&& noexcept {
 			return std::move(_value);
 		}
+
+		operator std::optional<T>() const noexcept {
+			return has_value() ? std::optional<T>(_value) : std::nullopt;
+		}
+
+		operator std::optional<T>&&()&& noexcept {
+			return has_value() ? std::optional<T>(std::move(_value)) : std::nullopt;
+		}
 	};
 
 	FASTGLTF_EXPORT template <typename T, typename U>
@@ -1305,15 +1363,6 @@ namespace fastgltf {
 		return opt.has_value() && *opt >= value;
 	}
 
-	/**
-	 * A type alias which checks if there is a specialization of OptionalFlagValue for T and "switches"
-	 * between fastgltf::OptionalWithFlagValue and std::optional.
-	 */
-	FASTGLTF_EXPORT template <typename T>
-	using Optional = std::conditional_t<
-		!std::is_same_v<std::nullopt_t, std::remove_const_t<decltype(OptionalFlagValue<T>::missing_value)>>,
-		OptionalWithFlagValue<T>,
-		std::optional<T>>;
 #pragma endregion
 
 #pragma region Structs
@@ -1427,90 +1476,123 @@ namespace fastgltf {
 		[[nodiscard]] bool valid() const noexcept;
 		[[nodiscard]] bool isLocalPath() const noexcept;
 		[[nodiscard]] bool isDataUri() const noexcept;
-    };
+	};
 
-    FASTGLTF_EXPORT inline constexpr std::size_t dynamic_extent = std::numeric_limits<std::size_t>::max();
+	FASTGLTF_EXPORT inline constexpr std::size_t dynamic_extent = std::numeric_limits<std::size_t>::max();
 
-    /**
-     * Custom span class imitating C++20's std::span for referencing bytes without owning the
-     * allocation. Can also directly be converted to a std::span or used by itself.
-     */
-    FASTGLTF_EXPORT template <typename T, std::size_t Extent = dynamic_extent>
-    class span {
-        using element_type = T;
-        using value_type = std::remove_cv_t<T>;
-        using size_type = std::size_t;
-        using difference_type = std::ptrdiff_t;
-        using pointer = T*;
-        using const_pointer = const T*;
-        using reference = T&;
-        using const_reference = const T&;
+	/**
+	 * Custom span class imitating C++20's std::span for referencing bytes without owning the
+	 * allocation. Can also directly be converted to a std::span or used by itself.
+	 */
+	FASTGLTF_EXPORT template <typename T, std::size_t Extent = dynamic_extent>
+	class span {
+		using element_type = T;
+		using value_type = std::remove_cv_t<T>;
+		using size_type = std::size_t;
+		using difference_type = std::ptrdiff_t;
+		using pointer = T*;
+		using const_pointer = const T*;
+		using reference = T&;
+		using const_reference = const T&;
 
-        pointer _ptr = nullptr;
-        size_type _size = 0;
+		using iterator = pointer;
+		using reverse_iterator = std::reverse_iterator<iterator>;
 
-    public:
-        constexpr span() noexcept = default;
+		pointer _ptr = nullptr;
+		size_type _size = 0;
 
-        template <typename Iterator>
-        explicit constexpr span(Iterator first, size_type count) : _ptr(first), _size(count) {}
+	public:
+		static constexpr std::size_t extent = Extent;
+
+		constexpr span() = default;
+
+		// std::span ctor (2)
+		template <typename Iterator>
+		explicit /*(Extent != dynamic_extent)*/ constexpr span(Iterator first, const size_type count) : _ptr(first), _size(count) {}
+
+		// std::span ctor (5)
+		template<typename U, std::size_t N>
+		constexpr span(std::array<U, N>& arr) noexcept : _ptr(arr.data()), _size(N) {}
+
+		// std::span ctor (6)
+		template<typename U, std::size_t N>
+		constexpr span(const std::array<U, N>& arr) noexcept : _ptr(arr.data()), _size(N) {}
 
 #if FASTGLTF_CPP_20
-        constexpr span(std::span<T> data) : _ptr(data.data()), _size(data.size()) {}
+		constexpr span(std::span<T> data) : _ptr(data.data()), _size(data.size()) {}
 #endif
 
-        constexpr span(const span& other) noexcept = default;
-        constexpr span& operator=(const span& other) noexcept = default;
+		constexpr span(const span& other) noexcept = default;
+		constexpr span& operator=(const span& other) = default;
 
-        [[nodiscard]] constexpr reference operator[](size_type idx) const {
-            return data()[idx];
-        }
+		[[nodiscard]] constexpr iterator begin() const noexcept {
+			return data();
+		}
+		[[nodiscard]] constexpr iterator end() const noexcept {
+			return data() + size();
+		}
+		[[nodiscard]] constexpr reverse_iterator rbegin() const noexcept {
+			return std::reverse_iterator(end());
+		}
+		[[nodiscard]] constexpr reverse_iterator rend() const noexcept {
+			return std::reverse_iterator(begin());
+		}
 
-		[[nodiscard]] constexpr reference at(size_type idx) const {
-			if (idx >= size()) {
-                raise<std::out_of_range>("Index is out of range for span");
-			}
+		[[nodiscard]] constexpr reference front() const { return *begin(); }
+		[[nodiscard]] constexpr reference back() const { return *(end() - 1); }
+
+		[[nodiscard]] constexpr reference operator[](size_type idx) const {
 			return data()[idx];
 		}
 
-        [[nodiscard]] constexpr pointer data() const noexcept {
-            return _ptr;
-        }
+		[[nodiscard]] constexpr reference at(size_type idx) const {
+			return data()[idx];
+		}
 
-        [[nodiscard]] constexpr size_type size() const noexcept {
-            return _size;
-        }
+		[[nodiscard]] constexpr pointer data() const {
+			return _ptr;
+		}
 
-        [[nodiscard]] constexpr size_type size_bytes() const noexcept {
-            return size() * sizeof(element_type);
-        }
+		[[nodiscard]] constexpr size_type size() const {
+			return _size;
+		}
 
-        [[nodiscard]] constexpr bool empty() const noexcept {
-            return size() == 0;
-        }
+		[[nodiscard]] constexpr size_type size_bytes() const {
+			return size() * sizeof(element_type);
+		}
 
-        [[nodiscard]] constexpr span<T, Extent> first(size_type count) const {
-            return span(_ptr, count);
-        }
+		[[nodiscard]] constexpr bool empty() const {
+			return size() == 0;
+		}
 
-        [[nodiscard]] constexpr span<T, Extent> last(size_type count) const {
-            return span(&data()[size() - count], count);
-        }
+		[[nodiscard]] constexpr span first(size_type count) const {
+			return span(_ptr, count);
+		}
 
-        [[nodiscard]] constexpr span<T, Extent> subspan(size_type offset, size_type count = dynamic_extent) const {
-            return span(&data()[offset], count == dynamic_extent ? size() - offset : count);
-        }
+		[[nodiscard]] constexpr span last(size_type count) const {
+			return span(&data()[size() - count], count);
+		}
+
+		[[nodiscard]] constexpr span subspan(size_type offset, size_type count = dynamic_extent) const {
+			return span(&data()[offset], count == dynamic_extent ? size() - offset : count);
+		}
 
 #if FASTGLTF_CPP_20
-        operator std::span<T>() const {
-            return std::span(data(), size());
-        }
+		operator std::span<T, Extent == dynamic_extent ? std::dynamic_extent : Extent>() const {
+			return std::span<T, Extent == dynamic_extent ? std::dynamic_extent : Extent>(data(), size());
+		}
 #endif
-    };
+	};
 
-	// Deduction guide for easily instantiating spans
+	FASTGLTF_EXPORT template <typename T>
+	span(T* data, std::size_t count) -> span<T>;
+
 	FASTGLTF_EXPORT template <typename T>
 	span(const T* data, std::size_t size) -> span<const T>;
+
+	// std::span deduction guide (4)
+	FASTGLTF_EXPORT template<class T, std::size_t N>
+	span(const std::array<T, N>&) -> span<const T, N>;
 
     FASTGLTF_EXPORT using CustomBufferId = std::uint64_t;
 
@@ -1691,6 +1773,27 @@ namespace fastgltf {
         }
     };
 
+	struct DracoCompressedPrimitive {
+		std::size_t bufferView;
+		FASTGLTF_FG_PMR_NS::SmallVector<Attribute, 4> attributes;
+
+		[[nodiscard]] auto findAttribute(std::string_view name) noexcept {
+			for (auto* it = attributes.begin(); it != attributes.end(); ++it) {
+				if (it->name == name)
+					return it;
+			}
+			return attributes.end();
+		}
+
+		[[nodiscard]] auto findAttribute(std::string_view name) const noexcept {
+			for (const auto* it = attributes.cbegin(); it != attributes.cend(); ++it) {
+				if (it->name == name)
+					return it;
+			}
+			return attributes.cend();
+		}
+	};
+
     FASTGLTF_EXPORT struct Primitive {
 		// Instead of a map, we have a list of attributes here. Each pair contains
 		// the name of the attribute and the corresponding accessor index.
@@ -1705,9 +1808,11 @@ namespace fastgltf {
 		/**
 		 * Represents the mappings data from KHR_material_variants.
 		 * Use the variant index to index into this array to get the corresponding material index to use.
-		 * If the optional has no value, the normal materialIndex should be used as a fallback.
+		 * If this vector is empty, the normal materialIndex should be used as a fallback.
 		 */
 		std::vector<Optional<std::size_t>> mappings;
+
+		std::unique_ptr<DracoCompressedPrimitive> dracoCompression;
 
 		[[nodiscard]] auto findAttribute(std::string_view name) noexcept {
 			for (auto* it = attributes.begin(); it != attributes.end(); ++it) {
@@ -1862,7 +1967,7 @@ namespace fastgltf {
         Optional<TextureInfo> clearcoatTexture;
         num clearcoatRoughnessFactor = 0.0f;
         Optional<TextureInfo> clearcoatRoughnessTexture;
-        Optional<TextureInfo> clearcoatNormalTexture;
+        Optional<NormalTextureInfo> clearcoatNormalTexture;
     };
 
     FASTGLTF_EXPORT struct MaterialSheen {
@@ -2115,7 +2220,7 @@ namespace fastgltf {
 #if !FASTGLTF_DISABLE_CUSTOM_MEMORY_POOL
 		// This has to be first in this struct so that it gets destroyed last, leaving all allocations
 		// alive until the end.
-		std::shared_ptr<ChunkMemoryResource> memoryResource;
+		std::shared_ptr<std::pmr::monotonic_buffer_resource> memoryResource;
 #endif
 
 	public:

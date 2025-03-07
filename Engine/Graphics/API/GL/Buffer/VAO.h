@@ -40,17 +40,17 @@ namespace GL
 		virtual void Draw(u32 count, const GPU::IndirectDraw*) const = 0;
 		virtual void DrawDirect(u32 count, u32 offset, u32 instanceCount = 1) const = 0;
 
-		NODISCARD ALWAYS_INLINE const Buffer<u8>& GetBuffer(u8 i) { return _buffers[i]; }
+		NODISCARD ALWAYS_INLINE const Buffer<std::byte>& GetBuffer(u8 i) { return _buffers[i]; }
 
 		void UpdateBufferDirect(u8 i, const void*, size_t count, size_t offset = 0);
-		void UpdateBuffer(u8 i, GPU::Buffer<u8>&& buf);
-		ALWAYS_INLINE void UpdateBuffer(u8 i, GPU::Buffer<u8>& buf) { UpdateBuffer(i, std::move(GPU::Buffer(buf))); }
+		void UpdateBuffer(u8 i, GPU::Buffer<std::byte>&& buf);
+		ALWAYS_INLINE void UpdateBuffer(u8 i, GPU::Buffer<std::byte>& buf) { UpdateBuffer(i, std::move(GPU::Buffer(buf))); }
 
 		~IVAO() override;
 
 	private:
 		RelativePointer<GPU::VAO> _settings = DEFAULT;
-		Array<Buffer<u8>> _buffers = DEFAULT;
+		Array<Buffer<std::byte>> _buffers = DEFAULT;
 	};
 
 	class VAO : protected GPU::VAO, public IVAO
@@ -79,21 +79,21 @@ namespace GL
 		GET_CONST(u8, FieldCount, Counts.FieldCount);
 
 		GET_CONST(const GPU::MaterialSlot*, Materials, Materials);
-		GET_CONST(const GPU::Buffer<u8>*, Buffers, Buffers);
+		GET_CONST(const GPU::Buffer<std::byte>*, Buffers, Buffers);
 		GET_CONST(const GPU::VertexField*, Fields, Fields);
 
 		GET_CONST(GLenum, TriangleMode, TriangleFormat);
-		GET_CONST(const GPU::Buffer<u8>&, TriBuffer, TriangleBuffer);
+		GET_CONST(const GPU::Buffer<std::byte>&, TriBuffer, TriangleBuffer);
 
 		void Draw(u8 index, u16 instanceCount = 1) const override;
 		void Draw(u32 count, const GPU::IndirectDraw*) const override;
 		void DrawDirect(u32 count, u32 offset, u32 instanceCount = 1) const override;
 
 		void UpdateIndicesDirect(const void*, size_t count, size_t offset = 0);
-		void UpdateIndices(GPU::Buffer<u8>&& buf);
-		ALWAYS_INLINE void UpdateIndices(GPU::Buffer<u8>& buf) { UpdateIndices(std::move(GPU::Buffer(buf))); }
+		void UpdateIndices(GPU::Buffer<std::byte>&& buf);
+		ALWAYS_INLINE void UpdateIndices(GPU::Buffer<std::byte>& buf) { UpdateIndices(std::move(GPU::Buffer(buf))); }
 
 	private:
-		Buffer<u8> _triangleBuffer = DEFAULT;
+		Buffer<std::byte> _triangleBuffer = DEFAULT;
 	};
 }

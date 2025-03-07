@@ -28,7 +28,7 @@ namespace GPU
 	ENUM_OPERATOR(BufferUsageHint, |);
 	ENUM_OPERATOR(BufferUsageHint, &);
 
-	template<typename T = u8>
+	template<typename T>
 	class Buffer : public gE::Asset
 	{
 		SERIALIZABLE_PROTO("SBUF", 1, Buffer, Asset);

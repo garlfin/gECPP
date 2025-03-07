@@ -14,10 +14,10 @@
 
 namespace gE::Editor
 {
-    constexpr inline std::array Filters
+    CONSTEXPR_GLOBAL std::array Filters
     {
-        SDL_DialogFileFilter("Textures: .pvr", "pvr"),
-        SDL_DialogFileFilter("3D Models: .dae, .fbx, .obj, .gltf, .glb", "dae;fbx;obj;gltf;glb")
+        SDL_DialogFileFilter("Texture: .pvr", "pvr"),
+        SDL_DialogFileFilter("Model: .gltf, .glb", "gltf;glb")
     };
 
     enum class LoadAssetMode

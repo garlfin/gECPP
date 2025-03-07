@@ -102,17 +102,17 @@ namespace gE::DefaultPipeline
 
 		ALWAYS_INLINE void UpdateCamera(u64 size = sizeof(GPU::Camera), u64 offset = 0) const
 		{
-			_cameraBuffer.ReplaceDataDirect((u8*) &Camera + offset, size, offset);
+			_cameraBuffer.ReplaceDataDirect((std::byte*) &Camera + offset, size, offset);
 		}
 
 		ALWAYS_INLINE void UpdateScene(u64 size = sizeof(GPU::Scene), u64 offset = 0) const
 		{
-			_sceneBuffer.ReplaceDataDirect((u8*) &Scene + offset, size, offset);
+			_sceneBuffer.ReplaceDataDirect((std::byte*) &Scene + offset, size, offset);
 		}
 
 		ALWAYS_INLINE void UpdateLighting(u64 size = sizeof(GPU::Lighting), u64 offset = 0) const
 		{
-			_lightBuffer.ReplaceDataDirect((u8*) &Lighting + offset, size, offset);
+			_lightBuffer.ReplaceDataDirect((std::byte*) &Lighting + offset, size, offset);
 		}
 
 		GPU::Camera Camera = DEFAULT;

@@ -31,7 +31,7 @@ gE::GUIManager::GUIManager(Window* window) :
     SetStyle();
 
     auto fontFormat = GPU::Texture2D(IMGUIFontFormat, Size2D(width, height));
-    fontFormat.Data.Data = Array(width * height, (const u8*) pixelData);
+    fontFormat.Data.Data = Array(width * height, (const std::byte*) pixelData);
     fontFormat.Data.MipCount = 1;
     fontFormat.Data.PixelFormat = GL_RED;
     fontFormat.Data.PixelType = GL_UNSIGNED_BYTE;
@@ -98,10 +98,10 @@ void gE::GUIManager::OnRender(const ImDrawData* draw) const
     vaoFormat.Fields[1] = GPU::VertexField("UV", GL_FLOAT, false, 0, 1, 2, offsetof(ImDrawVert, uv));
     vaoFormat.Fields[2] = GPU::VertexField("COL", GL_UNSIGNED_BYTE, true, 0, 2, 4, offsetof(ImDrawVert, col));
 
-    vaoFormat.Buffers[0] = GPU::Buffer<>(sizeof(ImDrawVert) * vertSize, nullptr, sizeof(ImDrawVert), false);
+    vaoFormat.Buffers[0] = GPU::Buffer<std::byte>(sizeof(ImDrawVert) * vertSize, nullptr, sizeof(ImDrawVert), false);
     vaoFormat.Buffers[0].UsageHint = GPU::BufferUsageHint::Dynamic;
 
-    vaoFormat.TriangleBuffer = GPU::Buffer<>(sizeof(ImDrawIdx) * triSize, nullptr, sizeof(ImDrawIdx), false);
+    vaoFormat.TriangleBuffer = GPU::Buffer<std::byte>(sizeof(ImDrawIdx) * triSize, nullptr, sizeof(ImDrawIdx), false);
     vaoFormat.TriangleBuffer.UsageHint = GPU::BufferUsageHint::Dynamic;
     vaoFormat.TriangleFormat = GLType<ImDrawIdx>;
 

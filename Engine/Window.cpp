@@ -74,7 +74,7 @@ Window::Window(glm::u16vec2 size, const std::string& name) :
 		Log::FatalError("Failed to load OpenGL functions.");
 
 	PVR::Header iconHeader;
-	Array<u8> iconData = PVR::ReadRaw("Resource/gE.PVR", iconHeader);
+	Array<std::byte> iconData = PVR::ReadRaw("Resource/gE.PVR", iconHeader);
 
 	_icon = SDL_CreateSurfaceFrom(iconHeader.Size.x, iconHeader.Size.y, SDL_PIXELFORMAT_RGBA8888, iconData.Data(), 4 * iconHeader.Size.x);
 	SDL_SetWindowIcon(_window, _icon);
@@ -232,7 +232,7 @@ void Window::OnInit()
 
 	GPU::VAO blitVAOFormat = DEFAULT;
 	blitVAOFormat.Counts.BufferCount = 1;
-	blitVAOFormat.Buffers[0] = GPU::Buffer<u8>(1);
+	blitVAOFormat.Buffers[0] = GPU::Buffer<std::byte>(1);
 
 	BlitShader = ptr_create<API::Shader>(this, GPU::Shader("Resource/Shader/blit.vert", "Resource/Shader/blit.frag"));
 	BlitVAO = ptr_create<API::VAO>(this, move(blitVAOFormat));

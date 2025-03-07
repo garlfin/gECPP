@@ -42,13 +42,13 @@ namespace GPU
 		VAOFieldCounts Counts{};
 		MaterialSlot Materials[GE_MAX_VAO_MATERIAL];
 		VertexField Fields[GE_MAX_VAO_FIELD];
-		Buffer<u8> Buffers[GE_MAX_VAO_BUFFER];
+		Buffer<std::byte> Buffers[GE_MAX_VAO_BUFFER];
 
-		void Free() override { for(Buffer<u8>& buffer : Buffers) buffer.Free(); };
+		void Free() override { for(Buffer<std::byte>& buffer : Buffers) buffer.Free(); };
 
 		NODISCARD bool IsFree() const override
 		{
-			for(const Buffer<u8>& buffer : Buffers)
+			for(const Buffer<std::byte>& buffer : Buffers)
 				if(!buffer.IsFree())
 					return false;
 			return true;
@@ -67,7 +67,7 @@ namespace GPU
 		NODISCARD ALWAYS_INLINE bool IsFree() const override { return VAO::IsFree() && TriangleBuffer.IsFree(); }
 
 		GLenum TriangleFormat = DEFAULT;
-		Buffer<u8> TriangleBuffer;
+		Buffer<std::byte> TriangleBuffer;
 
 		~IndexedVAO() override { ASSET_CHECK_FREE(IndexedVAO); }
 	};

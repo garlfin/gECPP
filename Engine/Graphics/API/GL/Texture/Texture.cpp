@@ -58,7 +58,7 @@ namespace GL
 		if(!Data) return;
 
 		glm::u32vec2 size = Size;
-		const u8* dataPtr = Data.Data.Data();
+		const std::byte* dataPtr = Data.Data.Data();
 
 		for(u8 i = 0; i < Data.MipCount; i++, size >>= Size2D(1))
 		{
@@ -97,7 +97,7 @@ namespace GL
 		if(!Data) return;
 
 		glm::u32vec3 size = Size;
-		const u8* dataPtr = Data.Data.Data();
+		const std::byte* dataPtr = Data.Data.Data();
 
 		for(u8 i = 0; i < Data.MipCount; i++, size >>= Size3D(1))
 		{
@@ -128,7 +128,7 @@ namespace GL
 		if(!Data.Data) return;
 
 		u32 size = Size;
-		u8* dataPtr = Data.Data.Data(); // sobbing rn
+		std::byte* dataPtr = Data.Data.Data(); // sobbing rn
 
 		for(u8 i = 0; i < Data.MipCount; i++, size >>= 1)
 		{
@@ -159,7 +159,7 @@ namespace GL
 		if(!Data.Data) return;
 
 		u32 size = Size;
-		const u8* dataPtr = Data.Data.Data(); // sobbing rn
+		const std::byte* dataPtr = Data.Data.Data(); // sobbing rn
 
 		for(u8 i = 0; i < Data.MipCount; i++, size >>= 1)
 		{

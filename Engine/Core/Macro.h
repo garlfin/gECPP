@@ -104,7 +104,7 @@ T& PlacementNew(T& to, ARGS&&... args)
 
 #define UNPACK(...) __VA_ARGS__
 
-#define GE_FAIL(ERR) GE_ASSERTM(false, ERR);
+#define GE_FAIL(ERR) GE_ASSERTM(false, ERR)
 
 #define BIT_FIELD(FIELD, INDEX) ((FIELD) >> (INDEX) & 1)
 #define BIT_SIZE(X) (sizeof(decltype(X)) * 8)

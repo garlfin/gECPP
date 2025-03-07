@@ -69,7 +69,7 @@ namespace gE::SDFPipeline
 
 		ALWAYS_INLINE void UpdateScene(u64 size = sizeof(GPU::SDFScene), u64 offset = 0) const
 		{
-			_sdfBuffer.ReplaceDataDirect((u8*) &Scene + offset, size, offset);
+			_sdfBuffer.ReplaceDataDirect((std::byte*) &Scene + offset, size, offset);
 		}
 
 		GPU::SDFScene Scene;

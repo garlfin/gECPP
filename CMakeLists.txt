@@ -34,9 +34,8 @@ add_library(IMGUI STATIC ${IMGUI_SRC})
 target_link_libraries(IMGUI)
 
 # FastGLTF
-file(GLOB_RECURSE FASTGLTF_SRC "Vendor/FastGLTF/*.cpp" "Vendor/FastGLTF/*.h")
-add_library(FASTGLTF STATIC ${FASTGLTF_SRC})
-target_link_libraries(FASTGLTF)
+add_library(FASTGLTF STATIC IMPORTED)
+set_property(TARGET FASTGLTF PROPERTY IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/FastGLTF/bin/libfastgltf.a")
 
 # ASSIMP
 add_library(ASSIMP STATIC IMPORTED)

@@ -111,7 +111,7 @@ namespace gE::Editor
         else if(_loading.Mode == LoadAssetMode::ImportMesh)
         {
             Array<File> files;
-            Model::ReadAsFile(&GetWindow(), _loading.Path, files);
+            Model::ReadGLTFAsFile(&GetWindow(), _loading.Path, files);
 
             for(File& file : files) assetManager.AddFile(std::move(file));
         }
@@ -199,7 +199,7 @@ namespace gE::Editor
                 ImGui::Image((ImTextureID) (API::Texture*) &icon->SpriteSheet->Texture, ImVec2(_iconSize, _iconSize), icon->GetBottomUV(), icon->GetTopUV(), ImGui::GetStyle().Colors[ImGuiCol_Text]);
             }
 
-            float textWidth = ImGui::CalcTextSize(fileName.c_str()).x;
+            const float textWidth = ImGui::CalcTextSize(fileName.c_str()).x;
 
             ImGui::SetCursorPosX(top.x + std::max((_iconSize - textWidth) / 2.f, 0.f));
             ImGui::TextUnformatted(fileName.c_str());

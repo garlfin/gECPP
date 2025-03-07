@@ -3,7 +3,7 @@
 layout(location = 0) in vec3 Position;
 layout(location = 1) in vec2 UV;
 layout(location = 2) in vec3 Normal;
-layout(location = 3) in vec3 Tangent;
+layout(location = 3) in vec4 Tangent;
 
 #include "Include/Camera.glsl"
 #include "Include/Scene.glsl"
@@ -48,8 +48,8 @@ void main()
 
     vec3 nor, tan, bitan;
     nor = normalize(objectInfo.Normal * Normal);
-    tan = normalize(objectInfo.Normal * Tangent);
-    bitan = normalize(cross(nor, tan));
+    tan = normalize(objectInfo.Normal * Tangent.xyz);
+    bitan = normalize(cross(nor, tan) * Sign(Tangent.w));
 
     VertexIn.TBN = mat3(tan, bitan, nor);
 

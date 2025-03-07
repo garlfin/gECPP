@@ -12,7 +12,7 @@ namespace gE
     {
         Read(in, Name);
 
-        if(Version == 2)
+        if(GetVersion() >= 2)
         {
             Read<u8>(in);
             //MaterialNames = ReadArray<u8, std::string>(in);
@@ -27,7 +27,7 @@ namespace gE
         Serializable* vao = type->Factory(in, s);
         VAO = ptr_cast((API::IVAO*) vao->GetUnderlying());
 
-        if(Version == 2 && Read<bool>(in))
+        if(GetVersion() >= 2 && Read<bool>(in))
         {
             const TYPE_T* shapeType = ReadType<Window*>(in);
             GE_ASSERTM(shapeType, "NO SHAPE TYPE INFO!");

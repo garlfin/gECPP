@@ -50,7 +50,7 @@ public:
 	char magic[4]; \
 	Read<char>(in, 4, magic); \
 	GE_ASSERTM(strcmpb(magic, MAGIC, 4), "UNEXPECTED MAGIC!"); \
-	Version = Read<u8>(in);
+	_version = Read<u8>(in);
 
 #define SERIALIZABLE_PROTO(MAGIC_VAL, VERSION_VAL, TYPE, SUPER_T) \
 	public: \
@@ -60,12 +60,13 @@ public:
 		TYPE() = default; \
 		REFLECTABLE_MAGIC_IMPL(MAGIC_VAL); \
 		inline void Deserialize(istream& in, SETTINGS_T s) override { PlacementNew(*this, in, s); } \
-		inline void Serialize(ostream& out) const override { SUPER::Serialize(out); Write(out, 4, MAGIC); Write<u8>(out, Version); ISerialize(out); } \
-		u8 Version = VERSION_VAL; \
+		inline void Serialize(ostream& out) const override { SUPER::Serialize(out); Write(out, 4, MAGIC); Write<u8>(out, _version); ISerialize(out); } \
+		GET_CONST(u8, Version, _version) \
 		DEFAULT_OPERATOR_CM(TYPE); \
 	private: \
 		void IDeserialize(istream& in, SETTINGS_T s); \
-		void ISerialize(ostream& out) const;
+		void ISerialize(ostream& out) const; \
+		u8 _version = VERSION_VAL; \
 
 template<class T, class S>
 concept is_serializable_in = requires(T t, S s, std::istream& i)
@@ -122,6 +123,8 @@ void WriteType(std::ostream& out, const Type<T>& type)
 
 template<> void Read(std::istream& in, u32 count, std::string* t);
 template<> void Write(std::ostream& out, u32 count, const std::string* t);
+
+template<> void Write(std::ostream& out, u32 count, const std::string_view* t);
 
 template<is_serializable_in<gE::Window*> T>
 void ReadSerializableFromFile(gE::Window* window, const Path& path, T& t)
@@ -209,6 +212,7 @@ inline void Read(std::istream& in, u32 count, std::string* t)
 	}
 }
 
+
 template<>
 inline void Write(std::ostream& out, u32 count, const std::string* t)
 {
@@ -220,6 +224,20 @@ inline void Write(std::ostream& out, u32 count, const std::string* t)
 
 		Write(out, length);
 		Write(out, length, str.c_str());
+	}
+}
+
+template<>
+inline void Write(std::ostream& out, u32 count, const std::string_view* t)
+{
+	for(u32 i = 0; i < count; i++)
+	{
+		const std::string_view& str = t[i];
+
+		u32 length = str.length();
+
+		Write(out, length);
+		Write(out, length, str.data());
 	}
 }
 

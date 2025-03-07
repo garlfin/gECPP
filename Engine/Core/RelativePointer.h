@@ -23,7 +23,7 @@ public:
 	);
 
 	OPERATOR_MOVE_IMPL(RelativePointer,,,
-		_t = (T*) ((u8*) o._t - (u8*) &o + (u8*) this);
+		_t = (T*) ((std::byte*) o._t - (std::byte*) &o + (std::byte*) this);
 		if(!o._t) _t = nullptr;
 	);
 

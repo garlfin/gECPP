@@ -7,7 +7,7 @@
 
 namespace gE::PVR
 {
-	Array<u8> ReadRaw(const Path& path, Header& header)
+	Array<std::byte> ReadRaw(const Path& path, Header& header)
 	{
 		std::ifstream src;
 		src.open(path, std::ios::in | std::ios::binary);
@@ -21,7 +21,7 @@ namespace gE::PVR
 		header.Deserialize(src, nullptr);
 
 		copySize -= src.tellg();
-		Array<u8> data(copySize);
+		Array<std::byte> data(copySize);
 		src.read((char*) data.Data(), copySize);
 
 		return data;
@@ -30,7 +30,7 @@ namespace gE::PVR
 	API::Texture* Read(Window* window, const Path& path, GPU::WrapMode wrapMode, GPU::FilterMode filterMode)
 	{
 		Header header;
-		Array<u8> imageData = ReadRaw(path, header);
+		Array<std::byte> imageData = ReadRaw(path, header);
 		if(!imageData) return nullptr;
 
 		API::Texture* tex = nullptr;
