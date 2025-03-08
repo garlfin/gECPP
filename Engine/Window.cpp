@@ -119,13 +119,13 @@ bool Window::Run()
 
 	SDL_GL_SetSwapInterval(0);
 
-	OnInit();
-	glMemoryBarrier(GL_ALL_BARRIER_BITS);
-
 	glBlendEquation(GL_FUNC_ADD);
 	glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 	glDisable(GL_MULTISAMPLE);
+	glMemoryBarrier(GL_ALL_BARRIER_BITS);
+
+	OnInit();
 
 #ifdef GE_DEBUG_PERFORMANCE
 	GL::Timer timer(this);
@@ -172,6 +172,7 @@ bool Window::Run()
 				}
 			}
 
+			_keyboardState.ClearShortcutState();
 			_mouseState.Update();
 
 		#ifdef GE_DEBUG_PERFORMANCE
@@ -194,7 +195,7 @@ bool Window::Run()
 		#ifdef GE_DEBUG_PERFORMANCE
 			if(shouldDebugTick)
 			{
-				float renderTime = timer.End() * MS_TO_S;
+				const float renderTime = timer.End() * MS_TO_S;
 
 				sprintf_s(
 					WindowTitleBuf,

@@ -33,6 +33,7 @@ public:
 
 	virtual void Deserialize(istream& in, SETTINGS_T settings) {};
 	virtual void Serialize(ostream& out) const {};
+	virtual void Reload(SETTINGS_T settings) {};
 
 	virtual Underlying* GetUnderlying() { return nullptr; }
 	virtual const Underlying* GetUnderlying() const { return nullptr; }

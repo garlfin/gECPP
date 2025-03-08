@@ -13,7 +13,7 @@ namespace gE::Editor
 {
     AssetInspector::AssetInspector(Editor* editor) : Window(editor, "Asset Inspector")
     {
-        SetShortcut({ Key::LControl, Key::LShift, Key::A });
+        SetShortcut({ KeyModifier::LControl, KeyModifier::LShift, Key::A });
     }
 
     void AssetInspector::IOnEditorGUI()
@@ -27,10 +27,10 @@ namespace gE::Editor
             {
                 Asset& asset = _selected->Get();
 
-                if(ImGui::Button("Reload File"))
+                if(ImGui::Button("Reload from File"))
                     _selected->ForceLoad();
                 ImGui::SameLine();
-                if(ImGui::Button("Save File"))
+                if(ImGui::Button("Save to File"))
                 {
                     if(asset.IsFree())
                         Log::Warning(std::format("Could not write to file because {} was freed.", _selected->GetPath().string()));
@@ -42,9 +42,11 @@ namespace gE::Editor
                 }
                 if(!asset.IsFree())
                 {
-                    ImGui::SameLine();
                     if(ImGui::Button("Free CPU-Side Data"))
                         asset.Free();
+                    ImGui::SameLine();
+                    if(ImGui::Button("Reload from CPU"))
+                        asset.Reload(&GetWindow());
                 }
 
                 ImGui::Separator();
@@ -71,7 +73,7 @@ namespace gE::Editor
         _defaultIcon = Sprite(_iconSpriteSheet, glm::u16vec2(0));
         delete sheetTex;
 
-        SetShortcut({ Key::LControl, Key::A });
+        SetShortcut({ KeyModifier::LControl, KeyModifier::None, Key::A });
 
         AddIcon(Material::Type, Sprite(_iconSpriteSheet, glm::u16vec2(1, 0)));
         AddIcon(GPU::Shader::Type, Sprite(_iconSpriteSheet, glm::u16vec2(2, 0)));

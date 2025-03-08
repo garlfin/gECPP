@@ -8,8 +8,6 @@
 #include <Core/Math/Math.h>
 #include <SDL3/SDL_events.h>
 
-struct GLFWwindow;
-
 namespace gE
 {
     enum class Key : u16
@@ -122,16 +120,25 @@ namespace gE
         KPPlus = SDL_SCANCODE_KP_PLUS,
         KPEnter = SDL_SCANCODE_KP_ENTER,
         KPEquals = SDL_SCANCODE_KP_EQUALS,
-        LShift = SDL_SCANCODE_LSHIFT,
+
+        Size = SDL_SCANCODE_RGUI
+    };
+
+    enum class KeyModifier : u16
+    {
+        None = 0,
+
         LControl = SDL_SCANCODE_LCTRL,
+        LShift = SDL_SCANCODE_LSHIFT,
         LAlt = SDL_SCANCODE_LALT,
-        LWindowsKey = SDL_SCANCODE_LGUI,
-        RShift = SDL_SCANCODE_RSHIFT,
-        RControl = SDL_SCANCODE_RCTRL,
         RAlt = SDL_SCANCODE_LALT,
+        LWindowsKey = SDL_SCANCODE_LGUI,
+        RControl = SDL_SCANCODE_RCTRL,
+        RShift = SDL_SCANCODE_RSHIFT,
         RWindowsKey = SDL_SCANCODE_RGUI,
 
-        Size = SDL_SCANCODE_COUNT
+        Min = LControl,
+        Size = 8
     };
 
     enum class KeyState : u8
@@ -142,6 +149,15 @@ namespace gE
         Pressed = Down | StateChanged,
         Released = Up | StateChanged,
         None = 0
+    };
+
+    struct Shortcut
+    {
+        KeyModifier First = KeyModifier::None;
+        KeyModifier Second = KeyModifier::None;
+        Key Third = Key::None;
+
+        NODISCARD bool operator==(const Shortcut& o);
     };
 
     ENUM_OPERATOR(KeyState, |);
@@ -157,13 +173,12 @@ namespace gE
     public:
         KeyboardState() = default;
 
-        ALWAYS_INLINE KeyState GetKey(Key key) const
-        {
-            if(key == Key::None) return DEFAULT;
-            return _keys[(u16) key];
-        }
+        ALWAYS_INLINE KeyState GetKey(Key key) const;
+        ALWAYS_INLINE KeyState GetKey(KeyModifier key) const;
+        ALWAYS_INLINE bool GetShortcut(Shortcut shortcut) const;
 
         void ProcessKey(const SDL_KeyboardEvent&);
+        void ClearShortcutState();
         void ClearKeyStates();
 
         GET_SET(bool, IsFocused, _focused);
@@ -171,15 +186,9 @@ namespace gE
     private:
         KeyState _keys[(u16) Key::Size] = DEFAULT;
         bool _focused = false;
-    };
 
-    struct Shortcut
-    {
-    public:
-        bool IsPressed(const KeyboardState&) const;
-
-        Key First = Key::None;
-        Key Second = Key::None;
-        Key Third = Key::None;
+        Shortcut _shortcut;
     };
 }
+
+#include "KeyboardState.inl"

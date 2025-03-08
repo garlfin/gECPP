@@ -98,7 +98,7 @@ namespace gE
             _controller->SetShape(capsuleShape);
 
             dir *= Speed;
-            if (!IsKeyDown(crouchState) && IsKeyDown(keyboard.GetKey(Key::LShift))) dir *= SPEED_MULTIPLIER;
+            if (!IsKeyDown(crouchState) && IsKeyDown(keyboard.GetKey(KeyModifier::LShift))) dir *= SPEED_MULTIPLIER;
 
             if (grounded) _dir = transform->Rotation * dir;
 

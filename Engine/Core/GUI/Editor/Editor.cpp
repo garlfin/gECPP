@@ -33,7 +33,7 @@ namespace gE::Editor
 
     void Window::OnEditorGUI()
     {
-        if(_shortcut.IsPressed(GetWindow().GetKeyboard())) _isOpen = true;
+        if(GetWindow().GetKeyboard().GetShortcut(_shortcut)) _isOpen = true;
 
         if(!_isOpen) return;
 
@@ -44,7 +44,7 @@ namespace gE::Editor
 
     EditorLog::EditorLog(Editor* editor) : Window(editor, "Console", ImGuiWindowFlags_MenuBar)
     {
-        SetShortcut({ Key::LControl, Key::L });
+        SetShortcut({ KeyModifier::LControl, KeyModifier::None, Key::L });
     }
 
     void EditorLog::IOnEditorGUI()

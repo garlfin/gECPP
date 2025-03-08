@@ -21,6 +21,7 @@
 		typedef SUPER_T::SETTINGS_T SETTINGS_T; \
 		typedef SUPER_T SUPER; \
 		inline void Deserialize(istream& in, gE::Window* window) override { PlacementNew(*this, in, window); } \
+		inline void Reload(gE::Window* window) override { GE_ASSERT(!IsFree()); SUPER_T tmp = move(*this); PlacementNew(*this, window, move(tmp)); } \
 		TYPE() = default; \
 		using SUPER_T::Free; \
 		using SUPER_T::IsFree; \
