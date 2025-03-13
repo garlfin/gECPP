@@ -18,7 +18,7 @@ namespace gE
 
         GET_CONST(Window&, Window, *_window);
 
-        void Bind() const { GetShader().Bind(); }
+        void Bind() const;
 
         NODISCARD virtual const API::Shader& GetReferenceShader() const = 0;
         NODISCARD virtual const API::Shader& GetShader() const = 0;
@@ -36,6 +36,8 @@ namespace gE
 
     class ForwardShader final : public Shader
     {
+        REFLECTABLE_ONGUI_PROTO(Shader);
+
     public:
         ForwardShader(Window*, const GPU::Shader& source);
 
@@ -44,6 +46,7 @@ namespace gE
 
         void Free() override { _shader.Free(); }
         NODISCARD bool IsFree() const override { return _shader.IsFree(); }
+        void Reload(SETTINGS_T window) override;
 
 #ifdef DEBUG
         NODISCARD bool VerifyUniforms(const std::string&) const override { return true; }

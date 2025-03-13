@@ -145,17 +145,17 @@ struct EnumData
 			void OnEditorGUI(u8 depth) override { SUPER::OnEditorGUI(depth); IOnEditorGUI(depth); } \
 		private: \
 			void IOnEditorGUI(u8 depth)
-	#define REFLECTABLE_ONGUI_IMPL(TYPE, CODE) \
-		void TYPE::IOnEditorGUI(u8 depth) { CODE }
+	#define REFLECTABLE_ONGUI_IMPL(TYPE, ...) \
+		void TYPE::IOnEditorGUI(u8 depth) { __VA_ARGS__ }
 	#define REFLECTABLE_ICON_PROTO() \
 		bool OnEditorIcon(Size1D size) override
-	#define REFLECTABLE_ICON_IMPL(TYPE, CODE) \
-		bool TYPE::OnEditorIcon(Size1D size) { CODE; return true; }
+	#define REFLECTABLE_ICON_IMPL(TYPE, ...) \
+		bool TYPE::OnEditorIcon(Size1D size) { __VA_ARGS__; return true; }
 #else
 	#define REFLECTABLE_ONGUI_PROTO(SUPER)
-	#define REFLECTABLE_ONGUI_IMPL(TYPE, CODE)
+	#define REFLECTABLE_ONGUI_IMPL(TYPE, ...)
 	#define REFLECTABLE_ICON_PROTO
-	#define REFLECTABLE_ICON_IMPL(TYPE, CODE)
+	#define REFLECTABLE_ICON_IMPL(TYPE, ...)
 #endif
 
 #define REFLECTABLE_MAGIC_IMPL(MAGIC_VAL) \
@@ -181,7 +181,16 @@ struct EnumData
 #define REFLECTABLE_ONEDITOR_NO_IMPL(TYPE, SUPER) \
 	void TYPE::OnEditorGUI(u8 depth) { SUPER::OnEditorGUI(depth); }
 
-#define ENUM_DEF(E_TYPE, E_VAL) ENUM_PAIR(E_TYPE::E_VAL, #E_VAL)
+#define REFLECTABLE_ENUM(ETYPE, ENUM, SIZE, ...) \
+	CONSTEXPR_GLOBAL EnumData<ENUM, SIZE> E##ENUM \
+	{ \
+		EnumType::ETYPE, \
+		{ \
+			__VA_ARGS__ \
+		} \
+	};
+
+#define ENUM_DEF(E_TYPE, E_NAME) ENUM_PAIR(E_TYPE::E_NAME, #E_NAME)
 #define ENUM_PAIR(E_VAL, E_NAME) std::make_pair(E_VAL, E_NAME##sv)
 
 // Typesystem must be explicity instantiated.

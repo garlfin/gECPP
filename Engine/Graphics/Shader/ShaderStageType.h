@@ -14,4 +14,10 @@ namespace GPU
 		Fragment = GL_FRAGMENT_SHADER,
 		Compute = GL_COMPUTE_SHADER
 	};
+
+	REFLECTABLE_ENUM(Normal, ShaderStageType, 3,
+		ENUM_DEF(ShaderStageType, Vertex),
+		ENUM_DEF(ShaderStageType, Fragment),
+		ENUM_DEF(ShaderStageType, Compute)
+	);
 }

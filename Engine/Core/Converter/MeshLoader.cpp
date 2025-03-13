@@ -26,6 +26,8 @@ namespace gE::Model
     void ProcessSubmesh(GPU::VAO& meshOut, const gltf::Asset& file, const gltf::Mesh& meshIn);
     void ProcessSubmesh(GPU::IndexedVAO& meshOut, const gltf::Asset& file, const gltf::Mesh& meshIn);
 
+    TransformData GetTransformFromNode(const gltf::Node& node);
+
     void ReadGLTF(Window* window, const Path& path, Array<Mesh>& meshesOut, Array<Skeleton>& skeletons)
     {
         gltf::Expected<gltf::GltfDataBuffer> data = gltf::GltfDataBuffer::FromPath(path);
@@ -87,6 +89,36 @@ namespace gE::Model
                 meshOut.VAO = ptr_create<API::VAO>(window, move(meshSettings));
             }
         }
+
+        skeletons = Array<Skeleton>(file->skins.size());
+        for(size_t i = 0; i < file->skins.size(); i++)
+        {
+            const gltf::Skin& skeletonIn = file->skins[i];
+            Skeleton& skeletonOut = skeletons[i];
+
+            skeletonOut.Name = skeletonIn.name;
+            skeletonOut.Bones = Array<Bone>(skeletonIn.joints.size());
+
+            for(size_t b = 0; b < skeletonIn.joints.size(); b++)
+            {
+                const gltf::Node& boneIn = file->nodes[skeletonIn.joints[b]];
+                Bone& boneOut = skeletonOut.Bones[b];
+
+                boneOut.Name = boneIn.name;
+                boneOut.Transform = GetTransformFromNode(boneIn);
+                boneOut.InverseBindMatrix = glm::inverse(boneOut.Transform.ToMat4());
+
+                for(size_t childIndex : boneIn.children)
+                {
+                    childIndex = std::ranges::find(skeletonIn.joints, childIndex) - skeletonIn.joints.begin();
+                    Bone& child = skeletonOut.Bones[childIndex];
+
+                    child.Parent.Name = boneIn.name;
+                    child.Parent.Location = b;
+                    child.Parent.Pointer = &boneOut;
+                }
+            }
+        }
     }
 
     void ReadGLTFAsFile(Window* window, const std::filesystem::path& path, Array<File>& files)
@@ -97,14 +129,23 @@ namespace gE::Model
         Array<Skeleton> skeletons;
         ReadGLTF(window, path, meshes, skeletons);
 
-        files = Array<File>(meshes.Count());
+        files = Array<File>(meshes.Count() + skeletons.Count());
         size_t fileOffset = 0;
+
         for(size_t i = 0; i < meshes.Count(); i++, fileOffset++)
         {
             Mesh& mesh = meshes[i];
             Path filePath = parentDirectory / Path(mesh.Name).replace_extension(Mesh::Type.Extension);
 
             files[fileOffset] = File(window, filePath, std::move(mesh));
+        }
+
+        for(size_t i = 0; i < skeletons.Count(); i++, fileOffset++)
+        {
+            Skeleton& skeleton = skeletons[i];
+            Path filePath = parentDirectory / Path(skeleton.Name).replace_extension(Skeleton::Type.Extension);
+
+            files[fileOffset] = File(window, filePath, std::move(skeleton));
         }
     }
 
@@ -271,5 +312,24 @@ namespace gE::Model
 
             offset += accessor.count;
         }
+    }
+
+    TransformData GetTransformFromNode(const gltf::Node& node)
+    {
+        TransformData result;
+        if(const gltf::TRS* trs = std::get_if<gltf::TRS>(&node.transform))
+        {
+            result.Position = std::bit_cast<glm::vec3>(trs->translation);
+            result.Rotation = std::bit_cast<glm::quat>(trs->rotation);
+            result.Scale = std::bit_cast<glm::vec3>(trs->scale);
+        }
+        else
+        {
+            const gltf::math::fmat4x4* mat = std::get_if<gltf::math::fmat4x4>(&node.transform);
+            Decompose(*(const glm::mat4*) mat, result.Position, result.Rotation, result.Scale);
+        }
+
+        // ReSharper disable once CppSomeObjectMembersMightNotBeInitialized
+        return result;
     }
 }

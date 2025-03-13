@@ -11,7 +11,7 @@
 
 namespace gE::Editor
 {
-    AssetInspector::AssetInspector(Editor* editor) : Window(editor, "Asset Inspector")
+    AssetInspector::AssetInspector(Editor* editor) : Window(editor, "Asset Inspector", ImGuiWindowFlags_HorizontalScrollbar)
     {
         SetShortcut({ KeyModifier::LControl, KeyModifier::LShift, Key::A });
     }
@@ -40,13 +40,14 @@ namespace gE::Editor
                         Log::Info(std::format("Wrote file to {}", _selected->GetPath().string()));
                     }
                 }
+
                 if(!asset.IsFree())
                 {
-                    if(ImGui::Button("Free CPU-Side Data"))
-                        asset.Free();
-                    ImGui::SameLine();
                     if(ImGui::Button("Reload from CPU"))
                         asset.Reload(&GetWindow());
+                    ImGui::SameLine();
+                    if(ImGui::Button("Free CPU-Side Data"))
+                        asset.Free();
                 }
 
                 ImGui::Separator();

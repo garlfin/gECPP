@@ -57,6 +57,7 @@ namespace GL
 		VertexStage = move(vert.GetSettings());
 
 		glLinkProgram(ID);
+		glGetProgramiv(ID, GL_LINK_STATUS, (GLint*) &_isCompiled);
 
 		GetShaderStatus(*this);
 	}
@@ -69,6 +70,7 @@ namespace GL
 		ComputeStage = move(comp.GetSettings());
 
 		glLinkProgram(ID);
+		glGetProgramiv(ID, GL_LINK_STATUS, (GLint*) &_isCompiled);
 
 		GetShaderStatus(*this);
 	}

@@ -105,8 +105,6 @@ namespace gE
 
         if(_previousScale != transform->Scale)
         {
-            Log::Write("INFO: SHAPE SCALING\n");
-
             const px::Shape& joltShape = _collider->GetShape().GetJoltShape();
             const px::ShapeSettings::ShapeResult result = joltShape.ScaleShape(Physics::ToPX(transform->Scale));
             GE_ASSERTM(result.IsValid(), "INVALID SCALED SHAPE!");

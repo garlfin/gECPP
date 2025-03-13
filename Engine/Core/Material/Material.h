@@ -20,17 +20,13 @@ namespace gE
 		GreaterEqual = GL_GEQUAL
 	};
 
-	CONSTEXPR_GLOBAL EnumData<DepthFunction, 5> EDepthFunction
-	{
-		EnumType::Normal,
-		{
-			ENUM_PAIR(DepthFunction::Disable, "Disable"),
-			ENUM_PAIR(DepthFunction::Less, "Less"),
-			ENUM_PAIR(DepthFunction::LessEqual, "Less-Equal"),
-			ENUM_PAIR(DepthFunction::Greater, "Greater"),
-			ENUM_PAIR(DepthFunction::GreaterEqual, "Greater-Equal")
-		}
-	};
+	REFLECTABLE_ENUM(Normal, DepthFunction, 5,
+		ENUM_PAIR(DepthFunction::Disable, "Disable"),
+		ENUM_PAIR(DepthFunction::Less, "Less"),
+		ENUM_PAIR(DepthFunction::LessEqual, "Less-Equal"),
+		ENUM_PAIR(DepthFunction::Greater, "Greater"),
+		ENUM_PAIR(DepthFunction::GreaterEqual, "Greater-Equal")
+	);
 
 	enum class CullMode : GLenum
 	{
@@ -39,15 +35,11 @@ namespace gE
 		Front = GL_FRONT,
 	};
 
-	CONSTEXPR_GLOBAL EnumData<CullMode, 3> ECullMode
-	{
-		EnumType::Normal,
-		{
-			ENUM_PAIR(CullMode::Disable, "Disable"),
-			ENUM_PAIR(CullMode::Back, "Back"),
-			ENUM_PAIR(CullMode::Front, "Front")
-		}
-	};
+	REFLECTABLE_ENUM(Normal, CullMode, 3,
+		ENUM_PAIR(CullMode::Disable, "Disable"),
+		ENUM_PAIR(CullMode::Back, "Back"),
+		ENUM_PAIR(CullMode::Front, "Front")
+	);
 
 	enum class BlendMode : GLenum
 	{
@@ -56,15 +48,11 @@ namespace gE
 		Blend
 	};
 
-	CONSTEXPR_GLOBAL EnumData<BlendMode, 3> EBlendMode
-	{
-		EnumType::Normal,
-		{
-			ENUM_PAIR(BlendMode::Disable, "Disable"),
-			ENUM_PAIR(BlendMode::Dither, "Dither"),
-			ENUM_PAIR(BlendMode::Blend, "Blend")
-		}
-	};
+	REFLECTABLE_ENUM(Normal, BlendMode, 3,
+		ENUM_PAIR(BlendMode::Disable, "Disable"),
+		ENUM_PAIR(BlendMode::Dither, "Dither"),
+		ENUM_PAIR(BlendMode::Blend, "Blend")
+	);
 
 	class Material : public Asset
 	{

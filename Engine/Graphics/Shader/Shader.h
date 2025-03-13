@@ -10,12 +10,7 @@
 
 #include "ShaderStageType.h"
 
-namespace GL
-{
-	class ShaderStage;
-	class Shader;
-	class ComputeShader;
-}
+#define GE_SS_MIN_VIEW_HEIGHT 512
 
 namespace GPU
 {
@@ -40,13 +35,13 @@ namespace GPU
 	struct ShaderStage : public gE::Asset
 	{
 		SERIALIZABLE_PROTO("STGE", 1, ShaderStage, Asset);
-		REFLECTABLE_TYPE_PROTO(ShaderStage, "GPU::ShaderStage");
+		REFLECTABLE_PROTO(ShaderStage, Asset, "GPU::ShaderStage");
 
 	public:
 		ShaderStage(ShaderStageType, const Path&);
 
 		ShaderStageType StageType = DEFAULT;
-		ShaderSource Source;
+		ShaderSource Source = DEFAULT;
 		Path BasePath = DEFAULT;
 
 		ALWAYS_INLINE void Free() override { Source.Free(); };
@@ -61,7 +56,7 @@ namespace GPU
 	struct Shader : public gE::Asset
 	{
 		SERIALIZABLE_PROTO("SHDR", 1, Shader, Asset);
-		REFLECTABLE_TYPE_PROTO(Shader, "GPU::Shader");
+		REFLECTABLE_PROTO(Shader, Asset, "GPU::Shader");
 
 	public:
 		Shader(const Path& v, const Path& f);
@@ -76,7 +71,7 @@ namespace GPU
 	struct ComputeShader : public gE::Asset
 	{
 		SERIALIZABLE_PROTO("COMP", 1, ComputeShader, Asset);
-		REFLECTABLE_TYPE_PROTO(ComputeShader, "GPU::ComputeShader");
+		REFLECTABLE_PROTO(ComputeShader, Asset, "GPU::ComputeShader");
 
 	public:
 		explicit ComputeShader(const Path& c);

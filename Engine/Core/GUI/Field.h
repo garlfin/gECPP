@@ -77,6 +77,12 @@ namespace gE
     template <class T, glm::length_t COMPONENT_COUNT>
     bool DrawField(const ScalarField<T>&, const glm::vec<COMPONENT_COUNT, T>&, u8 depth);
 
+    template <class T>
+    bool DrawField(const ScalarField<T>&, glm::qua<T>&, u8 depth);
+
+    template <class T>
+    bool DrawField(const ScalarField<T>&, const glm::qua<T>&, u8 depth);
+
     template<class T, class SETTINGS_T>
     T* DrawField(const ArrayField<SETTINGS_T>&, Array<T>&, u8 depth);
 

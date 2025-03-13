@@ -55,17 +55,20 @@ namespace gE
             {
                 if(ImGui::BeginCombo(label.c_str(), preview.c_str()))
                 {
-                    for(const auto& e : eType.Enums)
+                    if constexpr(!isConst)
                     {
-                        const bool selected = t == e.first;
-                        if(ImGui::Selectable(e.second.data(), selected))
+                        for(const auto& e : eType.Enums)
                         {
-                            if(!selected)
-                                changed = true;
-                            t = e.first;
+                            const bool selected = t == e.first;
+                            if(ImGui::Selectable(e.second.data(), selected))
+                            {
+                                if(!selected)
+                                    changed = true;
+                                t = e.first;
+                            }
+                            if(selected)
+                                ImGui::SetItemDefaultFocus();
                         }
-                        if(selected)
-                            ImGui::SetItemDefaultFocus();
                     }
                     ImGui::EndCombo();
                 }
@@ -112,7 +115,7 @@ namespace gE
         }
         else GE_SWITCH_TYPE(std::string)
         {
-            changed = ImGui::InputText(label.c_str(), &t);
+            changed = ImGui::InputText(label.c_str(), (std::string*) &t);
         }
         else if constexpr(isReflectable)
         {
@@ -227,10 +230,32 @@ namespace gE
         RAW_T temp = vec;
 
         ImGui::BeginDisabled(true);
-            const bool changed = DrawField(settings, temp, depth);
+            DrawField(settings, temp, depth);
         ImGui::EndDisabled();
 
+        return false;
+    }
+
+    template <class T>
+    bool DrawField(const ScalarField<T>& settings, glm::qua<T>& quat, u8 depth)
+    {
+        glm::vec<3, T> temp = glm::degrees(glm::eulerAngles(quat));
+        const bool changed = DrawField(settings, temp, depth);
+        quat = glm::radians(temp);
+
         return changed;
+    }
+
+    template <class T>
+    bool DrawField(const ScalarField<T>& settings, const glm::qua<T>& quat, u8 depth)
+    {
+        glm::vec<4, T> temp = glm::degrees(glm::eulerAngles(quat));
+
+        ImGui::BeginDisabled(true);
+            DrawField(settings, temp, depth);
+        ImGui::EndDisabled();
+
+        return false;
     }
 
     template <class T, class SETTINGS_T>

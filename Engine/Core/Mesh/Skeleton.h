@@ -10,14 +10,21 @@
 #include <Core/Serializable/Asset.h>
 #include <Core/Serializable/Serializable.h>
 
-#define GE_MAX_BONES 256
+#define GE_MAX_BONES (UINT16_MAX - 1)
 
 namespace gE
 {
     struct Skeleton;
     struct Animation;
+}
 
-    enum class AnimationInterpolationMode : u8
+template struct TypeSystem<gE::Skeleton&>;
+
+template struct TypeSystem<gE::Animation&>;
+
+namespace gE
+{
+    enum class FrameInterpolationMode : u8
     {
         None,
         Linear,
@@ -30,23 +37,28 @@ namespace gE
     {
     public:
         u16 FrameID = DEFAULT;
-        AnimationInterpolationMode InterpolationMode = DEFAULT;
+        FrameInterpolationMode InterpolationMode = DEFAULT;
         TransformData Transform = DEFAULT;
     };
 
-    template<class T, class SKELETON_T>
+    template<class BONE_T, class SKELETON_T>
     struct BoneReference : public Serializable<SKELETON_T&>
     {
         SERIALIZABLE_PROTO("BREF", 1, BoneReference, Serializable<SKELETON_T&>);
 
     public:
-        T* Parent = DEFAULT;
-        u8 SuggestedLocation = -1;
+        BONE_T* Resolve(const SKELETON_T& skel);
+        void Set(const SKELETON_T& skel, BONE_T& bone) const;
+
+        BONE_T* Pointer = DEFAULT;
+        u16 Location = -1;
+        std::string Name = DEFAULT;
     };
 
     struct Bone : public Serializable<Skeleton&>
     {
         SERIALIZABLE_PROTO("BONE", 1, Bone, Serializable);
+        REFLECTABLE_PROTO(Bone, Serializable, "gE::Bone");
 
     public:
         NODISCARD inline bool IsFree() const { return Name.empty(); }
@@ -59,18 +71,20 @@ namespace gE
         glm::mat4 InverseBindMatrix = DEFAULT;
     };
 
-    struct Skeleton : public Asset
+    struct Skeleton final : public Asset
     {
         SERIALIZABLE_PROTO("SKEL", 1, Skeleton, Asset);
+        REFLECTABLE_PROTO(Skeleton, Asset, "gE::BoneReference");
 
     public:
         Bone* FindBone(const std::string&, u8 suggestedLocation = -1);
-        NODISCARD const Bone* FindBone(const std::string&, u8 suggestedLocation = -1) const;
+        NODISCARD Bone* FindBone(const std::string&, u8 suggestedLocation = -1) const;
         NODISCARD ALWAYS_INLINE u8 GetIndex(const Bone& bone) const { return &bone - Bones.Data(); }
 
         NODISCARD inline bool IsFree() const override { return Bones.IsFree(); }
         inline void Free() override { Bones.Free(); }
 
+        std::string Name = DEFAULT;
         Array<Bone> Bones = DEFAULT;
     };
 
@@ -79,15 +93,12 @@ namespace gE
         SERIALIZABLE_PROTO("ABNE", 1, AnimatedBone, Serializable);
 
     public:
-        bool Retarget(Skeleton*);
+        bool Retarget(const Skeleton&);
+        NODISCARD inline bool IsFree() const { return Frames.IsFree(); }
+        inline void Free() { Frames.Free(); }
 
-        NODISCARD inline bool IsFree() const { return Name.empty() && Frames.IsFree(); }
-        inline void Free() { Name.clear(); Frames.Free(); }
-
-        std::string Name = DEFAULT;
-        Bone* Target = DEFAULT;
+        BoneReference<Bone, Skeleton> Target = DEFAULT;
         BoneReference<AnimatedBone, Animation> Parent = DEFAULT;
-
         Array<Frame> Frames = DEFAULT;
     };
 
@@ -96,8 +107,7 @@ namespace gE
         SERIALIZABLE_PROTO("ANIM", 1, Animation, Asset);
 
     public:
-        AnimatedBone* FindBone(const std::string&, u8 suggestedLocation = -1);
-        NODISCARD const AnimatedBone* FindBone(const std::string&, u8 suggestedLocation = -1) const;
+        NODISCARD AnimatedBone* FindBone(const std::string&, u8 suggestedLocation = -1) const;
         NODISCARD ALWAYS_INLINE u8 GetIndex(const AnimatedBone& bone) const { return &bone - Bones.Data(); }
 
         NODISCARD inline bool IsFree() const override { return Skeleton.IsFree() && Bones.IsFree(); }
@@ -117,20 +127,34 @@ namespace gE
     template <class T, class SKELETON_T>
     void BoneReference<T, SKELETON_T>::IDeserialize(istream& in, SETTINGS_T settings)
     {
-        Read(in, SuggestedLocation);
-
-        const std::string parentName = Read<std::string>(in);
-        Parent = settings.FindBone(parentName);
+        Location = Read<u16>(in);
+        Name = Read<std::string>(in);
+        Resolve(settings);
     }
 
     template <class T, class SKELETON_T>
     void BoneReference<T, SKELETON_T>::ISerialize(ostream& out) const
     {
-        Write(out, SuggestedLocation);
+        Write(out, Location);
+        Write(out, Name);
+    }
 
-        if(Parent)
-            Write(out, Parent->Name);
-        else
-            Write(out, std::string());
+    template <class BONE_T, class SKELETON_T>
+    BONE_T* BoneReference<BONE_T, SKELETON_T>::Resolve(const SKELETON_T& skel)
+    {
+        if(!Pointer && !Name.empty())
+        {
+            Pointer = skel.FindBone(Name, Location);
+            Location = Pointer - skel.Bones.begin();
+        }
+        return Pointer;
+    }
+
+    template <class BONE_T, class SKELETON_T>
+    void BoneReference<BONE_T, SKELETON_T>::Set(const SKELETON_T& skel, BONE_T& bone) const
+    {
+        Pointer = &bone;
+        Name = bone.Name;
+        Location = skel.GetIndex(bone);
     }
 }

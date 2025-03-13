@@ -21,7 +21,7 @@ void DemoWindow::OnInit()
 
 	PBRMaterialSettings cobbleSettings
 	{
-		 Assets.AddSerializableFromFile<GL::Texture2D>("Resource/Texture/cobble_col.tex2")->Cast<API::Texture2D, false>(),
+		Assets.AddFile(PVR::ReadAsFile(this, "Resource/Texture/cobble_col.pvr"))->Cast<API::Texture2D, false>(),
 		 Assets.AddFile(PVR::ReadAsFile(this, "Resource/Texture/cobble_armd.pvr"))->Cast<API::Texture2D, false>(),
 		 Assets.AddFile(PVR::ReadAsFile(this, "Resource/Texture/cobble_nor.pvr"))->Cast<API::Texture2D, false>(),
 	};
@@ -40,24 +40,24 @@ void DemoWindow::OnInit()
 		Assets.AddFile(PVR::ReadAsFile(this, "Resource/Texture/grass_nor.pvr"))->Cast<API::Texture2D, false>(),
 	};
 
-	auto rasterShader = ref_create<ForwardShader>(this, GPU::Shader("Resource/Shader/uber.vert", "Resource/Shader/uber.frag"));
+	const auto rasterShaderSource = ref_create<ForwardShader>(this, GPU::Shader("Resource/Shader/uber.vert", "Resource/Shader/uber.frag"));
+	const auto rasterShader = Assets.AddFile(File(this, "Resource/Shader/Raster.shdr", rasterShaderSource))->Cast<Shader, false>();
 
-	auto cobbleMaterial = Assets.AddFile(File(this, "Cobble", PBRMaterial(this, rasterShader, cobbleSettings)))->Cast<PBRMaterial, false>();
-	auto tileMaterial = Assets.AddFile(File(this, "Tile", PBRMaterial(this, rasterShader, tileSettings)))->Cast<PBRMaterial, false>();
-	auto grassMaterial = Assets.AddFile(File(this, "Grass", PBRMaterial(this, rasterShader, grassSettings)))->Cast<PBRMaterial, false>();
+	const auto cobbleMaterial = Assets.AddFile(File(this, "Cobble", PBRMaterial(this, rasterShader, cobbleSettings)))->Cast<PBRMaterial, false>();
+	const auto tileMaterial = Assets.AddFile(File(this, "Tile", PBRMaterial(this, rasterShader, tileSettings)))->Cast<PBRMaterial, false>();
+	const auto grassMaterial = Assets.AddFile(File(this, "Grass", PBRMaterial(this, rasterShader, grassSettings)))->Cast<PBRMaterial, false>();
 
-	Reference<Mesh> sceneMesh = Assets.AddSerializableFromFile<Mesh>("Resource/Model/Plane.001.mesh")->Cast<Mesh, false>();
-	Reference<Mesh> cubeMesh = Assets.AddSerializableFromFile<Mesh>("Resource/Model/Cube.mesh")->Cast<Mesh, false>();
+	const auto sceneMesh = Assets.AddSerializableFromFile<Mesh>("Resource/Model/Plane.001.mesh")->Cast<Mesh, false>();
+	const auto cubeMesh = Assets.AddSerializableFromFile<Mesh>("Resource/Model/Cube.mesh")->Cast<Mesh, false>();
 
 	auto* mesh = new StaticMeshEntity(this, sceneMesh);
-
 	mesh->SetName("Room");
 	mesh->GetTransform().SetScale(glm::vec3(0.5));
 	mesh->GetRenderer().SetMaterial(0, cobbleMaterial);
 	mesh->GetRenderer().SetMaterial(1, tileMaterial);
 	mesh->GetRenderer().SetMaterial(2, grassMaterial);
 
-	glm::vec3 sunRotation(-31.f, 30.f, 0.f);
+	constexpr glm::vec3 sunRotation(-31.f, 30.f, 0.f);
 	auto* sun = new DirectionalLight(this, 1024, 10.f, glm::quat(radians(sunRotation)));
 	sun->SetName("Sun");
 	Lights->Sun = sun;

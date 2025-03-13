@@ -118,7 +118,18 @@ namespace gE
 	ForwardShader::ForwardShader(Window* window, const GPU::Shader& source) : Shader(window),
 	    _shader(window, source)
 	{
+#ifndef GE_ENABLE_EDITOR
 		_shader.Free();
+#endif
+	}
+
+	REFLECTABLE_ONGUI_IMPL(ForwardShader,
+		_shader.OnEditorGUI(depth);
+	);
+
+	void ForwardShader::Reload(Window* window)
+	{
+		 _shader.Reload(window);
 	}
 
 	DeferredShader::DeferredShader(Window* window, const GPU::Shader& source) : Shader(window)
@@ -167,5 +178,13 @@ namespace gE
 #endif
 
 	REFLECTABLE_FACTORY_NO_IMPL(Shader);
-	REFLECTABLE_ONGUI_IMPL(Shader, {});
+	REFLECTABLE_ONGUI_IMPL(Shader, {})
+
+	void Shader::Bind() const
+	{
+		if(const API::Shader& shader = GetShader();
+			shader.GetIsCompiled()) shader.Bind();
+		else
+			GetWindow().GetDefaultMaterial().GetShader().Bind();
+	}
 }

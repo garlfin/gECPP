@@ -21,6 +21,7 @@ namespace GL
 		explicit IShader(gE::Window*);
 
 		ALWAYS_INLINE void Bind() const override { glUseProgram(ID); }
+		GET_CONST(bool, IsCompiled, _isCompiled);
 
 		ALWAYS_INLINE u32 GetUniformLocation(const std::string& name) const { return glGetUniformLocation(ID, name.c_str()); }
 		std::string GetUniformName(u32 index) const;
@@ -42,6 +43,9 @@ namespace GL
 		void SetUniform(u8 loc, const Texture&) const;
 
 		inline ~IShader() override { glDeleteProgram(ID); }
+
+	protected:
+		bool _isCompiled = false;
 	};
 
 	class Shader final : protected GPU::Shader, public IShader
@@ -57,7 +61,7 @@ namespace GL
 		API_DEFAULT_CM_CONSTRUCTOR(ComputeShader);
 		API_UNDERLYING_IMPL();
 
-	 public:
+	public:
 		ALWAYS_INLINE void Dispatch(u16 x, u16 y, u16 z) const { Bind(); glDispatchCompute(x, y, z); }
 		ALWAYS_INLINE void Dispatch(u16 x, u16 y) const { Bind(); glDispatchCompute(x, y, 1); }
 		ALWAYS_INLINE void Dispatch(u16 x) const { Bind(); glDispatchCompute(x, 1, 1); }
@@ -71,7 +75,7 @@ namespace GL
 		API_SERIALIZABLE(ShaderStage, GPU::ShaderStage);
 		API_DEFAULT_CM_CONSTRUCTOR(ShaderStage);
 
-	 public:
+	public:
 		ALWAYS_INLINE void Bind() const override { }
 		ALWAYS_INLINE void Attach(const IShader& shader) const { glAttachShader(shader.Get(), ID); }
 

@@ -81,19 +81,15 @@ public:
 	NODISCARD ALWAYS_INLINE I* Data() { return _t; }
 	NODISCARD ALWAYS_INLINE const I* Data() const { return _t; }
 
-	NODISCARD ALWAYS_INLINE I& operator[](u64 i) { GE_ASSERTM(_t, "ERROR: ARRAY NOT INITIALIZED"); return _t[i]; }
-	NODISCARD ALWAYS_INLINE const I& operator[](u64 i) const { GE_ASSERTM(_t, "ERROR: ARRAY NOT INITIALIZED"); return _t[i]; }
+	NODISCARD ALWAYS_INLINE I& operator[](u64 i) const { GE_ASSERTM(_t, "ERROR: ARRAY NOT INITIALIZED"); return _t[i]; }
 
 	NODISCARD ALWAYS_INLINE bool IsFree() const { return !_t; }
 	ALWAYS_INLINE void Free() { delete[] _t; _t = nullptr; }
 
 	ALWAYS_INLINE operator bool() const { return _t; }
 
-	T* begin() { return _t; }
-	const T* begin() const { return _t; }
-
-	T* end() { return _t + _size; }
-	const T* end() const { return _t + _size; }
+	T* begin() const { return _t; }
+	T* end() const { return _t + _size; }
 
 	~Array() { Free(); }
 
