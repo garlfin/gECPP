@@ -78,6 +78,25 @@ namespace gE
 
             }
         }
+        else GE_SWITCH_TYPE(bool)
+        {
+            T temp = t;
+            if constexpr(isConst)
+                ImGui::Checkbox(label.c_str(), &temp);
+            else
+            {
+                ImGui::Checkbox(label.c_str(), &t);
+                changed = temp == t;
+            }
+        }
+        else GE_SWITCH_TYPE(std::string)
+        {
+            changed = ImGui::InputText(label.c_str(), (std::string*) &t);
+        }
+        else GE_SWITCH_TYPE(std::span<char>)
+        {
+            changed = ImGui::InputText(label.c_str(), (char*) t.data(), t.size());
+        }
         else if constexpr(std::is_scalar_v<RAW_T> && !std::is_same_v<RAW_T, bool>)
         {
             static_assert(std::is_same_v<SETTINGS_T, ScalarField<RAW_T>>);
@@ -101,21 +120,6 @@ namespace gE
 
             if(!settings.Tooltip.empty() && ImGui::IsItemHovered(GE_EDITOR_TOOLTIP_FLAGS))
                 ImGui::SetTooltip(settings.Tooltip.data());
-        }
-        else GE_SWITCH_TYPE(bool)
-        {
-            T temp = t;
-            if constexpr(isConst)
-                ImGui::Checkbox(label.c_str(), &temp);
-            else
-            {
-                ImGui::Checkbox(label.c_str(), &t);
-                changed = temp == t;
-            }
-        }
-        else GE_SWITCH_TYPE(std::string)
-        {
-            changed = ImGui::InputText(label.c_str(), (std::string*) &t);
         }
         else if constexpr(isReflectable)
         {

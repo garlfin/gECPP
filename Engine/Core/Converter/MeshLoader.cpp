@@ -22,13 +22,15 @@ namespace gE::Model
 
     void SetupMeshFields(GPU::VAO& meshOut, size_t vertexCount);
     void SetupMeshFields(GPU::IndexedVAO& meshOut, size_t vertexCount, size_t triCount);
+    void SetupMeshWeights(GPU::VAO& meshOut, size_t vertexCount);
     void SetupMeshMaterials(GPU::VAO& meshOut, const gltf::Asset& file, const gltf::Mesh& mesh);
     void ProcessSubmesh(GPU::VAO& meshOut, const gltf::Asset& file, const gltf::Mesh& meshIn);
     void ProcessSubmesh(GPU::IndexedVAO& meshOut, const gltf::Asset& file, const gltf::Mesh& meshIn);
+    void ProcessSubmeshWeights(GPU::VAO& meshOut, const gltf::Asset& file, const gltf::Mesh& meshIn);
 
     TransformData GetTransformFromNode(const gltf::Node& node);
 
-    void ReadGLTF(Window* window, const Path& path, Array<Mesh>& meshesOut, Array<Skeleton>& skeletons)
+    void ReadGLTF(Window* window, const Path& path, GLTFResult& result)
     {
         gltf::Expected<gltf::GltfDataBuffer> data = gltf::GltfDataBuffer::FromPath(path);
         if(data.error() != gltf::Error::None)
@@ -39,16 +41,17 @@ namespace gE::Model
         if(data.error() != gltf::Error::None)
             return Log::Error(std::format("Failed to parse {}.", path.string()));
 
-        meshesOut = Array<Mesh>(file->meshes.size());
+        result.Meshes = Array<Mesh>(file->meshes.size());
         for(size_t i = 0; i < file->meshes.size(); i++)
         {
             const gltf::Mesh& meshIn = file->meshes[i];
-            Mesh& meshOut = meshesOut[i];
+            Mesh& meshOut = result.Meshes[i];
 
             meshOut.Name = meshIn.name;
 
             size_t vertexCount = 0;
             size_t indexCount = 0;
+            bool hasWeights = false;
             for(const gltf::Primitive& subMesh : meshIn.primitives)
             {
                 const PrimitiveData position = GetAttributeData(file.get(), subMesh, "POSITION");
@@ -66,6 +69,7 @@ namespace gE::Model
                 GE_ASSERT(indices.Accessor->count % 3 == 0);
 
                 indexCount += indices.Accessor->count;
+                hasWeights |= subMesh.findAttribute("JOINTS_0") != subMesh.attributes.end();
             }
 
             if(indexCount)
@@ -75,6 +79,12 @@ namespace gE::Model
                 SetupMeshMaterials(meshSettings, file.get(), meshIn);
                 SetupMeshFields(meshSettings, vertexCount, indexCount / 3);
                 ProcessSubmesh(meshSettings, file.get(), meshIn);
+
+                if(hasWeights)
+                {
+                    SetupMeshWeights(meshSettings, vertexCount);
+                    ProcessSubmeshWeights(meshSettings, file.get(), meshIn);
+                }
 
                 meshOut.VAO = ptr_create<API::IndexedVAO>(window, move(meshSettings));
             }
@@ -86,15 +96,21 @@ namespace gE::Model
                 SetupMeshFields(meshSettings, vertexCount);
                 ProcessSubmesh(meshSettings, file.get(), meshIn);
 
+                if(hasWeights)
+                {
+                    SetupMeshWeights(meshSettings, vertexCount);
+                    ProcessSubmeshWeights(meshSettings, file.get(), meshIn);
+                }
+
                 meshOut.VAO = ptr_create<API::VAO>(window, move(meshSettings));
             }
         }
 
-        skeletons = Array<Skeleton>(file->skins.size());
+        result.Skeletons = Array<Skeleton>(file->skins.size());
         for(size_t i = 0; i < file->skins.size(); i++)
         {
             const gltf::Skin& skeletonIn = file->skins[i];
-            Skeleton& skeletonOut = skeletons[i];
+            Skeleton& skeletonOut = result.Skeletons[i];
 
             skeletonOut.Name = skeletonIn.name;
             skeletonOut.Bones = Array<Bone>(skeletonIn.joints.size());
@@ -125,24 +141,23 @@ namespace gE::Model
     {
         const Path parentDirectory = path.parent_path();
 
-        Array<Mesh> meshes;
-        Array<Skeleton> skeletons;
-        ReadGLTF(window, path, meshes, skeletons);
+        GLTFResult result;
+        ReadGLTF(window, path, result);
 
-        files = Array<File>(meshes.Count() + skeletons.Count());
+        files = Array<File>(result.Meshes.Count() + result.Skeletons.Count());
         size_t fileOffset = 0;
 
-        for(size_t i = 0; i < meshes.Count(); i++, fileOffset++)
+        for(size_t i = 0; i < result.Meshes.Count(); i++, fileOffset++)
         {
-            Mesh& mesh = meshes[i];
+            Mesh& mesh = result.Meshes[i];
             Path filePath = parentDirectory / Path(mesh.Name).replace_extension(Mesh::Type.Extension);
 
             files[fileOffset] = File(window, filePath, std::move(mesh));
         }
 
-        for(size_t i = 0; i < skeletons.Count(); i++, fileOffset++)
+        for(size_t i = 0; i < result.Skeletons.Count(); i++, fileOffset++)
         {
-            Skeleton& skeleton = skeletons[i];
+            Skeleton& skeleton = result.Skeletons[i];
             Path filePath = parentDirectory / Path(skeleton.Name).replace_extension(Skeleton::Type.Extension);
 
             files[fileOffset] = File(window, filePath, std::move(skeleton));
@@ -189,18 +204,12 @@ namespace gE::Model
 
     void SetupMeshFields(GPU::VAO& meshOut, size_t vertexCount)
     {
-        meshOut.Counts.BufferCount = 1; // INTERLEAVED
-        meshOut.Counts.FieldCount = 4; // POS UV NOR TAN
+        meshOut.AddBuffer(GPU::Buffer<std::byte>(vertexCount, nullptr, sizeof(Vertex)));
 
-        GPU::Buffer<std::byte>& buf = meshOut.Buffers[0];
-        buf.Stride = sizeof(Vertex);
-        buf.Data = Array<std::byte>(vertexCount * buf.Stride);
-        buf.UsageHint = GPU::BufferUsageHint::Default;
-
-        meshOut.Fields[0] = POSITION_FIELD;
-        meshOut.Fields[1] = UV_FIELD;
-        meshOut.Fields[2] = NORMAL_FIELD;
-        meshOut.Fields[3] = TANGENT_FIELD;
+        meshOut.AddField(POSITION_FIELD);
+        meshOut.AddField(UV_FIELD);
+        meshOut.AddField(NORMAL_FIELD);
+        meshOut.AddField(TANGENT_FIELD);
     }
 
     void SetupMeshFields(GPU::IndexedVAO& meshOut, size_t vertexCount, size_t triCount)
@@ -213,6 +222,14 @@ namespace gE::Model
         buf.Stride = sizeof(Face);
         buf.Data = Array<std::byte>(triCount * buf.Stride);
         buf.UsageHint = GPU::BufferUsageHint::Default;
+    }
+
+    void SetupMeshWeights(GPU::VAO& meshOut, size_t vertexCount)
+    {
+        meshOut.AddBuffer(GPU::Buffer<std::byte>(vertexCount, nullptr, sizeof(VertexWeight)));
+
+        meshOut.AddField(BONES_FIELD);
+        meshOut.AddField(WEIGHTS_FIELD);
     }
 
     void SetupMeshMaterials(GPU::VAO& meshOut, const gltf::Asset& file, const gltf::Mesh& mesh)
@@ -246,7 +263,7 @@ namespace gE::Model
 
     void ProcessSubmesh(GPU::VAO& meshOut, const gltf::Asset& file, const gltf::Mesh& meshIn)
     {
-        GPU::Buffer<std::byte>& buf = meshOut.Buffers[0];
+        const GPU::Buffer<std::byte>& buf = meshOut.Buffers[0];
         GE_ASSERT(buf.GetByteCount() % sizeof(Vertex) == 0);
 
         size_t offset = 0;
@@ -274,7 +291,7 @@ namespace gE::Model
     {
         ProcessSubmesh((GPU::VAO&) meshOut, file, meshIn);
 
-        GPU::Buffer<std::byte>& buf = meshOut.TriangleBuffer;
+        const GPU::Buffer<std::byte>& buf = meshOut.TriangleBuffer;
         GE_ASSERT(buf.GetByteCount() % sizeof(Face) == 0);
 
         size_t offset = 0;
@@ -311,6 +328,28 @@ namespace gE::Model
             }
 
             offset += accessor.count;
+        }
+    }
+
+    void ProcessSubmeshWeights(GPU::VAO& meshOut, const gltf::Asset& file, const gltf::Mesh& meshIn)
+    {
+        const GPU::Buffer<std::byte>& buf = meshOut.Buffers[1];
+        GE_ASSERT(buf.GetByteCount() % sizeof(VertexWeight) == 0);
+
+        size_t offset = 0;
+        for(const gltf::Primitive& submeshIn : meshIn.primitives)
+        {
+            GE_ASSERT(submeshIn.type == gltf::PrimitiveType::Triangles);
+
+            const PrimitiveData bones = GetAttributeData(file, submeshIn, "JOINTS_0");
+            const PrimitiveData weights = GetAttributeData(file, submeshIn, "WEIGHTS_0");
+
+            const std::span writeSpan { (VertexWeight*) buf.Data.begin() + offset, (VertexWeight*) buf.Data.end() };
+
+            GE_MODEL_CHECK_ATTR(BONES_FIELD, bones, (ConversionFunc<glm::u8vec4, glm::u8vec4>) nullptr);
+            GE_MODEL_CHECK_ATTR(WEIGHTS_FIELD, weights, ConvertWeight);
+
+            offset += bones.Accessor->count;
         }
     }
 

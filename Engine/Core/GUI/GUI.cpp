@@ -94,9 +94,9 @@ void gE::GUIManager::OnRender(const ImDrawData* draw) const
     vaoFormat.Counts.BufferCount = 1;
     vaoFormat.Counts.FieldCount = 3;
 
-    vaoFormat.Fields[0] = GPU::VertexField("POS", GL_FLOAT, false, 0, 0, 2, 0);
-    vaoFormat.Fields[1] = GPU::VertexField("UV", GL_FLOAT, false, 0, 1, 2, offsetof(ImDrawVert, uv));
-    vaoFormat.Fields[2] = GPU::VertexField("COL", GL_UNSIGNED_BYTE, true, 0, 2, 4, offsetof(ImDrawVert, col));
+    vaoFormat.Fields[0] = GPU::VertexField("POS", GPU::ElementType::Float, false, 0, 0, 2, 0);
+    vaoFormat.Fields[1] = GPU::VertexField("UV", GPU::ElementType::Float, false, 0, 1, 2, offsetof(ImDrawVert, uv));
+    vaoFormat.Fields[2] = GPU::VertexField("COL", GPU::ElementType::UByte, true, 0, 2, 4, offsetof(ImDrawVert, col));
 
     vaoFormat.Buffers[0] = GPU::Buffer<std::byte>(sizeof(ImDrawVert) * vertSize, nullptr, sizeof(ImDrawVert), false);
     vaoFormat.Buffers[0].UsageHint = GPU::BufferUsageHint::Dynamic;

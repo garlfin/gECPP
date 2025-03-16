@@ -69,6 +69,22 @@ public:
 		void ISerialize(ostream& out) const; \
 		u8 _version = VERSION_VAL; \
 
+#define SERIALIZABLE_PROTO_NOHEADER(TYPE, SUPER_T) \
+	public: \
+		typedef SUPER_T SUPER; \
+		typedef SUPER::SETTINGS_T SETTINGS_T;\
+		TYPE(istream& in, SETTINGS_T s) : SUPER(in, s) { IDeserialize(in, s); } \
+		TYPE() = default; \
+		REFLECTABLE_MAGIC_IMPL(""); \
+		inline void Deserialize(istream& in, SETTINGS_T s) override { PlacementNew(*this, in, s); } \
+		inline void Serialize(ostream& out) const override { SUPER::Serialize(out); ISerialize(out); } \
+		GET_CONST(u8, Version, 0) \
+		DEFAULT_OPERATOR_CM(TYPE); \
+	private: \
+		void IDeserialize(istream& in, SETTINGS_T s); \
+		void ISerialize(ostream& out) const; \
+		u8 _version = 0; \
+
 template<class T, class S>
 concept is_serializable_in = requires(T t, S s, std::istream& i)
 {

@@ -4,13 +4,34 @@
 
 #pragma once
 
-#define GE_MAX_VAO_BUFFER 5
-#define GE_MAX_VAO_MATERIAL 5
-#define GE_MAX_VAO_FIELD 5
+#define GE_MAX_VAO_BUFFER 8
+#define GE_MAX_VAO_MATERIAL 8
+#define GE_MAX_VAO_FIELD 8
 #define GE_MAX_VAO_LOD 8
 
 namespace GPU
 {
+	enum class ElementType : GLenum
+	{
+		Byte = 0x1400,
+		UByte = 0x1401,
+		Short = 0x1402,
+		UShort = 0x1403,
+		Int = 0x1404,
+		UInt = 0x1405,
+		Float = 0x1406
+	};
+
+	REFLECTABLE_ENUM(Normal, ElementType, 7,
+		ENUM_DEF(ElementType, Byte),
+		ENUM_DEF(ElementType, UByte),
+		ENUM_DEF(ElementType, Short),
+		ENUM_DEF(ElementType, UShort),
+		ENUM_DEF(ElementType, Int),
+		ENUM_DEF(ElementType, UInt),
+		ENUM_DEF(ElementType, Float),
+	);
+
 	struct MaterialSlot : public Serializable<>
 	{
 		SERIALIZABLE_PROTO("MAT", 1, MaterialSlot, Serializable);
@@ -25,14 +46,31 @@ namespace GPU
 		u32 Count = 0;
 	};
 
-	struct VertexField
+	struct VertexField : public Serializable<>
 	{
-		char Name[4] = DEFAULT;
-		GLenum ElementType = DEFAULT;
+		SERIALIZABLE_PROTO_NOHEADER(VertexField, Serializable);
+		REFLECTABLE_PROTO(VertexField, Serializable, "GPU::VertexField");
+
+	public:
+		constexpr VertexField(const char name[4], ElementType elementType, bool normalized, u8 bufferIndex, u8 index, u8 elementCount, u8 offset);
+
+		alignas(4) char Name[4] = DEFAULT;
+		ElementType ElementType = DEFAULT;
 		bool Normalized : 1 = DEFAULT;
 		u8 BufferIndex : 7 = DEFAULT;
 		u8 Index = DEFAULT;
 		u8 ElementCount = DEFAULT;
 		u8 Offset = DEFAULT;
 	};
+
+	constexpr VertexField::VertexField(const char name[4], enum ElementType elementType, bool normalized, u8 bufferIndex, u8 index, u8 elementCount, u8 offset) :
+		ElementType(elementType),
+		Normalized(normalized),
+		BufferIndex(bufferIndex),
+		Index(index),
+		ElementCount(elementCount),
+		Offset(offset)
+	{
+		std::copy_n(name, 4, Name);
+	}
 }

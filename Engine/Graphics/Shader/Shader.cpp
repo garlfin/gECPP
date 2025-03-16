@@ -28,7 +28,7 @@ namespace GPU
 		const ImVec2 contentRegion = ImGui::GetContentRegionAvail();
 		ImVec2 size = ImGui::CalcTextSize(&*Source.begin(), &*Source.end(), contentRegion.x);
 		size.x = std::max(size.x, contentRegion.x);
-		size.y = std::min(size.y, contentRegion.y);
+		size.y = std::max(size.y, contentRegion.y);
 
 		ImGui::InputTextMultiline("##source", &Source, size, ImGuiInputTextFlags_NoHorizontalScroll);
 	);

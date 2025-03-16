@@ -13,6 +13,13 @@
 
 namespace gE::Model
 {
-    void ReadGLTF(Window*, const Path&, Array<Mesh>& meshesOut, Array<Skeleton>& skeletons);
+    struct GLTFResult
+    {
+        Array<Mesh> Meshes;
+        Array<Skeleton> Skeletons;
+        Array<Animation> Animations;
+    };
+
+    void ReadGLTF(Window*, const Path&, GLTFResult& result);
     void ReadGLTFAsFile(Window*, const std::filesystem::path&, Array<File>& files);
 };

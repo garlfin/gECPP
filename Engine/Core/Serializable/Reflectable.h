@@ -181,6 +181,13 @@ struct EnumData
 #define REFLECTABLE_ONEDITOR_NO_IMPL(TYPE, SUPER) \
 	void TYPE::OnEditorGUI(u8 depth) { SUPER::OnEditorGUI(depth); }
 
+
+/**
+ *
+ * @param ETYPE EnumType: View mode (Normal, Bitfield)
+ * @param ENUM Enum
+ * @param SIZE Number of enums
+ */
 #define REFLECTABLE_ENUM(ETYPE, ENUM, SIZE, ...) \
 	CONSTEXPR_GLOBAL EnumData<ENUM, SIZE> E##ENUM \
 	{ \

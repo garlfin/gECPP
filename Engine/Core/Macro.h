@@ -234,7 +234,8 @@ T& PlacementNew(T& to, ARGS&&... args)
 		return (TYPE) ~std::underlying_type_t<TYPE>(a); \
 	} \
 
+#pragma GCC diagnostic ignored "-Winvalid-offsetof"
 #define offsetbetween(TYPE, FIELDFROM, FIELDTO) (offsetof(TYPE, FIELDTO) - offsetof(TYPE, FIELDFROM))
-#define sizebetween(TYPE, FIELDFROM, FIELDTO) (offsetof(TYPE, FIELDTO) + sizeof(typeof(TYPE::FIELDTO)) - offsetof(TYPE, FIELDFROM))
+#define sizebetween(TYPE, FIELDFROM, FIELDTO) (offsetof(TYPE, FIELDTO) + sizeof(TYPE::FIELDTO) - offsetof(TYPE, FIELDFROM))
 #define offsetof_memptr(TYPE, PTR) ((size_t) &((TYPE*) nullptr->*PTR))
 #define sizeof_array(ARR) (sizeof(ARR) / sizeof(*(ARR))

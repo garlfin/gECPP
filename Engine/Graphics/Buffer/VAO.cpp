@@ -13,7 +13,7 @@ namespace GPU
 	{
 		Counts = Read<VAOFieldCounts>(in);
 		ReadSerializable(in, Counts.MaterialCount, Materials, nullptr);
-		Read(in, Counts.FieldCount, Fields);
+		ReadSerializable(in, Counts.FieldCount, Fields, nullptr);
 		ReadSerializable(in, Counts.BufferCount, Buffers, s);
 	}
 
@@ -51,6 +51,17 @@ namespace GPU
 		Write(out, Count);
 	}
 
+	void VertexField::IDeserialize(istream& in, SETTINGS_T s)
+	{
+		static_assert(sizebetween(VertexField, Name, Offset) == 12);
+		Read<char>(in, 12, Name);
+	}
+
+	void VertexField::ISerialize(ostream& out) const
+	{
+		Write<char>(out, 12, Name);
+	}
+
 	REFLECTABLE_ONGUI_IMPL(MaterialSlot,
 	{
 		DrawField(gE::Field{ "Name" }, Name, depth);
@@ -74,6 +85,7 @@ namespace GPU
 
 		DrawField(gE::ArrayField<gE::Field>{ "Materials" }, Materials, Counts.MaterialCount, depth);
 		DrawField(gE::ArrayField<gE::Field>{ "Buffers" }, Buffers, Counts.BufferCount, depth);
+		DrawField(gE::ArrayField<gE::Field>{ "Fields" }, Fields, Counts.FieldCount, depth);
 	});
 
 	REFLECTABLE_ONGUI_IMPL(IndexedVAO,
@@ -81,7 +93,26 @@ namespace GPU
 		DrawField(gE::Field{ "Triangles" }, TriangleBuffer, depth);
 	});
 
+	REFLECTABLE_ONGUI_IMPL(VertexField,
+	{
+		DrawField<const std::span<char>>(gE::Field{ "Name" }, std::span(Name), depth);
+		DrawField(gE::EnumField{ "Element Type", "", EElementType}, ElementType, depth);
+
+		bool normalized = Normalized;
+		DrawField(gE::Field{ "Normalized" }, normalized, depth);
+		Normalized = normalized;
+
+		u8 bufIndex = BufferIndex;
+		DrawField(gE::ScalarField<u8>{ "Buffer Index", "", 0, GE_MAX_VAO_BUFFER}, bufIndex, depth);
+		BufferIndex = bufIndex;
+
+		DrawField(gE::ScalarField<u8>{ "Index", "", 0, GE_MAX_VAO_FIELD}, Index, depth);
+		DrawField(gE::ScalarField<u8>{ "Element Count", "", 1, 4}, ElementCount, depth);
+		DrawField(gE::ScalarField<u8>{ "Offset" }, Offset, depth);
+	});
+
 	REFLECTABLE_FACTORY_IMPL(VAO, API::VAO);
 	REFLECTABLE_FACTORY_IMPL(IndexedVAO, API::IndexedVAO);
 	REFLECTABLE_FACTORY_IMPL(MaterialSlot, MaterialSlot);
+	REFLECTABLE_FACTORY_IMPL(VertexField, VertexField);
 }

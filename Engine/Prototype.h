@@ -37,7 +37,7 @@ namespace gE
 
 }
 
-template<class T>
+template<class T = std::nullptr_t>
 struct Reflectable;
 
 template<class T = std::nullptr_t>

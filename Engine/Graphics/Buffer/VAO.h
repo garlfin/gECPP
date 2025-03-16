@@ -45,6 +45,8 @@ namespace GPU
 		Buffer<std::byte> Buffers[GE_MAX_VAO_BUFFER];
 
 		void Free() override { for(Buffer<std::byte>& buffer : Buffers) buffer.Free(); };
+		void AddField(const VertexField& field) { GE_ASSERT(Counts.FieldCount < GE_MAX_VAO_FIELD); Fields[Counts.FieldCount++] = field; }
+		void AddBuffer(Buffer<std::byte>&& buf) { GE_ASSERT(Counts.BufferCount < GE_MAX_VAO_BUFFER); Buffers[Counts.BufferCount++] = buf; }
 
 		NODISCARD bool IsFree() const override
 		{

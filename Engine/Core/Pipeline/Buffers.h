@@ -82,7 +82,7 @@ namespace GPU
     {
         gE::RenderFlags State;
         GPU_ALIGN u32 InstanceCount[API_MAX_MULTI_DRAW];
-        GPU_ALIGN ObjectInfo Objects[API_MAX_INSTANCE];
+        ObjectInfo Objects[API_MAX_INSTANCE];
     };
 
     struct Lighting

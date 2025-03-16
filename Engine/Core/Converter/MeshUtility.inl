@@ -14,7 +14,7 @@ namespace gE::Model
         GPU::VertexField field;
 
         std::copy_n(name, sizeof(field.Name), field.Name);
-        field.ElementType = GLType<typename T::value_type>;
+        field.ElementType = (GPU::ElementType) GLType<typename T::value_type>;
         field.ElementCount = T::length();
         field.Index = index;
 
@@ -51,6 +51,20 @@ namespace gE::Model
         }
     }
 
+    inline u8 VertexWeight::AddWeight(u16 bone, u8 weight)
+    {
+        for(u8 i = 0; i < 4; i++)
+        {
+            if(Weights[i]) continue;
+
+            Bones[i] = bone;
+            Weights[i] = weight;
+            return i;
+        }
+
+        return -1;
+    }
+
     inline glm::i8vec3 ConvertNormal(const glm::vec3& normal) noexcept
     {
         const glm::vec3 vec = clamp(normal, glm::vec3(-1.f), glm::vec3(1.f));
@@ -66,5 +80,11 @@ namespace gE::Model
 #endif
 
         return vec * glm::vec4(INT8_MAX);
+    }
+
+    inline glm::u8vec4 ConvertWeight(const glm::vec4& weight) noexcept
+    {
+        const glm::vec4 vec = clamp(weight, glm::vec4(0.f), glm::vec4(1.f));
+        return glm::u8vec4(vec * glm::vec4(UINT8_MAX));
     }
 }
