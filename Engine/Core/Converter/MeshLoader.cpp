@@ -135,6 +135,16 @@ namespace gE::Model
                 }
             }
         }
+
+        result.Animations = Array<Animation>(file->animations.size());
+        for (size_t i = 0; i < file->skins.size(); i++)
+        {
+            const gltf::Animation& animationIn = file->animations[i];
+            Animation& animationOut = result.Animations[i];
+
+            animationOut.Name = animationIn.name;
+            animationOut.Channels = Array<AnimationChannel>(animationIn.channels.size());
+        }
     }
 
     void ReadGLTFAsFile(Window* window, const std::filesystem::path& path, Array<File>& files)
@@ -144,7 +154,7 @@ namespace gE::Model
         GLTFResult result;
         ReadGLTF(window, path, result);
 
-        files = Array<File>(result.Meshes.Count() + result.Skeletons.Count());
+        files = Array<File>(result.Meshes.Count() + result.Skeletons.Count() + result.Animations.Count());
         size_t fileOffset = 0;
 
         for(size_t i = 0; i < result.Meshes.Count(); i++, fileOffset++)
@@ -161,6 +171,14 @@ namespace gE::Model
             Path filePath = parentDirectory / Path(skeleton.Name).replace_extension(Skeleton::Type.Extension);
 
             files[fileOffset] = File(window, filePath, std::move(skeleton));
+        }
+
+        for(size_t i = 0; i < result.Animations.Count(); i++, fileOffset++)
+        {
+            Animation& animation = result.Animations[i];
+            Path filePath = parentDirectory / Path(animation.Name).replace_extension(Animation::Type.Extension);
+
+            files[fileOffset] = File(window, filePath, std::move(animation));
         }
     }
 
@@ -358,17 +376,16 @@ namespace gE::Model
         TransformData result;
         if(const gltf::TRS* trs = std::get_if<gltf::TRS>(&node.transform))
         {
-            result.Position = std::bit_cast<glm::vec3>(trs->translation);
+            result.Location = std::bit_cast<glm::vec3>(trs->translation);
             result.Rotation = std::bit_cast<glm::quat>(trs->rotation);
             result.Scale = std::bit_cast<glm::vec3>(trs->scale);
         }
         else
         {
             const gltf::math::fmat4x4* mat = std::get_if<gltf::math::fmat4x4>(&node.transform);
-            Decompose(*(const glm::mat4*) mat, result.Position, result.Rotation, result.Scale);
+            Decompose(*(const glm::mat4*) mat, result.Location, result.Rotation, result.Scale);
         }
 
-        // ReSharper disable once CppSomeObjectMembersMightNotBeInitialized
         return result;
     }
 }

@@ -12,7 +12,7 @@ namespace gE
     void Bone::IDeserialize(istream& in, SETTINGS_T s)
     {
         Read(in, Name);
-        ReadSerializable(in, Parent, s);
+        ReadSerializable(in, Parent, &s);
         Read(in, Transform);
         InverseBindMatrix = inverse(Transform.ToMat4());
     }
@@ -34,25 +34,6 @@ namespace gE
         DrawField(ScalarField{ "Scale", "", FLT_EPSILON }, Transform.Scale, depth);
     );
 
-    void AnimatedBone::IDeserialize(istream& in, Animation& animation)
-    {
-        ReadSerializable(in, Target, animation.Skeleton);
-        ReadSerializable(in, Parent, animation);
-        ReadArray<u16>(in, Frames);
-    }
-
-    void AnimatedBone::ISerialize(ostream& out) const
-    {
-        Write(out, Target);
-        Write(out, Parent);
-        WriteArray<u16>(out, Frames);
-    }
-
-    bool AnimatedBone::Retarget(const Skeleton& skeleton)
-    {
-        return Target.Resolve(skeleton);
-    }
-
     void Skeleton::IDeserialize(istream& in, SETTINGS_T s)
     {
         Read(in, Name);
@@ -65,16 +46,8 @@ namespace gE
         WriteArray<u8>(out, Bones);
     }
 
-    REFLECTABLE_FACTORY_IMPL(Skeleton, Skeleton);
-    REFLECTABLE_ONGUI_IMPL(Skeleton,
-        DrawField(Field{ "Name" }, Name, depth);
-        DrawField(ArrayField<Field>{ "Bones", "", ArrayViewMode::Elements }, Bones, depth);
-    );
-
-    Bone* Skeleton::FindBone(const std::string& name, u8 suggestedLocation)
+    Bone* Skeleton::FindBone(std::string_view name, u16 suggestedLocation) const
     {
-        GE_ASSERTM(Bones.Count() <= GE_MAX_BONES, "TOO MANY BONES!");
-
         if(suggestedLocation != -1 && Bones[suggestedLocation].Name == name)
             return &Bones[suggestedLocation];
 
@@ -83,16 +56,27 @@ namespace gE
         return nullptr;
     }
 
-    Bone* Skeleton::FindBone(const std::string& name, u8 suggestedLocation) const
+    REFLECTABLE_FACTORY_IMPL(Skeleton, Skeleton);
+    REFLECTABLE_ONGUI_IMPL(Skeleton,
+        DrawField(Field{ "Name" }, Name, depth);
+        DrawField(ArrayField<Field>{ "Bones", "", ArrayViewMode::Elements }, Bones, depth);
+    )
+
+    bool AnimationChannel::Retarget(const Skeleton* skel)
     {
-        GE_ASSERTM(Bones.Count() <= GE_MAX_BONES, "TOO MANY BONES!");
+        return Target.Resolve(skel);
+    }
 
-        if(suggestedLocation != -1 && Bones[suggestedLocation].Name == name)
-            return &Bones[suggestedLocation];
+    void AnimationChannel::IDeserialize(istream& in, SETTINGS_T s)
+    {
+        ReadSerializable(in, Target, s);
+        ReadArray<u16>(in, Frames);
+    }
 
-        for (u8 i = 0; i < Bones.Count(); ++i)
-            if(Bones[i].Name == name) return &Bones[i];
-        return nullptr;
+    void AnimationChannel::ISerialize(ostream& out) const
+    {
+        Write(out, Target);
+        WriteArray<u16>(out, Frames);
     }
 
     void Animation::IDeserialize(istream& in, SETTINGS_T s)
@@ -100,7 +84,7 @@ namespace gE
         Read(in, Name);
         Read(in, FPS);
         Read(in, FrameCount);
-        ReadArraySerializable<u16>(in, Bones, *this);
+        ReadArraySerializable<u16>(in, Channels, nullptr);
     }
 
     void Animation::ISerialize(ostream& out) const
@@ -108,30 +92,28 @@ namespace gE
         Write(out, Name);
         Write(out, FPS);
         Write(out, FrameCount);
-        WriteArray<u16>(out, Bones);
+        WriteArray<u16>(out, Channels);
     }
 
-    AnimatedBone* Animation::FindBone(const std::string& name, u8 suggestedLocation) const
+    AnimationChannel* Animation::FindChannel(std::string_view name, u16 suggestedLocation) const
     {
-        GE_ASSERTM(Bones.Count() <= GE_MAX_BONES, "TOO MANY BONES!");
+        if(suggestedLocation != -1 && Channels[suggestedLocation].Target.Name == name)
+            return &Channels[suggestedLocation];
 
-        if(suggestedLocation != -1 && Bones[suggestedLocation].Target.Name == name)
-            return &Bones[suggestedLocation];
-
-        for (u8 i = 0; i < Bones.Count(); ++i)
-            if(Bones[i].Target.Name == name) return &Bones[i];
+        for (u8 i = 0; i < Channels.Count(); ++i)
+            if(Channels[i].Target.Name == name) return &Channels[i];
         return nullptr;
     }
 
     void Animation::Retarget(const Reference<gE::Skeleton>& skeleton)
     {
-        GE_ASSERTM((bool) skeleton, "NO SKELETON PROVIDED!");
-        GE_ASSERTM(Bones.Count() <= GE_MAX_BONES, "TOO MANY BONES!");
-
-        if(Skeleton == skeleton) return;
+        if(!skeleton || Skeleton == skeleton) return;
 
         Skeleton = skeleton;
-        for(u8 i = 0; i < Bones.Count(); i++)
-            Bones[i].Retarget(*Skeleton);
+        for(u8 i = 0; i < Channels.Count(); i++)
+            Channels[i].Retarget(Skeleton.GetPointer());
     }
+
+    REFLECTABLE_ONGUI_IMPL(Animation, );
+    REFLECTABLE_FACTORY_IMPL(Animation, Animation);
 }
