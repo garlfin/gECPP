@@ -17,14 +17,29 @@ namespace gE::Model
 	template<class TO_T, class FROM_T>
 	using ConversionFunc = TO_T(*)(const FROM_T& from) noexcept;
 
+	struct AccessorData
+	{
+		const gltf::Accessor* Accessor = nullptr;
+		const gltf::BufferView* View = nullptr;
+		const gltf::Buffer* Buffer = nullptr;
+	};
+
 	struct PrimitiveData
 	{
 		const gltf::Attribute* Attribute = nullptr;
-		const gltf::Accessor* Accessor = nullptr;
-		const gltf::BufferView* BufferView = nullptr;
-		const gltf::Buffer* Buffer = nullptr;
+		AccessorData Accessor = DEFAULT;
 
-		ALWAYS_INLINE operator bool() const { return Accessor; }
+		ALWAYS_INLINE operator bool() const { return Accessor.Accessor; }
+		ALWAYS_INLINE AccessorData* operator->() { return &Accessor; }
+		ALWAYS_INLINE const AccessorData* operator->() const { return &Accessor; }
+	};
+
+	struct ChannelData
+	{
+		const gltf::AnimationChannel* Channel = nullptr;
+		const gltf::AnimationSampler* Sampler = nullptr;
+		AccessorData Input = DEFAULT;
+		AccessorData Output = DEFAULT;
 	};
 
 	struct Vertex
@@ -50,6 +65,9 @@ namespace gE::Model
 
     template<class FIELD_T, class STRUCT>
     NODISCARD GPU::VertexField CreateField(FIELD_T STRUCT::* dst, const char[4], u8 index, u8 bufIndex);
+
+	template<class FROM_T>
+	FROM_T AccessBuffer(const AccessorData& accessor, size_t index, size_t stride = 0);
 
 	template<class FROM_T, class TO_T, class SPAN_T>
 	void FillBuffer(const GPU::VertexField& field, std::span<SPAN_T> dstSpan, const PrimitiveData& primitive, ConversionFunc<TO_T, FROM_T> func);

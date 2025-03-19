@@ -18,8 +18,8 @@ namespace GPU
 	};
 
 	REFLECTABLE_ENUM(Normal, FilterMode, 2,
-		ENUM_DEF(FilterMode, Nearest),
-		ENUM_DEF(FilterMode, Linear)
+		REFLECT_ENUM(FilterMode, Nearest),
+		REFLECT_ENUM(FilterMode, Linear)
 	);
 
 	enum class WrapMode : GLenum
@@ -30,9 +30,9 @@ namespace GPU
 	};
 
 	REFLECTABLE_ENUM(Normal, WrapMode, 3,
-		ENUM_DEF(WrapMode, Clamp),
-		ENUM_DEF(WrapMode, Repeat),
-		ENUM_DEF(WrapMode, Border)
+		REFLECT_ENUM(WrapMode, Clamp),
+		REFLECT_ENUM(WrapMode, Repeat),
+		REFLECT_ENUM(WrapMode, Border)
 	);
 
 	struct CompressionScheme

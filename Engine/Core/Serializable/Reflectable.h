@@ -25,6 +25,24 @@ concept ReflConstructible = requires
 };
 
 template<class T>
+concept HasType = requires(std::add_const_t<T>& t)
+{
+	t.GetType();
+};
+
+template<class T>
+concept HasOnGUI = requires(T& t, u8 depth)
+{
+	t.OnEditorGUI(depth);
+};
+
+template<class T>
+concept HasEditorName = requires(std::add_const_t<T>& t)
+{
+	{ t.GetEditorName() } -> std::convertible_to<std::string>;
+};
+
+template<class T>
 struct TypeCompare
 {
 	using is_transparent = void;
@@ -90,6 +108,7 @@ struct IReflectable
 #ifdef GE_ENABLE_EDITOR
 	virtual void OnEditorGUI(u8 depth) {};
 	virtual bool OnEditorIcon(Size1D size) { return false; }
+	virtual std::string GetEditorName() const { return std::format("{}", (const void*) this); }
 #endif
 	virtual ~IReflectable() = default;
 };
@@ -146,16 +165,24 @@ struct EnumData
 		private: \
 			void IOnEditorGUI(u8 depth)
 	#define REFLECTABLE_ONGUI_IMPL(TYPE, ...) \
-		void TYPE::IOnEditorGUI(u8 depth) { __VA_ARGS__ }
+			void TYPE::IOnEditorGUI(u8 depth) { __VA_ARGS__ }
 	#define REFLECTABLE_ICON_PROTO() \
-		bool OnEditorIcon(Size1D size) override
+		public: \
+			bool OnEditorIcon(Size1D size) override
+	#define REFLECTABLE_NAME_PROTO() \
+		public: \
+			std::string GetEditorName() const override
 	#define REFLECTABLE_ICON_IMPL(TYPE, ...) \
 		bool TYPE::OnEditorIcon(Size1D size) { __VA_ARGS__; return true; }
+	#define REFLECTABLE_NAME_IMPL(TYPE, ...) \
+		std::string TYPE::GetEditorName() const { __VA_ARGS__; }
 #else
 	#define REFLECTABLE_ONGUI_PROTO(SUPER)
 	#define REFLECTABLE_ONGUI_IMPL(TYPE, ...)
-	#define REFLECTABLE_ICON_PROTO
+	#define REFLECTABLE_ICON_PROTO()
+	#define REFLECTABLE_NAME_PROTO()
 	#define REFLECTABLE_ICON_IMPL(TYPE, ...)
+	#define REFLECTABLE_NAME_IMPL(TYPE, ...)
 #endif
 
 #define REFLECTABLE_MAGIC_IMPL(MAGIC_VAL) \
@@ -181,23 +208,26 @@ struct EnumData
 #define REFLECTABLE_ONEDITOR_NO_IMPL(TYPE, SUPER) \
 	void TYPE::OnEditorGUI(u8 depth) { SUPER::OnEditorGUI(depth); }
 
-
 /**
  *
  * @param ETYPE EnumType: View mode (Normal, Bitfield)
  * @param ENUM Enum
  * @param SIZE Number of enums
  */
-#define REFLECTABLE_ENUM(ETYPE, ENUM, SIZE, ...) \
-	CONSTEXPR_GLOBAL EnumData<ENUM, SIZE> E##ENUM \
-	{ \
-		EnumType::ETYPE, \
+#ifdef GE_ENABLE_IMGUI
+	#define REFLECTABLE_ENUM(ETYPE, ENUM, SIZE, ...) \
+		CONSTEXPR_GLOBAL EnumData<ENUM, SIZE> E##ENUM \
 		{ \
-			__VA_ARGS__ \
-		} \
-	};
+			EnumType::ETYPE, \
+			{ \
+				__VA_ARGS__ \
+			} \
+		}
+#else
+	#define REFLECTABLE_ENUM(ETYPE, ENUM, SIZE, ...)
+#endif
 
-#define ENUM_DEF(E_TYPE, E_NAME) ENUM_PAIR(E_TYPE::E_NAME, #E_NAME)
+#define REFLECT_ENUM(E_TYPE, E_NAME) ENUM_PAIR(E_TYPE::E_NAME, #E_NAME)
 #define ENUM_PAIR(E_VAL, E_NAME) std::make_pair(E_VAL, E_NAME##sv)
 
 // Typesystem must be explicity instantiated.

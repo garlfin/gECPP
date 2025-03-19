@@ -27,5 +27,9 @@ namespace gE
         static TransformData mix(const TransformData& a, const TransformData& b, float factor);
 
         glm::mat4 ToMat4() const;
+
+    #ifdef GE_ENABLE_IMGUI
+        void OnEditorGUI(u8 depth);
+    #endif
     };
 }

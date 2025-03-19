@@ -20,9 +20,7 @@ namespace gE::Editor
     {
         if(_selected)
         {
-            const std::string_view type = _selected->GetFileType() ? _selected->GetFileType()->Name : "gE::Asset (NO TYPE INFO)";
-
-            ImGui::TextUnformatted(std::format("{}\n\t{}", _selected->GetPath().string(), type).c_str());
+            ImGui::TextUnformatted(GetLabel<Asset>(_selected->Get().GetPointer(), "gE::Asset").c_str());
             if(_selected->IsLoaded())
             {
                 Asset& asset = _selected->Get();

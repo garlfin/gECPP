@@ -17,9 +17,7 @@ namespace gE::Editor
     {
         if (_selected)
         {
-            const std::string_view type = _selected->GetType() ? _selected->GetType()->Name : "gE::Entity (NO TYPE INFO)";
-
-            ImGui::TextUnformatted(std::format("{} ({})", type, (void*) _selected).c_str());
+            ImGui::TextUnformatted(GetLabel<Entity>(_selected, "gE::Entity").c_str());
             ImGui::Separator();
             _selected->OnEditorGUI(0);
         }

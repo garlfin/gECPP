@@ -20,9 +20,9 @@ namespace gE::PostProcess
 	{
 		EnumType::Normal,
 		{
-			ENUM_DEF(ExposureMode, Physical),
-			ENUM_DEF(ExposureMode, Automatic),
-			ENUM_DEF(ExposureMode, Manual),
+			REFLECT_ENUM(ExposureMode, Physical),
+			REFLECT_ENUM(ExposureMode, Automatic),
+			REFLECT_ENUM(ExposureMode, Manual),
 		}
 	};
 

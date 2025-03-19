@@ -23,13 +23,13 @@ namespace GPU
 	};
 
 	REFLECTABLE_ENUM(Normal, ElementType, 7,
-		ENUM_DEF(ElementType, Byte),
-		ENUM_DEF(ElementType, UByte),
-		ENUM_DEF(ElementType, Short),
-		ENUM_DEF(ElementType, UShort),
-		ENUM_DEF(ElementType, Int),
-		ENUM_DEF(ElementType, UInt),
-		ENUM_DEF(ElementType, Float),
+		REFLECT_ENUM(ElementType, Byte),
+		REFLECT_ENUM(ElementType, UByte),
+		REFLECT_ENUM(ElementType, Short),
+		REFLECT_ENUM(ElementType, UShort),
+		REFLECT_ENUM(ElementType, Int),
+		REFLECT_ENUM(ElementType, UInt),
+		REFLECT_ENUM(ElementType, Float),
 	);
 
 	struct MaterialSlot : public Serializable<>

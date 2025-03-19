@@ -26,8 +26,9 @@ namespace gE
   	class Entity : public Reflectable<const EntityCreationSettings&>, public Managed<Entity>
 	{
   		REFLECTABLE_ONGUI_PROTO(Reflectable);
+  		REFLECTABLE_NAME_PROTO();
 
-	 public:
+	public:
 		explicit Entity(Window*, Entity* = nullptr, LayerMask layers = LayerMask::All, EntityFlags = DEFAULT);
 
 		void Destroy(bool flagChildren = true);
@@ -43,7 +44,7 @@ namespace gE
 
  		friend class EntityManager;
 
-	 private:
+	private:
 		Window* _window = nullptr;
 		Entity* _parent = nullptr;
   		std::string _name = "Entity";

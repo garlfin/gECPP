@@ -16,8 +16,8 @@ namespace GPU
 	};
 
 	REFLECTABLE_ENUM(Normal, ShaderStageType, 3,
-		ENUM_DEF(ShaderStageType, Vertex),
-		ENUM_DEF(ShaderStageType, Fragment),
-		ENUM_DEF(ShaderStageType, Compute)
+		REFLECT_ENUM(ShaderStageType, Vertex),
+		REFLECT_ENUM(ShaderStageType, Fragment),
+		REFLECT_ENUM(ShaderStageType, Compute)
 	);
 }

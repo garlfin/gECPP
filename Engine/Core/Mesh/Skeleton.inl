@@ -8,19 +8,6 @@
 
 namespace gE
 {
-    inline void BoneReference::IDeserialize(istream& in, Skeleton* skeleton)
-    {
-        Location = Read<u16>(in);
-        Name = Read<std::string>(in);
-        Resolve(skeleton);
-    }
-
-    inline void BoneReference::ISerialize(ostream& out) const
-    {
-        Write(out, Location);
-        Write(out, Name);
-    }
-
     inline Bone* BoneReference::Resolve(const Skeleton* skeleton)
     {
         if (Pointer || Name.empty() || !skeleton) return Pointer;
@@ -50,5 +37,10 @@ namespace gE
         if(!Pointer || !skel) return;
 
         Location = skel->GetIndex(*Pointer);
+    }
+
+    inline const Frame* AnimationChannel::GetFrame(float time) const
+    {
+        return std::lower_bound(Frames.begin(), Frames.end(), time, [](const Frame& frame, float time){ return frame.Time < time; });
     }
 }

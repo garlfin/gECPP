@@ -28,12 +28,31 @@ namespace gE
     IM_TYPE_(float, ImGuiDataType_Float);
     IM_TYPE_(double, ImGuiDataType_Double);
 
+    template <class T>
+    std::string GetLabel(std::add_const_t<T>* t, std::string_view type)
+    {
+        if constexpr(HasType<T>)
+            if(t && t->GetType())
+                type = t->GetType()->Name;
+
+        std::string name;
+        if constexpr(HasEditorName<T>)
+            name = t->GetEditorName();
+        else
+            name = std::format("{}", (const void*) t);
+
+        if(type.size())
+            return std::format("{} ({})", name, type);
+        return name;
+    }
+
     template <class T, class SETTINGS_T>
     bool DrawField(const SETTINGS_T& settings, T& t, u8 depth)
     {
         using RAW_T = std::remove_cvref_t<T>;
         constexpr bool isConst = std::is_const_v<T>;
         constexpr bool isReflectable = std::is_base_of_v<IReflectable, RAW_T>;
+        constexpr bool isDrawable = HasOnGUI<IReflectable>;
 
         const std::string label = std::format("##{}", settings.Name);
 
@@ -121,17 +140,14 @@ namespace gE
             if(!settings.Tooltip.empty() && ImGui::IsItemHovered(GE_EDITOR_TOOLTIP_FLAGS))
                 ImGui::SetTooltip(settings.Tooltip.data());
         }
-        else if constexpr(isReflectable)
+        else if constexpr(isDrawable)
         {
-            std::string_view type = "IReflectable (NO TYPE INFO)";
-            if constexpr(requires(RAW_T e) { e.GetType(); })
-                if(const auto* reflectedType = t.GetType())
-                    type = reflectedType->Name;
+            const std::string nodeLabel = std::format("{}##{}", GetLabel<RAW_T>(&t), (void*) &t);
 
             ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
             if(depth < 1) nodeFlags |= ImGuiTreeNodeFlags_DefaultOpen;
 
-            if(ImGui::TreeNodeEx(std::format("{} ({})", type, (void*) &t).c_str(), nodeFlags))
+            if(ImGui::TreeNodeEx(nodeLabel.c_str(), nodeFlags))
             {
                 if constexpr (isConst)
                     ImGui::BeginDisabled();
@@ -342,15 +358,11 @@ namespace gE
         ImGui::SameLine();
 
         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x + ImGui::GetScrollX());
-        std::string_view type = "IReflectable (NO TYPE INFO)";
-        if constexpr(requires(RAW_T e) { e.GetType(); })
-            if(ref && ref->GetType())
-                type = ref->GetType()->Name;
 
         ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
         if(depth < 1) nodeFlags |= ImGuiTreeNodeFlags_DefaultOpen;
 
-        const bool open = ImGui::TreeNodeEx(std::format("{} ({})##{}", type, (void*) ref.GetPointer(), settings.Name).c_str(), nodeFlags);
+        const bool open = ImGui::TreeNodeEx(std::format("{}##{}", GetLabel<T>(ref.GetPointer(), "IReflectable"), settings.Name).c_str(), nodeFlags);
 
         bool changed = false;
         if(ImGui::BeginDragDropTarget())

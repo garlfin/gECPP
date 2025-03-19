@@ -64,6 +64,7 @@ namespace gE
     class File final : public Serializable<FileLoadArgs&>
     {
         SERIALIZABLE_PROTO("FILE", 0, File, Serializable);
+        REFLECTABLE_NAME_PROTO();
 
     public:
         File(Window* window, const Path& path, const Type<Window*>* type);

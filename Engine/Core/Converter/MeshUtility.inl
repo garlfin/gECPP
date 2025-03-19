@@ -25,29 +25,37 @@ namespace gE::Model
         return field;
     }
 
+    template <class FROM_T>
+    FROM_T AccessBuffer(const AccessorData& accessor, size_t index, size_t stride)
+    {
+        stride = stride ? stride : accessor.View->byteStride.value_or(gltf::getElementByteSize(accessor.Accessor->type, accessor.Accessor->componentType));
+        const gltf::sources::Array* data = std::get_if<gltf::sources::Array>(&accessor.Buffer->data);
+        GE_ASSERT(data);
+
+        return *(const FROM_T*) &data->bytes[accessor.View->byteOffset + accessor.Accessor->byteOffset + stride * index];
+    }
+
     template<class FROM_T, class TO_T, class SPAN_T>
     void FillBuffer(const GPU::VertexField& field, std::span<SPAN_T> dstSpan, const PrimitiveData& primitive, ConversionFunc<TO_T, FROM_T> func)
     {
-        const gltf::Accessor& accessor = *primitive.Accessor;
-        const gltf::BufferView& bufView = *primitive.BufferView;
-        const size_t stride = bufView.byteStride.value_or(gltf::getElementByteSize(accessor.type, accessor.componentType));
+        const gltf::Accessor& accessor = *primitive->Accessor;
+        const gltf::BufferView& bufView = *primitive->View;
 
         GE_ASSERT(GLType<typename FROM_T::value_type> == gltf::getGLComponentType(accessor.componentType));
         GE_ASSERT(FROM_T::length() == gltf::getNumComponents(accessor.type));
         // GE_ASSERT(field.Normalized == accessor.normalized);
 
-        const gltf::sources::Array* data = std::get_if<gltf::sources::Array>(&primitive.Buffer->data);
+        const gltf::sources::Array* data = std::get_if<gltf::sources::Array>(&primitive->Buffer->data);
         GE_ASSERT(data);
 
         for(size_t i = 0; i < accessor.count; i++)
         {
             TO_T* dst = (TO_T*) ((std::byte*) &dstSpan[i] + field.Offset);
-            const FROM_T* src = (const FROM_T*) &data->bytes[bufView.byteOffset + accessor.byteOffset + stride * i];
 
             if constexpr (std::is_same_v<FROM_T, TO_T>)
-                *dst = *src;
+                *dst = AccessBuffer<FROM_T>(primitive.Accessor, i);
             else
-                *dst = func(*src);
+                *dst = func(AccessBuffer<FROM_T>(primitive.Accessor, i));
         }
     }
 

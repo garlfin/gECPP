@@ -17,16 +17,20 @@ CONSTEXPR_GLOBAL gltf::Options GLTF_LOAD_OPTIONS = gltf::Options::LoadExternalBu
 
 namespace gE::Model
 {
+    AccessorData GetAccessorData(const gltf::Asset& file, size_t index);
     PrimitiveData GetAttributeData(const gltf::Asset& file, const gltf::Primitive& prim, std::string_view attribute);
     PrimitiveData GetIndicesData(const gltf::Asset& file, const gltf::Primitive& prim);
+    ChannelData GetChannelData(const gltf::Asset& file, const gltf::Animation& animation, const gltf::AnimationChannel& channel);
 
     void SetupMeshFields(GPU::VAO& meshOut, size_t vertexCount);
     void SetupMeshFields(GPU::IndexedVAO& meshOut, size_t vertexCount, size_t triCount);
     void SetupMeshWeights(GPU::VAO& meshOut, size_t vertexCount);
     void SetupMeshMaterials(GPU::VAO& meshOut, const gltf::Asset& file, const gltf::Mesh& mesh);
-    void ProcessSubmesh(GPU::VAO& meshOut, const gltf::Asset& file, const gltf::Mesh& meshIn);
-    void ProcessSubmesh(GPU::IndexedVAO& meshOut, const gltf::Asset& file, const gltf::Mesh& meshIn);
-    void ProcessSubmeshWeights(GPU::VAO& meshOut, const gltf::Asset& file, const gltf::Mesh& meshIn);
+    void ProcessSubmesh(const GPU::VAO& meshOut, const gltf::Asset& file, const gltf::Mesh& meshIn);
+    void ProcessSubmesh(const GPU::IndexedVAO& meshOut, const gltf::Asset& file, const gltf::Mesh& meshIn);
+    void ProcessSubmeshWeights(const GPU::VAO& meshOut, const gltf::Asset& file, const gltf::Mesh& meshIn);
+    void ProcessChannel(AnimationChannel& channelOut, const gltf::Asset& file, const gltf::Animation& animationIn,
+                        const gltf::AnimationChannel& channelIn);
 
     TransformData GetTransformFromNode(const gltf::Node& node);
 
@@ -58,17 +62,17 @@ namespace gE::Model
                 const PrimitiveData indices = GetIndicesData(file.get(), subMesh);
 
                 GE_ASSERT(position);
-                vertexCount += position.Accessor->count;
+                vertexCount += position->Accessor->count;
 
-                if(!indices.Accessor) return;
+                if(!indices->Accessor) return;
 
             #ifdef DEBUG
-                if(indexCount) GE_ASSERT(indices.Accessor->count);
+                if(indexCount) GE_ASSERT(indices->Accessor->count);
             #endif
 
-                GE_ASSERT(indices.Accessor->count % 3 == 0);
+                GE_ASSERT(indices->Accessor->count % 3 == 0);
 
-                indexCount += indices.Accessor->count;
+                indexCount += indices->Accessor->count;
                 hasWeights |= subMesh.findAttribute("JOINTS_0") != subMesh.attributes.end();
             }
 
@@ -143,7 +147,17 @@ namespace gE::Model
             Animation& animationOut = result.Animations[i];
 
             animationOut.Name = animationIn.name;
+
             animationOut.Channels = Array<AnimationChannel>(animationIn.channels.size());
+            for(size_t c = 0; c < animationIn.channels.size(); c++)
+            {
+                const gltf::AnimationChannel& channelIn = animationIn.channels[c];
+                AnimationChannel& channelOut = animationOut.Channels[c];
+
+                if(!channelIn.nodeIndex.has_value()) continue;
+
+                ProcessChannel(channelOut, file.get(), animationIn, channelIn);
+            }
         }
     }
 
@@ -182,42 +196,54 @@ namespace gE::Model
         }
     }
 
+    AccessorData GetAccessorData(const gltf::Asset& file, size_t index)
+    {
+        AccessorData result = DEFAULT;
+
+        result.Accessor = &file.accessors[index];
+
+        if(!result.Accessor->bufferViewIndex.has_value()) return result;
+
+        result.View = &file.bufferViews[result.Accessor->bufferViewIndex.value()];
+        result.Buffer = &file.buffers[result.View->bufferIndex];
+
+        return result;
+    }
+
     PrimitiveData GetAttributeData(const gltf::Asset& file, const gltf::Primitive& prim, std::string_view attribute)
     {
-        PrimitiveData data = DEFAULT;
+        PrimitiveData result = DEFAULT;
 
-        data.Attribute = prim.findAttribute(attribute);
-        if(data.Attribute == prim.attributes.end()) return data;
+        result.Attribute = prim.findAttribute(attribute);
+        if(result.Attribute == prim.attributes.end()) return result;
 
-        data.Accessor = &file.accessors[data.Attribute->accessorIndex];
+        result.Accessor = GetAccessorData(file, result.Attribute->accessorIndex);
 
-        if(data.Accessor->bufferViewIndex.has_value())
-            data.BufferView = &file.bufferViews[data.Accessor->bufferViewIndex.value()];
-        else
-            return data;
-
-        data.Buffer = &file.buffers[data.BufferView->bufferIndex];
-
-        return data;
+        return result;
     }
 
     PrimitiveData GetIndicesData(const gltf::Asset& file, const gltf::Primitive& prim)
     {
-        PrimitiveData data = DEFAULT;
+        PrimitiveData result = DEFAULT;
 
         if(!prim.indicesAccessor.has_value())
-            return data;
+            return result;
 
-        data.Accessor = &file.accessors[prim.indicesAccessor.value()];
+        result.Accessor = GetAccessorData(file, prim.indicesAccessor.value());
 
-        if(data.Accessor->bufferViewIndex.has_value())
-            data.BufferView = &file.bufferViews[data.Accessor->bufferViewIndex.value()];
-        else
-            return data;
+        return result;
+    }
 
-        data.Buffer = &file.buffers[data.BufferView->bufferIndex];
+    ChannelData GetChannelData(const gltf::Asset& file, const gltf::Animation& animation, const gltf::AnimationChannel& channel)
+    {
+        ChannelData result = DEFAULT;
 
-        return data;
+        result.Channel = &channel;
+        result.Sampler = &animation.samplers[channel.samplerIndex];
+        result.Input = GetAccessorData(file, result.Sampler->inputAccessor);
+        result.Output = GetAccessorData(file, result.Sampler->outputAccessor);
+
+        return result;
     }
 
     void SetupMeshFields(GPU::VAO& meshOut, size_t vertexCount)
@@ -264,7 +290,7 @@ namespace gE::Model
 
             if(const PrimitiveData indices = GetIndicesData(file, prim))
             {
-                slot.Count = indices.Accessor->count / 3;
+                slot.Count = indices->Accessor->count / 3;
                 slot.Offset = offset;
                 offset += slot.Count;
                 continue;
@@ -273,13 +299,13 @@ namespace gE::Model
             const PrimitiveData position = GetAttributeData(file, prim, "POSITION");
             GE_ASSERT(position);
 
-            slot.Count = position.Accessor->count / 3;
+            slot.Count = position->Accessor->count / 3;
             slot.Offset = offset;
             offset += slot.Count;
         }
     }
 
-    void ProcessSubmesh(GPU::VAO& meshOut, const gltf::Asset& file, const gltf::Mesh& meshIn)
+    void ProcessSubmesh(const GPU::VAO& meshOut, const gltf::Asset& file, const gltf::Mesh& meshIn)
     {
         const GPU::Buffer<std::byte>& buf = meshOut.Buffers[0];
         GE_ASSERT(buf.GetByteCount() % sizeof(Vertex) == 0);
@@ -301,11 +327,11 @@ namespace gE::Model
             GE_MODEL_CHECK_ATTR(NORMAL_FIELD, normal, ConvertNormal);
             GE_MODEL_CHECK_ATTR(TANGENT_FIELD, tangent, ConvertTangent);
 
-            offset += position.Accessor->count;
+            offset += position->Accessor->count;
         }
     }
 
-    void ProcessSubmesh(GPU::IndexedVAO& meshOut, const gltf::Asset& file, const gltf::Mesh& meshIn)
+    void ProcessSubmesh(const GPU::IndexedVAO& meshOut, const gltf::Asset& file, const gltf::Mesh& meshIn)
     {
         ProcessSubmesh((GPU::VAO&) meshOut, file, meshIn);
 
@@ -316,16 +342,16 @@ namespace gE::Model
         for(const gltf::Primitive& submeshIn : meshIn.primitives)
         {
             const PrimitiveData indices = GetIndicesData(file, submeshIn);
-            const gltf::Accessor& accessor = *indices.Accessor;
-            const gltf::BufferView& bufView = *indices.BufferView;
+            const gltf::Accessor& accessor = *indices->Accessor;
+            const gltf::BufferView& bufView = *indices->View;
             const std::span writeSpan { ((u32*) buf.Data.begin()) + offset, (u32*) buf.Data.end() };
             const size_t stride = bufView.byteStride.value_or(gltf::getElementByteSize(accessor.type, accessor.componentType));
 
             GE_ASSERT(submeshIn.type == gltf::PrimitiveType::Triangles)
             GE_ASSERT(accessor.count % 3 == 0);
-            GE_ASSERT(indices.Accessor);
+            GE_ASSERT(indices->Accessor);
 
-            const gltf::sources::Array* data = std::get_if<gltf::sources::Array>(&indices.Buffer->data);
+            const gltf::sources::Array* data = std::get_if<gltf::sources::Array>(&indices->Buffer->data);
             GE_ASSERT(data);
 
             for(size_t i = 0; i < accessor.count; i++)
@@ -349,7 +375,7 @@ namespace gE::Model
         }
     }
 
-    void ProcessSubmeshWeights(GPU::VAO& meshOut, const gltf::Asset& file, const gltf::Mesh& meshIn)
+    void ProcessSubmeshWeights(const GPU::VAO& meshOut, const gltf::Asset& file, const gltf::Mesh& meshIn)
     {
         const GPU::Buffer<std::byte>& buf = meshOut.Buffers[1];
         GE_ASSERT(buf.GetByteCount() % sizeof(VertexWeight) == 0);
@@ -367,7 +393,33 @@ namespace gE::Model
             GE_MODEL_CHECK_ATTR(BONES_FIELD, bones, (ConversionFunc<glm::u8vec4, glm::u8vec4>) nullptr);
             GE_MODEL_CHECK_ATTR(WEIGHTS_FIELD, weights, ConvertWeight);
 
-            offset += bones.Accessor->count;
+            offset += bones->Accessor->count;
+        }
+    }
+
+    void ProcessChannel(AnimationChannel& channelOut, const gltf::Asset& file, const gltf::Animation& animationIn,
+                        const gltf::AnimationChannel& channelIn)
+    {
+        const ChannelData channelData = GetChannelData(file, animationIn, channelIn);
+
+        channelOut.Target.Name = file.nodes[channelIn.nodeIndex.value_or(0)].name;
+        channelOut.Frames = Array<Frame>(channelData.Input.Accessor->count);
+        channelOut.ChannelType = (ChannelType) channelIn.path;
+
+        for(size_t i = 0; i < channelOut.Frames.Count(); i++)
+        {
+            Frame& frameOut = channelOut.Frames[i];
+
+            frameOut.Time = AccessBuffer<float>(channelData.Input, i);
+
+            if(channelOut.ChannelType == ChannelType::Location || channelOut.ChannelType == ChannelType::Scale)
+                frameOut.Value = AccessBuffer<glm::vec3>(channelData.Output, i);
+            else
+                frameOut.Value = AccessBuffer<glm::quat>(channelData.Output, i);
+
+#ifdef GE_ENABLE_IMGUI
+            frameOut.Channel = &channelOut;
+#endif
         }
     }
 

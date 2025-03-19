@@ -16,30 +16,55 @@ namespace gE
 {
     struct Skeleton;
     struct Animation;
+    struct AnimationChannel;
     struct Bone;
 }
 
 template struct TypeSystem<gE::Skeleton&>;
-
-template struct TypeSystem<gE::Animation&>;
+template struct TypeSystem<gE::Skeleton*>;
 
 namespace gE
 {
     enum class FrameInterpolationMode : u8
     {
-        None,
+        Step,
         Linear,
         Ease,
         EaseIn,
         EaseOut
     };
 
+    REFLECTABLE_ENUM(Normal, FrameInterpolationMode, 5,
+        REFLECT_ENUM(FrameInterpolationMode, Step),
+        REFLECT_ENUM(FrameInterpolationMode, Linear),
+        REFLECT_ENUM(FrameInterpolationMode, Ease),
+        REFLECT_ENUM(FrameInterpolationMode, EaseIn),
+        REFLECT_ENUM(FrameInterpolationMode, EaseOut),
+    );
+
+    enum class ChannelType : u8
+    {
+        Location = 1,
+        Rotation = 2,
+        Scale = 3
+    };
+
+    REFLECTABLE_ENUM(Normal, ChannelType, 3,
+        REFLECT_ENUM(ChannelType, Location),
+        REFLECT_ENUM(ChannelType, Rotation),
+        REFLECT_ENUM(ChannelType, Scale)
+    );
+
     struct Frame
     {
-    public:
-        u16 FrameID = DEFAULT;
-        FrameInterpolationMode InterpolationMode = DEFAULT;
-        TransformData Transform = DEFAULT;
+        float Time;
+        std::variant<glm::vec3, glm::quat> Value;
+
+#ifdef GE_ENABLE_IMGUI
+        AnimationChannel* Channel;
+        void OnEditorGUI(u8 depth);
+        std::string GetEditorName() const { return std::to_string(Time); }
+#endif
     };
 
     struct BoneReference : public Serializable<Skeleton*>
@@ -47,7 +72,7 @@ namespace gE
         SERIALIZABLE_PROTO("BREF", 1, BoneReference, Serializable);
 
     public:
-        Bone* Resolve(const Skeleton* skel);
+        Bone* Resolve(const Skeleton* skeleton);
         void Set(const Skeleton* skel, Bone& bone);
         void Set(const Skeleton& skel, std::string_view name);
         void Optimize(const Skeleton* skel);
@@ -63,8 +88,8 @@ namespace gE
         REFLECTABLE_PROTO(Bone, Serializable, "gE::Bone");
 
     public:
-        NODISCARD inline bool IsFree() const { return Name.empty(); }
-        inline void Free() { Name.clear(); }
+        NODISCARD bool IsFree() const { return Name.empty(); }
+        void Free() { Name.clear(); }
 
         std::string Name = DEFAULT;
         BoneReference Parent = DEFAULT;
@@ -82,23 +107,27 @@ namespace gE
         NODISCARD Bone* FindBone(std::string_view name, u16 suggestedLocation = -1) const;
         NODISCARD ALWAYS_INLINE u16 GetIndex(const Bone& bone) const { return &bone - Bones.Data(); }
 
-        NODISCARD inline bool IsFree() const override { return Bones.IsFree(); }
-        inline void Free() override { Bones.Free(); }
+        NODISCARD bool IsFree() const override { return Bones.IsFree(); }
+        void Free() override { Bones.Free(); }
 
         std::string Name = DEFAULT;
         Array<Bone> Bones = DEFAULT;
     };
 
-    struct AnimationChannel : public Serializable<Skeleton*>
+    struct AnimationChannel final : public Serializable<Skeleton*>
     {
         SERIALIZABLE_PROTO("ABNE", 1, AnimationChannel, Serializable);
+        REFLECTABLE_PROTO(AnimationChannel, Serializable, "gE::AnimationChannel");
 
     public:
+        NODISCARD inline const Frame* GetFrame(float time) const;
         bool Retarget(const Skeleton*);
-        NODISCARD inline bool IsFree() const { return Frames.IsFree(); }
-        inline void Free() { Frames.Free(); }
+
+        NODISCARD bool IsFree() const { return Frames.IsFree(); }
+        void Free() { Frames.Free(); }
 
         BoneReference Target = DEFAULT;
+        ChannelType ChannelType = DEFAULT;
         Array<Frame> Frames = DEFAULT;
     };
 
@@ -109,16 +138,13 @@ namespace gE
 
     public:
         NODISCARD AnimationChannel* FindChannel(std::string_view name, u16 suggestedLocation = -1) const;
+        void Retarget(const Reference<Skeleton>&);
 
         NODISCARD inline bool IsFree() const override { return Skeleton.IsFree() && Channels.IsFree(); }
         inline void Free() override { Name.clear(); Skeleton.Free(); Channels.Free(); }
 
-        void Retarget(const Reference<Skeleton>&);
-
         std::string Name = DEFAULT;
-
-        u16 FPS = DEFAULT;
-        u16 FrameCount = DEFAULT;
+        float Length = DEFAULT;
 
         Reference<Skeleton> Skeleton = DEFAULT;
         Array<AnimationChannel> Channels = DEFAULT;

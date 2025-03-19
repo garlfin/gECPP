@@ -29,6 +29,8 @@ namespace gE
 		DrawField(Field{ "Transform" }, _transform, depth);
 	});
 
+	REFLECTABLE_NAME_IMPL(Entity, return _name);
+
 	void Entity::Destroy(bool flagChildren)
 	{
 		GetWindow().GetEntities().DestroyEntity(*this, flagChildren);

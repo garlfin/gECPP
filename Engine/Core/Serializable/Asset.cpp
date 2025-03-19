@@ -45,6 +45,8 @@ namespace gE
         return type;
     }
 
+    REFLECTABLE_NAME_IMPL(File, return _path.string());
+
     Bank::Bank(Window* window, const Path& path, AssetLoadMode mode) :
         _path(path),
         _stream(_path, std::ios::in | std::ios::binary),

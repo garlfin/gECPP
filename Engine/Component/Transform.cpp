@@ -64,6 +64,15 @@ namespace gE
 		return model;
 	}
 
+#ifdef GE_ENABLE_IMGUI
+	void TransformData::OnEditorGUI(u8 depth)
+	{
+		DrawField(ScalarField<float>{ "Position" }, Position, depth);
+		DrawField(ScalarField<float>{ "Rotation" }, Rotation, depth);
+		DrawField(ScalarField{ "Scale", "", FLT_EPSILON }, Scale, depth);
+	}
+#endif
+
 	Transform::Transform(Entity* o, const TransformData& d) :
 		Component(o, &GetWindow().GetTransforms()),
 	    _model(1.0)

@@ -65,6 +65,9 @@ namespace gE
     template<class T>
     CONSTEXPR_GLOBAL ImGuiDataType IMType = 0;
 
+    template<class T>
+    std::string GetLabel(std::add_const_t<T>* t, std::string_view defaultType = DEFAULT);
+
     template<class T, class SETTINGS_T>
     bool DrawField(const SETTINGS_T&, T&, u8 depth);
 
