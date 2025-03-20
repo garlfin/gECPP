@@ -16,7 +16,7 @@ namespace gE
 {
 	class Component : public Reflectable<Entity*>, public Managed<Component>
 	{
-		REFLECTABLE_PROTO_NOIMPL(Reflectable);
+		REFLECTABLE_NOIMPL(Reflectable);
 
 	 public:
 		explicit Component(Entity* owner, IComponentManager* = nullptr);

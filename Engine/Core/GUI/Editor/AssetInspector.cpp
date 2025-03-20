@@ -74,12 +74,12 @@ namespace gE::Editor
 
         SetShortcut({ KeyModifier::LControl, KeyModifier::None, Key::A });
 
-        AddIcon(Material::Type, Sprite(_iconSpriteSheet, glm::u16vec2(1, 0)));
-        AddIcon(GPU::Shader::Type, Sprite(_iconSpriteSheet, glm::u16vec2(2, 0)));
-        AddIcon(GPU::ShaderSource::Type, Sprite(_iconSpriteSheet, glm::u16vec2(3, 0)));
-        AddIcon(GPU::ComputeShader::Type, Sprite(_iconSpriteSheet, glm::u16vec2(4, 0)));
-        AddIcon(GPU::VAO::Type, Sprite(_iconSpriteSheet, glm::u16vec2(5, 0)));
-        AddIcon(Mesh::Type, Sprite(_iconSpriteSheet, glm::u16vec2(5, 0)));
+        AddIcon(Material::SType, Sprite(_iconSpriteSheet, glm::u16vec2(1, 0)));
+        AddIcon(GPU::Shader::SType, Sprite(_iconSpriteSheet, glm::u16vec2(2, 0)));
+        AddIcon(GPU::ShaderSource::SType, Sprite(_iconSpriteSheet, glm::u16vec2(3, 0)));
+        AddIcon(GPU::ComputeShader::SType, Sprite(_iconSpriteSheet, glm::u16vec2(4, 0)));
+        AddIcon(GPU::VAO::SType, Sprite(_iconSpriteSheet, glm::u16vec2(5, 0)));
+        AddIcon(Mesh::SType, Sprite(_iconSpriteSheet, glm::u16vec2(5, 0)));
     }
 
     void AssetManager::LoadFileCallback(LoadingAsset* asset, const char* const* paths, int filter)

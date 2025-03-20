@@ -23,7 +23,7 @@ namespace GL
 		API_SERIALIZABLE(Buffer, GPU::Buffer<T>);
 		API_DEFAULT_CM_CONSTRUCTOR(Buffer);
 
-	 public:
+	public:
 		Buffer(gE::Window* window, u32 count, const T* data = nullptr, GPU::BufferUsageHint hint = GPU::BufferUsageHint::Default);
 
 		template<typename I>

@@ -25,8 +25,7 @@ namespace GPU
 
 	class Texture : public gE::Asset
 	{
-		SERIALIZABLE_PROTO("TEX", 1, Texture, Asset);
-		REFLECTABLE_ONGUI_PROTO(Asset);
+		SERIALIZABLE_PROTO("GPU::Texture", "TEX", 1, Texture, Asset);
 
 	public:
 		ALWAYS_INLINE void Free() override { Data.Free(); }
@@ -47,8 +46,7 @@ namespace GPU
 
 	class Texture1D : public Texture
 	{
-		SERIALIZABLE_PROTO("TEX1", 1, Texture1D, Texture);
-		REFLECTABLE_PROTO(Texture1D, Texture, "API::Texture1D");
+		SERIALIZABLE_PROTO("API::Texture1D", "TEX1", 1, Texture1D, Texture);
 
 	public:
 		Texture1D(const Texture& super, Size1D size) : Texture(super), Size(size) {};
@@ -59,8 +57,7 @@ namespace GPU
 
  	class Texture2D : public Texture
 	{
- 		SERIALIZABLE_PROTO("TEX2", 1, Texture2D, Texture);
- 		REFLECTABLE_PROTO(Texture2D, Texture, "GPU::Texture2D");
+ 		SERIALIZABLE_PROTO("GPU::Texture2D", "TEX2", 1, Texture2D, Texture);
 
  	public:
  		Texture2D(const Texture& super, Size2D size) : Texture(super), Size(size) {};
@@ -71,8 +68,7 @@ namespace GPU
 
 	class Texture3D : public Texture
 	{
-		SERIALIZABLE_PROTO("TEX3", 1, Texture3D, Texture);
-		REFLECTABLE_PROTO(Texture3D, Texture, "GPU::Texture3D");
+		SERIALIZABLE_PROTO("GPU::Texture3D", "TEX3", 1, Texture3D, Texture);
 
 	public:
 		Texture3D(const Texture& super, Size3D size) : Texture(super), Size(size) {};
@@ -83,8 +79,7 @@ namespace GPU
 
 	class TextureCube : public Texture
 	{
-		SERIALIZABLE_PROTO("TEXC", 1, TextureCube, Texture);
-		REFLECTABLE_PROTO(TextureCube, Texture, "GPU::TextureCube");
+		SERIALIZABLE_PROTO("GPU::TextureCube", "TEXC", 1, TextureCube, Texture);
 
 	public:
 		TextureCube(const Texture& super, Size1D size) : Texture(super), Size(size) {};

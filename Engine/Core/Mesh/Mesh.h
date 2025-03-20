@@ -20,8 +20,7 @@ namespace gE
 
     struct Mesh : public Asset
     {
-        SERIALIZABLE_PROTO("MESH", 2, Mesh, Asset);
-        REFLECTABLE_PROTO(Mesh, Asset, "gE::Mesh");
+        SERIALIZABLE_PROTO("gE::Mesh", "MESH", 2, Mesh, Asset);
 
     public:
         void Free() override;

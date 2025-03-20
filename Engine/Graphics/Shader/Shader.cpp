@@ -23,7 +23,7 @@ namespace GPU
 		Write(out, Source);
 	}
 
-	REFLECTABLE_FACTORY_IMPL(ShaderSource, ShaderSource);
+	REFLECTABLE_FACTORY_IMPL(ShaderSource);
 	REFLECTABLE_ONGUI_IMPL(ShaderSource,
 		const ImVec2 contentRegion = ImGui::GetContentRegionAvail();
 		ImVec2 size = ImGui::CalcTextSize(&*Source.begin(), &*Source.end(), contentRegion.x);
@@ -79,7 +79,7 @@ namespace GPU
 		gE::DrawField(gE::Field{ "Source" }, Source, depth);
 		gE::DrawField<const std::string>(gE::Field{ "Base Path", "The path used for relative includes (#include \"\")." }, BasePath.string(), depth);
 	);
-	REFLECTABLE_FACTORY_IMPL(ShaderStage, API::ShaderStage)
+	API_REFLECTABLE_FACTORY_IMPL(ShaderStage, API::ShaderStage)
 
 	Shader::Shader(const Path& v, const Path& f) :
 		VertexStage(ShaderStageType::Vertex, v),
@@ -91,7 +91,7 @@ namespace GPU
 		gE::DrawField(gE::Field{ "Vertex" }, VertexStage, depth);
 		gE::DrawField(gE::Field{ "Fragment" }, FragmentStage, depth);
 	);
-	REFLECTABLE_FACTORY_IMPL(Shader, API::Shader);
+	API_REFLECTABLE_FACTORY_IMPL(Shader, API::Shader);
 
 	ComputeShader::ComputeShader(const Path& c) :
 		ComputeStage(ShaderStageType::Compute, c)
@@ -101,5 +101,5 @@ namespace GPU
 	REFLECTABLE_ONGUI_IMPL(ComputeShader,
 		gE::DrawField(gE::Field{ "Compute" }, ComputeStage, depth);
 	);
-	REFLECTABLE_FACTORY_IMPL(ComputeShader, API::ComputeShader);
+	API_REFLECTABLE_FACTORY_IMPL(ComputeShader, API::ComputeShader);
 }

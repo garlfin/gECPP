@@ -21,7 +21,7 @@ using UFactoryFunction = void(*)(std::istream&, T, Serializable<gE::Window*>&);
 template<class SERIALIZABLE_T>
 concept ReflConstructible = requires
 {
-	SERIALIZABLE_T::Type;
+	SERIALIZABLE_T::SType;
 };
 
 template<class T>
@@ -155,8 +155,8 @@ struct EnumData
 		using THIS_T = TYPE; \
 		static TYPE* Factory(std::istream& in, SETTINGS_T t); \
 		static void UFactory(std::istream& in, SETTINGS_T t, TYPE& result); \
-		const TYPE_T* GetType() const override { return &Type; }; \
-		FORCE_IMPL static inline const TYPE_T Type{ NAME, (FactoryFunction<SETTINGS_T>) Factory, (UFactoryFunction<SETTINGS_T>) UFactory, MAGIC, __VA_ARGS__ }; \
+		const TYPE_T* GetType() const override { return &SType; }; \
+		FORCE_IMPL static inline const TYPE_T SType{ NAME, (FactoryFunction<SETTINGS_T>) Factory, (UFactoryFunction<SETTINGS_T>) UFactory, MAGIC, __VA_ARGS__ }; \
 
 #ifdef GE_ENABLE_IMGUI
 	#define REFLECTABLE_ONGUI_PROTO(SUPER) \
@@ -193,13 +193,13 @@ struct EnumData
 	REFLECTABLE_TYPE_PROTO(TYPE, NAME, __VA_ARGS__); \
 	REFLECTABLE_ONGUI_PROTO(SUPER)
 
-#define REFLECTABLE_PROTO_NOIMPL(SUPER) \
+#define REFLECTABLE_NOIMPL(SUPER) \
 	public: \
 		void OnEditorGUI(u8 depth) override { SUPER::OnEditorGUI(depth); }
 
-#define REFLECTABLE_FACTORY_IMPL(TYPE, CONSTRUCTION_T, ...) \
-	__VA_ARGS__ TYPE* TYPE::Factory(std::istream& in, TYPE::SETTINGS_T t) { return (TYPE*) new CONSTRUCTION_T(in, t); } \
-	__VA_ARGS__ void TYPE::UFactory(std::istream& in, TYPE::SETTINGS_T t, TYPE& result) { PlacementNew((CONSTRUCTION_T&) result, in, t); }
+#define REFLECTABLE_FACTORY_IMPL(TYPE, ...) \
+	__VA_ARGS__ TYPE* TYPE::Factory(std::istream& in, TYPE::SETTINGS_T t) { return (TYPE*) new TYPE(in, t); } \
+	__VA_ARGS__ void TYPE::UFactory(std::istream& in, TYPE::SETTINGS_T t, TYPE& result) { PlacementNew((TYPE&) result, in, t); }
 
 #define REFLECTABLE_FACTORY_NO_IMPL(TYPE, ...) \
 	__VA_ARGS__ TYPE* TYPE::Factory(std::istream&, TYPE::SETTINGS_T) { return nullptr; } \

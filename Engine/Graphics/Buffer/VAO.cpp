@@ -68,6 +68,8 @@ namespace GPU
 		DrawField(gE::ScalarField<u32>{ "Offset", "Tri offset" }, Offset, depth);
 		DrawField(gE::ScalarField{ "Count", "Number of tris", 1u }, Count, depth);
 	});
+	REFLECTABLE_NAME_IMPL(MaterialSlot, return Name);
+	REFLECTABLE_FACTORY_IMPL(MaterialSlot);
 
 	REFLECTABLE_ONGUI_IMPL(VAO,
 	{
@@ -87,11 +89,13 @@ namespace GPU
 		DrawField(gE::ArrayField<gE::Field>{ "Buffers" }, Buffers, Counts.BufferCount, depth);
 		DrawField(gE::ArrayField<gE::Field>{ "Fields" }, Fields, Counts.FieldCount, depth);
 	});
+	API_REFLECTABLE_FACTORY_IMPL(VAO, API::VAO);
 
 	REFLECTABLE_ONGUI_IMPL(IndexedVAO,
 	{
 		DrawField(gE::Field{ "Triangles" }, TriangleBuffer, depth);
 	});
+	API_REFLECTABLE_FACTORY_IMPL(IndexedVAO, API::IndexedVAO);
 
 	REFLECTABLE_ONGUI_IMPL(VertexField,
 	{
@@ -110,9 +114,6 @@ namespace GPU
 		DrawField(gE::ScalarField<u8>{ "Element Count", "", 1, 4}, ElementCount, depth);
 		DrawField(gE::ScalarField<u8>{ "Offset" }, Offset, depth);
 	});
-
-	REFLECTABLE_FACTORY_IMPL(VAO, API::VAO);
-	REFLECTABLE_FACTORY_IMPL(IndexedVAO, API::IndexedVAO);
-	REFLECTABLE_FACTORY_IMPL(MaterialSlot, MaterialSlot);
-	REFLECTABLE_FACTORY_IMPL(VertexField, VertexField);
+	REFLECTABLE_NAME_IMPL(VertexField, return Name);
+	REFLECTABLE_FACTORY_IMPL(VertexField);
 }

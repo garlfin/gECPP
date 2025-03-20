@@ -18,6 +18,7 @@
 namespace gE
 {
     class Bank;
+    class File;
 
     using UUID = __uint128_t;
 
@@ -25,7 +26,7 @@ namespace gE
 
     class Asset : public Serializable<Window*>
     {
-        REFLECTABLE_PROTO_NOIMPL(Serializable);
+        REFLECTABLE_NOIMPL(Serializable);
 
     public:
         using SUPER = Serializable;
@@ -61,9 +62,36 @@ namespace gE
         AssetLoadMode LoadMode;
     };
 
+    struct BankLoadArgs
+    {
+        Path Path;
+        std::ifstream Stream;
+        Window* Window;
+        AssetLoadMode Mode;
+    };
+
+    struct AssetCompare
+    {
+        using is_transparent = void;
+
+        NODISCARD ALWAYS_INLINE bool operator()(const Bank& a, const Bank& b) const;
+        NODISCARD ALWAYS_INLINE bool operator()(const Bank& a, const UUID& b) const;
+        NODISCARD ALWAYS_INLINE bool operator()(const UUID& a, const Bank& b) const;
+
+        NODISCARD ALWAYS_INLINE bool operator()(const File& a, const File& b) const;
+        NODISCARD ALWAYS_INLINE bool operator()(const File& a, const UUID& b) const;
+        NODISCARD ALWAYS_INLINE bool operator()(const UUID& a, const File& b) const;
+    };
+}
+
+template struct TypeSystem<gE::FileLoadArgs&>;
+template struct TypeSystem<gE::BankLoadArgs&>;
+
+namespace gE
+{
     class File final : public Serializable<FileLoadArgs&>
     {
-        SERIALIZABLE_PROTO("FILE", 0, File, Serializable);
+        SERIALIZABLE_PROTO("gE::File", "FILE", 0, File, Serializable);
         REFLECTABLE_NAME_PROTO();
 
     public:
@@ -119,30 +147,10 @@ namespace gE
         friend class Bank;
     };
 
-    struct BankLoadArgs
-    {
-        Path Path;
-        std::ifstream Stream;
-        Window* Window;
-        AssetLoadMode Mode;
-    };
-
-    struct AssetCompare
-    {
-        using is_transparent = void;
-
-        NODISCARD ALWAYS_INLINE bool operator()(const Bank& a, const Bank& b) const;
-        NODISCARD ALWAYS_INLINE bool operator()(const Bank& a, const UUID& b) const;
-        NODISCARD ALWAYS_INLINE bool operator()(const UUID& a, const Bank& b) const;
-
-        NODISCARD ALWAYS_INLINE bool operator()(const File& a, const File& b) const;
-        NODISCARD ALWAYS_INLINE bool operator()(const File& a, const UUID& b) const;
-        NODISCARD ALWAYS_INLINE bool operator()(const UUID& a, const File& b) const;
-    };
-
     class Bank final : public Serializable<BankLoadArgs&>
     {
-        SERIALIZABLE_PROTO("BANK", 0, Bank, Serializable);
+        SERIALIZABLE_PROTO("gE::Bank", "BANK", 0, Bank, Serializable);
+        REFLECTABLE_NAME_PROTO();
 
     public:
         using FILE_SET_T = std::set<File, AssetCompare>;

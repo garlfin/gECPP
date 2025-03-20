@@ -77,28 +77,32 @@ namespace GPU
 		update |= gE::DrawField(gE::EnumField{ "Filter", "", EFilterMode }, Filter, depth);
 		if(update) UpdateParameters();
 	);
+	REFLECTABLE_FACTORY_NO_IMPL(Texture);
 
 	GPU_TEXTURE_DEFINITION(Texture1D, Dimension::D1D);
 	REFLECTABLE_ONGUI_IMPL(Texture1D,
 		gE::DrawField(gE::ScalarField<u32>{ "Size" }, (const Size1D&) Size, depth);
 	);
-	REFLECTABLE_FACTORY_IMPL(Texture1D, API::Texture1D);
+	API_REFLECTABLE_FACTORY_IMPL(Texture1D, API::Texture1D);
 
 	GPU_TEXTURE_DEFINITION(Texture2D, Dimension::D2D);
 	REFLECTABLE_ONGUI_IMPL(Texture2D,
 		gE::DrawField(gE::ScalarField<u32>{ "Size" }, (const Size2D&) Size, depth);
 	);
-	REFLECTABLE_FACTORY_IMPL(Texture2D, API::Texture2D);
+	API_REFLECTABLE_FACTORY_IMPL(Texture2D, API::Texture2D);
 
 	GPU_TEXTURE_DEFINITION(Texture3D, Dimension::D3D);
 	REFLECTABLE_ONGUI_IMPL(Texture3D,
 		gE::DrawField(gE::ScalarField<u32>{ "Size" }, (const Size3D&) Size, depth);
 	);
-	REFLECTABLE_FACTORY_IMPL(Texture3D, API::Texture3D);
+	API_REFLECTABLE_FACTORY_IMPL(Texture3D, API::Texture3D);
 
 	GPU_TEXTURE_DEFINITION(TextureCube, Dimension::D1D);
 	REFLECTABLE_ONGUI_IMPL(TextureCube,
 		gE::DrawField(gE::ScalarField<u32>{ "Size" }, (const Size1D&) Size, depth);
 	);
-	REFLECTABLE_FACTORY_IMPL(TextureCube, API::TextureCube);
+	API_REFLECTABLE_FACTORY_IMPL(TextureCube, API::TextureCube);
+
+	REFLECTABLE_ONGUI_IMPL(TextureData, );
+	REFLECTABLE_FACTORY_IMPL(TextureData);
 }

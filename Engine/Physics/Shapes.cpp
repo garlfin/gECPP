@@ -66,10 +66,26 @@ namespace Physics
         return point;
     }
 
-    REFLECTABLE_FACTORY_IMPL(SphereShape, Jolt::SphereShape);
-    REFLECTABLE_FACTORY_IMPL(BoxShape, Jolt::BoxShape);
-    REFLECTABLE_FACTORY_IMPL(CapsuleShape, Jolt::CapsuleShape);
-    REFLECTABLE_FACTORY_IMPL(ConvexMeshShape, Jolt::ConvexMeshShape);
+    REFLECTABLE_ONGUI_IMPL(Shape, );
+    REFLECTABLE_FACTORY_NO_IMPL(Shape);
+
+    REFLECTABLE_ONGUI_IMPL(ConvexShape, );
+    REFLECTABLE_FACTORY_NO_IMPL(ConvexShape);
+
+    REFLECTABLE_ONGUI_IMPL(SphereShape, );
+    API_REFLECTABLE_FACTORY_IMPL(SphereShape, Jolt::SphereShape);
+
+    REFLECTABLE_ONGUI_IMPL(BoxShape, );
+    API_REFLECTABLE_FACTORY_IMPL(BoxShape, Jolt::BoxShape);
+
+    REFLECTABLE_ONGUI_IMPL(CapsuleShape, );
+    API_REFLECTABLE_FACTORY_IMPL(CapsuleShape, Jolt::CapsuleShape);
+
+    REFLECTABLE_ONGUI_IMPL(ConvexMeshShape, );
+    API_REFLECTABLE_FACTORY_IMPL(ConvexMeshShape, Jolt::ConvexMeshShape);
+
+    REFLECTABLE_ONGUI_IMPL(BakedConvexMeshShape, )
+    API_REFLECTABLE_FACTORY_IMPL(BakedConvexMeshShape, BakedConvexMeshShape);
 }
 
 namespace Jolt

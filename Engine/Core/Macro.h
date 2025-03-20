@@ -98,8 +98,8 @@ T& PlacementNew(T& to, ARGS&&... args)
 	#define GE_ASSERTM(COND, ERR) { bool cond = COND; if(!cond) __debugbreak(); assertm(cond, ERR); }
 	#define GE_ASSERT(COND) { bool cond = COND; if(!cond) __debugbreak(); assert(cond); }
 #else
-	#define GE_ASSERTM(COND, ERR) assertm(cond, ERR)
-	#define GE_ASSERT(COND) assert(cond)
+	#define GE_ASSERTM(COND, ERR)
+	#define GE_ASSERT(COND)
 #endif
 
 #define UNPACK(...) __VA_ARGS__

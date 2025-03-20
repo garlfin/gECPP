@@ -16,8 +16,7 @@ namespace GPU
 {
 	struct ShaderSource final : public gE::Asset
 	{
-		SERIALIZABLE_PROTO("SSRC", 0, ShaderSource, Asset);
-		REFLECTABLE_PROTO(ShaderSource, Asset, "GPU::ShaderSource");
+		SERIALIZABLE_PROTO("GPU::ShaderSource", "SSRC", 0, ShaderSource, Asset);
 
 	public:
 		explicit ShaderSource(const Path&);
@@ -34,8 +33,7 @@ namespace GPU
 
 	struct ShaderStage : public gE::Asset
 	{
-		SERIALIZABLE_PROTO("STGE", 1, ShaderStage, Asset);
-		REFLECTABLE_PROTO(ShaderStage, Asset, "GPU::ShaderStage");
+		SERIALIZABLE_PROTO("GPU::ShaderStage", "STGE", 1, ShaderStage, Asset);
 
 	public:
 		ShaderStage(ShaderStageType, const Path&);
@@ -55,8 +53,7 @@ namespace GPU
 
 	struct Shader : public gE::Asset
 	{
-		SERIALIZABLE_PROTO("SHDR", 1, Shader, Asset);
-		REFLECTABLE_PROTO(Shader, Asset, "GPU::Shader");
+		SERIALIZABLE_PROTO("GPU::Shader", "SHDR", 1, Shader, Asset);
 
 	public:
 		Shader(const Path& v, const Path& f);
@@ -70,8 +67,7 @@ namespace GPU
 
 	struct ComputeShader : public gE::Asset
 	{
-		SERIALIZABLE_PROTO("COMP", 1, ComputeShader, Asset);
-		REFLECTABLE_PROTO(ComputeShader, Asset, "GPU::ComputeShader");
+		SERIALIZABLE_PROTO("GPU::ComputeShader", "COMP", 1, ComputeShader, Asset);
 
 	public:
 		explicit ComputeShader(const Path& c);

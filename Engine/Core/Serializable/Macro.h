@@ -27,7 +27,7 @@
 		using SUPER_T::IsFree; \
 		using SUPER_T::OnEditorGUI; \
 		using SUPER_T::GetType; \
-		using SUPER_T::Type; \
+		using SUPER_T::SType; \
 		TYPE(istream& in, gE::Window* window) \
 		{ \
 			SUPER_T tmp(in, window); \
@@ -49,3 +49,7 @@
 	NAMESPACE##__VA_ARGS__::__VA_ARGS__(gE::Window* window, SUPER&& INTERNAL_SETTINGS) : SUPER(move(INTERNAL_SETTINGS))
 
 #define API_SERIALIZABLE_IMPL(...) API_SERIALIZABLE_IMPL_NAMESPACE(, __VA_ARGS__)
+
+#define API_REFLECTABLE_FACTORY_IMPL(TYPE, CONSTRUCTION_T, ...) \
+	__VA_ARGS__ TYPE* TYPE::Factory(std::istream& in, TYPE::SETTINGS_T t) { return (TYPE*) new CONSTRUCTION_T(in, t); } \
+	__VA_ARGS__ void TYPE::UFactory(std::istream& in, TYPE::SETTINGS_T t, TYPE& result) { PlacementNew((CONSTRUCTION_T&) result, in, t); }

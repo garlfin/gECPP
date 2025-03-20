@@ -35,7 +35,7 @@ namespace gE
     template <class SERIALIZABLE_T> requires ReflConstructible<SERIALIZABLE_T>
     const File* AssetManager::AddSerializableFromFile(const Path& path)
     {
-        const File* file = AddFile(File(_window, path, &SERIALIZABLE_T::Type));
+        const File* file = AddFile(File(_window, path, &SERIALIZABLE_T::SType));
         file->Load();
         return file;
     }

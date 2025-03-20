@@ -29,7 +29,7 @@ namespace gE::Model
     void ProcessSubmesh(const GPU::VAO& meshOut, const gltf::Asset& file, const gltf::Mesh& meshIn);
     void ProcessSubmesh(const GPU::IndexedVAO& meshOut, const gltf::Asset& file, const gltf::Mesh& meshIn);
     void ProcessSubmeshWeights(const GPU::VAO& meshOut, const gltf::Asset& file, const gltf::Mesh& meshIn);
-    void ProcessChannel(AnimationChannel& channelOut, const gltf::Asset& file, const gltf::Animation& animationIn,
+    float ProcessChannel(AnimationChannel& channelOut, const gltf::Asset& file, const gltf::Animation& animationIn,
                         const gltf::AnimationChannel& channelIn);
 
     TransformData GetTransformFromNode(const gltf::Node& node);
@@ -156,7 +156,7 @@ namespace gE::Model
 
                 if(!channelIn.nodeIndex.has_value()) continue;
 
-                ProcessChannel(channelOut, file.get(), animationIn, channelIn);
+                animationOut.Length = std::max(animationOut.Length, ProcessChannel(channelOut, file.get(), animationIn, channelIn));
             }
         }
     }
@@ -174,7 +174,7 @@ namespace gE::Model
         for(size_t i = 0; i < result.Meshes.Count(); i++, fileOffset++)
         {
             Mesh& mesh = result.Meshes[i];
-            Path filePath = parentDirectory / Path(mesh.Name).replace_extension(Mesh::Type.Extension);
+            Path filePath = parentDirectory / Path(mesh.Name).replace_extension(Mesh::SType.Extension);
 
             files[fileOffset] = File(window, filePath, std::move(mesh));
         }
@@ -182,7 +182,7 @@ namespace gE::Model
         for(size_t i = 0; i < result.Skeletons.Count(); i++, fileOffset++)
         {
             Skeleton& skeleton = result.Skeletons[i];
-            Path filePath = parentDirectory / Path(skeleton.Name).replace_extension(Skeleton::Type.Extension);
+            Path filePath = parentDirectory / Path(skeleton.Name).replace_extension(Skeleton::SType.Extension);
 
             files[fileOffset] = File(window, filePath, std::move(skeleton));
         }
@@ -190,7 +190,7 @@ namespace gE::Model
         for(size_t i = 0; i < result.Animations.Count(); i++, fileOffset++)
         {
             Animation& animation = result.Animations[i];
-            Path filePath = parentDirectory / Path(animation.Name).replace_extension(Animation::Type.Extension);
+            Path filePath = parentDirectory / Path(animation.Name).replace_extension(Animation::SType.Extension);
 
             files[fileOffset] = File(window, filePath, std::move(animation));
         }
@@ -347,7 +347,7 @@ namespace gE::Model
             const std::span writeSpan { ((u32*) buf.Data.begin()) + offset, (u32*) buf.Data.end() };
             const size_t stride = bufView.byteStride.value_or(gltf::getElementByteSize(accessor.type, accessor.componentType));
 
-            GE_ASSERT(submeshIn.type == gltf::PrimitiveType::Triangles)
+            GE_ASSERT(submeshIn.type == gltf::PrimitiveType::Triangles);
             GE_ASSERT(accessor.count % 3 == 0);
             GE_ASSERT(indices->Accessor);
 
@@ -397,14 +397,14 @@ namespace gE::Model
         }
     }
 
-    void ProcessChannel(AnimationChannel& channelOut, const gltf::Asset& file, const gltf::Animation& animationIn,
+    float ProcessChannel(AnimationChannel& channelOut, const gltf::Asset& file, const gltf::Animation& animationIn,
                         const gltf::AnimationChannel& channelIn)
     {
         const ChannelData channelData = GetChannelData(file, animationIn, channelIn);
 
         channelOut.Target.Name = file.nodes[channelIn.nodeIndex.value_or(0)].name;
         channelOut.Frames = Array<Frame>(channelData.Input.Accessor->count);
-        channelOut.ChannelType = (ChannelType) channelIn.path;
+        channelOut.Type = (ChannelType) channelIn.path;
 
         for(size_t i = 0; i < channelOut.Frames.Count(); i++)
         {
@@ -412,7 +412,7 @@ namespace gE::Model
 
             frameOut.Time = AccessBuffer<float>(channelData.Input, i);
 
-            if(channelOut.ChannelType == ChannelType::Location || channelOut.ChannelType == ChannelType::Scale)
+            if(channelOut.Type == ChannelType::Location || channelOut.Type == ChannelType::Scale)
                 frameOut.Value = AccessBuffer<glm::vec3>(channelData.Output, i);
             else
                 frameOut.Value = AccessBuffer<glm::quat>(channelData.Output, i);
@@ -421,6 +421,8 @@ namespace gE::Model
             frameOut.Channel = &channelOut;
 #endif
         }
+
+        return std::get<std::vector<double, std::pmr::polymorphic_allocator<double>>>(channelData.Input.Accessor->max)[0];
     }
 
     TransformData GetTransformFromNode(const gltf::Node& node)

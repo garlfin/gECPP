@@ -9,9 +9,27 @@
 
 namespace gE
 {
-#ifdef GE_ENABLE_IMGUI
-    void Frame::OnEditorGUI(u8 depth)
+    void Frame::IDeserialize(istream& in, const AnimationChannel& s)
     {
+        Channel = s;
+
+        Read(in, Time);
+        if(Channel->Type == ChannelType::Location || Channel->Type == ChannelType::Rotation)
+            Value = Read<glm::vec3>(in);
+        else
+            Value = Read<glm::quat>(in);
+    }
+
+    void Frame::ISerialize(ostream& out) const
+    {
+        Write(out, Time);
+        if(std::holds_alternative<glm::vec3>(Value))
+            Write(out, std::get<glm::vec3>(Value));
+        else
+            Write(out, std::get<glm::quat>(Value));
+    }
+
+    REFLECTABLE_ONGUI_IMPL(Frame,
         if(!Channel) return;
 
         size_t index = this - &Channel->Frames[0];
@@ -21,14 +39,15 @@ namespace gE
 
         DrawField<float>(ScalarField{ "Time", "", minTime, maxTime }, Time, depth);
 
-        if(Channel->ChannelType == ChannelType::Location)
+        if(Channel->Type == ChannelType::Location)
             DrawField(ScalarField<float>{ "Location" }, std::get<glm::vec3>(Value), depth);
-        else if(Channel->ChannelType == ChannelType::Rotation)
+        else if(Channel->Type == ChannelType::Rotation)
             DrawField(ScalarField<float>{ "Rotation" }, std::get<glm::quat>(Value), depth);
-        else if(Channel->ChannelType == ChannelType::Scale)
+        else if(Channel->Type == ChannelType::Scale)
             DrawField(ScalarField{ "Scale", "", FLT_EPSILON }, std::get<glm::vec3>(Value), depth);
-    }
-#endif
+    );
+    REFLECTABLE_NAME_IMPL(Frame, return std::to_string(Time));
+    REFLECTABLE_FACTORY_IMPL(Frame);
 
     inline void BoneReference::IDeserialize(istream& in, Skeleton* skeleton)
     {
@@ -42,6 +61,15 @@ namespace gE
         Write(out, Location);
         Write(out, Name);
     }
+
+    REFLECTABLE_ONGUI_IMPL(BoneReference,
+        if(Pointer)
+            DrawField(Field{ "Target (Pointer)" }, Pointer.GetPointer(), depth);
+        else
+            DrawField<const std::string>(Field{ "Target (Name)" }, Name, depth);
+    );
+    REFLECTABLE_NAME_IMPL(BoneReference, return Name);
+    REFLECTABLE_FACTORY_IMPL(BoneReference);
 
     void Bone::IDeserialize(istream& in, SETTINGS_T s)
     {
@@ -58,12 +86,12 @@ namespace gE
         Write(out, Transform);
     }
 
-    REFLECTABLE_FACTORY_IMPL(Bone, Bone);
     REFLECTABLE_ONGUI_IMPL(Bone,
         DrawField(Field{ "Name" }, Name, depth);
-        DrawField(Field{ "Parent" }, Parent.Pointer, depth);
+        DrawField(Field{ "Parent" }, Parent.Pointer.GetPointer(), depth);
         DrawField(ScalarField<float>{ "Transform" }, Transform, depth);
     );
+    REFLECTABLE_FACTORY_IMPL(Bone);
 
     void Skeleton::IDeserialize(istream& in, SETTINGS_T s)
     {
@@ -87,7 +115,7 @@ namespace gE
         return nullptr;
     }
 
-    REFLECTABLE_FACTORY_IMPL(Skeleton, Skeleton);
+    REFLECTABLE_FACTORY_IMPL(Skeleton);
     REFLECTABLE_ONGUI_IMPL(Skeleton,
         DrawField(Field{ "Name" }, Name, depth);
         DrawField(ArrayField<Field>{ "Bones", "", ArrayViewMode::Elements }, Bones, depth);
@@ -101,7 +129,7 @@ namespace gE
     void AnimationChannel::IDeserialize(istream& in, SETTINGS_T s)
     {
         ReadSerializable(in, Target, s);
-        ReadArray<u16>(in, Frames);
+        ReadArraySerializable<u16>(in, Frames, *this);
     }
 
     void AnimationChannel::ISerialize(ostream& out) const
@@ -114,7 +142,10 @@ namespace gE
         DrawField(Field{ "Target" }, Target, depth);
         DrawField(ArrayField<Field>{ "Frames" }, Frames, depth);
     );
-    REFLECTABLE_FACTORY_IMPL(AnimationChannel, AnimationChannel);
+    REFLECTABLE_NAME_IMPL(AnimationChannel,
+        return std::format("{}::{}", Target.Name, EChannelType.At(Type)->second)
+    );
+    REFLECTABLE_FACTORY_IMPL(AnimationChannel);
 
     void Animation::IDeserialize(istream& in, SETTINGS_T s)
     {
@@ -154,5 +185,5 @@ namespace gE
         DrawField<const float>(ScalarField<float>{ "Length" }, Length, depth);
         DrawField(ArrayField<Field>{ "Channels" }, Channels, depth);
     );
-    REFLECTABLE_FACTORY_IMPL(Animation, Animation);
+    REFLECTABLE_FACTORY_IMPL(Animation);
 }

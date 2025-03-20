@@ -31,8 +31,7 @@ namespace GPU
 	template<typename T>
 	class Buffer : public gE::Asset
 	{
-		SERIALIZABLE_PROTO("SBUF", 1, Buffer, Asset);
-		REFLECTABLE_PROTO(Buffer, Asset, "GPU::Buffer");
+		SERIALIZABLE_PROTO("GPU::Buffer", "SBUF", 1, Buffer, Asset);
 
 	 public:
 		static_assert(!std::is_pointer_v<T>, "Buffer data shouldn't be a pointer!");

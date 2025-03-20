@@ -34,8 +34,8 @@ namespace GPU
 
 	struct MaterialSlot : public Serializable<>
 	{
-		SERIALIZABLE_PROTO("MAT", 1, MaterialSlot, Serializable);
-		REFLECTABLE_PROTO(MaterialSlot, Serializable, "GPU::MaterialSlot");
+		SERIALIZABLE_PROTO("GPU::MaterialSlot", "MAT", 1, MaterialSlot, Serializable);
+		REFLECTABLE_NAME_PROTO();
 
 	public:
 		MaterialSlot(std::string&& name, u32 offset, u32 count) : Name(move(name)), Offset(offset), Count(count) {}
@@ -48,8 +48,8 @@ namespace GPU
 
 	struct VertexField : public Serializable<>
 	{
-		SERIALIZABLE_PROTO_NOHEADER(VertexField, Serializable);
-		REFLECTABLE_PROTO(VertexField, Serializable, "GPU::VertexField");
+		SERIALIZABLE_PROTO_NOHEADER("GPU::VertexField", VertexField, Serializable);
+		REFLECTABLE_NAME_PROTO();
 
 	public:
 		constexpr VertexField(const char name[4], ElementType elementType, bool normalized, u8 bufferIndex, u8 index, u8 elementCount, u8 offset);

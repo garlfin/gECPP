@@ -23,7 +23,7 @@ template<class T>
 struct Serializable : public Reflectable<T>
 {
 	DEFAULT_OPERATOR_CM(Serializable);
-	REFLECTABLE_PROTO_NOIMPL(Reflectable<T>);
+	REFLECTABLE_NOIMPL(Reflectable<T>);
 
 public:
 	Serializable() = default;
@@ -53,7 +53,7 @@ public:
 	GE_ASSERTM(strcmpb(magic, MAGIC, 4), "UNEXPECTED MAGIC!"); \
 	_version = Read<u8>(in);
 
-#define SERIALIZABLE_PROTO(MAGIC_VAL, VERSION_VAL, TYPE, SUPER_T) \
+#define SERIALIZABLE_PROTO(NAME, MAGIC_VAL, VERSION_VAL, TYPE, SUPER_T, ...) \
 	public: \
 		typedef SUPER_T SUPER; \
 		typedef SUPER::SETTINGS_T SETTINGS_T;\
@@ -68,8 +68,9 @@ public:
 		void IDeserialize(istream& in, SETTINGS_T s); \
 		void ISerialize(ostream& out) const; \
 		u8 _version = VERSION_VAL; \
+		REFLECTABLE_PROTO(TYPE, SUPER_T, NAME, __VA_ARGS__)
 
-#define SERIALIZABLE_PROTO_NOHEADER(TYPE, SUPER_T) \
+#define SERIALIZABLE_PROTO_NOHEADER(NAME, TYPE, SUPER_T, ...) \
 	public: \
 		typedef SUPER_T SUPER; \
 		typedef SUPER::SETTINGS_T SETTINGS_T;\
@@ -84,6 +85,7 @@ public:
 		void IDeserialize(istream& in, SETTINGS_T s); \
 		void ISerialize(ostream& out) const; \
 		u8 _version = 0; \
+		REFLECTABLE_PROTO(TYPE, SUPER_T, NAME, __VA_ARGS__)
 
 template<class T, class S>
 concept is_serializable_in = requires(T t, S s, std::istream& i)

@@ -28,8 +28,7 @@ namespace Physics
 
     struct Shape : public gE::Asset
     {
-        SERIALIZABLE_PROTO("SHPE", 1, Shape, Asset);
-        REFLECTABLE_PROTO_NOIMPL(gE::Asset);
+        SERIALIZABLE_PROTO("Physics::Shape", "SHPE", 1, Shape, Asset);
 
     public:
         void Free() override {};
@@ -40,8 +39,7 @@ namespace Physics
 
     struct ConvexShape : public Shape
     {
-        SERIALIZABLE_PROTO("CSHP", 1, ConvexShape, Shape);
-        REFLECTABLE_PROTO_NOIMPL(Shape);
+        SERIALIZABLE_PROTO("Physics::ConvexShape", "CSHP", 1, ConvexShape, Shape);
 
     public:
         bool operator==(const ConvexShape& o) const { return Mass == o.Mass; }
@@ -51,8 +49,7 @@ namespace Physics
 
     struct SphereShape : public ConvexShape
     {
-        SERIALIZABLE_PROTO("SSHP", 1, SphereShape, ConvexShape);
-        REFLECTABLE_TYPE_PROTO(SphereShape, "Physics::SphereShape");
+        SERIALIZABLE_PROTO("Physics::SphereShape", "SSHP", 1, SphereShape, ConvexShape);
 
     public:
         bool operator==(const SphereShape& o) const
@@ -65,8 +62,7 @@ namespace Physics
 
     struct BoxShape : public ConvexShape
     {
-        SERIALIZABLE_PROTO("BSHP", 1, BoxShape, ConvexShape);
-        REFLECTABLE_TYPE_PROTO(BoxShape, "Physics::BoxShape");
+        SERIALIZABLE_PROTO("Physics::BoxShape", "BSHP", 1, BoxShape, ConvexShape);
 
     public:
         bool operator==(const BoxShape& o) const
@@ -79,8 +75,7 @@ namespace Physics
 
     struct CapsuleShape : public ConvexShape
     {
-        SERIALIZABLE_PROTO("CPSL", 1, CapsuleShape, ConvexShape);
-        REFLECTABLE_TYPE_PROTO(CapsuleShape, "Physics::CapsuleShape");
+        SERIALIZABLE_PROTO("Physics::CapsuleShape", "CPSL", 1, CapsuleShape, ConvexShape);
 
     public:
         bool operator==(const CapsuleShape& o) const
@@ -107,7 +102,7 @@ namespace Physics
 
     struct BakedConvexMeshShape : public Serializable<>
     {
-        SERIALIZABLE_PROTO("BCVX", 1, BakedConvexMeshShape, Serializable);
+        SERIALIZABLE_PROTO("Physics::BakesConvexMeshShape", "BCVX", 1, BakedConvexMeshShape, Serializable);
 
     public:
         void Free();
@@ -135,8 +130,7 @@ namespace Physics
 
     struct ConvexMeshShape : public ConvexShape
     {
-        SERIALIZABLE_PROTO("CNVX", 1, ConvexMeshShape, ConvexShape);
-        REFLECTABLE_TYPE_PROTO(ConvexMeshShape, "gE::ConvexMeshShape");
+        SERIALIZABLE_PROTO("gE::ConvexMeshShape", "CNVX", 1, ConvexMeshShape, ConvexShape);
 
     public:
         Array<glm::vec3> Points = DEFAULT;

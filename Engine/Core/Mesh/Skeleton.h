@@ -10,6 +10,8 @@
 #include <Core/Serializable/Asset.h>
 #include <Core/Serializable/Serializable.h>
 
+#include "Core/RelativePointer.h"
+
 #define GE_MAX_BONES (UINT16_MAX - 1)
 
 namespace gE
@@ -22,6 +24,7 @@ namespace gE
 
 template struct TypeSystem<gE::Skeleton&>;
 template struct TypeSystem<gE::Skeleton*>;
+template struct TypeSystem<const gE::AnimationChannel&>;
 
 namespace gE
 {
@@ -55,21 +58,24 @@ namespace gE
         REFLECT_ENUM(ChannelType, Scale)
     );
 
-    struct Frame
+    struct Frame : public Serializable<const AnimationChannel&>
     {
+        SERIALIZABLE_PROTO_NOHEADER("gE::Frame", Frame, Serializable);
+        REFLECTABLE_NAME_PROTO();
+
+    public:
         float Time;
         std::variant<glm::vec3, glm::quat> Value;
 
 #ifdef GE_ENABLE_IMGUI
-        AnimationChannel* Channel;
-        void OnEditorGUI(u8 depth);
-        std::string GetEditorName() const { return std::to_string(Time); }
+        RelativePointer<const AnimationChannel> Channel;
 #endif
     };
 
     struct BoneReference : public Serializable<Skeleton*>
     {
-        SERIALIZABLE_PROTO("BREF", 1, BoneReference, Serializable);
+        SERIALIZABLE_PROTO("gE::BoneReference", "BREF", 1, BoneReference, Serializable);
+        REFLECTABLE_NAME_PROTO();
 
     public:
         Bone* Resolve(const Skeleton* skeleton);
@@ -77,15 +83,14 @@ namespace gE
         void Set(const Skeleton& skel, std::string_view name);
         void Optimize(const Skeleton* skel);
 
-        Bone* Pointer = DEFAULT;
+        RelativePointer<Bone> Pointer = DEFAULT;
         u16 Location = -1;
         std::string Name = DEFAULT;
     };
 
     struct Bone : public Serializable<Skeleton&>
     {
-        SERIALIZABLE_PROTO("BONE", 1, Bone, Serializable);
-        REFLECTABLE_PROTO(Bone, Serializable, "gE::Bone");
+        SERIALIZABLE_PROTO("gE::Bone", "BONE", 1, Bone, Serializable);
 
     public:
         NODISCARD bool IsFree() const { return Name.empty(); }
@@ -100,8 +105,7 @@ namespace gE
 
     struct Skeleton final : public Asset
     {
-        SERIALIZABLE_PROTO("SKEL", 1, Skeleton, Asset);
-        REFLECTABLE_PROTO(Skeleton, Asset, "gE::BoneReference");
+        SERIALIZABLE_PROTO("gE::Skeleton", "SKEL", 1, Skeleton, Asset);
 
     public:
         NODISCARD Bone* FindBone(std::string_view name, u16 suggestedLocation = -1) const;
@@ -116,8 +120,8 @@ namespace gE
 
     struct AnimationChannel final : public Serializable<Skeleton*>
     {
-        SERIALIZABLE_PROTO("ABNE", 1, AnimationChannel, Serializable);
-        REFLECTABLE_PROTO(AnimationChannel, Serializable, "gE::AnimationChannel");
+        SERIALIZABLE_PROTO("gE::AnimationChannel", "ABNE", 1, AnimationChannel, Serializable);
+        REFLECTABLE_NAME_PROTO();
 
     public:
         NODISCARD inline const Frame* GetFrame(float time) const;
@@ -127,14 +131,13 @@ namespace gE
         void Free() { Frames.Free(); }
 
         BoneReference Target = DEFAULT;
-        ChannelType ChannelType = DEFAULT;
+        ChannelType Type = DEFAULT;
         Array<Frame> Frames = DEFAULT;
     };
 
     struct Animation : public Asset
     {
-        SERIALIZABLE_PROTO("ANIM", 1, Animation, Asset);
-        REFLECTABLE_PROTO(Animation, Asset, "gE::Animation");
+        SERIALIZABLE_PROTO("gE::Animation", "ANIM", 1, Animation, Asset);
 
     public:
         NODISCARD AnimationChannel* FindChannel(std::string_view name, u16 suggestedLocation = -1) const;

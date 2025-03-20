@@ -84,6 +84,5 @@ namespace gE
         if(Shape)
             DrawField(Field{ "Shape" }, Shape->GetSettings(), depth);
     });
-
-    REFLECTABLE_FACTORY_IMPL(Mesh, Mesh);
+    REFLECTABLE_FACTORY_IMPL(Mesh);
 }

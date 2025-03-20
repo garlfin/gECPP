@@ -45,7 +45,9 @@ namespace gE
         return type;
     }
 
+    REFLECTABLE_ONGUI_IMPL(File, );
     REFLECTABLE_NAME_IMPL(File, return _path.string());
+    REFLECTABLE_FACTORY_IMPL(File);
 
     Bank::Bank(Window* window, const Path& path, AssetLoadMode mode) :
         _path(path),
@@ -89,6 +91,10 @@ namespace gE
     {
         return _stream;
     }
+
+    REFLECTABLE_ONGUI_IMPL(Bank, );
+    REFLECTABLE_NAME_IMPL(Bank, return _path.string());
+    REFLECTABLE_FACTORY_IMPL(Bank);
 
     Bank* AssetManager::LoadBank(const Path& path, AssetLoadMode mode)
     {
