@@ -110,6 +110,13 @@ struct IReflectable
 	virtual bool OnEditorIcon(Size1D size) { return false; }
 	virtual std::string GetEditorName() const { return std::format("{}", (const void*) this); }
 #endif
+
+	template<class I>
+	NODISCARD bool IsCastable() const
+	{
+		return dynamic_cast<const I*>(this);
+	}
+
 	virtual ~IReflectable() = default;
 };
 

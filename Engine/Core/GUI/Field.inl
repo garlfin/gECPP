@@ -35,11 +35,9 @@ namespace gE
             if(t && t->GetType())
                 type = t->GetType()->Name;
 
-        std::string name;
+        std::string name = std::format("{}", (const void*) t);
         if constexpr(HasEditorName<T>)
-            name = t->GetEditorName();
-        else
-            name = std::format("{}", (const void*) t);
+            if(t) name = t->GetEditorName();
 
         if(type.size())
             return std::format("{} ({})", name, type);
@@ -114,7 +112,8 @@ namespace gE
         }
         else GE_SWITCH_TYPE(std::span<char>)
         {
-            changed = ImGui::InputText(label.c_str(), (char*) t.data(), t.size());
+            std::string text(t.begin(), t.end());
+            changed = ImGui::InputText(label.c_str(), &text);
         }
         else if constexpr(std::is_scalar_v<RAW_T> && !std::is_same_v<RAW_T, bool>)
         {
@@ -299,7 +298,7 @@ namespace gE
             ).c_str());
         }
 
-        Field tempField = settings;
+        SETTINGS_T tempField = settings;
         tempField.Name = DEFAULT;
 
         if(viewName)
@@ -338,21 +337,23 @@ namespace gE
         return changed;
     }
 
-    template<class T>
-    bool DragDropCompare(ImGuiPayload& payload)
+    template<class BASE_T, class T>
+    bool DragDropCompare(ImGuiPayload& payload, const DragDropField<BASE_T, T>* field)
     {
-        const bool isReflectable = payload.IsDataType(GE_EDITOR_ASSET_PAYLOAD);
-        const Reference<Asset>& data = **(const Reference<Asset>**) payload.Data;
+        const bool isType = payload.IsDataType(field->Type.c_str());
+        const Reference<BASE_T>& data = **(const Reference<BASE_T>**) payload.Data;
 
-        if(!isReflectable) return false;
-        return data->IsCastable<T>();
+        return isType && data->template IsCastable<T>();
     }
 
-    template <class T> requires std::is_base_of_v<Reflectable<Window*>, T>
-    bool DrawField(const Field& settings, Reference<T>& ref, u8 depth)
+    template<class BASE_T, class T> requires IsDragDroppable<BASE_T, T>
+    bool DrawField(const DragDropField<BASE_T, T>& settings, Reference<T>& ref, u8 depth)
     {
         using RAW_T = std::remove_const_t<T>;
         constexpr bool isConst = std::is_const_v<T>;
+
+        GE_ASSERT(!settings.Type.empty());
+        GE_ASSERT(settings.Acceptor);
 
         ImGui::TextUnformatted(settings.Name.data());
         ImGui::SameLine();
@@ -362,12 +363,12 @@ namespace gE
         ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
         if(depth < 1) nodeFlags |= ImGuiTreeNodeFlags_DefaultOpen;
 
-        const bool open = ImGui::TreeNodeEx(std::format("{}##{}", GetLabel<T>(ref.GetPointer(), "IReflectable"), settings.Name).c_str(), nodeFlags);
+        const bool open = ImGui::TreeNodeEx(std::format("{}##{}", GetLabel<T>(ref.GetPointer()), settings.Name).c_str(), nodeFlags);
 
         bool changed = false;
         if(ImGui::BeginDragDropTarget())
         {
-            if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(DragDropCompare<T>))
+            if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload((IMGUI_ACCEPT_PAYLOAD_FUNC) DragDropCompare<BASE_T, T>, &settings))
             {
                 const Reference<T>& newReference = **(const Reference<T>**) payload->Data;
                 if(ref != newReference)

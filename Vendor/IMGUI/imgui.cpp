@@ -14917,14 +14917,14 @@ const ImGuiPayload* ImGui::AcceptDragDropPayload(const char* type, ImGuiDragDrop
     return &payload;
 }
 
-const ImGuiPayload* ImGui::AcceptDragDropPayload(IMGUI_ACCEPT_PAYLOAD_FUNC func, ImGuiDragDropFlags flags)
+const ImGuiPayload* ImGui::AcceptDragDropPayload(IMGUI_ACCEPT_PAYLOAD_FUNC func, const void* userData, ImGuiDragDropFlags flags)
 {
     ImGuiContext& g = *GImGui;
     ImGuiPayload& payload = g.DragDropPayload;
     IM_ASSERT(g.DragDropActive);                        // Not called between BeginDragDropTarget() and EndDragDropTarget() ?
     IM_ASSERT(payload.DataFrameCount != -1);            // Forgot to call EndDragDropTarget() ?
     IM_ASSERT(func);
-    if (!func(payload))
+    if (!func(payload, userData))
         return NULL;
 
     // Accept smallest drag target bounding box, this allows us to nest drag targets conveniently without ordering constraints.

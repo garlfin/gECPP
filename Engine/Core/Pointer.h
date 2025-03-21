@@ -22,7 +22,7 @@ public:
 template<class T>
 class Reference
 {
- public:
+public:
 	explicit Reference(T* t) : _t(t) { if(t) _counter = new RefCounter(1, 0); }
 	Reference() = default;
 
@@ -65,7 +65,11 @@ class Reference
 
 		if(!--_counter->RefCount)
 		{
-			delete _t;
+			if constexpr(!std::is_same_v<T, void>)
+				delete _t;
+			else
+				gE::Log::Write("Reference<void> was deleted, not actually freeing object.");
+
 			if(!_counter->WeakCount)
 				delete _counter;
 		}
@@ -82,7 +86,7 @@ class Reference
 		return Reference<I>(_t, _counter);
 	}
 
-	template<class I> requires std::is_base_of_v<T, I>
+	template<class I> requires std::is_base_of_v<T, I> || std::is_same_v<T, void>
 	ALWAYS_INLINE explicit operator Reference<I>() const
 	{
 		return Reference<I>((I*) _t, _counter);
@@ -90,7 +94,7 @@ class Reference
 
 	~Reference() { Free(); }
 
- private:
+private:
 	Reference(T* t, RefCounter* c) : _t(t), _counter(c) { if(_counter) ++_counter->RefCount; }
 
 	T* _t = nullptr;

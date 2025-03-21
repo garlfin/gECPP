@@ -19,8 +19,27 @@ struct Underlying
 	virtual ~Underlying() = default;
 };
 
+struct ISerializable
+{
+public:
+	ISerializable() = default;
+
+	virtual Underlying* GetUnderlying() { return nullptr; }
+	virtual const Underlying* GetUnderlying() const { return nullptr; }
+
+	template<class I>
+	NODISCARD bool IsCastable() const
+	{
+		const Underlying* underlying = GetUnderlying();
+
+		return dynamic_cast<const I*>(this) || dynamic_cast<const I*>(underlying);
+	}
+
+	virtual ~ISerializable() = default;
+};
+
 template<class T>
-struct Serializable : public Reflectable<T>
+struct Serializable : public Reflectable<T>, public ISerializable
 {
 	DEFAULT_OPERATOR_CM(Serializable);
 	REFLECTABLE_NOIMPL(Reflectable<T>);
@@ -35,14 +54,7 @@ public:
 	virtual void Serialize(ostream& out) const {};
 	virtual void Reload(SETTINGS_T settings) {};
 
-	virtual Underlying* GetUnderlying() { return nullptr; }
-	virtual const Underlying* GetUnderlying() const { return nullptr; }
-
-	template<class I>
-	NODISCARD bool IsCastable() const
-	{
-		return dynamic_cast<const I*>(this) || dynamic_cast<const I*>(GetUnderlying());
-	}
+	using ISerializable::IsCastable;
 
 	~Serializable() override = default;
 };

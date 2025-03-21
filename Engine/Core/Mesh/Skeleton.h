@@ -91,6 +91,7 @@ namespace gE
     struct Bone : public Serializable<Skeleton&>
     {
         SERIALIZABLE_PROTO("gE::Bone", "BONE", 1, Bone, Serializable);
+        REFLECTABLE_NAME_PROTO();
 
     public:
         NODISCARD bool IsFree() const { return Name.empty(); }
@@ -106,6 +107,7 @@ namespace gE
     struct Skeleton final : public Asset
     {
         SERIALIZABLE_PROTO("gE::Skeleton", "SKEL", 1, Skeleton, Asset);
+        REFLECTABLE_NAME_PROTO();
 
     public:
         NODISCARD Bone* FindBone(std::string_view name, u16 suggestedLocation = -1) const;
@@ -138,19 +140,24 @@ namespace gE
     struct Animation : public Asset
     {
         SERIALIZABLE_PROTO("gE::Animation", "ANIM", 1, Animation, Asset);
+        REFLECTABLE_NAME_PROTO();
 
     public:
         NODISCARD AnimationChannel* FindChannel(std::string_view name, u16 suggestedLocation = -1) const;
-        void Retarget(const Reference<Skeleton>&);
 
-        NODISCARD inline bool IsFree() const override { return Skeleton.IsFree() && Channels.IsFree(); }
-        inline void Free() override { Name.clear(); Skeleton.Free(); Channels.Free(); }
+        GET_CONST(const Reference<Skeleton>&, Skeleton, _skeleton);
+        void SetSkeleton(const Reference<Skeleton>&);
+
+        NODISCARD inline bool IsFree() const override { return _skeleton.IsFree() && Channels.IsFree(); }
+        inline void Free() override { Name.clear(); _skeleton.Free(); Channels.Free(); }
 
         std::string Name = DEFAULT;
         float Length = DEFAULT;
 
-        Reference<Skeleton> Skeleton = DEFAULT;
         Array<AnimationChannel> Channels = DEFAULT;
+
+    private:
+        Reference<Skeleton> _skeleton = DEFAULT;
     };
 }
 

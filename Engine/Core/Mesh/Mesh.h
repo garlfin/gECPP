@@ -10,6 +10,8 @@
 #include <Graphics/Buffer/VAO.h>
 #include <Physics/Shapes.h>
 
+#include "Skeleton.h"
+
 namespace gE
 {
     struct VertexWeight
@@ -21,6 +23,7 @@ namespace gE
     struct Mesh : public Asset
     {
         SERIALIZABLE_PROTO("gE::Mesh", "MESH", 2, Mesh, Asset);
+        REFLECTABLE_NAME_PROTO();
 
     public:
         void Free() override;
@@ -37,6 +40,6 @@ namespace gE
         GET_CONST(const TYPE_T*, ShapeType, Shape->GetSettings().GetType());
         Pointer<Jolt::Shape> Shape;
 
-        Pointer<API::Buffer<VertexWeight>> BoneWeights = DEFAULT;
+        Reference<Skeleton> Skeleton;
     };
 }

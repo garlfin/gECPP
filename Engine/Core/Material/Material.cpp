@@ -56,7 +56,7 @@ namespace gE
 
 	REFLECTABLE_ONGUI_IMPL(Material,
 	{
-		DrawField(Field{ "Shader" }, _shader, depth);
+		DrawField(AssetDragDropField<Shader>{ "Shader" }, _shader, depth);
 		DrawField(EnumField{ "Depth Function", "", EDepthFunction }, _depthFunc, depth);
 		DrawField(EnumField{ "Cull Mode", "", ECullMode }, _cullMode, depth);
 		DrawField(EnumField{ "Blend Mode", "", EBlendMode }, _blendMode, depth);
@@ -87,9 +87,9 @@ namespace gE
 
 	REFLECTABLE_ONGUI_IMPL(PBRMaterial,
 	{
-		DrawField(Field{ "Albedo" }, *_albedo, depth);
-		DrawField(Field{ "ARMD", "AO, Roughness, Metallic, _" }, *_armd, depth);
-		DrawField(Field{ "Normal" }, *_normal, depth);
+		DrawField(AssetDragDropField<API::Texture2D>{ "Albedo" }, *_albedo, depth);
+		DrawField(AssetDragDropField<API::Texture2D>{ "ARMD", "AO, Roughness, Metallic, _" }, *_armd, depth);
+		DrawField(AssetDragDropField<API::Texture2D>{ "Normal" }, *_normal, depth);
 	});
 
 	REFLECTABLE_FACTORY_NO_IMPL(PBRMaterial);

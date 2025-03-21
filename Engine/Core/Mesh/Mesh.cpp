@@ -68,12 +68,12 @@ namespace gE
         MaterialNames.Free();
         VAO.Free();
         Shape.Free();
-        BoneWeights.Free();
+        Skeleton.Free();
     }
 
     bool Mesh::IsFree() const
     {
-        return Name.empty() && MaterialNames.IsFree() && VAO.IsFree() && Shape.IsFree() && BoneWeights.IsFree();
+        return Name.empty() && MaterialNames.IsFree() && VAO.IsFree() && Shape.IsFree() && Skeleton.IsFree();
     }
 
     REFLECTABLE_ONGUI_IMPL(Mesh,
@@ -83,6 +83,9 @@ namespace gE
 
         if(Shape)
             DrawField(Field{ "Shape" }, Shape->GetSettings(), depth);
+
+        DrawField(AssetDragDropField<struct Skeleton>{ "Skeleton" }, Skeleton, depth);
     });
+    REFLECTABLE_NAME_IMPL(Mesh, return Name);
     REFLECTABLE_FACTORY_IMPL(Mesh);
 }

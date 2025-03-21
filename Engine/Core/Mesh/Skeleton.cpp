@@ -91,6 +91,7 @@ namespace gE
         DrawField(Field{ "Parent" }, Parent.Pointer.GetPointer(), depth);
         DrawField(ScalarField<float>{ "Transform" }, Transform, depth);
     );
+    REFLECTABLE_NAME_IMPL(Bone, return Name);
     REFLECTABLE_FACTORY_IMPL(Bone);
 
     void Skeleton::IDeserialize(istream& in, SETTINGS_T s)
@@ -107,7 +108,7 @@ namespace gE
 
     Bone* Skeleton::FindBone(std::string_view name, u16 suggestedLocation) const
     {
-        if(suggestedLocation != -1 && Bones[suggestedLocation].Name == name)
+        if(suggestedLocation != (u16) -1 && Bones[suggestedLocation].Name == name)
             return &Bones[suggestedLocation];
 
         for (u8 i = 0; i < Bones.Count(); ++i)
@@ -115,11 +116,12 @@ namespace gE
         return nullptr;
     }
 
-    REFLECTABLE_FACTORY_IMPL(Skeleton);
     REFLECTABLE_ONGUI_IMPL(Skeleton,
         DrawField(Field{ "Name" }, Name, depth);
         DrawField(ArrayField<Field>{ "Bones", "", ArrayViewMode::Elements }, Bones, depth);
     )
+    REFLECTABLE_NAME_IMPL(Skeleton, return Name);
+    REFLECTABLE_FACTORY_IMPL(Skeleton);
 
     bool AnimationChannel::Retarget(const Skeleton* skel)
     {
@@ -171,19 +173,21 @@ namespace gE
         return nullptr;
     }
 
-    void Animation::Retarget(const Reference<gE::Skeleton>& skeleton)
+    void Animation::SetSkeleton(const Reference<gE::Skeleton>& skeleton)
     {
-        if(!skeleton || Skeleton == skeleton) return;
+        if(!skeleton || _skeleton == skeleton) return;
 
-        Skeleton = skeleton;
+        _skeleton = skeleton;
         for(u8 i = 0; i < Channels.Count(); i++)
-            Channels[i].Retarget(Skeleton.GetPointer());
+            Channels[i].Retarget(_skeleton.GetPointer());
     }
 
     REFLECTABLE_ONGUI_IMPL(Animation,
         DrawField(Field{ "Name" }, Name, depth);
+        DrawField(AssetDragDropField<Skeleton>{ "Skeleton" }, *this, depth, &Animation::GetSkeleton, &Animation::SetSkeleton);
         DrawField<const float>(ScalarField<float>{ "Length" }, Length, depth);
         DrawField(ArrayField<Field>{ "Channels" }, Channels, depth);
     );
+    REFLECTABLE_NAME_IMPL(Animation, return Name);
     REFLECTABLE_FACTORY_IMPL(Animation);
 }

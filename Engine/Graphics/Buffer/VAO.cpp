@@ -99,7 +99,7 @@ namespace GPU
 
 	REFLECTABLE_ONGUI_IMPL(VertexField,
 	{
-		DrawField<const std::span<char>>(gE::Field{ "Name" }, std::span(Name), depth);
+		DrawField<const std::span<char>>(gE::Field{ "Name" }, std::span(Name, Name + 4), depth);
 		DrawField(gE::EnumField{ "Element Type", "", EElementType}, ElementType, depth);
 
 		bool normalized = Normalized;
@@ -114,6 +114,6 @@ namespace GPU
 		DrawField(gE::ScalarField<u8>{ "Element Count", "", 1, 4}, ElementCount, depth);
 		DrawField(gE::ScalarField<u8>{ "Offset" }, Offset, depth);
 	});
-	REFLECTABLE_NAME_IMPL(VertexField, return Name);
+	REFLECTABLE_NAME_IMPL(VertexField, return std::string(Name, 4));
 	REFLECTABLE_FACTORY_IMPL(VertexField);
 }
