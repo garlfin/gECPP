@@ -26,18 +26,12 @@ namespace gE
 		}
 	}
 
-	void MeshRenderer::OnRender(float delta, Camera*)
-	{
-		// DefaultPipeline::Buffers& buffers = GetWindow().GetPipelineBuffers();
-	}
-
 	void MeshRenderer::SetMesh(const Reference<Mesh>& mesh)
 	{
 		if(_mesh == mesh) return;
 
 		_mesh = mesh;
-		for(u8 i = 0; i < GE_MAX_VAO_MATERIAL; i++)
-			PlacementNew(_drawCalls[i], *this, i);
+		UpdateDrawCalls();
 	}
 
 	void MeshRenderer::SetMaterial(u8 i, const Reference<Material>& mat)
@@ -71,18 +65,47 @@ namespace gE
 		PlacementNew(_drawCalls[i], *this, i);
 	}
 
+	void MeshRenderer::UpdateDrawCalls()
+	{
+		for(u8 i = 0; i < GE_MAX_VAO_MATERIAL; i++)
+			PlacementNew(_drawCalls[i], *this, i);
+	}
+
+	REFLECTABLE_ONGUI_IMPL(MeshRenderer,
+       const size_t materialCount = _mesh->VAO->GetSettings().Counts.MaterialCount;
+
+       DrawField(AssetDragDropField<Mesh>{ "Mesh" }, *this, depth, GetMesh, SetMesh);
+       const size_t changed = DrawField(ArrayField<AssetDragDropField<Material>>{ "Materials" },
+           _materials.Data(), materialCount, depth);
+
+       if(changed != materialCount)
+       UpdateDrawCall(changed);
+	)
 	REFLECTABLE_FACTORY_NO_IMPL(MeshRenderer);
 
-	void MeshRenderer::IOnEditorGUI(u8 depth)
+	Animator::Animator(const Reference<Skeleton>& skeleton) :
+		_skeleton(skeleton)
 	{
-		const size_t materialCount = _mesh->VAO->GetSettings().Counts.MaterialCount;
 
-		DrawField(AssetDragDropField<Mesh>{ "Mesh" }, *this, depth, GetMesh, SetMesh);
-		const size_t changed = DrawField(ArrayField<AssetDragDropField<Material>>{ "Materials" }, _materials.Data(), materialCount, depth);
-
-		if(changed != materialCount)
-			UpdateDrawCall(changed);
 	};
+
+	REFLECTABLE_ONGUI_IMPL(Animator, )
+	REFLECTABLE_FACTORY_NO_IMPL(Animator);
+
+	AnimatedMeshRenderer::AnimatedMeshRenderer(Entity* owner, Animator* animator, const Reference<Mesh>& mesh) : MeshRenderer(owner, mesh),
+		_animator(animator)
+	{
+		UpdateDrawCalls();
+	}
+
+	void AnimatedMeshRenderer::SetMesh(const Reference<Mesh>& mesh)
+	{
+		MeshRenderer::SetMesh(mesh);
+	}
+
+	REFLECTABLE_ONGUI_IMPL(AnimatedMeshRenderer,
+	);
+	REFLECTABLE_FACTORY_NO_IMPL(AnimatedMeshRenderer);
 
 	void RendererManager::OnRender(float d, Camera* camera)
 	{
@@ -98,15 +121,15 @@ namespace gE
 	{
 		if(i >= renderer.GetMesh()->VAO->GetSettings().Counts.MaterialCount) return;
 
-		_vao = renderer.GetMesh()->VAO.GetPointer();
-		renderer.GetWindow().GetRenderers().GetDrawCallManager().Register(this);
+		_vao = &renderer.GetVAO();
+		if(_vao)
+			renderer.GetWindow().GetRenderers().GetDrawCallManager().Register(this);
 	}
 
 	DrawCall::~DrawCall()
 	{
-		if(!_vao) return;
-
-		_transform->GetWindow().GetRenderers().GetDrawCallManager().Remove(this);
+		if(_vao)
+			_transform->GetWindow().GetRenderers().GetDrawCallManager().Remove(this);
 	}
 
 	void DrawCallManager::OnRender(float delta, const Camera* camera)

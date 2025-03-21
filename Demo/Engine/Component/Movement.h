@@ -18,8 +18,7 @@ namespace gE
 {
     class Movement final : public Behavior
     {
-        REFLECTABLE_MAGIC_IMPL("MOV");
-        REFLECTABLE_PROTO(Movement, Behavior, "gE::Movement");
+        REFLECTABLE_PROTO("MOV", "gE::Movement", Movement, Behavior);
 
     public:
         explicit Movement(Entity* o, CharacterController& controller) :
@@ -118,7 +117,7 @@ namespace gE
         glm::vec3 _dir = DEFAULT;
     };
 
-    inline REFLECTABLE_FACTORY_NO_IMPL(Movement);
+    REFLECTABLE_FACTORY_NO_IMPL(Movement, inline);
 
     inline REFLECTABLE_ONGUI_IMPL(Movement,
     {

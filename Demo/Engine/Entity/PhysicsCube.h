@@ -13,8 +13,7 @@ namespace gE
 
     class PhysicsCubeEntity final : public Entity
     {
-        REFLECTABLE_MAGIC_IMPL("PCUB");
-        REFLECTABLE_PROTO(PhysicsCubeEntity, Entity, "gE::PhysicsCubeEntity");
+        REFLECTABLE_PROTO("PCUB", "gE::PhysicsCubeEntity", PhysicsCubeEntity, Entity);
 
     public:
         PhysicsCubeEntity(Window* window, const Reference<Mesh>& mesh, glm::vec3 size, EntityFlags flags = DEFAULT) :
@@ -35,7 +34,7 @@ namespace gE
         BoxCollider _collider;
     };
 
-    inline REFLECTABLE_FACTORY_NO_IMPL(PhysicsCubeEntity);
+    REFLECTABLE_FACTORY_NO_IMPL(PhysicsCubeEntity, inline);
     inline REFLECTABLE_ONGUI_IMPL(PhysicsCubeEntity,
     {
         DrawField(Field{ "Mesh Renderer"sv }, _renderer, depth);

@@ -27,8 +27,7 @@ namespace gE
 
 	class DirectionalLight : public Light
 	{
-		REFLECTABLE_MAGIC_IMPL("DLIT"); // Die lit reference?!
-		REFLECTABLE_TYPE_PROTO(DirectionalLight, "gE::DirectionalLight");
+		REFLECTABLE_TYPE_PROTO("DLIT", "gE::DirectionalLight", DirectionalLight); // Die lit reference?!
 
 	public:
 		DirectionalLight(Window*, u16 size, float scale, const glm::quat& = glm::identity<glm::quat>());

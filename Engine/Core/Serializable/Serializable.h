@@ -71,7 +71,7 @@ public:
 		typedef SUPER::SETTINGS_T SETTINGS_T;\
 		TYPE(istream& in, SETTINGS_T s) : SUPER(in, s) { SERIALIZABLE_CHECK_HEADER(); IDeserialize(in, s); } \
 		TYPE() = default; \
-		REFLECTABLE_MAGIC_IMPL(MAGIC_VAL); \
+		static const constexpr char MAGIC[5] = MAGIC_VAL; \
 		inline void Deserialize(istream& in, SETTINGS_T s) override { PlacementNew(*this, in, s); } \
 		inline void Serialize(ostream& out) const override { SUPER::Serialize(out); Write(out, 4, MAGIC); Write<u8>(out, _version); ISerialize(out); } \
 		GET_CONST(u8, Version, _version) \
@@ -80,7 +80,7 @@ public:
 		void IDeserialize(istream& in, SETTINGS_T s); \
 		void ISerialize(ostream& out) const; \
 		u8 _version = VERSION_VAL; \
-		REFLECTABLE_PROTO(TYPE, SUPER_T, NAME, __VA_ARGS__)
+		REFLECTABLE_PROTO(NAME, MAGIC_VAL, TYPE, SUPER_T, __VA_ARGS__)
 
 #define SERIALIZABLE_PROTO_NOHEADER(NAME, TYPE, SUPER_T, ...) \
 	public: \
@@ -88,7 +88,6 @@ public:
 		typedef SUPER::SETTINGS_T SETTINGS_T;\
 		TYPE(istream& in, SETTINGS_T s) : SUPER(in, s) { IDeserialize(in, s); } \
 		TYPE() = default; \
-		REFLECTABLE_MAGIC_IMPL(""); \
 		inline void Deserialize(istream& in, SETTINGS_T s) override { PlacementNew(*this, in, s); } \
 		inline void Serialize(ostream& out) const override { SUPER::Serialize(out); ISerialize(out); } \
 		GET_CONST(u8, Version, 0) \
@@ -97,7 +96,7 @@ public:
 		void IDeserialize(istream& in, SETTINGS_T s); \
 		void ISerialize(ostream& out) const; \
 		u8 _version = 0; \
-		REFLECTABLE_PROTO(TYPE, SUPER_T, NAME, __VA_ARGS__)
+		REFLECTABLE_PROTO("", NAME, TYPE, SUPER_T, __VA_ARGS__)
 
 template<class T, class S>
 concept is_serializable_in = requires(T t, S s, std::istream& i)

@@ -27,8 +27,7 @@ namespace gE
 
 	class PointLight : public Light
 	{
-		REFLECTABLE_MAGIC_IMPL("PLIT"); // P Litty?!
-		REFLECTABLE_PROTO(PointLight, Light, "gE::PointLight");
+		REFLECTABLE_PROTO("PLIT", "gE::PointLight", PointLight, Light); // P Litty?!
 
 	public:
 		PointLight(Window*, u16 resolution);

@@ -22,10 +22,9 @@ namespace gE
 
 	class Player : public Entity
 	{
-		REFLECTABLE_MAGIC_IMPL("PLYR");
-		REFLECTABLE_PROTO(Player, Entity, "gE::Player");
+		REFLECTABLE_PROTO("PLYR", "gE::Player", Player, Entity);
 
-	 public:
+	public:
 		explicit Player(Window* window) : Entity(window),
 			_movement(this, _controller),
 			_controller(this, Physics::CapsuleShape())
@@ -35,12 +34,12 @@ namespace gE
 		GET(Movement&, Movement, _movement);
 		GET(CharacterController&, Controller, _controller);
 
-	 private:
+	private:
 		Movement _movement;
 		CharacterController _controller;
 	};
-	inline REFLECTABLE_FACTORY_NO_IMPL(Player);
 
+	REFLECTABLE_FACTORY_NO_IMPL(Player, inline);
 	inline REFLECTABLE_ONGUI_IMPL(Player,
 	{
 		DrawField(Field{ "Movement"sv }, _movement, depth);
@@ -49,8 +48,7 @@ namespace gE
 
 	class PlayerCamera final : public Entity
 	{
-		REFLECTABLE_MAGIC_IMPL("PCAM");
-		REFLECTABLE_PROTO(PlayerCamera, Entity, "gE::PlayerCamera");
+		REFLECTABLE_PROTO("PCAM", "gE::PlayerCamera", PlayerCamera, Entity);
 
 	public:
 		PlayerCamera(Window* window, Player& player) : Entity(window, &player),
@@ -86,8 +84,8 @@ namespace gE
 		PostProcess::Bloom _bloom;
 		PostProcess::Tonemap _tonemap;
 	};
-	inline REFLECTABLE_FACTORY_NO_IMPL(PlayerCamera);
 
+	REFLECTABLE_FACTORY_NO_IMPL(PlayerCamera, inline);
 	inline REFLECTABLE_ONGUI_IMPL(PlayerCamera,
 	{
 		DrawField(Field{ "Camera"sv, ""}, _camera, depth);

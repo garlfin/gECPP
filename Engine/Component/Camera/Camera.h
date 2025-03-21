@@ -74,8 +74,7 @@ namespace gE
 
     class PerspectiveCamera final : public Camera2D
     {
-        REFLECTABLE_MAGIC_IMPL("PCAM");
-        REFLECTABLE_PROTO(PerspectiveCamera, Camera2D, "gE::PerspectiveCamera");
+        REFLECTABLE_PROTO("PCAM", "gE::PerspectiveCamera", PerspectiveCamera, Camera2D);
 
     public:
         PerspectiveCamera(Entity*, TARGET_T&, const PerspectiveCameraSettings&, ComponentManager<Camera>* = nullptr);
@@ -108,8 +107,7 @@ namespace gE
 
     class OrthographicCamera final : public Camera2D
     {
-        REFLECTABLE_MAGIC_IMPL("OCAM");
-        REFLECTABLE_PROTO(OrthographicCamera, Camera2D, "gE::OrthographicCamera");
+        REFLECTABLE_PROTO("OCAM", "gE::OrthographicCamera", OrthographicCamera, Camera2D);
 
     public:
         OrthographicCamera(Entity*, TARGET_T&, const OrthographicCameraSettings&, ComponentManager<Camera>* = nullptr);
@@ -125,8 +123,7 @@ namespace gE
 
     class Camera3D final : public Camera
     {
-        REFLECTABLE_MAGIC_IMPL("3CAM");
-        REFLECTABLE_PROTO(Camera3D, Camera, "gE::Camera3D");
+        REFLECTABLE_PROTO("3CAM", "gE::Camera3D", Camera3D, Camera);
 
     public:
         using TARGET_T = RenderTarget<Camera3D>;
@@ -152,8 +149,7 @@ namespace gE
 
     class CameraCube final : public Camera
     {
-        REFLECTABLE_MAGIC_IMPL("CCAM");
-        REFLECTABLE_PROTO(CameraCube, Camera, "gE::CameraCube");
+        REFLECTABLE_PROTO("CCAM", "gE::CameraCube", CameraCube, Camera);
 
     public:
         using TARGET_T = RenderTarget<CameraCube>;

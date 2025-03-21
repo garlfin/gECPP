@@ -18,7 +18,7 @@ namespace gE
 	{
 		REFLECTABLE_NOIMPL(Reflectable);
 
-	 public:
+	public:
 		explicit Component(Entity* owner, IComponentManager* = nullptr);
 
 		GET_CONST(Entity&, Owner, *_owner);
@@ -39,7 +39,7 @@ namespace gE
 
 		~Component() override = default;
 
-	 private:
+	private:
 		Window& _window;
 		RelativePointer<Entity> _owner;
 	};

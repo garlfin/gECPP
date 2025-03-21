@@ -11,8 +11,7 @@ namespace gE
 {
     class StaticMeshEntity : public Entity
     {
-        REFLECTABLE_MAGIC_IMPL("STME");
-        REFLECTABLE_PROTO(StaticMeshEntity, Entity, "gE::VoxelDemo::StaticMeshEntity");
+        REFLECTABLE_PROTO("STME", "gE::VoxelDemo::StaticMeshEntity", StaticMeshEntity, Entity);
 
     public:
         StaticMeshEntity(Window* window, const Reference<Mesh>& mesh) :
@@ -25,8 +24,7 @@ namespace gE
         MeshRenderer _renderer;
     };
 
-    inline REFLECTABLE_FACTORY_NO_IMPL(StaticMeshEntity);
-
+    REFLECTABLE_FACTORY_NO_IMPL(StaticMeshEntity, inline);
     inline REFLECTABLE_ONGUI_IMPL(StaticMeshEntity,
     {
         DrawField(Field{ "Renderer"sv }, _renderer, depth);
