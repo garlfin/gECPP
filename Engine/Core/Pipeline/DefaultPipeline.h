@@ -100,26 +100,11 @@ namespace gE::DefaultPipeline
 	{
 		explicit Buffers(Window*);
 
-		ALWAYS_INLINE void UpdateCamera(u64 size = sizeof(GPU::Camera), u64 offset = 0) const
-		{
-			_cameraBuffer.ReplaceDataDirect((std::byte*) &Camera + offset, size, offset);
-		}
+		GET_CONST(const API::Buffer<GPU::Camera>&, Camera, _cameraBuffer);
+		GET_CONST(const API::Buffer<GPU::Scene>&, Scene, _sceneBuffer);
+		GET_CONST(const API::Buffer<GPU::Lighting>&, Lights, _lightBuffer);
 
-		ALWAYS_INLINE void UpdateScene(u64 size = sizeof(GPU::Scene), u64 offset = 0) const
-		{
-			_sceneBuffer.ReplaceDataDirect((std::byte*) &Scene + offset, size, offset);
-		}
-
-		ALWAYS_INLINE void UpdateLighting(u64 size = sizeof(GPU::Lighting), u64 offset = 0) const
-		{
-			_lightBuffer.ReplaceDataDirect((std::byte*) &Lighting + offset, size, offset);
-		}
-
-		GPU::Camera Camera = DEFAULT;
-		GPU::Scene Scene = DEFAULT;
-		GPU::Lighting Lighting = DEFAULT;
-
-	 private:
+	private:
 		API::Buffer<GPU::Camera> _cameraBuffer;
 		API::Buffer<GPU::Scene> _sceneBuffer;
 		API::Buffer<GPU::Lighting> _lightBuffer;

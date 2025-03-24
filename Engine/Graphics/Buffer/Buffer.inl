@@ -12,7 +12,10 @@ namespace GPU
 	template<class T>
 	void Buffer<T>::IDeserialize(std::istream& in, gE::Window* s)
 	{
-		Stride = Read<u8>(in);
+		if(_version < 2)
+			Stride = Read<u8>(in);
+		else
+			Stride = Read<size_t>(in);
 		Data = ReadArray<u32, T>(in);
 	}
 
@@ -24,8 +27,10 @@ namespace GPU
 	}
 
 	template <typename T>
-	Buffer<T>::Buffer(u32 count, const T* data, u8 stride, bool createBacking) :
-		Stride(stride), Data(count * stride, data, createBacking)
+	Buffer<T>::Buffer(u32 count, const T* data, size_t stride, BufferUsageHint hint, bool createBacking) :
+		Stride(stride),
+		Data(count, data, createBacking),
+		UsageHint(hint)
 	{
 
 	}
@@ -35,11 +40,11 @@ namespace GPU
 	{
 		ImGui::TextUnformatted(std::format("Array of {}:\n\tSize: {}\n\tByte Count: {}\n\tPointer: {}",
 			demangle(typeid(T).name()),
-			Data.Count(),
-			Data.ByteCount(),
+			Data.Size(),
+			Data.ByteSize(),
 			(void*) Data.Data()
 		).c_str());
-	});
+	})
 
 	template<class T>
 	Buffer<T>* Buffer<T>::Factory(std::istream& in, SETTINGS_T t)

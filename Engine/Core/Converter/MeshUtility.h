@@ -45,14 +45,14 @@ namespace gE::Model
 	struct Vertex
 	{
 		glm::vec3 Position;
-		glm::vec2 UV;
-		glm::i8vec3 Normal;
-		glm::i8vec4 Tangent;
+		alignas(8) glm::vec2 UV;
+		alignas(4) glm::i8vec3 Normal;
+		alignas(4) glm::i8vec4 Tangent;
 	};
 
 	struct VertexWeight
 	{
-		glm::u16vec4 Bones;
+		glm::u8vec4 Bones;
 		glm::u8vec4 Weights;
 
 		inline u8 AddWeight(u16 bone, u8 weight);
@@ -87,8 +87,8 @@ namespace gE::Model
 	GLOBAL GPU::VertexField NORMAL_FIELD = CreateField(&Vertex::Normal, "NOR", 2, 0);
 	GLOBAL GPU::VertexField TANGENT_FIELD = CreateField(&Vertex::Tangent, "TAN", 3, 0);
 
-	GLOBAL GPU::VertexField BONES_FIELD = CreateField(&VertexWeight::Bones, "BONE", 3, 0);
-	GLOBAL GPU::VertexField WEIGHTS_FIELD = CreateField(&VertexWeight::Weights, "WGHT", 3, 0);
+	GLOBAL GPU::VertexField BONES_FIELD = CreateField(&VertexWeight::Bones, "BONE", 3, 1);
+	GLOBAL GPU::VertexField WEIGHTS_FIELD = CreateField(&VertexWeight::Weights, "WGHT", 3, 1);
 
 	GLOBAL GPU::VertexField INDICES_FIELD = CreateField(&Face::Triangle, "TRI", 0, 1);
 }

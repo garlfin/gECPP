@@ -6,6 +6,7 @@
 
 #include <Core/Converter/PVR.h>
 #include <Core/Material/PBRMaterial.h>
+#include <Demo/Engine/Entity/AnimatedMeshEntity.h>
 #include <Demo/Engine/Entity/EmptyColliderEntity.h>
 #include <Demo/Engine/Entity/PhysicsCube.h>
 #include <Demo/Engine/Entity/Player.h>
@@ -96,6 +97,9 @@ void DemoWindow::OnInit()
 	auto* floor = new EmptyColliderEntity(this, glm::vec3(5.f, 0.1f, 5.f), EntityFlags(true));
 	floor->SetName("Floor Collider");
 	floor->GetTransform().SetLocation(glm::vec3(0.f, -0.1, 0.f));
+
+	auto* animatedCube = new AnimatedMeshEntity(this, cubeMesh);
+	animatedCube->SetName("Animated Cube");
 
 	Cubemaps->Skybox = ref_cast((GL::TextureCube*) PVR::Read(this, "Resource/Texture/sky.pvr", GPU::WrapMode::Clamp));
 	Cubemaps->Skybox->Free();

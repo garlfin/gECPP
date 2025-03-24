@@ -20,9 +20,9 @@
 namespace gE::VoxelPipeline
 {
 	Buffers::Buffers(Window* window) :
-		_voxelBuffer(window, 1, nullptr, GPU::BufferUsageHint::Dynamic)
+		_voxelBuffer(window, 1, nullptr, GPU::BufferUsageHint::Dynamic, true)
 	{
-		_voxelBuffer.Bind(API::BufferTarget::ShaderStorage, 4);
+		_voxelBuffer.Bind(API::BufferBaseTarget::ShaderStorage, 4);
 	}
 
 	Target3D::Target3D(VoxelCapture& capture, Camera3D& camera, ProbeSettings probeSettings) :
@@ -75,8 +75,8 @@ namespace gE::VoxelPipeline
 		transform.SetPosition(pos);
 		transform.OnUpdate(0.f); // Force update on model matrix since it passed its tick.
 
-		GetOwner().GetGPUVoxelScene(buffers.Scene);
-		buffers.UpdateScene();
+		GetOwner().GetGPUVoxelScene(**buffers.GetScene().GetData());
+		buffers.GetScene().UpdateData();
 
 		glm::u16vec3 dispatchSize = DIV_CEIL_T(_colorBack.GetSize(), VOXEL_TAA_GROUP_SIZE, glm::u16vec3);
 

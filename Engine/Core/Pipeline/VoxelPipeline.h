@@ -35,12 +35,7 @@ namespace gE::VoxelPipeline
 	 public:
 		explicit Buffers(Window* window);
 
-		ALWAYS_INLINE void UpdateScene(u64 size = sizeof(GPU::VoxelScene), u64 offset = 0) const
-		{
-			_voxelBuffer.ReplaceDataDirect((std::byte*) &Scene + offset, size, offset);
-		}
-
-		GPU::VoxelScene Scene;
+		GET_CONST(const API::Buffer<GPU::VoxelScene>&, Scene, _voxelBuffer)
 
 	private:
 		API::Buffer<GPU::VoxelScene> _voxelBuffer;

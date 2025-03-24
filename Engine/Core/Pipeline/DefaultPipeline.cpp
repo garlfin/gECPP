@@ -18,13 +18,13 @@
 namespace gE
 {
 	DefaultPipeline::Buffers::Buffers(Window* window) :
-		_cameraBuffer(window, 1, nullptr, GPU::BufferUsageHint::Dynamic),
-		_sceneBuffer(window, 1, nullptr, GPU::BufferUsageHint::Dynamic),
-		_lightBuffer(window, 1, nullptr, GPU::BufferUsageHint::Dynamic)
+		_cameraBuffer(window, 1, nullptr, GPU::BufferUsageHint::Dynamic, true),
+		_sceneBuffer(window, 1, nullptr, GPU::BufferUsageHint::Dynamic, true),
+		_lightBuffer(window, 1, nullptr, GPU::BufferUsageHint::Dynamic, true)
 	{
-		_sceneBuffer.Bind(API::BufferTarget::Uniform, 0);
-		_cameraBuffer.Bind(API::BufferTarget::Uniform, 1);
-		_lightBuffer.Bind(API::BufferTarget::Uniform, 2);
+		_sceneBuffer.Bind(API::BufferBaseTarget::Uniform, 0);
+		_cameraBuffer.Bind(API::BufferBaseTarget::Uniform, 1);
+		_lightBuffer.Bind(API::BufferBaseTarget::Uniform, 2);
 	}
 
 	void DefaultPipeline::Target2D::RenderPass(float delta, Camera*)

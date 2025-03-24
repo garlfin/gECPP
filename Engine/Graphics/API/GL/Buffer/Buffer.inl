@@ -15,49 +15,83 @@ namespace GL
 		glCreateBuffers(1, &ID);
 
 		if((bool)(SUPER::UsageHint & GPU::BufferUsageHint::Mutable))
-			glNamedBufferData(ID, SUPER::GetByteCount(), SUPER::GetData(), GetMutableFlags(SUPER::UsageHint));
+			glNamedBufferData(ID, SUPER::GetByteSize(), SUPER::GetData(), GetMutableFlags(SUPER::UsageHint));
 		else
-			glNamedBufferStorage(ID, SUPER::GetByteCount(), SUPER::GetData(), GetImmutableFlags(SUPER::UsageHint));
+			glNamedBufferStorage(ID, SUPER::GetByteSize(), SUPER::GetData(), GetImmutableFlags(SUPER::UsageHint));
 	}
 
 	template<typename T>
-	Buffer<T>::Buffer(gE::Window* window, u32 count, const T* data, GPU::BufferUsageHint hint) :
-		APIObject(window)
+	Buffer<T>::Buffer(gE::Window* window, size_t count, const T* data, GPU::BufferUsageHint hint, bool createBacking) :
+		Buffer(window, SUPER(count, data, sizeof(typename Array<T>::I), hint, createBacking))
 	{
-
-		static constexpr size_t SIZE = sizeof(typename Array<T>::I);
-
-		SUPER::UsageHint = hint;
-
-		GPU::Buffer<T>::Data = Array<T>(count, (const T*) nullptr, false);
-
-		glCreateBuffers(1, &ID);
-		if((bool)(SUPER::UsageHint & GPU::BufferUsageHint::Mutable))
-			glNamedBufferData(ID, SIZE * count, data, GetMutableFlags(SUPER::UsageHint));
-		else
-			glNamedBufferStorage(ID, SIZE * count, data, GetImmutableFlags(SUPER::UsageHint));
-	}
-
-	template<typename T>
-	template<typename I>
-	void Buffer<T>::ReplaceDataDirect(const I* data, uint32_t count, uint32_t offset) const
-	{
-		static constexpr size_t SIZE = sizeof(typename Array<I>::I);
-		GE_ASSERT(SIZE * count + offset <= GPU::Buffer<T>::GetByteCount());
-
-		if(!data || !count) return;
-		glNamedBufferSubData(ID, offset, SIZE * count, data);
 	}
 
 	template <typename T>
-	void Buffer<T>::ReplaceData(Array<T>&& data) const
+	void Buffer<T>::ReplaceData(Array<T>&& data)
 	{
 		GPU::Buffer<T>::Data = std::move(data);
-		ReplaceDataDirect(GetSettings().GetData(), GetSettings().GetCount());
+		UpdateDataDirect(data.begin(), data.end());
+	}
+
+	template <typename T>
+	void Buffer<T>::ReplaceData(Array<T>& data)
+	{
+		ReplaceData(std::move(Array(data)));
+	}
+
+	template <typename T>
+	template <typename I>
+	void Buffer<T>::UpdateDataDirect(std::span<I> data, size_t offset) const
+	{
+		GE_ASSERTM(data.size_bytes() + offset <= GPU::Buffer<T>::GetByteSize(), "Too much data for buffer.");
+
+		if(!data.size()) return;
+		glNamedBufferSubData(ID, offset, data.size_bytes(), data.data());
+	}
+
+	template <typename T>
+	template <typename I>
+	void Buffer<T>::UpdateData(size_t count, size_t offset) const
+	{
+		if(!count) count = (SUPER::Data.ByteSize() - offset) / sizeof(I);
+
+		std::byte* const beg = (std::byte*) GetData().begin() + offset;
+		std::byte* const end = beg + count * sizeof(I);
+
+		GE_ASSERTM(sizeof(I) * count + offset <= GPU::Buffer<T>::GetByteSize(), "Too much data for buffer.");
+		UpdateDataDirect(std::span((I*) beg, (I*) end), offset);
+	}
+
+	template <typename T>
+	template <typename I>
+	void Buffer<T>::RetrieveDataDirect(std::span<I> data, size_t offset) const
+	{
+		GE_ASSERTM(data.size_bytes() + offset <= SUPER::Data.ByteSize(), "DATA ARRAY NOT LARGE ENOUGH TO STORE MEMORY");
+		glGetNamedBufferSubData(ID, offset, data.size_bytes(), data.data());
+	}
+
+	template <typename T>
+	template <typename I>
+	void Buffer<T>::RetrieveData(size_t count, size_t offset)
+	{
+		if(!count) count = (SUPER::Data.ByteSize() - offset) / sizeof(I);
+
+		std::byte* const beg = (std::byte*) GetData().begin() + offset;
+		std::byte* const end = beg + count * sizeof(I);
+
+		GE_ASSERT(!IsFree());
+		GE_ASSERTM(sizeof(I) * count + offset <= SUPER::Data.ByteSize(), "DATA ARRAY NOT LARGE ENOUGH TO STORE MEMORY");
+		RetrieveDataDirect<I>(std::span((I*) beg, (I*) end), offset);
 	}
 
 	template<typename T>
-	void Buffer<T>::Bind(BufferTarget target, uint32_t slot) const
+	void Buffer<T>::Bind() const
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, ID);
+	}
+
+	template<typename T>
+	void Buffer<T>::Bind(BufferBaseTarget target, uint32_t slot) const
 	{
 		glBindBufferBase((GLenum) target, slot, ID);
 	}
@@ -69,35 +103,15 @@ namespace GL
 	}
 
 	template<typename T>
-	void Buffer<T>::Bind() const
-	{
-		glBindBuffer(GL_ARRAY_BUFFER, ID);
-	}
-
-	template <typename T>
-	void Buffer<T>::RetrieveData(u64 size, u64 offset)
-	{
-		GE_ASSERTM(!IsFree(), "DATA MAY NOT BE FREE");
-		GE_ASSERTM(SUPER::Data.MemSize() > size + offset, "DATA ARRAY NOT LARGE ENOUGH TO STORE MEMORY");
-		RetrieveData(SUPER::Data.Data(), size, offset);
-	}
-
-	template <typename T>
-	void Buffer<T>::RetrieveData(T* data, u64 size, u64 offset)
-	{
-		glGetNamedBufferSubData(ID, offset, size, data);
-	}
-
-	template<typename T>
 	template<typename I>
-	void Buffer<T>::Realloc(uint32_t count, I* data)
+	void Buffer<T>::Reallocate(uint32_t count, I* data)
 	{
 		static constexpr size_t SIZE_T = sizeof(typename Array<I>::I);
 		if((bool)(SUPER::UsageHint & GPU::BufferUsageHint::Mutable))
 			glNamedBufferData(ID, SIZE_T * count, data, GetMutableFlags(SUPER::UsageHint));
 		else
 		{
-			gE::Log::Write("Consider using Buffer<T, true> (Dynamic Buffer) when reallocating.");
+			gE::Log::Write("Consider using a buffer with the dynamic flag when reallocating.");
 			glDeleteBuffers(1, &ID);
 			glCreateBuffers(1, &ID);
 			glNamedBufferStorage(ID, SIZE_T * count, data, GetImmutableFlags(SUPER::UsageHint));

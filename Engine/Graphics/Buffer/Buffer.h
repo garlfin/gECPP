@@ -31,26 +31,26 @@ namespace GPU
 	template<typename T>
 	class Buffer : public gE::Asset
 	{
-		SERIALIZABLE_PROTO("GPU::Buffer", "SBUF", 1, Buffer, Asset);
+		SERIALIZABLE_PROTO("GPU::Buffer", "SBUF", 2, Buffer, Asset);
 
-	 public:
+	public:
 		static_assert(!std::is_pointer_v<T>, "Buffer data shouldn't be a pointer!");
 
-		explicit Buffer(u32 count, const T* = nullptr, u8 stride = sizeof(typename Array<T>::I), bool createBacking = true);
+		explicit Buffer(u32 count, const T* = nullptr, size_t stride = sizeof(typename Array<T>::I), BufferUsageHint hint = BufferUsageHint::Default, bool createBacking = true);
 		explicit Buffer(const Array<T>& arr) : Stride(sizeof(typename Array<T>::I)), Data(arr) {}
 		explicit Buffer(Array<T>&& arr) : Stride(sizeof(typename Array<T>::I)), Data(arr) {}
 
 		GET_CONST(u8, Stride, Stride);
 		GET_CONST(const Array<T>&, Array, Data);
 		GET_CONST(const T*, Data, Data.Data())
-		GET_CONST(u32, ElementCount, Data.Count() / Stride);
-		GET_CONST(u32, Count, Data.Count());
-		GET_CONST(u32, ByteCount, Data.ByteCount());
+		GET_CONST(u32, ElementCount, Data.Size() / Stride);
+		GET_CONST(u32, Size, Data.Size());
+		GET_CONST(u32, ByteSize, Data.ByteSize());
 
 		ALWAYS_INLINE void Free() override { Data.Free(); }
 		ALWAYS_INLINE bool IsFree() const override { return Data.IsFree(); }
 
-		uint8_t Stride = DEFAULT;
+		size_t Stride = DEFAULT;
 		Array<T> Data = DEFAULT;
 		BufferUsageHint UsageHint = BufferUsageHint::Default;
 

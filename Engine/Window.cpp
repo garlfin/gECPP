@@ -307,6 +307,7 @@ void Window::OnRender(float delta)
 
 	Lights->OnRender(delta, nullptr);
 	Cubemaps->OnRender(delta, nullptr);
+	Renderers->OnUpdate(delta); // Will tick animated mesh entities
 	Cameras.OnRender(delta);
 	Transforms.OnRender(delta, nullptr);
 

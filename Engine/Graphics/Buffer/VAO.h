@@ -63,11 +63,11 @@ namespace GPU
 		SERIALIZABLE_PROTO("GPU::IndexedVAO", "IVAO", 1, IndexedVAO, VAO, &GPU::VAO::SType);
 
 	public:
-		ALWAYS_INLINE void Free() override { VAO::Free(); TriangleBuffer.Free(); }
-		NODISCARD ALWAYS_INLINE bool IsFree() const override { return VAO::IsFree() && TriangleBuffer.IsFree(); }
+		ALWAYS_INLINE void Free() override { VAO::Free(); IndicesBuffer.Free(); }
+		NODISCARD ALWAYS_INLINE bool IsFree() const override { return VAO::IsFree() && IndicesBuffer.IsFree(); }
 
-		GLenum TriangleFormat = DEFAULT;
-		Buffer<std::byte> TriangleBuffer;
+		GLenum IndicesFormat = DEFAULT;
+		Buffer<std::byte> IndicesBuffer;
 
 		~IndexedVAO() override { ASSET_CHECK_FREE(IndexedVAO); }
 	};

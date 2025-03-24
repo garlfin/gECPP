@@ -56,7 +56,7 @@ namespace gE
 
 	class Material : public Asset
 	{
-		REFLECTABLE_PROTO("MAT", "gE::Material", Material, Asset, );
+		REFLECTABLE_PROTO("gE::Material", "MAT", Material, Asset, );
 
 	public:
 		Material(Window* window, const Reference<Shader>& shader, DepthFunction depthFunc = DepthFunction::Less, CullMode cullMode = CullMode::Back);

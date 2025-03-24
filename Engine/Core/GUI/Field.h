@@ -67,25 +67,35 @@ namespace gE
         const EnumData<T, SIZE>& Type;
     };
 
-    template<class BASE_T>
-    using DragDropCompareFunc = bool(*)(const Reference<BASE_T>&);
+    using NoUserData = const std::nullptr_t*;
 
-    template<class BASE_T, class T> requires IsDragDroppable<BASE_T, T>
+    template<class BASE_T, class SETTINGS_T = std::nullptr_t>
+    using DragDropCompareFunc = bool(*)(const Reference<BASE_T>&, const SETTINGS_T* userData);
+
+    template<class BASE_T, class T, class SETTINGS_T = std::nullptr_t> requires IsDragDroppable<BASE_T, T>
     struct DragDropField : public Field
     {
         std::string Type = "";
-        DragDropCompareFunc<BASE_T> Acceptor;
-    };
-
-    template<class T> requires IsDragDroppable<Asset, T>
-    struct DragDropField<Asset, T> : public Field
-    {
-        std::string Type = GE_EDITOR_ASSET_PAYLOAD;
-        DragDropCompareFunc<Asset> Acceptor = [](const Reference<Asset>& asset) { return asset->IsCastable<T>(); };
+        DragDropCompareFunc<BASE_T> Acceptor = nullptr;
+        const SETTINGS_T* UserData = DEFAULT;
     };
 
     template<class T>
-    using AssetDragDropField = DragDropField<Asset, T>;
+    bool AssetDragDropAcceptor(const Reference<Asset>& asset, NoUserData)
+    {
+        return asset->IsCastable<T>();
+    }
+
+    template<class T, class SETTINGS_T> requires IsDragDroppable<Asset, T>
+    struct DragDropField<Asset, T, SETTINGS_T> : public Field
+    {
+        std::string Type = GE_EDITOR_ASSET_PAYLOAD;
+        DragDropCompareFunc<Asset, SETTINGS_T> Acceptor = AssetDragDropAcceptor<T>;
+        SETTINGS_T* UserData = DEFAULT;
+    };
+
+    template<class T, class SETTINGS_T = std::nullptr_t>
+    using AssetDragDropField = DragDropField<Asset, T, SETTINGS_T>;
 
     template<class T>
     CONSTEXPR_GLOBAL ImGuiDataType IMType = 0;
@@ -117,8 +127,8 @@ namespace gE
     template<class T, class SETTINGS_T>
     size_t DrawField(const ArrayField<SETTINGS_T>&, T*, size_t, u8 depth);
 
-    template<class BASE_T, class T = BASE_T> requires IsDragDroppable<BASE_T, T>
-    bool DrawField(const DragDropField<BASE_T, T>& settings, Reference<T>&, u8 depth);
+    template<class BASE_T, class T = BASE_T, class SETTINGS_T = std::nullptr_t> requires IsDragDroppable<BASE_T, T>
+    bool DrawField(const DragDropField<BASE_T, T, SETTINGS_T>& settings, Reference<T>&, u8 depth);
 
     template<class SETTINGS_T, class OWNER_T, class OUT_T, class IN_T>
     bool DrawField(const SETTINGS_T&, OWNER_T&, u8 depth, GetterFunction<OUT_T, OWNER_T>, SetterFunction<IN_T, OWNER_T>);

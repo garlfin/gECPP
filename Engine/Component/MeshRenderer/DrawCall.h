@@ -58,7 +58,7 @@ namespace gE
 		using SET_T = std::set<const DrawCall*, DrawCallCompare>;
 
 		explicit DrawCallManager(Window* window) :
-			_indirectDrawBuffer(window, API_MAX_MULTI_DRAW, nullptr, GPU::BufferUsageHint::Dynamic)
+			_indirectDrawBuffer(window, API_MAX_MULTI_DRAW, nullptr, GPU::BufferUsageHint::Dynamic, true)
 		{
 			_indirectDrawBuffer.Bind(API::BufferTarget::IndirectDrawBuffer);
 		}
@@ -68,16 +68,11 @@ namespace gE
 		void Register(const DrawCall*);
 		void Remove(const DrawCall*);
 
-		ALWAYS_INLINE void UpdateDrawCalls(u64 size = sizeof(API::IndirectDrawIndexed) * API_MAX_MULTI_DRAW, u64 offset = 0) const
-		{
-			_indirectDrawBuffer.ReplaceDataDirect((std::byte*) IndirectDraws + offset, size, offset);
-		}
-
-		API::IndirectDrawIndexed IndirectDraws[API_MAX_MULTI_DRAW] DEFAULT;
+		GET_CONST(const API::Buffer<API::IndirectDrawIndexed>&, Draws, _indirectDrawBuffer);
 
 	private:
 		API::Buffer<API::IndirectDrawIndexed> _indirectDrawBuffer;
-		GPU::IndirectDraw batches[API_MAX_MULTI_DRAW] DEFAULT;
+		GPU::IndirectDraw _batches[API_MAX_MULTI_DRAW] DEFAULT;
 		SET_T _draws = DEFAULT;
 	};
 }

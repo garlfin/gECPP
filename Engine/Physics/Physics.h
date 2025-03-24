@@ -165,12 +165,12 @@ namespace Physics
             static_assert(std::is_trivially_copyable_v<OUT_T>);
             static_assert(sizeof(IN_T) == sizeof(OUT_T));
 
-            return px::Array<OUT_T>((OUT_T*) array.Data(), (OUT_T*) array.Data() + array.Count());
+            return px::Array<OUT_T>((OUT_T*) array.Data(), (OUT_T*) array.Data() + array.Size());
         }
 
-        px::Array<OUT_T> arr(array.Count());
+        px::Array<OUT_T> arr(array.Size());
 
-        for(size_t i = 0; i < array.Count(); i++)
+        for(size_t i = 0; i < array.Size(); i++)
             arr[i] = CAST_FUNC(array[i]);
 
         return arr;
@@ -190,7 +190,7 @@ namespace Physics
 
         Array<OUT_T> arr(array.size());
 
-        for(size_t i = 0; i < arr.Count(); i++)
+        for(size_t i = 0; i < arr.Size(); i++)
             arr[i] = CAST_FUNC(array[i]);
 
         return arr;

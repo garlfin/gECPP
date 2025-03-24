@@ -1,0 +1,110 @@
+#extension GL_AMD_gpu_shader_int16 : enable
+#extension GL_NV_gpu_shader5 : enable
+
+#define INT8_MAX 127
+#define UINT8_MAX 255
+
+struct PackedVertex
+{
+    vec3 Position;
+    vec2 UV;
+    u8vec3 Normal;
+    u8vec4 Tangent;
+};
+
+struct Vertex
+{
+    vec3 Position;
+    vec2 UV;
+    vec3 Normal;
+    vec4 Tangent;
+};
+
+struct PackedVertexWeight
+{
+    u8vec4 IDs;
+    u8vec4 Weights;
+};
+
+struct VertexWeight
+{
+    uvec4 IDs;
+    vec4 Weights;
+};
+
+Vertex UnpackVertex(PackedVertex vertex);
+PackedVertex PackVertex(Vertex vertex);
+VertexWeight UnpackVertexWeight(PackedVertexWeight vertex);
+
+ivec4 UnpackIVec4(uint);
+uint PackIVec4(ivec4);
+uvec4 UnpackUVec4(uint);
+
+layout(std430, binding = 9) restrict readonly buffer VerticesInBuf
+{
+    PackedVertex VerticesIn[];
+};
+
+layout(std430, binding = 10) restrict readonly buffer WeightsInBuf
+{
+    PackedVertexWeight WeightsIn[];
+};
+
+layout(std430, binding = 11) restrict readonly buffer JointsInBuf
+{
+    mat4 JointsIn[256];
+};
+
+layout(std430, binding = 12) restrict writeonly buffer VerticesOutBuf
+{
+    PackedVertex VerticesOut[];
+};
+
+layout(local_size_x = 32) in;
+void main()
+{
+    Vertex vertex = UnpackVertex(VerticesIn[gl_GlobalInvocationID.x]);
+    VertexWeight weight = UnpackVertexWeight(WeightsIn[gl_GlobalInvocationID.x]);
+
+    mat4 skinMatrix = JointsIn[weight.IDs[0]] * weight.Weights[0] +
+                      JointsIn[weight.IDs[1]] * weight.Weights[1] +
+                      JointsIn[weight.IDs[2]] * weight.Weights[2] +
+                      JointsIn[weight.IDs[3]] * weight.Weights[3];
+
+    vertex.Position    = vec3(skinMatrix * vec4(vertex.Position, 1.0));
+    vertex.Normal      = vec3(skinMatrix * vec4(vertex.Normal, 1.0));
+    vertex.Tangent.xyz = vec3(skinMatrix * vec4(vertex.Tangent.xyz, 1.0));
+
+    VerticesOut[gl_GlobalInvocationID.x] = PackVertex(vertex);
+}
+
+Vertex UnpackVertex(PackedVertex vertex)
+{
+    return Vertex
+    (
+        vertex.Position,
+        vertex.UV,
+        vec3(vertex.Normal.xyz) / INT8_MAX,
+        vec4(vertex.Tangent) / INT8_MAX
+    );
+}
+
+PackedVertex PackVertex(Vertex vertex)
+{
+    return PackedVertex
+    (
+        vertex.Position,
+        vertex.UV,
+        u8vec3(round(vertex.Normal * INT8_MAX)),
+        u8vec4(round(vertex.Tangent * INT8_MAX))
+    );
+}
+
+VertexWeight UnpackVertexWeight(PackedVertexWeight vertex)
+{
+    return VertexWeight
+    (
+        vertex.IDs,
+        vec4(vertex.Weights) / UINT8_MAX
+    );
+}

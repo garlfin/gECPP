@@ -280,7 +280,7 @@ namespace gE
     template <class T, class SETTINGS_T>
     T* DrawField(const ArrayField<SETTINGS_T>& settings, Array<T>& ts, u8 depth)
     {
-        return ts.begin() + DrawField(settings, ts.Data(), ts.Count(), depth);
+        return ts.begin() + DrawField(settings, ts.Data(), ts.Size(), depth);
     }
 
     template <class T, class SETTINGS_T>
@@ -337,17 +337,17 @@ namespace gE
         return changed;
     }
 
-    template<class BASE_T, class T>
-    bool DragDropCompare(ImGuiPayload& payload, const DragDropField<BASE_T, T>* field)
+    template<class BASE_T, class T, class SETTINGS_T>
+    bool DragDropCompare(ImGuiPayload& payload, const DragDropField<BASE_T, T, SETTINGS_T>* field)
     {
         const bool isType = payload.IsDataType(field->Type.c_str());
         const Reference<BASE_T>& data = **(const Reference<BASE_T>**) payload.Data;
 
-        return isType && data->template IsCastable<T>();
+        return isType && field->Acceptor(data, field->UserData);
     }
 
-    template<class BASE_T, class T> requires IsDragDroppable<BASE_T, T>
-    bool DrawField(const DragDropField<BASE_T, T>& settings, Reference<T>& ref, u8 depth)
+    template<class BASE_T, class T, class SETTINGS_T> requires IsDragDroppable<BASE_T, T>
+    bool DrawField(const DragDropField<BASE_T, T, SETTINGS_T>& settings, Reference<T>& ref, u8 depth)
     {
         using RAW_T = std::remove_const_t<T>;
         constexpr bool isConst = std::is_const_v<T>;
@@ -368,7 +368,7 @@ namespace gE
         bool changed = false;
         if(ImGui::BeginDragDropTarget())
         {
-            if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload((IMGUI_ACCEPT_PAYLOAD_FUNC) DragDropCompare<BASE_T, T>, &settings))
+            if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload((IMGUI_ACCEPT_PAYLOAD_FUNC) DragDropCompare<BASE_T, T, SETTINGS_T>, &settings))
             {
                 const Reference<T>& newReference = **(const Reference<T>**) payload->Data;
                 if(ref != newReference)

@@ -168,10 +168,10 @@ namespace gE::Model
         GLTFResult result;
         ReadGLTF(window, path, result);
 
-        files = Array<File>(result.Meshes.Count() + result.Skeletons.Count() + result.Animations.Count());
+        files = Array<File>(result.Meshes.Size() + result.Skeletons.Size() + result.Animations.Size());
         size_t fileOffset = 0;
 
-        for(size_t i = 0; i < result.Meshes.Count(); i++, fileOffset++)
+        for(size_t i = 0; i < result.Meshes.Size(); i++, fileOffset++)
         {
             Mesh& mesh = result.Meshes[i];
             Path filePath = parentDirectory / Path(mesh.Name).replace_extension(Mesh::SType.Extension);
@@ -179,7 +179,7 @@ namespace gE::Model
             files[fileOffset] = File(window, filePath, std::move(mesh));
         }
 
-        for(size_t i = 0; i < result.Skeletons.Count(); i++, fileOffset++)
+        for(size_t i = 0; i < result.Skeletons.Size(); i++, fileOffset++)
         {
             Skeleton& skeleton = result.Skeletons[i];
             Path filePath = parentDirectory / Path(skeleton.Name).replace_extension(Skeleton::SType.Extension);
@@ -187,7 +187,7 @@ namespace gE::Model
             files[fileOffset] = File(window, filePath, std::move(skeleton));
         }
 
-        for(size_t i = 0; i < result.Animations.Count(); i++, fileOffset++)
+        for(size_t i = 0; i < result.Animations.Size(); i++, fileOffset++)
         {
             Animation& animation = result.Animations[i];
             Path filePath = parentDirectory / Path(animation.Name).replace_extension(Animation::SType.Extension);
@@ -248,7 +248,7 @@ namespace gE::Model
 
     void SetupMeshFields(GPU::VAO& meshOut, size_t vertexCount)
     {
-        meshOut.AddBuffer(GPU::Buffer<std::byte>(vertexCount, nullptr, sizeof(Vertex)));
+        meshOut.AddBuffer(GPU::Buffer<std::byte>(vertexCount * sizeof(Vertex), nullptr, sizeof(Vertex)));
 
         meshOut.AddField(POSITION_FIELD);
         meshOut.AddField(UV_FIELD);
@@ -260,17 +260,13 @@ namespace gE::Model
     {
         SetupMeshFields(meshOut, vertexCount);
 
-        meshOut.TriangleFormat = GL_UNSIGNED_INT;
-
-        GPU::Buffer<std::byte>& buf = meshOut.TriangleBuffer;
-        buf.Stride = sizeof(Face);
-        buf.Data = Array<std::byte>(triCount * buf.Stride);
-        buf.UsageHint = GPU::BufferUsageHint::Default;
+        meshOut.IndicesFormat = GLType<u32>;
+        meshOut.IndicesBuffer = GPU::Buffer<std::byte>(triCount * sizeof(Face), nullptr, sizeof(Face));
     }
 
     void SetupMeshWeights(GPU::VAO& meshOut, size_t vertexCount)
     {
-        meshOut.AddBuffer(GPU::Buffer<std::byte>(vertexCount, nullptr, sizeof(VertexWeight)));
+        meshOut.AddBuffer(GPU::Buffer<std::byte>(vertexCount * sizeof(VertexWeight), nullptr, sizeof(VertexWeight)));
 
         meshOut.AddField(BONES_FIELD);
         meshOut.AddField(WEIGHTS_FIELD);
@@ -308,7 +304,7 @@ namespace gE::Model
     void ProcessSubmesh(const GPU::VAO& meshOut, const gltf::Asset& file, const gltf::Mesh& meshIn)
     {
         const GPU::Buffer<std::byte>& buf = meshOut.Buffers[0];
-        GE_ASSERT(buf.GetByteCount() % sizeof(Vertex) == 0);
+        GE_ASSERT(buf.GetByteSize() % sizeof(Vertex) == 0);
 
         size_t offset = 0;
         for(const gltf::Primitive& submeshIn : meshIn.primitives)
@@ -335,8 +331,8 @@ namespace gE::Model
     {
         ProcessSubmesh((GPU::VAO&) meshOut, file, meshIn);
 
-        const GPU::Buffer<std::byte>& buf = meshOut.TriangleBuffer;
-        GE_ASSERT(buf.GetByteCount() % sizeof(Face) == 0);
+        const GPU::Buffer<std::byte>& buf = meshOut.IndicesBuffer;
+        GE_ASSERT(buf.GetByteSize() % sizeof(Face) == 0);
 
         size_t offset = 0;
         for(const gltf::Primitive& submeshIn : meshIn.primitives)
@@ -378,7 +374,7 @@ namespace gE::Model
     void ProcessSubmeshWeights(const GPU::VAO& meshOut, const gltf::Asset& file, const gltf::Mesh& meshIn)
     {
         const GPU::Buffer<std::byte>& buf = meshOut.Buffers[1];
-        GE_ASSERT(buf.GetByteCount() % sizeof(VertexWeight) == 0);
+        GE_ASSERT(buf.GetByteSize() % sizeof(VertexWeight) == 0);
 
         size_t offset = 0;
         for(const gltf::Primitive& submeshIn : meshIn.primitives)
@@ -406,7 +402,7 @@ namespace gE::Model
         channelOut.Frames = Array<Frame>(channelData.Input.Accessor->count);
         channelOut.Type = (ChannelType) channelIn.path;
 
-        for(size_t i = 0; i < channelOut.Frames.Count(); i++)
+        for(size_t i = 0; i < channelOut.Frames.Size(); i++)
         {
             Frame& frameOut = channelOut.Frames[i];
 

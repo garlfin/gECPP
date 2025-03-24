@@ -41,6 +41,7 @@ namespace gE
 
     inline const Frame* AnimationChannel::GetFrame(float time) const
     {
-        return std::lower_bound(Frames.begin(), Frames.end(), time, [](const Frame& frame, float time){ return frame.Time < time; });
+        const Frame* it = std::lower_bound(Frames.begin(), Frames.end(), time, [](const Frame& frame, float time){ return frame.Time < time; });
+        return it == Frames.end() ? Frames.begin() : it;
     }
 }

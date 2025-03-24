@@ -14,12 +14,6 @@
 
 namespace gE
 {
-    struct VertexWeight
-    {
-        glm::u8vec4 IDs = glm::u8vec4(-1);
-        glm::u8vec4 Weights = glm::u8vec4(0);
-    };
-
     struct Mesh : public Asset
     {
         SERIALIZABLE_PROTO("gE::Mesh", "MESH", 2, Mesh, Asset);

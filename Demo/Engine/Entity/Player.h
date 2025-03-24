@@ -22,7 +22,7 @@ namespace gE
 
 	class Player : public Entity
 	{
-		REFLECTABLE_PROTO("PLYR", "gE::Player", Player, Entity);
+		REFLECTABLE_PROTO("gE::Player", "PLYR", Player, Entity);
 
 	public:
 		explicit Player(Window* window) : Entity(window),
@@ -48,7 +48,7 @@ namespace gE
 
 	class PlayerCamera final : public Entity
 	{
-		REFLECTABLE_PROTO("PCAM", "gE::PlayerCamera", PlayerCamera, Entity);
+		REFLECTABLE_PROTO("gE::PlayerCamera", "PCAM", PlayerCamera, Entity);
 
 	public:
 		PlayerCamera(Window* window, Player& player) : Entity(window, &player),

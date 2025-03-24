@@ -61,6 +61,7 @@ namespace gE
         UpdateProjection();
 
         DefaultPipeline::Buffers& buffers = GetWindow().GetPipelineBuffers();
+        GPU::Camera& camera = **buffers.GetCamera().GetData();
 
         bool isFirst = _settings.Timing.GetIsFirst();
         bool shouldTick = _settings.Timing.Tick();
@@ -71,10 +72,10 @@ namespace gE
         if (!_target->Setup(delta, callingCamera)) return;
         _target->RenderDependencies(delta);
 
-        GetGPUCamera(buffers.Camera);
-        _target->GetGPUCameraOverrides(buffers.Camera);
+        GetGPUCamera(camera);
+        _target->GetGPUCameraOverrides(camera);
 
-        buffers.UpdateCamera();
+        buffers.GetCamera().UpdateData();
 
         _target->Bind();
         _target->RenderPass(delta, callingCamera);

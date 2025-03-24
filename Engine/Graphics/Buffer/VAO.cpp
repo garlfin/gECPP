@@ -27,14 +27,14 @@ namespace GPU
 
 	void IndexedVAO::IDeserialize(istream& in, SETTINGS_T s)
 	{
-		TriangleFormat = Read<GLenum>(in);
-		ReadSerializable(in, TriangleBuffer, s);
+		IndicesFormat = Read<GLenum>(in);
+		ReadSerializable(in, IndicesBuffer, s);
 	}
 
 	void IndexedVAO::ISerialize(ostream& out) const
 	{
-		Write(out, TriangleFormat);
-		Write(out, TriangleBuffer);
+		Write(out, IndicesFormat);
+		Write(out, IndicesBuffer);
 	}
 
 	void MaterialSlot::IDeserialize(istream& in, SETTINGS_T)
@@ -93,7 +93,7 @@ namespace GPU
 
 	REFLECTABLE_ONGUI_IMPL(IndexedVAO,
 	{
-		DrawField(gE::Field{ "Triangles" }, TriangleBuffer, depth);
+		DrawField(gE::Field{ "Triangles" }, IndicesBuffer, depth);
 	});
 	API_REFLECTABLE_FACTORY_IMPL(IndexedVAO, API::IndexedVAO);
 

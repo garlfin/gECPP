@@ -82,7 +82,7 @@ public:
 		u8 _version = VERSION_VAL; \
 		REFLECTABLE_PROTO(NAME, MAGIC_VAL, TYPE, SUPER_T, __VA_ARGS__)
 
-#define SERIALIZABLE_PROTO_NOHEADER(NAME, TYPE, SUPER_T, ...) \
+#define SERIALIZABLE_PROTO_NOHEADER(NAME, MAGIC_VAL, TYPE, SUPER_T, ...) \
 	public: \
 		typedef SUPER_T SUPER; \
 		typedef SUPER::SETTINGS_T SETTINGS_T;\
@@ -96,7 +96,7 @@ public:
 		void IDeserialize(istream& in, SETTINGS_T s); \
 		void ISerialize(ostream& out) const; \
 		u8 _version = 0; \
-		REFLECTABLE_PROTO("", NAME, TYPE, SUPER_T, __VA_ARGS__)
+		REFLECTABLE_PROTO(MAGIC_VAL, NAME, TYPE, SUPER_T, __VA_ARGS__)
 
 template<class T, class S>
 concept is_serializable_in = requires(T t, S s, std::istream& i)
@@ -203,7 +203,7 @@ void WriteArray(std::ostream& out, u32 count, const Array<T>* t)
 	{
 		const Array<T>& arr = t[i];
 
-		UINT_T length = arr.Count();
+		UINT_T length = arr.Size();
 
 		Write(out, length);
 		Write(out, length, arr.Data());

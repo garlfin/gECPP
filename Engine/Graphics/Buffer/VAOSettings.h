@@ -48,7 +48,7 @@ namespace GPU
 
 	struct VertexField : public Serializable<>
 	{
-		SERIALIZABLE_PROTO_NOHEADER("GPU::VertexField", VertexField, Serializable);
+		SERIALIZABLE_PROTO_NOHEADER("GPU::VertexField", "VFLD", VertexField, Serializable);
 		REFLECTABLE_NAME_PROTO();
 
 	public:

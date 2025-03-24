@@ -98,16 +98,17 @@ void gE::GUIManager::OnRender(const ImDrawData* draw) const
     vaoFormat.Fields[1] = GPU::VertexField("UV", GPU::ElementType::Float, false, 0, 1, 2, offsetof(ImDrawVert, uv));
     vaoFormat.Fields[2] = GPU::VertexField("COL", GPU::ElementType::UByte, true, 0, 2, 4, offsetof(ImDrawVert, col));
 
-    vaoFormat.Buffers[0] = GPU::Buffer<std::byte>(sizeof(ImDrawVert) * vertSize, nullptr, sizeof(ImDrawVert), false);
+    vaoFormat.Buffers[0] = GPU::Buffer<std::byte>(sizeof(ImDrawVert) * vertSize, nullptr, sizeof(ImDrawVert), GPU::BufferUsageHint::Default,false);
     vaoFormat.Buffers[0].UsageHint = GPU::BufferUsageHint::Dynamic;
 
-    vaoFormat.TriangleBuffer = GPU::Buffer<std::byte>(sizeof(ImDrawIdx) * triSize, nullptr, sizeof(ImDrawIdx), false);
-    vaoFormat.TriangleBuffer.UsageHint = GPU::BufferUsageHint::Dynamic;
-    vaoFormat.TriangleFormat = GLType<ImDrawIdx>;
+    vaoFormat.IndicesBuffer = GPU::Buffer<std::byte>(sizeof(ImDrawIdx) * triSize, nullptr, sizeof(ImDrawIdx), GPU::BufferUsageHint::Default, false);
+    vaoFormat.IndicesBuffer.UsageHint = GPU::BufferUsageHint::Dynamic;
+    vaoFormat.IndicesFormat = GLType<ImDrawIdx>;
 
     API::IndexedVAO vao(_window, std::move(vaoFormat));
 
     DefaultPipeline::Buffers& buffers = _window->GetPipelineBuffers();
+    GPU::Camera& camera = **buffers.GetCamera().GetData();
 
     const float right = draw->DisplayPos.x + draw->DisplaySize.x;
     const float bottom = draw->DisplayPos.y + draw->DisplaySize.y;
@@ -121,8 +122,8 @@ void gE::GUIManager::OnRender(const ImDrawData* draw) const
     glBlendEquation(GL_FUNC_ADD);
     glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
-    buffers.Camera.Projection = glm::ortho(draw->DisplayPos.x, right, draw->DisplayPos.y, bottom);
-    buffers.UpdateCamera(sizeof(glm::mat4), offsetof(GPU::Camera, Projection));
+    camera.Projection = glm::ortho(draw->DisplayPos.x, right, draw->DisplayPos.y, bottom);
+    buffers.GetCamera().UpdateData<std::byte>(sizeof(glm::mat4), offsetof(GPU::Camera, Projection));
 
     _imShader.Bind();
 
@@ -131,8 +132,8 @@ void gE::GUIManager::OnRender(const ImDrawData* draw) const
 
     for(const ImDrawList* cmdList : draw->CmdLists)
     {
-        vao.UpdateBufferDirect(0, cmdList->VtxBuffer.Data, cmdList->VtxBuffer.size_in_bytes());
-        vao.UpdateIndicesDirect(cmdList->IdxBuffer.Data, cmdList->IdxBuffer.size_in_bytes());
+        vao.UpdateBufferDirect(0, std::span((std::byte*) cmdList->VtxBuffer.begin(), (std::byte*) cmdList->VtxBuffer.end()));
+        vao.UpdateIndicesDirect(std::span((std::byte*) cmdList->IdxBuffer.begin(), (std::byte*) cmdList->IdxBuffer.end()));
 
         for(const ImDrawCmd& drawCall : cmdList->CmdBuffer)
         {

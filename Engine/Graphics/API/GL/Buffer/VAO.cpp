@@ -33,12 +33,12 @@ namespace GL
 		}
 	}
 
-	void IVAO::UpdateBufferDirect(u8 i, const void* data, size_t count, size_t offset)
+	void IVAO::UpdateBufferDirect(u8 i, std::span<std::byte> data, size_t offset) const
 	{
-		_buffers[i].ReplaceDataDirect(data, count, offset);
+		_buffers[i].UpdateDataDirect(data, offset);
 	}
 
-	void IVAO::UpdateBuffer(u8 i, GPU::Buffer<std::byte>&& buf)
+	void IVAO::UpdateBuffer(u8 i, GPU::Buffer<std::byte>&& buf) const
 	{
 		Buffer<std::byte>& dst = _buffers[i];
 
@@ -65,10 +65,10 @@ namespace GL
 
 	API_SERIALIZABLE_IMPL(IndexedVAO), IVAO(window, *this)
 	{
-		PlacementNew(_triangleBuffer, window, move(TriangleBuffer));
-		TriangleBuffer = move(_triangleBuffer.GetSettings());
+		PlacementNew(_indicesBuffer, window, move(IndicesBuffer));
+		IndicesBuffer = move(_indicesBuffer.GetSettings());
 
-		glVertexArrayElementBuffer(ID, _triangleBuffer.Get());
+		glVertexArrayElementBuffer(ID, _indicesBuffer.Get());
 	}
 
 	void IndexedVAO::Draw(u8 index, u16 instanceCount) const
@@ -76,7 +76,7 @@ namespace GL
 		if(!instanceCount) return;
 		Bind();
 		const GPU::MaterialSlot& material = Materials[index];
-		glDrawElementsInstanced(GL_TRIANGLES, material.Count * 3, TriangleFormat, (void*) (sizeof(u32) * material.Offset * 3), instanceCount);
+		glDrawElementsInstanced(GL_TRIANGLES, material.Count * 3, IndicesFormat, (void*) (sizeof(u32) * material.Offset * 3), instanceCount);
 	}
 
 	void VAO::Draw(u32 count, const GPU::IndirectDraw* calls) const
@@ -88,7 +88,7 @@ namespace GL
 		u32 baseInstance = 0;
 		for(u32 i = 0; i < count; i++)
 		{
-			IndirectDraw& to = ((IndirectDraw*) drawManager.IndirectDraws)[i];
+			IndirectDraw& to = ((IndirectDraw*) drawManager.GetDraws().GetData().Data())[i];
 			const GPU::IndirectDraw& call = calls[i];
 			const GPU::MaterialSlot& material = Materials[call.Material];
 
@@ -100,7 +100,7 @@ namespace GL
 			baseInstance += call.InstanceCount;
 		}
 
-		drawManager.UpdateDrawCalls(sizeof(IndirectDrawIndexed) * count);
+		drawManager.GetDraws().UpdateData(sizeof(IndirectDrawIndexed) * count);
 
 		Bind();
 		glMultiDrawArraysIndirect(GL_TRIANGLES, nullptr, count, 0);
@@ -122,7 +122,7 @@ namespace GL
 		u32 baseInstance = 0;
 		for(u32 i = 0; i < count; i++)
 		{
-			IndirectDrawIndexed& to = ((IndirectDrawIndexed*) drawManager.IndirectDraws)[i];
+			IndirectDrawIndexed& to = ((IndirectDrawIndexed*) drawManager.GetDraws().GetData().Data())[i];
 			const GPU::IndirectDraw& call = calls[i];
 			const GPU::MaterialSlot& material = Materials[call.Material];
 
@@ -135,27 +135,27 @@ namespace GL
 			baseInstance += call.InstanceCount;
 		}
 
-		drawManager.UpdateDrawCalls(sizeof(IndirectDrawIndexed) * count);
+		drawManager.GetDraws().UpdateData<IndirectDrawIndexed>(count);
 
 		Bind();
-		glMultiDrawElementsIndirect(GL_TRIANGLES, TriangleFormat, nullptr, count, 0);
+		glMultiDrawElementsIndirect(GL_TRIANGLES, IndicesFormat, nullptr, count, 0);
 	}
 
 	void IndexedVAO::DrawDirect(u32 count, u32 offset, u32 instanceCount) const
 	{
 		if(!instanceCount) return;
 		Bind();
-		glDrawElementsInstanced(GL_TRIANGLES, count * 3, TriangleFormat, (void*) (GLSizeOf(TriangleFormat) * offset), instanceCount);
+		glDrawElementsInstanced(GL_TRIANGLES, count * 3, IndicesFormat, (void*) (GLSizeOf(IndicesFormat) * offset), instanceCount);
 	}
 
-	void IndexedVAO::UpdateIndicesDirect(const void* data, size_t count, size_t offset)
+	void IndexedVAO::UpdateIndicesDirect(std::span<std::byte> data, size_t offset) const
 	{
-		_triangleBuffer.ReplaceDataDirect(data, count, offset);
+		_indicesBuffer.UpdateDataDirect(data, offset);
 	}
 
-	void IndexedVAO::UpdateIndices(GPU::Buffer<std::byte>&& buf)
+	void IndexedVAO::UpdateIndices(GPU::Buffer<std::byte>&& buf) const
 	{
-		_triangleBuffer = API::Buffer(&GetWindow(), std::move(buf));
-		glVertexArrayElementBuffer(ID, _triangleBuffer.Get());
+		_indicesBuffer = API::Buffer(&GetWindow(), std::move(buf));
+		glVertexArrayElementBuffer(ID, _indicesBuffer.Get());
 	}
 }

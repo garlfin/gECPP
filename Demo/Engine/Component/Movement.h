@@ -18,7 +18,7 @@ namespace gE
 {
     class Movement final : public Behavior
     {
-        REFLECTABLE_PROTO("MOV", "gE::Movement", Movement, Behavior);
+        REFLECTABLE_PROTO("gE::Movement", "MOV", Movement, Behavior);
 
     public:
         explicit Movement(Entity* o, CharacterController& controller) :

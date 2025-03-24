@@ -15,13 +15,13 @@ namespace gE
 {
     class MeshRenderer : public Component
     {
-        REFLECTABLE_PROTO("MREN", "gE::MeshRenderer", MeshRenderer, Component);
+        REFLECTABLE_PROTO("gE::MeshRenderer", "MREN", MeshRenderer, Component);
 
     public:
         MeshRenderer(Entity* o, const Reference<Mesh>& mesh);
 
         void OnInit() override {};
-        void OnRender(float delta, Camera*) override {};
+        void OnUpdate(float delta) override {};
 
         GET_CONST(const Reference<Mesh>&, Mesh, _mesh);
         virtual void SetMesh(const Reference<Mesh>& mesh);
@@ -39,6 +39,7 @@ namespace gE
     protected:
         void UpdateDrawCall(size_t i);
         void UpdateDrawCalls();
+        virtual DragDropCompareFunc<Asset> GetDragDropAcceptor();
 
     private:
         Reference<Mesh> _mesh;
@@ -48,29 +49,42 @@ namespace gE
 
     class Animator : public Reflectable<Window*>
     {
-        REFLECTABLE_PROTO("AMTR", "gE::Animator", Animator, Reflectable);
+        REFLECTABLE_PROTO("gE::Animator", "AMTR", Animator, Reflectable);
 
     public:
         explicit Animator(const Reference<Skeleton>&);
 
-        GET_SET(Reference<Skeleton>, Skeleton, _skeleton);
+        void Get(const Array<glm::mat4>&) const;
+        void SetSkeleton(const Reference<Skeleton>&);
+        GET_CONST(const Reference<Skeleton>&, Skeleton, _skeleton);
         GET_SET(Reference<Animation>, Animation, _animation);
 
+    protected:
+        GET_CONST(const Array<TransformData>&, Transforms, _transforms);
+
     private:
+        static bool DragDropAcceptor(const Reference<Asset>& asset, const Animator* animator);
+
         Reference<Skeleton> _skeleton;
         Reference<Animation> _animation;
+        Array<TransformData> _transforms;
+        float _time;
     };
 
-    class AnimatedMeshRenderer : public MeshRenderer
+    class AnimatedMeshRenderer final : public MeshRenderer
     {
-        REFLECTABLE_PROTO("AMRE", "gE::AnimatedMeshRenderer", AnimatedMeshRenderer, MeshRenderer);
+        REFLECTABLE_PROTO("gE::AnimatedMeshRenderer", "AMRE", AnimatedMeshRenderer, MeshRenderer);
 
     public:
         AnimatedMeshRenderer(Entity* owner, Animator* animator, const Reference<Mesh>& mesh);
 
-        void OnRender(float delta, Camera* camera) override;
-        API::IVAO& GetVAO() const override { return _vao; }
+        void OnUpdate(float delta) override;
+        API::IVAO& GetVAO() const override;
         void SetMesh(const Reference<Mesh>& mesh) override;
+
+    protected:
+        static bool DragDropAcceptor(const Reference<Asset>& asset, NoUserData);
+        DragDropCompareFunc<Asset> GetDragDropAcceptor() override { return DragDropAcceptor; }
 
     private:
         Pointer<API::IVAO> _vao;
@@ -80,15 +94,17 @@ namespace gE
     class RendererManager : public ComponentManager<MeshRenderer>
     {
     public:
-        explicit RendererManager(Window* window) : ComponentManager(window), _drawCallManager(window) {};
+        explicit RendererManager(Window* window);;
 
         void OnRender(float d, Camera* camera) override;
 
         GET(DrawCallManager&, DrawCallManager, _drawCallManager);
         GET(API::ComputeShader&, SkinningShader, _skinningShader);
+        GET(API::Buffer<glm::mat4>&, Joints, _bonesBuffer);
 
     private:
         DrawCallManager _drawCallManager;
         API::ComputeShader _skinningShader;
+        API::Buffer<glm::mat4> _bonesBuffer;
     };
 }

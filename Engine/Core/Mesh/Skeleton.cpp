@@ -35,7 +35,7 @@ namespace gE
         size_t index = this - &Channel->Frames[0];
 
         const float minTime = index ? Channel->Frames[index - 1].Time + FLT_EPSILON : 0.f;
-        const float maxTime = index + 1 == Channel->Frames.Count() ? FLT_MAX : Channel->Frames[index + 1].Time - FLT_EPSILON;
+        const float maxTime = index + 1 == Channel->Frames.Size() ? FLT_MAX : Channel->Frames[index + 1].Time - FLT_EPSILON;
 
         DrawField<float>(ScalarField{ "Time", "", minTime, maxTime }, Time, depth);
 
@@ -111,7 +111,7 @@ namespace gE
         if(suggestedLocation != (u16) -1 && Bones[suggestedLocation].Name == name)
             return &Bones[suggestedLocation];
 
-        for (u8 i = 0; i < Bones.Count(); ++i)
+        for (u8 i = 0; i < Bones.Size(); ++i)
             if(Bones[i].Name == name) return &Bones[i];
         return nullptr;
     }
@@ -126,6 +126,42 @@ namespace gE
     bool AnimationChannel::Retarget(const Skeleton* skel)
     {
         return Target.Resolve(skel);
+    }
+
+    void AnimationChannel::Get(float time, TransformData& transform) const
+    {
+        if(InterpolationMode == FrameInterpolationMode::Linear)
+            GetLinear(time, transform);
+        else
+            GetStep(time, transform);
+    }
+
+    void AnimationChannel::GetStep(float time, TransformData& transform) const
+    {
+        const Frame* frame = GetFrame(time);
+
+        if(Type == ChannelType::Location)
+            transform.Location = std::get<glm::vec3>(frame->Value);
+        if(Type == ChannelType::Rotation)
+            transform.Rotation = std::get<glm::quat>(frame->Value);
+        if(Type == ChannelType::Scale)
+            transform.Scale = std::get<glm::vec3>(frame->Value);
+    }
+
+    void AnimationChannel::GetLinear(float time, TransformData& transform) const
+    {
+        const Frame* const frame = GetFrame(time);
+        const Frame* const nextFrame = frame + 1 == Frames.end() ? frame : frame + 1;
+
+        float fac = (time - frame->Time) / (nextFrame->Time - frame->Time);
+        if(frame == nextFrame || fac < 0) fac = 0.f;
+
+        if(Type == ChannelType::Location)
+            transform.Location = glm::mix(std::get<glm::vec3>(frame->Value), std::get<glm::vec3>(nextFrame->Value), fac);
+        if(Type == ChannelType::Rotation)
+            transform.Rotation = glm::slerp(std::get<glm::quat>(frame->Value), std::get<glm::quat>(nextFrame->Value), fac);
+        if(Type == ChannelType::Scale)
+            transform.Scale = glm::mix(std::get<glm::vec3>(frame->Value), std::get<glm::vec3>(nextFrame->Value), fac);
     }
 
     void AnimationChannel::IDeserialize(istream& in, SETTINGS_T s)
@@ -168,7 +204,7 @@ namespace gE
         if(suggestedLocation != -1 && Channels[suggestedLocation].Target.Name == name)
             return &Channels[suggestedLocation];
 
-        for (u8 i = 0; i < Channels.Count(); ++i)
+        for (u8 i = 0; i < Channels.Size(); ++i)
             if(Channels[i].Target.Name == name) return &Channels[i];
         return nullptr;
     }
@@ -178,15 +214,26 @@ namespace gE
         if(!skeleton || _skeleton == skeleton) return;
 
         _skeleton = skeleton;
-        for(u8 i = 0; i < Channels.Count(); i++)
+        for(u8 i = 0; i < Channels.Size(); i++)
             Channels[i].Retarget(_skeleton.GetPointer());
     }
 
+    void Animation::Get(float time, const Array<TransformData>& transform) const
+    {
+        if(!_skeleton) return;
+
+        GE_ASSERT(_skeleton->Bones.Size() <= transform.Size());
+        time = glm::mod(glm::abs(time), Length);
+
+        for(const AnimationChannel& channel : Channels)
+            channel.Get(time, transform[channel.Target.Location]);
+    }
+
     REFLECTABLE_ONGUI_IMPL(Animation,
-        DrawField(Field{ "Name" }, Name, depth);
-        DrawField(AssetDragDropField<Skeleton>{ "Skeleton" }, *this, depth, &Animation::GetSkeleton, &Animation::SetSkeleton);
-        DrawField<const float>(ScalarField<float>{ "Length" }, Length, depth);
-        DrawField(ArrayField<Field>{ "Channels" }, Channels, depth);
+       DrawField(Field{ "Name" }, Name, depth);
+       DrawField(AssetDragDropField<Skeleton>{ "Skeleton" }, *this, depth, &Animation::GetSkeleton, &Animation::SetSkeleton);
+       DrawField<const float>(ScalarField<float>{ "Length" }, Length, depth);
+       DrawField(ArrayField<Field>{ "Channels" }, Channels, depth);
     );
     REFLECTABLE_NAME_IMPL(Animation, return Name);
     REFLECTABLE_FACTORY_IMPL(Animation);

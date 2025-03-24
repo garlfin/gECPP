@@ -60,7 +60,7 @@ namespace gE
 
     struct Frame : public Serializable<const AnimationChannel&>
     {
-        SERIALIZABLE_PROTO_NOHEADER("gE::Frame", Frame, Serializable);
+        SERIALIZABLE_PROTO_NOHEADER("gE::Frame", "FRM", Frame, Serializable);
         REFLECTABLE_NAME_PROTO();
 
     public:
@@ -132,8 +132,13 @@ namespace gE
         NODISCARD bool IsFree() const { return Frames.IsFree(); }
         void Free() { Frames.Free(); }
 
+        void Get(float time, TransformData& transform) const;
+        void GetStep(float time, TransformData& transform) const;
+        void GetLinear(float time, TransformData& transform) const;
+
         BoneReference Target = DEFAULT;
         ChannelType Type = DEFAULT;
+        FrameInterpolationMode InterpolationMode = FrameInterpolationMode::Linear;
         Array<Frame> Frames = DEFAULT;
     };
 
@@ -147,6 +152,8 @@ namespace gE
 
         GET_CONST(const Reference<Skeleton>&, Skeleton, _skeleton);
         void SetSkeleton(const Reference<Skeleton>&);
+
+        void Get(float time, const Array<TransformData>& transform) const;
 
         NODISCARD inline bool IsFree() const override { return _skeleton.IsFree() && Channels.IsFree(); }
         inline void Free() override { Name.clear(); _skeleton.Free(); Channels.Free(); }

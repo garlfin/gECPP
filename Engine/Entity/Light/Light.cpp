@@ -49,7 +49,7 @@ namespace gE
 	void LightManager::UseNearestLights(const glm::vec3& point) const
 	{
 		DefaultPipeline::Buffers& buffers = _window->GetPipelineBuffers();
-		GPU::Lighting& lighting = buffers.Lighting;
+		GPU::Lighting& lighting = **buffers.GetLights().GetData();
 
 		lighting.LightCount = List.GetSize();
 
@@ -59,8 +59,8 @@ namespace gE
 		for(ITER_T* light = List.GetFirst(); light; light = light->GetNext(), i++)
 			(**light)->GetGPULight(lighting.Lights[i]);
 
-		buffers.UpdateLighting(sizeof(u32));
-		buffers.UpdateLighting(sizeof(GPU::Light) * lighting.LightCount, offsetof(GPU::Lighting, Lights));
+		buffers.GetLights().UpdateData<u32>(1);
+		buffers.GetLights().UpdateData<GPU::Light>(lighting.LightCount, offsetof(GPU::Lighting, Lights));
 	}
 
 	DirectionalLight::DirectionalLight(Window* w, u16 size, float scale, const glm::quat& rot) :

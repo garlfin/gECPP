@@ -41,13 +41,13 @@ namespace gE
 	void CubemapManager::OnRender(float delta, Camera* camera)
 	{
 		DefaultPipeline::Buffers& buffers = _window->GetPipelineBuffers();
-		GPU::Lighting& lighting = buffers.Lighting;
+		GPU::Lighting& lighting = **buffers.GetLights().GetData();
 
 		GE_ASSERTM((bool) Skybox, "ERROR: NO SKYBOX TEXTURE");
 
 		lighting.Skybox = Skybox->GetHandle();
 
-		buffers.UpdateLighting(sizebetween(GPU::Lighting, Skybox, SkyboxIrradiance), offsetof(GPU::Lighting, Skybox));
+		buffers.GetLights().UpdateData<std::byte>(offsetbetween(GPU::Lighting, Skybox, SkyboxIrradiance), offsetof(GPU::Lighting, Skybox));
 
 		for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())
 			(**i)->GetCamera().OnRender(delta, camera);
@@ -56,31 +56,28 @@ namespace gE
 	void CubemapManager::UseNearestCubemaps(const glm::vec3& point) const
 	{
 		DefaultPipeline::Buffers& buffers = _window->GetPipelineBuffers();
-		GPU::Lighting& lighting = buffers.Lighting;
+		GPU::Lighting& lighting = **buffers.GetLights().GetData();
 
 		lighting.CubemapCount = 1;
 		(**List.GetFirst())->GetGPUCubemap(lighting.Cubemaps[0]);
 
-		buffers.UpdateLighting(sizeof(u32), offsetof(GPU::Lighting, CubemapCount));
-		buffers.UpdateLighting(sizeof(GPU::Cubemap), offsetof(GPU::Lighting, Cubemaps));
+		buffers.GetLights().UpdateData<u32>(1, offsetof(GPU::Lighting, CubemapCount));
+		buffers.GetLights().UpdateData<GPU::Cubemap>(1, offsetof(GPU::Lighting, Cubemaps));
 	}
 
 	void CubemapManager::CreateHarmonic() const
 	{
 		DefaultPipeline::Buffers& buffers = _window->GetPipelineBuffers();
-		GPU::Lighting& lighting = buffers.Lighting;
+		GPU::Lighting& lighting = **buffers.GetLights().GetData();
 
 		GPU::ComputeShader shaderSettings("Resource/Shader/Compute/sh.comp");
 		API::ComputeShader shader(_window, move(shaderSettings));
 		shader.Free();
 
-		GPU::Buffer<ColorHarmonic> bufferSettings(SH_SAMPLE_GROUPS, nullptr);
-		bufferSettings.UsageHint = GPU::BufferUsageHint::Read;
-
+		GPU::Buffer<ColorHarmonic> bufferSettings(SH_SAMPLE_GROUPS, nullptr, sizeof(ColorHarmonic), GPU::BufferUsageHint::Read, true);
 		API::Buffer<ColorHarmonic> buf(_window, move(bufferSettings));
-		buf.Free();
 
-		buf.Bind(GL::BufferTarget::ShaderStorage, 9);
+		buf.Bind(GL::BufferBaseTarget::ShaderStorage, 9);
 		shader.SetUniform(0, Skybox, 0);
 		shader.SetUniform(1, SH_MODE_SAMPLE);
 
@@ -94,7 +91,7 @@ namespace gE
 		shader.Dispatch(1);
 
 		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_UNIFORM_BARRIER_BIT);
-		buf.RetrieveData(&lighting.SkyboxIrradiance);
+		buf.RetrieveData();
 	}
 
 	CubemapManager::CubemapManager(Window* window) : Manager(),

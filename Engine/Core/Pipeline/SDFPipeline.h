@@ -67,12 +67,7 @@ namespace gE::SDFPipeline
 	 public:
 		explicit Buffers(Window* window);
 
-		ALWAYS_INLINE void UpdateScene(u64 size = sizeof(GPU::SDFScene), u64 offset = 0) const
-		{
-			_sdfBuffer.ReplaceDataDirect((std::byte*) &Scene + offset, size, offset);
-		}
-
-		GPU::SDFScene Scene;
+		GET_CONST(const API::Buffer<GPU::SDFScene>&, Scene, _sdfBuffer);
 
 	 private:
 		API::Buffer<GPU::SDFScene> _sdfBuffer;
