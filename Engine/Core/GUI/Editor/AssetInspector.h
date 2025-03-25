@@ -12,6 +12,8 @@
 #include <Core/Serializable/Asset.h>
 #include <SDL3/SDL_dialog.h>
 
+#include "Core/Converter/MeshLoader.h"
+
 namespace gE::Editor
 {
     CONSTEXPR_GLOBAL std::array Filters
@@ -75,5 +77,6 @@ namespace gE::Editor
         Reference<SpriteSheet> _iconSpriteSheet;
         std::map<const Type<gE::Window*>*, Sprite> _icons;
         Sprite _defaultIcon;
+        Model::GLTFImportSettings _gltfImportSettings = DEFAULT;
     };
 }

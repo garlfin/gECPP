@@ -13,6 +13,15 @@
 
 namespace gE::Model
 {
+    struct GLTFImportSettings
+    {
+        float BoneScale = 1.f;
+
+    #ifdef GE_ENABLE_IMGUI
+        void OnEditorGUI(u8 depth);
+    #endif
+    };
+
     struct GLTFResult
     {
         Array<Mesh> Meshes;
@@ -20,6 +29,6 @@ namespace gE::Model
         Array<Animation> Animations;
     };
 
-    void ReadGLTF(Window*, const Path&, GLTFResult& result);
-    void ReadGLTFAsFile(Window*, const std::filesystem::path&, Array<File>& files);
+    void ReadGLTF(Window*, const Path&, const GLTFImportSettings&, GLTFResult&);
+    void ReadGLTFAsFile(Window*, const Path&, const GLTFImportSettings&, Array<File>& files);
 };

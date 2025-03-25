@@ -50,13 +50,13 @@ public:
 
 	OPERATOR_COPY_NOSUPER(Array, Free,
 	{
-		if(!o._size || !o._t) return;
+		_size = o._size;
+
+		if(!_size || !o._t) return;
 
 		gE::Log::Write("WARNING: REALLOCATION! \n\tSIZE: {} bytes\n\tFUNCTION: {}\n", o._size * sizeof(I), PRETTY_FUNCTION);
 
-		_size = o._size;
 		_t = new I[_size];
-
 		if constexpr(std::is_trivially_copyable_v<I>)
 			memcpy(_t, o._t, _size * sizeof(I));
 		else

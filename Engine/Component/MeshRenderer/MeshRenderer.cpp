@@ -96,7 +96,7 @@ namespace gE
 
 	}
 
-	void Animator::Get(const Array<glm::mat4>& matrices) const
+	void Animator::Get(const Array<glm::mat4>& matrices, bool inverse) const
 	{
 		GE_ASSERT(matrices.Size() >= _transforms.Size());
 
@@ -107,16 +107,21 @@ namespace gE
 			return;
 		}
 
-		for(size_t i = 0; i < _transforms.Size(); i++)
+		for(size_t i = 0; i < _skeleton->Bones.Size(); i++)
 			_transforms[i] = _skeleton->Bones[i].Transform;
 
 		if(_animation)
 			_animation->Get(_time, _transforms);
 
-		// underflows to be greater than _transforms.size()
-		// backwards because it appears blender's gltfs store the hierarchy backwards
-		for(size_t i = _transforms.Size() - 1; i < _transforms.Size(); i--)
-			matrices[i] = _skeleton->Bones[i].InverseBindMatrix * _transforms[i].ToMat4();
+		for(size_t i = 0; i < _skeleton->Bones.Size(); i++)
+			if(const Bone* const parent = _skeleton->Bones[i].Parent.Pointer)
+				matrices[i] = matrices[_skeleton->GetIndex(*parent)] * _transforms[i].ToMat4();
+			else
+				matrices[i] = _transforms[i].ToMat4();
+
+		if(inverse)
+			for(size_t i = 0; i < _skeleton->Bones.Size(); i++)
+				matrices[i] = _skeleton->Bones[i].InverseBindMatrix * matrices[i];
 	}
 
 	void Animator::SetSkeleton(const Reference<Skeleton>& skeleton)
@@ -128,13 +133,13 @@ namespace gE
 
 	bool Animator::DragDropAcceptor(const Reference<Asset>& asset, const Animator* animator)
 	{
-		return AssetDragDropAcceptor<Animation>(asset, nullptr) && ((Animation*) asset.GetPointer())->GetSkeleton() == animator->_skeleton;
+		return AssetDragDropAcceptor<Animation>(asset, nullptr) && ((Animation*) asset.GetPointer())->GetSkeleton();
 	}
 
 	REFLECTABLE_ONGUI_IMPL(Animator,
-		DrawField(AssetDragDropField<Animation, Animator>{ "Animation", "", GE_EDITOR_ASSET_PAYLOAD, DragDropAcceptor, this }, _animation, depth);
-		if(DrawField(AssetDragDropField<Skeleton>{ "Skeleton", "", GE_EDITOR_ASSET_PAYLOAD }, *this, depth, &Animator::GetSkeleton, &Animator::SetSkeleton))
-			_animation = DEFAULT;
+		if(DrawField(AssetDragDropField<Animation, Animator>{ "Animation", "", GE_EDITOR_ASSET_PAYLOAD, DragDropAcceptor, this }, _animation, depth))
+			SetSkeleton(_animation->GetSkeleton());
+		DrawField(AssetDragDropField<Skeleton>{ "Skeleton", "", GE_EDITOR_ASSET_PAYLOAD }, *this, depth, &Animator::GetSkeleton, &Animator::SetSkeleton);
 		DrawField(ScalarField{ "Time", "", 0.f }, _time, depth);
 	);
 	REFLECTABLE_FACTORY_NO_IMPL(Animator);
@@ -144,6 +149,23 @@ namespace gE
 	{
 		AnimatedMeshRenderer::SetMesh(mesh);
 		UpdateDrawCalls();
+	}
+
+	void AnimatedMeshRenderer::OnRender(float delta, Camera* camera)
+	{
+#ifdef GE_ENABLE_EDITOR
+		if(GetWindow().RenderState.RenderMode != RenderMode::Fragment) return;
+		if(!GetMesh()->Skeleton || !_enableDebugView) return;
+
+		RendererManager& manager = GetWindow().GetRenderers();
+
+		_animator->Get(manager.GetJoints().GetData(), false);
+		manager.GetJoints().UpdateData();
+
+		glDepthFunc(GL_ALWAYS);
+		manager.GetBoneDebugShader().Bind();
+		manager.GetBoneDebugVAO().Draw(0, (u16) GetMesh()->Skeleton->Bones.Size());
+#endif
 	}
 
 	void AnimatedMeshRenderer::OnUpdate(float delta)
@@ -212,21 +234,24 @@ namespace gE
 	}
 
 	REFLECTABLE_ONGUI_IMPL(AnimatedMeshRenderer,
+		DrawField(Field{ "Enable Debug Skeleton" }, _enableDebugView, depth);
 	);
 	REFLECTABLE_FACTORY_NO_IMPL(AnimatedMeshRenderer);
 
 	RendererManager::RendererManager(Window* window): ComponentManager(window),
 		_drawCallManager(window),
 		_skinningShader(window, GPU::ComputeShader("Resource/Shader/Compute/skinning.comp")),
-		_bonesBuffer(window, GE_MAX_BONES, nullptr, GPU::BufferUsageHint::Dynamic | GPU::BufferUsageHint::Write, true)
+		_bonesBuffer(window, GE_MAX_BONES, nullptr, GPU::BufferUsageHint::Dynamic | GPU::BufferUsageHint::Write, true),
+		_boneDebugVAO(window, BoneDebugVAOFormat),
+		_boneDebugShader(window, GPU::Shader("Resource/Shader/bone.vert", "Resource/Shader/Bone.frag"))
 	{
 		_bonesBuffer.Bind(API::BufferBaseTarget::ShaderStorage, 11);
 	}
 
 	void RendererManager::OnRender(float d, Camera* camera)
 	{
-		IComponentManager::OnRender(d, camera);
 		_drawCallManager.OnRender(d, camera);
+		IComponentManager::OnRender(d, camera);
 	}
 
 	DrawCall::DrawCall(const MeshRenderer& renderer, u8 i) :

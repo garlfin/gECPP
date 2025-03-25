@@ -17,11 +17,6 @@ CONSTEXPR_GLOBAL gltf::Options GLTF_LOAD_OPTIONS = gltf::Options::LoadExternalBu
 
 namespace gE::Model
 {
-    AccessorData GetAccessorData(const gltf::Asset& file, size_t index);
-    PrimitiveData GetAttributeData(const gltf::Asset& file, const gltf::Primitive& prim, std::string_view attribute);
-    PrimitiveData GetIndicesData(const gltf::Asset& file, const gltf::Primitive& prim);
-    ChannelData GetChannelData(const gltf::Asset& file, const gltf::Animation& animation, const gltf::AnimationChannel& channel);
-
     void SetupMeshFields(GPU::VAO& meshOut, size_t vertexCount);
     void SetupMeshFields(GPU::IndexedVAO& meshOut, size_t vertexCount, size_t triCount);
     void SetupMeshWeights(GPU::VAO& meshOut, size_t vertexCount);
@@ -30,11 +25,18 @@ namespace gE::Model
     void ProcessSubmesh(const GPU::IndexedVAO& meshOut, const gltf::Asset& file, const gltf::Mesh& meshIn);
     void ProcessSubmeshWeights(const GPU::VAO& meshOut, const gltf::Asset& file, const gltf::Mesh& meshIn);
     float ProcessChannel(AnimationChannel& channelOut, const gltf::Asset& file, const gltf::Animation& animationIn,
-                        const gltf::AnimationChannel& channelIn);
+                       const gltf::AnimationChannel& channelIn, float scale);
 
     TransformData GetTransformFromNode(const gltf::Node& node);
 
-    void ReadGLTF(Window* window, const Path& path, GLTFResult& result)
+#ifdef GE_ENABLE_IMGUI
+    void GLTFImportSettings::OnEditorGUI(u8 depth)
+    {
+        DrawField(ScalarField{ "Bone Scale", "", FLT_EPSILON }, BoneScale, depth);
+    }
+#endif
+
+    void ReadGLTF(Window* window, const Path& path, const GLTFImportSettings& settings, GLTFResult& result)
     {
         gltf::Expected<gltf::GltfDataBuffer> data = gltf::GltfDataBuffer::FromPath(path);
         if(data.error() != gltf::Error::None)
@@ -126,7 +128,14 @@ namespace gE::Model
 
                 boneOut.Name = boneIn.name;
                 boneOut.Transform = GetTransformFromNode(boneIn);
-                boneOut.InverseBindMatrix = glm::inverse(boneOut.Transform.ToMat4());
+                boneOut.Transform.Position *= settings.BoneScale;
+
+                if(boneOut.Parent)
+                    boneOut.Model = boneOut.Parent->Model * boneOut.Transform.ToMat4();
+                else
+                    boneOut.Model = boneOut.Transform.ToMat4();
+
+                boneOut.InverseBindMatrix = glm::inverse(boneOut.Model);
 
                 for(size_t childIndex : boneIn.children)
                 {
@@ -141,7 +150,7 @@ namespace gE::Model
         }
 
         result.Animations = Array<Animation>(file->animations.size());
-        for (size_t i = 0; i < file->skins.size(); i++)
+        for (size_t i = 0; i < file->animations.size(); i++)
         {
             const gltf::Animation& animationIn = file->animations[i];
             Animation& animationOut = result.Animations[i];
@@ -156,17 +165,17 @@ namespace gE::Model
 
                 if(!channelIn.nodeIndex.has_value()) continue;
 
-                animationOut.Length = std::max(animationOut.Length, ProcessChannel(channelOut, file.get(), animationIn, channelIn));
+                animationOut.Length = std::max(animationOut.Length, ProcessChannel(channelOut, file.get(), animationIn, channelIn, settings.BoneScale));
             }
         }
     }
 
-    void ReadGLTFAsFile(Window* window, const std::filesystem::path& path, Array<File>& files)
+    void ReadGLTFAsFile(Window* window, const std::filesystem::path& path, const GLTFImportSettings& settings, Array<File>& files)
     {
         const Path parentDirectory = path.parent_path();
 
         GLTFResult result;
-        ReadGLTF(window, path, result);
+        ReadGLTF(window, path, settings, result);
 
         files = Array<File>(result.Meshes.Size() + result.Skeletons.Size() + result.Animations.Size());
         size_t fileOffset = 0;
@@ -334,13 +343,15 @@ namespace gE::Model
         const GPU::Buffer<std::byte>& buf = meshOut.IndicesBuffer;
         GE_ASSERT(buf.GetByteSize() % sizeof(Face) == 0);
 
-        size_t offset = 0;
+        size_t indexOffset = 0;
+        size_t vertexOffset = 0;
         for(const gltf::Primitive& submeshIn : meshIn.primitives)
         {
             const PrimitiveData indices = GetIndicesData(file, submeshIn);
+            const PrimitiveData positions = GetAttributeData(file, submeshIn, "POSITION");
             const gltf::Accessor& accessor = *indices->Accessor;
             const gltf::BufferView& bufView = *indices->View;
-            const std::span writeSpan { ((u32*) buf.Data.begin()) + offset, (u32*) buf.Data.end() };
+            const std::span writeSpan { ((u32*) buf.Data.begin()) + indexOffset, (u32*) buf.Data.end() };
             const size_t stride = bufView.byteStride.value_or(gltf::getElementByteSize(accessor.type, accessor.componentType));
 
             GE_ASSERT(submeshIn.type == gltf::PrimitiveType::Triangles);
@@ -355,19 +366,14 @@ namespace gE::Model
                 u32* dst = &writeSpan[i];
 
                 if(accessor.componentType == gltf::ComponentType::UnsignedShort)
-                {
-                    const u16* src = (const u16*) &data->bytes[bufView.byteOffset + accessor.byteOffset + stride * i];
-                    *dst = *src;
-                }
+                    *dst = AccessBuffer<u16>(indices.Accessor, i, stride) + vertexOffset;
                 else if(accessor.componentType == gltf::ComponentType::UnsignedInt)
-                {
-                    const u32* src = (const u32*) &data->bytes[bufView.byteOffset + accessor.byteOffset + stride * i];
-                    *dst = *src;
-                }
+                    *dst = AccessBuffer<u32>(indices.Accessor, i, stride) + vertexOffset;
                 else GE_FAIL("Unsupported index type!");
             }
 
-            offset += accessor.count;
+            indexOffset += accessor.count;
+            vertexOffset += positions->Accessor->count;
         }
     }
 
@@ -394,7 +400,7 @@ namespace gE::Model
     }
 
     float ProcessChannel(AnimationChannel& channelOut, const gltf::Asset& file, const gltf::Animation& animationIn,
-                        const gltf::AnimationChannel& channelIn)
+                        const gltf::AnimationChannel& channelIn, float scale)
     {
         const ChannelData channelData = GetChannelData(file, animationIn, channelIn);
 
@@ -408,7 +414,9 @@ namespace gE::Model
 
             frameOut.Time = AccessBuffer<float>(channelData.Input, i);
 
-            if(channelOut.Type == ChannelType::Location || channelOut.Type == ChannelType::Scale)
+            if(channelOut.Type == ChannelType::Location)
+                frameOut.Value = AccessBuffer<glm::vec3>(channelData.Output, i) * scale;
+            else if(channelOut.Type == ChannelType::Scale)
                 frameOut.Value = AccessBuffer<glm::vec3>(channelData.Output, i);
             else
                 frameOut.Value = AccessBuffer<glm::quat>(channelData.Output, i);

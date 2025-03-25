@@ -83,6 +83,9 @@ namespace gE
         void Set(const Skeleton& skel, std::string_view name);
         void Optimize(const Skeleton* skel);
 
+        Bone* operator->() const { return Pointer; }
+        operator bool() const { return Pointer; }
+
         RelativePointer<Bone> Pointer = DEFAULT;
         u16 Location = -1;
         std::string Name = DEFAULT;
@@ -101,6 +104,7 @@ namespace gE
         BoneReference Parent = DEFAULT;
 
         TransformData Transform = DEFAULT;
+        glm::mat4 Model = DEFAULT;
         glm::mat4 InverseBindMatrix = DEFAULT;
     };
 

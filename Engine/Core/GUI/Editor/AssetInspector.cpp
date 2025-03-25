@@ -21,6 +21,7 @@ namespace gE::Editor
         if(_selected)
         {
             ImGui::TextUnformatted(GetLabel<Asset>(_selected->Get().GetPointer(), "gE::Asset").c_str());
+            ImGui::Text("Path", _selected->GetPath().c_str());
             if(_selected->IsLoaded())
             {
                 Asset& asset = _selected->Get();
@@ -110,12 +111,7 @@ namespace gE::Editor
         if(_loading.Mode == LoadAssetMode::ImportTexture)
             assetManager.AddFile(PVR::ReadAsFile(&GetWindow(), _loading.Path));
         else if(_loading.Mode == LoadAssetMode::ImportMesh)
-        {
-            Array<File> files;
-            Model::ReadGLTFAsFile(&GetWindow(), _loading.Path, files);
-
-            for(File& file : files) assetManager.AddFile(std::move(file));
-        }
+            ImGui::OpenPopup("GLTF Import Settings");
         else if(_loading.Mode == LoadAssetMode::LoadFile)
         {
             const Path extension = _loading.Path.extension();
@@ -155,8 +151,6 @@ namespace gE::Editor
                 SDL_ShowOpenFileDialog((SDL_DialogFileCallback) LoadFileCallback, &_loading, nullptr, nullptr, 0, nullptr, false);
             if(ImGui::Button("Import"))
                 SDL_ShowOpenFileDialog((SDL_DialogFileCallback) ImportFileCallback, &_loading, nullptr, Filters.data(), Filters.size(), nullptr, false);
-
-            //if(ImGui::BeginPopupModal(55))
 
             ImGui::SetNextItemWidth(128.f);
             ImGui::SliderScalar("Icon Size", ImGuiDataType_U16, &_iconSize, &minScale, &maxScale, nullptr, ImGuiSliderFlags_AlwaysClamp);
@@ -218,5 +212,23 @@ namespace gE::Editor
         }
         ImGui::EndTable();
         ImGui::PopStyleVar();
+
+        ImGui::SetNextWindowPos(ImVec2(GetWindow().GetSize() / 2u), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+        ImGui::SetNextWindowSize(ImVec2(GetWindow().GetSize().x / 4u, 0.f));
+        if(ImGui::BeginPopupModal("GLTF Import Settings", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            _gltfImportSettings.OnEditorGUI(0);
+
+            if(ImGui::Button("OK"))
+            {
+                Array<File> files;
+                Model::ReadGLTFAsFile(&GetWindow(), _loading.Path, _gltfImportSettings, files);
+                for(File& file : files)
+                    assetManager.AddFile(std::move(file));
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
+
     }
 }

@@ -9,6 +9,18 @@
 
 namespace GPU
 {
+	GLenum ToGLEnum(PrimitiveType primType)
+	{
+		switch(primType)
+		{
+		case PrimitiveType::Point: return GL_POINTS;
+		case PrimitiveType::Line: return GL_LINES;
+		case PrimitiveType::Triangle: return GL_TRIANGLES;
+		default:
+			assert(false);
+		}
+	}
+
 	void VAO::IDeserialize(istream& in, SETTINGS_T s)
 	{
 		Counts = Read<VAOFieldCounts>(in);

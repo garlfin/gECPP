@@ -9,15 +9,19 @@
 
 namespace gE
 {
-    void Frame::IDeserialize(istream& in, const AnimationChannel& s)
+    void Frame::IDeserialize(istream& in, const AnimationChannel& channel)
     {
-        Channel = s;
+#ifdef GE_ENABLE_IMGUI
+        Channel = channel;
+#endif
 
         Read(in, Time);
-        if(Channel->Type == ChannelType::Location || Channel->Type == ChannelType::Rotation)
+        if(channel.Type == ChannelType::Location || channel.Type == ChannelType::Scale)
             Value = Read<glm::vec3>(in);
-        else
+        else if(channel.Type == ChannelType::Rotation)
             Value = Read<glm::quat>(in);
+        else
+            assert(false);
     }
 
     void Frame::ISerialize(ostream& out) const
@@ -76,7 +80,7 @@ namespace gE
         Read(in, Name);
         ReadSerializable(in, Parent, &s);
         Read(in, Transform);
-        InverseBindMatrix = inverse(Transform.ToMat4());
+        Read(in, InverseBindMatrix);
     }
 
     void Bone::ISerialize(ostream& out) const
@@ -84,6 +88,7 @@ namespace gE
         Write(out, Name);
         Write(out, Parent);
         Write(out, Transform);
+        Write(out, InverseBindMatrix);
     }
 
     REFLECTABLE_ONGUI_IMPL(Bone,
@@ -167,12 +172,14 @@ namespace gE
     void AnimationChannel::IDeserialize(istream& in, SETTINGS_T s)
     {
         ReadSerializable(in, Target, s);
+        Read(in, Type);
         ReadArraySerializable<u16>(in, Frames, *this);
     }
 
     void AnimationChannel::ISerialize(ostream& out) const
     {
         Write(out, Target);
+        Write(out, Type);
         WriteArray<u16>(out, Frames);
     }
 
@@ -209,7 +216,7 @@ namespace gE
         return nullptr;
     }
 
-    void Animation::SetSkeleton(const Reference<gE::Skeleton>& skeleton)
+    void Animation::SetSkeleton(const Reference<Skeleton>& skeleton)
     {
         if(!skeleton || _skeleton == skeleton) return;
 

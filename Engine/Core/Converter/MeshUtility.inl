@@ -28,7 +28,9 @@ namespace gE::Model
     template <class FROM_T>
     FROM_T AccessBuffer(const AccessorData& accessor, size_t index, size_t stride)
     {
-        stride = stride ? stride : accessor.View->byteStride.value_or(gltf::getElementByteSize(accessor.Accessor->type, accessor.Accessor->componentType));
+        if(!stride)
+            stride = accessor.View->byteStride.value_or(gltf::getElementByteSize(accessor.Accessor->type, accessor.Accessor->componentType));
+
         const gltf::sources::Array* data = std::get_if<gltf::sources::Array>(&accessor.Buffer->data);
         GE_ASSERT(data);
 

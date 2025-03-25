@@ -54,7 +54,7 @@ namespace gE
     public:
         explicit Animator(const Reference<Skeleton>&);
 
-        void Get(const Array<glm::mat4>&) const;
+        void Get(const Array<glm::mat4>&, bool inverse = true) const;
         void SetSkeleton(const Reference<Skeleton>&);
         GET_CONST(const Reference<Skeleton>&, Skeleton, _skeleton);
         GET_SET(Reference<Animation>, Animation, _animation);
@@ -68,7 +68,7 @@ namespace gE
         Reference<Skeleton> _skeleton;
         Reference<Animation> _animation;
         Array<TransformData> _transforms;
-        float _time;
+        float _time = DEFAULT;
     };
 
     class AnimatedMeshRenderer final : public MeshRenderer
@@ -78,6 +78,7 @@ namespace gE
     public:
         AnimatedMeshRenderer(Entity* owner, Animator* animator, const Reference<Mesh>& mesh);
 
+        void OnRender(float delta, Camera* camera) override;
         void OnUpdate(float delta) override;
         API::IVAO& GetVAO() const override;
         void SetMesh(const Reference<Mesh>& mesh) override;
@@ -87,24 +88,54 @@ namespace gE
         DragDropCompareFunc<Asset> GetDragDropAcceptor() override { return DragDropAcceptor; }
 
     private:
-        Pointer<API::IVAO> _vao;
-        RelativePointer<Animator> _animator;
+        Pointer<API::IVAO> _vao = DEFAULT;
+        RelativePointer<Animator> _animator = DEFAULT;
+
+#ifdef GE_ENABLE_EDITOR
+        bool _enableDebugView = false;
+#endif
     };
+
+#ifdef DEBUG
+    GLOBAL GPU::VAO BoneDebugVAOFormat = []()
+    {
+        constexpr static glm::vec3 linePoints[2] { glm::vec3(0, 0, 0), glm::vec3(0, 0.01, 0) };
+
+        GPU::VAO vao = DEFAULT;
+
+        vao.PrimitiveType = GPU::PrimitiveType::Line;
+        vao.AddMaterial(GPU::MaterialSlot("", 0, 1));
+        vao.AddBuffer(GPU::Buffer(sizeof(glm::vec3) * 2, (const std::byte*) linePoints, sizeof(glm::vec3)));
+        vao.AddField(GPU::VertexField("POS", GPU::ElementType::Float, false, 0, 0, 3, 0));
+
+        return vao;
+    }();
+#endif
 
     class RendererManager : public ComponentManager<MeshRenderer>
     {
     public:
-        explicit RendererManager(Window* window);;
+        explicit RendererManager(Window* window);
 
         void OnRender(float d, Camera* camera) override;
 
         GET(DrawCallManager&, DrawCallManager, _drawCallManager);
-        GET(API::ComputeShader&, SkinningShader, _skinningShader);
-        GET(API::Buffer<glm::mat4>&, Joints, _bonesBuffer);
+        GET_CONST(const API::ComputeShader&, SkinningShader, _skinningShader);
+        GET_CONST(const API::Buffer<glm::mat4>&, Joints, _bonesBuffer);
+
+#ifdef DEBUG
+        GET_CONST(const API::VAO&, BoneDebugVAO, _boneDebugVAO);
+        GET_CONST(const API::Shader&, BoneDebugShader, _boneDebugShader);
+#endif
 
     private:
         DrawCallManager _drawCallManager;
         API::ComputeShader _skinningShader;
         API::Buffer<glm::mat4> _bonesBuffer;
+
+#ifdef DEBUG
+        API::VAO _boneDebugVAO;
+        API::Shader _boneDebugShader;
+#endif
     };
 }

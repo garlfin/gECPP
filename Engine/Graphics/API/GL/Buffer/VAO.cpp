@@ -60,7 +60,7 @@ namespace GL
 		if(!instanceCount) return;
 		Bind();
 		const GPU::MaterialSlot& material = Materials[index];
-		glDrawArraysInstanced(GL_TRIANGLES, material.Offset * 3, material.Count * 3, instanceCount);
+		glDrawArraysInstanced(ToGLEnum(PrimitiveType), material.Offset * (size_t) PrimitiveType, material.Count * (size_t) PrimitiveType, instanceCount);
 	}
 
 	API_SERIALIZABLE_IMPL(IndexedVAO), IVAO(window, *this)
@@ -76,7 +76,7 @@ namespace GL
 		if(!instanceCount) return;
 		Bind();
 		const GPU::MaterialSlot& material = Materials[index];
-		glDrawElementsInstanced(GL_TRIANGLES, material.Count * 3, IndicesFormat, (void*) (sizeof(u32) * material.Offset * 3), instanceCount);
+		glDrawElementsInstanced(ToGLEnum(PrimitiveType), material.Count * (size_t) PrimitiveType, IndicesFormat, (void*) (sizeof(u32) * material.Offset * (size_t) PrimitiveType), instanceCount);
 	}
 
 	void VAO::Draw(u32 count, const GPU::IndirectDraw* calls) const
@@ -93,9 +93,9 @@ namespace GL
 			const GPU::MaterialSlot& material = Materials[call.Material];
 
 			to.InstanceCount = call.InstanceCount * GetWindow().RenderState.InstanceMultiplier;
-			to.Count = material.Count * 3;
+			to.Count = material.Count * (size_t) PrimitiveType;
 			to.BaseInstance = baseInstance;
-			to.First = material.Offset * 3;
+			to.First = material.Offset * (size_t) PrimitiveType;
 
 			baseInstance += call.InstanceCount;
 		}
@@ -103,14 +103,14 @@ namespace GL
 		drawManager.GetDraws().UpdateData(sizeof(IndirectDrawIndexed) * count);
 
 		Bind();
-		glMultiDrawArraysIndirect(GL_TRIANGLES, nullptr, count, 0);
+		glMultiDrawArraysIndirect(ToGLEnum(PrimitiveType), nullptr, count, 0);
 	}
 
 	void VAO::DrawDirect(u32 count, u32 offset, u32 instanceCount) const
 	{
 		if(!instanceCount) return;
 		Bind();
-		glDrawArraysInstanced(GL_TRIANGLES, offset * 3, count * 3, instanceCount);
+		glDrawArraysInstanced(ToGLEnum(PrimitiveType), offset * (size_t) PrimitiveType, count * (size_t) PrimitiveType, instanceCount);
 	}
 
 	void IndexedVAO::Draw(u32 count, const GPU::IndirectDraw* calls) const
@@ -127,10 +127,10 @@ namespace GL
 			const GPU::MaterialSlot& material = Materials[call.Material];
 
 			to.InstanceCount = call.InstanceCount * GetWindow().RenderState.InstanceMultiplier;
-			to.Count = material.Count * 3;
+			to.Count = material.Count * (size_t) PrimitiveType;
 			to.BaseInstance = baseInstance;
 			to.BaseVertex = 0;
-			to.FirstIndex = material.Offset * 3;
+			to.FirstIndex = material.Offset * (size_t) PrimitiveType;
 
 			baseInstance += call.InstanceCount;
 		}
@@ -138,14 +138,14 @@ namespace GL
 		drawManager.GetDraws().UpdateData<IndirectDrawIndexed>(count);
 
 		Bind();
-		glMultiDrawElementsIndirect(GL_TRIANGLES, IndicesFormat, nullptr, count, 0);
+		glMultiDrawElementsIndirect(ToGLEnum(PrimitiveType), IndicesFormat, nullptr, count, 0);
 	}
 
 	void IndexedVAO::DrawDirect(u32 count, u32 offset, u32 instanceCount) const
 	{
 		if(!instanceCount) return;
 		Bind();
-		glDrawElementsInstanced(GL_TRIANGLES, count * 3, IndicesFormat, (void*) (GLSizeOf(IndicesFormat) * offset), instanceCount);
+		glDrawElementsInstanced(ToGLEnum(PrimitiveType), count * (size_t) PrimitiveType, IndicesFormat, (void*) (GLSizeOf(IndicesFormat) * offset), instanceCount);
 	}
 
 	void IndexedVAO::UpdateIndicesDirect(std::span<std::byte> data, size_t offset) const

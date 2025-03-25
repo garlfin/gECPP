@@ -14,6 +14,8 @@
 #include <Entity/Light/DirectionalLight.h>
 #include <Entity/Light/PointLight.h>
 
+#include "Core/Converter/MeshLoader.h"
+
 using namespace gE::VoxelDemo;
 
 void DemoWindow::OnInit()

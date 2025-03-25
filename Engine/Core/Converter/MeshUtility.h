@@ -74,8 +74,12 @@ namespace gE::Model
 
 	NODISCARD inline glm::i8vec3 ConvertNormal(const glm::vec3& normal) noexcept;
 	NODISCARD inline glm::i8vec4 ConvertTangent(const glm::vec4& normal) noexcept;
-
 	NODISCARD inline glm::u8vec4 ConvertWeight(const glm::vec4& weight) noexcept;
+
+	AccessorData GetAccessorData(const gltf::Asset& file, size_t index);
+	PrimitiveData GetAttributeData(const gltf::Asset& file, const gltf::Primitive& prim, std::string_view attribute);
+	PrimitiveData GetIndicesData(const gltf::Asset& file, const gltf::Primitive& prim);
+	ChannelData GetChannelData(const gltf::Asset& file, const gltf::Animation& animation, const gltf::AnimationChannel& channel);
 }
 
 #include "MeshUtility.inl"

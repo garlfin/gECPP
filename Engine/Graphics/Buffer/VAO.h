@@ -33,6 +33,15 @@ namespace GPU
 		u8 LOD;
 	};
 
+	enum class PrimitiveType
+	{
+		Point = 1,
+		Line = 2,
+		Triangle = 3,
+	};
+
+	NODISCARD GLenum ToGLEnum(PrimitiveType primType);
+
 	class VAO : public gE::Asset
 	{
 		SERIALIZABLE_PROTO("GPU::VAO", "VAO", 1, VAO, Asset);
@@ -42,10 +51,12 @@ namespace GPU
 		MaterialSlot Materials[GE_MAX_VAO_MATERIAL];
 		VertexField Fields[GE_MAX_VAO_FIELD];
 		Buffer<std::byte> Buffers[GE_MAX_VAO_BUFFER];
+		PrimitiveType PrimitiveType = PrimitiveType::Triangle;
 
 		void Free() override { for(Buffer<std::byte>& buffer : Buffers) buffer.Free(); };
 		void AddField(const VertexField& field) { GE_ASSERT(Counts.FieldCount < GE_MAX_VAO_FIELD); Fields[Counts.FieldCount++] = field; }
 		void AddBuffer(Buffer<std::byte>&& buf) { GE_ASSERT(Counts.BufferCount < GE_MAX_VAO_BUFFER); Buffers[Counts.BufferCount++] = buf; }
+		void AddMaterial(MaterialSlot&& material) { GE_ASSERT(Counts.BufferCount < GE_MAX_VAO_MATERIAL); Materials[Counts.MaterialCount++] = material; }
 
 		NODISCARD bool IsFree() const override
 		{
