@@ -59,11 +59,11 @@ void main()
 	ParallaxEffectSettings parallaxSettings = ParallaxEffectSettings(0.5f, POM_MIN_LAYER, POM_MAX_LAYER, 0.0, 0.5);
 
     vec3 viewDir = normalize(Camera.Position - VertexIn.FragPos);
-    vec2 uv = ParallaxMapping(viewDir, ARMDTex, vert, parallaxSettings);
+    vert.UV = ParallaxMapping(viewDir, ARMDTex, vert, parallaxSettings);
 
-    vec3 albedo = texture(AlbedoTex, uv).rgb;
-    vec3 armd = texture(ARMDTex, uv * vec2(1, -1)).rgb;
-    vec3 normal = texture(NormalTex, uv).rgb;
+    vec3 albedo = texture(AlbedoTex, vert.UV).rgb;
+    vec3 armd = texture(ARMDTex, vert.UV * vec2(1, -1)).rgb;
+    vec3 normal = texture(NormalTex, vert.UV).rgb;
 
 	normal = normal * 2.0 - 1.0;
     normal = normalize(VertexIn.TBN * normal);

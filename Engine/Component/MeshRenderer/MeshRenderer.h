@@ -10,6 +10,7 @@
 #include <Graphics/Buffer/VAO.h>
 
 #include "DrawCall.h"
+#include "Core/Pipeline/Buffers.h"
 
 namespace gE
 {
@@ -33,6 +34,7 @@ namespace gE
         void SetNullMaterial(u8 i);
 
         virtual API::IVAO& GetVAO() const { return _mesh->VAO; }
+        virtual GPU::ObjectFlags GetFlags() const { return DEFAULT; }
 
         friend class RendererManager;
 
@@ -81,12 +83,15 @@ namespace gE
 
         void OnRender(float delta, Camera* camera) override;
         void OnUpdate(float delta) override;
+
         API::IVAO& GetVAO() const override;
+        GPU::ObjectFlags GetFlags() const override;
         void SetMesh(const Reference<Mesh>& mesh) override;
 
     protected:
         static bool DragDropAcceptor(const Reference<Asset>& asset, NoUserData);
         DragDropCompareFunc<Asset> GetDragDropAcceptor() override { return DragDropAcceptor; }
+        static void AddPreviousPositionField(GPU::VAO& vao, size_t vertexCount);
 
     private:
         Pointer<API::IVAO> _vao = DEFAULT;

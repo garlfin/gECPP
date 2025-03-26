@@ -104,7 +104,6 @@ namespace gE
         BoneReference Parent = DEFAULT;
 
         TransformData Transform = DEFAULT;
-        glm::mat4 Model = DEFAULT;
         glm::mat4 InverseBindMatrix = DEFAULT;
     };
 

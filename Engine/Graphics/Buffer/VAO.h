@@ -9,8 +9,6 @@
 #include "Buffer.h"
 #include "VAOSettings.h"
 
-#define API_MAX_MULTI_DRAW 8
-
 namespace GL
 {
 	class VAO;

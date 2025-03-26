@@ -1,7 +1,7 @@
 #include "Bindless.glsl"
 #include "SphericalHarmonics.glsl"
 
-#define INT_CEIL(X, Y) (((X) + (Y) - 1) / (Y))
+#define DIV_CEIL(X, Y) (((X) + (Y) - 1) / (Y))
 
 #extension GL_ARB_shader_draw_parameters : require
 #extension GL_ARB_gpu_shader_int64 : enable
@@ -45,12 +45,13 @@ struct ObjectInfo
     mat4 Model;
     mat4 PreviousModel;
     mat3 Normal;
+    uint Flags;
 };
 
 struct SceneData
 {
     uint State;
-    uvec4 InstanceCount[INT_CEIL(MAX_MULTI_DRAW, 4)];
+    uvec4 InstanceCount[DIV_CEIL(MAX_MULTI_DRAW, 4)];
     ObjectInfo Objects[MAX_OBJECTS];
 };
 
@@ -114,6 +115,8 @@ layout(LIGHT_UNIFORM_LAYOUT, binding = LIGHT_UNIFORM_LOCATION) uniform LightingU
 
 #define RASTER_MODE_NORMAL 0
 #define RASTER_MODE_CONSERVATIVE 1
+
+#define OBJECT_FLAG_DYNAMIC 1 == 1
 
 const uint Scene_RenderMode = Scene.State & 2;
 const uint Scene_WriteMode = Scene.State >> 2 & 2;

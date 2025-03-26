@@ -122,6 +122,7 @@ namespace gE::Model
             skeletonOut.Name = skeletonIn.name;
             skeletonOut.Bones = Array<Bone>(skeletonIn.joints.size());
 
+            Array<glm::mat4> modelMatrices = Array<glm::mat4>(skeletonIn.joints.size());
             for(size_t b = 0; b < skeletonIn.joints.size(); b++)
             {
                 const gltf::Node& boneIn = file->nodes[skeletonIn.joints[b]];
@@ -132,11 +133,11 @@ namespace gE::Model
                 boneOut.Transform.Position *= settings.BoneScale;
 
                 if(boneOut.Parent)
-                    boneOut.Model = boneOut.Parent->Model * boneOut.Transform.ToMat4();
+                    modelMatrices[b] = modelMatrices[skeletonOut.GetIndex(boneOut.Parent.Pointer)] * boneOut.Transform.ToMat4();
                 else
-                    boneOut.Model = boneOut.Transform.ToMat4();
+                    modelMatrices[b] = boneOut.Transform.ToMat4();
 
-                boneOut.InverseBindMatrix = glm::inverse(boneOut.Model);
+                boneOut.InverseBindMatrix = glm::inverse(modelMatrices[b]);
 
                 for(size_t childIndex : boneIn.children)
                 {
@@ -277,9 +278,6 @@ namespace gE::Model
     void SetupMeshWeights(GPU::VAO& meshOut, size_t vertexCount)
     {
         meshOut.AddBuffer(GPU::Buffer<std::byte>(vertexCount * sizeof(VertexWeight), nullptr, sizeof(VertexWeight)));
-
-        meshOut.AddField(BONES_FIELD);
-        meshOut.AddField(WEIGHTS_FIELD);
     }
 
     void SetupMeshMaterials(GPU::VAO& meshOut, const gltf::Asset& file, const gltf::Mesh& mesh)

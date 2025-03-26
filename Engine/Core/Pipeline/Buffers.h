@@ -8,12 +8,12 @@
 
 #include <Core/WindowState.h>
 #include <Core/Math/Math.h>
-#include <Graphics/Buffer/VAO.h>
 #include <Graphics/Texture/Texture.h>
 
 #define API_MAX_INSTANCE 64
 #define API_MAX_LIGHT 4
 #define API_MAX_CUBEMAP 4
+#define API_MAX_MULTI_DRAW 8
 
 namespace GPU
 {
@@ -71,11 +71,17 @@ namespace GPU
         GPU_ALIGN handle Color;
     };
 
+    struct ObjectFlags
+    {
+        bool IsDynamic : 1 = 0;
+    };
+
     struct ObjectInfo
     {
         glm::mat4 Model;
         glm::mat4 PreviousModel;
         glm::mat3x4 Normal;
+        GPU_ALIGN ObjectFlags Flags = DEFAULT;
     };
 
     struct Scene

@@ -54,6 +54,7 @@ namespace gE
 		NODISCARD ALWAYS_INLINE const glm::mat4& PreviousRenderModel() const { return _previousModel; }
 
 		NODISCARD ALWAYS_INLINE const TransformData* operator->() const { return &_transform; }
+		NODISCARD ALWAYS_INLINE const TransformData& operator*() const { return _transform; }
 
 		GET_CONST(const TransformData&, GlobalTransform, _globalTransform);
 		GET_CONST(TransformFlags, Flags, _flags);

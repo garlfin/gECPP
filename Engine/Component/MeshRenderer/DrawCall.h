@@ -6,6 +6,7 @@
 
 #include <Core/Manager.h>
 #include <Core/Math/Math.h>
+#include <Engine/Core/Pipeline/Buffers.h>
 #include <Graphics/Buffer/Buffer.h>
 
 namespace gE
@@ -38,6 +39,8 @@ namespace gE
 		GET_CONST(u8, MaterialIndex, _materialIndex);
 		GET_CONST(u8, LOD, _lod);
 
+		GET_SET(GPU::ObjectFlags, Flags, _flags);
+
 		bool operator<(const DrawCall& b) const;
 
 		~DrawCall();
@@ -50,6 +53,8 @@ namespace gE
 		Material* _material = nullptr;
 		u8 _materialIndex = 0;
 		u8 _lod = 0;
+
+		GPU::ObjectFlags _flags = DEFAULT;
 	};
 
 	class DrawCallManager final

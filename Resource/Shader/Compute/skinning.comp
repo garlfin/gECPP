@@ -8,8 +8,8 @@ struct PackedVertex
 {
     vec3 Position;
     vec2 UV;
-    u8vec3 Normal;
-    u8vec4 Tangent;
+    i8vec3 Normal;
+    i8vec4 Tangent;
 };
 
 struct Vertex
@@ -40,24 +40,29 @@ ivec4 UnpackIVec4(uint);
 uint PackIVec4(ivec4);
 uvec4 UnpackUVec4(uint);
 
-layout(std430, binding = 9) restrict readonly buffer VerticesInBuf
+layout(std430, binding = 9) restrict readonly buffer VerticesInUniform
 {
     PackedVertex VerticesIn[];
 };
 
-layout(std430, binding = 10) restrict readonly buffer WeightsInBuf
+layout(std430, binding = 10) restrict readonly buffer WeightsInUniform
 {
     PackedVertexWeight WeightsIn[];
 };
 
-layout(std430, binding = 11) restrict readonly buffer JointsInBuf
+layout(std430, binding = 11) restrict readonly buffer JointsInUniform
 {
     mat4 JointsIn[256];
 };
 
-layout(std430, binding = 12) restrict writeonly buffer VerticesOutBuf
+layout(std430, binding = 12) restrict buffer VerticesOutUniform
 {
     PackedVertex VerticesOut[];
+};
+
+layout(std430, binding = 13) restrict writeonly buffer PreviousPositionsOutUniform
+{
+    vec3 PreviousPositionsOut[];
 };
 
 layout(local_size_x = 32) in;
@@ -70,6 +75,8 @@ void main()
                       JointsIn[weight.IDs[1]] * weight.Weights[1] +
                       JointsIn[weight.IDs[2]] * weight.Weights[2] +
                       JointsIn[weight.IDs[3]] * weight.Weights[3];
+
+    PreviousPositionsOut[gl_GlobalInvocationID.x] = UnpackVertex(VerticesOut[gl_GlobalInvocationID.x]).Position;
 
     vertex.Position    = vec3(skinMatrix * vec4(vertex.Position, 1.0));
     vertex.Normal      = normalize(vec3(skinMatrix * vec4(vertex.Normal, 0.0)));
@@ -95,8 +102,8 @@ PackedVertex PackVertex(Vertex vertex)
     (
         vertex.Position,
         vertex.UV,
-        u8vec3(round(vertex.Normal * INT8_MAX)),
-        u8vec4(round(vertex.Tangent * INT8_MAX))
+        i8vec3(round(vertex.Normal * INT8_MAX)),
+        i8vec4(round(vertex.Tangent * INT8_MAX))
     );
 }
 

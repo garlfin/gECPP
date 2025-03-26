@@ -6,9 +6,15 @@ layout(std430, binding = 11) restrict readonly buffer JointsInBuf
 };
 
 #include "Include/Camera.glsl"
+#include "Include/Scene.glsl"
 
 void main()
 {
     mat4 viewProjection = Camera.Projection * Camera.View[0];
-    gl_Position = viewProjection * JointsIn[gl_InstanceID] * vec4(Position, 1.0);
+    mat4 model = Scene.Objects[0].Model;
+
+    vec3 position = Position;
+    if(gl_VertexID == 1) position.y /= length(model[1].xyz);
+
+    gl_Position = viewProjection * model * JointsIn[gl_InstanceID] * vec4(position, 1.0);
 }

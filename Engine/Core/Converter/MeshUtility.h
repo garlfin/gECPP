@@ -92,8 +92,8 @@ namespace gE::Model
 	GLOBAL GPU::VertexField NORMAL_FIELD = CreateField(&Vertex::Normal, "NOR", 2, 0);
 	GLOBAL GPU::VertexField TANGENT_FIELD = CreateField(&Vertex::Tangent, "TAN", 3, 0);
 
-	GLOBAL GPU::VertexField BONES_FIELD = CreateField(&VertexWeight::Bones, "BONE", 3, 1);
-	GLOBAL GPU::VertexField WEIGHTS_FIELD = CreateField(&VertexWeight::Weights, "WGHT", 3, 1);
+	GLOBAL GPU::VertexField BONES_FIELD = CreateField(&VertexWeight::Bones, "BONE", 5, 1);
+	GLOBAL GPU::VertexField WEIGHTS_FIELD = CreateField(&VertexWeight::Weights, "WGHT", 6, 1);
 
 	GLOBAL GPU::VertexField INDICES_FIELD = CreateField(&Face::Triangle, "TRI", 0, 1);
 }

@@ -79,14 +79,13 @@ namespace gE
 	}
 
 	REFLECTABLE_ONGUI_IMPL(MeshRenderer,
-	   const size_t materialCount = _mesh->VAO->GetSettings().Counts.MaterialCount;
+		const size_t materialCount = _mesh->VAO->GetSettings().Counts.MaterialCount;
 
-	   DrawField(AssetDragDropField<Mesh>{ "Mesh", "", GE_EDITOR_ASSET_PAYLOAD, GetDragDropAcceptor() }, *this, depth, GetMesh, SetMesh);
-	   const size_t changed = DrawField(ArrayField<AssetDragDropField<Material>>{ "Materials" },
-	       _materials.Data(), materialCount, depth);
+		DrawField(AssetDragDropField<Mesh>{ "Mesh", "", GE_EDITOR_ASSET_PAYLOAD, GetDragDropAcceptor() }, *this, depth, GetMesh, SetMesh);
+		const size_t changed = DrawField(ArrayField<AssetDragDropField<Material>>{ "Materials" }, _materials.Data(), materialCount, depth);
 
-	   if(changed != materialCount)
-	   UpdateDrawCall(changed);
+		if(changed != materialCount)
+			UpdateDrawCall(changed);
 	)
 	REFLECTABLE_FACTORY_NO_IMPL(MeshRenderer);
 
@@ -157,10 +156,14 @@ namespace gE
 		if(GetWindow().RenderState.RenderMode != RenderMode::Fragment) return;
 		if(!GetMesh()->Skeleton || !_enableDebugView) return;
 
-		RendererManager& manager = GetWindow().GetRenderers();
+		const RendererManager& manager = GetWindow().GetRenderers();
+		const DefaultPipeline::Buffers& buffers = GetWindow().GetPipelineBuffers();
 
 		_animator->Get(manager.GetJoints().GetData(), false);
-		manager.GetJoints().UpdateData();
+		manager.GetJoints().UpdateData(GetMesh()->Skeleton->Bones.Size());
+
+		buffers.GetScene().GetData()[0].Objects[0] = GPU::ObjectInfo{ GetOwner().GetTransform().Model() };
+		buffers.GetScene().UpdateData<GPU::ObjectInfo>(1, offsetof(GPU::Scene, Objects));
 
 		glDepthFunc(GL_ALWAYS);
 		manager.GetBoneDebugShader().Bind();
@@ -180,16 +183,18 @@ namespace gE
 		const API::Buffer<std::byte>& vertices = vao.GetBuffer(0);
 		const API::Buffer<std::byte>& weights = vao.GetBuffer(1);
 		const API::Buffer<std::byte>& verticesOut = _vao->GetBuffer(0);
+		const API::Buffer<std::byte>& previousPositionOut = _vao->GetBuffer(1);
 
 		const size_t vertexCount = vertices->GetSize() / sizeof(Model::Vertex);
 
 		vertices.Bind(GL::BufferBaseTarget::ShaderStorage, 9);
 		weights.Bind(GL::BufferBaseTarget::ShaderStorage, 10);
 		verticesOut.Bind(GL::BufferBaseTarget::ShaderStorage, 12);
+		previousPositionOut.Bind(GL::BufferBaseTarget::ShaderStorage, 13);
 
 		_animator->SetTime(_animator->GetTime() + delta);
 		_animator->Get(jointBuf);
-		manager.GetJoints().UpdateData();
+		manager.GetJoints().UpdateData(GetMesh()->Skeleton->Bones.Size());
 
 		skinningShader.Dispatch(DIV_CEIL(vertexCount, 32));
 	}
@@ -199,6 +204,14 @@ namespace gE
 		if(GetMesh()->Skeleton)
 			return _vao;
 		return MeshRenderer::GetVAO();
+	}
+
+	GPU::ObjectFlags AnimatedMeshRenderer::GetFlags() const
+	{
+		return
+		{
+			GetMesh()->Skeleton && _animator->GetSkeleton()
+		};
 	}
 
 	void AnimatedMeshRenderer::SetMesh(const Reference<Mesh>& mesh)
@@ -212,13 +225,21 @@ namespace gE
 			Log::Write("Warning: Mesh not freed before use in AnimatedMeshRenderer\n");
 
 		if(dynamic_cast<API::VAO*>(mesh->VAO.GetPointer()))
-			_vao = ptr_create<API::VAO>(&GetWindow(), meshVao->GetSettings());
+		{
+			GPU::VAO settings = meshVao->GetSettings();
+			AddPreviousPositionField(settings, settings.Buffers[0].GetSize() / sizeof(Model::Vertex));
+
+			_vao = ptr_create<API::VAO>(&GetWindow(), move(settings));
+		}
 		else
 		{
 			const API::IndexedVAO& meshIndexedVao = (API::IndexedVAO&) meshVao->GetSettings();
 			const API::Buffer<std::byte>& meshIndices = meshIndexedVao.GetIndices();
 
-			Pointer<API::IndexedVAO> vao = ptr_create<API::IndexedVAO>(&GetWindow(), meshIndexedVao.GetSettings());
+			GPU::IndexedVAO settings = meshIndexedVao.GetSettings();
+			AddPreviousPositionField(settings, settings.Buffers[0].GetSize() / sizeof(Model::Vertex));
+
+			Pointer<API::IndexedVAO> vao = ptr_create<API::IndexedVAO>(&GetWindow(), move(settings));
 
 			if(meshIndices.IsFree())
 				glCopyNamedBufferSubData(meshIndices.Get(), vao->GetIndices().Get(), 0, 0, meshIndices->GetByteSize());
@@ -234,8 +255,16 @@ namespace gE
 		return AssetDragDropAcceptor<Mesh>(asset, userData) && ((Mesh*) asset.GetPointer())->Skeleton;
 	}
 
+	void AnimatedMeshRenderer::AddPreviousPositionField(GPU::VAO& vao, size_t vertexCount)
+	{
+		constexpr static GPU::VertexField previousPositionField { "PVRP", GPU::ElementType::Float, false, 1, 4, 3, 0};
+
+		vao.AddField(previousPositionField);
+		vao.Buffers[1] = GPU::Buffer<std::byte>(sizeof(glm::vec4) * vertexCount, nullptr, sizeof(glm::vec4), GPU::BufferUsageHint::Dynamic, false);
+	}
+
 	REFLECTABLE_ONGUI_IMPL(AnimatedMeshRenderer,
-		DrawField(Field{ "Enable Debug Skeleton" }, _enableDebugView, depth);
+	    DrawField(Field{ "Enable Debug Skeleton" }, _enableDebugView, depth);
 	);
 	REFLECTABLE_FACTORY_NO_IMPL(AnimatedMeshRenderer);
 
@@ -259,7 +288,8 @@ namespace gE
 		_transform(&renderer.GetOwner().GetTransform()),
 		_material(renderer.GetMaterial(i)),
 		_materialIndex(i),
-		_lod(0)
+		_lod(0),
+		_flags(renderer.GetFlags())
 	{
 		if(i >= renderer.GetMesh()->VAO->GetSettings().Counts.MaterialCount) return;
 
@@ -304,6 +334,7 @@ namespace gE
 			object.Model = draw->GetTransform().Model();
 			object.PreviousModel = draw->GetTransform().PreviousRenderModel();
 			object.Normal = glm::transpose(glm::inverse(draw->GetTransform().Model()));
+			object.Flags = draw->GetFlags();
 
 			instanceCount++;
 			batchInstanceCount++;
