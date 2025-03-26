@@ -16,6 +16,7 @@ namespace gE::Model
     struct GLTFImportSettings
     {
         float BoneScale = 1.f;
+        bool FlipTangents = false;
 
     #ifdef GE_ENABLE_IMGUI
         void OnEditorGUI(u8 depth);

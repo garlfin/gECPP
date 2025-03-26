@@ -21,8 +21,8 @@ namespace gE::Model
     void SetupMeshFields(GPU::IndexedVAO& meshOut, size_t vertexCount, size_t triCount);
     void SetupMeshWeights(GPU::VAO& meshOut, size_t vertexCount);
     void SetupMeshMaterials(GPU::VAO& meshOut, const gltf::Asset& file, const gltf::Mesh& mesh);
-    void ProcessSubmesh(const GPU::VAO& meshOut, const gltf::Asset& file, const gltf::Mesh& meshIn);
-    void ProcessSubmesh(const GPU::IndexedVAO& meshOut, const gltf::Asset& file, const gltf::Mesh& meshIn);
+    void ProcessSubmesh(const GPU::VAO& meshOut, const gltf::Asset& file, const gltf::Mesh& meshIn, const GLTFImportSettings& settings);
+    void ProcessSubmesh(const GPU::IndexedVAO& meshOut, const gltf::Asset& file, const gltf::Mesh& meshIn, const GLTFImportSettings& settings);
     void ProcessSubmeshWeights(const GPU::VAO& meshOut, const gltf::Asset& file, const gltf::Mesh& meshIn);
     float ProcessChannel(AnimationChannel& channelOut, const gltf::Asset& file, const gltf::Animation& animationIn,
                        const gltf::AnimationChannel& channelIn, float scale);
@@ -33,6 +33,7 @@ namespace gE::Model
     void GLTFImportSettings::OnEditorGUI(u8 depth)
     {
         DrawField(ScalarField{ "Bone Scale", "", FLT_EPSILON }, BoneScale, depth);
+        DrawField(Field{ "Flip Tangent", "" }, FlipTangents, depth);
     }
 #endif
 
@@ -84,7 +85,7 @@ namespace gE::Model
 
                 SetupMeshMaterials(meshSettings, file.get(), meshIn);
                 SetupMeshFields(meshSettings, vertexCount, indexCount / 3);
-                ProcessSubmesh(meshSettings, file.get(), meshIn);
+                ProcessSubmesh(meshSettings, file.get(), meshIn, settings);
 
                 if(hasWeights)
                 {
@@ -100,7 +101,7 @@ namespace gE::Model
 
                 SetupMeshMaterials(meshSettings, file.get(), meshIn);
                 SetupMeshFields(meshSettings, vertexCount);
-                ProcessSubmesh(meshSettings, file.get(), meshIn);
+                ProcessSubmesh(meshSettings, file.get(), meshIn, settings);
 
                 if(hasWeights)
                 {
@@ -310,7 +311,7 @@ namespace gE::Model
         }
     }
 
-    void ProcessSubmesh(const GPU::VAO& meshOut, const gltf::Asset& file, const gltf::Mesh& meshIn)
+    void ProcessSubmesh(const GPU::VAO& meshOut, const gltf::Asset& file, const gltf::Mesh& meshIn, const GLTFImportSettings& settings)
     {
         const GPU::Buffer<std::byte>& buf = meshOut.Buffers[0];
         GE_ASSERT(buf.GetByteSize() % sizeof(Vertex) == 0);
@@ -330,15 +331,15 @@ namespace gE::Model
             GE_MODEL_CHECK_ATTR(POSITION_FIELD, position, (ConversionFunc<glm::vec3, glm::vec3>) nullptr);
             GE_MODEL_CHECK_ATTR(UV_FIELD, uv, (ConversionFunc<glm::vec2, glm::vec2>) nullptr);
             GE_MODEL_CHECK_ATTR(NORMAL_FIELD, normal, ConvertNormal);
-            GE_MODEL_CHECK_ATTR(TANGENT_FIELD, tangent, ConvertTangent);
+            GE_MODEL_CHECK_ATTR(TANGENT_FIELD, tangent, settings.FlipTangents ? ConvertTangentFlipped : ConvertTangent);
 
             offset += position->Accessor->count;
         }
     }
 
-    void ProcessSubmesh(const GPU::IndexedVAO& meshOut, const gltf::Asset& file, const gltf::Mesh& meshIn)
+    void ProcessSubmesh(const GPU::IndexedVAO& meshOut, const gltf::Asset& file, const gltf::Mesh& meshIn, const GLTFImportSettings& settings)
     {
-        ProcessSubmesh((GPU::VAO&) meshOut, file, meshIn);
+        ProcessSubmesh((GPU::VAO&) meshOut, file, meshIn, settings);
 
         const GPU::Buffer<std::byte>& buf = meshOut.IndicesBuffer;
         GE_ASSERT(buf.GetByteSize() % sizeof(Face) == 0);

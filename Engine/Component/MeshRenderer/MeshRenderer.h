@@ -58,6 +58,7 @@ namespace gE
         void SetSkeleton(const Reference<Skeleton>&);
         GET_CONST(const Reference<Skeleton>&, Skeleton, _skeleton);
         GET_SET(Reference<Animation>, Animation, _animation);
+        GET_SET(float, Time, _time);
 
     protected:
         GET_CONST(const Array<TransformData>&, Transforms, _transforms);
@@ -99,7 +100,7 @@ namespace gE
 #ifdef DEBUG
     GLOBAL GPU::VAO BoneDebugVAOFormat = []()
     {
-        constexpr static glm::vec3 linePoints[2] { glm::vec3(0, 0, 0), glm::vec3(0, 0.01, 0) };
+        constexpr static glm::vec3 linePoints[2] { glm::vec3(0, 0, 0), glm::vec3(0, 0.1, 0) };
 
         GPU::VAO vao = DEFAULT;
 

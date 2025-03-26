@@ -121,7 +121,7 @@ namespace gE
 
 		if(inverse)
 			for(size_t i = 0; i < _skeleton->Bones.Size(); i++)
-				matrices[i] = _skeleton->Bones[i].InverseBindMatrix * matrices[i];
+				matrices[i] = matrices[i] * _skeleton->Bones[i].InverseBindMatrix;
 	}
 
 	void Animator::SetSkeleton(const Reference<Skeleton>& skeleton)
@@ -129,7 +129,7 @@ namespace gE
 		_skeleton = skeleton;
 		if(_transforms.Size() != _skeleton->Bones.Size())
 			_transforms = Array<TransformData>(_skeleton->Bones.Size());
-	};
+	}
 
 	bool Animator::DragDropAcceptor(const Reference<Asset>& asset, const Animator* animator)
 	{
@@ -187,6 +187,7 @@ namespace gE
 		weights.Bind(GL::BufferBaseTarget::ShaderStorage, 10);
 		verticesOut.Bind(GL::BufferBaseTarget::ShaderStorage, 12);
 
+		_animator->SetTime(_animator->GetTime() + delta);
 		_animator->Get(jointBuf);
 		manager.GetJoints().UpdateData();
 

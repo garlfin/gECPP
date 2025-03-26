@@ -84,11 +84,14 @@ namespace gE::Model
     inline glm::i8vec4 ConvertTangent(const glm::vec4& normal) noexcept
     {
         glm::vec4 vec = clamp(normal, glm::vec4(-1.f), glm::vec4(1.f));
+        vec.w = 1.f;
+        return vec * glm::vec4(INT8_MAX);
+    }
 
-#ifdef GE_MODEL_FLIP_HANDEDNESS
-        vec.w *= -1.f;
-#endif
-
+    inline glm::i8vec4 ConvertTangentFlipped(const glm::vec4& normal) noexcept
+    {
+        glm::vec4 vec = clamp(normal, glm::vec4(-1.f), glm::vec4(1.f));
+        vec.w = -1.f;
         return vec * glm::vec4(INT8_MAX);
     }
 

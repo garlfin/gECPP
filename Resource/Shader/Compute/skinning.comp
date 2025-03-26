@@ -72,8 +72,8 @@ void main()
                       JointsIn[weight.IDs[3]] * weight.Weights[3];
 
     vertex.Position    = vec3(skinMatrix * vec4(vertex.Position, 1.0));
-    vertex.Normal      = vec3(skinMatrix * vec4(vertex.Normal, 1.0));
-    vertex.Tangent.xyz = vec3(skinMatrix * vec4(vertex.Tangent.xyz, 1.0));
+    vertex.Normal      = normalize(vec3(skinMatrix * vec4(vertex.Normal, 0.0)));
+    vertex.Tangent.xyz = normalize(vec3(skinMatrix * vec4(vertex.Tangent.xyz, 0.0)));
 
     VerticesOut[gl_GlobalInvocationID.x] = PackVertex(vertex);
 }

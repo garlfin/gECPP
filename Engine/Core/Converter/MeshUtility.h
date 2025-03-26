@@ -74,6 +74,7 @@ namespace gE::Model
 
 	NODISCARD inline glm::i8vec3 ConvertNormal(const glm::vec3& normal) noexcept;
 	NODISCARD inline glm::i8vec4 ConvertTangent(const glm::vec4& normal) noexcept;
+	NODISCARD inline glm::i8vec4 ConvertTangentFlipped(const glm::vec4& normal) noexcept;
 	NODISCARD inline glm::u8vec4 ConvertWeight(const glm::vec4& weight) noexcept;
 
 	AccessorData GetAccessorData(const gltf::Asset& file, size_t index);
