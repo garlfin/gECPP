@@ -18,9 +18,6 @@ using namespace gE;
 	char WindowTitleBuf[256];
 #endif
 
-#define BRDF_SIZE 512
-#define BRDF_GROUP_SIZE 8
-
 [[noreturn]] void Terminate()
 {
 	DEBUGBREAK();
@@ -243,25 +240,9 @@ void Window::OnInit()
 	BloomShader = ptr_create<API::ComputeShader>(this, GPU::ComputeShader("Resource/Shader/PostProcess/bloom.comp"));
 	VoxelComputeShader = ptr_create<API::ComputeShader>(this, GPU::ComputeShader("Resource/Shader/Compute/voxel.comp"));
 	HiZShader = ptr_create<API::ComputeShader>(this, GPU::ComputeShader("Resource/Shader/Compute/hiz.comp"));
-
-	{
-		API::ComputeShader brdfShader(this, GPU::ComputeShader("Resource/Shader/Compute/brdf.comp"));
-
-		GPU::Texture2D brdfTextureSettings;
-		brdfTextureSettings.Format = GL_RG16F;
-		brdfTextureSettings.WrapMode = GPU::WrapMode::Clamp;
-		brdfTextureSettings.Size = Size2D(BRDF_SIZE);
-
-		BRDFLookup = ptr_create<API::Texture2D>(this, brdfTextureSettings);
-
-		constexpr glm::uvec2 brdfGroupSize = DIV_CEIL_T(BRDF_SIZE, BRDF_GROUP_SIZE, glm::uvec2);
-
-		brdfShader.Bind();
-		BRDFLookup->Bind(0, GL_WRITE_ONLY);
-		brdfShader.Dispatch(brdfGroupSize);
-	}
-
 	DefaultMaterial = ptr_create<Material>(this, ref_create<ForwardShader>(this, GPU::Shader("Resource/Shader/uber.vert", "Resource/Shader/missing.frag")));
+
+	PBRMaterialManager = ptr_create<PBRMaterialBuffers>(this);
 }
 
 void Window::Blit(const API::Texture& texture)

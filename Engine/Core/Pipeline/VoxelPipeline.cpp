@@ -62,13 +62,12 @@ namespace gE::VoxelPipeline
 	{
 		if(!camera) return false;
 
-		Buffers& buffers = GetWindow().GetVoxelBuffers();
-		API::ComputeShader& voxelShader = GetWindow().GetVoxelComputeShader();
-		Transform& transform = GetOwner().GetTransform();
+		const Buffers& buffers = GetWindow().GetVoxelBuffers();
+		const API::ComputeShader& voxelShader = GetWindow().GetVoxelComputeShader();
 		const TransformData& cameraTransform = camera->GetOwner().GetTransform().GetGlobalTransform();
+		Transform& transform = GetOwner().GetTransform();
 
-		float cellSize = GetScale() / GetSize().x * VOXEL_SNAP;
-
+		const float cellSize = GetScale() / GetSize().x * VOXEL_SNAP;
 		const glm::vec3 pos = floor(cameraTransform.Position / cellSize) * cellSize;
 		const glm::ivec3 velocity = ceil(pos - transform->Position);
 
@@ -78,7 +77,7 @@ namespace gE::VoxelPipeline
 		GetOwner().GetGPUVoxelScene(**buffers.GetScene().GetData());
 		buffers.GetScene().UpdateData();
 
-		glm::u16vec3 dispatchSize = DIV_CEIL_T(_colorBack.GetSize(), VOXEL_TAA_GROUP_SIZE, glm::u16vec3);
+		const glm::u16vec3 dispatchSize = DIV_CEIL_T(_colorBack.GetSize(), VOXEL_TAA_GROUP_SIZE, glm::u16vec3);
 
 		voxelShader.Bind();
 
@@ -101,7 +100,7 @@ namespace gE::VoxelPipeline
 
 	void Target3D::PostProcessPass(float d)
 	{
-		API::ComputeShader& voxelShader = GetWindow().GetVoxelComputeShader();
+		const API::ComputeShader& voxelShader = GetWindow().GetVoxelComputeShader();
 
 		_color.Bind(0, GL_READ_WRITE);
 		_colorBack.Bind(2, GL_READ_WRITE);

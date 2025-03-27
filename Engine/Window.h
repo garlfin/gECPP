@@ -23,6 +23,8 @@
 #include <Graphics/Texture/TextureSlotManager.h>
 #include <SDL3/SDL_surface.h>
 
+#include "Core/Material/PBRMaterial.h"
+
 #define GE_REFRESH_RATE _monitor.RefreshRate
 
 #define GE_DEBUG_POLL_RATE 16
@@ -64,16 +66,16 @@ namespace gE
 		GET(gE::VoxelCapture*, VoxelCapture, VoxelSceneCapture.GetPointer());
 		GET(gE::SDFCapture*, SDFCapture, SDFSceneCapture.GetPointer());
 
-		GET(gE::Material&, DefaultMaterial, DefaultMaterial);
-		GET(API::Texture2D&, BRDFLookupTexture, BRDFLookup);
+		GET_CONST(const gE::Material&, DefaultMaterial, DefaultMaterial);
+		GET_CONST(const PBRMaterialBuffers&, PBRMaterialManager, PBRMaterialManager);
 		GET(std::vector<GPU::PreprocessorPair>&, ShaderCompilationState, ShaderCompilationState);
 
 		// Post Process Data
-		GET(API::ComputeShader&, TAAShader, TAAShader);
-		GET(API::ComputeShader&, TonemapShader, TonemapShader);
-		GET(API::ComputeShader&, BloomShader, BloomShader);
-		GET(API::ComputeShader&, VoxelComputeShader, VoxelComputeShader);
-		GET(API::ComputeShader&, HiZShader, HiZShader);
+		GET_CONST(const API::ComputeShader&, TAAShader, TAAShader);
+		GET_CONST(const API::ComputeShader&, TonemapShader, TonemapShader);
+		GET_CONST(const API::ComputeShader&, BloomShader, BloomShader);
+		GET_CONST(const API::ComputeShader&, VoxelComputeShader, VoxelComputeShader);
+		GET_CONST(const API::ComputeShader&, HiZShader, HiZShader);
 
 		// Managers
 		GET(CameraManager&, Cameras, Cameras);
@@ -152,12 +154,12 @@ namespace gE
 		Pointer<Material> DefaultMaterial;
 		Pointer<API::Shader> BlitShader;
 		Pointer<API::VAO> BlitVAO;
-		Pointer<API::Texture2D> BRDFLookup;
 		Pointer<API::ComputeShader> TAAShader;
 		Pointer<API::ComputeShader> TonemapShader;
 		Pointer<API::ComputeShader> BloomShader;
 		Pointer<API::ComputeShader> VoxelComputeShader;
 		Pointer<API::ComputeShader> HiZShader;
+		Pointer<PBRMaterialBuffers> PBRMaterialManager;
 
 		AssetManager Assets;
 

@@ -26,6 +26,19 @@ uniform sampler2D AlbedoTex;
 uniform sampler2D ARMDTex;
 uniform sampler2D NormalTex;
 
+struct PBRMaterialData
+{
+    vec2 Scale;
+    vec2 Offset;
+    float ParallaxDepth;
+    float NormalStrength;
+};
+
+layout(std140, binding = 4) uniform PBRMaterialUniform
+{
+    PBRMaterialData PBRMaterial;
+};
+
 struct VertexOut
 {
     vec3 FragPos;
@@ -53,13 +66,14 @@ void main()
         VertexIn.FragPos,
         normalize(VertexIn.TBN[2]),
         VertexIn.TBN,
-        VertexIn.UV * 10
+        (VertexIn.UV + PBRMaterial.Offset) * PBRMaterial.Scale
     );
 
-	ParallaxEffectSettings parallaxSettings = ParallaxEffectSettings(0.5f, POM_MIN_LAYER, POM_MAX_LAYER, 0.0, 0.5);
+	ParallaxEffectSettings parallaxSettings = ParallaxEffectSettings(PBRMaterial.ParallaxDepth, POM_MIN_LAYER, POM_MAX_LAYER, 0.0, 0.5);
 
     vec3 viewDir = normalize(Camera.Position - VertexIn.FragPos);
-    vert.UV = ParallaxMapping(viewDir, ARMDTex, vert, parallaxSettings);
+    if(PBRMaterial.ParallaxDepth > 0.0)
+        vert.UV = ParallaxMapping(viewDir, ARMDTex, vert, parallaxSettings);
 
     vec3 albedo = texture(AlbedoTex, vert.UV).rgb;
     vec3 armd = texture(ARMDTex, vert.UV * vec2(1, -1)).rgb;
@@ -67,6 +81,8 @@ void main()
 
 	normal = normal * 2.0 - 1.0;
     normal = normalize(VertexIn.TBN * normal);
+    normal = mix(VertexIn.TBN[2], normal, PBRMaterial.NormalStrength);
+    normal = normalize(normal);
 
     PBRFragment frag = PBRFragment
     (

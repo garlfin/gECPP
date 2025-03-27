@@ -42,10 +42,9 @@ namespace gE
 
 		window.GetRenderers().OnRender(0.f, &camera);
 
-		API::ComputeShader& hiZShader = window.GetHiZShader();
+		const API::ComputeShader& hiZShader = window.GetHiZShader();
 
 		hiZShader.Bind();
-
 		hiZShader.SetUniform(0, glm::vec4(HIZ_MODE_COPY, 0.0, camera.GetClipPlanes()));
 		hiZShader.SetUniform(1, *_depth, 0);
 		_linearDepth.Bind(0, GL_WRITE_ONLY, 0);

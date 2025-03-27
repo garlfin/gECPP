@@ -307,5 +307,5 @@ template<class T>
 void ReadSerializable(std::istream& in, u32 count, T* t, typename T::SETTINGS_T s)
 {
 	if(!count) return;
-	for(u32 i = 0; i < count; i++) t[i] = T(in, s);
+	for(u32 i = 0; i < count; i++) PlacementNew<T>(t[i], in, s);
 }

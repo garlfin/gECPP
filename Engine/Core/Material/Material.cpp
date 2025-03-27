@@ -75,24 +75,52 @@ namespace gE
 
 	void PBRMaterial::Bind() const
 	{
+		const PBRMaterialBuffers& manager = GetWindow().GetPBRMaterialManager();
+
 		GetWindow().GetSlotManager().Reset();
 
 		_albedo.Set();
 		_armd.Set();
 		_normal.Set();
-		_brdfLUT.Set(GetWindow().GetBRDFLookupTexture());
+		_brdfLUT.Set(manager.GetBRDFLUT());
+
+		manager.GetBuffer().UpdateDataDirect(std::span(&_data, &_data + 1));
 
 		Material::Bind();
 	}
+
+#ifdef GE_ENABLE_IMGUI
+	void PBRMaterialData::OnEditorGUI(u8 depth)
+	{
+		DrawField(ScalarField<float>{ "Scale" }, Scale, depth);
+		DrawField(ScalarField<float>{ "Offset" }, Offset, depth);
+		DrawField(ScalarField{ "Parllax Depth", "", 0.f, 1.f, FLT_EPSILON, ScalarViewMode::Slider }, ParallaxDepth, depth);
+		DrawField(ScalarField{ "Normal Map Strength", "", 0.f, 1.f, FLT_EPSILON, ScalarViewMode::Slider }, NormalStrength, depth);
+	}
+#endif
 
 	REFLECTABLE_ONGUI_IMPL(PBRMaterial,
 	{
 		DrawField(AssetDragDropField<API::Texture2D>{ "Albedo" }, *_albedo, depth);
 		DrawField(AssetDragDropField<API::Texture2D>{ "ARMD", "AO, Roughness, Metallic, _" }, *_armd, depth);
 		DrawField(AssetDragDropField<API::Texture2D>{ "Normal" }, *_normal, depth);
+		DrawField(Field{ "Settings" }, _data, depth);
 	});
-
 	REFLECTABLE_FACTORY_NO_IMPL(PBRMaterial);
+
+	PBRMaterialBuffers::PBRMaterialBuffers(Window* window) :
+		_buffer(window, 1, nullptr, GPU::BufferUsageHint::Dynamic | GPU::BufferUsageHint::Write, false),
+		_brdfLUT(window, BRDFLUTFormat)
+	{
+		_buffer.Bind(API::BufferBaseTarget::Uniform, 4);
+
+		const API::ComputeShader brdfShader(window, GPU::ComputeShader("Resource/Shader/Compute/brdf.comp"));
+		const glm::uvec2 brdfGroupSize = DIV_CEIL_T(_brdfLUT.GetSize(), BRDF_GROUP_SIZE, glm::uvec2);
+
+		brdfShader.Bind();
+		_brdfLUT.Bind(0, GL_WRITE_ONLY);
+		brdfShader.Dispatch(brdfGroupSize);
+	}
 
 	DynamicUniform::DynamicUniform(const Shader& shader, u32 location) :
 		_shader(&shader), _location(location)
@@ -142,13 +170,10 @@ namespace gE
 		{
 		case RenderMode::Both:
 			return _forwardShader;
-
 		case RenderMode::Fragment:
 			return _deferredShader;
-
 		case RenderMode::Geometry:
 			return _gBufferShader;
-
 		default:
 			GE_FAIL("UNEXPECTED RENDER MODE!");
 			return *(API::Shader*) nullptr;

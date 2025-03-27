@@ -17,7 +17,7 @@ namespace gE::PostProcess
 
     bool TAA::RenderPass(GL::Texture2D& in, GL::Texture2D& out)
     {
-        API::ComputeShader& shader = GetWindow().GetTAAShader();
+        const API::ComputeShader& shader = GetWindow().GetTAAShader();
 
         shader.Bind();
 
