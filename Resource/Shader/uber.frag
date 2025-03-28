@@ -1,7 +1,7 @@
 #define ENABLE_VOXEL_TRACE
 //#define ENABLE_SS_TRACE
-#define ENABLE_SMRT
-//#define ENABLE_SMRT_CONTACT_SHADOW
+//#define ENABLE_SMRT
+#define ENABLE_SMRT_CONTACT_SHADOW
 #define ENABLE_GI
 
 #define HIZ_MAX_ITER 128
@@ -95,13 +95,15 @@ void main()
     );
 
     PBRSample pbrSample = ImportanceSample(vert, frag);
+    AOSettings aoSettings = AOSettings(8, 0.2, 0.5, 0.5);
+    float ao = SS_AO(aoSettings, vert);
 
     vec3 ambient = SH_SampleProbe(Lighting.SkyboxIrradiance, frag.Normal).rgb / PI;
 #ifdef ENABLE_GI
     ambient = SampleLighting(vert, pbrSample.Diffuse, true);
 #endif
 
-    FragColor.rgb = albedo * ambient;// * armd.r;
+    FragColor.rgb = albedo * ambient * ao;
 
     for(int i = 0; i < Lighting.LightCount; i++)
         FragColor.rgb += GetLighting(vert, frag, Lighting.Lights[i], VertexIn.FragPosLightSpace[i]);
