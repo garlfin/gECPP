@@ -14,11 +14,23 @@
     #define RAY_MIP_SKIP 1
 #endif
 
+#ifndef SS_BIAS
+    #define SS_BIAS 0.01
+#endif
+
 #define RAY_MAX_MIP 4
 
 struct AOSettings
 {
+    uint Iterations;
     float Radius;
+    float Thickness;
+    float Intensity;
+};
+
+struct AOSettingsInternal
+{
+    AOSettings _base;
     float RadiusPixels;
     float InvRadiusS;
 };
@@ -172,7 +184,7 @@ RayResult SS_Trace(SSRay ray, SSRaySettings settings)
         }
 
         float depth = textureLod(Camera.Depth, uv.xy, float(mip)).r;
-        depth = SS_GetDepthWithBias(depth, 0.01);
+        depth = SS_GetDepthWithBias(depth, SS_BIAS);
 
         if(depth < uv.z)
             if(mip == ray.BaseMip)
@@ -216,7 +228,7 @@ RayResult SS_TraceRough(SSRay ray, SSLinearRaySettings settings)
         if(uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) break;
 
         float depth = textureLod(Camera.Depth, uv.xy, float(ray.BaseMip)).r;
-        depth = SS_GetDepthWithBias(depth, 0.01);
+        depth = SS_GetDepthWithBias(depth, SS_BIAS);
 
         float offset = uv.z - depth;
         if(offset > 0.0)
@@ -230,26 +242,35 @@ RayResult SS_TraceRough(SSRay ray, SSLinearRaySettings settings)
     return result;
 }
 
-float SS_ComputeAO(AOSettings s, Vertex vert)
+float SS_ComputeAO(AOSettingsInternal settings, Vertex vert)
 {
-    return 0.5;
+    float ao = 0.0;
+    for(int s = 0; s < settings._base.Iterations; s++)
+    {
+        vec2 disk = VogelDisk(s, settings._base.Iterations, IGNSample * PI * 2.0);
+        vec3 samplePos = vert.Position + vert.TBN * (normalize(vec3(disk, IGNSample)) * settings._base.Radius);
+        vec3 uv = SS_WorldToUV(samplePos);
+
+        float delta = uv.z - SS_GetDepthWithBias(textureLod(Camera.Depth, uv.xy, 0.0).x, SS_BIAS);
+        if(delta > 0 && delta < settings._base.Thickness) ao += 1.0;
+    }
+    return 1.0 - ao * settings._base.Intensity / settings._base.Iterations;
 }
 
 float SS_AO(AOSettings s, Vertex vert)
 {
-    vert.Position = SS_WorldToUV(vert.Position);
-    vert.Normal = SS_DirToView(vert.Normal);
+    //vert.Position = SS_WorldToUV(vert.Position);
+    //vert.Normal = SS_DirToView(vert.Normal);
     float depth = vert.Position.z;
 
-    s.RadiusPixels = s.Radius * 0.5 / tan(Camera.Parameters.x * 0.5) * Camera.Size.y;
-    s.InvRadiusS = -1.0 / (s.RadiusPixels * s.RadiusPixels);
+    AOSettingsInternal settings;
+    settings._base = s;
+    settings.RadiusPixels = s.Radius * 0.5 / tan(Camera.Parameters.x * 0.5) * Camera.Size.y;
+    settings.InvRadiusS = -1.0 / (settings.RadiusPixels * settings.RadiusPixels);
+    settings.RadiusPixels /= depth;
 
-    s.RadiusPixels /= depth;
-
-    if(s.RadiusPixels < 1.0) return 1.0;
-
-    float ao = SS_ComputeAO(s, vert);
-    return clamp(ao * 2.0 - 1.0, 0.0, 1.0);
+    //if(settings.RadiusPixels < 1.0) return 1.0;
+    return SS_ComputeAO(settings, vert);
 }
 
 // TODO: CLIP RAY TO SCREEN BOUNDS
