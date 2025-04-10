@@ -126,6 +126,9 @@ namespace gE
 		virtual void OnRender(float);
 		virtual void OnDestroy() {};
 
+		static constexpr VoxelCaptureSettings DefaultVoxelSettings{ 128, 8.4f, VoxelPipeline::ProbeSettings(glm::u8vec3(8)) };
+		void InitVoxelReflections(const VoxelCaptureSettings& settings = DefaultVoxelSettings);
+
 		Pointer<DefaultPipeline::Buffers> PipelineBuffers;
 		Pointer<VoxelPipeline::Buffers> VoxelBuffers;
 

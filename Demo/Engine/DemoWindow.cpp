@@ -103,11 +103,6 @@ void DemoWindow::OnInit()
 	auto* animatedCube = new AnimatedMeshEntity(this, cubeMesh);
 	animatedCube->SetName("Animated Cube");
 
-	Cubemaps->Skybox = ref_cast((GL::TextureCube*) PVR::Read(this, "Resource/Texture/sky.pvr", GPU::WrapMode::Clamp));
-	Cubemaps->Skybox->Free();
-	Cubemaps->CreateHarmonic();
-
-	VoxelCaptureSettings voxelSettings(128, 8.4f, VoxelPipeline::ProbeSettings(glm::u8vec3(8)));
-	VoxelSceneCapture = ptr_create<VoxelCapture>(this, voxelSettings);
-	VoxelSceneCapture->SetName("Voxel Capture");
+	Cubemaps->LoadSkybox(("Resource/Texture/sky.pvr"));
+	InitVoxelReflections();
 }

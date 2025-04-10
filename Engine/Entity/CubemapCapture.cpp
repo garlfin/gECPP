@@ -5,6 +5,7 @@
 #include "CubemapCapture.h"
 
 #include <Window.h>
+#include <Core/Converter/PVR.h>
 #include <Entity/Light/DirectionalLight.h>
 
 #define SH_MODE_SAMPLE 0u
@@ -63,6 +64,13 @@ namespace gE
 
 		buffers.GetLights().UpdateData<u32>(1, offsetof(GPU::Lighting, CubemapCount));
 		buffers.GetLights().UpdateData<GPU::Cubemap>(1, offsetof(GPU::Lighting, Cubemaps));
+	}
+
+	void CubemapManager::LoadSkybox(const Path& path)
+	{
+		Skybox = ref_cast((GL::TextureCube*) PVR::Read(_window, "Resource/Texture/sky.pvr", GPU::WrapMode::Clamp));
+		Skybox->Free();
+		CreateHarmonic();
 	}
 
 	void CubemapManager::CreateHarmonic() const

@@ -60,10 +60,10 @@ namespace gE
 		Reference<API::TextureCube> Skybox = DEFAULT;
 
 		void DrawSkybox() const;
-
 		void OnRender(float delta, Camera*);
-
 		void UseNearestCubemaps(const glm::vec3& point) const;
+
+		void LoadSkybox(const Path& path);
 		void CreateHarmonic() const;
 
 	 private:

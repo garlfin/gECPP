@@ -220,7 +220,6 @@ void Window::OnInit()
 	ShaderCompilationState.emplace_back("ENABLE_TAA");
 
 	PipelineBuffers = ptr_create<DefaultPipeline::Buffers>(this);
-	VoxelBuffers = ptr_create<VoxelPipeline::Buffers>(this);
 
 	Lights = ptr_create<LightManager>(this);
 	Cubemaps = ptr_create<CubemapManager>(this);
@@ -238,7 +237,6 @@ void Window::OnInit()
 	TAAShader = ptr_create<API::ComputeShader>(this, GPU::ComputeShader("Resource/Shader/PostProcess/taa.comp"));
 	TonemapShader = ptr_create<API::ComputeShader>(this, GPU::ComputeShader("Resource/Shader/PostProcess/tonemap.comp"));
 	BloomShader = ptr_create<API::ComputeShader>(this, GPU::ComputeShader("Resource/Shader/PostProcess/bloom.comp"));
-	VoxelComputeShader = ptr_create<API::ComputeShader>(this, GPU::ComputeShader("Resource/Shader/Compute/voxel.comp"));
 	HiZShader = ptr_create<API::ComputeShader>(this, GPU::ComputeShader("Resource/Shader/Compute/hiz.comp"));
 	DefaultMaterial = ptr_create<Material>(this, ref_create<ForwardShader>(this, GPU::Shader("Resource/Shader/uber.vert", "Resource/Shader/missing.frag")));
 
@@ -310,6 +308,14 @@ void Window::OnRender(float delta)
 	Blit(GUI->GetColor());
 
 	Cameras.GetCurrentCamera()->GetCamera().Resize(_viewport.Size);
+}
+
+void Window::InitVoxelReflections(const VoxelCaptureSettings& settings)
+{
+	VoxelBuffers = ptr_create<VoxelPipeline::Buffers>(this);
+	VoxelComputeShader = ptr_create<API::ComputeShader>(this, GPU::ComputeShader("Resource/Shader/Compute/voxel.comp"));
+	VoxelSceneCapture = ptr_create<VoxelCapture>(this, settings);
+	VoxelSceneCapture->SetName("Voxel Capture");
 }
 
 Camera3D* Window::GetReflectionSystem() const
