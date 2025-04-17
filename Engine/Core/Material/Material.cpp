@@ -52,6 +52,7 @@ namespace gE
 		glDisable(GL_BLEND);
 
 		_shader->Bind();
+		GetWindow().GetSlotManager().Reset();
 	}
 
 	REFLECTABLE_ONGUI_IMPL(Material,
@@ -75,18 +76,16 @@ namespace gE
 
 	void PBRMaterial::Bind() const
 	{
+		Material::Bind();
+
 		const PBRMaterialBuffers& manager = GetWindow().GetPBRMaterialManager();
 
-		GetWindow().GetSlotManager().Reset();
-
-		_albedo.Set();
-		_armd.Set();
-		_normal.Set();
-		_brdfLUT.Set(manager.GetBRDFLUT());
+		_albedo.Use();
+		_armd.Use();
+		_normal.Use();
+		_brdfLUT.Use(manager.GetBRDFLUT());
 
 		manager.GetBuffer().UpdateDataDirect(std::span(&_data, &_data + 1));
-
-		Material::Bind();
 	}
 
 #ifdef GE_ENABLE_IMGUI
@@ -131,7 +130,7 @@ namespace gE
 	{ }
 
 	template<>
-	void DynamicUniform::Set(const API::Texture& t) const
+	void DynamicUniform::Use(const API::Texture& t) const
 	{
 		_shader->GetShader().SetUniform(_location, t, _shader->GetWindow().GetSlotManager().Increment(&t));
 	}

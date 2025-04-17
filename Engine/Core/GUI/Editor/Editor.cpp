@@ -84,14 +84,13 @@ namespace gE::Editor
     void Editor::OnGUI()
     {
         KeyboardState& keyboard = _window->GetKeyboard();
+
         if(!keyboard.GetIsFocused() && keyboard.GetKey(Key::F1) == KeyState::Pressed)
             _isOpen = !_isOpen;
 
         _window->SetViewport(Viewport(_window->GetSize(), DEFAULT));
 
         if(!_isOpen) return;
-
-        keyboard.SetIsFocused(ImGui::GetIO().WantCaptureKeyboard);
 
         ImGuiID centralNodeID = ImGui::DockSpaceOverViewport(0, nullptr, ImGuiDockNodeFlags_PassthruCentralNode | ImGuiDockNodeFlags_NoDockingInCentralNode);
         ImGuiDockNode* centralNode = ImGui::DockBuilderGetCentralNode(centralNodeID);

@@ -16,7 +16,7 @@ namespace gE
 {
     class MeshRenderer : public Component
     {
-        REFLECTABLE_PROTO("gE::MeshRenderer", "MREN", MeshRenderer, Component);
+        REFLECTABLE_PROTO("MREN", MeshRenderer, Component);
 
     public:
         MeshRenderer(Entity* o, const Reference<Mesh>& mesh);
@@ -24,6 +24,7 @@ namespace gE
         void OnInit() override {};
         void OnUpdate(float delta) override {};
 
+        GET_CONST(size_t, MaterialCount, _materials.Size());
         GET_CONST(const Reference<Mesh>&, Mesh, _mesh);
         virtual void SetMesh(const Reference<Mesh>& mesh);
 
@@ -51,7 +52,7 @@ namespace gE
 
     class Animator : public Reflectable<Window*>
     {
-        REFLECTABLE_PROTO("gE::Animator", "AMTR", Animator, Reflectable);
+        REFLECTABLE_PROTO("AMTR", Animator, Reflectable);
 
     public:
         explicit Animator(const Reference<Skeleton>&);
@@ -76,7 +77,7 @@ namespace gE
 
     class AnimatedMeshRenderer final : public MeshRenderer
     {
-        REFLECTABLE_PROTO("gE::AnimatedMeshRenderer", "AMRE", AnimatedMeshRenderer, MeshRenderer);
+        REFLECTABLE_PROTO("AMRE", AnimatedMeshRenderer, MeshRenderer);
 
     public:
         AnimatedMeshRenderer(Entity* owner, Animator* animator, const Reference<Mesh>& mesh);

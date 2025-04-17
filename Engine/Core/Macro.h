@@ -48,13 +48,12 @@ using add_const_conditional = std::conditional_t<CONST, add_const_before_pointer
 inline std::string demangle(const char* name)
 {
 	int status = -1;
-	const std::unique_ptr<char, void(*)(void*)> res
-	{
-		abi::__cxa_demangle(name, nullptr, nullptr, &status),
-		std::free
-	};
 
-	return !status ? res.get() : name;
+	char* demangled = abi::__cxa_demangle(name, nullptr, nullptr, &status);
+	std::string result(!status ? demangled : name);
+	std::free(demangled);
+
+	return result;
 }
 #else
 inline std::string demangle(const char* name)
@@ -133,7 +132,7 @@ T& PlacementNew(T& to, ARGS&&... args)
 	NODISCARD ALWAYS_INLINE TYPE Get##ACCESSOR() { return FIELD; } \
 	GET_CONST(const TYPE, ACCESSOR, FIELD)
 
-#define SET(TYPE, ACCESSOR, FIELD) ALWAYS_INLINE void Set##ACCESSOR(TYPE ACCESSOR##_) { FIELD = ACCESSOR##_; }
+#define SET(TYPE, ACCESSOR, FIELD, ...) ALWAYS_INLINE void Set##ACCESSOR(TYPE ACCESSOR##_) { FIELD = __VA_ARGS__ ACCESSOR##_; }
 #define SET_XVAL(TYPE, ACCESSOR, FIELD) ALWAYS_INLINE void Set##ACCESSOR(TYPE&& FIELD##_) { FIELD = std::move(FIELD##_); }
 
 #define GET_SET(TYPE, ACCESSOR, FIELD) \

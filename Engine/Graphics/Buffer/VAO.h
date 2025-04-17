@@ -42,7 +42,7 @@ namespace GPU
 
 	class VAO : public gE::Asset
 	{
-		SERIALIZABLE_PROTO("GPU::VAO", "VAO", 1, VAO, Asset);
+		SERIALIZABLE_PROTO("VAO", 1, VAO, Asset);
 
 	public:
 		VAOFieldCounts Counts{};
@@ -69,7 +69,7 @@ namespace GPU
 
 	class IndexedVAO : public VAO
 	{
-		SERIALIZABLE_PROTO("GPU::IndexedVAO", "IVAO", 1, IndexedVAO, VAO, &GPU::VAO::SType);
+		SERIALIZABLE_PROTO("IVAO", 1, IndexedVAO, VAO, &GPU::VAO::SType);
 
 	public:
 		ALWAYS_INLINE void Free() override { VAO::Free(); IndicesBuffer.Free(); }

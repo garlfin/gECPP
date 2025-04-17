@@ -12,7 +12,7 @@ namespace gE
 	{
 		REFLECTABLE_NOIMPL(Component);
 
-	 public:
+	public:
 		explicit Behavior(Entity* o);
 	};
 
@@ -22,6 +22,6 @@ namespace gE
 	 public:
 		inline explicit TypedBehavior(T* o) : Behavior(o) { };
 
-		GET_CONST(T*, Owner, (T*) Component::GetOwner());
+		GET_CONST(T&, Owner, (T&) Behavior::GetOwner());
 	};
 }

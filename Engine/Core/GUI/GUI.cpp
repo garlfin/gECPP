@@ -50,7 +50,12 @@ gE::GUIManager::GUIManager(Window* window) :
 
 void gE::GUIManager::BeginGUI()
 {
+    KeyboardState& keyboard = _window->GetKeyboard();
+    MouseState& mouse = _window->GetMouse();
     const bool active = _window->GetMouse().GetIsEnabled();
+
+    keyboard.SetIsFocused(ImGui::GetIO().WantCaptureKeyboard);
+    mouse.SetIsFocused(ImGui::GetIO().WantCaptureMouse);
 
 #ifdef GE_ENABLE_IMGUI
     ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_NoMouse;

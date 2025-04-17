@@ -51,7 +51,7 @@ namespace gE
 		DefaultPipeline::Buffers& buffers = _window->GetPipelineBuffers();
 		GPU::Lighting& lighting = **buffers.GetLights().GetData();
 
-		lighting.LightCount = List.GetSize();
+		lighting.LightCount = List.Size();
 
 		GE_ASSERTM(lighting.LightCount <= 4, "TOO MANY LIGHTS!");
 

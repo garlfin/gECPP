@@ -8,8 +8,6 @@
 
 namespace gE
 {
-    Path FixPath(const Path& path, const Type<Window*>& type);
-
     File::File(Window* window, const Path& path, const Type<Window*>* type) :
         _window(window),
         _type(type),
@@ -167,8 +165,25 @@ namespace gE
 
     UUID HashPath(const Path& path)
     {
-        const std::string str = path.string();
+        const std::string str = FixPath(path).string();
         return std::bit_cast<__uint128_t>(CityHash::CityHash128(str.c_str(), str.length()));
+    }
+
+    Path FixPath(const Path& path)
+    {
+        Path::string_type str = path;
+        std::ranges::replace(str, '\\', '/');
+        return Path(std::move(str), std::filesystem::path::generic_format);
+    }
+
+    Path FixPath(const Path& path, const Type<Window*>& type)
+    {
+        Path newPath = FixPath(path);
+
+        if(!type.Extension.empty())
+            newPath.replace_extension(type.Extension);
+
+        return newPath;
     }
 
     void File::IDeserialize(istream& in, SETTINGS_T s)
@@ -261,10 +276,5 @@ namespace gE
     Reference<Asset> File::Lock() const
     {
         return _asset = (Reference<Asset>) _weakAsset;
-    }
-
-    Path FixPath(const Path& path, const Type<Window*>& type)
-    {
-        return type.Extension.empty() ? path : COPY(path).replace_extension(type.Extension);
     }
 }

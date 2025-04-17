@@ -74,9 +74,12 @@ namespace gE
                 {
                     if constexpr(!isConst)
                     {
-                        for(const auto& e : eType.Enums)
+                        for(size_t i = 0; i < eType.Enums.size(); i++)
                         {
+                            const auto& e = eType.Enums[i];
                             const bool selected = t == e.first;
+
+                            if(~settings.VisibleEnums >> i & 1) continue;
                             if(ImGui::Selectable(e.second.data(), selected))
                             {
                                 if(!selected)

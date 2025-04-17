@@ -138,6 +138,6 @@ namespace gE
 		LightManager& lightManager = GetWindow().GetLights();
 
 		if(reflectionSystem) reflectionSystem->OnRender(delta, &RenderTarget::GetCamera());
-		lightManager.Sun->GetCamera().OnRender(delta, &RenderTarget::GetCamera());
+		if(lightManager.Sun) lightManager.Sun->GetCamera().OnRender(delta, &RenderTarget::GetCamera());
 	}
 }

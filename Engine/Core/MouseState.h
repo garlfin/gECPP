@@ -28,6 +28,7 @@ namespace gE
         explicit MouseState(Window* window) : _window(window) {};
 
         GET_SET(bool, IsEnabled, _enabled);
+        GET_SET(bool, IsFocused, _focused);
         GET_CONST(glm::vec2, Position, _mousePosition);
         GET_CONST(glm::vec2, Delta, _previousMousePosition - _mousePosition);
 
@@ -44,5 +45,6 @@ namespace gE
         glm::vec2 _previousMousePosition = DEFAULT;
         KeyState _buttons[(u8) MouseButton::Last + 1] = DEFAULT;
         bool _enabled = true;
+        bool _focused = false;
     };
 };

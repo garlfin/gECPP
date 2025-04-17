@@ -44,11 +44,14 @@ enum class Dimension : u8
 	D3D = 3
 };
 
-template<Dimension DIMENSION, typename INT_T = float>
-using Position = std::conditional_t<DIMENSION == Dimension::D1D, INT_T, glm::vec<(u8) DIMENSION, INT_T>>;
+template<class COMPONENT_T>
+concept is_integer_v = std::is_scalar_v<COMPONENT_T> && !std::is_floating_point_v<COMPONENT_T>;
 
-template<Dimension DIMENSION, typename INT_T = u32>
-using Size = Position<DIMENSION, INT_T>;
+template<Dimension DIMENSION, typename COMPONENT_T = float>
+using Position = std::conditional_t<DIMENSION == Dimension::D1D, COMPONENT_T, glm::vec<(u8) DIMENSION, COMPONENT_T>>;
+
+template<Dimension DIMENSION, typename COMPONENT_T = u32> requires is_integer_v<COMPONENT_T>
+using Size = Position<DIMENSION, COMPONENT_T>;
 
 // World's dumbest optimization
 constexpr size_t GLSizeOf(u32 t)

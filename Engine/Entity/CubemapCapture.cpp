@@ -48,7 +48,7 @@ namespace gE
 
 		lighting.Skybox = Skybox->GetHandle();
 
-		buffers.GetLights().UpdateData<std::byte>(offsetbetween(GPU::Lighting, Skybox, SkyboxIrradiance), offsetof(GPU::Lighting, Skybox));
+		buffers.GetLights().UpdateData<std::byte>(sizebetween(GPU::Lighting, Skybox, SkyboxIrradiance), offsetof(GPU::Lighting, Skybox));
 
 		for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())
 			(**i)->GetCamera().OnRender(delta, camera);
@@ -59,8 +59,11 @@ namespace gE
 		DefaultPipeline::Buffers& buffers = _window->GetPipelineBuffers();
 		GPU::Lighting& lighting = **buffers.GetLights().GetData();
 
-		lighting.CubemapCount = 1;
-		(**List.GetFirst())->GetGPUCubemap(lighting.Cubemaps[0]);
+		lighting.CubemapCount = std::min<u32>(List.Size(), API_MAX_CUBEMAP);
+
+		auto it = List.GetFirst();
+		for(u32 i = 0; i < lighting.CubemapCount; i++, it++)
+			(**it)->GetGPUCubemap(lighting.Cubemaps[i]);
 
 		buffers.GetLights().UpdateData<u32>(1, offsetof(GPU::Lighting, CubemapCount));
 		buffers.GetLights().UpdateData<GPU::Cubemap>(1, offsetof(GPU::Lighting, Cubemaps));
@@ -100,6 +103,8 @@ namespace gE
 
 		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_UNIFORM_BARRIER_BIT);
 		buf.RetrieveData();
+
+		_window->GetPipelineBuffers().GetLights().GetData()[0].SkyboxIrradiance = buf.GetData()[0];
 	}
 
 	CubemapManager::CubemapManager(Window* window) : Manager(),

@@ -49,9 +49,7 @@ public:
 	ALWAYS_INLINE operator T&() const { return *_t; } // NOLINT
 	explicit ALWAYS_INLINE operator T*() const { return _t; } // NOLINT
 
-	ALWAYS_INLINE const T& operator||(const T& t) const { return _t ? *_t : t; };
-	ALWAYS_INLINE T& operator||(T& t) const { return _t ? *_t : t; }
-	ALWAYS_INLINE const T* operator||(const T* t) const { return _t ? _t : t; };
+	ALWAYS_INLINE T& operator||(T& t) const { return _t ? *_t : t; };
 	ALWAYS_INLINE T* operator||(T* t) const { return _t ? _t : t; }
 
 	ALWAYS_INLINE bool operator ==(const Reference& o) const { return _t == o._t; }
@@ -137,9 +135,7 @@ public:
 	ALWAYS_INLINE operator T&() const { GE_ASSERT(_counter->RefCount); return *_t; } // NOLINT
 	explicit ALWAYS_INLINE operator T*() const { return _counter->RefCount ? _t : nullptr; } // NOLINT
 
-	ALWAYS_INLINE const T& operator||(const T& t) const { return _t && _counter->RefCount ? *_t : t; };
 	ALWAYS_INLINE T& operator||(T& t) const { return _t && _counter->RefCount ? *_t : t; }
-	ALWAYS_INLINE const T* operator||(const T* t) const { return _t && _counter->RefCount ? _t : t; };
 	ALWAYS_INLINE T* operator||(T* t) const { return _t && _counter->RefCount ? _t : t; }
 
 	ALWAYS_INLINE bool operator ==(const WeakReference& o) const { return _t == o._t; }
@@ -222,9 +218,7 @@ class Pointer
 	ALWAYS_INLINE operator T&() const { return *_t; } // NOLINT
 	explicit ALWAYS_INLINE operator T*() const { return _t; } // NOLINT
 
-	ALWAYS_INLINE const T& operator||(const T& t) const { return _t ? *_t : t; };
 	ALWAYS_INLINE T& operator||(T& t) const { return _t ? *_t : t; }
-	ALWAYS_INLINE const T* operator||(const T* t) const { return _t ? _t : t; };
 	ALWAYS_INLINE T* operator||(T* t) const { return _t ? _t : t; }
 
 	ALWAYS_INLINE bool operator ==(const Pointer& o) const { return _t == o._t; }

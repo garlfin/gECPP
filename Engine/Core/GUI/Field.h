@@ -65,6 +65,7 @@ namespace gE
     struct EnumField : public Field
     {
         const EnumData<T, SIZE>& Type;
+        size_t VisibleEnums = SIZE_MAX;
     };
 
     using NoUserData = const std::nullptr_t*;

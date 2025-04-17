@@ -58,7 +58,7 @@ namespace gE
 
 		GET_CONST(LinkedNode<T>*, First, _first);
 		GET_CONST(LinkedNode<T>*, Last, _last);
-		GET_CONST(u32, Size, _size);
+		size_t Size() const { return _size; }
 
 		friend class LinkedNode<T>;
 
@@ -181,7 +181,7 @@ namespace gE
 		DELETE_OPERATOR_COPY(Managed);
 		OPERATOR_MOVE_NOSUPER(Managed, Free,
 			_t = o._t;
-			Node = move(o.Iterator);
+			Node = move(o.Node);
 		);
 
 		typedef LinkedNode<Managed> ITER_T;

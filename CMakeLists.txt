@@ -64,3 +64,8 @@ target_link_libraries(gECPP PUBLIC FMOD FMOD_STUDIO GLAD SDL JOLT CITYHASH IMGUI
 file(GLOB_RECURSE VOXELDEMO_SRC "Demo/*.cpp" "Demo/*.h" "Demo/*.inl")
 add_executable(VoxelDemo ${VOXELDEMO_SRC})
 target_link_libraries(VoxelDemo gECPP)
+
+# COASTERBUILDER
+file(GLOB_RECURSE COASTERBUILDER_SRC "CoasterBuilder/*.cpp" "CoasterBuilder/*.h" "CoasterBuilder/*.inl")
+add_executable(CoasterBuilder ${COASTERBUILDER_SRC})
+target_link_libraries(CoasterBuilder gECPP)

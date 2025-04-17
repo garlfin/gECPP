@@ -9,17 +9,17 @@
 #define POM_MIN_LAYER 8
 #define POM_MAX_LAYER 32
 
-#include "Include/Camera.glsl"
-#include "Include/Scene.glsl"
-#include "Include/PBR.glsl"
-#include "Include/Effect.glsl"
+#include <Resource/Shader/Include/Camera.glsl>
+#include <Resource/Shader/Include/Scene.glsl>
+#include <Resource/Shader/Include/PBR.glsl>
+#include <Resource/Shader/Include/Effect.glsl>
 
 #ifdef ENABLE_VOXEL_TRACE
-#include "Include/Voxel.glsl"
+#include <Resource/Shader/Include/Voxel.glsl>
 #endif
 
 #ifdef ENABLE_SDF_TRACE
-#include "Include/SDF.glsl"
+#include <Resource/Shader/Include/SDF.glsl>
 #endif
 
 uniform sampler2D AlbedoTex;
@@ -98,7 +98,7 @@ void main()
     AOSettings aoSettings = AOSettings(8, 0.2, 0.5, 0.5);
     float ao = SS_AO(aoSettings, vert);
 
-    vec3 ambient = SH_SampleProbe(Lighting.SkyboxIrradiance, frag.Normal).rgb / PI;
+    vec3 ambient = SH_SampleProbe(Lighting.SkyboxIrradiance, frag.Normal).rgb;
 #ifdef ENABLE_GI
     ambient = SampleLighting(vert, pbrSample.Diffuse, true);
 #endif

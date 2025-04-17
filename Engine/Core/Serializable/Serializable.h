@@ -17,6 +17,12 @@
 struct Underlying
 {
 	virtual ~Underlying() = default;
+
+	template<class I>
+	NODISCARD bool IsCastable() const
+	{
+		return dynamic_cast<const I*>(this);
+	}
 };
 
 struct ISerializable
@@ -31,8 +37,7 @@ public:
 	NODISCARD bool IsCastable() const
 	{
 		const Underlying* underlying = GetUnderlying();
-
-		return dynamic_cast<const I*>(this) || dynamic_cast<const I*>(underlying);
+		return dynamic_cast<const I*>(this) || (underlying && underlying->IsCastable<I>());
 	}
 
 	virtual ~ISerializable() = default;
@@ -65,7 +70,7 @@ public:
 	GE_ASSERTM(strcmpb(magic, MAGIC, 4), "UNEXPECTED MAGIC!"); \
 	_version = Read<u8>(in);
 
-#define SERIALIZABLE_PROTO(NAME, MAGIC_VAL, VERSION_VAL, TYPE, SUPER_T, ...) \
+#define SERIALIZABLE_PROTO(MAGIC_VAL, VERSION_VAL, TYPE, SUPER_T, ...) \
 	public: \
 		typedef SUPER_T SUPER; \
 		typedef SUPER::SETTINGS_T SETTINGS_T;\
@@ -80,9 +85,9 @@ public:
 		void IDeserialize(istream& in, SETTINGS_T s); \
 		void ISerialize(ostream& out) const; \
 		u8 _version = VERSION_VAL; \
-		REFLECTABLE_PROTO(NAME, MAGIC_VAL, TYPE, SUPER_T, __VA_ARGS__)
+		REFLECTABLE_PROTO(MAGIC_VAL, TYPE, SUPER_T, __VA_ARGS__)
 
-#define SERIALIZABLE_PROTO_NOHEADER(NAME, MAGIC_VAL, TYPE, SUPER_T, ...) \
+#define SERIALIZABLE_PROTO_NOHEADER(MAGIC_VAL, TYPE, SUPER_T, ...) \
 	public: \
 		typedef SUPER_T SUPER; \
 		typedef SUPER::SETTINGS_T SETTINGS_T;\
@@ -96,7 +101,7 @@ public:
 		void IDeserialize(istream& in, SETTINGS_T s); \
 		void ISerialize(ostream& out) const; \
 		u8 _version = 0; \
-		REFLECTABLE_PROTO(MAGIC_VAL, NAME, TYPE, SUPER_T, __VA_ARGS__)
+		REFLECTABLE_PROTO(MAGIC_VAL, TYPE, SUPER_T, __VA_ARGS__)
 
 template<class T, class S>
 concept is_serializable_in = requires(T t, S s, std::istream& i)

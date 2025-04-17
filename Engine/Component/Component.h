@@ -50,7 +50,7 @@ namespace gE
 	 public:
 		inline explicit TypedComponent(T* o) : Component(o) { };
 
-		GET_CONST(T*, Owner, (T*) Component::GetOwner());
+		GET_CONST(T&, Owner, (T&) Component::GetOwner());
 	};
 
 	class IComponentManager : public Manager<Managed<Component>>

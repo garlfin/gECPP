@@ -83,7 +83,8 @@ template<class T>
 struct Type
 {
 	Type() = delete;
-	explicit Type(std::string_view name, FactoryFunction<T> factory, UFactoryFunction<T> uFactory, const char extension[5], const Type* baseType = nullptr) :
+
+	explicit Type(const std::string& name, FactoryFunction<T> factory, UFactoryFunction<T> uFactory, const char extension[5], const Type* baseType = nullptr) :
 		Name(name),
 		Factory(factory),
 		UFactory(uFactory),
@@ -93,9 +94,15 @@ struct Type
 		TypeSystem<T>::_types.insert(this);
 	}
 
+	template<class I, typename... ARGS>
+	static Type MakeType(ARGS&&... args)
+	{
+		return Type(demangle(typeid(I).name()), std::forward<ARGS>(args)...);
+	}
+
 	NODISCARD const Type* GetBaseType() const { return BaseType ? BaseType : this; }
 
-	std::string_view Name;
+	std::string Name;
 	Path Extension;
 	FactoryFunction<T> Factory;
 	UFactoryFunction<T> UFactory;
@@ -157,13 +164,13 @@ struct EnumData
 	NODISCARD typename ARR_T::const_iterator At(T t) const;
 };
 
-#define REFLECTABLE_TYPE_PROTO(NAME, MAGIC_VAL, TYPE, ...) \
+#define REFLECTABLE_TYPE_PROTO(MAGIC_VAL, TYPE, ...) \
 	public: \
 		using THIS_T = TYPE; \
 		static TYPE* Factory(std::istream& in, SETTINGS_T t); \
 		static void UFactory(std::istream& in, SETTINGS_T t, TYPE& result); \
 		const TYPE_T* GetType() const override { return &SType; }; \
-		FORCE_IMPL static inline const TYPE_T SType{ NAME, (FactoryFunction<SETTINGS_T>) Factory, (UFactoryFunction<SETTINGS_T>) UFactory, MAGIC_VAL, __VA_ARGS__ }; \
+		FORCE_IMPL static inline const TYPE_T SType = TYPE_T::MakeType<TYPE>((FactoryFunction<SETTINGS_T>) Factory, (UFactoryFunction<SETTINGS_T>) UFactory, MAGIC_VAL __VA_OPT__(,) __VA_ARGS__); \
 
 #ifdef GE_ENABLE_IMGUI
 	#define REFLECTABLE_ONGUI_PROTO(SUPER) \
@@ -192,8 +199,8 @@ struct EnumData
 	#define REFLECTABLE_NAME_IMPL(TYPE, ...)
 #endif
 
-#define REFLECTABLE_PROTO(NAME, MAGIC_VAL, TYPE, SUPER, ...) \
-	REFLECTABLE_TYPE_PROTO(NAME, MAGIC_VAL, TYPE, __VA_ARGS__); \
+#define REFLECTABLE_PROTO(MAGIC_VAL, TYPE, SUPER, ...) \
+	REFLECTABLE_TYPE_PROTO(MAGIC_VAL, TYPE, __VA_ARGS__); \
 	REFLECTABLE_ONGUI_PROTO(SUPER)
 
 #define REFLECTABLE_NOIMPL(SUPER) \
@@ -233,7 +240,7 @@ struct EnumData
 #define REFLECT_ENUM(E_TYPE, E_NAME) ENUM_PAIR(E_TYPE::E_NAME, #E_NAME)
 #define ENUM_PAIR(E_VAL, E_NAME) std::make_pair(E_VAL, E_NAME##sv)
 
-// Typesystem must be explicity instantiated.
+// Typesystem must be explicitly instantiated.
 template struct TypeSystem<gE::Window*>;
 template struct TypeSystem<std::nullptr_t>;
 

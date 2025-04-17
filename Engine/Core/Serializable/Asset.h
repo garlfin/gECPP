@@ -23,6 +23,8 @@ namespace gE
     using UUID = __uint128_t;
 
     UUID HashPath(const Path& path);
+    Path FixPath(const Path& path);
+    Path FixPath(const Path& path, const Type<Window*>& type);
 
     class Asset : public Serializable<Window*>
     {
@@ -91,7 +93,7 @@ namespace gE
 {
     class File final : public Serializable<FileLoadArgs&>
     {
-        SERIALIZABLE_PROTO("gE::File", "FILE", 0, File, Serializable);
+        SERIALIZABLE_PROTO("FILE", 0, File, Serializable);
         REFLECTABLE_NAME_PROTO();
 
     public:
@@ -149,7 +151,7 @@ namespace gE
 
     class Bank final : public Serializable<BankLoadArgs&>
     {
-        SERIALIZABLE_PROTO("gE::Bank", "BANK", 0, Bank, Serializable);
+        SERIALIZABLE_PROTO("BANK", 0, Bank, Serializable);
         REFLECTABLE_NAME_PROTO();
 
     public:

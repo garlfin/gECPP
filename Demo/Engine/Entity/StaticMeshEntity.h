@@ -11,7 +11,7 @@ namespace gE
 {
     class StaticMeshEntity : public Entity
     {
-        REFLECTABLE_PROTO("gE::VoxelDemo::StaticMeshEntity", "STME", StaticMeshEntity, Entity);
+        REFLECTABLE_PROTO("STME", StaticMeshEntity, Entity);
 
     public:
         StaticMeshEntity(Window* window, const Reference<Mesh>& mesh) :

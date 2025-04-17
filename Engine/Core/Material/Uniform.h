@@ -18,7 +18,7 @@ namespace gE
         GET_CONST(u32, , _location);
 
         template<class T>
-        ALWAYS_INLINE void Set(const T& t) const
+        ALWAYS_INLINE void Use(const T& t) const
         {
             if(_location != -1u) _shader->GetShader().SetUniform(_location, t);
         }
@@ -29,7 +29,7 @@ namespace gE
     };
 
     template<>
-    void DynamicUniform::Set(const API::Texture& t) const;
+    void DynamicUniform::Use(const API::Texture& t) const;
 
     template<class T>
     class Uniform : private DynamicUniform
@@ -40,7 +40,7 @@ namespace gE
         using DynamicUniform::Get;
         using DynamicUniform::GetShader;
 
-        ALWAYS_INLINE void Set(const T& t) const { DynamicUniform::Set(t); }
+        ALWAYS_INLINE void Use(const T& t) const { DynamicUniform::Use(t); }
     };
 
     template<class T>
@@ -67,7 +67,7 @@ namespace gE
         ALWAYS_INLINE operator T*() const { return &_t; } // NOLINT
         ALWAYS_INLINE operator T&() const { return _t; } // NOLINT
 
-        ALWAYS_INLINE void Set() const { Uniform<T>::Set(_t); }
+        ALWAYS_INLINE void Use() const { Uniform<T>::Use(_t); }
 
         GET_SET(T&, , _t);
         SET_XVAL(T, , _t);
