@@ -28,7 +28,6 @@ namespace gE
 		using RenderFunction = void(Component::*)(float, Camera*);
 
 		virtual void OnInit() = 0;
-
 		virtual void OnFixedUpdate(float delta) {};
 		virtual void OnLateFixedUpdate(float delta) {};
 		virtual void OnUpdate(float delta) { };

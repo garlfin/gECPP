@@ -17,12 +17,6 @@
 struct Underlying
 {
 	virtual ~Underlying() = default;
-
-	template<class I>
-	NODISCARD bool IsCastable() const
-	{
-		return dynamic_cast<const I*>(this);
-	}
 };
 
 struct ISerializable
@@ -37,7 +31,8 @@ public:
 	NODISCARD bool IsCastable() const
 	{
 		const Underlying* underlying = GetUnderlying();
-		return dynamic_cast<const I*>(this) || (underlying && underlying->IsCastable<I>());
+
+		return dynamic_cast<const I*>(this) || dynamic_cast<const I*>(underlying);
 	}
 
 	virtual ~ISerializable() = default;
@@ -70,7 +65,7 @@ public:
 	GE_ASSERTM(strcmpb(magic, MAGIC, 4), "UNEXPECTED MAGIC!"); \
 	_version = Read<u8>(in);
 
-#define SERIALIZABLE_PROTO(MAGIC_VAL, VERSION_VAL, TYPE, SUPER_T, ...) \
+#define SERIALIZABLE_PROTO_NOOP(MAGIC_VAL, VERSION_VAL, TYPE, SUPER_T, ...) \
 	public: \
 		typedef SUPER_T SUPER; \
 		typedef SUPER::SETTINGS_T SETTINGS_T;\
@@ -80,12 +75,15 @@ public:
 		inline void Deserialize(istream& in, SETTINGS_T s) override { PlacementNew(*this, in, s); } \
 		inline void Serialize(ostream& out) const override { SUPER::Serialize(out); Write(out, 4, MAGIC); Write<u8>(out, _version); ISerialize(out); } \
 		GET_CONST(u8, Version, _version) \
-		DEFAULT_OPERATOR_CM(TYPE); \
 	private: \
 		void IDeserialize(istream& in, SETTINGS_T s); \
 		void ISerialize(ostream& out) const; \
 		u8 _version = VERSION_VAL; \
 		REFLECTABLE_PROTO(MAGIC_VAL, TYPE, SUPER_T, __VA_ARGS__)
+
+#define SERIALIZABLE_PROTO(MAGIC_VAL, VERSION_VAL, TYPE, SUPER_T, ...) \
+	SERIALIZABLE_PROTO_NOOP(MAGIC_VAL, VERSION_VAL, TYPE, SUPER_T, __VA_ARGS__); \
+	DEFAULT_OPERATOR_CM(TYPE)
 
 #define SERIALIZABLE_PROTO_NOHEADER(MAGIC_VAL, TYPE, SUPER_T, ...) \
 	public: \
@@ -143,6 +141,7 @@ template<typename UINT_T, class T> void ReadArraySerializable(std::istream& in, 
 
 template<class T> void ReadSerializable(std::istream& in, u32 count, T* t, typename T::SETTINGS_T s);
 template<class T> void ReadSerializable(std::istream& in, T& t, typename T::SETTINGS_T s) { ReadSerializable<T>(in, 1, &t, s); }
+template<class T> NODISCARD T ReadSerializable(std::istream& in, typename T::SETTINGS_T s) { T t; ReadSerializable<T>(in, t, s); return t; }
 
 template<class T>
 const Type<T>* ReadType(std::istream& in)

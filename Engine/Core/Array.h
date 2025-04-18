@@ -99,6 +99,34 @@ private:
 	I* _t = nullptr;
 };
 
+template<class FIRST_ARR_T, class SECOND_ARR_T>
+class PairSpan
+{
+public:
+	using FIRST_IT_T = typename FIRST_ARR_T::iterator;
+	using SECOND_IT_T = typename SECOND_ARR_T::iterator;
+
+	struct iterator
+	{
+		FIRST_IT_T first;
+		SECOND_IT_T second;
+
+		NODISCARD bool operator==(const iterator& b) { return first == b.first || second == b.second; }
+		NODISCARD iterator& operator++() { first++; second++; return *this; };
+	};
+
+	PairSpan(const FIRST_ARR_T& first, const FIRST_ARR_T& second) :
+		Begin(first.begin(), second.begin()),
+		End(first.end(), second.end())
+	{};
+
+	iterator Begin = DEFAULT;
+	iterator End = DEFAULT;
+
+	iterator begin() const { return Begin; }
+	iterator end() const { return End; }
+};
+
 template<typename T>
 size_t Array<T>::CopyToCArray(I* arr, size_t arrSize) const
 {

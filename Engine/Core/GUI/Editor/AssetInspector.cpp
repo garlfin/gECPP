@@ -83,22 +83,24 @@ namespace gE::Editor
         AddIcon(Mesh::SType, Sprite(_iconSpriteSheet, glm::u16vec2(5, 0)));
     }
 
-    void AssetManager::LoadFileCallback(LoadingAsset* asset, const char* const* paths, int filter)
+    void AssetManager::LoadFileCallback(LoadingAssetData* asset, const char* const* paths, int filter)
     {
         if(!*paths) return;
 
         asset->Mutex.lock();
-        asset->Path = std::filesystem::relative(*paths);
+        for(const char* const* path = paths; *path; path++)
+            asset->Paths.push_back(Path(*path));
         asset->Mode = LoadAssetMode::LoadFile;
         asset->Mutex.unlock();
     }
 
-    void AssetManager::ImportFileCallback(LoadingAsset* asset, const char* const* paths, int filter)
+    void AssetManager::ImportFileCallback(LoadingAssetData* asset, const char* const* paths, int filter)
     {
         if(!*paths) return;
 
         asset->Mutex.lock();
-        asset->Path = std::filesystem::relative(*paths);
+        for(const char* const* path = paths; *path; path++)
+            asset->Paths.push_back(Path(*path));
         asset->Mode = (LoadAssetMode) filter;
         asset->Mutex.unlock();
     }
@@ -109,25 +111,27 @@ namespace gE::Editor
 
         _loading.Mutex.lock();
         if(_loading.Mode == LoadAssetMode::ImportTexture)
-            assetManager.AddFile(PVR::ReadAsFile(&GetWindow(), _loading.Path));
+            for(const Path& path : _loading.Paths)
+                assetManager.AddFile(PVR::ReadAsFile(&GetWindow(), path));
         else if(_loading.Mode == LoadAssetMode::ImportMesh)
             ImGui::OpenPopup("GLTF Import Settings");
         else if(_loading.Mode == LoadAssetMode::LoadFile)
-        {
-            const Path extension = _loading.Path.extension();
-            if(extension == File::Extension)
-                assetManager.LoadFile(_loading.Path, AssetLoadMode::PathsAndFiles);
-            else
+            for(const Path& path : _loading.Paths)
             {
-                auto it = std::ranges::find_if(TypeSystem<gE::Window*>::GetTypes(), [&extension](const Type<gE::Window*>* type)
+                const Path extension = path.extension();
+                if(extension == File::Extension)
+                    assetManager.LoadFile(path, AssetLoadMode::PathsAndFiles);
+                else
                 {
-                    return extension == type->Extension;
-                });
+                    auto it = std::ranges::find_if(TypeSystem<gE::Window*>::GetTypes(), [&extension](const Type<gE::Window*>* type)
+                    {
+                        return extension == type->Extension;
+                    });
 
-                if(it != TypeSystem<gE::Window*>::GetTypes().end())
-                    assetManager.AddFile(File(&GetWindow(), _loading.Path, *it))->Load();
+                    if(it != TypeSystem<gE::Window*>::GetTypes().end())
+                        assetManager.AddFile(File(&GetWindow(), path, *it))->Load();
+                }
             }
-        }
         _loading.Mode = LoadAssetMode::None;
         _loading.Mutex.unlock();
     }
@@ -146,15 +150,13 @@ namespace gE::Editor
         LoadPendingFile();
 
         ImGui::BeginMenuBar();
-
             if(ImGui::Button("Load"))
-                SDL_ShowOpenFileDialog((SDL_DialogFileCallback) LoadFileCallback, &_loading, nullptr, nullptr, 0, nullptr, false);
+                SDL_ShowOpenFileDialog((SDL_DialogFileCallback) LoadFileCallback, &_loading, nullptr, nullptr, 0, nullptr, true);
             if(ImGui::Button("Import"))
-                SDL_ShowOpenFileDialog((SDL_DialogFileCallback) ImportFileCallback, &_loading, nullptr, Filters.data(), Filters.size(), nullptr, false);
+                SDL_ShowOpenFileDialog((SDL_DialogFileCallback) ImportFileCallback, &_loading, nullptr, Filters.data(), Filters.size(), nullptr, true);
 
             ImGui::SetNextItemWidth(128.f);
             ImGui::SliderScalar("Icon Size", ImGuiDataType_U16, &_iconSize, &minScale, &maxScale, nullptr, ImGuiSliderFlags_AlwaysClamp);
-
         ImGui::EndMenuBar();
 
         const u32 windowSize = ImGui::GetContentRegionAvail().x - ImGui::GetCursorPos().x;
@@ -222,9 +224,12 @@ namespace gE::Editor
             if(ImGui::Button("OK"))
             {
                 Array<File> files;
-                Model::ReadGLTFAsFile(&GetWindow(), _loading.Path, _gltfImportSettings, files);
-                for(File& file : files)
-                    assetManager.AddFile(std::move(file));
+                for(const Path& path : _loading.Paths)
+                {
+                    Model::ReadGLTFAsFile(&GetWindow(), path, _gltfImportSettings, files);
+                    for(File& file : files)
+                        assetManager.AddFile(std::move(file));
+                }
                 ImGui::CloseCurrentPopup();
             }
             ImGui::EndPopup();

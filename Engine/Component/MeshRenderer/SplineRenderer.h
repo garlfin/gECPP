@@ -41,7 +41,6 @@ namespace gE
 
     #ifdef GE_ENABLE_EDITOR
             bool _enableDebugView = false;
-            u8 _debugIterations = 16; // Per segment
             Pointer<API::VAO> _debugVAO;
     #endif
     };

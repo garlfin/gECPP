@@ -24,6 +24,8 @@ namespace gE
         _weakAsset(asset),
         _asset(asset)
     {
+        if(_asset)
+            _asset->_file = this;
     }
 
     File::File(Window* window, const Path& path, const WeakReference<Asset>& asset) :
@@ -33,7 +35,22 @@ namespace gE
         _uuid(HashPath(_path)),
         _weakAsset(asset)
     {
+        if(_weakAsset)
+            _weakAsset->_file = this;
     }
+
+    OPERATOR_MOVE_IMPL(File::, File, this->~File(),
+        _window = o._window;
+        _type = o._type;
+        _path = std::move(o._path);
+        _uuid = o._uuid;
+        _bank = o._bank;
+        _weakAsset = std::move(o._weakAsset);
+        _asset = std::move(o._asset);
+
+        if(_weakAsset)
+            _weakAsset->_file = this;
+    );
 
     const Type<Window*>* File::ValidateAssetType(const Asset& asset)
     {
@@ -47,15 +64,21 @@ namespace gE
     REFLECTABLE_NAME_IMPL(File, return _path.string());
     REFLECTABLE_FACTORY_IMPL(File);
 
+    void FileInfo::IDeserialize(istream& in, SETTINGS_T s) {}
+    void FileInfo::ISerialize(ostream& out) const {}
+
+    REFLECTABLE_ONGUI_IMPL(FileInfo, );
+    REFLECTABLE_FACTORY_IMPL(FileInfo);
+
     Bank::Bank(Window* window, const Path& path, AssetLoadMode mode) :
+        _window(window),
         _path(path),
-        _stream(_path, std::ios::in | std::ios::binary),
-        _window(window)
+        _stream(ref_create<std::ifstream>(_path, std::ios::in | std::ios::binary))
     {
-        GE_ASSERTM(_stream.is_open(), "COULD NOT OPEN BANK!");
+        GE_ASSERTM(_stream->fail(), "COULD NOT OPEN BANK!");
     }
 
-    const File* Bank::FindFile(const UUID& uuid)
+    const File* Bank::FindFile(const UUID& uuid) const
     {
         const auto it = _files.find(uuid);
         return it == _files.end() ? nullptr : &*it;
@@ -71,12 +94,47 @@ namespace gE
 
     void Bank::IDeserialize(istream& in, SETTINGS_T s)
     {
-        // TODO
+        _path = s.Path;
+        _uuid = HashPath(_path);
+        _stream = s.Stream;
+
+        if(s.Mode == AssetLoadMode::None)
+            return;
+
+        const size_t fileCount = Read<size_t>(in);
+
+        if((bool)(s.Mode & AssetLoadMode::Paths))
+            for(size_t i = 0; i < fileCount; i++)
+                _fileInfo.insert(ReadSerializable<FileInfo>(in, nullptr));
+
+        auto infoIt = _fileInfo.begin();
+        GE_ASSERTM(infoIt != _fileInfo.end() && _fileInfo.size() == fileCount, "PATHS NOT LOADED");
+
+        if((bool)(s.Mode & AssetLoadMode::Files))
+            for(size_t i = 0; i < fileCount; i++, ++infoIt)
+            {
+                FileLoadArgs args{ _window, this, infoIt->Path, s.Mode };
+                _files.emplace(in, args);
+            }
     }
 
     void Bank::ISerialize(ostream& out) const
     {
-        // TODO
+        Write(out, _files.size());
+
+        const size_t infoTableOffset = out.tellp();
+        out.seekp(infoTableOffset + sizeof(FileInfo) * _files.size());
+
+        FILE_INFO_SET_T fileInfoSet;
+        for(const File& file : _files)
+        {
+            fileInfoSet.emplace(file._path, file._uuid, out.tellp());
+            file.Serialize(out);
+        }
+
+        out.seekp(infoTableOffset);
+        for(const FileInfo& info : fileInfoSet)
+            Write(out, info);
     }
 
     void Bank::RemoveFile(const File& file)
@@ -85,9 +143,11 @@ namespace gE
         _files.erase(file);
     }
 
-    std::ifstream& Bank::MoveStreamToFile(const UUID& uuid)
+    std::istream& Bank::MoveStreamToFile(const UUID& uuid)
     {
-        return _stream;
+        const auto& it = _fileInfo.find(uuid);
+        GE_ASSERT(it != _fileInfo.end());
+        return _stream->seekg(it->Offset);
     }
 
     REFLECTABLE_ONGUI_IMPL(Bank, );
@@ -116,7 +176,7 @@ namespace gE
 
     const File* AssetManager::LoadFile(const Path& path, AssetLoadMode mode)
     {
-        FileLoadArgs args(_window, nullptr, mode);
+        FileLoadArgs args(_window, nullptr, path, mode);
 
         std::ifstream stream(path, std::ios::in | std::ios::binary);
 
@@ -136,11 +196,16 @@ namespace gE
         return &*_files.insert(std::move(file)).first;
     }
 
-    const File* AssetManager::FindFile(const UUID& uuid)
+    const File* AssetManager::FindFile(const UUID& uuid) const
     {
-        const auto& it = _files.find(uuid);
-        if(it == _files.end()) return nullptr;
-        return &*it;
+        if(const auto& it = _files.find(uuid); it != _files.end())
+            return &*it;
+
+        for(const auto& bank : _banks)
+            if(const File* file = bank->FindFile(uuid))
+                return file;
+
+        return nullptr;
     }
 
     bool AssetManager::RemoveBank(const UUID& uuid)
@@ -189,11 +254,11 @@ namespace gE
     void File::IDeserialize(istream& in, SETTINGS_T s)
     {
         _bank = s.Bank;
+        _path = s.Path;
+        _uuid = HashPath(_path);
 
         if(_bank) _bank->MoveStreamToFile(_uuid);
 
-        _path = Read<std::string>(in);
-        _uuid = Read<UUID>(in);
         _type = ReadType<Window*>(in);
         GE_ASSERT(_type);
 
@@ -203,13 +268,9 @@ namespace gE
 
     void File::ISerialize(ostream& out) const
     {
-        Write(out, _path.string());
-        Write(out, _uuid);
-
         GE_ASSERTM(!_asset.IsFree(), "Asset must be loaded.");
         GE_ASSERT(_type);
         WriteType(out, *_type);
-
         Write(out, *_asset);
     }
 

@@ -5,6 +5,7 @@
 #pragma once
 
 #include <set>
+#include <map>
 #include <Core/Pointer.h>
 #include <Core/Macro.h>
 #include <Core/Serializable/Serializable.h>
@@ -44,6 +45,11 @@ namespace gE
         void Serialize(ostream& out) const override { SUPER::Serialize(out); }
 
         ~Asset() override = default;
+
+        friend class File;
+
+    private:
+        File* _file = nullptr;
     };
 
     enum class AssetLoadMode : u8
@@ -57,17 +63,31 @@ namespace gE
     ENUM_OPERATOR(AssetLoadMode, |);
     ENUM_OPERATOR(AssetLoadMode, &);
 
+    struct FileInfo : public Serializable<>
+    {
+        SERIALIZABLE_PROTO_NOHEADER("INFO", FileInfo, Serializable);
+
+    public:
+        FileInfo(const Path& path, UUID uuid, size_t offset) : Path(path), UUID(uuid), Offset(offset) {};
+        FileInfo(Path&& path, UUID uuid, size_t offset) : Path(std::move(path)), UUID(uuid), Offset(offset) {};
+
+        Path Path;
+        UUID UUID;
+        mutable size_t Offset;
+    };
+
     struct FileLoadArgs
     {
         Window* Window;
         Bank* Bank;
+        Path Path;
         AssetLoadMode LoadMode;
     };
 
     struct BankLoadArgs
     {
         Path Path;
-        std::ifstream Stream;
+        Reference<std::istream> Stream;
         Window* Window;
         AssetLoadMode Mode;
     };
@@ -83,18 +103,25 @@ namespace gE
         NODISCARD ALWAYS_INLINE bool operator()(const File& a, const File& b) const;
         NODISCARD ALWAYS_INLINE bool operator()(const File& a, const UUID& b) const;
         NODISCARD ALWAYS_INLINE bool operator()(const UUID& a, const File& b) const;
+
+        NODISCARD ALWAYS_INLINE bool operator()(const FileInfo& a, const FileInfo& b) const;
+        NODISCARD ALWAYS_INLINE bool operator()(const FileInfo& a, const UUID& b) const;
+        NODISCARD ALWAYS_INLINE bool operator()(const UUID& a, const FileInfo& b) const;
     };
 }
 
-template struct TypeSystem<gE::FileLoadArgs&>;
-template struct TypeSystem<gE::BankLoadArgs&>;
+template struct TypeSystem<const gE::FileLoadArgs&>;
+template struct TypeSystem<const gE::BankLoadArgs&>;
 
 namespace gE
 {
-    class File final : public Serializable<FileLoadArgs&>
+    class File final : public Serializable<const FileLoadArgs&>
     {
-        SERIALIZABLE_PROTO("FILE", 0, File, Serializable);
+        SERIALIZABLE_PROTO_NOOP("FILE", 0, File, Serializable);
         REFLECTABLE_NAME_PROTO();
+
+        OPERATOR_MOVE_PROTO(File);
+        OPERATOR_COPY_PROTO(File);
 
     public:
         File(Window* window, const Path& path, const Type<Window*>* type);
@@ -149,27 +176,27 @@ namespace gE
         friend class Bank;
     };
 
-    class Bank final : public Serializable<BankLoadArgs&>
+    class Bank final : public Serializable<const BankLoadArgs&>
     {
         SERIALIZABLE_PROTO("BANK", 0, Bank, Serializable);
         REFLECTABLE_NAME_PROTO();
 
     public:
         using FILE_SET_T = std::set<File, AssetCompare>;
+        using FILE_INFO_SET_T = std::set<FileInfo, AssetCompare>;
 
         Bank(Window* window, const Path& path, AssetLoadMode);
 
-        void Free() { _path.clear(); _stream.close(); }
-        bool IsFree() const { return _path.empty() && !_stream.is_open(); }
+        void Free() { _path.clear(); _stream.Free(); _fileInfo.clear(); }
+        bool IsFree() const { return _path.empty() && !_stream && _fileInfo.empty(); }
 
         GET_CONST(const Path&, Path, _path);
         GET(std::istream&, Stream, _stream);
         GET_CONST(Window&, Window, *_window);
         GET_CONST(const UUID&, UUID, _uuid);
-        GET(FILE_SET_T, Files, _files);
 
-        const File* FindFile(const Path& path) { return FindFile(HashPath(path)); }
-        const File* FindFile(const UUID& uuid);
+        const File* FindFile(const Path& path) const { return FindFile(HashPath(path)); }
+        const File* FindFile(const UUID& uuid) const;
 
         const File* AddFile(File&&);
         void RemoveFile(const File&);
@@ -180,14 +207,15 @@ namespace gE
         NODISCARD ALWAYS_INLINE bool operator<(const Bank& o) const { return _uuid < o._uuid; }
 
     private:
-        std::ifstream& MoveStreamToFile(const UUID& uuid);
+        std::istream& MoveStreamToFile(const UUID& uuid);
+
+        Window* _window = DEFAULT;
 
         Path _path = DEFAULT;
         UUID _uuid = DEFAULT;
-        std::ifstream _stream = DEFAULT;
-
+        Reference<std::istream> _stream = DEFAULT;
         FILE_SET_T _files = DEFAULT;
-        Window* _window = DEFAULT;
+        FILE_INFO_SET_T _fileInfo = DEFAULT;
 
         friend class File;
     };
@@ -222,8 +250,8 @@ namespace gE
         template<class SERIALIZABLE_T> requires ReflConstructible<SERIALIZABLE_T>
         const File* AddSerializableFromFile(const Path&);
 
-        NODISCARD const File* FindFile(const Path& path) { return FindFile(HashPath(path)); }
-        NODISCARD const File* FindFile(const UUID& uuid);
+        NODISCARD const File* FindFile(const Path& path) const { return FindFile(HashPath(path)); }
+        NODISCARD const File* FindFile(const UUID& uuid) const;
 
         void RemoveBank(const Bank& bank) { RemoveBank(bank.GetUUID()); }
         bool RemoveBank(const Path& path) { return RemoveBank(HashPath(path)); }

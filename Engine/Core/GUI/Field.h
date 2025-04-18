@@ -32,7 +32,8 @@ namespace gE
     {
         Stats = 1,
         Elements = 1 << 1,
-        Name = 1 << 2
+        Name = 1 << 2,
+        Default = Elements
     };
 
     ENUM_OPERATOR(ArrayViewMode, &);
@@ -41,7 +42,7 @@ namespace gE
     template<class T>
     struct ArrayField : public T
     {
-        ArrayViewMode ViewMode = ArrayViewMode::Elements;
+        ArrayViewMode ViewMode = ArrayViewMode::Default;
     };
 
     enum class ScalarViewMode : u8

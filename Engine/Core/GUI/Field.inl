@@ -140,7 +140,7 @@ namespace gE
                 t = glm::clamp(t, settings.Minimum, settings.Maximum);
 
             if(!settings.Tooltip.empty() && ImGui::IsItemHovered(GE_EDITOR_TOOLTIP_FLAGS))
-                ImGui::SetTooltip(settings.Tooltip.data());
+                ImGui::SetTooltip("%s", settings.Tooltip.data());
         }
         else if constexpr(isDrawable)
         {
@@ -237,7 +237,7 @@ namespace gE
         vec = glm::clamp(vec, settings.Minimum, settings.Maximum);
 
         if(!settings.Tooltip.empty() && ImGui::IsItemHovered(GE_EDITOR_TOOLTIP_FLAGS))
-            ImGui::SetTooltip(settings.Tooltip.data());
+            ImGui::SetTooltip("%s", settings.Tooltip.data());
 
         /*if constexpr (CONST)
             ImGui::EndDisabled();*/

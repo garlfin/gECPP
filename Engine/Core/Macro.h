@@ -22,9 +22,16 @@ using namespace std::string_view_literals;
 #include <cxxabi.h>
 	#define PRETTY_FUNCTION __PRETTY_FUNCTION__
 	#define TRAP __builtin_trap
-	#define DEBUGBREAK __debugbreak
 	#define FORCE_IMPL __attribute__((used))
 	#define NO_IMPL __attribute__((unused))
+#endif
+
+#if defined(__WIN64__) || defined(__WIN32__)
+	#define DEBUGBREAK __debugbreak
+#endif
+
+#if defined(__APPLE__)
+	#define DEBUGBREAK __builtin_debugtrap
 #endif
 
 #ifdef GE_COMPILER_MSVC
@@ -94,8 +101,8 @@ T& PlacementNew(T& to, ARGS&&... args)
 #define assertm(exp, msg) assert(((void) msg, exp))
 
 #ifdef DEBUG
-	#define GE_ASSERTM(COND, ERR) { bool cond = COND; if(!cond) __debugbreak(); assertm(cond, ERR); }
-	#define GE_ASSERT(COND) { bool cond = COND; if(!cond) __debugbreak(); assert(cond); }
+	#define GE_ASSERTM(COND, ERR) { bool cond = COND; if(!cond) DEBUGBREAK(); assertm(cond, ERR); }
+	#define GE_ASSERT(COND) { bool cond = COND; if(!cond) DEBUGBREAK(); assert(cond); }
 #else
 	#define GE_ASSERTM(COND, ERR)
 	#define GE_ASSERT(COND)
@@ -140,51 +147,51 @@ T& PlacementNew(T& to, ARGS&&... args)
     SET(add_const_before_ref<TYPE>, ACCESSOR, FIELD)
 
 #define OPERATOR_MOVE_PROTO(TYPE) \
-    TYPE(TYPE&&); \
-	TYPE& operator=(TYPE&&);
+    TYPE(TYPE&&) noexcept; \
+	TYPE& operator=(TYPE&&) noexcept;
 
 #define OPERATOR_COPY_PROTO(TYPE) \
-	TYPE(const TYPE&); \
-	TYPE& operator=(const TYPE& ACCESSOR);
+	TYPE(const TYPE&) noexcept; \
+	TYPE& operator=(const TYPE& ACCESSOR) noexcept;
 
-#define OPERATOR_MOVE_IMPL(TYPE, DESTRUCTOR, INHERIT, CODE) \
-    TYPE(TYPE&& o) noexcept \
+#define OPERATOR_MOVE_IMPL(NAMESPACE, TYPE, DESTRUCTOR, CODE) \
+    NAMESPACE TYPE(TYPE&& o) noexcept \
 	{ \
 		if(&o == this) return; \
-		[&]() { INHERIT; CODE; }(); \
+		[&]() { CODE; }(); \
 	} \
-	TYPE& operator=(TYPE&& o) noexcept \
+	TYPE& NAMESPACE operator=(TYPE&& o) noexcept \
 	{ \
 		if(&o == this) return *this; \
 		DESTRUCTOR; \
-		[&]() { INHERIT; CODE; }(); \
+		[&]() { CODE; }(); \
 		return* this; \
 	}
 
-#define OPERATOR_COPY_IMPL(TYPE, DESTRUCTOR, INHERIT, CODE) \
-	TYPE(const TYPE& o) \
+#define OPERATOR_COPY_IMPL(NAMESPACE, TYPE, DESTRUCTOR, CODE) \
+	NAMESPACE TYPE(const TYPE& o) \
 	{ \
-		[&]() { INHERIT; CODE; }(); \
+		[&]() { CODE; }(); \
 	} \
-	TYPE& operator=(const TYPE& o) \
+	TYPE& NAMESPACE operator=(const TYPE& o) \
 	{ \
 		if(&o == this) return *this; \
 		DESTRUCTOR; \
-		[&]() { INHERIT; CODE; }(); \
+		[&]() { CODE; }(); \
 		return *this; \
 	}
 
 #define OPERATOR_MOVE(TYPE, DESTRUCTOR, SUPER, CODE) \
-	OPERATOR_MOVE_IMPL(TYPE, TYPE::DESTRUCTOR(), SUPER::operator=(move(o)), CODE)
+	OPERATOR_MOVE_IMPL(, TYPE, TYPE::DESTRUCTOR(), SUPER::operator=(move(o)); CODE)
 
 #define OPERATOR_COPY(TYPE, DESTRUCTOR, SUPER, CODE) \
-	OPERATOR_COPY_IMPL(TYPE, TYPE::DESTRUCTOR(), SUPER::operator=(o), CODE)
+	OPERATOR_COPY_IMPL(, TYPE, TYPE::DESTRUCTOR(), SUPER::operator=(o); CODE)
 
 #define OPERATOR_MOVE_NOSUPER(TYPE, DESTRUCTOR, CODE) \
-	OPERATOR_MOVE_IMPL(TYPE, TYPE::DESTRUCTOR(),, CODE)
+	OPERATOR_MOVE_IMPL(, TYPE, TYPE::DESTRUCTOR(), CODE)
 
 #define OPERATOR_COPY_NOSUPER(TYPE, DESTRUCTOR, CODE) \
-	OPERATOR_COPY_IMPL(TYPE, TYPE::DESTRUCTOR(),, CODE)
+	OPERATOR_COPY_IMPL(, TYPE, TYPE::DESTRUCTOR(), CODE)
 
 #define OPERATOR_CAST_CONST(TYPE, FIELD) ALWAYS_INLINE operator TYPE() const { return FIELD; }
 #define OPERATOR_CAST(TYPE, FIELD) \

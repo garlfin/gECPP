@@ -67,6 +67,9 @@ public:
     using Point = SplinePoint<DIMENSION>;
     using Position = ::Position<DIMENSION>;
 
+    GET_CONST(size_t, Size, _points.size());
+    GET_CONST(size_t, Segments, GetSize() - 1);
+
     float GetLength() const;
     void AddPoint(const Point& point, size_t index = -1);
     void SetPoint(size_t index, const Point&);

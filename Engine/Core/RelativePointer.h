@@ -17,12 +17,12 @@ public:
 	RelativePointer(T& t) : _t(&t) {};
 	RelativePointer(T* t) : _t(t) {};
 
-	OPERATOR_COPY_IMPL(RelativePointer,,,
+	OPERATOR_COPY_IMPL(, RelativePointer,,
 		_t = (T*) ((u64) o._t - (u64) &o + (u64) this);
 		if(!o._t) _t = nullptr;
 	);
 
-	OPERATOR_MOVE_IMPL(RelativePointer,,,
+	OPERATOR_MOVE_IMPL(, RelativePointer,,
 		_t = (T*) ((std::byte*) o._t - (std::byte*) &o + (std::byte*) this);
 		if(!o._t) _t = nullptr;
 	);

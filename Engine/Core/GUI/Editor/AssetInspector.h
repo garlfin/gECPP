@@ -30,10 +30,10 @@ namespace gE::Editor
         None = -1
     };
 
-    struct LoadingAsset
+    struct LoadingAssetData
     {
         std::mutex Mutex = DEFAULT;
-        Path Path = DEFAULT;
+        std::vector<Path> Paths = DEFAULT;
         LoadAssetMode Mode = LoadAssetMode::None;
     };
 
@@ -56,8 +56,9 @@ namespace gE::Editor
     public:
         AssetManager(Editor*, AssetInspector*);
 
-        GET(LoadingAsset&, Loading, _loading);
+        GET(LoadingAssetData&, Loading, _loading);
         GET_SET(Reference<SpriteSheet>, IconSheet, _iconSpriteSheet);
+        GET_SET(Path&, Path, _path);
 
         void AddIcon(const Type<gE::Window*>& type, const Sprite& sprite);
 
@@ -65,18 +66,21 @@ namespace gE::Editor
         void IOnEditorGUI() override;
 
     private:
-        static void LoadFileCallback(LoadingAsset*, const char* const* paths, int filter);
-        static void ImportFileCallback(LoadingAsset*, const char* const* paths, int filter);
+        static void LoadFileCallback(LoadingAssetData*, const char* const* paths, int filter);
+        static void ImportFileCallback(LoadingAssetData*, const char* const* paths, int filter);
 
         void LoadPendingFile();
 
         AssetInspector* _inspector = DEFAULT;
         u16 _iconSize = 128;
-        LoadingAsset _loading = DEFAULT;
+        LoadingAssetData _loading = DEFAULT;
+
+        Path _path = "/Resource/";
 
         Reference<SpriteSheet> _iconSpriteSheet;
         std::map<const Type<gE::Window*>*, Sprite> _icons;
         Sprite _defaultIcon;
+
         Model::GLTFImportSettings _gltfImportSettings = DEFAULT;
     };
 }
