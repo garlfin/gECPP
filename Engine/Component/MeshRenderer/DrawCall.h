@@ -49,10 +49,10 @@ namespace gE
 		std::set<const DrawCall*, DrawCallCompare>::iterator _it = DEFAULT;
 
 		const Transform* _transform = nullptr;
-		API::IVAO* _vao = nullptr;
 		Material* _material = nullptr;
 		u8 _materialIndex = 0;
 		u8 _lod = 0;
+		API::IVAO* _vao = nullptr;
 
 		GPU::ObjectFlags _flags = DEFAULT;
 	};

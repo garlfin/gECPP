@@ -34,7 +34,7 @@ namespace gE
         void SetMaterial(u8 i, Reference<Material>&& mat);
         void SetNullMaterial(u8 i);
 
-        virtual API::IVAO& GetVAO() const { return _mesh->VAO; }
+        virtual API::IVAO* GetVAO() const { return _mesh ? _mesh->VAO.GetPointer() : nullptr; }
         virtual GPU::ObjectFlags GetFlags() const { return DEFAULT; }
 
         friend class RendererManager;
@@ -85,9 +85,13 @@ namespace gE
         void OnRender(float delta, Camera* camera) override;
         void OnUpdate(float delta) override;
 
-        API::IVAO& GetVAO() const override;
+        API::IVAO* GetVAO() const override;
         GPU::ObjectFlags GetFlags() const override;
         void SetMesh(const Reference<Mesh>& mesh) override;
+
+    #ifdef GE_ENABLE_EDITOR
+        GET_SET(bool, EnableDebugView, _enableDebugView);
+    #endif
 
     protected:
         static bool DragDropAcceptor(const Reference<Asset>& asset, NoUserData);
@@ -133,6 +137,7 @@ namespace gE
 #ifdef DEBUG
         GET_CONST(const API::VAO&, BoneDebugVAO, _boneDebugVAO);
         GET_CONST(const API::Shader&, BoneDebugShader, _boneDebugShader);
+        GET_CONST(const API::Shader&, WireframeShader, _wireframeShader);
 #endif
 
     private:
@@ -143,6 +148,7 @@ namespace gE
 #ifdef DEBUG
         API::VAO _boneDebugVAO;
         API::Shader _boneDebugShader;
+        API::Shader _wireframeShader;
 #endif
     };
 }

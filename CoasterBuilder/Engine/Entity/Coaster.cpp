@@ -29,7 +29,22 @@ namespace Coaster
 
     Coaster::Coaster(gE::Window* window, const Reference<const CoasterType>& type) : Entity(window),
         _type(type),
-        _editor(this)
+        _editor(this),
+        _splineRenderer(this, DEFAULT, _spline)
     {
+        _splineRenderer.SetEnableDebugView(true);
+        _spline.AddPoint({ glm::vec3(0.f, 0.f, 0.f) });
+
+        _spline.AddPoint({ glm::vec3(1.f, 0.f, 0.f) });
+        _spline.AddPoint({ glm::vec3(1.f, 1.f, 0.f) });
+
+        _spline.AddPoint({ glm::vec3(1.f, 2.f, 0.f) });
+        _spline.AddPoint({ glm::vec3(0.f, 2.f, 0.f) });
+
+        _spline.AddPoint({ glm::vec3(-1.f, 2.f, 0.f) });
+        _spline.AddPoint({ glm::vec3(-1.f, 1.f, 0.f) });
+
+        _spline.AddPoint({ glm::vec3(-1.f, 0.f, 0.f) });
+        _spline.AddPoint({ glm::vec3(0.f, 0.f, 0.f) });
     }
 }

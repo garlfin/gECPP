@@ -75,9 +75,15 @@ namespace gE
 
 		glDepthMask(0);
 		glColorMask(1, 1, 1, 1);
+		glLineWidth(2.f);
 
+#ifdef DEBUG
+		window.GetCubemaps().DrawSkybox(); // Allow wireframes to draw on top
+		window.GetRenderers().OnRender(0.f, &camera);
+#else
 		window.GetRenderers().OnRender(0.f, &camera);
 		window.GetCubemaps().DrawSkybox();
+#endif
 	}
 
 	void DefaultPipeline::Target2D::PostProcessPass(float)

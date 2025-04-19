@@ -10,35 +10,41 @@ template <class T>
 constexpr T CubicInterpolation<T>::Interpolate(float t, const T& a, const T& b, const T& c) const
 {
     const T at = a * t, bt = b * t, ct = c * t;
-    return at * t - 2 * bt * t + ct * t + 2 * bt - 2 * ct + c;
+    return a - 2.f * at + 2.f * bt + at * t - 2.f * bt * t + ct * t;
 }
 
 template <class T>
 constexpr T CubicInterpolation<T>::Interpolate(float t, const T& a, const T& b) const
 {
-    return t * a + (1.f - t) * b;
+    return t * b + (1.f - t) * a;
 }
 
 template <Dimension DIMENSION>
 float Spline<DIMENSION>::GetLength() const
 {
-    const size_t samples = SPLINE_LENGTH_ITERATIONS * _points.size();
-    float length = 0.0;
+    const size_t samples = GetSegmentCount() * SPLINE_LENGTH_ITERATIONS;
 
-    if(_points.size() <= 1 || !_lengthInvalidated)
-        return length;
+    if(!_lengthInvalidated)
+        return _length;
 
-    Position previousPosition = _points[0].Position;
+    _lengthInvalidated = false;
+
+    if(_points.size() <= 1)
+        return _length = 0.f;
+
+    if(_points.size() == 2)
+        return _length = glm::distance(_points[0].Position, _points[1].Position) * 2.f;
+
+    Position previousPosition = Evaluate(DistanceMode::Relative, 0.f).Position;
     for(size_t i = 0; i < samples; i++)
     {
         const Position newPosition = Evaluate(DistanceMode::Relative, (float)(i + 1) / samples).Position;
 
-        length += glm::distance(previousPosition, newPosition);
+        _length += glm::distance(previousPosition, newPosition);
         previousPosition = newPosition;
     }
 
-    _lengthInvalidated = false;
-    return length;
+    return _length;
 }
 
 template <Dimension DIMENSION>
@@ -68,24 +74,40 @@ template <Dimension DIMENSION>
 template <class INTERPOLATOR> requires interpolator<SplinePoint<DIMENSION>, INTERPOLATOR>
 typename Spline<DIMENSION>::Point Spline<DIMENSION>::Evaluate(DistanceMode mode, float distance, INTERPOLATOR interpolator) const
 {
+    distance = AdjustDistance(mode, distance);
     if(mode == DistanceMode::Absolute)
         distance /= GetLength();
 
     if(_points.empty()) return DEFAULT;
+    if(!GetSegmentCount() || GetSegmentCount() % 2 == 1) return DEFAULT;
 
-    const size_t basePosition = distance * _points.size();
+    const float delta = GetSegmentCount() / 2.f;
+    float fac = distance * delta;
+    size_t basePoint = fac;
+    fac -= basePoint;
+    basePoint *= 2;
 
-    const Point& a = _points[(basePosition - 1) % _points.size()];
-    const Point& b = _points[basePosition];
-    const Point& c = _points[(basePosition + 1) % _points.size()];
+    if(_points.size() - basePoint == 0)
+            return _points.back();
 
-    if(_points.size() == 1) return b;
-    if(_points.size() == 2) return interpolator.Interpolate(distance, b, c);
-
-    const float delta = 1.f / (_points.size() - 1);
-    const float fac = (glm::mod(distance, delta) + delta) / (delta * 2.f);
+    const SplinePoint<DIMENSION>& a = _points[basePoint];
+    const SplinePoint<DIMENSION>& b = _points[basePoint + 1];
+    const SplinePoint<DIMENSION>& c = _points[basePoint + 2];
 
     return interpolator.Interpolate(fac, a, b, c);
+}
+
+template <Dimension DIMENSION>
+float Spline<DIMENSION>::AdjustDistance(DistanceMode mode, float distance) const
+{
+    const float denominator = (mode == DistanceMode::Absolute ? GetLength() : 1.f) + FLT_EPSILON;
+
+    if(distance >= 0)
+        distance = glm::mod(distance, denominator);
+    else
+        distance = denominator - glm::mod(distance, denominator);
+
+    return distance;
 }
 
 template <Dimension DIMENSION>

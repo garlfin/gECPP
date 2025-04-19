@@ -7,6 +7,7 @@
 #include <Window.h>
 #include <CoasterBuilder/Engine/Component/CoasterEditor.h>
 #include "CoasterFlags.h"
+#include "Component/MeshRenderer/SplineRenderer.h"
 #include "Core/Math/Spline.h"
 
 namespace Coaster
@@ -55,6 +56,8 @@ namespace Coaster
     private:
         Reference<const CoasterType> _type;
         Spline<Dimension::D3D> _spline;
+
         CoasterEditor _editor;
+        gE::SplineRenderer _splineRenderer;
     };
 }

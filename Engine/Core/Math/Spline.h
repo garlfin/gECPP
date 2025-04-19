@@ -60,6 +60,7 @@ concept interpolator = requires(const POINT_T& point, const INTERPOLATOR_T& inte
     { interpolator.Interpolate(0.f, point, point) } -> std::same_as<POINT_T>;
 };
 
+// Like bezier, but nurbs and terrible
 template<Dimension DIMENSION = Dimension::D3D>
 class Spline
 {
@@ -68,19 +69,20 @@ public:
     using Position = ::Position<DIMENSION>;
 
     GET_CONST(size_t, Size, _points.size());
-    GET_CONST(size_t, Segments, GetSize() - 1);
+    GET_CONST(size_t, SegmentCount, GetSize() - 1);
 
     float GetLength() const;
     void AddPoint(const Point& point, size_t index = -1);
     void SetPoint(size_t index, const Point&);
     const Point& GetPoint(size_t index);
 
-    template<class INTERPOLATOR = CubicInterpolation<Point>> requires interpolator<Point, INTERPOLATOR>
+    template<class INTERPOLATOR = CubicInterpolation<SplinePoint<DIMENSION>>> requires interpolator<SplinePoint<DIMENSION>, INTERPOLATOR>
     Point Evaluate(DistanceMode mode, float distance, INTERPOLATOR interpolator = DEFAULT) const;
 
 private:
-    std::vector<Point> _points;
+    float AdjustDistance(DistanceMode mode, float distance) const;
 
+    std::vector<Point> _points;
     mutable float _length = DEFAULT;
     mutable bool _lengthInvalidated = true;
 };

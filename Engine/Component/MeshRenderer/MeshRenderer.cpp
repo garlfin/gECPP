@@ -199,10 +199,10 @@ namespace gE
 		skinningShader.Dispatch(DIV_CEIL(vertexCount, 32));
 	}
 
-	GL::IVAO& AnimatedMeshRenderer::GetVAO() const
+	GL::IVAO* AnimatedMeshRenderer::GetVAO() const
 	{
 		if(GetMesh()->Skeleton)
-			return _vao;
+			return _vao.GetPointer();
 		return MeshRenderer::GetVAO();
 	}
 
@@ -273,7 +273,8 @@ namespace gE
 		_skinningShader(window, GPU::ComputeShader("Resource/Shader/Compute/skinning.comp")),
 		_bonesBuffer(window, GE_MAX_BONES, nullptr, GPU::BufferUsageHint::Dynamic | GPU::BufferUsageHint::Write, true),
 		_boneDebugVAO(window, BoneDebugVAOFormat),
-		_boneDebugShader(window, GPU::Shader("Resource/Shader/bone.vert", "Resource/Shader/Bone.frag"))
+		_boneDebugShader(window, GPU::Shader("Resource/Shader/bone.vert", "Resource/Shader/wireframe.frag")),
+		_wireframeShader(window, GPU::Shader("Resource/Shader/wireframe.vert", "Resource/Shader/wireframe.frag"))
 	{
 		_bonesBuffer.Bind(API::BufferBaseTarget::ShaderStorage, 11);
 	}
@@ -289,13 +290,12 @@ namespace gE
 		_material(renderer.GetMaterial(i)),
 		_materialIndex(i),
 		_lod(0),
-		_flags(renderer.GetFlags())
+		_flags(renderer.GetFlags()),
+		_vao(renderer.GetVAO())
 	{
+		if(!_vao) return;
 		if(i >= renderer.GetMesh()->VAO->GetSettings().Counts.MaterialCount) return;
-
-		_vao = &renderer.GetVAO();
-		if(_vao)
-			renderer.GetWindow().GetRenderers().GetDrawCallManager().Register(this);
+		renderer.GetWindow().GetRenderers().GetDrawCallManager().Register(this);
 	}
 
 	DrawCall::~DrawCall()
