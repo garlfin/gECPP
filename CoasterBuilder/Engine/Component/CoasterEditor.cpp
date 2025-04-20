@@ -15,23 +15,38 @@ namespace Coaster
     void CoasterEditor::OnGUI(float delta)
     {
         Coaster& owner = GetOwner();
-       // auto& tracks = GetOwner().GetTrack().GetList();
-        //Track& lastTrack = ***tracks.GetLast();
 
         ImGui::Begin("Roller Coaster Construction", nullptr, ImGuiWindowFlags_MenuBar);
             ImGui::BeginMenuBar();
-               // const size_t trackCount = tracks.Size();
-               // ImGui::TextUnformatted(std::format("{}\tTrack Count: {}", GetOwner().GetName(), trackCount).c_str());
+               const size_t trackCount = owner.GetTrack().size();
+               ImGui::TextUnformatted(std::format("{}\tTrack Count: {}", GetOwner().GetName(), trackCount).c_str());
             ImGui::EndMenuBar();
 
-        //DrawField(gE::EnumField{ "Type", "", ETrackType, (size_t) lastTrack.GetPiece().NextTypes }, _type, 0);
+            if(ImGui::RadioButton("LEFT", &turnSelection, -3))
+            {
+                _preset = &*owner.GetCoasterType().SmallTurn;
+                _flipped = true;
+            }
 
-        const TrackPiece& piece = owner.GetCoasterType().GetPiece(_type);
+            ImGui::SameLine();
+            if(ImGui::RadioButton("STRAIGHT", &turnSelection, 0) || !turnSelection)
+            {
+                _preset = &*owner.GetCoasterType().Straight;
+                _flipped = false;
+            }
 
-        DrawField(gE::EnumField{ "Modifications", "", ETrackMod, (size_t) piece.Modifications }, _flag, 0);
+            ImGui::SameLine();
+            if(ImGui::RadioButton("RIGHT", &turnSelection, 3))
+            {
+                _preset = &*owner.GetCoasterType().SmallTurn;
+                _flipped = false;
+            }
 
-       // if(ImGui::Button("Build"))
-        //    new Track(&GetWindow(), GetOwner(), &piece, _flag, &lastTrack);
+            if(_preset)
+                DrawField(gE::EnumField{ "Modifications", "", EETrackMod, (size_t) _preset->Modifications }, _modSelection, 0);
+
+            if(ImGui::Button("Build") && _preset)
+                new Track(&owner, owner.GetTrack().size() ? owner.GetTrack().back() : nullptr, _preset, _flipped);
 
         ImGui::End();
     }

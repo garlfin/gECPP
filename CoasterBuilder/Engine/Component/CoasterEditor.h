@@ -9,6 +9,7 @@
 
 namespace Coaster
 {
+    struct TrackPreset;
     class Coaster;
 
     class CoasterEditor : public gE::TypedBehavior<Coaster>
@@ -21,7 +22,11 @@ namespace Coaster
         void OnGUI(float delta) override;
 
     private:
-        TrackMod _flag = TrackMod::None;
-        TrackType _type = TrackType::Straight;
+        int turnSelection = DEFAULT;
+        int slopeSelection = DEFAULT;
+        ETrackMod _modSelection = DEFAULT;
+
+        const TrackPreset* _preset = nullptr;
+        bool _flipped = false;
     };
 }

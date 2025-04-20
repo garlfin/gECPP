@@ -12,19 +12,25 @@
 
 namespace Coaster
 {
-    struct TrackPiece final : public Serializable<gE::Window*>
+    struct TrackPreset final : public Serializable<gE::Window*>
     {
-        SERIALIZABLE_PROTO("TRCK", 0, TrackPiece, Serializable);
+        SERIALIZABLE_PROTO("TRCK", 0, TrackPreset, Serializable);
 
     public:
-        Array<std::pair<TrackMod, Reference<gE::Mesh>>> Meshes = DEFAULT;
-        Reference<gE::Material> Material = DEFAULT;
-        TrackType NextTypes = TrackType::All;
-        TrackMod Modifications = TrackMod::None;
-        i8 ExitRotation = 0;
+        Spline<Dimension::D3D> Spline;
+        ETrackType NextTypes = ETrackType::All;
+        ETrackMod Modifications = ETrackMod::None;
+        glm::vec3 Offset = DEFAULT;
         glm::vec3 ExitPosition = DEFAULT;
+        float ExitRotation = DEFAULT;
+        glm::mat4 FlipTransform = glm::mat4(1.f);
+        bool ReverseSplineOnFlip = false;
+    };
 
-        Reference<gE::Mesh> GetMesh(TrackMod) const;
+    struct TrackAppearance
+    {
+        Reference<gE::Mesh> Mesh;
+        Reference<gE::Material> Material;
     };
 
     struct CoasterType final : public Serializable<gE::Window*>
@@ -34,16 +40,46 @@ namespace Coaster
     public:
         std::string Name;
 
-        TrackPiece Pieces[6];
+        TrackAppearance Track;
 
-        constexpr TrackPiece& GetPiece(TrackType type) { return Pieces[std::countr_zero((std::underlying_type_t<TrackType>) type)]; }
-        constexpr const TrackPiece& GetPiece(TrackType type) const { return Pieces[std::countr_zero((std::underlying_type_t<TrackType>) type)]; }
+        Pointer<TrackPreset> Straight;
 
-        constexpr TrackPiece& Straight() { return GetPiece(TrackType::Straight); }
-        constexpr TrackPiece& SmallTurn() { return GetPiece(TrackType::Turn); }
-        constexpr TrackPiece& BigTurn() { return GetPiece(TrackType::BigTurn); }
+        Pointer<TrackPreset> SmallTurn;
+        Pointer<TrackPreset> BigTurn;
+        Pointer<TrackPreset> HalfTurn;
 
-        Array<TrackPiece> SpecialPieces;
+        Array<TrackPreset> SpecialPieces;
+
+        const TrackPreset* GetPreset(ETrackType) const;
+        const TrackAppearance* GetModAppearance(ETrackMod) const;
+    };
+
+    class Track
+    {
+    public:
+        using Iterator = size_t;
+        using SplineIterator = Spline<Dimension::D3D>::Iterator;
+        using SplineRange = std::ranges::subrange<SplineIterator>;
+
+        Track(Coaster* coaster, const Track* previous, const TrackPreset* preset, bool flip);
+
+        GET_CONST(Iterator, Iterator, _iterator);
+        GET_CONST(Coaster&, Coaster, *_coaster);
+        GET_CONST(const TrackPreset&, Preset, *_preset);
+        GET_CONST(bool, IsFlipped, _isFlipped);
+
+        ~Track();
+
+    private:
+        Coaster* _coaster = DEFAULT;
+        const TrackPreset* _preset = DEFAULT;
+        bool _isFlipped = false;
+
+        Iterator _iterator = DEFAULT;
+        SplineRange _splineIterator = DEFAULT;
+
+        glm::vec3 _exitPosition = DEFAULT;
+        float _exitRotation = 0.f;
     };
 
     class Coaster final : public gE::Entity
@@ -53,9 +89,18 @@ namespace Coaster
 
         GET_CONST(const CoasterType&, CoasterType, *_type);
 
+        GET_CONST(const Spline<Dimension::D3D>&, Spline, _spline);
+        GET_CONST(const std::vector<Track*>&, Track, _track);
+
+        ~Coaster() override;
+
+        friend class Track;
+
     private:
         Reference<const CoasterType> _type;
+
         Spline<Dimension::D3D> _spline;
+        std::vector<Track*> _track;
 
         CoasterEditor _editor;
         gE::SplineRenderer _splineRenderer;

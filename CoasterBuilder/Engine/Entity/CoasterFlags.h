@@ -13,10 +13,22 @@ namespace Coaster
         2.f,
     };
 
+    CONSTEXPR_GLOBAL glm::vec3 Up
+    {
+        0.f,
+        1.f,
+        0.f
+    };
+
+    inline glm::quat TileRotationToQuat(float rotation)
+    {
+        return glm::quat(glm::radians(glm::vec3(0.f, rotation, 0.f)));
+    }
+
     CONSTEXPR_GLOBAL float GentleAngle = 30.f;
     CONSTEXPR_GLOBAL float SteepAngle = 60.f;
 
-    enum class TrackType : u16
+    enum class ETrackType : u16
     {
         Straight = 1 << 0,
         Turn = 1 << 1,
@@ -29,19 +41,20 @@ namespace Coaster
         All = UINT16_MAX
     };
 
-    ENUM_OPERATOR(TrackType, |);
-    ENUM_OPERATOR(TrackType, &);
-    REFLECTABLE_ENUM(Normal, TrackType, 7,
-        ENUM_PAIR(TrackType::Straight, "Straight"),
-        ENUM_PAIR(TrackType::Turn, "Small Turn"),
-        ENUM_PAIR(TrackType::BigTurn, "Big Turn"),
-        ENUM_PAIR(TrackType::HalfTurn, "Half Turn"),
-        ENUM_PAIR(TrackType::GentleSlope, "Gentle Slope"),
-        ENUM_PAIR(TrackType::SteepSlope, "Steep Slope"),
-        ENUM_PAIR(TrackType::Special, "Special"),
+    ENUM_OPERATOR(ETrackType, |);
+    ENUM_OPERATOR(ETrackType, &);
+
+    REFLECTABLE_ENUM(Normal, ETrackType, 7,
+        ENUM_PAIR(ETrackType::Straight, "Straight"),
+        ENUM_PAIR(ETrackType::Turn, "Small Turn"),
+        ENUM_PAIR(ETrackType::BigTurn, "Big Turn"),
+        ENUM_PAIR(ETrackType::HalfTurn, "Half Turn"),
+        ENUM_PAIR(ETrackType::GentleSlope, "Gentle Slope"),
+        ENUM_PAIR(ETrackType::SteepSlope, "Steep Slope"),
+        ENUM_PAIR(ETrackType::Special, "Special"),
     );
 
-    enum class TrackMod : u8
+    enum class ETrackMod : u8
     {
         None = 0,
         Station = 1 << 0,
@@ -52,15 +65,15 @@ namespace Coaster
         All = UINT8_MAX
     };
 
-    ENUM_OPERATOR(TrackMod, |);
-    ENUM_OPERATOR(TrackMod, &);
-    REFLECTABLE_ENUM(Normal, TrackMod, 6,
-        ENUM_PAIR(TrackMod::None, "None"),
-        ENUM_PAIR(TrackMod::Station, "Station"),
-        ENUM_PAIR(TrackMod::ChainLift, "Chain Lift"),
-        ENUM_PAIR(TrackMod::DriveTire, "Drive Tires"),
-        ENUM_PAIR(TrackMod::Brakes, "Brakes"),
-        ENUM_PAIR(TrackMod::BlockBrakes, "Block Brakes"),
+    ENUM_OPERATOR(ETrackMod, |);
+    ENUM_OPERATOR(ETrackMod, &);
+    REFLECTABLE_ENUM(Normal, ETrackMod, 6,
+        ENUM_PAIR(ETrackMod::None, "None"),
+        ENUM_PAIR(ETrackMod::Station, "Station"),
+        ENUM_PAIR(ETrackMod::ChainLift, "Chain Lift"),
+        ENUM_PAIR(ETrackMod::DriveTire, "Drive Tires"),
+        ENUM_PAIR(ETrackMod::Brakes, "Brakes"),
+        ENUM_PAIR(ETrackMod::BlockBrakes, "Block Brakes"),
     );
 
     enum class Direction : u8

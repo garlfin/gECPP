@@ -19,15 +19,18 @@ template<Dimension DIMENSION>
 struct SplinePoint
 {
     ::Position<DIMENSION> Position = DEFAULT;
-    ::Position<DIMENSION> Tangent = DEFAULT;
+    ::Position<DIMENSION> Normal = DEFAULT;
 
-    SplinePoint operator+(const SplinePoint& b) const;
-    SplinePoint operator-(const SplinePoint& b) const;
-    SplinePoint operator*(float b) const;
+    SplinePoint operator*(const TransformMatrix<DIMENSION>& transform) const;
 };
 
 template<Dimension DIMENSION>
-SplinePoint<DIMENSION> operator*(float a, const SplinePoint<DIMENSION>& b) { return b * a; }
+struct SplineResult
+{
+    ::Position<DIMENSION> Position = DEFAULT;
+    ::Position<DIMENSION> Tangent = DEFAULT;
+    ::Position<DIMENSION> Normal = DEFAULT;
+};
 
 template<class T>
 struct SplineDataPoint
@@ -50,34 +53,46 @@ template<class T>
 struct CubicInterpolation
 {
     constexpr T Interpolate(float t, const T& a, const T& b, const T& c) const;
+    constexpr T InterpolateDerivative(float t, const T& a, const T& b, const T& c) const;
     constexpr T Interpolate(float t, const T& a, const T& b) const;
+    constexpr T InterpolateDerivative(float t, const T& a, const T& b) const;
 };
 
 template<class POINT_T, class INTERPOLATOR_T>
 concept interpolator = requires(const POINT_T& point, const INTERPOLATOR_T& interpolator)
 {
     { interpolator.Interpolate(0.f, point, point, point) } -> std::same_as<POINT_T>;
+    { interpolator.InterpolateDerivative(0.f, point, point, point) } -> std::same_as<POINT_T>;
     { interpolator.Interpolate(0.f, point, point) } -> std::same_as<POINT_T>;
+    { interpolator.InterpolateDerivative(0.f, point, point) } -> std::same_as<POINT_T>;
 };
 
 // Like bezier, but nurbs and terrible
-template<Dimension DIMENSION = Dimension::D3D>
+template<Dimension DIMENSION>
 class Spline
 {
 public:
     using Point = SplinePoint<DIMENSION>;
+    using Result = SplineResult<DIMENSION>;
     using Position = ::Position<DIMENSION>;
+    using Iterator = typename std::vector<Point>::const_iterator;
+    using TransformMatrix = TransformMatrix<DIMENSION>;
+
+    Spline() = default;
+    Spline(std::initializer_list<Point> points) : _points(points) {};
 
     GET_CONST(size_t, Size, _points.size());
     GET_CONST(size_t, SegmentCount, GetSize() - 1);
+    GET_CONST(bool, IsValid, GetSize() && GetSegmentCount() && GetSegmentCount() % 2 == 0);
 
     float GetLength() const;
+    void AddSpline(const Spline& spline, const TransformMatrix& transform = TransformMatrix(1.f));
     void AddPoint(const Point& point, size_t index = -1);
     void SetPoint(size_t index, const Point&);
-    const Point& GetPoint(size_t index);
+    Iterator GetPoint(size_t index);
 
-    template<class INTERPOLATOR = CubicInterpolation<SplinePoint<DIMENSION>>> requires interpolator<SplinePoint<DIMENSION>, INTERPOLATOR>
-    Point Evaluate(DistanceMode mode, float distance, INTERPOLATOR interpolator = DEFAULT) const;
+    template<class INTERPOLATOR = CubicInterpolation<::Position<DIMENSION>>> requires interpolator<::Position<DIMENSION>, INTERPOLATOR>
+    Result Evaluate(DistanceMode mode, float distance, INTERPOLATOR interpolator = DEFAULT) const;
 
 private:
     float AdjustDistance(DistanceMode mode, float distance) const;

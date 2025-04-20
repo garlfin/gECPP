@@ -53,6 +53,12 @@ using Position = std::conditional_t<DIMENSION == Dimension::D1D, COMPONENT_T, gl
 template<Dimension DIMENSION, typename COMPONENT_T = u32> requires is_integer_v<COMPONENT_T>
 using Size = Position<DIMENSION, COMPONENT_T>;
 
+template<Dimension DIMENSION, typename COMPONENT_T = float>
+using RotationMatrix = glm::mat<(size_t) DIMENSION, (size_t) DIMENSION, COMPONENT_T>;
+
+template<Dimension DIMENSION, typename COMPONENT_T = float>
+using TransformMatrix = glm::mat<(size_t) DIMENSION + 1, (size_t) DIMENSION + 1, COMPONENT_T>;
+
 // World's dumbest optimization
 constexpr size_t GLSizeOf(u32 t)
 {

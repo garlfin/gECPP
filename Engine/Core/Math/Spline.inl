@@ -14,9 +14,32 @@ constexpr T CubicInterpolation<T>::Interpolate(float t, const T& a, const T& b, 
 }
 
 template <class T>
+constexpr T CubicInterpolation<T>::InterpolateDerivative(float t, const T& a, const T& b, const T& c) const
+{
+    const T at = a * t, bt = b * t, ct = c * t;
+    return 2.f * (b - a) + 2.f * at - 4.f * bt + 2.f * ct;
+}
+
+template <class T>
 constexpr T CubicInterpolation<T>::Interpolate(float t, const T& a, const T& b) const
 {
     return t * b + (1.f - t) * a;
+}
+
+template <class T>
+constexpr T CubicInterpolation<T>::InterpolateDerivative(float t, const T& a, const T& b) const
+{
+    return -2.f * a * b * t + a * b;
+}
+
+template <Dimension DIMENSION>
+SplinePoint<DIMENSION> SplinePoint<DIMENSION>::operator*(const TransformMatrix<DIMENSION>& transform) const
+{
+    return
+    {
+        transform * glm::vec<(size_t) DIMENSION + 1, float>(Position, 1.f),
+        glm::normalize(::Position<DIMENSION>(transform * glm::vec<(size_t) DIMENSION + 1, float>(Normal, 0.f)))
+    };
 }
 
 template <Dimension DIMENSION>
@@ -48,6 +71,21 @@ float Spline<DIMENSION>::GetLength() const
 }
 
 template <Dimension DIMENSION>
+void Spline<DIMENSION>::AddSpline(const Spline& spline, const TransformMatrix& transform)
+{
+    if(!spline.GetIsValid()) return;
+
+    size_t offset = _points.size() ? 1 : 0;
+
+    _points.reserve(_points.size() + spline.GetSize() - offset);
+
+    for(const Point& point : std::ranges::subrange(spline._points.begin() + offset, spline._points.end()))
+        _points.push_back(point * transform);
+
+    _lengthInvalidated = true;
+}
+
+template <Dimension DIMENSION>
 void Spline<DIMENSION>::AddPoint(const Point& point, size_t index)
 {
     if(index == -1u) index = _points.size();
@@ -64,15 +102,15 @@ void Spline<DIMENSION>::SetPoint(size_t index, const Point& point)
 }
 
 template <Dimension DIMENSION>
-const typename Spline<DIMENSION>::Point& Spline<DIMENSION>::GetPoint(size_t index)
+typename Spline<DIMENSION>::Iterator Spline<DIMENSION>::GetPoint(size_t index)
 {
     GE_ASSERT(index < _points.size());
     return _points[index];
 }
 
 template <Dimension DIMENSION>
-template <class INTERPOLATOR> requires interpolator<SplinePoint<DIMENSION>, INTERPOLATOR>
-typename Spline<DIMENSION>::Point Spline<DIMENSION>::Evaluate(DistanceMode mode, float distance, INTERPOLATOR interpolator) const
+template <class INTERPOLATOR> requires interpolator<Position<DIMENSION>, INTERPOLATOR>
+typename Spline<DIMENSION>::Result Spline<DIMENSION>::Evaluate(DistanceMode mode, float distance, INTERPOLATOR interpolator) const
 {
     distance = AdjustDistance(mode, distance);
     if(mode == DistanceMode::Absolute)
@@ -88,13 +126,18 @@ typename Spline<DIMENSION>::Point Spline<DIMENSION>::Evaluate(DistanceMode mode,
     basePoint *= 2;
 
     if(_points.size() - basePoint == 0)
-            return _points.back();
+            return DEFAULT;
 
     const SplinePoint<DIMENSION>& a = _points[basePoint];
     const SplinePoint<DIMENSION>& b = _points[basePoint + 1];
     const SplinePoint<DIMENSION>& c = _points[basePoint + 2];
 
-    return interpolator.Interpolate(fac, a, b, c);
+    return
+    {
+        interpolator.Interpolate(fac, a.Position, b.Position, c.Position),
+        glm::normalize(interpolator.Interpolate(fac, a.Normal, b.Normal, c.Normal)),
+        glm::normalize(interpolator.InterpolateDerivative(fac, a.Position, b.Position, c.Position))
+    };
 }
 
 template <Dimension DIMENSION>
@@ -108,24 +151,6 @@ float Spline<DIMENSION>::AdjustDistance(DistanceMode mode, float distance) const
         distance = denominator - glm::mod(distance, denominator);
 
     return distance;
-}
-
-template <Dimension DIMENSION>
-SplinePoint<DIMENSION> SplinePoint<DIMENSION>::operator+(const SplinePoint& b) const
-{
-    return SplinePoint{ Position + b.Position, Tangent + b.Tangent };
-}
-
-template <Dimension DIMENSION>
-SplinePoint<DIMENSION> SplinePoint<DIMENSION>::operator-(const SplinePoint& b) const
-{
-    return SplinePoint{ Position - b.Position, Tangent - b.Tangent };
-}
-
-template <Dimension DIMENSION>
-SplinePoint<DIMENSION> SplinePoint<DIMENSION>::operator*(float b) const
-{
-    return SplinePoint{ Position * b, Tangent * b };
 }
 
 template <class T, Dimension DIMENSION>

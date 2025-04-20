@@ -41,19 +41,26 @@ namespace Coaster
         auto defaultCoasterType = ref_create<CoasterType>();
         defaultCoasterType->Name = "Default Coaster";
 
-        defaultCoasterType->Straight().Meshes = { {TrackMod::None, Assets.FindFile("CoasterBuilder/Resource/Model/TrackFlat.MESH")->Cast<Mesh, false>() } };
-        defaultCoasterType->Straight().Material = prototypeMaterial;
-        defaultCoasterType->Straight().ExitPosition = glm::vec3(GridSize.x, 0, 0);
-        defaultCoasterType->Straight().Modifications = TrackMod::All;
+        defaultCoasterType->Straight = ptr_create<TrackPreset>();
+        defaultCoasterType->Straight->Spline =
+        {
+            { glm::vec3(-GridSize.x / 2.f, 0.f, 0.f), Up },
+            { glm::vec3(0.f), Up },
+            { glm::vec3(GridSize.x / 2.f, 0.f, 0.f), Up },
+        };
+        defaultCoasterType->Straight->ExitPosition = glm::vec3(GridSize.x, 0.f, 0.f);
 
-        defaultCoasterType->SmallTurn().Meshes = { {TrackMod::None, Assets.FindFile("CoasterBuilder/Resource/Model/TrackTurn.MESH")->Cast<Mesh, false>() } };
-        defaultCoasterType->SmallTurn().Material = prototypeMaterial;
-        defaultCoasterType->SmallTurn().ExitPosition = glm::vec3(GridSize.x, 0, GridSize.x);
-        defaultCoasterType->SmallTurn().ExitRotation = 1;
-        defaultCoasterType->SmallTurn().Modifications = TrackMod::None;
+        defaultCoasterType->SmallTurn = ptr_create<TrackPreset>();
+        defaultCoasterType->SmallTurn->Spline =
+        {
+            { glm::vec3(-GridSize.x / 2.f, 0.f, 0.f), Up },
+            { glm::vec3(0.f), Up },
+            { glm::vec3(0.f, 0.f, GridSize.x / 2.f), Up },
+        };
+        defaultCoasterType->SmallTurn->ExitPosition = glm::vec3(0, 0, GridSize.x);
+        defaultCoasterType->SmallTurn->ExitRotation = -90.f;
+        defaultCoasterType->SmallTurn->FlipTransform = glm::scale(glm::mat4(1.f), glm::vec3(1.f, 1.f, -1.f));
 
-        auto* coaster = new Coaster(this, defaultCoasterType);
-        //auto* station = new Track(this, *coaster, &defaultCoasterType->Straight(), TrackMod::None, nullptr);
-        //station->GetRenderer().SetMaterial(0, prototypeMaterial);
+        new Coaster(this, defaultCoasterType);
     }
 }
