@@ -25,6 +25,8 @@ namespace Coaster
         float ExitRotation = DEFAULT;
         glm::mat4 FlipTransform = glm::mat4(1.f);
         bool ReverseSplineOnFlip = false;
+
+        Pointer<TrackPreset> TransitionPreset;
     };
 
     struct TrackAppearance
@@ -42,13 +44,15 @@ namespace Coaster
 
         TrackAppearance Track;
 
-        Pointer<TrackPreset> Straight;
+        Reference<TrackPreset> Straight;
 
-        Pointer<TrackPreset> SmallTurn;
-        Pointer<TrackPreset> BigTurn;
-        Pointer<TrackPreset> HalfTurn;
+        Reference<TrackPreset> SmallTurn;
+        Reference<TrackPreset> BigTurn;
+        Reference<TrackPreset> HalfTurn;
 
-        Array<TrackPreset> SpecialPieces;
+        Reference<TrackPreset> GentleSlope;
+
+        Array<Reference<TrackPreset>> SpecialPieces;
 
         const TrackPreset* GetPreset(ETrackType) const;
         const TrackAppearance* GetModAppearance(ETrackMod) const;
@@ -66,6 +70,7 @@ namespace Coaster
         GET_CONST(Iterator, Iterator, _iterator);
         GET_CONST(Coaster&, Coaster, *_coaster);
         GET_CONST(const TrackPreset&, Preset, *_preset);
+        GET_CONST(const TrackPreset&, SubPreset, *_subPreset);
         GET_CONST(bool, IsFlipped, _isFlipped);
 
         ~Track();
@@ -73,6 +78,7 @@ namespace Coaster
     private:
         Coaster* _coaster = DEFAULT;
         const TrackPreset* _preset = DEFAULT;
+        const TrackPreset* _subPreset = DEFAULT;
         bool _isFlipped = false;
 
         Iterator _iterator = DEFAULT;

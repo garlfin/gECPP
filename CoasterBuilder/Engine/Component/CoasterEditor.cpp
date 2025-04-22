@@ -22,25 +22,14 @@ namespace Coaster
                ImGui::TextUnformatted(std::format("{}\tTrack Count: {}", GetOwner().GetName(), trackCount).c_str());
             ImGui::EndMenuBar();
 
-            if(ImGui::RadioButton("LEFT", &turnSelection, -3))
-            {
-                _preset = &*owner.GetCoasterType().SmallTurn;
-                _flipped = true;
-            }
+            ImGui::TextUnformatted("Turn:");
+            ShowRadio("Left", -3, *owner.GetCoasterType().SmallTurn, true, false);
+            ShowRadio("Straight", 0, *owner.GetCoasterType().Straight, false);
+            ShowRadio("Right", 3, *owner.GetCoasterType().SmallTurn, false);
 
-            ImGui::SameLine();
-            if(ImGui::RadioButton("STRAIGHT", &turnSelection, 0) || !turnSelection)
-            {
-                _preset = &*owner.GetCoasterType().Straight;
-                _flipped = false;
-            }
-
-            ImGui::SameLine();
-            if(ImGui::RadioButton("RIGHT", &turnSelection, 3))
-            {
-                _preset = &*owner.GetCoasterType().SmallTurn;
-                _flipped = false;
-            }
+            ImGui::TextUnformatted("Slope:");
+            ShowRadio("Gentle Down", 5, *owner.GetCoasterType().GentleSlope, true, false);
+            ShowRadio("Gentle Up", 6, *owner.GetCoasterType().GentleSlope, false);
 
             if(_preset)
                 DrawField(gE::EnumField{ "Modifications", "", EETrackMod, (size_t) _preset->Modifications }, _modSelection, 0);
@@ -49,5 +38,17 @@ namespace Coaster
                 new Track(&owner, owner.GetTrack().size() ? owner.GetTrack().back() : nullptr, _preset, _flipped);
 
         ImGui::End();
+    }
+
+    void CoasterEditor::ShowRadio(std::string_view label, int id, const TrackPreset& preset, bool flipped, bool sameLine)
+    {
+        if(sameLine)
+            ImGui::SameLine();
+
+        if(ImGui::RadioButton(label.data(), &turnSelection, id) || turnSelection == id)
+        {
+            _preset = &preset;
+            _flipped = flipped;
+        }
     }
 }

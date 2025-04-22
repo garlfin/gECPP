@@ -129,7 +129,7 @@ namespace gE
 
 		light.Position = -transform->Forward();
 		light.Type = GPU::LightType::Directional;
-		light.PackedSettings = u32(camera.GetScale().y * 2);
+		light.PackedSettings = (u32) camera.GetScale().y * 2u;
 	}
 
 	REFLECTABLE_FACTORY_NO_IMPL(DirectionalLight);

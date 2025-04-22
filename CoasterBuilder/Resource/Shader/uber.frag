@@ -1,4 +1,6 @@
 #define ENABLE_SMRT_CONTACT_SHADOW
+#define ENABLE_SS_TRACE
+#define DIRECTIONAL_SHADOW_RADIUS 0.05
 
 #define HIZ_MAX_ITER 128
 
@@ -115,21 +117,11 @@ vec3 SampleLighting(Vertex vert, vec3 sampleDirection)
     vec3 rayColor;
 
     #ifdef ENABLE_SS_TRACE
-    if(Scene_VoxelWriteMode != VOXEL_MODE_WRITE && !rough)
+    if(Scene_VoxelWriteMode != VOXEL_MODE_WRITE)
     {
         SSRaySettings raySettings = SSRaySettings(HIZ_MAX_ITER, EPSILON, 0.2, vert.Normal);
-
-        if(rough)
-        {
-            SSLinearRaySettings linearSettings = SSLinearRaySettings(raySettings, 0.1, 1.0);
-            SSRay ssRay = CreateSSRayLinear(ray, linearSettings);
-            result = SS_TraceRough(ssRay, linearSettings);
-        }
-        else
-        {
-            SSRay ssRay = CreateSSRayHiZ(ray, raySettings);
-            result = SS_Trace(ssRay, raySettings);
-        }
+        SSRay ssRay = CreateSSRayHiZ(ray, raySettings);
+        result = SS_Trace(ssRay, raySettings);
 
         rayColor = textureLod(Camera.Color, result.Position.xy, 0.0).rgb;
     }

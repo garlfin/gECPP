@@ -34,14 +34,20 @@ namespace Coaster
         const auto prototypeMaterial = Assets.AddFile(File(this, "Cobble", Material(this, rasterShader, prototypeAlbedo)))->Cast<PBRMaterial, false>();
 
         constexpr glm::vec3 sunRotation(-31.f, 30.f, 0.f);
-        auto* sun = new DirectionalLight(this, 512, 10.f, glm::quat(radians(sunRotation)));
+        auto* sun = new DirectionalLight(this, 512, 4.f, glm::quat(radians(sunRotation)));
         sun->SetName("Sun");
+
         Lights->Sun = sun;
 
         auto defaultCoasterType = ref_create<CoasterType>();
         defaultCoasterType->Name = "Default Coaster";
+        defaultCoasterType->Track =
+        TrackAppearance{
+            Assets.FindFile("CoasterBuilder/Resource/Model/Track.MESH")->Cast<gE::Mesh, false>(),
+            prototypeMaterial
+        };
 
-        defaultCoasterType->Straight = ptr_create<TrackPreset>();
+        defaultCoasterType->Straight = ref_create<TrackPreset>();
         defaultCoasterType->Straight->Spline =
         {
             { glm::vec3(-GridSize.x / 2.f, 0.f, 0.f), Up },
@@ -50,16 +56,36 @@ namespace Coaster
         };
         defaultCoasterType->Straight->ExitPosition = glm::vec3(GridSize.x, 0.f, 0.f);
 
-        defaultCoasterType->SmallTurn = ptr_create<TrackPreset>();
+        defaultCoasterType->SmallTurn = ref_create<TrackPreset>();
         defaultCoasterType->SmallTurn->Spline =
         {
             { glm::vec3(-GridSize.x / 2.f, 0.f, 0.f), Up },
             { glm::vec3(0.f), Up },
             { glm::vec3(0.f, 0.f, GridSize.x / 2.f), Up },
         };
-        defaultCoasterType->SmallTurn->ExitPosition = glm::vec3(0, 0, GridSize.x);
+        defaultCoasterType->SmallTurn->ExitPosition = glm::vec3(0.f, 0.f, GridSize.x);
         defaultCoasterType->SmallTurn->ExitRotation = -90.f;
         defaultCoasterType->SmallTurn->FlipTransform = glm::scale(glm::mat4(1.f), glm::vec3(1.f, 1.f, -1.f));
+
+        defaultCoasterType->GentleSlope = ref_create<TrackPreset>();
+        defaultCoasterType->GentleSlope->Spline =
+        {
+            { glm::vec3(-GridSize.x / 2.f, 0.f, 0.f), Up },
+            { glm::vec3(0.f, GridSize.y / 2.f, 0.f), Up },
+            { glm::vec3(GridSize.x / 2.f, GridSize.y, 0.f), Up },
+        };
+        defaultCoasterType->GentleSlope->ExitPosition = glm::vec3(GridSize.x, GridSize.y, 0);
+        defaultCoasterType->GentleSlope->FlipTransform = glm::scale(glm::mat4(1.f), glm::vec3(1.f, -1.f, 1.f));
+
+        TrackPreset& gentleTransition = defaultCoasterType->GentleSlope->TransitionPreset = ptr_create<TrackPreset>();
+        gentleTransition.Spline =
+        {
+            { glm::vec3(-GridSize.x / 2.f, 0.f, 0.f), Up },
+            { glm::vec3(0.f), Up },
+            { glm::vec3(GridSize.x / 2.f, GridSize.y / 2.f, 0.f), Up },
+        };
+        gentleTransition.ExitPosition = glm::vec3(GridSize.x, GridSize.y / 2.f, 0);
+        gentleTransition.FlipTransform = defaultCoasterType->GentleSlope->FlipTransform;
 
         new Coaster(this, defaultCoasterType);
     }

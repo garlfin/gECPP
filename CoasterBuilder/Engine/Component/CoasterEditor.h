@@ -22,6 +22,8 @@ namespace Coaster
         void OnGUI(float delta) override;
 
     private:
+        void ShowRadio(std::string_view label, int id, const TrackPreset& preset, bool flipped, bool sameLine = true);
+
         int turnSelection = DEFAULT;
         int slopeSelection = DEFAULT;
         ETrackMod _modSelection = DEFAULT;

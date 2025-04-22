@@ -38,18 +38,30 @@ namespace Coaster
     Track::Track(Coaster* coaster, const Track* previous, const TrackPreset* preset, bool flip) :
         _coaster(coaster),
         _preset(preset),
+        _subPreset(preset),
         _isFlipped(flip),
         _iterator(coaster->_track.end() - coaster->_track.begin())
     {
-        glm::vec3 offset = preset->Offset;
-        glm::vec3 exitPosition = preset->ExitPosition;
-        float exitRotation = preset->ExitRotation;
+        if(_preset->TransitionPreset && previous && (previous->_preset != _preset || previous->_isFlipped != _isFlipped))
+        {
+            _subPreset = _preset->TransitionPreset.GetPointer();
+        }
+
+        if(previous && previous->_preset->TransitionPreset && (previous->_preset != _preset || previous->_isFlipped != _isFlipped))
+        {
+            _subPreset = previous->_preset->TransitionPreset.GetPointer();
+            _isFlipped = previous->_isFlipped;
+        }
+
+        glm::vec3 offset = _subPreset->Offset;
+        glm::vec3 exitPosition = _subPreset->ExitPosition;
+        float exitRotation = _subPreset->ExitRotation;
         glm::mat4 transform = glm::mat4(1.f);
 
-        if(flip)
+        if(_isFlipped)
         {
-            offset = preset->FlipTransform * glm::vec4(offset, 1.f);
-            exitPosition = preset->FlipTransform * glm::vec4(exitPosition, 1.f);
+            offset = _subPreset->FlipTransform * glm::vec4(offset, 1.f);
+            exitPosition = _subPreset->FlipTransform * glm::vec4(exitPosition, 1.f);
             exitRotation *= -1.f;
         }
 
@@ -67,11 +79,10 @@ namespace Coaster
         transform = glm::translate(transform, offset);
         if(previous)
             transform *= glm::toMat4(TileRotationToQuat(previous->_exitRotation));
-        if(flip)
-            transform *= preset->FlipTransform;
+        if(_isFlipped)
+            transform *= _subPreset->FlipTransform;
 
-
-        coaster->_spline.AddSpline(preset->Spline, transform);
+        coaster->_spline.AddSpline(_subPreset->Spline, transform);
         coaster->_track.push_back(this);
     }
 
@@ -83,8 +94,9 @@ namespace Coaster
     Coaster::Coaster(gE::Window* window, const Reference<const CoasterType>& type) : Entity(window),
         _type(type),
         _editor(this),
-        _splineRenderer(this, DEFAULT, _spline)
+        _splineRenderer(this, type->Track.Mesh, _spline)
     {
+        _splineRenderer.SetMaterial(0, type->Track.Material);
         _splineRenderer.SetEnableDebugView(true);
     }
 
