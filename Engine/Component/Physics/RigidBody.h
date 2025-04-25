@@ -24,7 +24,7 @@ namespace gE
 		float LinearDamping = 0.05f;
 		float AngularDamping = 0.05f;
 		float TerminalVelocity = 500.f;
-		float MaxAngularVelocity = 0.25f * glm::pi<float>() * 60.f;
+		float MaxAngularVelocity = 0.25f * pi<float>() * 60.f;
 		float GravityFactor = 1.0;
 		PhysicsMaterial Material = DEFAULT;
 	};
@@ -44,12 +44,12 @@ namespace gE
 		void OnDestroy() override;
 		void ForceUpdateTransforms() override;
 
-		GET_CONST(glm::vec3, Velocity, Physics::ToGLM(_body->GetLinearVelocity()));
-		void SetInstantVelocity(const glm::vec3&);
-		void AddImpulse(const glm::vec3&);
-		void AddImpulse(const glm::vec3&, const glm::vec3& dir);
-		void AddForce(const glm::vec3&);
-		void AddForce(const glm::vec3&, const glm::vec3& dir);
+		GET_CONST(vec3, Velocity, Physics::ToGLM(_body->GetLinearVelocity()));
+		void SetInstantVelocity(const vec3&);
+		void AddImpulse(const vec3&);
+		void AddImpulse(const vec3&, const vec3& dir);
+		void AddForce(const vec3&);
+		void AddForce(const vec3&, const vec3& dir);
 
 		~RigidBody() override;
 
@@ -62,6 +62,6 @@ namespace gE
 		RigidBodySettings _settings;
 		RelativePointer<Collider> _collider;
 		px::Body* _body = nullptr;
-		glm::vec3 _previousScale;
+		vec3 _previousScale;
 	};
 }

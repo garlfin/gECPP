@@ -9,14 +9,14 @@
 
 namespace gE
 {
-    inline Physics::BoxShape GetShapeSettings(const glm::vec3& extents);
+    inline Physics::BoxShape GetShapeSettings(const vec3& extents);
 
     class PhysicsCubeEntity final : public Entity
     {
         REFLECTABLE_PROTO("PCUB", PhysicsCubeEntity, Entity);
 
     public:
-        PhysicsCubeEntity(Window* window, const Reference<Mesh>& mesh, glm::vec3 size, EntityFlags flags = DEFAULT) :
+        PhysicsCubeEntity(Window* window, const Reference<Mesh>& mesh, vec3 size, EntityFlags flags = DEFAULT) :
             Entity(window, nullptr, LayerMask::All, flags),
             _renderer(this, mesh),
             _rigidBody(this, RigidBodySettings(), _collider),

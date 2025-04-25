@@ -23,6 +23,7 @@
 #include <Graphics/Texture/TextureSlotManager.h>
 #include <SDL3/SDL_surface.h>
 
+#include "Core/VR.h"
 #include "Core/Material/PBRMaterial.h"
 
 #define GE_REFRESH_RATE _monitor.RefreshRate
@@ -54,7 +55,7 @@ namespace gE
 	class Window
 	{
 	 public:
-		explicit Window(glm::u16vec2 size, const std::string& name = "gE");
+		explicit Window(u16vec2 size, const std::string& name = "gE");
 
 		bool Run();
 
@@ -113,8 +114,11 @@ namespace gE
 
 		GET_CONST(SDL_Window*, SDLWindow, _window);
 
+		GET(class VR*, VR, VR.GetPointer());
+		GET_CONST(bool, VREnabled, (bool) VR);
+
 #ifdef GE_ENABLE_EDITOR
-		GET(Editor::Editor&, Editor, *Editor);
+		GET(Editor::Editor*, Editor, Editor.GetPointer());
 #endif
 
 		virtual ~Window();
@@ -126,7 +130,7 @@ namespace gE
 		virtual void OnRender(float);
 		virtual void OnDestroy() {};
 
-		static constexpr VoxelCaptureSettings DefaultVoxelSettings{ 128, 8.4f, VoxelPipeline::ProbeSettings(glm::u8vec3(8)) };
+		static constexpr VoxelCaptureSettings DefaultVoxelSettings{ 128, 8.4f, VoxelPipeline::ProbeSettings(u8vec3(8)) };
 		void InitVoxelReflections(const VoxelCaptureSettings& settings = DefaultVoxelSettings);
 
 		Pointer<DefaultPipeline::Buffers> PipelineBuffers;
@@ -152,6 +156,7 @@ namespace gE
 
 #ifdef GE_ENABLE_EDITOR
 		Pointer<Editor::Editor> Editor;
+		Pointer<VR> VR;
 #endif
 
 		Pointer<Material> DefaultMaterial;

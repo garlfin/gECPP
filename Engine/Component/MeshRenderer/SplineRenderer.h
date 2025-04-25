@@ -18,7 +18,7 @@ namespace gE
         GPU::VAO result = DEFAULT;
 
         result.PrimitiveType = GPU::PrimitiveType::Line;
-        result.AddBuffer(GPU::Buffer<std::byte>(0, nullptr, sizeof(glm::vec3)));
+        result.AddBuffer(GPU::Buffer<std::byte>(0, nullptr, sizeof(vec3)));
         result.AddField(GPU::VertexField("POS", GPU::ElementType::Float, false, 0, 0, 3, 0));
         result.AddMaterial(DEFAULT);
 

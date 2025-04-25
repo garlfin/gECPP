@@ -1,5 +1,5 @@
-#define ENABLE_SMRT_CONTACT_SHADOW
-#define ENABLE_SS_TRACE
+//#define ENABLE_SMRT_CONTACT_SHADOW
+//#define ENABLE_SS_TRACE
 #define DIRECTIONAL_SHADOW_RADIUS 0.05
 
 #define HIZ_MAX_ITER 128
@@ -68,7 +68,7 @@ void main()
     AOSettings aoSettings = AOSettings(8, 0.2, 0.5, 0.5);
 
 #ifdef EXT_BINDLESS
-    float ao = SS_AO(aoSettings, vert);
+    float ao = 1.0;//SS_AO(aoSettings, vert);
 #else
     float ao = 1.0;
 #endif

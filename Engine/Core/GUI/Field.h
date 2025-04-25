@@ -6,6 +6,7 @@
 
 #include <string>
 #include <Core/Macro.h>
+#include <Core/Math/Math.h>
 #include <Vendor/IMGUI/imgui.h>
 
 #include "Editor/Settings.h"
@@ -111,17 +112,17 @@ namespace gE
     template<class T, class SETTINGS_T>
     bool DrawField(const SETTINGS_T&, T*, u8 depth);
 
-    template <class T, glm::length_t COMPONENT_COUNT>
-    bool DrawField(const ScalarField<T>&, glm::vec<COMPONENT_COUNT, T>&, u8 depth);
+    template <class T, length_t COMPONENT_COUNT>
+    bool DrawField(const ScalarField<T>&, vec<COMPONENT_COUNT, T>&, u8 depth);
 
-    template <class T, glm::length_t COMPONENT_COUNT>
-    bool DrawField(const ScalarField<T>&, const glm::vec<COMPONENT_COUNT, T>&, u8 depth);
-
-    template <class T>
-    bool DrawField(const ScalarField<T>&, glm::qua<T>&, u8 depth);
+    template <class T, length_t COMPONENT_COUNT>
+    bool DrawField(const ScalarField<T>&, const vec<COMPONENT_COUNT, T>&, u8 depth);
 
     template <class T>
-    bool DrawField(const ScalarField<T>&, const glm::qua<T>&, u8 depth);
+    bool DrawField(const ScalarField<T>&, qua<T>&, u8 depth);
+
+    template <class T>
+    bool DrawField(const ScalarField<T>&, const qua<T>&, u8 depth);
 
     template<class T, class SETTINGS_T>
     T* DrawField(const ArrayField<SETTINGS_T>&, Array<T>&, u8 depth);

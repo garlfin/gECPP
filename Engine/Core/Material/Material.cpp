@@ -114,7 +114,7 @@ namespace gE
 		_buffer.Bind(API::BufferBaseTarget::Uniform, 4);
 
 		const API::ComputeShader brdfShader(window, GPU::ComputeShader("Resource/Shader/Compute/brdf.comp"));
-		const glm::uvec2 brdfGroupSize = DIV_CEIL_T(_brdfLUT.GetSize(), BRDF_GROUP_SIZE, glm::uvec2);
+		const uvec2 brdfGroupSize = DIV_CEIL_T(_brdfLUT.GetSize(), BRDF_GROUP_SIZE, uvec2);
 
 		brdfShader.Bind();
 		_brdfLUT.Bind(0, GL_WRITE_ONLY);

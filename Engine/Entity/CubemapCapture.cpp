@@ -54,7 +54,7 @@ namespace gE
 			(**i)->GetCamera().OnRender(delta, camera);
 	}
 
-	void CubemapManager::UseNearestCubemaps(const glm::vec3& point) const
+	void CubemapManager::UseNearestCubemaps(const vec3& point) const
 	{
 		DefaultPipeline::Buffers& buffers = _window->GetPipelineBuffers();
 		GPU::Lighting& lighting = **buffers.GetLights().GetData();
@@ -133,7 +133,7 @@ namespace gE
 		CameraCube& camera = GetCamera();
 		Window& window = camera.GetWindow();
 
-		window.GetLights().UseNearestLights(glm::vec3(0.0f));
+		window.GetLights().UseNearestLights(vec3(0.0f));
 
 		window.RenderState = RenderState::Cubemap;
 

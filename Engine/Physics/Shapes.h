@@ -22,8 +22,8 @@ namespace Physics
 {
     struct ColliderTransform
     {
-        glm::vec3 Position = glm::vec3(0.0);
-        glm::quat Rotation = glm::identity<glm::quat>();
+        vec3 Position = vec3(0.0);
+        quat Rotation = identity<quat>();
     };
 
     struct Shape : public gE::Asset
@@ -70,7 +70,7 @@ namespace Physics
             return ConvexShape::operator==(o) && Extents == o.Extents;
         }
 
-        glm::vec3 Extents = glm::vec3(1.f);
+        vec3 Extents = vec3(1.f);
     };
 
     struct CapsuleShape : public ConvexShape
@@ -95,7 +95,7 @@ namespace Physics
 
     struct ConvexMeshPoint
     {
-        glm::vec3 Position = DEFAULT;
+        vec3 Position = DEFAULT;
         u32 FaceCount = DEFAULT;
         u32 Faces[3] = DEFAULT;
     };
@@ -108,8 +108,8 @@ namespace Physics
         void Free();
         NODISCARD bool IsFree() const;
 
-        glm::vec3 CenterOfMass = DEFAULT;
-        glm::mat4 Inertia = DEFAULT;
+        vec3 CenterOfMass = DEFAULT;
+        mat4 Inertia = DEFAULT;
         gE::AABB<Dimension::D3D> Bounds = DEFAULT;
         Array<ConvexMeshPoint> Points = DEFAULT;
         Array<ConvexMeshFace> Faces = DEFAULT;
@@ -133,7 +133,7 @@ namespace Physics
         SERIALIZABLE_PROTO("CNVX", 1, ConvexMeshShape, ConvexShape);
 
     public:
-        Array<glm::vec3> Points = DEFAULT;
+        Array<vec3> Points = DEFAULT;
         BakedConvexMeshShape BakedSettings = DEFAULT;
 
         void Free() override { Points.Free(); BakedSettings.Free(); }

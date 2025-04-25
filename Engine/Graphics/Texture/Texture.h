@@ -20,8 +20,11 @@ namespace GL
 
 namespace GPU
 {
-	template<Dimension T>
-	u8 GetMipCount(const Size<T>& size);
+	template<Dimension DIMENSION>
+	u8 GetMipCount(const Size<DIMENSION>& size);
+
+	template<Dimension DIMENSION> requires ((u8) DIMENSION > 1)
+	u8 GetMipCountArray(const Size<DIMENSION>& size);
 
 	class Texture : public gE::Asset
 	{
@@ -64,6 +67,17 @@ namespace GPU
  		Texture2D(Texture&& super, Size2D size) : Texture(move(super)), Size(size) {};
 
 		Size2D Size = DEFAULT;
+	};
+
+	class Texture2DArray : public Texture
+	{
+		SERIALIZABLE_PROTO("TX2A", 1, Texture2DArray, Texture);
+
+	public:
+		Texture2DArray(const Texture& super, Size3D size) : Texture(super), Size(size) {};
+		Texture2DArray(Texture&& super, Size3D size) : Texture(move(super)), Size(size) {};
+
+		Size3D Size = DEFAULT;
 	};
 
 	class Texture3D : public Texture

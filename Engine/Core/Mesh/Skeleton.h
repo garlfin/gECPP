@@ -65,7 +65,7 @@ namespace gE
 
     public:
         float Time;
-        std::variant<glm::vec3, glm::quat> Value;
+        std::variant<vec3, quat> Value;
 
 #ifdef GE_ENABLE_IMGUI
         RelativePointer<const AnimationChannel> Channel;
@@ -104,7 +104,7 @@ namespace gE
         BoneReference Parent = DEFAULT;
 
         TransformData Transform = DEFAULT;
-        glm::mat4 InverseBindMatrix = DEFAULT;
+        mat4 InverseBindMatrix = DEFAULT;
     };
 
     struct Skeleton final : public Asset

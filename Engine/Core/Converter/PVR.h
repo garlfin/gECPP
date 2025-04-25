@@ -47,7 +47,7 @@ namespace gE::PVR
         Flags Flags;
         PixelFormat Format;
         ColorSpace ColorSpace;
-        glm::u32vec2 Size;
+        u32vec2 Size;
         uint32_t Depth;
         uint32_t Surfaces;
         uint32_t Faces;

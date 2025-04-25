@@ -78,7 +78,7 @@ vec3 GetLighting(const Vertex vert, const PBRFragment frag, const Light light, c
 vec3 GetLightingDirectional(const Vertex vert, const PBRFragment frag, const Light light, const vec4 fragLightSpace)
 {
     // Vector Setup
-    vec3 eye = normalize(Camera.Position - vert.Position);
+    vec3 eye = normalize(Camera.Position[ViewIndex] - vert.Position);
     vec3 halfEye = normalize(light.Position + eye);
 
     float nDotV = saturate(dot(frag.Normal, eye));
@@ -112,7 +112,7 @@ vec3 GetLightingPoint(const Vertex vert, const PBRFragment frag, const Light lig
     float strength = max(light.Color.r, max(light.Color.g, light.Color.b));
 
     // Vector Setup
-    vec3 eye = normalize(Camera.Position - vert.Position);
+    vec3 eye = normalize(Camera.Position[ViewIndex] - vert.Position);
     vec3 lightDir = light.Position - vert.Position;
 
     // Closest point to frag
@@ -160,7 +160,7 @@ vec3 GetLightingPoint(const Vertex vert, const PBRFragment frag, const Light lig
 vec3 FilterSpecular(const Vertex vert, const PBRFragment frag, const PBRSample pbrSample, vec3 color)
 {
     // PBR Setup
-    vec3 eye = normalize(Camera.Position - vert.Position);
+    vec3 eye = normalize(Camera.Position[ViewIndex] - vert.Position);
 
     float nDotV = saturate(dot(frag.Normal, eye));
     vec3 f0 = mix(frag.F0, frag.Albedo, frag.Metallic);
@@ -272,7 +272,7 @@ vec3 CubemapParallax(vec3 pos, vec3 dir, Cubemap cubemap, out float weight)
 #ifdef FRAGMENT_SHADER
 PBRSample ImportanceSample(const Vertex vert, const PBRFragment frag)
 {
-    vec3 eye = normalize(Camera.Position - vert.Position);
+    vec3 eye = normalize(Camera.Position[ViewIndex] - vert.Position);
     float nDotV = max(dot(frag.Normal, eye), 0.0);
 
     mat3 normalTBN = GetTBN(frag.Normal);

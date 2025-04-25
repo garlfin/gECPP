@@ -15,8 +15,8 @@ namespace gE::PostProcess
 	{
 		const API::ComputeShader& shader = GetWindow().GetBloomShader();
 
-		u8 mipCount = glm::min<u8>(in.GetMipCount(), GetSettings().Iterations);
-		glm::vec4 settings { GetSettings().Threshold, GetSettings().Knee, GetSettings().Intensity, 0.f }; // Mode/MIP
+		u8 mipCount = min<u8>(in.GetMipCount(), GetSettings().Iterations);
+		vec4 settings { GetSettings().Threshold, GetSettings().Knee, GetSettings().Intensity, 0.f }; // Mode/MIP
 
 		shader.Bind();
 		shader.SetUniform(2, GetSettings().PhysicalCamera->Exposure);

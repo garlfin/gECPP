@@ -29,15 +29,15 @@ namespace GL
 		ALWAYS_INLINE void SetUniform(u8 loc, u32 val) const { glProgramUniform1ui(ID, loc, val); }
 		ALWAYS_INLINE void SetUniform(u8 loc, i32 val) const { glProgramUniform1i(ID, loc, val); }
 		ALWAYS_INLINE void SetUniform(u8 loc, float val) const { glProgramUniform1f(ID, loc, val); }
-		ALWAYS_INLINE void SetUniform(u8 loc, const glm::vec2& val) const { glProgramUniform2f(ID, loc, val.x, val.y); }
-		ALWAYS_INLINE void SetUniform(u8 loc, const glm::vec3& val) const { glProgramUniform3f(ID, loc, val.x, val.y, val.z); }
-		ALWAYS_INLINE void SetUniform(u8 loc, const glm::vec4& val) const { glProgramUniform4f(ID, loc, val.x, val.y, val.z, val.w); }
-		ALWAYS_INLINE void SetUniform(u8 loc, const glm::ivec2& val) const { glProgramUniform2i(ID, loc, val.x, val.y); }
-		ALWAYS_INLINE void SetUniform(u8 loc, const glm::ivec3& val) const { glProgramUniform3i(ID, loc, val.x, val.y, val.z); }
-		ALWAYS_INLINE void SetUniform(u8 loc, const glm::ivec4& val) const { glProgramUniform4i(ID, loc, val.x, val.y, val.z, val.w); }
-		ALWAYS_INLINE void SetUniform(u8 loc, const glm::uvec2& val) const { glProgramUniform2ui(ID, loc, val.x, val.y); }
-		ALWAYS_INLINE void SetUniform(u8 loc, const glm::uvec3& val) const { glProgramUniform3ui(ID, loc, val.x, val.y, val.z); }
-		ALWAYS_INLINE void SetUniform(u8 loc, const glm::uvec4& val) const { glProgramUniform4ui(ID, loc, val.x, val.y, val.z, val.w); }
+		ALWAYS_INLINE void SetUniform(u8 loc, const vec2& val) const { glProgramUniform2f(ID, loc, val.x, val.y); }
+		ALWAYS_INLINE void SetUniform(u8 loc, const vec3& val) const { glProgramUniform3f(ID, loc, val.x, val.y, val.z); }
+		ALWAYS_INLINE void SetUniform(u8 loc, const vec4& val) const { glProgramUniform4f(ID, loc, val.x, val.y, val.z, val.w); }
+		ALWAYS_INLINE void SetUniform(u8 loc, const ivec2& val) const { glProgramUniform2i(ID, loc, val.x, val.y); }
+		ALWAYS_INLINE void SetUniform(u8 loc, const ivec3& val) const { glProgramUniform3i(ID, loc, val.x, val.y, val.z); }
+		ALWAYS_INLINE void SetUniform(u8 loc, const ivec4& val) const { glProgramUniform4i(ID, loc, val.x, val.y, val.z, val.w); }
+		ALWAYS_INLINE void SetUniform(u8 loc, const uvec2& val) const { glProgramUniform2ui(ID, loc, val.x, val.y); }
+		ALWAYS_INLINE void SetUniform(u8 loc, const uvec3& val) const { glProgramUniform3ui(ID, loc, val.x, val.y, val.z); }
+		ALWAYS_INLINE void SetUniform(u8 loc, const uvec4& val) const { glProgramUniform4ui(ID, loc, val.x, val.y, val.z, val.w); }
 
 		void SetUniform(u8 loc, const Texture&, u8 slot) const;
 		void SetUniform(u8 loc, const Texture&) const;
@@ -66,8 +66,8 @@ namespace GL
 		ALWAYS_INLINE void Dispatch(u16 x, u16 y) const { Bind(); glDispatchCompute(x, y, 1); }
 		ALWAYS_INLINE void Dispatch(u16 x) const { Bind(); glDispatchCompute(x, 1, 1); }
 
-		ALWAYS_INLINE void Dispatch(glm::u16vec3 size) const { Dispatch(size.x, size.y, size.z); }
-		ALWAYS_INLINE void Dispatch(glm::u16vec2 size) const { Dispatch(size.x, size.y); }
+		ALWAYS_INLINE void Dispatch(u16vec3 size) const { Dispatch(size.x, size.y, size.z); }
+		ALWAYS_INLINE void Dispatch(u16vec2 size) const { Dispatch(size.x, size.y); }
 	};
 
 	class ShaderStage final : protected GPU::ShaderStage, public APIObject

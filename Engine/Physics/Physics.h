@@ -147,12 +147,12 @@ namespace Physics
         return *(OUT_T*) &in;
     }
 
-    NODISCARD inline px::Vec3 ToPX(const glm::vec3& o) { return { o.x, o.y, o.z }; }
-    NODISCARD inline glm::vec3 ToGLM(const px::Vec3& o) { return { o.GetX(), o.GetY(), o.GetZ() }; }
-    NODISCARD inline px::Quat ToPX(const glm::quat& o) { return { o.x, o.y, o.z, o.w }; }
-    NODISCARD inline glm::quat ToGLM(const px::Quat& o) { return { o.GetW(), o.GetX(), o.GetY(), o.GetZ() }; }
-    NODISCARD inline px::Mat44 ToPX(const glm::mat4& o) { return PXBitCast<glm::mat4, px::Mat44>(o); }
-    NODISCARD inline glm::mat4 ToGLM(const px::Mat44& o) { return PXBitCast<px::Mat44, glm::mat4>(o); }
+    NODISCARD inline px::Vec3 ToPX(const vec3& o) { return { o.x, o.y, o.z }; }
+    NODISCARD inline vec3 ToGLM(const px::Vec3& o) { return { o.GetX(), o.GetY(), o.GetZ() }; }
+    NODISCARD inline px::Quat ToPX(const quat& o) { return { o.x, o.y, o.z, o.w }; }
+    NODISCARD inline quat ToGLM(const px::Quat& o) { return { o.GetW(), o.GetX(), o.GetY(), o.GetZ() }; }
+    NODISCARD inline px::Mat44 ToPX(const mat4& o) { return PXBitCast<mat4, px::Mat44>(o); }
+    NODISCARD inline mat4 ToGLM(const px::Mat44& o) { return PXBitCast<px::Mat44, mat4>(o); }
     NODISCARD inline gE::AABB<Dimension::D3D> ToGE(const px::AABox& o) { return { ToGLM(o.mMin), ToGLM(o.mMax) }; }
     NODISCARD inline px::AABox ToPX(const gE::AABB<Dimension::D3D>& o) { return { ToPX(o.Min), ToPX(o.Max) }; }
 

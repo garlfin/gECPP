@@ -7,6 +7,7 @@
 #include <Window.h>
 #include <Component/Camera/Camera.h>
 #include <Component/Physics/CharacterController.h>
+#include <Core/Pipeline/VRPipeline.h>
 #include <Core/Pipeline/PostProcess/Bloom.h>
 #include <Core/Pipeline/PostProcess/TAA.h>
 #include <Core/Pipeline/PostProcess/Tonemap.h>
@@ -60,12 +61,12 @@ namespace gE
 			_bloom(&_target, &_bloomSettings),
 			_tonemap(&_target, &_physicalCamera)
 		{
-			const auto offset = glm::vec3(0.f, player.GetController().GetShape()->Height / 2.f, 0.f);
+			const auto offset = vec3(0.f, player.GetController().GetShape()->Height / 2.f, 0.f);
 			GetTransform().SetPosition(offset);
 		}
 
 		GET(gE::PerspectiveCamera&, Camera, _camera);
-		GET(gE::DefaultPipeline::Target2D&, Target, _target);
+		GET(auto&, Target, _target);
 		GET(GL::Texture2D&, Color, _target.GetColor());
 		GET(GL::Texture2D&, Depth, _target.GetDepth());
 

@@ -95,7 +95,7 @@ namespace gE::PVR
 		Format = ::Read<PixelFormat>(in);
 		ColorSpace = ::Read<PVR::ColorSpace>(in);
 		::Read<uint32_t>(in); // This was like bpc or something; unimportant w/ compression
-		Size = ::Read<glm::u32vec2>(in);
+		Size = ::Read<u32vec2>(in);
 		Size = { Size.y, Size.x }; // NOLINT
 		// they store it height, width 🤦‍♂️
 		Depth = ::Read<u32>(in);

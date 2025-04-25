@@ -1,3 +1,5 @@
+#extension GL_ARB_shader_viewport_layer_array : require
+
 #include "Bindless.glsl"
 #include "SphericalHarmonics.glsl"
 
@@ -124,7 +126,22 @@ const uint Scene_DepthMode = Scene.State >> 4 & 1;
 const uint Scene_VoxelWriteMode = Scene.State >> 5 & 1;
 const uint Scene_RasterMode = Scene.State >> 6 & 1;
 const uint Scene_InstanceMultiplier = Scene.State >> 8 & 7;
+const bool Scene_UseLayer = bool(Scene.State >> 11 & 1);
 const bool Scene_EnableJitter = bool(Scene.State >> 12 & 1);
 const bool Scene_EnableFaceCull = bool(Scene.State >> 13 & 1);
 const bool Scene_EnableDepthTest = bool(Scene.State >> 14 & 1);
 const bool Scene_EnableSpecular = bool(Scene.State >> 15 & 1);
+
+#ifdef VERTEX_SHADER
+    void Scene_SetViewport()
+    {
+        if(Scene_UseLayer)
+            gl_Layer = int(ViewIndex);
+        else
+            gl_ViewportIndex = int(ViewIndex);
+    }
+
+    #define SCENE_VIEW_INDEX(INDEX)
+#else
+    #define SCENE_VIEW_INDEX(INDEX) uint ViewIndex = INDEX;
+#endif

@@ -36,12 +36,12 @@ namespace gE
         GET_CONST(CameraTiming, Timing, _settings.Timing);
         GET_CONST(gE::ClipPlanes, ClipPlanes, _settings.ClipPlanes);
         GET_CONST(const ICameraSettings&, Settings, _settings);
-        GET_CONST(const glm::mat4&, Projection, Projection);
+        GET_CONST(const mat4&, Projection, Projection);
 
     protected:
         virtual void UpdateProjection() = 0;
 
-        glm::mat4 Projection;
+        mat4 Projection;
         u32 Frame = 0;
 
     private:
@@ -84,7 +84,7 @@ namespace gE
         {
             if constexpr (T == AngleType::Radian)
                 return _fov;
-            return glm::degrees(_fov);
+            return degrees(_fov);
         }
 
         template <AngleType T = AngleType::Degree>
@@ -93,16 +93,20 @@ namespace gE
             if constexpr (T == AngleType::Radian)
                 _fov = fov;
             else
-                _fov = glm::radians(fov);
+                _fov = radians(fov);
         }
 
         void GetGPUCamera(GPU::Camera& camera) override;
+        void OnRender(float delta, Camera* callingCamera) override;
+
+        friend class VR;
 
     protected:
         void UpdateProjection() override;
 
     private:
-        float _fov;
+        float _fov = DEFAULT;
+        bool _isVR = false;
     };
 
     class OrthographicCamera final : public Camera2D
@@ -112,13 +116,13 @@ namespace gE
     public:
         OrthographicCamera(Entity*, TARGET_T&, const OrthographicCameraSettings&, ComponentManager<Camera>* = nullptr);
 
-        GET_CONST(const glm::vec2&, Scale, _orthographicScale);
+        GET_CONST(const vec2&, Scale, _orthographicScale);
 
     protected:
         void UpdateProjection() override;
 
     private:
-        glm::vec2 _orthographicScale;
+        vec2 _orthographicScale;
     };
 
     class Camera3D final : public Camera

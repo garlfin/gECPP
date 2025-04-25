@@ -34,10 +34,10 @@ namespace gE
         ALWAYS_INLINE void SetMass(float mass) { _controller->SetMass(mass); }
 
         GET_SET(bool, UseGravity, _useGravity);
-        GET_SET(glm::vec3, Velocity, _velocity);
+        GET_SET(vec3, Velocity, _velocity);
 
-        ALWAYS_INLINE void AddVelocity(const glm::vec3& velocity) { _velocity += velocity; }
-        ALWAYS_INLINE void Move(const glm::vec3& position) { _instantVelocity += position; }
+        ALWAYS_INLINE void AddVelocity(const vec3& velocity) { _velocity += velocity; }
+        ALWAYS_INLINE void Move(const vec3& position) { _instantVelocity += position; }
 
         GET_SET(bool, IsGrounded, _grounded);
         NODISCARD PhysicsComponent* GetGround() const { return (PhysicsComponent*) _controller->GetGroundUserData(); }
@@ -52,8 +52,8 @@ namespace gE
         UBroadPhaseFilter _broadFilter;
 
         bool _useGravity = true;
-        glm::vec3 _velocity = DEFAULT;
-        glm::vec3 _instantVelocity = DEFAULT;
+        vec3 _velocity = DEFAULT;
+        vec3 _instantVelocity = DEFAULT;
         bool _grounded = false;
     };
 }

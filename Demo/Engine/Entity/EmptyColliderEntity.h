@@ -9,12 +9,12 @@
 
 namespace gE
 {
-    inline Physics::BoxShape GetShapeSettings(const glm::vec3& extents);
+    inline Physics::BoxShape GetShapeSettings(const vec3& extents);
 
     class EmptyColliderEntity : public Entity
     {
     public:
-        EmptyColliderEntity(Window* window, glm::vec3 size, EntityFlags flags = DEFAULT) :
+        EmptyColliderEntity(Window* window, vec3 size, EntityFlags flags = DEFAULT) :
             Entity(window, nullptr, LayerMask::All, flags),
             _rigidBody(this, RigidBodySettings(), _collider),
             _collider(this, GetShapeSettings(size))
@@ -29,7 +29,7 @@ namespace gE
         BoxCollider _collider;
     };
 
-    inline Physics::BoxShape GetShapeSettings(const glm::vec3& extents)
+    inline Physics::BoxShape GetShapeSettings(const vec3& extents)
     {
         Physics::BoxShape shape = DEFAULT;
         shape.Extents = extents;

@@ -75,29 +75,29 @@ namespace gE::Model
         return -1;
     }
 
-    inline glm::i8vec3 ConvertNormal(const glm::vec3& normal) noexcept
+    inline i8vec3 ConvertNormal(const vec3& normal) noexcept
     {
-        const glm::vec3 vec = clamp(normal, glm::vec3(-1.f), glm::vec3(1.f));
-        return vec * glm::vec3(INT8_MAX);
+        const vec3 vec = clamp(normal, vec3(-1.f), vec3(1.f));
+        return vec * vec3(INT8_MAX);
     }
 
-    inline glm::i8vec4 ConvertTangent(const glm::vec4& normal) noexcept
+    inline i8vec4 ConvertTangent(const vec4& normal) noexcept
     {
-        glm::vec4 vec = clamp(normal, glm::vec4(-1.f), glm::vec4(1.f));
+        vec4 vec = clamp(normal, vec4(-1.f), vec4(1.f));
         vec.w = 1.f;
-        return vec * glm::vec4(INT8_MAX);
+        return vec * vec4(INT8_MAX);
     }
 
-    inline glm::i8vec4 ConvertTangentFlipped(const glm::vec4& normal) noexcept
+    inline i8vec4 ConvertTangentFlipped(const vec4& normal) noexcept
     {
-        glm::vec4 vec = clamp(normal, glm::vec4(-1.f), glm::vec4(1.f));
+        vec4 vec = clamp(normal, vec4(-1.f), vec4(1.f));
         vec.w = -1.f;
-        return vec * glm::vec4(INT8_MAX);
+        return vec * vec4(INT8_MAX);
     }
 
-    inline glm::u8vec4 ConvertWeight(const glm::vec4& weight) noexcept
+    inline u8vec4 ConvertWeight(const vec4& weight) noexcept
     {
-        const glm::vec4 vec = clamp(weight, glm::vec4(0.f), glm::vec4(1.f));
-        return glm::u8vec4(vec * glm::vec4(UINT8_MAX));
+        const vec4 vec = clamp(weight, vec4(0.f), vec4(1.f));
+        return u8vec4(vec * vec4(UINT8_MAX));
     }
 }

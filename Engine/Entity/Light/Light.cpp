@@ -46,7 +46,7 @@ namespace gE
 			(**i)->GetCamera().OnRender(delta, camera);
 	}
 
-	void LightManager::UseNearestLights(const glm::vec3& point) const
+	void LightManager::UseNearestLights(const vec3& point) const
 	{
 		DefaultPipeline::Buffers& buffers = _window->GetPipelineBuffers();
 		GPU::Lighting& lighting = **buffers.GetLights().GetData();
@@ -63,7 +63,7 @@ namespace gE
 		buffers.GetLights().UpdateData<GPU::Light>(lighting.LightCount, offsetof(GPU::Lighting, Lights));
 	}
 
-	DirectionalLight::DirectionalLight(Window* w, u16 size, float scale, const glm::quat& rot) :
+	DirectionalLight::DirectionalLight(Window* w, u16 size, float scale, const quat& rot) :
 		Light(w, _camera, _target),
 		_camera(this, _target, CreateDirectionalSettings(size, scale)),
 		_target(*this, _camera)
@@ -108,8 +108,8 @@ namespace gE
 		Transform& transform = GetOwner().GetTransform();
 		const TransformData& cameraTransform = callingCamera->GetOwner().GetTransform().GetGlobalTransform();
 
-		glm::vec2 planes = GetCamera().GetClipPlanes();
-		glm::vec3 offset = -transform->Forward();
+		vec2 planes = GetCamera().GetClipPlanes();
+		vec3 offset = -transform->Forward();
 		offset *= (planes.y - planes.x) * 0.5 + planes.x;
 		//		  (far - near) / 2 + near
 		//		  places the middle on the camera
@@ -193,8 +193,8 @@ namespace gE
 
 		return OrthographicCameraSettings
 		{
-			CameraSettings2D(DirectionalSettings, glm::ivec2(size)),
-			glm::vec2(scale)
+			CameraSettings2D(DirectionalSettings, ivec2(size)),
+			vec2(scale)
 		};
 	}
 

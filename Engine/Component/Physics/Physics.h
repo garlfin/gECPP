@@ -36,8 +36,8 @@ namespace gE
     protected:
         bool UseRotation = true;
 
-        glm::vec3 Position, PreviousPosition;
-        glm::quat Rotation, PreviousRotation;
+        vec3 Position, PreviousPosition;
+        quat Rotation, PreviousRotation;
 
     private:
         PhysicsInterpolationMode _interpolationMode = PhysicsInterpolationMode::Interpolate;

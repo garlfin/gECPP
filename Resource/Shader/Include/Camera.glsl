@@ -1,22 +1,24 @@
 #include "Bindless.glsl"
 #include "Math.glsl"
 
+#define MAX_VIEW 6
+
 struct CameraData
 {
-    vec3 Position;
-    uint Frame;
     vec2 Planes;
     ivec2 Size;
-    vec3 Parameters;
+    vec2 Parameters;
     float FrameDelta;
+    uint Frame;
     vec4 PipelineParameters;
 
     BINDLESS_TEXTURE(sampler2D, Color);
     BINDLESS_TEXTURE(sampler2D, Depth);
 
-    mat4 PreviousViewProjection;
     mat4 Projection;
-    mat4 View[6];
+    mat4 View[MAX_VIEW];
+    mat4 PreviousView[MAX_VIEW];
+    vec3 Position[MAX_VIEW];
 };
 
 #if defined(FRAGMENT_SHADER) && !defined(GL_ARB_bindless_texture)

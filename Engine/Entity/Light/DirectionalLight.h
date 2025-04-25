@@ -30,7 +30,7 @@ namespace gE
 		REFLECTABLE_TYPE_PROTO("DLIT", DirectionalLight); // Die lit reference?!
 
 	public:
-		DirectionalLight(Window*, u16 size, float scale, const glm::quat& = glm::identity<glm::quat>());
+		DirectionalLight(Window*, u16 size, float scale, const quat& = identity<quat>());
 
 		void GetGPULight(GPU::Light&) override;
 

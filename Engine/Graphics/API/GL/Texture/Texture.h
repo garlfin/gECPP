@@ -72,7 +72,20 @@ namespace GL
 		REFLECTABLE_ICON_PROTO();
 
 	public:
-		NODISCARD ALWAYS_INLINE Size2D GetSize(u8 mip = 0) const { return max(Size >> glm::u32vec2(mip), glm::u32vec2(1)); }
+		NODISCARD ALWAYS_INLINE Size2D GetSize(u8 mip = 0) const { return max(Size >> u32vec2(mip), u32vec2(1)); }
+
+		void CopyFrom(const GL::Texture&) override;
+		void UpdateParameters() override { GL::Texture::UpdateParameters(); }
+	};
+
+	class Texture2DArray final : protected GPU::Texture2DArray, public Texture
+	{
+		API_SERIALIZABLE(Texture2DArray, GPU::Texture2DArray);
+		API_DEFAULT_CM_CONSTRUCTOR(Texture2DArray);
+		API_UNDERLYING_IMPL();
+
+	public:
+		NODISCARD ALWAYS_INLINE Size3D GetSize(u8 mip = 0) const { return Size3D(max(Size2D(Size) >> Size2D(mip), Size2D(1)), Size.z); }
 
 		void CopyFrom(const GL::Texture&) override;
 		void UpdateParameters() override { GL::Texture::UpdateParameters(); }
@@ -85,7 +98,7 @@ namespace GL
 		API_UNDERLYING_IMPL();
 
 	public:
-		NODISCARD ALWAYS_INLINE Size3D GetSize(u8 mip = 0) const { return max(Size >> glm::u32vec3(mip), glm::u32vec3(1)); }
+		NODISCARD ALWAYS_INLINE Size3D GetSize(u8 mip = 0) const { return max(Size >> u32vec3(mip), u32vec3(1)); }
 
 		void CopyFrom(const GL::Texture&) override;
 		void UpdateParameters() override { GL::Texture::UpdateParameters(); }

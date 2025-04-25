@@ -16,7 +16,7 @@ namespace gE
 	class Camera3D;
 	class CameraCube;
 
-	typedef glm::vec2 ClipPlanes;
+	typedef vec2 ClipPlanes;
 
 	struct ICameraSettings
 	{
@@ -52,7 +52,7 @@ namespace gE
 
 	struct OrthographicCameraSettings : public CameraSettings2D
 	{
-		OrthographicCameraSettings(const CameraSettings2D& s, const glm::vec2& scale) : CameraSettings2D(s), Scale(scale) {};
-		glm::vec2 Scale;
+		OrthographicCameraSettings(const CameraSettings2D& s, const vec2& scale) : CameraSettings2D(s), Scale(scale) {};
+		vec2 Scale;
 	};
 }

@@ -1,5 +1,9 @@
-#include "Include/Camera.glsl"
 #include "Include/Scene.glsl"
+
+in flat uint ViewIndexIn;
+SCENE_VIEW_INDEX(ViewIndexIn);
+
+#include "Include/Camera.glsl"
 #include "Include/Voxel.glsl"
 
 #define CHECKER_SIZE 10

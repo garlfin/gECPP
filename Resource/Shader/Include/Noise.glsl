@@ -18,7 +18,11 @@ float InterleavedGradientNoise(vec2);
 // https://www.shadertoy.com/view/fdl3zn
 float InterleavedGradientNoise(vec2 uv)
 {
+#ifdef ENABLE_TAA
     const uint frame = Camera.Frame % IGN_MODULO;
+#else
+    const uint frame = 0;
+#endif
 
     if((frame & 2u) != 0u) uv = vec2(-uv.y, uv.x);
     if((frame & 1u) != 0u) uv.x = -uv.x;

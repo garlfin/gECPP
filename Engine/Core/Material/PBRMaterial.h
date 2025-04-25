@@ -24,10 +24,12 @@ namespace gE
 
 	struct PBRMaterialData
 	{
-		glm::vec2 Scale = glm::vec2(1.f);
-		glm::vec2 Offset = glm::vec2(0.f);
+		vec2 Scale = vec2(1.f);
+		vec2 Offset = vec2(0.f);
 		float ParallaxDepth = 0.5f;
 		float NormalStrength = 1.f;
+
+		vec2 _pad;
 
 #ifdef GE_ENABLE_IMGUI
 		void OnEditorGUI(u8 depth);

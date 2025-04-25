@@ -26,7 +26,7 @@ namespace gE
 		return CameraSettings3D
 		{
 			ICameraSettings { ClipPlanes(0.01, 100.0), DEFAULT },
-			glm::u16vec3(size)
+			u16vec3(size)
 		};
 	}
 }

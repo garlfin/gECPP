@@ -6,23 +6,23 @@
 
 namespace Coaster
 {
-    CONSTEXPR_GLOBAL glm::vec3 GridSize
+    CONSTEXPR_GLOBAL vec3 GridSize
     {
         2.f,
         2.f * std::sqrt(3.f) / 3.f,
         2.f,
     };
 
-    CONSTEXPR_GLOBAL glm::vec3 Up
+    CONSTEXPR_GLOBAL vec3 Up
     {
         0.f,
         1.f,
         0.f
     };
 
-    inline glm::quat TileRotationToQuat(float rotation)
+    inline quat TileRotationToQuat(float rotation)
     {
-        return glm::quat(glm::radians(glm::vec3(0.f, rotation, 0.f)));
+        return quat(radians(vec3(0.f, rotation, 0.f)));
     }
 
     CONSTEXPR_GLOBAL float GentleAngle = 30.f;

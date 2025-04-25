@@ -69,18 +69,18 @@ namespace gE::Editor
         _inspector(inspector)
     {
         API::Texture2D* sheetTex = (API::Texture2D*) PVR::Read(&GetWindow(), "Resource/Texture/editor_icons.pvr");
-        _iconSpriteSheet = ref_create<SpriteSheet>(move(*sheetTex), glm::u16vec2(8, 1));
-        _defaultIcon = Sprite(_iconSpriteSheet, glm::u16vec2(0));
+        _iconSpriteSheet = ref_create<SpriteSheet>(move(*sheetTex), u16vec2(8, 1));
+        _defaultIcon = Sprite(_iconSpriteSheet, u16vec2(0));
         delete sheetTex;
 
         SetShortcut({ KeyModifier::LControl, KeyModifier::None, Key::A });
 
-        AddIcon(Material::SType, Sprite(_iconSpriteSheet, glm::u16vec2(1, 0)));
-        AddIcon(GPU::Shader::SType, Sprite(_iconSpriteSheet, glm::u16vec2(2, 0)));
-        AddIcon(GPU::ShaderSource::SType, Sprite(_iconSpriteSheet, glm::u16vec2(3, 0)));
-        AddIcon(GPU::ComputeShader::SType, Sprite(_iconSpriteSheet, glm::u16vec2(4, 0)));
-        AddIcon(GPU::VAO::SType, Sprite(_iconSpriteSheet, glm::u16vec2(5, 0)));
-        AddIcon(Mesh::SType, Sprite(_iconSpriteSheet, glm::u16vec2(5, 0)));
+        AddIcon(Material::SType, Sprite(_iconSpriteSheet, u16vec2(1, 0)));
+        AddIcon(GPU::Shader::SType, Sprite(_iconSpriteSheet, u16vec2(2, 0)));
+        AddIcon(GPU::ShaderSource::SType, Sprite(_iconSpriteSheet, u16vec2(3, 0)));
+        AddIcon(GPU::ComputeShader::SType, Sprite(_iconSpriteSheet, u16vec2(4, 0)));
+        AddIcon(GPU::VAO::SType, Sprite(_iconSpriteSheet, u16vec2(5, 0)));
+        AddIcon(Mesh::SType, Sprite(_iconSpriteSheet, u16vec2(5, 0)));
     }
 
     void AssetManager::LoadFileCallback(LoadingAssetData* asset, const char* const* paths, int filter)

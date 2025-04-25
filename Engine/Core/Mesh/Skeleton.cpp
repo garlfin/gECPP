@@ -17,9 +17,9 @@ namespace gE
 
         Read(in, Time);
         if(channel.Type == ChannelType::Location || channel.Type == ChannelType::Scale)
-            Value = Read<glm::vec3>(in);
+            Value = Read<vec3>(in);
         else if(channel.Type == ChannelType::Rotation)
-            Value = Read<glm::quat>(in);
+            Value = Read<quat>(in);
         else
             assert(false);
     }
@@ -27,10 +27,10 @@ namespace gE
     void Frame::ISerialize(ostream& out) const
     {
         Write(out, Time);
-        if(std::holds_alternative<glm::vec3>(Value))
-            Write(out, std::get<glm::vec3>(Value));
+        if(std::holds_alternative<vec3>(Value))
+            Write(out, std::get<vec3>(Value));
         else
-            Write(out, std::get<glm::quat>(Value));
+            Write(out, std::get<quat>(Value));
     }
 
     REFLECTABLE_ONGUI_IMPL(Frame,
@@ -44,11 +44,11 @@ namespace gE
         DrawField<float>(ScalarField{ "Time", "", minTime, maxTime }, Time, depth);
 
         if(Channel->Type == ChannelType::Location)
-            DrawField(ScalarField<float>{ "Location" }, std::get<glm::vec3>(Value), depth);
+            DrawField(ScalarField<float>{ "Location" }, std::get<vec3>(Value), depth);
         else if(Channel->Type == ChannelType::Rotation)
-            DrawField(ScalarField<float>{ "Rotation" }, std::get<glm::quat>(Value), depth);
+            DrawField(ScalarField<float>{ "Rotation" }, std::get<quat>(Value), depth);
         else if(Channel->Type == ChannelType::Scale)
-            DrawField(ScalarField{ "Scale", "", FLT_EPSILON }, std::get<glm::vec3>(Value), depth);
+            DrawField(ScalarField{ "Scale", "", FLT_EPSILON }, std::get<vec3>(Value), depth);
     );
     REFLECTABLE_NAME_IMPL(Frame, return std::to_string(Time));
     REFLECTABLE_FACTORY_IMPL(Frame);
@@ -146,11 +146,11 @@ namespace gE
         const Frame* frame = GetFrame(time);
 
         if(Type == ChannelType::Location)
-            transform.Location = std::get<glm::vec3>(frame->Value);
+            transform.Location = std::get<vec3>(frame->Value);
         if(Type == ChannelType::Rotation)
-            transform.Rotation = std::get<glm::quat>(frame->Value);
+            transform.Rotation = std::get<quat>(frame->Value);
         if(Type == ChannelType::Scale)
-            transform.Scale = std::get<glm::vec3>(frame->Value);
+            transform.Scale = std::get<vec3>(frame->Value);
     }
 
     void AnimationChannel::GetLinear(float time, TransformData& transform) const
@@ -162,11 +162,11 @@ namespace gE
         if(frame == nextFrame || fac < 0) fac = 0.f;
 
         if(Type == ChannelType::Location)
-            transform.Location = glm::mix(std::get<glm::vec3>(frame->Value), std::get<glm::vec3>(nextFrame->Value), fac);
+            transform.Location = mix(std::get<vec3>(frame->Value), std::get<vec3>(nextFrame->Value), fac);
         if(Type == ChannelType::Rotation)
-            transform.Rotation = glm::slerp(std::get<glm::quat>(frame->Value), std::get<glm::quat>(nextFrame->Value), fac);
+            transform.Rotation = slerp(std::get<quat>(frame->Value), std::get<quat>(nextFrame->Value), fac);
         if(Type == ChannelType::Scale)
-            transform.Scale = glm::mix(std::get<glm::vec3>(frame->Value), std::get<glm::vec3>(nextFrame->Value), fac);
+            transform.Scale = mix(std::get<vec3>(frame->Value), std::get<vec3>(nextFrame->Value), fac);
     }
 
     void AnimationChannel::IDeserialize(istream& in, SETTINGS_T s)
@@ -230,7 +230,7 @@ namespace gE
         if(!_skeleton) return;
 
         GE_ASSERT(_skeleton->Bones.Size() <= transform.Size());
-        time = glm::mod(glm::abs(time), Length);
+        time = mod(abs(time), Length);
 
         for(const AnimationChannel& channel : Channels)
             channel.Get(time, transform[channel.Target.Location]);

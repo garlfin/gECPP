@@ -14,7 +14,7 @@ namespace Physics
     	BakedSettings = ptr_create<BakedConvexMeshShape>();
 
         px::ConvexHullShapeSettings settings = DEFAULT;
-        settings.mPoints = ToPX<glm::vec3, px::Vec3, ToPX>(Points);
+        settings.mPoints = ToPX<vec3, px::Vec3, ToPX>(Points);
 
         px::BakedConvexHullShapeSettings::EResult result;
         px::BakedConvexHullShapeSettings bakedPXSettings(settings, result);

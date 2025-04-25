@@ -127,8 +127,8 @@ void gE::GUIManager::OnRender(const ImDrawData* draw) const
     glBlendEquation(GL_FUNC_ADD);
     glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
-    camera.Projection = glm::ortho(draw->DisplayPos.x, right, draw->DisplayPos.y, bottom);
-    buffers.GetCamera().UpdateData<std::byte>(sizeof(glm::mat4), offsetof(GPU::Camera, Projection));
+    camera.Projection = ortho(draw->DisplayPos.x, right, draw->DisplayPos.y, bottom);
+    buffers.GetCamera().UpdateData<std::byte>(sizeof(mat4), offsetof(GPU::Camera, Projection));
 
     _imShader.Bind();
 

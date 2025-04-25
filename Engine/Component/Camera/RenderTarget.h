@@ -138,6 +138,6 @@ namespace gE
         ColorTarget(CAMERA_T& camera, TEX_T& color) : IColorTarget(camera, color) {};
 
         GET(TEX_T&, Color, (TEX_T&) IColorTarget::GetColor());
-        GET(CAMERA_T&, Camera, (CAMERA_T&) IColorTarget::GetCamera());
+        GET_CONST(CAMERA_T&, Camera, (CAMERA_T&) IColorTarget::GetCamera());
     };
 }

@@ -125,31 +125,31 @@ namespace gE
         );
     }
 
-    void RigidBody::SetInstantVelocity(const glm::vec3& velocity)
+    void RigidBody::SetInstantVelocity(const vec3& velocity)
     {
         px::BodyInterface& physics = *GetWindow().GetPhysics()._interface;
         physics.SetLinearVelocity(_body->GetID(), Physics::ToPX(velocity));
     }
 
-    void RigidBody::AddImpulse(const glm::vec3& impulse)
+    void RigidBody::AddImpulse(const vec3& impulse)
     {
         px::BodyInterface& physics = *GetWindow().GetPhysics()._interface;
         physics.AddImpulse(_body->GetID(), Physics::ToPX(impulse));
     }
 
-    void RigidBody::AddImpulse(const glm::vec3& impulse, const glm::vec3& dir)
+    void RigidBody::AddImpulse(const vec3& impulse, const vec3& dir)
     {
         px::BodyInterface& physics = *GetWindow().GetPhysics()._interface;
         physics.AddImpulse(_body->GetID(), Physics::ToPX(impulse), Physics::ToPX(dir));
     }
 
-    void RigidBody::AddForce(const glm::vec3& force)
+    void RigidBody::AddForce(const vec3& force)
     {
         px::BodyInterface& physics = *GetWindow().GetPhysics()._interface;
         physics.AddForce(_body->GetID(), Physics::ToPX(force));
     }
 
-    void RigidBody::AddForce(const glm::vec3& force, const glm::vec3& dir)
+    void RigidBody::AddForce(const vec3& force, const vec3& dir)
     {
         px::BodyInterface& physics = *GetWindow().GetPhysics()._interface;
         physics.AddForce(_body->GetID(), Physics::ToPX(force), Physics::ToPX(dir));

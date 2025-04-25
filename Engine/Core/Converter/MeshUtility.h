@@ -44,23 +44,23 @@ namespace gE::Model
 
 	struct Vertex
 	{
-		glm::vec3 Position;
-		alignas(8) glm::vec2 UV;
-		alignas(4) glm::i8vec3 Normal;
-		alignas(4) glm::i8vec4 Tangent;
+		vec3 Position;
+		alignas(8) vec2 UV;
+		alignas(4) i8vec3 Normal;
+		alignas(4) i8vec4 Tangent;
 	};
 
 	struct VertexWeight
 	{
-		glm::u8vec4 Bones;
-		glm::u8vec4 Weights;
+		u8vec4 Bones;
+		u8vec4 Weights;
 
 		inline u8 AddWeight(u16 bone, u8 weight);
 	};
 
 	struct Face
 	{
-		glm::u32vec3 Triangle;
+		u32vec3 Triangle;
 	};
 
     template<class FIELD_T, class STRUCT>
@@ -72,10 +72,10 @@ namespace gE::Model
 	template<class FROM_T, class TO_T, class SPAN_T>
 	void FillBuffer(const GPU::VertexField& field, std::span<SPAN_T> dstSpan, const PrimitiveData& primitive, ConversionFunc<TO_T, FROM_T> func);
 
-	NODISCARD inline glm::i8vec3 ConvertNormal(const glm::vec3& normal) noexcept;
-	NODISCARD inline glm::i8vec4 ConvertTangent(const glm::vec4& normal) noexcept;
-	NODISCARD inline glm::i8vec4 ConvertTangentFlipped(const glm::vec4& normal) noexcept;
-	NODISCARD inline glm::u8vec4 ConvertWeight(const glm::vec4& weight) noexcept;
+	NODISCARD inline i8vec3 ConvertNormal(const vec3& normal) noexcept;
+	NODISCARD inline i8vec4 ConvertTangent(const vec4& normal) noexcept;
+	NODISCARD inline i8vec4 ConvertTangentFlipped(const vec4& normal) noexcept;
+	NODISCARD inline u8vec4 ConvertWeight(const vec4& weight) noexcept;
 
 	AccessorData GetAccessorData(const gltf::Asset& file, size_t index);
 	PrimitiveData GetAttributeData(const gltf::Asset& file, const gltf::Primitive& prim, std::string_view attribute);

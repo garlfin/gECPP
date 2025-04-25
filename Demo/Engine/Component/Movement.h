@@ -63,16 +63,16 @@ namespace gE
             _rot.x += mouse.GetDelta().y * SENSITIVITY;
             _rot.x = std::clamp(_rot.x, -89.9f, 89.9f);
 
-            transform.SetRotation(glm::vec3(0, _rot.y * TO_RAD, 0));
-            cameraTransform.SetRotation(glm::vec3(_rot.x * TO_RAD, 0, 0));
+            transform.SetRotation(vec3(0, _rot.y * TO_RAD, 0));
+            if(!GetWindow().GetVREnabled()) cameraTransform.SetRotation(vec3(_rot.x * TO_RAD, 0, 0));
 
-            glm::vec3 dir(0.f);
+            vec3 dir(0.f);
             if (IsKeyDown(keyboard.GetKey(Key::W))) dir.z -= 1.f;
             if (IsKeyDown(keyboard.GetKey(Key::S))) dir.z += 1.f;
             if (IsKeyDown(keyboard.GetKey(Key::A))) dir.x -= 1.f;
             if (IsKeyDown(keyboard.GetKey(Key::D))) dir.x += 1.f;
 
-            if (glm::length2(dir) > 0) dir = normalize(dir);
+            if (length2(dir) > 0) dir = normalize(dir);
 
             Physics::CapsuleShape capsuleShape = DEFAULT;
             capsuleShape.Height = StandingHeight;
@@ -87,13 +87,13 @@ namespace gE
             {
                 const float heightDifference = (StandingHeight - CrouchingHeight) / 2.f;
                 if (IsKeyDown(crouchState))
-                    transform.SetPosition(transform->Position - glm::vec3(0, heightDifference, 0));
+                    transform.SetPosition(transform->Position - vec3(0, heightDifference, 0));
                 else
-                    transform.SetPosition(transform->Position + glm::vec3(0, heightDifference, 0));
+                    transform.SetPosition(transform->Position + vec3(0, heightDifference, 0));
                 _controller->ForceUpdateTransforms();
             }
 
-            cameraTransform.SetPosition(glm::vec3(0, capsuleShape.Height / 2.f, 0));
+            if(!GetWindow().GetVREnabled()) cameraTransform.SetPosition(vec3(0, capsuleShape.Height / 2.f, 0));
             _controller->SetShape(capsuleShape);
 
             dir *= Speed;
@@ -105,16 +105,16 @@ namespace gE
 
             if (IsKeyDown(keyboard.GetKey(Key::Space)) && grounded)
             {
-                _controller->AddVelocity(glm::vec3(0, std::sqrt(2.f * 9.81 * JUMP_HEIGHT), 0));
+                _controller->AddVelocity(vec3(0, std::sqrt(2.f * 9.81 * JUMP_HEIGHT), 0));
                 _controller->SetIsGrounded(false);
             }
         }
 
     private:
-        glm::vec3 _rot = DEFAULT;
+        vec3 _rot = DEFAULT;
         RelativePointer<CharacterController> _controller;
         Entity* _camera;
-        glm::vec3 _dir = DEFAULT;
+        vec3 _dir = DEFAULT;
     };
 
     REFLECTABLE_FACTORY_NO_IMPL(Movement, inline);

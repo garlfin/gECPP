@@ -74,8 +74,8 @@ namespace gE
         GE_ASSERTM(!GetOwner().GetParent(), "Physics objects must not have a parent!");
         Transform& transform = GetOwner().GetTransform();
 
-        glm::vec3 position;
-        glm::quat rotation;
+        vec3 position;
+        quat rotation;
 
         if(_interpolationMode == PhysicsInterpolationMode::None)
         {

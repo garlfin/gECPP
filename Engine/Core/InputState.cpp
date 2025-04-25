@@ -19,7 +19,7 @@ namespace gE
         to |= ((to ^ previousState) & KeyState::Down) << (KeyState) 1;
     }
 
-    void MouseState::SetPosition(glm::vec2 relative) const
+    void MouseState::SetPosition(vec2 relative) const
     {
         SDL_WarpMouseInWindow(_window->GetSDLWindow(), relative.x, relative.y);
     }
@@ -36,7 +36,7 @@ namespace gE
             state = SDL_GetMouseState(&x, &y);
 
             _previousMousePosition = _mousePosition;
-            _mousePosition = glm::vec2(x, y);
+            _mousePosition = vec2(x, y);
         }
         else
         {
@@ -44,8 +44,8 @@ namespace gE
             SDL_HideCursor();
             state = SDL_GetRelativeMouseState(&x, &y);
 
-            _previousMousePosition = glm::vec2(0);
-            _mousePosition = glm::vec2(x, y);
+            _previousMousePosition = vec2(0);
+            _mousePosition = vec2(x, y);
         }
 
         for(u8 i = 0; i < 5; i++)

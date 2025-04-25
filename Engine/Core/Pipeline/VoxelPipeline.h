@@ -17,7 +17,7 @@ namespace GPU
 {
 	struct VoxelScene
 	{
-		glm::vec3 Center;
+		vec3 Center;
 		float Scale;
 		handle Color;
 	};
@@ -43,7 +43,7 @@ namespace gE::VoxelPipeline
 
 	struct ProbeSettings
 	{
-		glm::u8vec3 GridResolution;
+		u8vec3 GridResolution;
 	};
 
 	GLOBAL GPU::Texture ColorFormat = []

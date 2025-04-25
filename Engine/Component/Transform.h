@@ -34,12 +34,12 @@ namespace gE
 
 		explicit Transform(Entity* o);
 
-		NODISCARD glm::mat4 GetParentTransform() const;
+		NODISCARD mat4 GetParentTransform() const;
 
-		void SetPosition(const glm::vec3& pos, TransformFlags flags = TransformFlags::All) { _flags |= flags; _transform.Position = pos; }
-		void SetLocation(const glm::vec3& pos, TransformFlags flags = TransformFlags::All) { _flags |= flags; _transform.Position = pos; }
-		void SetRotation(const glm::quat& rot, TransformFlags flags = TransformFlags::All) { _flags |= flags; _transform.Rotation = rot; }
-		void SetScale(const glm::vec3& scale, TransformFlags flags = TransformFlags::All) { _flags |= flags; _transform.Scale = scale; }
+		void SetPosition(const vec3& pos, TransformFlags flags = TransformFlags::All) { _flags |= flags; _transform.Position = pos; }
+		void SetLocation(const vec3& pos, TransformFlags flags = TransformFlags::All) { _flags |= flags; _transform.Position = pos; }
+		void SetRotation(const quat& rot, TransformFlags flags = TransformFlags::All) { _flags |= flags; _transform.Rotation = rot; }
+		void SetScale(const vec3& scale, TransformFlags flags = TransformFlags::All) { _flags |= flags; _transform.Scale = scale; }
 
 		ALWAYS_INLINE void Set(const TransformData& d) { Set(d, TransformFlags::All); }
 		ALWAYS_INLINE void Set(const Transform& d) { Set(d._transform, TransformFlags::All); }
@@ -49,9 +49,9 @@ namespace gE
 		void OnRender(float, Camera*) override;
 		void OnFixedUpdate(float) override;
 
-		ALWAYS_INLINE operator const glm::mat4&() const { return _model; }
-		NODISCARD ALWAYS_INLINE const glm::mat4& Model() const { return _model; }
-		NODISCARD ALWAYS_INLINE const glm::mat4& PreviousRenderModel() const { return _previousModel; }
+		ALWAYS_INLINE operator const mat4&() const { return _model; }
+		NODISCARD ALWAYS_INLINE const mat4& Model() const { return _model; }
+		NODISCARD ALWAYS_INLINE const mat4& PreviousRenderModel() const { return _previousModel; }
 
 		NODISCARD ALWAYS_INLINE const TransformData* operator->() const { return &_transform; }
 		NODISCARD ALWAYS_INLINE const TransformData& operator*() const { return _transform; }
@@ -66,17 +66,17 @@ namespace gE
 		inline void Set(const TransformData& d, TransformFlags flags) { _flags |= flags; _transform = d; };
 		inline void Set(const Transform& d, TransformFlags flags) { _flags |= flags; _transform = d._transform; };
 
-		void SetPosition_(const glm::vec3& pos) { SetPosition(pos); }
-		void SetRotation_(const glm::vec3& rot) { SetRotation(glm::radians(rot)); }
-		void SetScale_(const glm::vec3& scale) { SetScale(scale); }
+		void SetPosition_(const vec3& pos) { SetPosition(pos); }
+		void SetRotation_(const vec3& rot) { SetRotation(radians(rot)); }
+		void SetScale_(const vec3& scale) { SetScale(scale); }
 
-		GET_CONST(const glm::vec3&, Position_, _transform.Position);
-		GET_CONST(glm::vec3, Rotation_, glm::degrees(glm::eulerAngles(_transform.Rotation)));
-		GET_CONST(const glm::vec3&, Scale_, _transform.Scale);
+		GET_CONST(const vec3&, Position_, _transform.Position);
+		GET_CONST(vec3, Rotation_, degrees(eulerAngles(_transform.Rotation)));
+		GET_CONST(const vec3&, Scale_, _transform.Scale);
 
 	private:
 		TransformData _transform, _globalTransform;
-		glm::mat4 _model, _previousModel = glm::mat4(1.0);
+		mat4 _model, _previousModel = mat4(1.0);
 		TransformFlags _flags;
 	};
 

@@ -35,7 +35,7 @@ double SDLGetTime(u64 initTime)
 	return (double) counter / (double) SDL_GetPerformanceFrequency();
 }
 
-Window::Window(glm::u16vec2 size, const std::string& name) :
+Window::Window(u16vec2 size, const std::string& name) :
 	Cameras(this),
 	Transforms(this),
 	CullingManager(this),
@@ -271,6 +271,7 @@ void Window::OnUpdate(float delta)
 {
 	Entities.MarkDeletions();
 
+	if(VR) VR->OnUpdate();
 	Physics->OnUpdate(delta);
 	Cameras.OnUpdate(delta);
 	Behaviors.OnUpdate(delta);
@@ -307,7 +308,10 @@ void Window::OnRender(float delta)
 	glViewport(0, 0, _size.x, _size.y);
 	Blit(GUI->GetColor());
 
-	Cameras.GetCurrentCamera()->GetCamera().Resize(_viewport.Size);
+	if(VR)
+		VR->OnRender();
+	else
+		Cameras.GetCurrentCamera()->GetCamera().Resize(_viewport.Size);
 }
 
 void Window::InitVoxelReflections(const VoxelCaptureSettings& settings)

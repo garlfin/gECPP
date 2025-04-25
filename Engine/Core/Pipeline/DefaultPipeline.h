@@ -62,7 +62,7 @@ namespace gE::DefaultPipeline
 
  	class Target2D final : public RenderTarget<Camera2D>, public DepthTarget<Camera2D>, public ColorTarget<Camera2D>
 	{
-	 public:
+	public:
 		using TEX_T = API::Texture2D;
 		using POSTPROCESS_T = IPostProcessEffect<RenderTarget>;
  		using RenderTarget::GetCamera;
@@ -83,7 +83,7 @@ namespace gE::DefaultPipeline
 
 		~Target2D() override = default;
 
-	 private:
+	private:
  		Attachment<API::Texture2D, GL_DEPTH_ATTACHMENT> _depth;
 		Attachment<API::Texture2D, GL_COLOR_ATTACHMENT0> _color;
 		Attachment<API::Texture2D, GL_COLOR_ATTACHMENT1> _velocity;

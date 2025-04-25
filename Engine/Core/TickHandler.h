@@ -39,7 +39,7 @@ private:
 inline bool TickHandler::ShouldTickDelta(const double delta)
 {
     _delta += delta;
-    const double adjDelta = glm::min(_delta - RequiredDelta, RequiredDelta);
+    const double adjDelta = min(_delta - RequiredDelta, RequiredDelta);
 
     if(!RequiredDelta)
     {

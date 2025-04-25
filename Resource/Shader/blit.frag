@@ -5,5 +5,5 @@ out vec4 FragColor;
 
 void main()
 {
-    FragColor = texture(Color, UV);
+    FragColor = textureLod(Color, UV, 0.f);
 }

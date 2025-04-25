@@ -122,7 +122,7 @@ namespace gE::Model
             skeletonOut.Name = skeletonIn.name;
             skeletonOut.Bones = Array<Bone>(skeletonIn.joints.size());
 
-            Array<glm::mat4> modelMatrices = Array<glm::mat4>(skeletonIn.joints.size());
+            Array<mat4> modelMatrices = Array<mat4>(skeletonIn.joints.size());
             for(size_t b = 0; b < skeletonIn.joints.size(); b++)
             {
                 const gltf::Node& boneIn = file->nodes[skeletonIn.joints[b]];
@@ -137,7 +137,7 @@ namespace gE::Model
                 else
                     modelMatrices[b] = boneOut.Transform.ToMat4();
 
-                boneOut.InverseBindMatrix = glm::inverse(modelMatrices[b]);
+                boneOut.InverseBindMatrix = inverse(modelMatrices[b]);
 
                 for(size_t childIndex : boneIn.children)
                 {
@@ -326,8 +326,8 @@ namespace gE::Model
 
             const std::span writeSpan { (Vertex*) buf.Data.begin() + offset, (Vertex*) buf.Data.end() };
 
-            GE_MODEL_CHECK_ATTR(POSITION_FIELD, position, (ConversionFunc<glm::vec3, glm::vec3>) nullptr);
-            GE_MODEL_CHECK_ATTR(UV_FIELD, uv, (ConversionFunc<glm::vec2, glm::vec2>) nullptr);
+            GE_MODEL_CHECK_ATTR(POSITION_FIELD, position, (ConversionFunc<vec3, vec3>) nullptr);
+            GE_MODEL_CHECK_ATTR(UV_FIELD, uv, (ConversionFunc<vec2, vec2>) nullptr);
             GE_MODEL_CHECK_ATTR(NORMAL_FIELD, normal, ConvertNormal);
             GE_MODEL_CHECK_ATTR(TANGENT_FIELD, tangent, settings.FlipTangents ? ConvertTangentFlipped : ConvertTangent);
 
@@ -391,7 +391,7 @@ namespace gE::Model
 
             const std::span writeSpan { (VertexWeight*) buf.Data.begin() + offset, (VertexWeight*) buf.Data.end() };
 
-            GE_MODEL_CHECK_ATTR(BONES_FIELD, bones, (ConversionFunc<glm::u8vec4, glm::u8vec4>) nullptr);
+            GE_MODEL_CHECK_ATTR(BONES_FIELD, bones, (ConversionFunc<u8vec4, u8vec4>) nullptr);
             GE_MODEL_CHECK_ATTR(WEIGHTS_FIELD, weights, ConvertWeight);
 
             offset += bones->Accessor->count;
@@ -414,11 +414,11 @@ namespace gE::Model
             frameOut.Time = AccessBuffer<float>(channelData.Input, i);
 
             if(channelOut.Type == ChannelType::Location)
-                frameOut.Value = AccessBuffer<glm::vec3>(channelData.Output, i) * scale;
+                frameOut.Value = AccessBuffer<vec3>(channelData.Output, i) * scale;
             else if(channelOut.Type == ChannelType::Scale)
-                frameOut.Value = AccessBuffer<glm::vec3>(channelData.Output, i);
+                frameOut.Value = AccessBuffer<vec3>(channelData.Output, i);
             else
-                frameOut.Value = AccessBuffer<glm::quat>(channelData.Output, i);
+                frameOut.Value = AccessBuffer<quat>(channelData.Output, i);
 
 #ifdef GE_ENABLE_IMGUI
             frameOut.Channel = &channelOut;
@@ -433,14 +433,14 @@ namespace gE::Model
         TransformData result;
         if(const gltf::TRS* trs = std::get_if<gltf::TRS>(&node.transform))
         {
-            result.Location = std::bit_cast<glm::vec3>(trs->translation);
-            result.Rotation = std::bit_cast<glm::quat>(trs->rotation);
-            result.Scale = std::bit_cast<glm::vec3>(trs->scale);
+            result.Location = std::bit_cast<vec3>(trs->translation);
+            result.Rotation = std::bit_cast<quat>(trs->rotation);
+            result.Scale = std::bit_cast<vec3>(trs->scale);
         }
         else
         {
             const gltf::math::fmat4x4* mat = std::get_if<gltf::math::fmat4x4>(&node.transform);
-            Decompose(*(const glm::mat4*) mat, result.Location, result.Rotation, result.Scale);
+            result = Decompose(*(const mat4*) mat);
         }
 
         return result;

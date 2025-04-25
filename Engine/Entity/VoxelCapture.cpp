@@ -15,7 +15,7 @@ namespace gE
 		_camera(this, _target, CreateVoxelSettings(settings.Resolution, settings.Size)),
 		_target(*this, _camera, settings.ProbeSettings)
 	{
-		GetTransform().SetScale((glm::vec3) (settings.Size * 0.5f));
+		GetTransform().SetScale((vec3) (settings.Size * 0.5f));
 	}
 
 	void VoxelCapture::GetGPUVoxelScene(GPU::VoxelScene& scene)
@@ -32,7 +32,7 @@ namespace gE
 		return
 		{
 			ICameraSettings{ ClipPlanes(0.f, size), DEFAULT },
-			glm::ivec3(resolution)
+			ivec3(resolution)
 		};
 	}
 }

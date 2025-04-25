@@ -13,7 +13,7 @@ namespace Coaster
     class CoasterBuilderWindow : public Window
     {
     public:
-        explicit CoasterBuilderWindow(glm::u16vec2 size, const char* name = "Roller Coaster Builder") : Window(size, name) {};
+        explicit CoasterBuilderWindow(u16vec2 size, const char* name = "Roller Coaster Builder") : Window(size, name) {};
 
     private:
         void OnInit() override;

@@ -196,7 +196,7 @@ ALWAYS_INLINE Reference<T> ref_cast(T* t)
 template<class T>
 class Pointer
 {
- public:
+public:
 	ALWAYS_INLINE explicit Pointer(T* t) : _t(t) { };
 
 	template<class I> requires std::is_base_of_v<T, I>
@@ -233,7 +233,7 @@ class Pointer
 
 	~Pointer() { Free(); }
 
- private:
+private:
 	T* _t = nullptr;
 
 	template<class I> friend class Pointer;

@@ -32,7 +32,7 @@ namespace gE
 
 		GET(Camera&, Camera, _camera);
 		GET(GL::Texture&, Depth, *Depth);
-		GET_SET(glm::vec3, Color, _color);
+		GET_SET(vec3, Color, _color);
 
 	protected:
 		// Temporary workaround to bizzare bug.
@@ -40,7 +40,7 @@ namespace gE
 
 	private:
 		RelativePointer<Camera> _camera;
-		glm::vec3 _color = glm::vec3(1.0);
+		vec3 _color = vec3(1.0);
 	};
 
 	class LightManager : public Manager<Managed<Light>>
@@ -52,7 +52,7 @@ namespace gE
 
 		void OnRender(float delta, Camera*);
 
-		void UseNearestLights(const glm::vec3& point) const;
+		void UseNearestLights(const vec3& point) const;
 
 	 private:
 		Window* _window = DEFAULT;

@@ -53,15 +53,15 @@ namespace Coaster
             _isFlipped = previous->_isFlipped;
         }
 
-        glm::vec3 offset = _subPreset->Offset;
-        glm::vec3 exitPosition = _subPreset->ExitPosition;
+        vec3 offset = _subPreset->Offset;
+        vec3 exitPosition = _subPreset->ExitPosition;
         float exitRotation = _subPreset->ExitRotation;
-        glm::mat4 transform = glm::mat4(1.f);
+        mat4 transform = mat4(1.f);
 
         if(_isFlipped)
         {
-            offset = _subPreset->FlipTransform * glm::vec4(offset, 1.f);
-            exitPosition = _subPreset->FlipTransform * glm::vec4(exitPosition, 1.f);
+            offset = _subPreset->FlipTransform * vec4(offset, 1.f);
+            exitPosition = _subPreset->FlipTransform * vec4(exitPosition, 1.f);
             exitRotation *= -1.f;
         }
 
@@ -70,15 +70,15 @@ namespace Coaster
 
         if(previous)
         {
-            const glm::quat rot = TileRotationToQuat(previous->_exitRotation);
+            const quat rot = TileRotationToQuat(previous->_exitRotation);
             offset = previous->_exitPosition + rot * offset;
             _exitPosition = previous->_exitPosition + rot * _exitPosition;
             _exitRotation += previous->_exitRotation;
         }
 
-        transform = glm::translate(transform, offset);
+        transform = translate(transform, offset);
         if(previous)
-            transform *= glm::toMat4(TileRotationToQuat(previous->_exitRotation));
+            transform *= toMat4(TileRotationToQuat(previous->_exitRotation));
         if(_isFlipped)
             transform *= _subPreset->FlipTransform;
 

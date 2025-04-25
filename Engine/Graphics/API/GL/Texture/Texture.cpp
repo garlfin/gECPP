@@ -57,7 +57,7 @@ namespace GL
 
 		if(!Data) return;
 
-		glm::u32vec2 size = Size;
+		u32vec2 size = Size;
 		const std::byte* dataPtr = Data.Data.Data();
 
 		for(u8 i = 0; i < Data.MipCount; i++, size >>= Size2D(1))
@@ -89,6 +89,40 @@ namespace GL
 		ImGui::Image((ImTextureID) (API::Texture*) this, ImVec2(size, size));
 	);
 
+	API_SERIALIZABLE_IMPL(Texture2DArray), GL::Texture(window, GL_TEXTURE_2D_ARRAY, *this)
+	{
+		if(!MipCount) MipCount = GPU::GetMipCountArray<Dimension::D3D>(Size);
+		glTextureStorage3D(ID, MipCount, Format, Size.x, Size.y, Size.z);
+
+		if(!Data) return;
+
+		Size2D size = Size;
+		const std::byte* dataPtr = Data.Data.Data();
+
+		for(u8 i = 0; i < Data.MipCount; i++, size >>= Size2D(1))
+		{
+			size = max(size, Size2D(1));
+			const u64 dataSize = Data.Scheme.Size<Dimension::D2D>(size);
+
+			for(u32 z = 0; z < Size.z; z++)
+			{
+				if(Data.Scheme.IsCompressed())
+					glCompressedTextureSubImage3D(ID, i, 0, z, 0, size.x, size.y, 1, Format, dataSize, dataPtr);
+				else
+					glTextureSubImage3D(ID, i, 0, 0, z, size.x, size.y, 1, Data.PixelFormat, Data.PixelType, dataPtr);
+
+				dataPtr += dataSize;
+			}
+		}
+
+		if(Data.MipCount != MipCount) glGenerateTextureMipmap(ID);
+	}
+
+	void Texture2DArray::CopyFrom(const GL::Texture& o)
+	{
+		glCopyImageSubData(o.Get(), o.GetTarget(), 0, 0, 0, 0, ID, GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0, GetSize().x, GetSize().y, GetSize().z);
+	}
+
 	API_SERIALIZABLE_IMPL(Texture3D), GL::Texture(window, GL_TEXTURE_3D, *this)
 	{
 		if(!MipCount) MipCount = GPU::GetMipCount<Dimension::D3D>(Size);
@@ -96,7 +130,7 @@ namespace GL
 
 		if(!Data) return;
 
-		glm::u32vec3 size = Size;
+		u32vec3 size = Size;
 		const std::byte* dataPtr = Data.Data.Data();
 
 		for(u8 i = 0; i < Data.MipCount; i++, size >>= Size3D(1))
@@ -132,7 +166,7 @@ namespace GL
 
 		for(u8 i = 0; i < Data.MipCount; i++, size >>= 1)
 		{
-			size = glm::max(size, 1u);
+			size = max(size, 1u);
 			u64 dataSize = Data.Scheme.Size<Dimension::D3D>(Size3D(size, size, 6));
 
 			if(Data.Scheme.IsCompressed())
@@ -163,7 +197,7 @@ namespace GL
 
 		for(u8 i = 0; i < Data.MipCount; i++, size >>= 1)
 		{
-			size = glm::max(size, 1u);
+			size = max(size, 1u);
 			u64 dataSize = Data.Scheme.Size<Dimension::D1D>(size);
 
 			if(Data.Scheme.IsCompressed())

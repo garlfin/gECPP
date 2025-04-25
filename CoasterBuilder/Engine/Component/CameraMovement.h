@@ -24,7 +24,7 @@ namespace Coaster
 
     private:
         float _velocity = 0.f;
-        glm::vec3 _rot = DEFAULT;
+        vec3 _rot = DEFAULT;
     };
 
     inline REFLECTABLE_ONGUI_IMPL(FreeCamMovement,
@@ -39,7 +39,7 @@ namespace Coaster
         KeyboardState& keyboard = GetWindow().GetKeyboard();
         MouseState& mouse = GetWindow().GetMouse();
 
-        glm::vec3 direction = DEFAULT;
+        vec3 direction = DEFAULT;
 
         if(!mouse.GetIsFocused() && IsKeyDown(mouse.GetButton(MouseButton::Right)))
         {
@@ -56,7 +56,7 @@ namespace Coaster
             if(IsKeyDown(keyboard.GetKey(Key::D))) direction.x += 1.f;
 
             if(direction.x + direction.y + direction.z > 0.f)
-                direction = glm::normalize(direction);
+                direction = normalize(direction);
 
             direction = transform->Rotation * direction;
         }

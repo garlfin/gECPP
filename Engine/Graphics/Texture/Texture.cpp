@@ -88,8 +88,14 @@ namespace GPU
 	GPU_TEXTURE_DEFINITION(Texture2D, Dimension::D2D);
 	REFLECTABLE_ONGUI_IMPL(Texture2D,
 		gE::DrawField(gE::ScalarField<u32>{ "Size" }, (const Size2D&) Size, depth);
-	);
+	)
 	API_REFLECTABLE_FACTORY_IMPL(Texture2D, API::Texture2D);
+
+	GPU_TEXTURE_DEFINITION(Texture2DArray, Dimension::D3D);
+	REFLECTABLE_ONGUI_IMPL(Texture2DArray,
+		gE::DrawField(gE::ScalarField<u32>{ "Size" }, (const Size3D&) Size, depth);
+	);
+	API_REFLECTABLE_FACTORY_IMPL(Texture2DArray, API::Texture2DArray);
 
 	GPU_TEXTURE_DEFINITION(Texture3D, Dimension::D3D);
 	REFLECTABLE_ONGUI_IMPL(Texture3D,

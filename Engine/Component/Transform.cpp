@@ -9,10 +9,10 @@
 
 namespace gE
 {
-	glm::mat4 Transform::GetParentTransform() const
+	mat4 Transform::GetParentTransform() const
 	{
 		Entity* parent = GetOwner().GetParent();
-		return parent ? parent->GetTransform()._model : glm::mat4(1.f);
+		return parent ? parent->GetTransform()._model : mat4(1.f);
 	}
 
 	void Transform::OnUpdate(float)
@@ -25,7 +25,7 @@ namespace gE
 		if(!(bool)(_flags & TransformFlags::RenderInvalidated)) return;
 
 		_model = GetParentTransform() * _transform.ToMat4();
-		Decompose(_model, _globalTransform.Location, _globalTransform.Rotation, _globalTransform.Scale);
+		_globalTransform = Decompose(_model);
 	}
 
 	void Transform::OnRender(float, Camera*)
@@ -55,9 +55,9 @@ namespace gE
 		};
 	}
 
-	glm::mat4 TransformData::ToMat4() const
+	mat4 TransformData::ToMat4() const
 	{
-		glm::mat4 model = translate(glm::mat4(1.0), Location);
+		mat4 model = translate(mat4(1.0), Location);
 		model *= toMat4(Rotation);
 		model = scale(model, Scale);
 

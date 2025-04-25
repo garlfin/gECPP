@@ -12,20 +12,20 @@ namespace gE::Editor
     {
     public:
         API::Texture2D Texture;
-        glm::u16vec2 SpriteCount;
+        u16vec2 SpriteCount;
 
-        glm::vec2 GetSpriteSize() const { return 1.f / (glm::vec2) SpriteCount; }
-        glm::vec2 GetBottomUV(glm::u16vec2 sprite) const { return GetSpriteSize() * (glm::vec2) sprite; };
-        glm::vec2 GetTopUV(glm::u16vec2 sprite) const { return GetBottomUV(sprite) + GetSpriteSize(); };
+        vec2 GetSpriteSize() const { return 1.f / (vec2) SpriteCount; }
+        vec2 GetBottomUV(u16vec2 sprite) const { return GetSpriteSize() * (vec2) sprite; };
+        vec2 GetTopUV(u16vec2 sprite) const { return GetBottomUV(sprite) + GetSpriteSize(); };
     };
 
     struct Sprite
     {
     public:
         Reference<SpriteSheet> SpriteSheet;
-        glm::u16vec2 SpriteID;
+        u16vec2 SpriteID;
 
-        glm::vec2 GetBottomUV() const { return SpriteSheet->GetBottomUV(SpriteID); };
-        glm::vec2 GetTopUV() const { return SpriteSheet->GetTopUV(SpriteID); };
+        vec2 GetBottomUV() const { return SpriteSheet->GetBottomUV(SpriteID); };
+        vec2 GetTopUV() const { return SpriteSheet->GetTopUV(SpriteID); };
     };
 }

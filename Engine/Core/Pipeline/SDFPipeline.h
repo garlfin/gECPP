@@ -18,14 +18,14 @@ namespace GPU
 {
 	struct SDFReference
 	{
-		glm::u16vec3 UV;
+		u16vec3 UV;
 		u8 Flags; // TextureID: 6, IsDynamic, ---
-		glm::u8vec3 Size;
+		u8vec3 Size;
 	};
 
 	struct SDFInstance
 	{
-		glm::mat4 Transform;
+		mat4 Transform;
 		SDFReference Color;
 		u16 Mesh;
 	};
@@ -40,8 +40,8 @@ namespace GPU
 		u16 ChildB;
 
 		float Scale;
-		glm::i16vec3 Position;
-		glm::i16vec3 Bounds;
+		i16vec3 Position;
+		i16vec3 Bounds;
 	};
 
 	struct SDFScene

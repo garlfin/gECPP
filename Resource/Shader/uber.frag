@@ -1,6 +1,6 @@
 #define ENABLE_VOXEL_TRACE
-//#define ENABLE_SS_TRACE
-//#define ENABLE_SMRT
+#define ENABLE_SS_TRACE
+#define ENABLE_SMRT
 #define ENABLE_SMRT_CONTACT_SHADOW
 #define ENABLE_GI
 
@@ -9,8 +9,12 @@
 #define POM_MIN_LAYER 8
 #define POM_MAX_LAYER 32
 
-#include <Resource/Shader/Include/Camera.glsl>
 #include <Resource/Shader/Include/Scene.glsl>
+
+in flat uint ViewIndexIn;
+SCENE_VIEW_INDEX(ViewIndexIn);
+
+#include <Resource/Shader/Include/Camera.glsl>
 #include <Resource/Shader/Include/PBR.glsl>
 #include <Resource/Shader/Include/Effect.glsl>
 
@@ -71,7 +75,7 @@ void main()
 
 	ParallaxEffectSettings parallaxSettings = ParallaxEffectSettings(PBRMaterial.ParallaxDepth, POM_MIN_LAYER, POM_MAX_LAYER, 0.0, 0.5);
 
-    vec3 viewDir = normalize(Camera.Position - VertexIn.FragPos);
+    vec3 viewDir = normalize(Camera.Position[ViewIndex] - VertexIn.FragPos);
     if(PBRMaterial.ParallaxDepth > 0.0)
         vert.UV = ParallaxMapping(viewDir, ARMDTex, vert, parallaxSettings);
 
@@ -96,7 +100,12 @@ void main()
 
     PBRSample pbrSample = ImportanceSample(vert, frag);
     AOSettings aoSettings = AOSettings(8, 0.2, 0.5, 0.5);
-    float ao = SS_AO(aoSettings, vert);
+
+#ifdef EXT_BINDLESS
+    float ao = 1.0;//SS_AO(aoSettings, vert);
+#else
+    float ao = 1.0;
+#endif
 
     vec3 ambient = SH_SampleProbe(Lighting.SkyboxIrradiance, frag.Normal).rgb;
 #ifdef ENABLE_GI
@@ -108,11 +117,11 @@ void main()
     for(int i = 0; i < Lighting.LightCount; i++)
         FragColor.rgb += GetLighting(vert, frag, Lighting.Lights[i], VertexIn.FragPosLightSpace[i]);
 
-    if(Scene_EnableSpecular)
-    {
-        vec3 specular = SampleLighting(vert, pbrSample.Specular);
-        FragColor.rgb += FilterSpecular(vert, frag, pbrSample, specular);
-    }
+    //if(Scene_EnableSpecular)
+    //{
+    //    vec3 specular = SampleLighting(vert, pbrSample.Specular);
+    //    FragColor.rgb += FilterSpecular(vert, frag, pbrSample, specular);
+    //}
 
     FragColor.a = 1.0;
 

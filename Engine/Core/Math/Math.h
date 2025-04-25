@@ -11,6 +11,9 @@
 #include <GLM/vec2.hpp>
 #include <GLM/vec3.hpp>
 #include <GLM/gtx/quaternion.hpp>
+#include <GLM/gtx/matrix_decompose.hpp>
+
+#include "Transform.h"
 
 #define GL_BYTE 0x1400
 #define GL_UNSIGNED_BYTE 0x1401
@@ -44,20 +47,22 @@ enum class Dimension : u8
 	D3D = 3
 };
 
+using namespace glm;
+
 template<class COMPONENT_T>
 concept is_integer_v = std::is_scalar_v<COMPONENT_T> && !std::is_floating_point_v<COMPONENT_T>;
 
 template<Dimension DIMENSION, typename COMPONENT_T = float>
-using Position = std::conditional_t<DIMENSION == Dimension::D1D, COMPONENT_T, glm::vec<(u8) DIMENSION, COMPONENT_T>>;
+using Position = std::conditional_t<DIMENSION == Dimension::D1D, COMPONENT_T, vec<(u8) DIMENSION, COMPONENT_T>>;
 
 template<Dimension DIMENSION, typename COMPONENT_T = u32> requires is_integer_v<COMPONENT_T>
 using Size = Position<DIMENSION, COMPONENT_T>;
 
 template<Dimension DIMENSION, typename COMPONENT_T = float>
-using RotationMatrix = glm::mat<(size_t) DIMENSION, (size_t) DIMENSION, COMPONENT_T>;
+using RotationMatrix = mat<(size_t) DIMENSION, (size_t) DIMENSION, COMPONENT_T>;
 
 template<Dimension DIMENSION, typename COMPONENT_T = float>
-using TransformMatrix = glm::mat<(size_t) DIMENSION + 1, (size_t) DIMENSION + 1, COMPONENT_T>;
+using TransformMatrix = mat<(size_t) DIMENSION + 1, (size_t) DIMENSION + 1, COMPONENT_T>;
 
 // World's dumbest optimization
 constexpr size_t GLSizeOf(u32 t)
@@ -102,27 +107,21 @@ float constexpr fov_cast(float in, const Size2D& size)
 	else return val;
 }
 
-inline void Decompose(const glm::mat4& m, glm::vec3& p, glm::quat& r, glm::vec3& s)
+inline gE::TransformData Decompose(const mat4& m)
 {
-	p = m[3];
+	gE::TransformData result;
 
-	s = glm::vec3
-	{
-		length(*(glm::vec3*) &m[0]),
-		length(*(glm::vec3*) &m[1]),
-		length(*(glm::vec3*) &m[3])
-	};
+	glm::vec3 skew;
+	glm::vec4 perspective;
 
-	r.w = glm::sqrt(m[0][0] + m[1][1] + m[2][2] + 1.0) * 0.5f;
-	float root = r.w * 4.0;
-	r.x = (m[1][2] - m[2][1]) * root;
-	r.y = (m[2][0] - m[0][2]) * root;
-	r.z = (m[0][1] - m[1][0]) * root;
+	decompose(m, result.Scale, result.Rotation, result.Position, skew, perspective);
+
+	return result;
 }
 
 struct ColorHarmonic
 {
-	GPU_ALIGN glm::vec4 Coefficients[9];
+	GPU_ALIGN vec4 Coefficients[9];
 };
 
 struct Viewport

@@ -14,25 +14,26 @@
 #define API_MAX_LIGHT 4
 #define API_MAX_CUBEMAP 4
 #define API_MAX_MULTI_DRAW 8
+#define API_MAX_VIEW 6
 
 namespace GPU
 {
     struct Camera
     {
-        glm::vec3 Position;
-        u32 Frame;
-        glm::vec2 Planes; // Near, Far
-        glm::ivec2 Size; // Viewport Size
-        glm::vec3 Parameters; // Up to implementation
+        vec2 Planes; // Near, Far
+        ivec2 Size; // Viewport Size
+        vec2 Parameters; // Up to implementation
         float FrameDelta;
-        glm::vec4 PipelineParameters; // Up to implementation
+        u32 Frame;
+        vec4 PipelineParameters; // Up to implementation
 
         GPU_ALIGN handle ColorTexture;
         handle DepthTexture;
 
-        glm::mat4 PreviousViewProjection;
-        glm::mat4 Projection;
-        glm::mat4 View[6];
+        mat4 Projection;
+        mat4 View[API_MAX_VIEW];
+        mat4 PreviousView[API_MAX_VIEW];
+        vec4 Position[API_MAX_VIEW];
     };
 
     enum class LightType : u32
@@ -45,12 +46,12 @@ namespace GPU
 
     struct Light
     {
-        glm::mat4 ViewProjection;
-        glm::vec3 Position;
+        mat4 ViewProjection;
+        vec3 Position;
         LightType Type;
-        glm::vec3 Color;
+        vec3 Color;
         u32 PackedSettings;
-        glm::vec2 Planes;
+        vec2 Planes;
         handle Depth;
     };
 
@@ -64,9 +65,9 @@ namespace GPU
 
     struct Cubemap
     {
-        glm::vec3 Position;
+        vec3 Position;
         float BlendRadius;
-        glm::vec3 Scale;
+        vec3 Scale;
         CubemapType Type;
         GPU_ALIGN handle Color;
     };
@@ -78,9 +79,9 @@ namespace GPU
 
     struct ObjectInfo
     {
-        glm::mat4 Model;
-        glm::mat4 PreviousModel;
-        glm::mat3x4 Normal;
+        mat4 Model;
+        mat4 PreviousModel;
+        mat3x4 Normal;
         GPU_ALIGN ObjectFlags Flags = DEFAULT;
     };
 

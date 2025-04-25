@@ -26,16 +26,16 @@ namespace gE
 
             GPU::VAO format = SplineDebugVAOFormat;
             format.Materials[0].Count = segments;
-            format.Buffers->Data = Array<std::byte>(sizeof(glm::vec3) * segments * 2);
+            format.Buffers->Data = Array<std::byte>(sizeof(vec3) * segments * 2);
 
-            glm::vec3 oldPosition = _spline->Evaluate(DistanceMode::Relative, 0.f).Position;
+            vec3 oldPosition = _spline->Evaluate(DistanceMode::Relative, 0.f).Position;
             for(size_t i = 0; i < segments; i++)
             {
-                const size_t index = i * 2 * sizeof(glm::vec3);
-                const glm::vec3 position = _spline->Evaluate(DistanceMode::Relative, (float)(i + 1) / segments).Position;
+                const size_t index = i * 2 * sizeof(vec3);
+                const vec3 position = _spline->Evaluate(DistanceMode::Relative, (float)(i + 1) / segments).Position;
 
-                (glm::vec3&) format.Buffers[0].Data[index] = oldPosition;
-                (glm::vec3&) format.Buffers[0].Data[index + sizeof(glm::vec3)] = position;
+                (vec3&) format.Buffers[0].Data[index] = oldPosition;
+                (vec3&) format.Buffers[0].Data[index + sizeof(vec3)] = position;
 
                 oldPosition = position;
             }

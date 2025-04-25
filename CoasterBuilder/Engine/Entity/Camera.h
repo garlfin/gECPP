@@ -20,9 +20,9 @@ namespace Coaster
 
     public:
         explicit FreeCamera(Window* window) : Entity(window),
+            _taaSettings{ &DefaultPipeline::ColorFormat, &_renderTarget.GetVelocity(), &_renderTarget.GetPreviousDepth() },
             _camera(this, _renderTarget, GetCameraSettings(window), &window->GetCameras()),
             _renderTarget(*this, _camera, { &_exposure, &_tonemap, &_taa }),
-            _taaSettings{ &DefaultPipeline::ColorFormat, &_renderTarget.GetVelocity(), &_renderTarget.GetPreviousDepth() },
             _tonemap(&_renderTarget, &_physicalCamera),
             _exposure(&_renderTarget, &_physicalCamera),
             _taa(&_renderTarget, &_taaSettings),
@@ -61,7 +61,7 @@ namespace Coaster
             {
                 ICameraSettings
                 {
-                    glm::vec2(0.01f, 200.f),
+                    vec2(0.01f, 200.f),
                     DEFAULT
                 },
                 window->GetSize(),

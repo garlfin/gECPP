@@ -95,14 +95,14 @@ namespace gE
 
 	}
 
-	void Animator::Get(const Array<glm::mat4>& matrices, bool inverse) const
+	void Animator::Get(const Array<mat4>& matrices, bool inverse) const
 	{
 		GE_ASSERT(matrices.Size() >= _transforms.Size());
 
 		if(!_skeleton)
 		{
-			for(glm::mat4& matrix : matrices)
-				matrix = glm::mat4(1.f);
+			for(mat4& matrix : matrices)
+				matrix = mat4(1.f);
 			return;
 		}
 
@@ -178,7 +178,7 @@ namespace gE
 		const RendererManager& manager = GetWindow().GetRenderers();
 		const API::ComputeShader& skinningShader = manager.GetSkinningShader();
 		const API::IVAO& vao = *GetMesh()->VAO;
-		const Array<glm::mat4>& jointBuf = manager.GetJoints().GetData();
+		const Array<mat4>& jointBuf = manager.GetJoints().GetData();
 
 		const API::Buffer<std::byte>& vertices = vao.GetBuffer(0);
 		const API::Buffer<std::byte>& weights = vao.GetBuffer(1);
@@ -260,7 +260,7 @@ namespace gE
 		constexpr static GPU::VertexField previousPositionField { "PVRP", GPU::ElementType::Float, false, 1, 4, 3, 0};
 
 		vao.AddField(previousPositionField);
-		vao.Buffers[1] = GPU::Buffer<std::byte>(sizeof(glm::vec4) * vertexCount, nullptr, sizeof(glm::vec4), GPU::BufferUsageHint::Dynamic, false);
+		vao.Buffers[1] = GPU::Buffer<std::byte>(sizeof(vec4) * vertexCount, nullptr, sizeof(vec4), GPU::BufferUsageHint::Dynamic, false);
 	}
 
 	REFLECTABLE_ONGUI_IMPL(AnimatedMeshRenderer,
@@ -333,7 +333,7 @@ namespace gE
 
 			object.Model = draw->GetTransform().Model();
 			object.PreviousModel = draw->GetTransform().PreviousRenderModel();
-			object.Normal = glm::transpose(glm::inverse(draw->GetTransform().Model()));
+			object.Normal = transpose(inverse(draw->GetTransform().Model()));
 			object.Flags = draw->GetFlags();
 
 			instanceCount++;

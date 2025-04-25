@@ -9,7 +9,7 @@ int main(int argc, char** argv)
     bool restart = true;
     while(restart)
     {
-        Coaster::CoasterBuilderWindow window(glm::u16vec2(1920, 1080));
+        Coaster::CoasterBuilderWindow window(u16vec2(1920, 1080));
         restart = window.Run();
     }
 }

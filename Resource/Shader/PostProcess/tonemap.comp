@@ -25,7 +25,10 @@ void main()
 
     color.rgb *= Exposure;
     color.rgb = ACESNarkowicz(color.rgb);
+
+#ifndef VR
     color.rgb = LinearToSRGBFrostbite(color.rgb);
+#endif
 
     imageStore(ColorOut, texel, color);
 }

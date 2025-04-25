@@ -45,7 +45,7 @@ namespace gE
 		const API::ComputeShader& hiZShader = window.GetHiZShader();
 
 		hiZShader.Bind();
-		hiZShader.SetUniform(0, glm::vec4(HIZ_MODE_COPY, 0.0, camera.GetClipPlanes()));
+		hiZShader.SetUniform(0, vec4(HIZ_MODE_COPY, 0.0, camera.GetClipPlanes()));
 		hiZShader.SetUniform(1, *_depth, 0);
 		_linearDepth.Bind(0, GL_WRITE_ONLY, 0);
 
@@ -58,7 +58,7 @@ namespace gE
 		{
 			Size2D mipSize = _linearDepth.GetSize(i);
 
-			hiZShader.SetUniform(0, glm::vec4(HIZ_MODE_DOWNSAMPLE, i - 1, 0, 0));
+			hiZShader.SetUniform(0, vec4(HIZ_MODE_DOWNSAMPLE, i - 1, 0, 0));
 			_linearDepth.Bind(0, GL_WRITE_ONLY, i);
 
 			glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
@@ -67,8 +67,8 @@ namespace gE
 
 		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
-		window.GetLights().UseNearestLights(glm::vec3(0.0f));
-		window.GetCubemaps().UseNearestCubemaps(glm::vec3(0.0f));
+		window.GetLights().UseNearestLights(vec3(0.0f));
+		window.GetCubemaps().UseNearestCubemaps(vec3(0.0f));
 
 		// COLOR
 		window.RenderState = RenderState::PreZForward;

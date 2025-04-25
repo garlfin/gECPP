@@ -20,10 +20,10 @@ namespace Coaster
         Spline<Dimension::D3D> Spline;
         ETrackType NextTypes = ETrackType::All;
         ETrackMod Modifications = ETrackMod::None;
-        glm::vec3 Offset = DEFAULT;
-        glm::vec3 ExitPosition = DEFAULT;
+        vec3 Offset = DEFAULT;
+        vec3 ExitPosition = DEFAULT;
         float ExitRotation = DEFAULT;
-        glm::mat4 FlipTransform = glm::mat4(1.f);
+        mat4 FlipTransform = mat4(1.f);
         bool ReverseSplineOnFlip = false;
 
         Pointer<TrackPreset> TransitionPreset;
@@ -84,7 +84,7 @@ namespace Coaster
         Iterator _iterator = DEFAULT;
         SplineRange _splineIterator = DEFAULT;
 
-        glm::vec3 _exitPosition = DEFAULT;
+        vec3 _exitPosition = DEFAULT;
         float _exitRotation = 0.f;
     };
 

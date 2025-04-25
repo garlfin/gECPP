@@ -37,8 +37,8 @@ SplinePoint<DIMENSION> SplinePoint<DIMENSION>::operator*(const TransformMatrix<D
 {
     return
     {
-        transform * glm::vec<(size_t) DIMENSION + 1, float>(Position, 1.f),
-        glm::normalize(::Position<DIMENSION>(transform * glm::vec<(size_t) DIMENSION + 1, float>(Normal, 0.f)))
+        transform * vec<(size_t) DIMENSION + 1, float>(Position, 1.f),
+        normalize(::Position<DIMENSION>(transform * vec<(size_t) DIMENSION + 1, float>(Normal, 0.f)))
     };
 }
 
@@ -56,14 +56,14 @@ float Spline<DIMENSION>::GetLength() const
         return _length = 0.f;
 
     if(_points.size() == 2)
-        return _length = glm::distance(_points[0].Position, _points[1].Position) * 2.f;
+        return _length = distance(_points[0].Position, _points[1].Position) * 2.f;
 
     Position previousPosition = Evaluate(DistanceMode::Relative, 0.f).Position;
     for(size_t i = 0; i < samples; i++)
     {
         const Position newPosition = Evaluate(DistanceMode::Relative, (float)(i + 1) / samples).Position;
 
-        _length += glm::distance(previousPosition, newPosition);
+        _length += distance(previousPosition, newPosition);
         previousPosition = newPosition;
     }
 
@@ -135,8 +135,8 @@ typename Spline<DIMENSION>::Result Spline<DIMENSION>::Evaluate(DistanceMode mode
     return
     {
         interpolator.Interpolate(fac, a.Position, b.Position, c.Position),
-        glm::normalize(interpolator.Interpolate(fac, a.Normal, b.Normal, c.Normal)),
-        glm::normalize(interpolator.InterpolateDerivative(fac, a.Position, b.Position, c.Position))
+        normalize(interpolator.Interpolate(fac, a.Normal, b.Normal, c.Normal)),
+        normalize(interpolator.InterpolateDerivative(fac, a.Position, b.Position, c.Position))
     };
 }
 
@@ -146,9 +146,9 @@ float Spline<DIMENSION>::AdjustDistance(DistanceMode mode, float distance) const
     const float denominator = (mode == DistanceMode::Absolute ? GetLength() : 1.f) + FLT_EPSILON;
 
     if(distance >= 0)
-        distance = glm::mod(distance, denominator);
+        distance = mod(distance, denominator);
     else
-        distance = denominator - glm::mod(distance, denominator);
+        distance = denominator - mod(distance, denominator);
 
     return distance;
 }
@@ -241,9 +241,9 @@ float SplineData<T, DIMENSION>::AdjustDistance(DistanceMode mode, float distance
     const float denominator = mode == DistanceMode::Absolute ? _spline->GetLength() : 1.f;
 
     if(distance >= 0)
-        distance = glm::mod(distance, denominator);
+        distance = mod(distance, denominator);
     else
-        distance = denominator - glm::mod(distance, denominator);
+        distance = denominator - mod(distance, denominator);
 
     if(mode == _mode) return distance;
 

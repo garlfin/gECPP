@@ -57,7 +57,7 @@ namespace gE
     public:
         explicit Animator(const Reference<Skeleton>&);
 
-        void Get(const Array<glm::mat4>&, bool inverse = true) const;
+        void Get(const Array<mat4>&, bool inverse = true) const;
         void SetSkeleton(const Reference<Skeleton>&);
         GET_CONST(const Reference<Skeleton>&, Skeleton, _skeleton);
         GET_SET(Reference<Animation>, Animation, _animation);
@@ -110,13 +110,13 @@ namespace gE
 #ifdef DEBUG
     GLOBAL GPU::VAO BoneDebugVAOFormat = []()
     {
-        constexpr static glm::vec3 linePoints[2] { glm::vec3(0, 0, 0), glm::vec3(0, 0.1, 0) };
+        constexpr static vec3 linePoints[2] { vec3(0, 0, 0), vec3(0, 0.1, 0) };
 
         GPU::VAO vao = DEFAULT;
 
         vao.PrimitiveType = GPU::PrimitiveType::Line;
         vao.AddMaterial(GPU::MaterialSlot("", 0, 1));
-        vao.AddBuffer(GPU::Buffer(sizeof(glm::vec3) * 2, (const std::byte*) linePoints, sizeof(glm::vec3)));
+        vao.AddBuffer(GPU::Buffer(sizeof(vec3) * 2, (const std::byte*) linePoints, sizeof(vec3)));
         vao.AddField(GPU::VertexField("POS", GPU::ElementType::Float, false, 0, 0, 3, 0));
 
         return vao;
@@ -132,7 +132,7 @@ namespace gE
 
         GET(DrawCallManager&, DrawCallManager, _drawCallManager);
         GET_CONST(const API::ComputeShader&, SkinningShader, _skinningShader);
-        GET_CONST(const API::Buffer<glm::mat4>&, Joints, _bonesBuffer);
+        GET_CONST(const API::Buffer<mat4>&, Joints, _bonesBuffer);
 
 #ifdef DEBUG
         GET_CONST(const API::VAO&, BoneDebugVAO, _boneDebugVAO);
@@ -143,7 +143,7 @@ namespace gE
     private:
         DrawCallManager _drawCallManager;
         API::ComputeShader _skinningShader;
-        API::Buffer<glm::mat4> _bonesBuffer;
+        API::Buffer<mat4> _bonesBuffer;
 
 #ifdef DEBUG
         API::VAO _boneDebugVAO;

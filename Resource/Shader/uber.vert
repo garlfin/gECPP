@@ -1,5 +1,3 @@
-#extension GL_ARB_shader_viewport_layer_array : require
-
 layout(location = 0) in vec3 Position;
 layout(location = 1) in vec2 UV;
 layout(location = 2) in vec3 Normal;
@@ -22,6 +20,7 @@ struct VertexOut
 };
 
 out VertexOut VertexIn;
+out flat uint ViewIndexIn;
 
 void main()
 {
@@ -31,9 +30,11 @@ void main()
 
     VertexIn.FragPos = (objectInfo.Model * vec4(Position, 1)).xyz;
     VertexIn.UV = UV;
+    ViewIndexIn = ViewIndex;
+
+    Scene_SetViewport();
 
     gl_Position = viewProjection * vec4(VertexIn.FragPos, 1);
-    gl_Layer = int(ViewIndex);
     VertexIn.CurrentNDC = gl_Position;
 
     if(Scene_EnableJitter)
@@ -47,7 +48,7 @@ void main()
     vec3 previousPosition = (objectInfo.Flags & 1) == 1 ? PreviousPosition : Position;
 
     VertexIn.PreviousNDC = objectInfo.PreviousModel * vec4(previousPosition, 1);
-    VertexIn.PreviousNDC = Camera.PreviousViewProjection * vec4(VertexIn.PreviousNDC.xyz, 1);
+    VertexIn.PreviousNDC = Camera.Projection * Camera.PreviousView[ViewIndex] * vec4(VertexIn.PreviousNDC.xyz, 1);
 
     vec3 nor, tan, bitan;
     nor = normalize(objectInfo.Normal * Normal);

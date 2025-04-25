@@ -73,7 +73,7 @@ vec3 DirectionalPerspectiveDivide(vec4, vec2);
 float GetShadowDirectional(const Vertex vert, const Light light, const vec4 fragLightSpace)
 {
 #ifdef EXT_BINDLESS
-    float viewDistance = distance(vert.Position, Camera.Position);
+    float viewDistance = distance(vert.Position, Camera.Position[ViewIndex]);
     float nDotL = max(dot(vert.Normal, light.Position), 0.0);
     float bias = max(1.0 - nDotL, 0.1);
 
@@ -186,7 +186,7 @@ float GetShadowPoint(const Vertex vert, const Light light)
     vec3 lightDir = -normalize(baseSamplePos);
     float lightRadius = uintBitsToFloat(light.PackedSettings);
 
-    float viewDistance = distance(vert.Position, Camera.Position);
+    float viewDistance = distance(vert.Position, Camera.Position[ViewIndex]);
     float nDotL = max(dot(vert.Normal, lightDir), 0.0);
     float bias = (1.0 + nDotL) * POINT_SHADOW_BIAS * lightRadius * 10.0;
 
