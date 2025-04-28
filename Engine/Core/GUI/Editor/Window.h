@@ -8,7 +8,7 @@
 #include <Core/Macro.h>
 
 #include "Settings.h"
-#include "Core/KeyboardState.h"
+#include "Core/Input.h"
 
 namespace gE::Editor
 {

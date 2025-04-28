@@ -17,9 +17,7 @@ namespace gE
 
 	void Transform::OnUpdate(float)
 	{
-		Entity* parent = GetOwner().GetParent();
-
-		if(parent)
+		if(const Entity* parent = GetOwner().GetParent())
 			_flags |= parent->GetTransform()._flags & TransformFlags::RenderInvalidated;
 
 		if(!(bool)(_flags & TransformFlags::RenderInvalidated)) return;

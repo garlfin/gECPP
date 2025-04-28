@@ -41,8 +41,8 @@ namespace gE
 		void SetRotation(const quat& rot, TransformFlags flags = TransformFlags::All) { _flags |= flags; _transform.Rotation = rot; }
 		void SetScale(const vec3& scale, TransformFlags flags = TransformFlags::All) { _flags |= flags; _transform.Scale = scale; }
 
-		ALWAYS_INLINE void Set(const TransformData& d) { Set(d, TransformFlags::All); }
-		ALWAYS_INLINE void Set(const Transform& d) { Set(d._transform, TransformFlags::All); }
+		ALWAYS_INLINE void Set(const TransformData& d, TransformFlags flags = TransformFlags::All) { _flags |= flags; _transform = d; }
+		ALWAYS_INLINE void Set(const Transform& d, TransformFlags flags = TransformFlags::All) { Set(d._transform, flags); }
 
 		void OnInit() override {};
 		void OnUpdate(float) override;
@@ -63,9 +63,6 @@ namespace gE
 		friend class PhysicsComponent;
 
 	protected:
-		inline void Set(const TransformData& d, TransformFlags flags) { _flags |= flags; _transform = d; };
-		inline void Set(const Transform& d, TransformFlags flags) { _flags |= flags; _transform = d._transform; };
-
 		void SetPosition_(const vec3& pos) { SetPosition(pos); }
 		void SetRotation_(const vec3& rot) { SetRotation(radians(rot)); }
 		void SetScale_(const vec3& scale) { SetScale(scale); }

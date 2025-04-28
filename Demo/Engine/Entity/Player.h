@@ -54,10 +54,10 @@ namespace gE
 	public:
 		PlayerCamera(Window* window, Player& player) : Entity(window, &player),
 			_camera(this, _target, {{ FlyCameraSettings, window->GetSize() }}, &window->GetCameras()),
-			_target(*this, _camera, { &_taa, &_bloom, &_tonemap }),
+			_target(*this, _camera, { &_tonemap }),
 			_bloomSettings{ &_physicalCamera },
-			_taaSettings{ &DefaultPipeline::ColorFormat, &_target.GetVelocity(), &_target.GetPreviousDepth() },
-			_taa(&_target, &_taaSettings),
+			//_taaSettings{ &DefaultPipeline::ColorFormat, &_target.GetVelocity(), &_target.GetPreviousDepth() },
+			//_taa(&_target, &_taaSettings),
 			_bloom(&_target, &_bloomSettings),
 			_tonemap(&_target, &_physicalCamera)
 		{
@@ -75,13 +75,13 @@ namespace gE
 
 	private:
 		PerspectiveCamera _camera;
-		DefaultPipeline::Target2D _target;
+		VRPipeline::Target2D _target;
 
 		PostProcess::PhysicalCameraSettings _physicalCamera = DEFAULT;
 		PostProcess::BloomSettings _bloomSettings = DEFAULT;
-		PostProcess::TAASettings _taaSettings;
+		//PostProcess::TAASettings _taaSettings;
 
-		PostProcess::TAA _taa;
+		//PostProcess::TAA _taa;
 		PostProcess::Bloom _bloom;
 		PostProcess::Tonemap _tonemap;
 	};

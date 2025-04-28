@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <Core/KeyboardState.h>
+#include <Core/Input.h>
 #include <Core/Serializable/Asset.h>
 #include <Graphics/Graphics.h>
 

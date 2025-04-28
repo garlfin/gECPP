@@ -45,6 +45,8 @@ namespace gE
         void EndGUI();
         void OnRender(const ImDrawData*) const;
 
+        void Resize(Size2D size);
+
         ~GUIManager();
 
     private:

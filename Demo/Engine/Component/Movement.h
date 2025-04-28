@@ -57,6 +57,9 @@ namespace gE
                 mouse.SetPosition(GetWindow().GetSize() / 2u);
             }
 
+            if(GetWindow().GetVREnabled())
+                cameraTransform.SetPosition(cameraTransform->Position - StandingHeight / 2.f * vec3(0, 1, 0));
+
             if (cursorEnabled) return;
 
             _rot.y += mouse.GetDelta().x * SENSITIVITY;
@@ -109,6 +112,7 @@ namespace gE
                 _controller->SetIsGrounded(false);
             }
         }
+
 
     private:
         vec3 _rot = DEFAULT;

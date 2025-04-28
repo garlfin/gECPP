@@ -38,7 +38,9 @@ namespace gE
 		glDepthMask(1);
 		glColorMask(0, 0, 0, 0);
 		glClear(GL_DEPTH_BUFFER_BIT);
-		RenderTarget::GetCamera().SetViewport();
+
+		camera.SetViewport();
+		camera.GetFlagOverrides(window.RenderState);
 
 		window.GetRenderers().OnRender(0.f, &camera);
 
@@ -72,6 +74,7 @@ namespace gE
 
 		// COLOR
 		window.RenderState = RenderState::PreZForward;
+		camera.GetFlagOverrides(window.RenderState);
 
 		glDepthMask(0);
 		glColorMask(1, 1, 1, 1);

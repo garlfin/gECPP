@@ -8,8 +8,7 @@
 #include <Component/Physics/RigidBody.h>
 #include <Component/Sound/Sound.h>
 #include <Core/Pointer.h>
-#include <Core/KeyboardState.h>
-#include <Core/MouseState.h>
+#include <Core/Input.h>
 #include <Core/TickHandler.h>
 #include <Core/WindowState.h>
 #include <Core/GUI/Editor/Editor.h>
@@ -52,6 +51,16 @@ namespace gE
 
 	void OverrideSTDTerminate();
 
+	GLOBAL GPU::VAO BlitVAOFormat = []()
+	{
+		GPU::VAO result = DEFAULT;
+
+		result.AddField({ "POS", GPU::ElementType::Float, false, 0, 0, 2, 0 });
+		result.AddMaterial({ DEFAULT, 0, 0 });
+
+		return result;
+	}();
+
 	class Window
 	{
 	 public:
@@ -59,6 +68,7 @@ namespace gE
 
 		bool Run();
 
+		void Resize(Size2D size);
 		void Blit(const API::Texture& texture);
 
 		// Entities & Data
@@ -111,11 +121,12 @@ namespace gE
 
 		GET(KeyboardState&, Keyboard, _keyboardState);
 		GET(MouseState&, Mouse, _mouseState);
+		GET(IControllerState*, Controller, _controller.GetPointer());
 
 		GET_CONST(SDL_Window*, SDLWindow, _window);
 
-		GET(class VR*, VR, VR.GetPointer());
-		GET_CONST(bool, VREnabled, (bool) VR);
+		GET(VR*, VR, VRManager.GetPointer());
+		GET_CONST(bool, VREnabled, (bool) VRManager);
 
 #ifdef GE_ENABLE_EDITOR
 		GET(Editor::Editor*, Editor, Editor.GetPointer());
@@ -124,6 +135,7 @@ namespace gE
 		virtual ~Window();
 
 	 protected:
+		void PollInputs();
 		virtual void OnInit();
 		virtual void OnFixedUpdate(float);
 		virtual void OnUpdate(float);
@@ -156,7 +168,7 @@ namespace gE
 
 #ifdef GE_ENABLE_EDITOR
 		Pointer<Editor::Editor> Editor;
-		Pointer<VR> VR;
+		Pointer<VR> VRManager;
 #endif
 
 		Pointer<Material> DefaultMaterial;
@@ -174,7 +186,7 @@ namespace gE
 	 private:
 		SDL_Window* _window;
 		SDL_Surface* _icon;
-		void* _grapicsContext;
+		void* _graphicsContext;
 
 		Size2D _size;
 		Viewport _viewport;
@@ -185,8 +197,10 @@ namespace gE
 		TickHandler _physicsTick = DEFAULT;
 
 		Monitor _monitor;
+
 		KeyboardState _keyboardState;
 		MouseState _mouseState;
+		Pointer<IControllerState> _controller = DEFAULT;
 	};
 }
 

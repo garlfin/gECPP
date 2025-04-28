@@ -7,6 +7,7 @@
 #include <Core/Macro.h>
 #include <Core/Math/Math.h>
 #include <SDL3/SDL_events.h>
+#include <Prototype.h>
 
 namespace gE
 {
@@ -151,6 +152,8 @@ namespace gE
         None = 0
     };
 
+    void UpdateKeyState(bool pressed, KeyState& key);
+
     struct Shortcut
     {
         KeyModifier First = KeyModifier::None;
@@ -189,6 +192,143 @@ namespace gE
 
         Shortcut _shortcut;
     };
+
+    enum class MouseButton : u8
+    {
+        Left = 0,
+        Middle = 1,
+        Right = 2,
+        Front = 3,
+        Back = 4,
+        Size
+    };
+
+    class MouseState
+    {
+    public:
+        explicit MouseState(Window* window) : _window(window) {};
+
+        GET_SET(bool, IsEnabled, _enabled);
+        GET_SET(bool, IsFocused, _focused);
+        GET_CONST(vec2, Position, _mousePosition);
+        GET_CONST(vec2, Delta, _previousMousePosition - _mousePosition);
+
+        NODISCARD KeyState GetButton(MouseButton button) const { return _buttons[(u8) button]; }
+
+        void SetPosition(vec2) const;
+
+        void Update();
+
+    private:
+        Window* _window;
+
+        vec2 _mousePosition = DEFAULT;
+        vec2 _previousMousePosition = DEFAULT;
+        KeyState _buttons[(u8) MouseButton::Size] = DEFAULT;
+
+        bool _enabled = true;
+        bool _focused = false;
+    };
+
+    enum class ControllerButton : u8
+    {
+        LeftBumper = SDL_GAMEPAD_BUTTON_LEFT_SHOULDER,
+        RightBumper = SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER,
+
+        DPadUp = SDL_GAMEPAD_BUTTON_DPAD_UP,
+        DPadDown = SDL_GAMEPAD_BUTTON_DPAD_DOWN,
+        DPadLeft = SDL_GAMEPAD_BUTTON_DPAD_LEFT,
+        DPadRight = SDL_GAMEPAD_BUTTON_DPAD_RIGHT,
+
+        ActionUp = SDL_GAMEPAD_BUTTON_NORTH,
+        ActionDown = SDL_GAMEPAD_BUTTON_SOUTH,
+        ActionLeft = SDL_GAMEPAD_BUTTON_WEST,
+        ActionRight = SDL_GAMEPAD_BUTTON_EAST,
+
+        XboxY = ActionUp,
+        XboxA = ActionDown,
+        XboxX = ActionLeft,
+        XboxB = ActionRight,
+
+        PSTriangle = ActionUp,
+        PSX = ActionDown,
+        PSSquare = ActionLeft,
+        PSCircle = ActionRight,
+
+        LeftStick = SDL_GAMEPAD_BUTTON_LEFT_STICK,
+        RightStick = SDL_GAMEPAD_BUTTON_RIGHT_STICK,
+
+        Guide = SDL_GAMEPAD_BUTTON_GUIDE,
+        Select = Guide,
+        Start = SDL_GAMEPAD_BUTTON_START,
+
+        XboxView = Guide,
+        XboxHamburger = Start,
+
+        PSCreate = Guide,
+        PSHamburger = Start,
+
+        Size = SDL_GAMEPAD_BUTTON_COUNT
+    };
+
+    struct ControllerStickState
+    {
+        vec2 Direction;
+        KeyState State;
+    };
+
+    struct ControllerStickMapping
+    {
+        float DeadZone;
+        float Acceleration;
+
+        template<class T>
+        T Apply(const T& t) const;
+    };
+
+    class IControllerState
+    {
+    public:
+        IControllerState() = default;
+
+        virtual void Update() = 0;
+
+        NODISCARD float GetLeftTrigger(const ControllerStickMapping&) const;
+        NODISCARD float GetRightTrigger(const ControllerStickMapping&) const;
+        NODISCARD ControllerStickState GetLeftStick(const ControllerStickMapping&) const;
+        NODISCARD ControllerStickState GetRightStick(const ControllerStickMapping&) const;
+        NODISCARD KeyState GetButton(ControllerButton button) const { return Buttons[(u8) button]; }
+
+        GET(bool, IsEnabled, _enabled);
+        GET_SET(bool, IsFocused, _focused);
+
+        virtual ~IControllerState() = default;
+
+    protected:
+        float LeftTrigger = DEFAULT;
+        float RightTrigger = DEFAULT;
+        vec2 LeftStick = DEFAULT;
+        vec2 RightStick = DEFAULT;
+        KeyState Buttons[(u8) ControllerButton::Size] = DEFAULT;
+
+    private:
+        bool _enabled = false;
+        bool _focused = false;
+    };
+
+    class ControllerState : public IControllerState
+    {
+    public:
+        explicit ControllerState(Window* window, u32 id);
+
+        void Update() override;
+
+        ~ControllerState() override = default;
+
+    private:
+        Window* _window;
+        SDL_Gamepad* _gamepad;
+    };
 }
 
-#include "KeyboardState.inl"
+#include "Input.inl"

@@ -5,17 +5,7 @@
 #include <Component/Camera/RenderTarget.h>
 #include <Graphics/API/GL/Timer.h>
 #include <Graphics/Buffer/Buffer.h>
-#include <Graphics/Buffer/VAO.h>
 #include <Graphics/Texture/Texture.h>
-#include <Graphics/Texture/TextureSettings.h>
-
-#include "DefaultPipeline.h"
-
-namespace gE::RenderState
-{
-	CONSTEXPR_GLOBAL RenderFlags VRPreZ        = { RenderMode::Geometry, WriteMode::Depth, DepthMode::Normal, VoxelWriteMode::Read, RasterMode::Normal, 2, LayerMode::Viewport };
-	CONSTEXPR_GLOBAL RenderFlags VRPreZForward = { RenderMode::Fragment, WriteMode::Color, DepthMode::Normal, VoxelWriteMode::Read, RasterMode::Normal, 2, LayerMode::Viewport };
-}
 
 namespace gE::VRPipeline
 {

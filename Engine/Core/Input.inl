@@ -4,10 +4,18 @@
 
 #pragma once
 
-#include "KeyboardState.h"
+#include "Input.h"
 
 namespace gE
 {
+    inline void UpdateKeyState(bool pressed, KeyState& key)
+    {
+        const KeyState previousState = key;
+
+        key = pressed ? KeyState::Down : KeyState::Up;
+        key |= ((key ^ previousState) & KeyState::Down) << (KeyState) 1;
+    }
+
     inline bool Shortcut::operator==(const Shortcut& o)
     {
         bool same = true;
@@ -17,7 +25,6 @@ namespace gE
         same &= (bool) Third && Third == o.Third;
 
         return same;
-
     }
 
     ALWAYS_INLINE KeyState KeyboardState::GetKey(Key key) const
@@ -33,5 +40,14 @@ namespace gE
     inline bool KeyboardState::GetShortcut(Shortcut shortcut) const
     {
         return shortcut == _shortcut;
+    }
+
+    template <class T>
+    T ControllerStickMapping::Apply(const T& t) const
+    {
+        const T signT = glm::sign(t);
+        const float range = 1.f - DeadZone;
+
+        return signT * glm::max(glm::abs(t) - DeadZone, T(0.f)) / range;
     }
 }

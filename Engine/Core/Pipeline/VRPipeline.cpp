@@ -23,7 +23,9 @@ namespace gE::VRPipeline
 		Window& window = camera.GetWindow();
 
 		// PRE-Z
-		window.RenderState = RenderState::VRPreZ;
+		window.RenderState = RenderState::PreZ;
+		window.RenderState.EnableJitter = false;
+		camera.GetFlagOverrides(window.RenderState);
 
 		glDepthMask(1);
 		glColorMask(0, 0, 0, 0);
@@ -31,17 +33,15 @@ namespace gE::VRPipeline
 
 		camera.SetViewport();
 
-		const float halfX = camera.GetViewportSize().x / 2;
-		glViewportIndexedf(0, 0.f, 0.f, halfX, camera.GetViewportSize().y);
-		glViewportIndexedf(1, halfX, 0.f, halfX, camera.GetViewportSize().y);
-
 		window.GetRenderers().OnRender(0.f, &camera);
 
 		window.GetLights().UseNearestLights(vec3(0.0f));
 		window.GetCubemaps().UseNearestCubemaps(vec3(0.0f));
 
 		// COLOR
-		window.RenderState = RenderState::VRPreZForward;
+		window.RenderState = RenderState::PreZForward;
+		window.RenderState.EnableJitter = false;
+		camera.GetFlagOverrides(window.RenderState);
 
 		glDepthMask(0);
 		glColorMask(1, 1, 1, 1);
@@ -63,7 +63,6 @@ namespace gE::VRPipeline
 		for(POSTPROCESS_T* effect : _effects)
 			if(effect->RenderPass(*front, *back))
 				std::swap(front, back);
-
 
 		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 

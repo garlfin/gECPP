@@ -14,8 +14,6 @@
 #include <Entity/Light/DirectionalLight.h>
 #include <Entity/Light/PointLight.h>
 
-#include "Core/Converter/MeshLoader.h"
-
 using namespace gE::VoxelDemo;
 
 void DemoWindow::OnInit()
@@ -23,7 +21,7 @@ void DemoWindow::OnInit()
 	Window::OnInit();
 
 	if(VR::IsVRHeadsetPresent())
-		VR = ptr_create<class VR>(this);
+		VRManager = ptr_create<VR>(this);
 
 	PBRMaterialSettings cobbleSettings
 	{
@@ -80,7 +78,7 @@ void DemoWindow::OnInit()
 	playerCamera->SetName("Camera");
 
 	Cameras.SetCurrentCamera(&playerCamera->GetTarget());
-	if(VR) VR->SetCurrentCamera(&playerCamera->GetTarget());
+	if(VRManager) VRManager->SetCurrentCamera(&playerCamera->GetTarget());
 
 	player->GetMovement().SetFPCamera(playerCamera);
 

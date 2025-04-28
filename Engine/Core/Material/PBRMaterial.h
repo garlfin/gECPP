@@ -24,7 +24,7 @@ namespace gE
 
 	struct PBRMaterialData
 	{
-		vec2 Scale = vec2(1.f);
+		vec2 Scale = vec2(10.f);
 		vec2 Offset = vec2(0.f);
 		float ParallaxDepth = 0.5f;
 		float NormalStrength = 1.f;

@@ -18,6 +18,17 @@ using namespace gE;
 	char WindowTitleBuf[256];
 #endif
 
+CONSTEXPR_GLOBAL vec2 BlitVertices[6]
+{
+	vec2(0.f, 0.f),
+	vec2(0.f, 1.f),
+	vec2(1.f, 0.f),
+
+	vec2(1.f, 0.f),
+	vec2(0.f, 1.f),
+	vec2(1.f, 1.f)
+};
+
 [[noreturn]] void Terminate()
 {
 	DEBUGBREAK();
@@ -46,12 +57,14 @@ Window::Window(u16vec2 size, const std::string& name) :
 	_name(name),
 	_mouseState(this)
 {
-	if(!SDL_WasInit(SDL_INIT_VIDEO))
-		if (!SDL_Init(SDL_INIT_VIDEO))
+	constexpr u32 flags = SDL_INIT_VIDEO | SDL_INIT_GAMEPAD;
+
+	if(!SDL_WasInit(flags))
+		if (!SDL_Init(flags))
 			Log::FatalError("Failed to initialize SDL.");
 
 	_monitor = Monitor(SDL_GetCurrentDisplayMode(SDL_GetPrimaryDisplay()));
-	_window = SDL_CreateWindow(_name.c_str(), size.x, size.y, SDL_WINDOW_OPENGL | SDL_WINDOW_HIGH_PIXEL_DENSITY);
+	_window = SDL_CreateWindow(_name.c_str(), size.x, size.y, SDL_WINDOW_OPENGL | SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WINDOW_RESIZABLE);
 	if(!_window)
 		Log::FatalError("Failed to create Window.");
 
@@ -63,8 +76,8 @@ Window::Window(u16vec2 size, const std::string& name) :
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, true);
 #endif
 
-	_grapicsContext = SDL_GL_CreateContext(_window);
-	if(!_grapicsContext)
+	_graphicsContext = SDL_GL_CreateContext(_window);
+	if(!_graphicsContext)
 		Log::FatalError(std::format("Failed to create OpenGL context.\n\n{}", SDL_GetError()));
 
 	if(!gladLoadGLLoader((GLADloadproc) SDL_GL_GetProcAddress))
@@ -88,7 +101,7 @@ Window::Window(u16vec2 size, const std::string& name) :
 Window::~Window()
 {
 	SDL_DestroySurface(_icon);
-	SDL_GL_DestroyContext((SDL_GLContext) _grapicsContext);
+	SDL_GL_DestroyContext((SDL_GLContext) _graphicsContext);
 	SDL_DestroyWindow(_window);
 	SDL_Quit();
 }
@@ -105,6 +118,38 @@ Window::~Window()
 		Log::WriteLine(message);
 	}
 #endif
+
+void Window::PollInputs()
+{
+	_keyboardState.ClearKeyStates();
+
+	SDL_Event event;
+	while(SDL_PollEvent(&event))
+	{
+#ifdef GE_ENABLE_IMGUI
+		ImGui_ImplSDL3_ProcessEvent(&event);
+#endif
+		switch (event.type)
+		{
+		case SDL_EVENT_QUIT:
+			CloseState = CloseFlags::Close;
+			break;
+		case SDL_EVENT_KEY_DOWN:
+		case SDL_EVENT_KEY_UP:
+			_keyboardState.ProcessKey(event.key);
+			break;
+		case SDL_EVENT_WINDOW_RESIZED:
+			Resize(Size2D(event.window.data1, event.window.data2));
+			break;
+		default:
+			break;
+		}
+	}
+
+	_keyboardState.ClearShortcutState();
+	_mouseState.Update();
+	if(_controller) _controller->Update();
+}
 
 bool Window::Run()
 {
@@ -123,6 +168,16 @@ bool Window::Run()
 	glMemoryBarrier(GL_ALL_BARRIER_BITS);
 
 	OnInit();
+
+	if(SDL_HasGamepad())
+	{
+		SDL_JoystickID* ids = SDL_GetGamepads(nullptr);
+		_controller = ptr_create<ControllerState>(this, ids[0]);
+		SDL_free(ids);
+	}
+
+	if(VRManager)
+		_controller = ptr_create<VRControllerState>(this);
 
 #ifdef GE_DEBUG_PERFORMANCE
 	GL::Timer timer(this);
@@ -147,30 +202,6 @@ bool Window::Run()
 
 		if(_renderTick.ShouldTick(SDLGetTime(initTime)))
 		{
-			_keyboardState.ClearKeyStates();
-
-			SDL_Event event;
-			while(SDL_PollEvent(&event))
-			{
-			#ifdef GE_ENABLE_IMGUI
-				ImGui_ImplSDL3_ProcessEvent(&event);
-			#endif
-				switch (event.type)
-				{
-				case SDL_EVENT_QUIT:
-					CloseState = CloseFlags::Close;
-					break;
-				case SDL_EVENT_KEY_DOWN:
-				case SDL_EVENT_KEY_UP:
-					_keyboardState.ProcessKey(event.key);
-						break;
-				default:
-					break;
-				}
-			}
-
-			_keyboardState.ClearShortcutState();
-			_mouseState.Update();
 
 		#ifdef GE_DEBUG_PERFORMANCE
 			double updateDelta = SDLGetTime(initTime);
@@ -213,6 +244,14 @@ bool Window::Run()
 	return CloseState == CloseFlags::Restart;
 }
 
+void Window::Resize(Size2D size)
+{
+	_size = size;
+#ifdef GE_ENABLE_IMGUI
+	GUI->Resize(size);
+#endif
+}
+
 void Window::OnInit()
 {
 	if(GLAD_GL_ARB_bindless_texture)
@@ -227,12 +266,13 @@ void Window::OnInit()
 	Physics = ptr_create<PhysicsManager>(this);
 	GUI = ptr_create<GUIManager>(this);
 
-	GPU::VAO blitVAOFormat = DEFAULT;
-	blitVAOFormat.Counts.BufferCount = 1;
-	blitVAOFormat.Buffers[0] = GPU::Buffer<std::byte>(1);
+	GPU::VAO blitVAO = BlitVAOFormat;
+	blitVAO.AddBuffer(GPU::Buffer(6 * sizeof(vec2), (const std::byte*) BlitVertices, sizeof(vec2)));
+	blitVAO.Materials[0].Count = 2;
 
 	BlitShader = ptr_create<API::Shader>(this, GPU::Shader("Resource/Shader/blit.vert", "Resource/Shader/blit.frag"));
-	BlitVAO = ptr_create<API::VAO>(this, move(blitVAOFormat));
+	BlitVAO = ptr_create<API::VAO>(this, move(blitVAO));
+	BlitVAO->Free();
 
 	TAAShader = ptr_create<API::ComputeShader>(this, GPU::ComputeShader("Resource/Shader/PostProcess/taa.comp"));
 	TonemapShader = ptr_create<API::ComputeShader>(this, GPU::ComputeShader("Resource/Shader/PostProcess/tonemap.comp"));
@@ -245,7 +285,6 @@ void Window::OnInit()
 
 void Window::Blit(const API::Texture& texture)
 {
-	BlitVAO->Bind();
 	BlitShader->Bind();
 
 	glDisable(GL_DEPTH_TEST);
@@ -253,7 +292,7 @@ void Window::Blit(const API::Texture& texture)
 	glEnable(GL_BLEND);
 
 	texture.Use(0);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
+	BlitVAO->Draw(0);
 }
 
 void Window::OnFixedUpdate(float delta)
@@ -271,11 +310,11 @@ void Window::OnUpdate(float delta)
 {
 	Entities.MarkDeletions();
 
-	if(VR) VR->OnUpdate();
+	PollInputs();
+
 	Physics->OnUpdate(delta);
 	Cameras.OnUpdate(delta);
 	Behaviors.OnUpdate(delta);
-	Transforms.OnUpdate(delta);
 	Sounds.OnUpdate(delta);
 
 	Entities.FinalizeDeletions();
@@ -288,8 +327,13 @@ void Window::OnRender(float delta)
 	Lights->OnRender(delta, nullptr);
 	Cubemaps->OnRender(delta, nullptr);
 	Renderers->OnUpdate(delta); // Will tick animated mesh entities
+
+	if(VRManager) VRManager->OnUpdate();
+
+	Transforms.OnUpdate(delta); // Updates Model Matrices
+	Transforms.OnRender(delta, nullptr); // Resets flag
+
 	Cameras.OnRender(delta);
-	Transforms.OnRender(delta, nullptr);
 
 	GUI->BeginGUI();
 	Behaviors.OnGUI(delta);
@@ -308,8 +352,8 @@ void Window::OnRender(float delta)
 	glViewport(0, 0, _size.x, _size.y);
 	Blit(GUI->GetColor());
 
-	if(VR)
-		VR->OnRender();
+	if(VRManager)
+		VRManager->OnRender();
 	else
 		Cameras.GetCurrentCamera()->GetCamera().Resize(_viewport.Size);
 }

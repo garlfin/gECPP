@@ -129,6 +129,14 @@ namespace gE
         SetFOV(s.FOV);
     }
 
+    void PerspectiveCamera::GetFlagOverrides(RenderFlags& flags)
+    {
+        if(!_isVR) return;
+
+        flags.InstanceMultiplier *= 2;
+        flags.LayerMode = LayerMode::Viewport;
+    }
+
     void PerspectiveCamera::GetGPUCamera(GPU::Camera& camera)
     {
         Camera2D::GetGPUCamera(camera);
@@ -137,8 +145,10 @@ namespace gE
         {
             const VR& vr = *GetWindow().GetVR();
 
-            camera.View[1] = camera.View[0] * vr.GetRightEyeMatrix();
-            camera.View[0] = camera.View[1] * vr.GetLeftEyeMatrix();
+            const mat4 viewMatrix = camera.View[0];
+
+            camera.View[0] = vr.GetLeftEyeMatrix() * viewMatrix;
+            camera.View[1] = vr.GetRightEyeMatrix() * viewMatrix;
 
             TransformData view = Decompose(inverse(camera.View[0]));
             camera.Position[0] = vec4(view.Position, 0.f);
@@ -154,6 +164,15 @@ namespace gE
     {
         if(_isVR) Resize(GetWindow().GetVR()->GetSize());
         Camera2D::OnRender(delta, callingCamera);
+    }
+
+    void PerspectiveCamera::SetViewport() const
+    {
+        if(!_isVR) return Camera2D::SetViewport();
+
+        const float halfX = GetSize().x / 2;
+        glViewportIndexedf(0, 0.f, 0.f, halfX, GetSize().y);
+        glViewportIndexedf(1, halfX, 0.f, halfX, GetSize().y);
     }
 
     void PerspectiveCamera::UpdateProjection()

@@ -2,23 +2,14 @@
 // Created by scion on 11/30/2024.
 //
 
-#include "KeyboardState.h"
+#include "Input.h"
 
 #include <SDL3/SDL_events.h>
 
-#include "MouseState.h"
 #include "Window.h"
 
 namespace gE
 {
-    void ProcessButton(MouseButton key, KeyState& to, u32 state)
-    {
-        const KeyState previousState = to;
-
-        to = state & 1 << (u32) key ? KeyState::Down : KeyState::Up;
-        to |= ((to ^ previousState) & KeyState::Down) << (KeyState) 1;
-    }
-
     void MouseState::SetPosition(vec2 relative) const
     {
         SDL_WarpMouseInWindow(_window->GetSDLWindow(), relative.x, relative.y);
@@ -49,7 +40,7 @@ namespace gE
         }
 
         for(u8 i = 0; i < 5; i++)
-            ProcessButton((MouseButton) i, _buttons[i], state);
+            UpdateKeyState(state >> i & 1, _buttons[i]);
     }
 
     void KeyboardState::ProcessKey(const SDL_KeyboardEvent& event)
@@ -65,10 +56,7 @@ namespace gE
         }
 
         KeyState& to = _keys[scanCode];
-        const KeyState previousState = to;
-
-        to = event.down ? KeyState::Down : KeyState::Up;
-        to |= ((to ^ previousState) & KeyState::Down) << (KeyState) 1;
+        UpdateKeyState(event.down, to);
 
         if(!IsKeyDown(to)) return;
         if(scanCode < (SDL_Scancode) KeyModifier::Min)
@@ -99,4 +87,47 @@ namespace gE
 
         _shortcut.Third = Key::None;
     }
+
+    ControllerState::ControllerState(Window* window, u32 id) :
+        _window(window)
+    {
+        _gamepad = SDL_OpenGamepad(id);
+    }
+
+    float IControllerState::GetLeftTrigger(const ControllerStickMapping& map) const
+    {
+        return map.Apply(LeftTrigger);
+    }
+
+    float IControllerState::GetRightTrigger(const ControllerStickMapping& map) const
+    {
+        return map.Apply(RightTrigger);
+    }
+
+    ControllerStickState IControllerState::GetLeftStick(const ControllerStickMapping& map) const
+    {
+        return { map.Apply(LeftStick), Buttons[(u8) ControllerButton::LeftStick] };
+    }
+
+    ControllerStickState IControllerState::GetRightStick(const ControllerStickMapping& map) const
+    {
+        return { map.Apply(RightStick), Buttons[(u8) ControllerButton::RightStick] };
+    }
+
+#define GET_STICK(STICK) (float) SDL_GetGamepadAxis(_gamepad, STICK) / INT16_MAX
+    void ControllerState::Update()
+    {
+        LeftTrigger = GET_STICK(SDL_GAMEPAD_AXIS_LEFT_TRIGGER);
+        RightTrigger = GET_STICK(SDL_GAMEPAD_AXIS_RIGHT_TRIGGER);
+
+        LeftStick.x = GET_STICK(SDL_GAMEPAD_AXIS_LEFTX);
+        LeftStick.y = GET_STICK(SDL_GAMEPAD_AXIS_LEFTY);
+
+        RightStick.x = GET_STICK(SDL_GAMEPAD_AXIS_RIGHTX);
+        RightStick.y = GET_STICK(SDL_GAMEPAD_AXIS_RIGHTY);
+
+        for(u8 i = 0; i < (u8) ControllerButton::Size; i++)
+            UpdateKeyState(SDL_GetGamepadButton(_gamepad, (SDL_GamepadButton) i), Buttons[i]);
+    }
+#undef GET_STICK
 }

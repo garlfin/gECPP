@@ -157,6 +157,13 @@ void gE::GUIManager::OnRender(const ImDrawData* draw) const
     glDisable(GL_SCISSOR_TEST);
 }
 
+void gE::GUIManager::Resize(Size2D size)
+{
+    if(_color->GetSize() == size) return;
+
+    PlacementNew(_color, _framebuffer, GPU::Texture2D{ GUIColorFormat, size });
+}
+
 // https://github.com/adia-dev
 void gE::GUIManager::SetStyle()
 {

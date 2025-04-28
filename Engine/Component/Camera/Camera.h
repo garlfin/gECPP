@@ -25,10 +25,11 @@ namespace gE
     public:
         Camera(Entity*, IRenderTarget&, const ICameraSettings&, ComponentManager<Camera>* = nullptr);
 
-        void SetViewport() const;
+        virtual void SetViewport() const;
         void OnInit() override {};
         void OnRender(float delta, Camera* callingCamera) override;
 
+        virtual void GetFlagOverrides(RenderFlags& flags) {};
         virtual void GetGPUCamera(GPU::Camera&);
         virtual Size2D GetViewportSize() const = 0;
 
@@ -96,8 +97,10 @@ namespace gE
                 _fov = radians(fov);
         }
 
+        void GetFlagOverrides(RenderFlags& flags) override;
         void GetGPUCamera(GPU::Camera& camera) override;
         void OnRender(float delta, Camera* callingCamera) override;
+        void SetViewport() const override;
 
         friend class VR;
 
