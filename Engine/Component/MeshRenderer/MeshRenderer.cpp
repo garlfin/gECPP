@@ -257,7 +257,7 @@ namespace gE
 
 	void AnimatedMeshRenderer::AddPreviousPositionField(GPU::VAO& vao, size_t vertexCount)
 	{
-		constexpr static GPU::VertexField previousPositionField { "PVRP", GPU::ElementType::Float, false, 1, 4, 3, 0};
+		static GPU::VertexField previousPositionField { "PVRP", GPU::ElementType::Float, false, 1, 4, 3, 0};
 
 		vao.AddField(previousPositionField);
 		vao.Buffers[1] = GPU::Buffer<std::byte>(sizeof(vec4) * vertexCount, nullptr, sizeof(vec4), GPU::BufferUsageHint::Dynamic, false);

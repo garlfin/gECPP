@@ -77,6 +77,12 @@ namespace gE
         px::BroadPhaseLayer _layers[2] = DEFAULT;
     };
 
+    class CollisionListener final : public px::ContactListener
+    {
+    public:
+        void OnContactAdded(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::ContactManifold& inManifold, JPH::ContactSettings& ioSettings) override;
+    };
+
     GLOBAL px::ShapeFilter DefaultShapeFilter = DEFAULT;
     GLOBAL px::BodyFilter DefaultBodyFilter = DEFAULT;
 

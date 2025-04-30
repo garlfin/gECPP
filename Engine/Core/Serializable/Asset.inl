@@ -4,17 +4,13 @@
 
 namespace gE
 {
-    NODISCARD ALWAYS_INLINE bool AssetCompare::operator()(const Bank& a, const Bank& b) const { return a < b; }
-    NODISCARD ALWAYS_INLINE bool AssetCompare::operator()(const Bank& a, const UUID& b) const { return a.GetUUID() < b; }
-    NODISCARD ALWAYS_INLINE bool AssetCompare::operator()(const UUID& a, const Bank& b) const { return a < b.GetUUID(); }
+    NODISCARD ALWAYS_INLINE bool SerializableCompare::operator()(const ISerializable& a, const ISerializable& b) const { return a.GetUUID() < b.GetUUID(); }
+    NODISCARD ALWAYS_INLINE bool SerializableCompare::operator()(const ISerializable& a, const UUID& b) const { return a.GetUUID() < b; }
+    NODISCARD ALWAYS_INLINE bool SerializableCompare::operator()(const UUID& a, const ISerializable& b) const { return a < b.GetUUID(); }
 
-    NODISCARD ALWAYS_INLINE bool AssetCompare::operator()(const File& a, const File& b) const { return a < b; }
-    NODISCARD ALWAYS_INLINE bool AssetCompare::operator()(const File& a, const UUID& b) const { return a.GetUUID() < b; }
-    NODISCARD ALWAYS_INLINE bool AssetCompare::operator()(const UUID& a, const File& b) const { return a < b.GetUUID(); }
-
-    NODISCARD ALWAYS_INLINE bool AssetCompare::operator()(const FileInfo& a, const FileInfo& b) const { return a.UUID < b.UUID; }
-    NODISCARD ALWAYS_INLINE bool AssetCompare::operator()(const FileInfo& a, const UUID& b) const { return a.UUID < b; }
-    NODISCARD ALWAYS_INLINE bool AssetCompare::operator()(const UUID& a, const FileInfo& b) const { return a < b.UUID; }
+    NODISCARD ALWAYS_INLINE bool SerializableCompare::operator()(const FileInfo& a, const FileInfo& b) const { return a.UUID < b.UUID; }
+    NODISCARD ALWAYS_INLINE bool SerializableCompare::operator()(const FileInfo& a, const UUID& b) const { return a.UUID < b; }
+    NODISCARD ALWAYS_INLINE bool SerializableCompare::operator()(const UUID& a, const FileInfo& b) const { return a < b.UUID; }
 
     template <class T> requires std::is_base_of_v<Asset, T>
     File::File(Window* window, const Path& path, T&& t) : File(window, path, ref_create<T>(std::move(t))) {}
@@ -43,4 +39,20 @@ namespace gE
         file->Load();
         return file;
     }
+}
+
+template<class T> requires std::is_base_of_v<T, gE::Asset>
+void Read(std::istream& in, gE::Window* window, Reference<T>& reference)
+{
+    reference = DEFAULT;
+    if(Read<bool>(in))
+        reference = ReadAssetReference(in, window)->Cast<T, false>();
+}
+
+template <class T> requires std::is_base_of_v<T, gE::Asset>
+void Write(std::ostream& out, const Reference<T>& reference)
+{
+    Write(out, (bool) reference->GetFile());
+    if(reference->GetFile())
+        Write(out, reference->GetFile().GetPath().string());
 }

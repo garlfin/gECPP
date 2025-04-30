@@ -10,6 +10,7 @@
 #include <Core/Array.h>
 #include <Core/Binary.h>
 #include <Core/Macro.h>
+#include <Core/UUID.h>
 #include <Core/Math/Math.h>
 
 #include "Reflectable.h"
@@ -22,7 +23,10 @@ struct Underlying
 struct ISerializable
 {
 public:
-	ISerializable() = default;
+	ISerializable() : _UUID(gE::GenerateUUID()) {};
+	explicit ISerializable(const gE::UUID& uuid) : _UUID(uuid) {};
+
+	GET_CONST(const gE::UUID&, UUID, _UUID);
 
 	virtual Underlying* GetUnderlying() { return nullptr; }
 	virtual const Underlying* GetUnderlying() const { return nullptr; }
@@ -36,6 +40,11 @@ public:
 	}
 
 	virtual ~ISerializable() = default;
+
+	template<class T> friend struct Serializable;
+
+protected:
+	gE::UUID _UUID = DEFAULT;
 };
 
 template<class T>
@@ -46,12 +55,13 @@ struct Serializable : public Reflectable<T>, public ISerializable
 
 public:
 	Serializable() = default;
-	Serializable(istream&, T) { }
+	explicit Serializable(const gE::UUID& uuid) : ISerializable(uuid) {};
+	Serializable(istream& in, T settings) { Serializable::Deserialize(in, settings); }
 
 	using SETTINGS_T = T;
 
-	virtual void Deserialize(istream& in, SETTINGS_T settings) {};
-	virtual void Serialize(ostream& out) const {};
+	virtual void Deserialize(istream& in, SETTINGS_T settings);
+	virtual void Serialize(ostream& out) const;
 	virtual void Reload(SETTINGS_T settings) {};
 
 	using ISerializable::IsCastable;
@@ -117,7 +127,6 @@ template<class T, class S>
 concept is_serializable = is_serializable_in<S, T> and is_serializable_out<T>;
 
 template<class T> struct Serializable;
-template<is_serializable<gE::Window*> T> struct FileContainer;
 
 template<is_serializable_in<gE::Window*> T> void ReadSerializableFromFile(gE::Window*, const Path&, T&);
 template<is_serializable_in<gE::Window*> T> T* ReadSerializableFromFile(gE::Window*, const Path&);
@@ -160,156 +169,4 @@ template<> void Write(std::ostream& out, u32 count, const std::string* t);
 
 template<> void Write(std::ostream& out, u32 count, const std::string_view* t);
 
-template<is_serializable_in<gE::Window*> T>
-void ReadSerializableFromFile(gE::Window* window, const Path& path, T& t)
-{
-	std::ifstream file(path, std::ios::in | std::ios::binary);
-	GE_ASSERTM(file.is_open(), "COULD NOT OPEN FILE!");
-
-	t.Deserialize(file, window);
-
-	file.close();
-}
-
-template<is_serializable_in<gE::Window*> T>
-T* ReadSerializableFromFile(gE::Window* window, const Path& path)
-{
-	T* t = new T();
-	ReadSerializableFromFile(window, path, *t);
-	return t;
-}
-
-template<is_serializable_out T>
-void WriteSerializableToFile(const Path& path, const T& t)
-{
-	std::ofstream file(path, std::ios::out | std::ios::binary);
-	t.Serialize(file);
-}
-
-template<typename UINT_T, class T>
-void Read(std::istream& in, u32 count, Array<T>* t)
-{
-	for(u32 i = 0; i < count; i++)
-	{
-		Array<T>& arr = t[i];
-
-		UINT_T length = Read<UINT_T>(in);
-
-		arr = Array<T>(length);
-		Read<T>(in, length, arr.Data());
-	}
-}
-
-template<typename UINT_T, class T>
-void WriteArray(std::ostream& out, u32 count, const Array<T>* t)
-{
-	for(u32 i = 0; i < count; i++)
-	{
-		const Array<T>& arr = t[i];
-
-		UINT_T length = arr.Size();
-
-		Write(out, length);
-		Write(out, length, arr.Data());
-	}
-}
-
-template<typename UINT_T, class T>
-void ReadArray(std::istream& in, Array<T>& array)
-{
-	static_assert(std::is_trivially_copyable_v<T>);
-
-	UINT_T length = Read<UINT_T>(in);
-	array = Array<T>(length);
-	in.read((char*) array.Data(), length * sizeof(typename Array<T>::I));
-}
-
-template<typename UINT_T, class T>
-Array<T> ReadArray(std::istream& in)
-{
-	Array<T> array;
-	ReadArray<UINT_T, T>(in, array);
-	return array;
-}
-
-template<>
-inline void Read(std::istream& in, u32 count, std::string* t)
-{
-	for(u32 i = 0; i < count; i++)
-	{
-		std::string& str = t[i];
-
-		u32 length = Read<u32>(in);
-
-		str = std::string(length, 0);
-		Read(in, length, str.data());
-	}
-}
-
-
-template<>
-inline void Write(std::ostream& out, u32 count, const std::string* t)
-{
-	for(u32 i = 0; i < count; i++)
-	{
-		const std::string& str = t[i];
-
-		u32 length = str.length();
-
-		Write(out, length);
-		Write(out, length, str.c_str());
-	}
-}
-
-template<>
-inline void Write(std::ostream& out, u32 count, const std::string_view* t)
-{
-	for(u32 i = 0; i < count; i++)
-	{
-		const std::string_view& str = t[i];
-
-		u32 length = str.length();
-
-		Write(out, length);
-		Write(out, length, str.data());
-	}
-}
-
-template<typename T>
-void Read(istream& in, u32 count, T* t)
-{
-	if(!count) return;
-	static_assert(std::is_trivially_copyable_v<T> && !is_serializable_out<T>);
-	in.read((char*) t, sizeof(T) * count);
-}
-
-template<typename T>
-void Write(ostream& out, u32 count, const T* t)
-{
-	if(!count) return;
-	if constexpr(std::is_trivially_copyable_v<T> && !is_serializable_out<T>)
-		out.write((char*) t, sizeof(T) * count);
-	else
-		for(u32 i = 0; i < count; i++) t[i].Serialize(out);
-}
-
-template<typename UINT_T, class T>
-void ReadArraySerializable(std::istream& in, u32 count, Array<T>* ts, typename T::SETTINGS_T s)
-{
-	for(u32 i = 0; i < count; i++)
-	{
-		Array<T>& t = ts[i];
-
-		UINT_T length = Read<UINT_T>(in);
-
-		t = Array<T>(length);
-		ReadSerializable(in, length, t.Data(), s);
-	}
-}
-
-template<class T>
-void ReadSerializable(std::istream& in, u32 count, T* t, typename T::SETTINGS_T s)
-{
-	if(!count) return;
-	for(u32 i = 0; i < count; i++) PlacementNew<T>(t[i], in, s);
-}
+#include "Serializable.inl"

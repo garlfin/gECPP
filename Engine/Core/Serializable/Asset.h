@@ -4,10 +4,11 @@
 
 #pragma once
 
-#include <set>
 #include <map>
-#include <Core/Pointer.h>
+#include <set>
 #include <Core/Macro.h>
+#include <Core/Pointer.h>
+#include <Core/UUID.h>
 #include <Core/Serializable/Serializable.h>
 
 #ifdef DEBUG
@@ -21,9 +22,6 @@ namespace gE
     class Bank;
     class File;
 
-    using UUID = __uint128_t;
-
-    UUID HashPath(const Path& path);
     Path FixPath(const Path& path);
     Path FixPath(const Path& path, const Type<Window*>& type);
 
@@ -41,6 +39,8 @@ namespace gE
 
         virtual void Free() = 0;
         NODISCARD virtual bool IsFree() const = 0;
+
+        GET_CONST(File*, File, _file);
 
         void Serialize(ostream& out) const override { SUPER::Serialize(out); }
 
@@ -63,7 +63,7 @@ namespace gE
     ENUM_OPERATOR(AssetLoadMode, |);
     ENUM_OPERATOR(AssetLoadMode, &);
 
-    struct FileInfo : public Serializable<>
+    struct FileInfo final : public Serializable<>
     {
         SERIALIZABLE_PROTO_NOHEADER("INFO", FileInfo, Serializable);
 
@@ -92,22 +92,19 @@ namespace gE
         AssetLoadMode Mode;
     };
 
-    struct AssetCompare
+    struct SerializableCompare
     {
         using is_transparent = void;
 
-        NODISCARD ALWAYS_INLINE bool operator()(const Bank& a, const Bank& b) const;
-        NODISCARD ALWAYS_INLINE bool operator()(const Bank& a, const UUID& b) const;
-        NODISCARD ALWAYS_INLINE bool operator()(const UUID& a, const Bank& b) const;
-
-        NODISCARD ALWAYS_INLINE bool operator()(const File& a, const File& b) const;
-        NODISCARD ALWAYS_INLINE bool operator()(const File& a, const UUID& b) const;
-        NODISCARD ALWAYS_INLINE bool operator()(const UUID& a, const File& b) const;
+        NODISCARD ALWAYS_INLINE bool operator()(const ISerializable& a, const ISerializable& b) const;
+        NODISCARD ALWAYS_INLINE bool operator()(const ISerializable& a, const UUID& b) const;
+        NODISCARD ALWAYS_INLINE bool operator()(const UUID& a, const ISerializable& b) const;
 
         NODISCARD ALWAYS_INLINE bool operator()(const FileInfo& a, const FileInfo& b) const;
         NODISCARD ALWAYS_INLINE bool operator()(const FileInfo& a, const UUID& b) const;
         NODISCARD ALWAYS_INLINE bool operator()(const UUID& a, const FileInfo& b) const;
     };
+
 }
 
 template struct TypeSystem<const gE::FileLoadArgs&>;
@@ -121,7 +118,7 @@ namespace gE
         REFLECTABLE_NAME_PROTO();
 
         OPERATOR_MOVE_PROTO(File);
-        OPERATOR_COPY_PROTO(File);
+        DELETE_OPERATOR_COPY(File);
 
     public:
         File(Window* window, const Path& path, const Type<Window*>* type);
@@ -146,11 +143,8 @@ namespace gE
         GET_CONST(const Reference<Asset>&, , _asset);
         GET_CONST(const WeakReference<Asset>&, Weak, _weakAsset);
         GET_CONST(Bank*, Bank, _bank);
-        GET_CONST(const UUID&, UUID, _uuid);
         GET_CONST(const Path&, Path, _path);
         GET_CONST(Window&, Window, *_window);
-
-        NODISCARD ALWAYS_INLINE bool operator<(const File& o) const { return _uuid < o._uuid; }
 
         FORCE_IMPL static inline const Path Extension = ".file";
 
@@ -162,7 +156,6 @@ namespace gE
         Window* _window = DEFAULT;
         const Type<Window*>* _type = DEFAULT;
         Path _path = DEFAULT;
-        UUID _uuid = DEFAULT;
         Bank* _bank = DEFAULT;
 
         mutable WeakReference<Asset> _weakAsset = DEFAULT;
@@ -182,8 +175,8 @@ namespace gE
         REFLECTABLE_NAME_PROTO();
 
     public:
-        using FILE_SET_T = std::set<File, AssetCompare>;
-        using FILE_INFO_SET_T = std::set<FileInfo, AssetCompare>;
+        using FILE_SET_T = std::set<File, SerializableCompare>;
+        using FILE_INFO_SET_T = std::set<FileInfo, SerializableCompare>;
 
         Bank(Window* window, const Path& path, AssetLoadMode);
 
@@ -233,8 +226,8 @@ namespace gE
     class AssetManager
     {
     public:
-        using FILE_SET_T = std::set<File, AssetCompare>;
-        using BANK_SET_T = std::set<Pointer<Bank>, AssetCompare>;
+        using FILE_SET_T = std::set<File, SerializableCompare>;
+        using BANK_SET_T = std::set<Pointer<Bank>, SerializableCompare>;
 
         explicit AssetManager(Window* window) : _window(window) {}
 
@@ -271,5 +264,13 @@ namespace gE
         BANK_SET_T _banks = DEFAULT;
     };
 }
+
+template<class T> requires std::is_base_of_v<T, gE::Asset>
+void Read(std::istream&, gE::Window*, Reference<T>&);
+
+const gE::File* ReadAssetReference(std::istream&, gE::Window*);
+
+template <class T> requires std::is_base_of_v<T, gE::Asset>
+void Write(std::ostream&, const Reference<T>&);
 
 #include "Asset.inl"

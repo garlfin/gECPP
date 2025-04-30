@@ -54,6 +54,7 @@ struct TypeCompare
 	NODISCARD ALWAYS_INLINE bool operator()(const KEY_T& a, const TYPE_T& b) const;
 };
 
+
 template<class T>
 struct TypeSystem
 {
@@ -69,6 +70,16 @@ struct TypeSystem
 
 		GE_FAIL("NO SUCH REFLECTED TYPE!");
 		return nullptr;
+	}
+
+	static const Type<T>* GetTypeInfoFromExtension(const Path& extension)
+	{
+		auto it = std::ranges::find_if(_types, [&](const Type<T>* type)
+		   {
+			   return extension == type->Extension;
+		   });
+
+		return it == _types.end() ? nullptr : *it;
 	}
 
 	NODISCARD static ALWAYS_INLINE const SET_T& GetTypes() { return _types; };

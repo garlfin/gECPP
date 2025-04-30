@@ -35,6 +35,8 @@ namespace gE
             _filter
         );
 
+        _physics->SetContactListener(&_listener);
+
         _interface = &_physics->GetBodyInterface();
     }
 
@@ -43,8 +45,7 @@ namespace gE
         const int steps = std::clamp<int>(std::floor(delta * GE_PX_MIN_TICKRATE), 1, GE_PX_MAX_STEPS);
         _physics->Update(delta, steps, _allocator.GetPointer(), _jobSystem.GetPointer());
 
-        for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())
-            (**i)->OnFixedUpdate(delta);
+        ComponentManager::OnFixedUpdate(delta);
     }
 
     void PhysicsManager::OnEarlyFixedUpdate(float delta)
@@ -93,5 +94,24 @@ namespace gE
 
         transform.SetPosition(position, TransformFlags::RenderInvalidated);
         if(UseRotation) transform.SetRotation(rotation, TransformFlags::RenderInvalidated);
+    }
+
+    void CollisionListener::OnContactAdded(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::ContactManifold& inManifold, JPH::ContactSettings& ioSettings)
+    {
+        if(inBody1.IsSensor())
+            if(RigidBody* object = (RigidBody*) inBody1.GetUserData(); object->_isTrigger)
+            {
+                object->_collisionsLock.lock();
+                object->_collisions.emplace_back(CollisionState::Entering, (RigidBody*) inBody2.GetUserData());
+                object->_collisionsLock.unlock();
+            }
+
+        if(inBody2.IsSensor())
+            if(RigidBody* object = (RigidBody*) inBody2.GetUserData(); object->_isTrigger)
+            {
+                object->_collisionsLock.lock();
+                object->_collisions.emplace_back(CollisionState::Entering, (RigidBody*) inBody1.GetUserData());
+                object->_collisionsLock.unlock();
+            }
     }
 }

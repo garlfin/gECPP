@@ -36,11 +36,14 @@ namespace gE
 
 		GET_CONST(const Collider&, Collider, *_collider);
 		GET_CONST(const PhysicsMaterial&, Material, Material);
+		GET_SET(bool, IsTrigger, _isTrigger);
+
 		void SetMaterial(const PhysicsMaterial& material);
 
 		void OnInit() override;
 		void OnEarlyFixedUpdate(float d) override;
 		void OnFixedUpdate(float d) override;
+		void OnUpdate(float d) override;
 		void OnDestroy() override;
 		void ForceUpdateTransforms() override;
 
@@ -53,6 +56,8 @@ namespace gE
 
 		~RigidBody() override;
 
+		friend class CollisionListener;
+
 	protected:
 		NODISCARD ALWAYS_INLINE Collider& GetCollider() { return *_collider; }
 
@@ -63,5 +68,9 @@ namespace gE
 		RelativePointer<Collider> _collider;
 		px::Body* _body = nullptr;
 		vec3 _previousScale;
+
+		bool _isTrigger = false;
+		std::mutex _collisionsLock = DEFAULT;
+		std::vector<Collision> _collisions;
 	};
 }

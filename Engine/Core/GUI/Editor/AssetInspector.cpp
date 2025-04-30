@@ -21,7 +21,8 @@ namespace gE::Editor
         if(_selected)
         {
             ImGui::TextUnformatted(GetLabel<Asset>(_selected->Get().GetPointer(), "gE::Asset").c_str());
-            ImGui::Text("Path", _selected->GetPath().c_str());
+            ImGui::TextUnformatted(std::format("Path: {}", _selected->GetPath().string()).c_str());
+            ImGui::TextUnformatted(std::format("UUID: {}", _selected->GetUUID()).c_str());
             if(_selected->IsLoaded())
             {
                 Asset& asset = _selected->Get();
@@ -121,16 +122,8 @@ namespace gE::Editor
                 const Path extension = path.extension();
                 if(extension == File::Extension)
                     assetManager.LoadFile(path, AssetLoadMode::PathsAndFiles);
-                else
-                {
-                    auto it = std::ranges::find_if(TypeSystem<gE::Window*>::GetTypes(), [&extension](const Type<gE::Window*>* type)
-                    {
-                        return extension == type->Extension;
-                    });
-
-                    if(it != TypeSystem<gE::Window*>::GetTypes().end())
-                        assetManager.AddFile(File(&GetWindow(), path, *it))->Load();
-                }
+                else if(const Type<gE::Window*>* type = TypeSystem<gE::Window*>::GetTypeInfoFromExtension(extension))
+                    assetManager.AddFile(File(&GetWindow(), path, type))->Load();
             }
         _loading.Mode = LoadAssetMode::None;
         _loading.Mutex.unlock();

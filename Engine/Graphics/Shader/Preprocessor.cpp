@@ -30,7 +30,7 @@ namespace GPU
 			if(strcmpb(line.c_str(), API_INCLUDE_DIRECTIVE))
 			{
 				const Path includePath = std::filesystem::relative(GetIncludePath(line, path));
-				const gE::UUID includeUUID = gE::HashPath(includePath);
+				const gE::UUID includeUUID = gE::HashPath(gE::FixPath(includePath, ShaderSource::SType));
 				const gE::File* file = window->GetAssets().FindFile(includeUUID);
 
 				if(!file)

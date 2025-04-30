@@ -16,7 +16,7 @@ namespace gE::Editor
     class EditorLog final : public Window
     {
     public:
-         EditorLog(Editor*);
+        explicit EditorLog(Editor*);
 
     protected:
          void IOnEditorGUI() override;

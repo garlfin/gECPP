@@ -58,6 +58,7 @@ namespace gE
         settings.mMaxLinearVelocity = _settings.TerminalVelocity;
         settings.mMaxAngularVelocity = _settings.MaxAngularVelocity;
         settings.mGravityFactor = _settings.GravityFactor;
+        settings.mIsSensor = _isTrigger;
 
         _body = manager._interface->CreateBody(settings);
         manager._interface->AddBody(_body->GetID(), JPH::EActivation::Activate);
@@ -69,11 +70,15 @@ namespace gE
 
         if((bool)(transform.GetFlags() & TransformFlags::PhysicsInvalidated))
             ForceUpdateTransforms();
+
+        _body->SetIsSensor(_isTrigger);
     }
 
     void RigidBody::OnFixedUpdate(float d)
     {
-        Transform& transform = GetOwner().GetTransform();
+        PhysicsManager& manager = GetWindow().GetPhysics();
+
+        const Transform& transform = GetOwner().GetTransform();
         const Physics::ColliderTransform& offset = _collider->GetTransform();
 
         PreviousRotation = Rotation;
@@ -83,6 +88,24 @@ namespace gE
         Position = Physics::ToGLM(_body->GetPosition()) - offset.Position * transform->Scale * inverse(Rotation);
 
         Rotation *= inverse(offset.Rotation);
+
+        if(!_isTrigger) return;
+
+        std::ranges::remove_if(_collisions, [](const Collision& collision){ return collision.State == CollisionState::Exiting; });
+
+        for(Collision& collision : _collisions)
+        {
+            if(!manager.GetSystem().WereBodiesInContact(_body->GetID(), collision.Object->_body->GetID()))
+                collision.State = CollisionState::Exiting;
+            else
+                collision.State &= ~CollisionState::Changed;
+        }
+    }
+
+    void RigidBody::OnUpdate(float d)
+    {
+        if(!_isTrigger)
+            PhysicsComponent::OnUpdate(d);
     }
 
     void RigidBody::OnDestroy()

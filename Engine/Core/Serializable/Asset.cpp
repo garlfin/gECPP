@@ -4,46 +4,48 @@
 
 #include "Asset.h"
 
+#include <random>
+#include <Window.h>
 #include <CityHash/city.h>
 
 namespace gE
 {
-    File::File(Window* window, const Path& path, const Type<Window*>* type) :
+    File::File(Window* window, const Path& path, const Type<Window*>* type) : Serializable(0),
         _window(window),
         _type(type),
-        _path(FixPath(path, *_type)),
-        _uuid(HashPath(_path))
+        _path(FixPath(path, *_type))
     {
+        _UUID = HashPath(_path);
     }
 
-    File::File(Window* window, const Path& path, const Reference<Asset>& asset) :
+    File::File(Window* window, const Path& path, const Reference<Asset>& asset) : Serializable(0),
         _window(window),
         _type(ValidateAssetType(asset)),
         _path(FixPath(path, *_type)),
-        _uuid(HashPath(_path)),
         _weakAsset(asset),
         _asset(asset)
     {
+        _UUID = HashPath(_path);
         if(_asset)
             _asset->_file = this;
     }
 
-    File::File(Window* window, const Path& path, const WeakReference<Asset>& asset) :
+    File::File(Window* window, const Path& path, const WeakReference<Asset>& asset) : Serializable(0),
         _window(window),
         _type(ValidateAssetType(asset)),
         _path(FixPath(path, *_type)),
-        _uuid(HashPath(_path)),
         _weakAsset(asset)
     {
+        _UUID = HashPath(_path);
         if(_weakAsset)
             _weakAsset->_file = this;
     }
 
     OPERATOR_MOVE_IMPL(File::, File, this->~File(),
+        _UUID = o._UUID;
         _window = o._window;
         _type = o._type;
         _path = std::move(o._path);
-        _uuid = o._uuid;
         _bank = o._bank;
         _weakAsset = std::move(o._weakAsset);
         _asset = std::move(o._asset);
@@ -128,7 +130,7 @@ namespace gE
         FILE_INFO_SET_T fileInfoSet;
         for(const File& file : _files)
         {
-            fileInfoSet.emplace(file._path, file._uuid, out.tellp());
+            fileInfoSet.emplace(file._path, file.GetUUID(), out.tellp());
             file.Serialize(out);
         }
 
@@ -231,7 +233,19 @@ namespace gE
     UUID HashPath(const Path& path)
     {
         const std::string str = FixPath(path).string();
-        return std::bit_cast<__uint128_t>(CityHash::CityHash128(str.c_str(), str.length()));
+        return std::bit_cast<UUID>(CityHash::CityHash128(str.c_str(), str.length()));
+    }
+
+    UUID GenerateUUID()
+    {
+        static std::random_device randomDevice;
+        static std::mt19937_64 twister(randomDevice());
+        static std::uniform_int_distribution<u64> random(0, UINT64_MAX);
+
+        UUID uuid = random(twister);
+        uuid |= (UUID) random(twister) << 64;
+
+        return uuid;
     }
 
     Path FixPath(const Path& path)
@@ -255,9 +269,8 @@ namespace gE
     {
         _bank = s.Bank;
         _path = s.Path;
-        _uuid = HashPath(_path);
 
-        if(_bank) _bank->MoveStreamToFile(_uuid);
+        if(_bank) _bank->MoveStreamToFile(GetUUID());
 
         _type = ReadType<Window*>(in);
         GE_ASSERT(_type);
@@ -286,7 +299,7 @@ namespace gE
         GE_ASSERT(_type);
 
         if(_bank)
-            return Load(_bank->MoveStreamToFile(_uuid));
+            return Load(_bank->MoveStreamToFile(GetUUID()));
 
         std::ifstream stream(_path, std::ios::in | std::ios::binary);
 
@@ -338,4 +351,9 @@ namespace gE
     {
         return _asset = (Reference<Asset>) _weakAsset;
     }
+}
+
+const gE::File* ReadAssetReference(std::istream& in, gE::Window* window)
+{
+    return window->GetAssets().LoadFile(Read<std::string>(in), gE::AssetLoadMode::PathsAndFiles);
 }

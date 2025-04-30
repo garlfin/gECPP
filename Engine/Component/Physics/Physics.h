@@ -13,11 +13,35 @@
 
 namespace gE
 {
+    class PhysicsComponent;
+    class RigidBody;
+
     enum class PhysicsInterpolationMode : u8
     {
         None,
         Interpolate,
         Extrapolate
+    };
+
+    enum class CollisionState : u8
+    {
+        Changed = 1,
+        Intersecting = 1 << 1,
+
+        NoCollision = 0,
+        Entering = Changed | Intersecting,
+        Persisting = Intersecting,
+        Exiting = Changed,
+    };
+
+    ENUM_OPERATOR(CollisionState, |);
+    ENUM_OPERATOR(CollisionState, &);
+    ENUM_OPERATOR_UNARY(CollisionState, ~);
+
+    struct Collision
+    {
+        CollisionState State;
+        RigidBody* Object;
     };
 
     class PhysicsComponent : public Component
@@ -26,7 +50,7 @@ namespace gE
         using Component::Component;
 
         void OnInit() override;
-        void OnUpdate(float d) final;
+        void OnUpdate(float d) override;
 
         virtual void ForceUpdateTransforms() = 0;
         virtual void OnEarlyFixedUpdate(float d) = 0;
@@ -61,9 +85,10 @@ namespace gE
         ~PhysicsManager() override;
 
     private:
-        CollisionFilter _filter;
-        BroadPhaseFilter _broadFilter;
-        BroadPhase _broadPhase;
+        CollisionFilter _filter = DEFAULT;
+        BroadPhaseFilter _broadFilter = DEFAULT;
+        BroadPhase _broadPhase = DEFAULT;
+        CollisionListener _listener = DEFAULT;
 
         Pointer<px::Factory> _factory;
         Pointer<px::TempAllocatorImpl> _allocator;
