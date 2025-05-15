@@ -12,45 +12,13 @@
 
 namespace gE
 {
-	Material::Material(Window* window, const Reference<Shader>& shader, DepthFunction depthFunc, CullMode cullMode) :
-		_shader(shader), _depthFunc(depthFunc), _cullMode(cullMode), _window(window)
+	Material::Material(Window* window, const Reference<Shader>& shader) :
+		_window(window), _shader(shader)
 	{
 	}
 
 	void Material::Bind() const
 	{
-		const RenderFlags state = GetWindow().RenderState;
-
-		if((bool) _depthFunc && state.EnableDepthTest)
-		{
-			glEnable(GL_DEPTH_TEST);
-
-			GLenum depthFunc = (GLenum) _depthFunc;
-			if(state.WriteMode == WriteMode::Color) depthFunc = GL_EQUAL;
-
-			glDepthFunc(depthFunc);
-		}
-		else
-			glDisable(GL_DEPTH_TEST);
-
-		if((bool) _cullMode && state.EnableFaceCull)
-		{
-			glEnable(GL_CULL_FACE);
-			glCullFace((GLenum) _cullMode);
-		}
-		else
-			glDisable(GL_CULL_FACE);
-
-		if(GLAD_GL_NV_conservative_raster)
-		{
-			if(state.RasterMode == RasterMode::Conservative)
-				glEnable(GL_CONSERVATIVE_RASTERIZATION_NV);
-			else
-				glDisable(GL_CONSERVATIVE_RASTERIZATION_NV);
-		}
-
-		glDisable(GL_BLEND);
-
 		_shader->Bind();
 		GetWindow().GetSlotManager().Reset();
 	}
@@ -58,18 +26,12 @@ namespace gE
 	REFLECTABLE_ONGUI_IMPL(Material,
 	{
 		DrawField(AssetDragDropField<Shader>{ "Shader" }, _shader, depth);
-		DrawField(EnumField{ "Depth Function", "", EDepthFunction }, _depthFunc, depth);
-		DrawField(EnumField{ "Cull Mode", "", ECullMode }, _cullMode, depth);
-		DrawField(EnumField{ "Blend Mode", "", EBlendMode }, _blendMode, depth);
-	});
-
+	})
 	REFLECTABLE_FACTORY_NO_IMPL(Material);
 
 	PBRMaterial::PBRMaterial(Window* w, const Reference<Shader>& s, const PBRMaterialSettings& settings) :
 		Material(w, s),
-		_albedo(GetShader(), "AlbedoTex", settings.Albedo),
-		_armd(GetShader(), "ARMDTex", settings.ARMD),
-		_normal(GetShader(), "NormalTex", settings.Normal),
+		_settings(settings),
 		_brdfLUT(GetShader(), "BRDFLutTex")
 	{
 	}
@@ -77,19 +39,29 @@ namespace gE
 	void PBRMaterial::Bind() const
 	{
 		Material::Bind();
+		_brdfLUT.Use(GetWindow().GetPBRMaterialManager().GetBRDFLUT());
+	}
 
-		const PBRMaterialBuffers& manager = GetWindow().GetPBRMaterialManager();
+	void PBRMaterial::GetGPUMaterialData(size_t index) const
+	{
+		GPU::PBRMaterial& data = GetWindow().GetPBRMaterialManager().GetBuffer().GetData()[index];
 
-		_albedo.Use();
-		_armd.Use();
-		_normal.Use();
-		_brdfLUT.Use(manager.GetBRDFLUT());
+		data.Albedo = _settings.Albedo->GetHandle();
+		data.ARMD = _settings.ARMD->GetHandle();
+		data.Normal = _settings.Normal->GetHandle();
+		data.Scale = _settings.Scale;
+		data.Offset = _settings.Offset;
+		data.NormalStrength = _settings.NormalStrength;
+		data.ParallaxDepth = _settings.ParallaxDepth;
+	}
 
-		manager.GetBuffer().UpdateDataDirect(std::span(&_data, &_data + 1));
+	void PBRMaterial::FlushMaterialData(size_t size) const
+	{
+		GetWindow().GetPBRMaterialManager().GetBuffer().UpdateData(size);
 	}
 
 #ifdef GE_ENABLE_IMGUI
-	void PBRMaterialData::OnEditorGUI(u8 depth)
+	void PBRMaterialSettings::OnEditorGUI(u8 depth)
 	{
 		DrawField(ScalarField<float>{ "Scale" }, Scale, depth);
 		DrawField(ScalarField<float>{ "Offset" }, Offset, depth);
@@ -100,15 +72,12 @@ namespace gE
 
 	REFLECTABLE_ONGUI_IMPL(PBRMaterial,
 	{
-		DrawField(AssetDragDropField<API::Texture2D>{ "Albedo" }, *_albedo, depth);
-		DrawField(AssetDragDropField<API::Texture2D>{ "ARMD", "AO, Roughness, Metallic, _" }, *_armd, depth);
-		DrawField(AssetDragDropField<API::Texture2D>{ "Normal" }, *_normal, depth);
-		DrawField(Field{ "Settings" }, _data, depth);
+		DrawField(Field{ "Settings" }, _settings, depth);
 	});
 	REFLECTABLE_FACTORY_NO_IMPL(PBRMaterial);
 
 	PBRMaterialBuffers::PBRMaterialBuffers(Window* window) :
-		_buffer(window, 1, nullptr, GPU::BufferUsageHint::Dynamic | GPU::BufferUsageHint::Write, false),
+		_buffer(window, API_MAX_INSTANCE, nullptr, GPU::BufferUsageHint::Dynamic | GPU::BufferUsageHint::Write, true),
 		_brdfLUT(window, BRDFLUTFormat)
 	{
 		_buffer.Bind(API::BufferBaseTarget::Uniform, 4);
@@ -169,8 +138,6 @@ namespace gE
 		{
 		case RenderMode::Both:
 			return _forwardShader;
-		case RenderMode::Fragment:
-			return _deferredShader;
 		case RenderMode::Geometry:
 			return _gBufferShader;
 		default:
@@ -182,33 +149,67 @@ namespace gE
 	void DeferredShader::Free()
 	{
 		_forwardShader.Free();
-		_deferredShader.Free();
 		_gBufferShader.Free();
 	}
 
 	bool DeferredShader::IsFree() const
 	{
-		return _forwardShader.IsFree() && _deferredShader.IsFree() && _gBufferShader.IsFree();
+		return _forwardShader.IsFree() && _gBufferShader.IsFree();
 	}
 
 #ifdef DEBUG
 	bool DeferredShader::VerifyUniforms(const std::string& name) const
 	{
 		const u32 a = _forwardShader.GetUniformLocation(name);
-		const u32 b = _deferredShader.GetUniformLocation(name);
-		const u32 c = _gBufferShader.GetUniformLocation(name);
-		return a == b && b == c;
+		const u32 b = _gBufferShader.GetUniformLocation(name);
+		return a == b;
 	}
 #endif
 
 	REFLECTABLE_FACTORY_NO_IMPL(Shader);
-	REFLECTABLE_ONGUI_IMPL(Shader, {})
+	REFLECTABLE_ONGUI_IMPL(Shader,
+		DrawField(EnumField{ "Depth Function", "", EDepthFunction }, _depthFunc, depth);
+		DrawField(EnumField{ "Cull Mode", "", ECullMode }, _cullMode, depth);
+		DrawField(EnumField{ "Blend Mode", "", EBlendMode }, _blendMode, depth);
+	)
 
 	void Shader::Bind() const
 	{
+		const RenderFlags state = GetWindow().RenderState;
+
 		if(const API::Shader& shader = GetShader();
 			shader.GetIsCompiled()) shader.Bind();
 		else
 			GetWindow().GetDefaultMaterial().GetShader().Bind();
+
+		if((bool) _depthFunc && state.EnableDepthTest)
+		{
+			glEnable(GL_DEPTH_TEST);
+
+			GLenum depthFunc = (GLenum) _depthFunc;
+			if(state.WriteMode == WriteMode::Color) depthFunc = GL_EQUAL;
+
+			glDepthFunc(depthFunc);
+		}
+		else
+			glDisable(GL_DEPTH_TEST);
+
+		if((bool) _cullMode && state.EnableFaceCull)
+		{
+			glEnable(GL_CULL_FACE);
+			glCullFace((GLenum) _cullMode);
+		}
+		else
+			glDisable(GL_CULL_FACE);
+
+		if(GLAD_GL_NV_conservative_raster)
+		{
+			if(state.RasterMode == RasterMode::Conservative)
+				glEnable(GL_CONSERVATIVE_RASTERIZATION_NV);
+			else
+				glDisable(GL_CONSERVATIVE_RASTERIZATION_NV);
+		}
+
+		glDisable(GL_BLEND);
 	}
 }

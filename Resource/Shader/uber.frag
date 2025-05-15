@@ -14,9 +14,6 @@
 
 #include <Resource/Shader/Include/Scene.glsl>
 
-in flat uint ViewIndexIn;
-SCENE_VIEW_INDEX(ViewIndexIn);
-
 #include <Resource/Shader/Include/Camera.glsl>
 #include <Resource/Shader/Include/PBR.glsl>
 #include <Resource/Shader/Include/Effect.glsl>
@@ -29,21 +26,20 @@ SCENE_VIEW_INDEX(ViewIndexIn);
 #include <Resource/Shader/Include/SDF.glsl>
 #endif
 
-uniform sampler2D AlbedoTex;
-uniform sampler2D ARMDTex;
-uniform sampler2D NormalTex;
-
 struct PBRMaterialData
 {
     vec2 Scale;
     vec2 Offset;
     float ParallaxDepth;
     float NormalStrength;
+    BINDLESS_TEXTURE(sampler2D, Albedo);
+    BINDLESS_TEXTURE(sampler2D, ARMD);
+    BINDLESS_TEXTURE(sampler2D, Normal);
 };
 
 layout(std140, binding = 4) uniform PBRMaterialUniform
 {
-    PBRMaterialData PBRMaterial;
+    PBRMaterialData Materials[MAX_OBJECTS];
 };
 
 struct VertexOut
@@ -68,30 +64,37 @@ void main()
 {
     if(!bool(Scene_WriteMode & WRITE_MODE_COLOR)) return;
 
+    PBRMaterialData material = Materials[ObjectIndexIn];
+
     Vertex vert = Vertex
     (
         VertexIn.FragPos,
         normalize(VertexIn.TBN[2]),
         VertexIn.TBN,
-        (VertexIn.UV + PBRMaterial.Offset) * PBRMaterial.Scale
+        (VertexIn.UV + material.Offset) * material.Scale
     );
 
-	ParallaxEffectSettings parallaxSettings = ParallaxEffectSettings(PBRMaterial.ParallaxDepth, POM_MIN_LAYER, POM_MAX_LAYER, 0.0, 0.5);
+	ParallaxEffectSettings parallaxSettings = ParallaxEffectSettings(material.ParallaxDepth, POM_MIN_LAYER, POM_MAX_LAYER, 0.0, 0.5);
 
     vec3 viewDir = normalize(Camera.Position[ViewIndex] - VertexIn.FragPos);
 
-#ifdef ENABLE_POM
-    if(PBRMaterial.ParallaxDepth > 0.0)
-        vert.UV = ParallaxMapping(viewDir, ARMDTex, vert, parallaxSettings);
+#if defined(EXT_BINDLESS) && defined(EXT_BINDLESS)
+    if(material.ParallaxDepth > 0.0)
+        vert.UV = ParallaxMapping(viewDir, material.ARMD, vert, parallaxSettings);
 #endif
 
-    vec3 albedo = texture(AlbedoTex, vert.UV).rgb;
-    vec3 armd = texture(ARMDTex, vert.UV * vec2(1, -1)).rgb;
-    vec3 normal = texture(NormalTex, vert.UV).rgb;
-
+#ifdef EXT_BINDLESS
+    vec3 albedo = texture(material.Albedo, vert.UV).rgb;
+    vec3 armd = texture(material.ARMD, vert.UV * vec2(1, -1)).rgb;
+    vec3 normal = texture(material.Normal, vert.UV).rgb;
+#else
+    vec3 albedo = vec3(1.f);
+    vec3 armd = vec3(1.f);
+    vec3 normal = vec3(1.f);
+#endif
 	normal = normal * 2.0 - 1.0;
     normal = normalize(VertexIn.TBN * normal);
-    normal = mix(VertexIn.TBN[2], normal, PBRMaterial.NormalStrength);
+    normal = mix(VertexIn.TBN[2], normal, material.NormalStrength);
     normal = normalize(normal);
 
     PBRFragment frag = PBRFragment

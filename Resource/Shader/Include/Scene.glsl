@@ -100,6 +100,15 @@ layout(LIGHT_UNIFORM_LAYOUT, binding = LIGHT_UNIFORM_LOCATION) uniform LightingU
     uint InstanceCount = Scene.InstanceCount[gl_DrawID / 4][gl_DrawID % 4];
     uint ViewIndex = gl_InstanceID / InstanceCount;
     uint ObjectIndex = gl_BaseInstance + gl_InstanceID % InstanceCount;
+
+    out flat uint ObjectIndexIn;
+    out flat uint ViewIndexIn;
+#endif
+
+#ifdef FRAGMENT_SHADER
+    in flat uint ObjectIndexIn;
+    in flat uint ViewIndexIn;
+    uint ViewIndex = ViewIndexIn;
 #endif
 
 #define RENDER_MODE_GEOMETRY 1
@@ -133,15 +142,14 @@ const bool Scene_EnableDepthTest = bool(Scene.State >> 14 & 1);
 const bool Scene_EnableSpecular = bool(Scene.State >> 15 & 1);
 
 #ifdef VERTEX_SHADER
-    void Scene_SetViewport()
+    void Scene_Setup()
     {
         if(Scene_UseLayer)
             gl_Layer = int(ViewIndex);
         else
             gl_ViewportIndex = int(ViewIndex);
-    }
 
-    #define SCENE_VIEW_INDEX(INDEX)
-#else
-    #define SCENE_VIEW_INDEX(INDEX) uint ViewIndex = INDEX;
+        ObjectIndexIn = ObjectIndex;
+        ViewIndexIn = ViewIndex;
+    }
 #endif

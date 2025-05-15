@@ -16,7 +16,7 @@ void main()
 {
     mat4 viewProjection = Camera.Projection * Camera.View[gl_InstanceID];
 
-    Scene_SetViewport();
+    Scene_Setup();
 
     gl_Position = (viewProjection * vec4(Position, 0.f)).xyww;
 

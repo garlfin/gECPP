@@ -27,7 +27,7 @@ namespace GPU
 	struct IndirectDraw
 	{
 		u32 InstanceCount;
-		u8 Material;
+		u8 SubmeshIndex;
 		u8 LOD;
 	};
 

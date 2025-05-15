@@ -206,6 +206,15 @@ namespace gE
 	#endif
 	}
 
+	template <class T>
+	void Managed<T>::SetManager(Manager<Managed>* manager)
+	{
+		if(_manager) _manager->OnRemove(*this);
+
+		_manager = manager;
+		Register();
+	}
+
 	template<class T>
 	void Managed<T>::Register()
 	{

@@ -85,7 +85,6 @@ namespace gE
 		CONSTEXPR_GLOBAL RenderFlags PreZ        = { RenderMode::Geometry, WriteMode::Depth };
 		CONSTEXPR_GLOBAL RenderFlags PreZForward = { RenderMode::Fragment, WriteMode::Color };
 		CONSTEXPR_GLOBAL RenderFlags GBuffer     = { RenderMode::Geometry };
-		CONSTEXPR_GLOBAL RenderFlags Deferred    = { RenderMode::Fragment, WriteMode::Color, DepthMode::Normal, VoxelWriteMode::Read, RasterMode::Normal, 1, LayerMode::Layer, false, false, false, true };
 		CONSTEXPR_GLOBAL RenderFlags Shadow      = { RenderMode::Geometry, WriteMode::Depth, DepthMode::Normal, VoxelWriteMode::Read, RasterMode::Normal, 1, LayerMode::Layer, false, false };
 		CONSTEXPR_GLOBAL RenderFlags ShadowCube  = { RenderMode::Geometry, WriteMode::Depth, DepthMode::Radial, VoxelWriteMode::Read, RasterMode::Normal, 6, LayerMode::Layer, false, false };
 		CONSTEXPR_GLOBAL RenderFlags Cubemap     = { RenderMode::Both, WriteMode::Both, DepthMode::Normal, VoxelWriteMode::Read, RasterMode::Normal, 6, LayerMode::Layer, false, false, true, false };

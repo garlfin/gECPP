@@ -22,15 +22,6 @@ namespace gE
 		parent->_children.push_back(this);
 	}
 
-	REFLECTABLE_ONGUI_IMPL(Entity,
-	{
-		DrawField(Field{ "Name" }, _name, depth);
-		DrawField(Field{ "Parent" }, _parent, depth);
-		DrawField(Field{ "Transform" }, _transform, depth);
-	});
-
-	REFLECTABLE_NAME_IMPL(Entity, return _name);
-
 	void Entity::Destroy(bool flagChildren)
 	{
 		GetWindow().GetEntities().DestroyEntity(*this, flagChildren);
@@ -41,6 +32,37 @@ namespace gE
 		for(ITER_T* i = _deletionList.GetFirst(); i; i = i->GetNext())
 			(**i)->_flags.Deletion = true;
 	}
+
+	void Entity::IDeserialize(istream& in, SETTINGS_T s)
+	{
+		_window = s.Window;
+		_parent = s.Parent;
+
+		SetManager(&_window->GetEntities());
+		SetThis(this);
+
+		Read(in, _name);
+		Read(in, _flags);
+		Read(in, _layers);
+		ReadSerializable(in, _transform, this);
+	}
+
+	void Entity::ISerialize(ostream& out) const
+	{
+		Write(out, _name);
+		Write(out, _flags);
+		Write(out, _layers);
+		Write(out, _transform);
+	}
+
+	REFLECTABLE_ONGUI_IMPL(Entity,
+	{
+		DrawField(Field{ "Name" }, _name, depth);
+		DrawField(Field{ "Parent" }, _parent, depth);
+		DrawField(Field{ "Transform" }, _transform, depth);
+	});
+	REFLECTABLE_NAME_IMPL(Entity, return _name);
+	REFLECTABLE_FACTORY_NO_IMPL(Entity);
 
 	void EntityManager::FinalizeDeletions() const
 	{
@@ -83,10 +105,23 @@ namespace gE
 
 	Component::Component(Entity* owner, IComponentManager* manager) :
 		Managed(manager, *this),
-		_window(owner->GetWindow()), _owner(owner)
+		_window(&owner->GetWindow()), _owner(owner)
 	{
 		GE_ASSERT(owner);
 	}
+
+	void Component::IDeserialize(istream& in, SETTINGS_T s)
+	{
+		_owner = s;
+		_window = &_owner->GetWindow();
+
+		SetThis(this);
+	}
+
+	void Component::ISerialize(ostream& out) const {}
+
+	REFLECTABLE_ONGUI_IMPL(Component, );
+	REFLECTABLE_FACTORY_NO_IMPL(Component);
 
 	void IComponentManager::OnUpdate(float delta)
 	{
@@ -140,4 +175,14 @@ namespace gE
 	Behavior::Behavior(Entity* o) : Component(o, &o->GetWindow().GetBehaviors())
 	{
 	}
+
+	void Behavior::IDeserialize(istream& in, SETTINGS_T s)
+	{
+		SetManager(&GetWindow().GetBehaviors());
+	}
+
+	void Behavior::ISerialize(ostream& out) const {}
+
+	REFLECTABLE_ONGUI_IMPL(Behavior, );
+	REFLECTABLE_FACTORY_NO_IMPL(Behavior);
 }

@@ -22,7 +22,7 @@ namespace gE
         GET(gE::MeshRenderer&, Renderer, _renderer);
 
     private:
-        Animator _animator;
+        SimpleAnimator _animator;
         AnimatedMeshRenderer _renderer;
     };
 

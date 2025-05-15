@@ -69,30 +69,32 @@ public:
 	~Serializable() override = default;
 };
 
+// checks for "gE\\0\0" for backwards compatability purposes.
+// new magics are the same as the class name
 #define SERIALIZABLE_CHECK_HEADER() \
 	char magic[4]; \
 	Read<char>(in, 4, magic); \
-	GE_ASSERTM(strcmpb(magic, MAGIC, 4), "UNEXPECTED MAGIC!"); \
+	GE_ASSERTM(strcmpb(magic, SType.Magic.c_str(), 4), "UNEXPECTED MAGIC!") \
 	_version = Read<u8>(in);
 
-#define SERIALIZABLE_PROTO_NOOP(MAGIC_VAL, VERSION_VAL, TYPE, SUPER_T, ...) \
+#define SERIALIZABLE_PROTO_ABSTRACT(MAGIC_VAL, VERSION_VAL, TYPE, SUPER_T, ...) \
+	REFLECTABLE_PROTO(MAGIC_VAL, TYPE, SUPER_T, __VA_ARGS__); \
 	public: \
 		typedef SUPER_T SUPER; \
 		typedef SUPER::SETTINGS_T SETTINGS_T;\
 		TYPE(istream& in, SETTINGS_T s) : SUPER(in, s) { SERIALIZABLE_CHECK_HEADER(); IDeserialize(in, s); } \
 		TYPE() = default; \
-		static const constexpr char MAGIC[5] = MAGIC_VAL; \
-		inline void Deserialize(istream& in, SETTINGS_T s) override { PlacementNew(*this, in, s); } \
-		inline void Serialize(ostream& out) const override { SUPER::Serialize(out); Write(out, 4, MAGIC); Write<u8>(out, _version); ISerialize(out); } \
+		inline void Serialize(ostream& out) const override { SUPER::Serialize(out); Write(out, 4, SType.Magic.c_str()); Write<u8>(out, _version); ISerialize(out); } \
 		GET_CONST(u8, Version, _version) \
 	private: \
 		void IDeserialize(istream& in, SETTINGS_T s); \
 		void ISerialize(ostream& out) const; \
-		u8 _version = VERSION_VAL; \
-		REFLECTABLE_PROTO(MAGIC_VAL, TYPE, SUPER_T, __VA_ARGS__)
+		u8 _version = VERSION_VAL;
 
 #define SERIALIZABLE_PROTO(MAGIC_VAL, VERSION_VAL, TYPE, SUPER_T, ...) \
-	SERIALIZABLE_PROTO_NOOP(MAGIC_VAL, VERSION_VAL, TYPE, SUPER_T, __VA_ARGS__); \
+	SERIALIZABLE_PROTO_ABSTRACT(MAGIC_VAL, VERSION_VAL, TYPE, SUPER_T, __VA_ARGS__); \
+	public: \
+		inline void Deserialize(istream& in, SETTINGS_T s) override { PlacementNew(*this, in, s); } \
 	DEFAULT_OPERATOR_CM(TYPE)
 
 #define SERIALIZABLE_PROTO_NOHEADER(MAGIC_VAL, TYPE, SUPER_T, ...) \

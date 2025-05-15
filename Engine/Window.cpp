@@ -202,7 +202,6 @@ bool Window::Run()
 
 		if(_renderTick.ShouldTick(SDLGetTime(initTime)))
 		{
-
 		#ifdef GE_DEBUG_PERFORMANCE
 			double updateDelta = SDLGetTime(initTime);
 

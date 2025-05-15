@@ -5,6 +5,7 @@
 #pragma once
 
 #include <Core/Math/Math.h>
+#include <Core/Serializable/Serializable.h>
 
 #include "Macro.h"
 
@@ -41,3 +42,16 @@ public:
 private:
 	T* _t = nullptr;
 };
+
+template<class T>
+void Read(std::istream& in, RelativePointer<T>& pointer)
+{
+	T* raw = (T*)((std::byte*) &pointer + Read<u64>(in));
+	pointer = raw;
+}
+
+template<class T>
+void Write(std::ostream& out, const RelativePointer<T>& pointer)
+{
+	Write(out, (u64) ((std::byte*) pointer.GetPointer() - (std::byte*) &pointer));
+}

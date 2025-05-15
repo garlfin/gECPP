@@ -89,10 +89,12 @@ namespace gE
 			_list = o._list;
 			_previous = o._previous;
 			_next = o._next;
+
 			if(_previous) _previous->_next = this;
 			else _list->_first = this;
 			if(_next) _next->_previous = this;
 			else _list->_last = this;
+
 			o._list = nullptr;
 			o._previous = nullptr;
 			o._next = nullptr;
@@ -204,12 +206,14 @@ namespace gE
 		virtual ~Managed() { Free(); }
 
 	protected:
-		ALWAYS_INLINE void Register();
+		void Register();
+		void SetManager(Manager<Managed>* manager);
+		void SetThis(T* ts) { _t = ts; } // "ts" 🥀
 
 		LinkedNode<Managed> Node;
 
 	private:
-		RelativePointer<T> _t;
+		RelativePointer<T> _t = DEFAULT;
 		Manager<Managed>* _manager = nullptr;
 #ifdef DEBUG
 		bool _init = false;

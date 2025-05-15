@@ -114,7 +114,7 @@ namespace gE
 {
     class File final : public Serializable<const FileLoadArgs&>
     {
-        SERIALIZABLE_PROTO_NOOP("FILE", 0, File, Serializable);
+        SERIALIZABLE_PROTO_ABSTRACT("FILE", 0, File, Serializable);
         REFLECTABLE_NAME_PROTO();
 
         OPERATOR_MOVE_PROTO(File);

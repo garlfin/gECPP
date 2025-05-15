@@ -58,6 +58,19 @@ namespace gE
         REFLECT_ENUM(ChannelType, Scale)
     );
 
+    enum class TransformMixMode : u8
+    {
+        Mix,
+        Override = Mix,
+        Add,
+    };
+
+    REFLECTABLE_ENUM(Normal, TransformMixMode, 3,
+        REFLECT_ENUM(TransformMixMode, Mix),
+        REFLECT_ENUM(TransformMixMode, Override),
+        REFLECT_ENUM(TransformMixMode, Add)
+    );
+
     struct Frame : public Serializable<const AnimationChannel&>
     {
         SERIALIZABLE_PROTO_NOHEADER("FRM", Frame, Serializable);
@@ -145,6 +158,8 @@ namespace gE
         Array<Frame> Frames = DEFAULT;
     };
 
+    TransformData MixTransform(const TransformData& a, const TransformData& b, TransformMixMode mode, float strength);
+
     struct Animation : public Asset
     {
         SERIALIZABLE_PROTO("ANIM", 1, Animation, Asset);
@@ -156,7 +171,7 @@ namespace gE
         GET_CONST(const Reference<Skeleton>&, Skeleton, _skeleton);
         void SetSkeleton(const Reference<Skeleton>&);
 
-        void Get(float time, const Array<TransformData>& transform) const;
+        void Get(float time, TransformMixMode mode, float strength, const Array<TransformData>& transform) const;
 
         NODISCARD inline bool IsFree() const override { return _skeleton.IsFree() && Channels.IsFree(); }
         inline void Free() override { Name.clear(); _skeleton.Free(); Channels.Free(); }

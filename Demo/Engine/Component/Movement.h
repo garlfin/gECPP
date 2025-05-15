@@ -18,15 +18,13 @@ namespace gE
 {
     class Movement final : public Behavior
     {
-        REFLECTABLE_PROTO("MOV", Movement, Behavior);
+        SERIALIZABLE_PROTO("movement", 0, Movement, Behavior);
 
     public:
         explicit Movement(Entity* o, CharacterController& controller) :
             Behavior(o),
             _controller(controller)
-        {
-            GetWindow().GetMouse().SetIsEnabled(false);
-        }
+        {}
 
         GET_SET(Entity*, FPCamera, _camera);
 
@@ -37,7 +35,10 @@ namespace gE
         float JumpHeight = 1.f;
         float Sensitivity = 0.1f;
 
-        void OnInit() override {};
+        void OnInit() override
+        {
+            GetWindow().GetMouse().SetIsEnabled(false);
+        }
 
         void OnUpdate(float delta) override
         {
@@ -113,15 +114,34 @@ namespace gE
             }
         }
 
-
     private:
         vec3 _rot = DEFAULT;
         RelativePointer<CharacterController> _controller;
-        Entity* _camera;
+        Entity* _camera = DEFAULT;
         vec3 _dir = DEFAULT;
     };
 
-    REFLECTABLE_FACTORY_NO_IMPL(Movement, inline);
+    inline void Movement::IDeserialize(istream& in, SETTINGS_T s)
+    {
+        Read(in, Speed);
+        Read(in, SpeedMultiplier);
+        Read(in, StandingHeight);
+        Read(in, CrouchingHeight);
+        Read(in, JumpHeight);
+        Read(in, Sensitivity);
+        Read(in, _controller);
+    }
+
+    inline void Movement::ISerialize(ostream& out) const
+    {
+        Write(out, Speed);
+        Write(out, SpeedMultiplier);
+        Write(out, StandingHeight);
+        Write(out, CrouchingHeight);
+        Write(out, JumpHeight);
+        Write(out, Sensitivity);
+        Write(out, _controller);
+    }
 
     inline REFLECTABLE_ONGUI_IMPL(Movement,
     {
@@ -132,4 +152,6 @@ namespace gE
         DrawField(ScalarField{ "Jump Height"sv, ""sv, 0.f, 10.f, 0.01f }, JumpHeight, depth);
         DrawField(ScalarField{ "Sensitivity"sv, "Mouse sensitivity"sv, 0.01f, 10.f, 0.001f }, Sensitivity, depth);
     });
+
+    REFLECTABLE_FACTORY_IMPL(Movement, inline);
 }

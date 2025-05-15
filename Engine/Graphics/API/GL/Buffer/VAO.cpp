@@ -90,7 +90,7 @@ namespace GL
 		{
 			IndirectDraw& to = ((IndirectDraw*) drawManager.GetDraws().GetData().Data())[i];
 			const GPU::IndirectDraw& call = calls[i];
-			const GPU::MaterialSlot& material = Materials[call.Material];
+			const GPU::MaterialSlot& material = Materials[call.SubmeshIndex];
 
 			to.InstanceCount = call.InstanceCount * GetWindow().RenderState.InstanceMultiplier;
 			to.Count = material.Count * (size_t) PrimitiveType;
@@ -124,7 +124,7 @@ namespace GL
 		{
 			IndirectDrawIndexed& to = ((IndirectDrawIndexed*) drawManager.GetDraws().GetData().Data())[i];
 			const GPU::IndirectDraw& call = calls[i];
-			const GPU::MaterialSlot& material = Materials[call.Material];
+			const GPU::MaterialSlot& material = Materials[call.SubmeshIndex];
 
 			to.InstanceCount = call.InstanceCount * GetWindow().RenderState.InstanceMultiplier;
 			to.Count = material.Count * (size_t) PrimitiveType;

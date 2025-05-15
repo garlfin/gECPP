@@ -110,4 +110,3 @@ namespace gE::DefaultPipeline
 		API::Buffer<GPU::Lighting> _lightBuffer;
 	};
 }
-

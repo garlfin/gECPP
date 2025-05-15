@@ -54,6 +54,9 @@ namespace GL
 		void Bind(BufferTarget target) const;
 		void Bind() const override;
 
+		using GPU::Buffer<T>::begin;
+		using GPU::Buffer<T>::end;
+
 		~Buffer() override;
 
 	private:

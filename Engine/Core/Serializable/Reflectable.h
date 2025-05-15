@@ -95,8 +95,9 @@ struct Type
 {
 	Type() = delete;
 
-	explicit Type(const std::string& name, FactoryFunction<T> factory, UFactoryFunction<T> uFactory, const char extension[5], const Type* baseType = nullptr) :
+	explicit Type(const std::string& name, const char magic[5], const std::string& extension, FactoryFunction<T> factory, UFactoryFunction<T> uFactory, const Type* baseType = nullptr) :
 		Name(name),
+		Magic(magic),
 		Factory(factory),
 		UFactory(uFactory),
 		BaseType(baseType)
@@ -114,6 +115,7 @@ struct Type
 	NODISCARD const Type* GetBaseType() const { return BaseType ? BaseType : this; }
 
 	std::string Name;
+	std::string Magic;
 	Path Extension;
 	FactoryFunction<T> Factory;
 	UFactoryFunction<T> UFactory;
@@ -181,7 +183,7 @@ struct EnumData
 		static TYPE* Factory(std::istream& in, SETTINGS_T t); \
 		static void UFactory(std::istream& in, SETTINGS_T t, TYPE& result); \
 		const TYPE_T* GetType() const override { return &SType; }; \
-		FORCE_IMPL static inline const TYPE_T SType = TYPE_T::MakeType<TYPE>((FactoryFunction<SETTINGS_T>) Factory, (UFactoryFunction<SETTINGS_T>) UFactory, MAGIC_VAL __VA_OPT__(,) __VA_ARGS__); \
+		FORCE_IMPL static inline const TYPE_T SType = TYPE_T::MakeType<TYPE>(MAGIC_VAL, #TYPE, (FactoryFunction<SETTINGS_T>) Factory, (UFactoryFunction<SETTINGS_T>) UFactory __VA_OPT__(,) __VA_ARGS__); \
 
 #ifdef GE_ENABLE_IMGUI
 	#define REFLECTABLE_ONGUI_PROTO(SUPER) \

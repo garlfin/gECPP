@@ -20,12 +20,16 @@ namespace gE
 	{
 		Window* Window;
 		Entity* Parent;
-		std::string NameOverride;
 	};
+}
 
-  	class Entity : public Reflectable<const EntityCreationSettings&>, public Managed<Entity>
+template class TypeSystem<const gE::EntityCreationSettings&>;
+
+namespace gE
+{
+  	class Entity : public Serializable<const EntityCreationSettings&>, public Managed<Entity>
 	{
-  		REFLECTABLE_ONGUI_PROTO(Reflectable);
+  		SERIALIZABLE_PROTO_ABSTRACT("entity", 0, Entity, Serializable);
   		REFLECTABLE_NAME_PROTO();
 
 	public:
@@ -73,5 +77,3 @@ namespace gE
 		LinkedList<Managed<Entity>> _deletionList;
 	};
 }
-
-template class TypeSystem<const gE::EntityCreationSettings&>;

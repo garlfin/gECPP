@@ -13,6 +13,21 @@
 #define BRDF_SIZE 512
 #define BRDF_GROUP_SIZE 8
 
+namespace GPU
+{
+	struct PBRMaterial
+	{
+		vec2 Scale;
+		vec2 Offset;
+		float ParallaxDepth;
+		float NormalStrength;
+
+		handle Albedo = DEFAULT;
+		handle ARMD = DEFAULT;
+		handle Normal = DEFAULT;
+	};
+}
+
 namespace gE
 {
 	struct PBRMaterialSettings
@@ -20,20 +35,15 @@ namespace gE
 		Reference<API::Texture2D> Albedo;
 		Reference<API::Texture2D> ARMD;
 		Reference<API::Texture2D> Normal;
-	};
 
-	struct PBRMaterialData
-	{
 		vec2 Scale = vec2(10.f);
 		vec2 Offset = vec2(0.f);
 		float ParallaxDepth = 0.5f;
 		float NormalStrength = 1.f;
 
-		vec2 _pad;
-
-#ifdef GE_ENABLE_IMGUI
+	#ifdef GE_ENABLE_IMGUI
 		void OnEditorGUI(u8 depth);
-#endif
+	#endif
 	};
 
 	class PBRMaterial : public Material
@@ -44,13 +54,12 @@ namespace gE
 		PBRMaterial(Window* w, const Reference<Shader>& s, const PBRMaterialSettings& settings);
 
 		void Bind() const override;
+		void GetGPUMaterialData(size_t index) const override;
+		void FlushMaterialData(size_t size) const override;
 
 	private:
-		gE::ReferenceUniform<API::Texture2D> _albedo;
-		gE::ReferenceUniform<API::Texture2D> _armd;
-		gE::ReferenceUniform<API::Texture2D> _normal;
+		PBRMaterialSettings _settings;
 		DynamicUniform _brdfLUT;
-		PBRMaterialData _data;
 	};
 
 	GLOBAL GPU::Texture2D BRDFLUTFormat = []()
@@ -69,10 +78,10 @@ namespace gE
 		PBRMaterialBuffers(Window* window);
 
 		GET_CONST(const API::Texture2D&, BRDFLUT, _brdfLUT);
-		GET_CONST(const API::Buffer<PBRMaterialData>&, Buffer, _buffer);
+		GET_CONST(const API::Buffer<GPU::PBRMaterial>&, Buffer, _buffer);
 
 	private:
-		API::Buffer<PBRMaterialData> _buffer;
+		API::Buffer<GPU::PBRMaterial> _buffer;
 		API::Texture2D _brdfLUT;
 	};
 }

@@ -10,7 +10,7 @@ namespace gE
 {
 	class Behavior : public Component
 	{
-		REFLECTABLE_NOIMPL(Component);
+		SERIALIZABLE_PROTO_ABSTRACT("BHVR", 0, Behavior, Component);
 
 	public:
 		explicit Behavior(Entity* o);

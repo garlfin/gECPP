@@ -23,6 +23,9 @@ namespace gE
         NODISCARD ALWAYS_INLINE glm::vec3 Right() const { return Rotation * glm::vec3(1, 0, 0); }
         GET_CONST(glm::mat3, RotationMatrix, toMat3(Rotation));
 
+        TransformData operator*(float b) const;
+        TransformData operator+(const TransformData& b) const;
+
         static TransformData mix(const TransformData& a, const TransformData& b, float factor);
 
         glm::mat4 ToMat4() const;

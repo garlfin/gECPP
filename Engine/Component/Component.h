@@ -6,7 +6,7 @@
 
 #include <Core/Manager.h>
 #include <Core/RelativePointer.h>
-#include <Core/Serializable/Reflectable.h>
+#include <Core/Serializable/Serializable.h>
 
 #include "Prototype.h"
 
@@ -14,15 +14,15 @@ template struct TypeSystem<gE::Entity*>;
 
 namespace gE
 {
-	class Component : public Reflectable<Entity*>, public Managed<Component>
+	class Component : public Serializable<Entity*>, public Managed<Component>
 	{
-		REFLECTABLE_NOIMPL(Reflectable);
+		SERIALIZABLE_PROTO_ABSTRACT("component", 0, Component, Serializable);
 
 	public:
 		explicit Component(Entity* owner, IComponentManager* = nullptr);
 
 		GET_CONST(Entity&, Owner, *_owner);
-		GET_CONST(Window&, Window, _window);
+		GET_CONST(Window&, Window, *_window);
 
 		using UpdateFunction = void(Component::*)(float);
 		using RenderFunction = void(Component::*)(float, Camera*);
@@ -39,7 +39,7 @@ namespace gE
 		~Component() override = default;
 
 	private:
-		Window& _window;
+		Window* _window;
 		RelativePointer<Entity> _owner;
 	};
 

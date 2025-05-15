@@ -89,13 +89,12 @@ namespace gE
 	)
 	REFLECTABLE_FACTORY_NO_IMPL(MeshRenderer);
 
-	Animator::Animator(const Reference<Skeleton>& skeleton) :
+	IAnimator::IAnimator(const Reference<Skeleton>& skeleton) :
 		_skeleton(skeleton)
 	{
-
 	}
 
-	void Animator::Get(const Array<mat4>& matrices, bool inverse) const
+	void IAnimator::Get(float delta, const Array<mat4>& matrices)
 	{
 		GE_ASSERT(matrices.Size() >= _transforms.Size());
 
@@ -109,8 +108,7 @@ namespace gE
 		for(size_t i = 0; i < _skeleton->Bones.Size(); i++)
 			_transforms[i] = _skeleton->Bones[i].Transform;
 
-		if(_animation)
-			_animation->Get(_time, _transforms);
+		OnUpdate(delta);
 
 		for(size_t i = 0; i < _skeleton->Bones.Size(); i++)
 			if(const Bone* const parent = _skeleton->Bones[i].Parent.Pointer)
@@ -118,32 +116,43 @@ namespace gE
 			else
 				matrices[i] = _transforms[i].ToMat4();
 
-		if(inverse)
-			for(size_t i = 0; i < _skeleton->Bones.Size(); i++)
-				matrices[i] = matrices[i] * _skeleton->Bones[i].InverseBindMatrix;
+		for(size_t i = 0; i < _skeleton->Bones.Size(); i++)
+			matrices[i] = matrices[i] * _skeleton->Bones[i].InverseBindMatrix;
 	}
 
-	void Animator::SetSkeleton(const Reference<Skeleton>& skeleton)
+	void IAnimator::SetSkeleton(const Reference<Skeleton>& skeleton)
 	{
 		_skeleton = skeleton;
 		if(_transforms.Size() != _skeleton->Bones.Size())
 			_transforms = Array<TransformData>(_skeleton->Bones.Size());
 	}
 
-	bool Animator::DragDropAcceptor(const Reference<Asset>& asset, const Animator* animator)
+	bool IAnimator::DragDropAcceptor(const Reference<Asset>& asset, const IAnimator* animator)
 	{
 		return AssetDragDropAcceptor<Animation>(asset, nullptr) && ((Animation*) asset.GetPointer())->GetSkeleton();
 	}
 
-	REFLECTABLE_ONGUI_IMPL(Animator,
-		if(DrawField(AssetDragDropField<Animation, Animator>{ "Animation", "", GE_EDITOR_ASSET_PAYLOAD, DragDropAcceptor, this }, _animation, depth))
+	REFLECTABLE_ONGUI_IMPL(IAnimator,
+		DrawField(AssetDragDropField<Skeleton>{ "Skeleton", "", GE_EDITOR_ASSET_PAYLOAD }, *this, depth, &IAnimator::GetSkeleton, &IAnimator::SetSkeleton);
+	);
+	REFLECTABLE_FACTORY_NO_IMPL(IAnimator);
+
+	void SimpleAnimator::OnUpdate(float delta)
+	{
+		_time += delta;
+
+		if(_animation)
+			_animation->Get(_time, TransformMixMode::Override, 1.f, GetTransforms());
+	}
+
+	REFLECTABLE_ONGUI_IMPL(SimpleAnimator,
+		if(DrawField(AssetDragDropField<Animation, IAnimator>{ "Animation", "", GE_EDITOR_ASSET_PAYLOAD, DragDropAcceptor, this }, _animation, depth))
 			SetSkeleton(_animation->GetSkeleton());
-		DrawField(AssetDragDropField<Skeleton>{ "Skeleton", "", GE_EDITOR_ASSET_PAYLOAD }, *this, depth, &Animator::GetSkeleton, &Animator::SetSkeleton);
 		DrawField(ScalarField{ "Time", "", 0.f }, _time, depth);
 	);
-	REFLECTABLE_FACTORY_NO_IMPL(Animator);
+	REFLECTABLE_FACTORY_NO_IMPL(SimpleAnimator);
 
-	AnimatedMeshRenderer::AnimatedMeshRenderer(Entity* owner, Animator* animator, const Reference<Mesh>& mesh) : MeshRenderer(owner, mesh),
+	AnimatedMeshRenderer::AnimatedMeshRenderer(Entity* owner, IAnimator* animator, const Reference<Mesh>& mesh) : MeshRenderer(owner, mesh),
 		_animator(animator)
 	{
 		AnimatedMeshRenderer::SetMesh(mesh);
@@ -159,7 +168,10 @@ namespace gE
 		const RendererManager& manager = GetWindow().GetRenderers();
 		const DefaultPipeline::Buffers& buffers = GetWindow().GetPipelineBuffers();
 
-		_animator->Get(manager.GetJoints().GetData(), false);
+		_animator->Get(0.f, manager.GetJoints().GetData());
+		for(mat4& matrix : manager.GetJoints())
+			matrix = inverse(matrix);
+
 		manager.GetJoints().UpdateData(GetMesh()->Skeleton->Bones.Size());
 
 		buffers.GetScene().GetData()[0].Objects[0] = GPU::ObjectInfo{ GetOwner().GetTransform().Model() };
@@ -192,8 +204,7 @@ namespace gE
 		verticesOut.Bind(GL::BufferBaseTarget::ShaderStorage, 12);
 		previousPositionOut.Bind(GL::BufferBaseTarget::ShaderStorage, 13);
 
-		_animator->SetTime(_animator->GetTime() + delta);
-		_animator->Get(jointBuf);
+		_animator->Get(delta, jointBuf);
 		manager.GetJoints().UpdateData(GetMesh()->Skeleton->Bones.Size());
 
 		skinningShader.Dispatch(DIV_CEIL(vertexCount, 32));
@@ -288,10 +299,10 @@ namespace gE
 	DrawCall::DrawCall(const MeshRenderer& renderer, u8 i) :
 		_transform(&renderer.GetOwner().GetTransform()),
 		_material(renderer.GetMaterial(i)),
-		_materialIndex(i),
+		_submeshIndex(i),
 		_lod(0),
-		_flags(renderer.GetFlags()),
-		_vao(renderer.GetVAO())
+		_vao(renderer.GetVAO()),
+		_flags(renderer.GetFlags())
 	{
 		if(!_vao) return;
 		if(i >= renderer.GetMesh()->VAO->GetSettings().Counts.MaterialCount) return;
@@ -314,7 +325,7 @@ namespace gE
 
 		scene.State = window.RenderState;
 
-		u32 instanceCount = 0, batchInstanceCount = 0, batchCount = 0;
+		size_t instanceCount = 0, batchInstanceCount = 0, batchCount = 0;
 		for(ITER_T iter = _draws.begin(), nextIter; iter != _draws.end(); iter = nextIter)
 		{
 			GPU::ObjectInfo& object = scene.Objects[instanceCount];
@@ -322,13 +333,16 @@ namespace gE
 			bool flush = true;
 			bool flushBatch = true;
 
+			const Material* material = draw->GetMaterial() ? draw->GetMaterial() : &window.GetDefaultMaterial();
+			const Shader* shader = draw->GetShader();
+
 			nextIter = ++COPY(iter);
 			if(nextIter != _draws.end())
 			{
 				const DrawCall* nextDraw = *nextIter;
 
-				flush = &draw->GetVAO() != &nextDraw->GetVAO() || draw->GetMaterial() != nextDraw->GetMaterial();
-				flushBatch = draw->GetMaterialIndex() != nextDraw->GetMaterialIndex() || draw->GetLOD() != nextDraw->GetMaterialIndex();
+				flush = &draw->GetVAO() != &nextDraw->GetVAO() || draw->GetShader() != nextDraw->GetShader();
+				flushBatch = draw->GetSubmeshIndex() != nextDraw->GetSubmeshIndex() || draw->GetLOD() != nextDraw->GetSubmeshIndex();
 			}
 
 			object.Model = draw->GetTransform().Model();
@@ -336,13 +350,16 @@ namespace gE
 			object.Normal = transpose(inverse(draw->GetTransform().Model()));
 			object.Flags = draw->GetFlags();
 
+			if(material)
+				material->GetGPUMaterialData(instanceCount);
+
 			instanceCount++;
 			batchInstanceCount++;
 
 			if(flushBatch || flush)
 			{
 				scene.InstanceCount[batchCount] = batchInstanceCount;
-				_batches[batchCount] = GPU::IndirectDraw{ batchInstanceCount, draw->GetMaterialIndex(), draw->GetLOD() };
+				_batches[batchCount] = GPU::IndirectDraw{ (u32) batchInstanceCount, draw->GetSubmeshIndex(), draw->GetLOD() };
 
 				batchCount++;
 				batchInstanceCount = 0;
@@ -353,10 +370,17 @@ namespace gE
 			if(!flush) continue;
 
 			const size_t updateTo = offsetof(GPU::Scene, Objects) + sizeof(GPU::ObjectInfo) * instanceCount;
-			const Material* material = draw->GetMaterial() ? draw->GetMaterial() : &window.GetDefaultMaterial();
 
 			buffers.GetScene().UpdateData<std::byte>(updateTo);
-			material->Bind();
+
+			if(material)
+			{
+				material->FlushMaterialData(instanceCount);
+				material->Bind();
+			}
+			else
+				window.GetDefaultMaterial().Bind();
+
 			draw->GetVAO().Draw(batchCount, _batches);
 
 			batchCount = instanceCount = 0;

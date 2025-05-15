@@ -27,7 +27,7 @@ namespace gE
 
 	class Transform final : public Component
 	{
-		REFLECTABLE_PROTO("TRFM", Transform, Component);
+		SERIALIZABLE_PROTO("c_transform", 0, Transform, Component);
 
 	public:
 		Transform(Entity* o, const TransformData& d);

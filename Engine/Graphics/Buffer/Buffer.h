@@ -47,6 +47,9 @@ namespace GPU
 		GET_CONST(u32, Size, Data.Size());
 		GET_CONST(u32, ByteSize, Data.ByteSize());
 
+		T* begin() const { return Data.begin(); }
+		T* end() const { return Data.end(); }
+
 		ALWAYS_INLINE void Free() override { Data.Free(); }
 		ALWAYS_INLINE bool IsFree() const override { return Data.IsFree(); }
 

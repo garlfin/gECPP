@@ -16,8 +16,8 @@ namespace gE
     inline bool DrawCall::operator<(const DrawCall& b) const
     {
         if(_vao != b._vao) return _vao < b._vao;
-        if(_material != b._material) return _material < b._material;
-        if(_materialIndex != b._materialIndex) return _materialIndex < b._materialIndex;
+        if(GetShader() != b.GetShader()) return GetShader() < b.GetShader();
+        if(_submeshIndex != b._submeshIndex) return _submeshIndex < b._submeshIndex;
         if(_lod != b._lod) return _lod < b._lod;
         if(this != &b) return this < &b;
         return false;

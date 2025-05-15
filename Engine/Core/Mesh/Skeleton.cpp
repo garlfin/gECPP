@@ -192,6 +192,16 @@ namespace gE
     );
     REFLECTABLE_FACTORY_IMPL(AnimationChannel);
 
+    TransformData MixTransform(const TransformData& a, const TransformData& b, TransformMixMode mode, float strength)
+    {
+        switch(mode)
+        {
+        case TransformMixMode::Mix: return TransformData::mix(a, b, strength);
+        case TransformMixMode::Add: return a + b * strength;
+        default: return a;
+        }
+    }
+
     void Animation::IDeserialize(istream& in, SETTINGS_T s)
     {
         Read(in, Name);
@@ -225,15 +235,20 @@ namespace gE
             Channels[i].Retarget(_skeleton.GetPointer());
     }
 
-    void Animation::Get(float time, const Array<TransformData>& transform) const
+    void Animation::Get(float time, TransformMixMode mode, float strength, const Array<TransformData>& transform) const
     {
-        if(!_skeleton) return;
+        if(!_skeleton || strength == 0.f) return;
 
         GE_ASSERT(_skeleton->Bones.Size() <= transform.Size());
         time = mod(abs(time), Length);
 
         for(const AnimationChannel& channel : Channels)
-            channel.Get(time, transform[channel.Target.Location]);
+        {
+            TransformData newTransform;
+            channel.Get(time, newTransform);
+
+            transform[channel.Target.Location] = MixTransform(transform[channel.Target.Location], newTransform, mode, strength);
+        }
     }
 
     REFLECTABLE_ONGUI_IMPL(Animation,

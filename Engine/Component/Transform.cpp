@@ -20,6 +20,8 @@ namespace gE
 		if(const Entity* parent = GetOwner().GetParent())
 			_flags |= parent->GetTransform()._flags & TransformFlags::RenderInvalidated;
 
+		_previousModel = _model;
+
 		if(!(bool)(_flags & TransformFlags::RenderInvalidated)) return;
 
 		_model = GetParentTransform() * _transform.ToMat4();
@@ -28,7 +30,6 @@ namespace gE
 
 	void Transform::OnRender(float, Camera*)
 	{
-		_previousModel = _model;
 		_flags &= ~TransformFlags::RenderInvalidated;
 	}
 
@@ -41,6 +42,26 @@ namespace gE
 		Component(o, &o->GetWindow().GetTransforms()),
 	    _model(1.0)
 	{
+	}
+
+	TransformData TransformData::operator*(float b) const
+	{
+		return
+		{
+			Location * b,
+			Scale * b,
+			slerp(glm::identity<quat>(), Rotation, b)
+		};
+	}
+
+	TransformData TransformData::operator+(const TransformData& b) const
+	{
+		return
+		{
+			Location + b.Location,
+			Scale + b.Scale,
+			Rotation * b.Rotation,
+		};
 	}
 
 	TransformData TransformData::mix(const TransformData& a, const TransformData& b, float factor)
@@ -78,14 +99,31 @@ namespace gE
 		Set(d);
 	}
 
+	void Transform::IDeserialize(istream& in, SETTINGS_T s)
+	{
+		SetManager(&GetWindow().GetTransforms());
+
+		Read(in, _transform.Position);
+		Read(in, _transform.Rotation);
+		Read(in, _transform.Scale);
+
+		_flags = TransformFlags::All;
+	}
+
+	void Transform::ISerialize(ostream& out) const
+	{
+		Write(out, _transform.Position);
+		Write(out, _transform.Rotation);
+		Write(out, _transform.Scale);
+	}
+
 	REFLECTABLE_ONGUI_IMPL(Transform,
 	{
 		DrawField(ScalarField<float>{ "Position" }, *this, depth, &Transform::GetPosition_, &Transform::SetPosition_);
 		DrawField(ScalarField<float>{ "Rotation" }, *this, depth, &Transform::GetRotation_, &Transform::SetRotation_);
 		DrawField(ScalarField{ "Scale", "", FLT_EPSILON }, *this, depth, &Transform::GetScale_, &Transform::SetScale_);
 	});
-
-	REFLECTABLE_FACTORY_NO_IMPL(Transform);
+	REFLECTABLE_FACTORY_IMPL(Transform);
 
 	void TransformManager::OnUpdate(float delta)
 	{

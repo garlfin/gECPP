@@ -50,29 +50,42 @@ namespace gE
         Array<Reference<Material>> _materials;
     };
 
-    class Animator : public Reflectable<Window*>
+    class IAnimator : public Reflectable<Window*>
     {
-        REFLECTABLE_PROTO("AMTR", Animator, Reflectable);
+        REFLECTABLE_PROTO("AMTR", IAnimator, Reflectable);
 
     public:
-        explicit Animator(const Reference<Skeleton>&);
+        explicit IAnimator(const Reference<Skeleton>&);
 
-        void Get(const Array<mat4>&, bool inverse = true) const;
+        void Get(float delta, const Array<mat4>&);
         void SetSkeleton(const Reference<Skeleton>&);
         GET_CONST(const Reference<Skeleton>&, Skeleton, _skeleton);
+
+    protected:
+        static bool DragDropAcceptor(const Reference<Asset>& asset, const IAnimator* animator);
+
+        GET_CONST(const Array<TransformData>&, Transforms, _transforms);
+        virtual void OnUpdate(float delta) = 0;
+
+    private:
+        Reference<Skeleton> _skeleton;
+        Array<TransformData> _transforms;
+    };
+
+    class SimpleAnimator : public IAnimator
+    {
+        REFLECTABLE_PROTO("SANM", SimpleAnimator, IAnimator);
+    public:
+        explicit SimpleAnimator(const Reference<Skeleton>& skeleton) : IAnimator(skeleton) {};
+
         GET_SET(Reference<Animation>, Animation, _animation);
         GET_SET(float, Time, _time);
 
-    protected:
-        GET_CONST(const Array<TransformData>&, Transforms, _transforms);
+        void OnUpdate(float delta) override;
 
     private:
-        static bool DragDropAcceptor(const Reference<Asset>& asset, const Animator* animator);
-
-        Reference<Skeleton> _skeleton;
-        Reference<Animation> _animation;
-        Array<TransformData> _transforms;
         float _time = DEFAULT;
+        Reference<Animation> _animation;
     };
 
     class AnimatedMeshRenderer final : public MeshRenderer
@@ -80,7 +93,7 @@ namespace gE
         REFLECTABLE_PROTO("AMRE", AnimatedMeshRenderer, MeshRenderer);
 
     public:
-        AnimatedMeshRenderer(Entity* owner, Animator* animator, const Reference<Mesh>& mesh);
+        AnimatedMeshRenderer(Entity* owner, IAnimator* animator, const Reference<Mesh>& mesh);
 
         void OnRender(float delta, Camera* camera) override;
         void OnUpdate(float delta) override;
@@ -100,7 +113,7 @@ namespace gE
 
     private:
         Pointer<API::IVAO> _vao = DEFAULT;
-        RelativePointer<Animator> _animator = DEFAULT;
+        RelativePointer<IAnimator> _animator = DEFAULT;
 
 #ifdef GE_ENABLE_EDITOR
         bool _enableDebugView = false;

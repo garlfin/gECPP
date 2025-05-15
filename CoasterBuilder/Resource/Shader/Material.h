@@ -13,7 +13,7 @@ namespace Coaster
     class Material : public gE::Material
     {
     public:
-        Material(gE::Window* window, const Reference<gE::Shader>& shader, const Reference<API::Texture2D>& albedo) : gE::Material(window, shader),
+        Material(gE::Window* window, const Reference<Shader>& shader, const Reference<API::Texture2D>& albedo) : gE::Material(window, shader),
             _albedo(shader, "AlbedoTex", albedo),
             _brdfLUT(GetShader(), "BRDFLutTex")
         {};

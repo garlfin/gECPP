@@ -20,7 +20,6 @@ struct VertexOut
 };
 
 out VertexOut VertexIn;
-out flat uint ViewIndexIn;
 
 void main()
 {
@@ -30,9 +29,8 @@ void main()
 
     VertexIn.FragPos = (objectInfo.Model * vec4(Position, 1)).xyz;
     VertexIn.UV = UV;
-    ViewIndexIn = ViewIndex;
 
-    Scene_SetViewport();
+    Scene_Setup();
 
     gl_Position = viewProjection * vec4(VertexIn.FragPos, 1);
     VertexIn.CurrentNDC = gl_Position;
@@ -47,7 +45,7 @@ void main()
 
     vec3 previousPosition = (objectInfo.Flags & 1) == 1 ? PreviousPosition : Position;
 
-    VertexIn.PreviousNDC = objectInfo.PreviousModel * vec4(previousPosition, 1);
+    VertexIn.PreviousNDC = objectInfo.Model * vec4(previousPosition, 1);
     VertexIn.PreviousNDC = Camera.Projection * Camera.PreviousView[ViewIndex] * vec4(VertexIn.PreviousNDC.xyz, 1);
 
     vec3 nor, tan, bitan;
