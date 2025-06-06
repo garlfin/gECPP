@@ -46,7 +46,7 @@ namespace gE
             result.Get(),
             px::Vec3(),
             px::Quat::sIdentity(),
-            GetOwner().GetFlags().Static ? px::EMotionType::Static : px::EMotionType::Dynamic,
+            (bool) (GetOwner().GetFlags() & EntityFlags::Static) ? px::EMotionType::Static : px::EMotionType::Dynamic,
             (px::ObjectLayer) GetOwner().GetLayer()
         };
 

@@ -6,6 +6,8 @@
 
 #include <cstddef>
 
+#include "Core/Macro.h"
+
 namespace gE
 {
 	class Window;
@@ -17,15 +19,16 @@ namespace gE
 	template<class T> class TypedComponent;
 	template<class T> class TypedBehavior;
 
-	struct EntityFlags
+	enum class EntityFlags
 	{
-		EntityFlags() = default;
-		explicit EntityFlags(bool s) : Static(s) {};
-
-		bool Static : 1 = false;
-		bool Enabled : 1 = true;
-		bool Deletion : 1 = false;
+		Static = 1,
+		Enabled = 1 << 1,
+		Deletion = 1 << 2,
+		Internal = 1 << 3
 	};
+
+	ENUM_OPERATOR(EntityFlags, &);
+	ENUM_OPERATOR(EntityFlags, |);
 
 	class IComponentManager;
 	template<class T> class LinkedList;

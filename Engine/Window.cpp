@@ -194,10 +194,10 @@ bool Window::Run()
 	{
 		_time = SDLGetTime(initTime);
 
-#ifdef GE_ENABLE_EDITOR
-		if(Editor->GetIsRunning())
-#endif
 		if(_physicsTick.ShouldTick(_time))
+		#ifdef GE_ENABLE_EDITOR
+			if(Editor->GetIsRunning())
+		#endif
 			OnFixedUpdate(_physicsTick.GetDelta());
 
 		if(_renderTick.ShouldTick(SDLGetTime(initTime)))
@@ -211,9 +211,8 @@ bool Window::Run()
 			if(shouldDebugTick) timer.Start();
 		#endif
 
-		#ifdef GE_ENABLE_EDITOR
-			if(Editor->GetIsRunning())
-		#endif
+			PollInputs();
+
 			OnUpdate(_renderTick.GetDelta());
 			OnRender(_renderTick.GetDelta());
 
@@ -309,8 +308,6 @@ void Window::OnUpdate(float delta)
 {
 	Entities.MarkDeletions();
 
-	PollInputs();
-
 	Physics->OnUpdate(delta);
 	Cameras.OnUpdate(delta);
 	Behaviors.OnUpdate(delta);
@@ -332,7 +329,8 @@ void Window::OnRender(float delta)
 	Transforms.OnUpdate(delta); // Updates Model Matrices
 	Transforms.OnRender(delta, nullptr); // Resets flag
 
-	Cameras.OnRender(delta);
+	if(!Editor || Editor->OnRender())
+		Cameras.OnRender(delta, nullptr);
 
 	GUI->BeginGUI();
 	Behaviors.OnGUI(delta);
@@ -345,8 +343,11 @@ void Window::OnRender(float delta)
 
 	API::Framebuffer::Reset();
 
-	glViewport(0, _size.y - _viewport.Size.y, _viewport.Size.x, _viewport.Size.y);
-	Blit(Cameras.GetCurrentCamera()->GetColor());
+	if(!Editor->GetIsOpen())
+	{
+		glViewport(0, _size.y - _viewport.Size.y, _viewport.Size.x, _viewport.Size.y);
+		Blit(Cameras.GetCurrentCamera()->GetColor());
+	}
 
 	glViewport(0, 0, _size.x, _size.y);
 	Blit(GUI->GetColor());

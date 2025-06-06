@@ -53,7 +53,7 @@ namespace gE
 
     class Shader : public Asset
     {
-        REFLECTABLE_PROTO("SHDR", Shader, Asset);
+        REFLECTABLE_PROTO(Shader, Asset);
 
     public:
         explicit Shader(Window* window) : _window(window) {};

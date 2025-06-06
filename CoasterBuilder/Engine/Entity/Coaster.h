@@ -14,7 +14,7 @@ namespace Coaster
 {
     struct TrackPreset final : public Serializable<gE::Window*>
     {
-        SERIALIZABLE_PROTO("TRCK", 0, TrackPreset, Serializable);
+        SERIALIZABLE_PROTO(TrackPreset, Serializable);
 
     public:
         Spline<Dimension::D3D> Spline;
@@ -37,7 +37,7 @@ namespace Coaster
 
     struct CoasterType final : public Serializable<gE::Window*>
     {
-        SERIALIZABLE_PROTO("TRCK", 0, CoasterType, Serializable);
+        SERIALIZABLE_PROTO(CoasterType, Serializable);
 
     public:
         std::string Name;

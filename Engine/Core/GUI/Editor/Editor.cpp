@@ -77,7 +77,8 @@ namespace gE::Editor
         _assetInspector(this),
         _assetManager(this, &_assetInspector),
         _entityInspector(this),
-        _entityHierarchy(this, &_entityInspector)
+        _entityHierarchy(this, &_entityInspector),
+        _camera(window)
     {
     }
 
@@ -85,19 +86,26 @@ namespace gE::Editor
     {
         KeyboardState& keyboard = _window->GetKeyboard();
 
-        if(!keyboard.GetIsFocused() && keyboard.GetKey(Key::F1) == KeyState::Pressed)
+        if(!keyboard.GetIsFocused() && _isRunning && keyboard.GetKey(Key::F11) == KeyState::Pressed)
             _isOpen = !_isOpen;
 
         _window->SetViewport(Viewport(_window->GetSize(), DEFAULT));
 
         if(!_isOpen) return;
 
-        ImGuiID centralNodeID = ImGui::DockSpaceOverViewport(0, nullptr, ImGuiDockNodeFlags_PassthruCentralNode | ImGuiDockNodeFlags_NoDockingInCentralNode);
-        ImGuiDockNode* centralNode = ImGui::DockBuilderGetCentralNode(centralNodeID);
+        ImGui::DockSpaceOverViewport(0, nullptr);
 
-        const Size2D offset = (Size2D) centralNode->Pos;
-        const Size2D size = (Size2D) centralNode->Size;
-        _window->SetViewport(Viewport(size, offset));
+        ImGui::SetNextWindowSizeConstraints(ImVec2(256, 256), ImVec2(FLT_MAX, FLT_MAX));
+        ImGui::Begin("TopBar", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar);
+
+        if(ImGui::Button(_isRunning ? "Pause" : "Play"))
+            _isRunning = !_isRunning;
+
+        const Size2D size = (Size2D) ImGui::GetContentRegionAvail();
+        _window->SetViewport(Viewport(size));
+
+        ImGui::Image((ImTextureID) _viewportTexture, ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
+        ImGui::End();
 
         _log.OnEditorGUI();
 
@@ -106,6 +114,19 @@ namespace gE::Editor
 
         _assetManager.OnEditorGUI();
         _assetInspector.OnEditorGUI();
+    }
+
+    bool Editor::OnRender()
+    {
+        _viewportTexture = &_window->GetCameras().GetCurrentCamera()->GetColor();
+        if(!_isRunning)
+        {
+            _viewportTexture = &_camera.GetColor();
+            _camera.GetCamera().Resize(_window->GetViewport().Size);
+            _camera.GetCamera().OnRender(0.f, nullptr);
+        }
+
+        return _isRunning;
     }
 }
 #endif

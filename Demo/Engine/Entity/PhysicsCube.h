@@ -13,7 +13,7 @@ namespace gE
 
     class PhysicsCubeEntity final : public Entity
     {
-        REFLECTABLE_PROTO("PCUB", PhysicsCubeEntity, Entity);
+        REFLECTABLE_PROTO(PhysicsCubeEntity, Entity);
 
     public:
         PhysicsCubeEntity(Window* window, const Reference<Mesh>& mesh, vec3 size, EntityFlags flags = DEFAULT) :

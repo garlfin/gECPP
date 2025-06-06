@@ -54,7 +54,6 @@ struct TypeCompare
 	NODISCARD ALWAYS_INLINE bool operator()(const KEY_T& a, const TYPE_T& b) const;
 };
 
-
 template<class T>
 struct TypeSystem
 {
@@ -95,11 +94,12 @@ struct Type
 {
 	Type() = delete;
 
-	explicit Type(const std::string& name, const char magic[5], const std::string& extension, FactoryFunction<T> factory, UFactoryFunction<T> uFactory, const Type* baseType = nullptr) :
+	explicit Type(const std::string& name, const std::string& extension, FactoryFunction<T> factory, UFactoryFunction<T> uFactory, u8 version = 0, const Type* baseType = nullptr) :
 		Name(name),
-		Magic(magic),
+		Magic(extension),
 		Factory(factory),
 		UFactory(uFactory),
+		Version(version),
 		BaseType(baseType)
 	{
 		Extension.replace_extension(extension);
@@ -119,6 +119,7 @@ struct Type
 	Path Extension;
 	FactoryFunction<T> Factory;
 	UFactoryFunction<T> UFactory;
+	u8 Version;
 	const Type* BaseType;
 };
 
@@ -177,13 +178,13 @@ struct EnumData
 	NODISCARD typename ARR_T::const_iterator At(T t) const;
 };
 
-#define REFLECTABLE_TYPE_PROTO(MAGIC_VAL, TYPE, ...) \
+#define REFLECTABLE_TYPE_PROTO(TYPE, ...) \
 	public: \
 		using THIS_T = TYPE; \
 		static TYPE* Factory(std::istream& in, SETTINGS_T t); \
 		static void UFactory(std::istream& in, SETTINGS_T t, TYPE& result); \
 		const TYPE_T* GetType() const override { return &SType; }; \
-		FORCE_IMPL static inline const TYPE_T SType = TYPE_T::MakeType<TYPE>(MAGIC_VAL, #TYPE, (FactoryFunction<SETTINGS_T>) Factory, (UFactoryFunction<SETTINGS_T>) UFactory __VA_OPT__(,) __VA_ARGS__); \
+		FORCE_IMPL static inline const TYPE_T SType = TYPE_T::MakeType<TYPE>(#TYPE, (FactoryFunction<SETTINGS_T>) Factory, (UFactoryFunction<SETTINGS_T>) UFactory __VA_OPT__(,) __VA_ARGS__); \
 
 #ifdef GE_ENABLE_IMGUI
 	#define REFLECTABLE_ONGUI_PROTO(SUPER) \
@@ -212,8 +213,8 @@ struct EnumData
 	#define REFLECTABLE_NAME_IMPL(TYPE, ...)
 #endif
 
-#define REFLECTABLE_PROTO(MAGIC_VAL, TYPE, SUPER, ...) \
-	REFLECTABLE_TYPE_PROTO(MAGIC_VAL, TYPE, __VA_ARGS__); \
+#define REFLECTABLE_PROTO(TYPE, SUPER, ...) \
+	REFLECTABLE_TYPE_PROTO(TYPE, __VA_ARGS__); \
 	REFLECTABLE_ONGUI_PROTO(SUPER)
 
 #define REFLECTABLE_NOIMPL(SUPER) \

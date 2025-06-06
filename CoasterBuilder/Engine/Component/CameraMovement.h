@@ -10,7 +10,7 @@ namespace Coaster
 {
     class FreeCamMovement : public Behavior
     {
-        SERIALIZABLE_PROTO("FCAM", 0, FreeCamMovement, Behavior);
+        SERIALIZABLE_PROTO(FreeCamMovement, Behavior);
 
     public:
         explicit FreeCamMovement(gE::Entity* owner) : Behavior(owner) {};

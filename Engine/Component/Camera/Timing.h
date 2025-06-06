@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <Core/GUI/Editor/Editor.h>
-
 namespace gE
 {
 	struct CameraTiming

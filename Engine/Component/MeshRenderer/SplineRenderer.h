@@ -28,7 +28,7 @@ namespace gE
 
     class SplineRenderer : public MeshRenderer
     {
-        REFLECTABLE_PROTO("SPLR", SplineRenderer, MeshRenderer);
+        REFLECTABLE_PROTO(SplineRenderer, MeshRenderer);
 
     public:
         SplineRenderer(Entity* owner, const Reference<Mesh>& mesh, const Spline<Dimension::D3D>& spline);

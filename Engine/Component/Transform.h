@@ -27,7 +27,7 @@ namespace gE
 
 	class Transform final : public Component
 	{
-		SERIALIZABLE_PROTO("c_transform", 0, Transform, Component);
+		SERIALIZABLE_PROTO(Transform, Component);
 
 	public:
 		Transform(Entity* o, const TransformData& d);

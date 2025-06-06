@@ -15,7 +15,7 @@
 
 namespace gE
 {
-	inline ICameraSettings FlyCameraSettings
+	inline ICameraSettings PlayerCameraSettings
 	{
 		ClipPlanes(0.1, 100),
 		DEFAULT,
@@ -23,7 +23,7 @@ namespace gE
 
 	class Player : public Entity
 	{
-		REFLECTABLE_PROTO("PLYR", Player, Entity);
+		REFLECTABLE_PROTO(Player, Entity);
 
 	public:
 		explicit Player(Window* window) : Entity(window),
@@ -49,15 +49,15 @@ namespace gE
 
 	class PlayerCamera final : public Entity
 	{
-		REFLECTABLE_PROTO("PCAM", PlayerCamera, Entity);
+		REFLECTABLE_PROTO(PlayerCamera, Entity);
 
 	public:
 		PlayerCamera(Window* window, Player& player) : Entity(window, &player),
-			_camera(this, _target, {{ FlyCameraSettings, window->GetSize() }}, &window->GetCameras()),
-			_target(*this, _camera, { &_tonemap }),
+			_camera(this, _target, {{ PlayerCameraSettings, window->GetSize() }}, &window->GetCameras()),
+			_target(*this, _camera, { &_taa, &_bloom, &_tonemap }),
 			_bloomSettings{ &_physicalCamera },
-			//_taaSettings{ &DefaultPipeline::ColorFormat, &_target.GetVelocity(), &_target.GetPreviousDepth() },
-			//_taa(&_target, &_taaSettings),
+			_taaSettings{ &DefaultPipeline::ColorFormat, &_target.GetVelocity(), &_target.GetPreviousDepth() },
+			_taa(&_target, &_taaSettings),
 			_bloom(&_target, &_bloomSettings),
 			_tonemap(&_target, &_physicalCamera)
 		{
@@ -75,13 +75,13 @@ namespace gE
 
 	private:
 		PerspectiveCamera _camera;
-		VRPipeline::Target2D _target;
+		DefaultPipeline::Target2D _target;
 
 		PostProcess::PhysicalCameraSettings _physicalCamera = DEFAULT;
 		PostProcess::BloomSettings _bloomSettings = DEFAULT;
-		//PostProcess::TAASettings _taaSettings;
+		PostProcess::TAASettings _taaSettings;
 
-		//PostProcess::TAA _taa;
+		PostProcess::TAA _taa;
 		PostProcess::Bloom _bloom;
 		PostProcess::Tonemap _tonemap;
 	};

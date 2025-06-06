@@ -16,7 +16,7 @@ namespace gE
 {
     class MeshRenderer : public Component
     {
-        REFLECTABLE_PROTO("MREN", MeshRenderer, Component);
+        REFLECTABLE_PROTO(MeshRenderer, Component);
 
     public:
         MeshRenderer(Entity* o, const Reference<Mesh>& mesh);
@@ -52,7 +52,7 @@ namespace gE
 
     class IAnimator : public Reflectable<Window*>
     {
-        REFLECTABLE_PROTO("AMTR", IAnimator, Reflectable);
+        REFLECTABLE_PROTO(IAnimator, Reflectable);
 
     public:
         explicit IAnimator(const Reference<Skeleton>&);
@@ -74,7 +74,7 @@ namespace gE
 
     class SimpleAnimator : public IAnimator
     {
-        REFLECTABLE_PROTO("SANM", SimpleAnimator, IAnimator);
+        REFLECTABLE_PROTO(SimpleAnimator, IAnimator);
     public:
         explicit SimpleAnimator(const Reference<Skeleton>& skeleton) : IAnimator(skeleton) {};
 
@@ -90,7 +90,7 @@ namespace gE
 
     class AnimatedMeshRenderer final : public MeshRenderer
     {
-        REFLECTABLE_PROTO("AMRE", AnimatedMeshRenderer, MeshRenderer);
+        REFLECTABLE_PROTO(AnimatedMeshRenderer, MeshRenderer);
 
     public:
         AnimatedMeshRenderer(Entity* owner, IAnimator* animator, const Reference<Mesh>& mesh);

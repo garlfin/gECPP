@@ -34,7 +34,7 @@ namespace GPU
 
 	struct MaterialSlot : public Serializable<>
 	{
-		SERIALIZABLE_PROTO("MAT", 1, MaterialSlot, Serializable);
+		SERIALIZABLE_PROTO(MaterialSlot, Serializable);
 		REFLECTABLE_NAME_PROTO();
 
 	public:
@@ -48,7 +48,7 @@ namespace GPU
 
 	struct VertexField : public Serializable<>
 	{
-		SERIALIZABLE_PROTO_NOHEADER("VFLD", VertexField, Serializable);
+		SERIALIZABLE_PROTO_NOHEADER(VertexField, Serializable);
 		REFLECTABLE_NAME_PROTO();
 
 	public:

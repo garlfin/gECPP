@@ -12,10 +12,12 @@ namespace gE
 {
 	Entity::Entity(Window* window, Entity* parent, LayerMask layers, EntityFlags flags) :
 		Managed(&window->GetEntities(), *this),
-		_window(window), _parent(parent), _flags(flags),
+		_window(window),
+		_parent(parent),
+		_flags(flags),
 		_layers(layers), _transform(this)
 	{
-		if(flags.Static) _layers |= LayerMask::Static;
+		if((bool) (flags & EntityFlags::Static)) _layers |= LayerMask::Static;
 		if(!parent) return;
 
 		_sceneTreeDepth = _parent->_sceneTreeDepth + 1;
@@ -30,7 +32,7 @@ namespace gE
 	void EntityManager::MarkDeletions() const
 	{
 		for(ITER_T* i = _deletionList.GetFirst(); i; i = i->GetNext())
-			(**i)->_flags.Deletion = true;
+			(**i)->_flags |= EntityFlags::Deletion;
 	}
 
 	void Entity::IDeserialize(istream& in, SETTINGS_T s)
@@ -84,7 +86,7 @@ namespace gE
 			ITER_T* end = &entity.Node;
 			for(ITER_T* i = &entity.Node; i && (**i)->_sceneTreeDepth > depth; i = i->GetNext())
 			{
-				(**i)->_flags.Deletion = true;
+				(**i)->_flags |= EntityFlags::Deletion;
 				end = i;
 			}
 
@@ -131,9 +133,15 @@ namespace gE
 		{
 			Component& iter = ***i;
 
-			if(iter.GetOwner().GetFlags().Deletion)
+			if((bool) (iter.GetOwner().GetFlags() & EntityFlags::Deletion))
+			{
 				iter.OnDestroy();
-			else
+				continue;
+			}
+
+		#ifdef GE_ENABLE_EDITOR
+			if((bool)(iter.GetOwner().GetFlags() & EntityFlags::Internal) || GetWindow()->GetEditor()->GetIsRunning())
+		#endif
 				iter.OnUpdate(delta);
 		}
 	}

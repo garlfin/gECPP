@@ -75,7 +75,7 @@ namespace gE
 
     class PerspectiveCamera final : public Camera2D
     {
-        REFLECTABLE_PROTO("PCAM", PerspectiveCamera, Camera2D);
+        REFLECTABLE_PROTO(PerspectiveCamera, Camera2D);
 
     public:
         PerspectiveCamera(Entity*, TARGET_T&, const PerspectiveCameraSettings&, ComponentManager<Camera>* = nullptr);
@@ -114,7 +114,7 @@ namespace gE
 
     class OrthographicCamera final : public Camera2D
     {
-        REFLECTABLE_PROTO("OCAM", OrthographicCamera, Camera2D);
+        REFLECTABLE_PROTO(OrthographicCamera, Camera2D);
 
     public:
         OrthographicCamera(Entity*, TARGET_T&, const OrthographicCameraSettings&, ComponentManager<Camera>* = nullptr);
@@ -130,7 +130,7 @@ namespace gE
 
     class Camera3D final : public Camera
     {
-        REFLECTABLE_PROTO("3CAM", Camera3D, Camera);
+        REFLECTABLE_PROTO(Camera3D, Camera);
 
     public:
         using TARGET_T = RenderTarget<Camera3D>;
@@ -156,7 +156,7 @@ namespace gE
 
     class CameraCube final : public Camera
     {
-        REFLECTABLE_PROTO("CCAM", CameraCube, Camera);
+        REFLECTABLE_PROTO(CameraCube, Camera);
 
     public:
         using TARGET_T = RenderTarget<CameraCube>;
@@ -185,6 +185,8 @@ namespace gE
         using ComponentManager::ComponentManager;
 
         GET_SET(ColorTarget<Camera2D>*, CurrentCamera, _currentCamera);
+
+        void OnRender(float delta, Camera* camera) override;
 
         ~CameraManager() override = default;
 

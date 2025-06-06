@@ -10,15 +10,11 @@
 #include <Entity/Entity.h>
 #include <glm/gtx/string_cast.hpp>
 
-#define SENSITIVITY 0.1f
-#define SPEED_MULTIPLIER 2.f
-#define JUMP_HEIGHT 1.f
-
 namespace gE
 {
     class Movement final : public Behavior
     {
-        SERIALIZABLE_PROTO("movement", 0, Movement, Behavior);
+        SERIALIZABLE_PROTO(Movement, Behavior);
 
     public:
         explicit Movement(Entity* o, CharacterController& controller) :
@@ -63,8 +59,8 @@ namespace gE
 
             if (cursorEnabled) return;
 
-            _rot.y += mouse.GetDelta().x * SENSITIVITY;
-            _rot.x += mouse.GetDelta().y * SENSITIVITY;
+            _rot.y += mouse.GetDelta().x * Sensitivity;
+            _rot.x += mouse.GetDelta().y * Sensitivity;
             _rot.x = std::clamp(_rot.x, -89.9f, 89.9f);
 
             transform.SetRotation(vec3(0, _rot.y * TO_RAD, 0));
@@ -101,7 +97,7 @@ namespace gE
             _controller->SetShape(capsuleShape);
 
             dir *= Speed;
-            if (!IsKeyDown(crouchState) && IsKeyDown(keyboard.GetKey(KeyModifier::LShift))) dir *= SPEED_MULTIPLIER;
+            if (!IsKeyDown(crouchState) && IsKeyDown(keyboard.GetKey(KeyModifier::LShift))) dir *= SpeedMultiplier;
 
             if (grounded) _dir = transform->Rotation * dir;
 
@@ -109,7 +105,7 @@ namespace gE
 
             if (IsKeyDown(keyboard.GetKey(Key::Space)) && grounded)
             {
-                _controller->AddVelocity(vec3(0, std::sqrt(2.f * 9.81 * JUMP_HEIGHT), 0));
+                _controller->AddVelocity(vec3(0, std::sqrt(2.f * 9.81 * JumpHeight), 0));
                 _controller->SetIsGrounded(false);
             }
         }

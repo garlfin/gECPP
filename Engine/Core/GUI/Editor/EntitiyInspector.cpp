@@ -44,7 +44,11 @@ namespace gE::Editor
             if(curDepth > reverseDepth && reverseDepth != -1)
                 continue;
 
-            if(curDepth <= reverseDepth) reverseDepth = -1;
+            if(curDepth <= reverseDepth)
+                reverseDepth = -1;
+
+            if((bool)(entity.GetFlags() & EntityFlags::Internal))
+                continue;
 
             ImGuiTreeNodeFlags flag = GE_EDITOR_HIERARCHY_FLAGS | ImGuiTreeNodeFlags_Selected;
             if(curDepth >= nextDepth || !it->GetNext()) flag |= ImGuiTreeNodeFlags_Leaf;

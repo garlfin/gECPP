@@ -16,7 +16,7 @@ namespace gE
 {
     struct Mesh : public Asset
     {
-        SERIALIZABLE_PROTO("MESH", 2, Mesh, Asset);
+        SERIALIZABLE_PROTO(Mesh, Asset);
         REFLECTABLE_NAME_PROTO();
 
     public:

@@ -9,6 +9,7 @@
 #include <unordered_map>
 #include <Core/Array.h>
 #include <Core/Binary.h>
+#include <Core/Log.h>
 #include <Core/Macro.h>
 #include <Core/UUID.h>
 #include <Core/Math/Math.h>
@@ -69,16 +70,15 @@ public:
 	~Serializable() override = default;
 };
 
-// checks for "gE\\0\0" for backwards compatability purposes.
-// new magics are the same as the class name
 #define SERIALIZABLE_CHECK_HEADER() \
-	char magic[4]; \
+	char magic[5] {}; \
 	Read<char>(in, 4, magic); \
-	GE_ASSERTM(strcmpb(magic, SType.Magic.c_str(), 4), "UNEXPECTED MAGIC!") \
+	if(!strcmpb(magic, SType.Magic.c_str(), 4))\
+		gE::Log::Write(std::format("Expected {}, got {} while loading {}!\n", SType.Magic.substr(0, 4), magic, SType.Name)); \
 	_version = Read<u8>(in);
 
-#define SERIALIZABLE_PROTO_ABSTRACT(MAGIC_VAL, VERSION_VAL, TYPE, SUPER_T, ...) \
-	REFLECTABLE_PROTO(MAGIC_VAL, TYPE, SUPER_T, __VA_ARGS__); \
+#define SERIALIZABLE_PROTO_ABSTRACT(TYPE, SUPER_T, ...) \
+	REFLECTABLE_PROTO(TYPE, SUPER_T, __VA_ARGS__); \
 	public: \
 		typedef SUPER_T SUPER; \
 		typedef SUPER::SETTINGS_T SETTINGS_T;\
@@ -89,15 +89,15 @@ public:
 	private: \
 		void IDeserialize(istream& in, SETTINGS_T s); \
 		void ISerialize(ostream& out) const; \
-		u8 _version = VERSION_VAL;
+		u8 _version = SType.Version;
 
-#define SERIALIZABLE_PROTO(MAGIC_VAL, VERSION_VAL, TYPE, SUPER_T, ...) \
-	SERIALIZABLE_PROTO_ABSTRACT(MAGIC_VAL, VERSION_VAL, TYPE, SUPER_T, __VA_ARGS__); \
+#define SERIALIZABLE_PROTO(TYPE, SUPER_T, ...) \
+	SERIALIZABLE_PROTO_ABSTRACT(TYPE, SUPER_T, __VA_ARGS__); \
 	public: \
 		inline void Deserialize(istream& in, SETTINGS_T s) override { PlacementNew(*this, in, s); } \
 	DEFAULT_OPERATOR_CM(TYPE)
 
-#define SERIALIZABLE_PROTO_NOHEADER(MAGIC_VAL, TYPE, SUPER_T, ...) \
+#define SERIALIZABLE_PROTO_NOHEADER(TYPE, SUPER_T, ...) \
 	public: \
 		typedef SUPER_T SUPER; \
 		typedef SUPER::SETTINGS_T SETTINGS_T;\
@@ -111,7 +111,7 @@ public:
 		void IDeserialize(istream& in, SETTINGS_T s); \
 		void ISerialize(ostream& out) const; \
 		u8 _version = 0; \
-		REFLECTABLE_PROTO(MAGIC_VAL, TYPE, SUPER_T, __VA_ARGS__)
+		REFLECTABLE_PROTO(TYPE, SUPER_T, __VA_ARGS__)
 
 template<class T, class S>
 concept is_serializable_in = requires(T t, S s, std::istream& i)

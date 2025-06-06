@@ -73,7 +73,7 @@ namespace gE
 
     struct Frame : public Serializable<const AnimationChannel&>
     {
-        SERIALIZABLE_PROTO_NOHEADER("FRM", Frame, Serializable);
+        SERIALIZABLE_PROTO_NOHEADER(Frame, Serializable);
         REFLECTABLE_NAME_PROTO();
 
     public:
@@ -87,7 +87,7 @@ namespace gE
 
     struct BoneReference : public Serializable<Skeleton*>
     {
-        SERIALIZABLE_PROTO("BREF", 1, BoneReference, Serializable);
+        SERIALIZABLE_PROTO(BoneReference, Serializable);
         REFLECTABLE_NAME_PROTO();
 
     public:
@@ -106,7 +106,7 @@ namespace gE
 
     struct Bone : public Serializable<Skeleton&>
     {
-        SERIALIZABLE_PROTO("BONE", 1, Bone, Serializable);
+        SERIALIZABLE_PROTO(Bone, Serializable);
         REFLECTABLE_NAME_PROTO();
 
     public:
@@ -122,7 +122,7 @@ namespace gE
 
     struct Skeleton final : public Asset
     {
-        SERIALIZABLE_PROTO("SKEL", 1, Skeleton, Asset);
+        SERIALIZABLE_PROTO(Skeleton, Asset);
         REFLECTABLE_NAME_PROTO();
 
     public:
@@ -138,7 +138,7 @@ namespace gE
 
     struct AnimationChannel final : public Serializable<Skeleton*>
     {
-        SERIALIZABLE_PROTO("ABNE", 1, AnimationChannel, Serializable);
+        SERIALIZABLE_PROTO(AnimationChannel, Serializable);
         REFLECTABLE_NAME_PROTO();
 
     public:
@@ -162,7 +162,7 @@ namespace gE
 
     struct Animation : public Asset
     {
-        SERIALIZABLE_PROTO("ANIM", 1, Animation, Asset);
+        SERIALIZABLE_PROTO(Animation, Asset);
         REFLECTABLE_NAME_PROTO();
 
     public:

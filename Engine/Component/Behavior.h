@@ -10,7 +10,7 @@ namespace gE
 {
 	class Behavior : public Component
 	{
-		SERIALIZABLE_PROTO_ABSTRACT("BHVR", 0, Behavior, Component);
+		SERIALIZABLE_PROTO_ABSTRACT(Behavior, Component);
 
 	public:
 		explicit Behavior(Entity* o);

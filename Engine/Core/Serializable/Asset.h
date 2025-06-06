@@ -65,7 +65,7 @@ namespace gE
 
     struct FileInfo final : public Serializable<>
     {
-        SERIALIZABLE_PROTO_NOHEADER("INFO", FileInfo, Serializable);
+        SERIALIZABLE_PROTO_NOHEADER(FileInfo, Serializable);
 
     public:
         FileInfo(const Path& path, UUID uuid, size_t offset) : Path(path), UUID(uuid), Offset(offset) {};
@@ -114,7 +114,7 @@ namespace gE
 {
     class File final : public Serializable<const FileLoadArgs&>
     {
-        SERIALIZABLE_PROTO_ABSTRACT("FILE", 0, File, Serializable);
+        SERIALIZABLE_PROTO_ABSTRACT(File, Serializable);
         REFLECTABLE_NAME_PROTO();
 
         OPERATOR_MOVE_PROTO(File);
@@ -171,7 +171,7 @@ namespace gE
 
     class Bank final : public Serializable<const BankLoadArgs&>
     {
-        SERIALIZABLE_PROTO("BANK", 0, Bank, Serializable);
+        SERIALIZABLE_PROTO(Bank, Serializable);
         REFLECTABLE_NAME_PROTO();
 
     public:

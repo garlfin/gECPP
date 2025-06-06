@@ -29,7 +29,7 @@ namespace gE
 {
   	class Entity : public Serializable<const EntityCreationSettings&>, public Managed<Entity>
 	{
-  		SERIALIZABLE_PROTO_ABSTRACT("entity", 0, Entity, Serializable);
+  		SERIALIZABLE_PROTO_ABSTRACT(Entity, Serializable);
   		REFLECTABLE_NAME_PROTO();
 
 	public:

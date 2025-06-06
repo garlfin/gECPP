@@ -11,7 +11,7 @@ namespace gE
 {
     class AnimatedMeshEntity : public Entity
     {
-        REFLECTABLE_PROTO("STME", AnimatedMeshEntity, Entity);
+        REFLECTABLE_PROTO(AnimatedMeshEntity, Entity);
 
     public:
         AnimatedMeshEntity(Window* window, const Reference<Mesh>& mesh, Entity* parent = nullptr) : Entity(window, parent),

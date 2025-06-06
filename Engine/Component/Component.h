@@ -16,7 +16,7 @@ namespace gE
 {
 	class Component : public Serializable<Entity*>, public Managed<Component>
 	{
-		SERIALIZABLE_PROTO_ABSTRACT("component", 0, Component, Serializable);
+		SERIALIZABLE_PROTO_ABSTRACT(Component, Serializable);
 
 	public:
 		explicit Component(Entity* owner, IComponentManager* = nullptr);

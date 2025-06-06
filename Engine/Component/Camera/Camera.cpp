@@ -65,7 +65,7 @@ namespace gE
         bool isFirst = _settings.Timing.GetIsFirst();
         bool shouldTick = _settings.Timing.Tick();
 
-        if (!isFirst && (!shouldTick || GetOwner().GetFlags().Static)) return;
+        if (!isFirst && (!shouldTick || (bool) (GetOwner().GetFlags() & EntityFlags::Static))) return;
 
         // Limits "recursion"
         if (!_target->Setup(delta, callingCamera)) return;
@@ -278,5 +278,10 @@ namespace gE
         const vec3 pos = GetOwner().GetTransform().GetGlobalTransform().Position;
         for (u8 i = 0; i < 6; i++)
             cam.View[i] = lookAt(pos, pos + ForwardDirs[i], UpDirs[i]);
+    }
+
+    void CameraManager::OnRender(float delta, Camera* camera)
+    {
+        _currentCamera->GetCamera().OnRender(delta, nullptr);
     }
 }

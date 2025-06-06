@@ -4,9 +4,8 @@
 
 #pragma once
 
-#include <Prototype.h>
 #include <Core/Macro.h>
-#include <Core/Serializable/Serializable.h>
+#include <Entity/EditorCamera.h>
 
 #include "AssetInspector.h"
 #include "EntityInspector.h"
@@ -32,6 +31,7 @@ namespace gE::Editor
         explicit Editor(gE::Window* window);
 
         void OnGUI();
+        bool OnRender();
 
         GET_SET(bool, IsOpen, _isOpen);
         GET_SET(bool, IsRunning, _isRunning);
@@ -40,12 +40,15 @@ namespace gE::Editor
     private:
         gE::Window* _window = nullptr;
         Entity* _activeEntity = nullptr;
+        API::Texture* _viewportTexture = nullptr;
 
         EditorLog _log;
         AssetInspector _assetInspector;
         AssetManager _assetManager;
         EntityInspector _entityInspector;
         EntityHierarchy _entityHierarchy;
+
+        EditorCamera _camera;
 
         bool _isOpen = false;
         bool _isRunning = true;

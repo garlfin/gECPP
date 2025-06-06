@@ -27,7 +27,7 @@ namespace gE
 
 	class DirectionalLight : public Light
 	{
-		REFLECTABLE_TYPE_PROTO("DLIT", DirectionalLight); // Die lit reference?!
+		REFLECTABLE_TYPE_PROTO(DirectionalLight); // Die lit reference?!
 
 	public:
 		DirectionalLight(Window*, u16 size, float scale, const quat& = identity<quat>());
