@@ -40,3 +40,15 @@ mat4 JitterMat(vec2 offset)
     jitter[2].xy = offset;
     return jitter;
 }
+
+vec4 FixNan(vec4 color)
+{
+    vec4 result;
+
+    result.r = isinf(color.r) || isnan(color.r) ? 0.0 : color.r;
+    result.g = isinf(color.g) || isnan(color.g) ? 0.0 : color.g;
+    result.b = isinf(color.b) || isnan(color.b) ? 0.0 : color.b;
+    result.a = isinf(color.a) || isnan(color.a) ? 0.0 : color.a;
+
+    return result;
+}

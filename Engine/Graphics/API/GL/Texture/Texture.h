@@ -60,7 +60,6 @@ namespace GL
 		NODISCARD ALWAYS_INLINE Size1D GetSize(u8 mip = 0) const { return std::max<Size1D>(Size >> mip, 1); }
 
 		void CopyFrom(const GL::Texture&) override;
-		void UpdateParameters() override { GL::Texture::UpdateParameters(); }
 	};
 
 	class Texture2D final : protected GPU::Texture2D, public Texture
@@ -75,7 +74,6 @@ namespace GL
 		NODISCARD ALWAYS_INLINE Size2D GetSize(u8 mip = 0) const { return max(Size >> u32vec2(mip), u32vec2(1)); }
 
 		void CopyFrom(const GL::Texture&) override;
-		void UpdateParameters() override { GL::Texture::UpdateParameters(); }
 	};
 
 	class Texture2DArray final : protected GPU::Texture2DArray, public Texture
@@ -88,7 +86,6 @@ namespace GL
 		NODISCARD ALWAYS_INLINE Size3D GetSize(u8 mip = 0) const { return Size3D(max(Size2D(Size) >> Size2D(mip), Size2D(1)), Size.z); }
 
 		void CopyFrom(const GL::Texture&) override;
-		void UpdateParameters() override { GL::Texture::UpdateParameters(); }
 	};
 
 	class Texture3D final : protected GPU::Texture3D, public Texture
@@ -101,7 +98,6 @@ namespace GL
 		NODISCARD ALWAYS_INLINE Size3D GetSize(u8 mip = 0) const { return max(Size >> u32vec3(mip), u32vec3(1)); }
 
 		void CopyFrom(const GL::Texture&) override;
-		void UpdateParameters() override { GL::Texture::UpdateParameters(); }
 	};
 
 	class TextureCube final : protected GPU::TextureCube, public Texture
@@ -114,6 +110,5 @@ namespace GL
 		NODISCARD ALWAYS_INLINE Size1D GetSize(u8 mip = 0) const { return MAX(Size >> mip, 1); }
 
 		void CopyFrom(const GL::Texture&) override;
-		void UpdateParameters() override { GL::Texture::UpdateParameters(); }
 	};
 }

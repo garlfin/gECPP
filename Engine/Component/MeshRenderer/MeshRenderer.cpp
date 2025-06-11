@@ -263,7 +263,7 @@ namespace gE
 
 	bool AnimatedMeshRenderer::DragDropAcceptor(const Reference<Asset>& asset, NoUserData userData)
 	{
-		return AssetDragDropAcceptor<Mesh>(asset, userData) && ((Mesh*) asset.GetPointer())->Skeleton;
+		return AssetDragDropAcceptor<Mesh>(asset, userData);// && ((Mesh*) asset.GetPointer())->Skeleton;
 	}
 
 	void AnimatedMeshRenderer::AddPreviousPositionField(GPU::VAO& vao, size_t vertexCount)

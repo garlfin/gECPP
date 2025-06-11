@@ -31,8 +31,13 @@ struct PBRMaterialData
 {
     vec2 Scale;
     vec2 Offset;
+
     float ParallaxDepth;
     float NormalStrength;
+    float AOStrength;
+
+    uint sRGB;
+
     BINDLESS_TEXTURE(sampler2D, Albedo);
     BINDLESS_TEXTURE(sampler2D, ARMD);
     BINDLESS_TEXTURE(sampler2D, Normal);
@@ -86,8 +91,10 @@ void main()
 
 #ifdef EXT_BINDLESS
     vec3 albedo = texture(material.Albedo, vert.UV).rgb;
-    vec3 armd = texture(material.ARMD, vert.UV * vec2(1, -1)).rgb;
+    vec3 armd = texture(material.ARMD, vert.UV).rgb;
+    if((material.sRGB & 1) == 1) armd = pow(armd, vec3(1.0 / 2.2));
     vec3 normal = texture(material.Normal, vert.UV).rgb;
+    if((material.sRGB >> 8) == 1) armd = pow(armd, vec3(1.0 / 2.2));
 #else
     vec3 albedo = vec3(1.f);
     vec3 armd = vec3(1.f);
@@ -111,10 +118,10 @@ void main()
     PBRSample pbrSample = ImportanceSample(vert, frag);
     AOSettings aoSettings = AOSettings(8, 0.2, 0.5, 0.5);
 
-#ifdef EXT_BINDLESS
-    float ao = SS_AO(aoSettings, vert);
+#if defined(EXT_BINDLESS) && defined(ENABLE_SSAO)
+    float ao = SS_AO(aoSettings, vert) * SS_GetAOStrength(armd.r, material.AOStrength);
 #else
-    float ao = 1.0;
+    float ao = SS_GetAOStrength(armd.r, material.AOStrength);
 #endif
 
     vec3 ambient = SH_SampleProbe(Lighting.SkyboxIrradiance, frag.Normal).rgb / PI;
@@ -134,6 +141,7 @@ void main()
     }
 
     FragColor.a = 1.0;
+    FragColor = FixNan(FragColor);
 
     Velocity = PerspectiveToUV(VertexIn.PreviousNDC);
     Velocity.xy -= PerspectiveToUV(VertexIn.CurrentNDC).xy;

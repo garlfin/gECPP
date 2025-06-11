@@ -36,11 +36,13 @@ namespace gE::Editor
         GET_SET(bool, IsOpen, _isOpen);
         GET_SET(bool, IsRunning, _isRunning);
         GET_CONST(gE::Window&, Window, *_window);
+        GET_CONST(const Viewport&, Viewport, _viewport);
 
     private:
         gE::Window* _window = nullptr;
         Entity* _activeEntity = nullptr;
         API::Texture* _viewportTexture = nullptr;
+        Viewport _viewport;
 
         EditorLog _log;
         AssetInspector _assetInspector;

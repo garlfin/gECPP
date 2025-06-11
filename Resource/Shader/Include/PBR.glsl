@@ -228,6 +228,7 @@ float FalloffPoint(float distance, float maxDistance)
 
 vec3 FresnelSchlick(vec3 f0, float nDotV)
 {
+    nDotV = saturate(nDotV);
     return f0 + (1.0 - f0) * pow(2.0, (-5.55473 * nDotV - 6.98316) * nDotV);
 }
 

@@ -66,6 +66,7 @@ SSRay CreateSSRayLinear(Ray, SSLinearRaySettings);
 float SS_AO(AOSettings, Vertex);
 #endif
 
+
 // Helper Functions
 vec3 SS_WorldToUV(vec3);
 vec3 SS_WorldToView(vec3);
@@ -79,6 +80,7 @@ float LengthSquared(vec3 v) { return dot(v, v); }
 float SS_GetDepthWithBias(float d, float bias) { return d + min(RAY_MAX_BIAS, d * bias); }
 float SS_CorrectDepth(vec2, float);
 float SS_CorrectDepth(float near, float far, float lerp) { return SS_CorrectDepth(vec2(near, far), lerp); }
+float SS_GetAOStrength(float ao, float strength);
 
 // Implementation
 #if defined(EXT_BINDLESS) && defined(FRAGMENT_SHADER)
@@ -254,7 +256,7 @@ float SS_ComputeAO(AOSettingsInternal settings, Vertex vert)
         float delta = uv.z - SS_GetDepthWithBias(textureLod(Camera.Depth, uv.xy, 0.0).x, SS_BIAS);
         if(delta > 0 && delta < settings._base.Thickness) ao += 1.0;
     }
-    return 1.0 - ao * settings._base.Intensity / settings._base.Iterations;
+    return SS_GetAOStrength(1.0 - ao / settings._base.Iterations, settings._base.Intensity);
 }
 
 float SS_AO(AOSettings s, Vertex vert)
@@ -327,3 +329,11 @@ SSRay CreateSSRayLinear(Ray ray, SSLinearRaySettings settings)
     return result;
 }
 #endif
+
+
+float SS_GetAOStrength(float ao, float strength)
+{
+    if(strength == 0)
+    return 1.0;
+    return pow(ao, strength);
+}

@@ -11,7 +11,13 @@ namespace GL
 		APIObject(window), _settings(&settings), _target(target)
 	{
 		glCreateTextures(target, 1, &ID);
-		UpdateParameters();
+
+		glTextureParameteri(ID, GL_TEXTURE_MIN_FILTER, (GLint) _settings->Filter + (_settings->MipCount == 1 ? 0 : 0x102));
+		glTextureParameteri(ID, GL_TEXTURE_MAG_FILTER, (GLint) _settings->Filter);
+		glTextureParameteri(ID, GL_TEXTURE_WRAP_S, (GLint) _settings->WrapMode);
+		glTextureParameteri(ID, GL_TEXTURE_WRAP_T, (GLint) _settings->WrapMode);
+		glTextureParameteri(ID, GL_TEXTURE_WRAP_R, (GLint) _settings->WrapMode);
+		glTextureParameteri(ID, GL_TEXTURE_MAX_ANISOTROPY, GE_ANISOTROPY_COUNT);
 	}
 
 	handle Texture::GetHandle() const
@@ -25,22 +31,6 @@ namespace GL
 		glMakeTextureHandleResidentARB(_handle);
 
 		return _handle;
-	}
-
-	void Texture::UpdateParameters() const
-	{
-		glTextureParameteri(ID, GL_TEXTURE_MIN_FILTER, (GLint) _settings->Filter + (_settings->MipCount == 1 ? 0 : 0x102));
-		glTextureParameteri(ID, GL_TEXTURE_MAG_FILTER, (GLint) _settings->Filter);
-		glTextureParameteri(ID, GL_TEXTURE_WRAP_S, (GLint) _settings->WrapMode);
-		glTextureParameteri(ID, GL_TEXTURE_WRAP_T, (GLint) _settings->WrapMode);
-
-		// if(WrapMode == WrapMode::Border)
-		//	glTextureParameterfv(ID, GL_TEXTURE_BORDER_COLOR, WhiteBorderColor);
-
-		if(_target == GL_TEXTURE_CUBE_MAP || _target == GL_TEXTURE_3D)
-			glTextureParameteri(ID, GL_TEXTURE_WRAP_R, (GLint) _settings->WrapMode);
-		else if (_target == GL_TEXTURE_2D)
-			glTextureParameteri(ID, GL_TEXTURE_MAX_ANISOTROPY, GE_ANISOTROPY_COUNT);
 	}
 
 	Texture::~Texture()

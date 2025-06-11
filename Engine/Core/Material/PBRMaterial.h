@@ -15,16 +15,21 @@
 
 namespace GPU
 {
-	struct PBRMaterial
+	struct alignas(64) PBRMaterial
 	{
 		vec2 Scale;
 		vec2 Offset;
+
 		float ParallaxDepth;
 		float NormalStrength;
+		float AOStrength;
 
-		handle Albedo = DEFAULT;
-		handle ARMD = DEFAULT;
-		handle Normal = DEFAULT;
+		bool ARMDsRGB;
+		bool NormalsRGB;
+
+		handle Albedo;
+		handle ARMD;
+		handle Normal;
 	};
 }
 
@@ -38,8 +43,13 @@ namespace gE
 
 		vec2 Scale = vec2(10.f);
 		vec2 Offset = vec2(0.f);
+
 		float ParallaxDepth = 0.5f;
 		float NormalStrength = 1.f;
+		float AOStrength = 0.f;
+
+		bool ARMDsRGB;
+		bool NormalsRGB;
 
 	#ifdef GE_ENABLE_IMGUI
 		void OnEditorGUI(u8 depth);

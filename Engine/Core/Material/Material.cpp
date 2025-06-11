@@ -51,8 +51,13 @@ namespace gE
 		data.Normal = _settings.Normal->GetHandle();
 		data.Scale = _settings.Scale;
 		data.Offset = _settings.Offset;
-		data.NormalStrength = _settings.NormalStrength;
+
 		data.ParallaxDepth = _settings.ParallaxDepth;
+		data.NormalStrength = _settings.NormalStrength;
+		data.AOStrength = _settings.AOStrength;
+
+		data.NormalsRGB = _settings.NormalsRGB;
+		data.ARMDsRGB = _settings.ARMDsRGB;
 	}
 
 	void PBRMaterial::FlushMaterialData(size_t size) const
@@ -67,6 +72,13 @@ namespace gE
 		DrawField(ScalarField<float>{ "Offset" }, Offset, depth);
 		DrawField(ScalarField{ "Parllax Depth", "", 0.f, 1.f, FLT_EPSILON, ScalarViewMode::Slider }, ParallaxDepth, depth);
 		DrawField(ScalarField{ "Normal Map Strength", "", 0.f, 1.f, FLT_EPSILON, ScalarViewMode::Slider }, NormalStrength, depth);
+		DrawField(ScalarField{ "AO Strength", "", 0.f, 5.f, FLT_EPSILON, ScalarViewMode::Slider }, AOStrength, depth);
+
+		DrawField(AssetDragDropField<API::Texture2D>{ "Albedo" }, Albedo, depth);
+		DrawField(Field{"Normal sRGB Color Space"}, NormalsRGB, depth);
+		DrawField(AssetDragDropField<API::Texture2D>{ "Normal" }, Normal, depth);
+		DrawField(Field{"ARMD sRGB Color Space"}, ARMDsRGB, depth);
+		DrawField(AssetDragDropField<API::Texture2D>{ "ARMD" }, ARMD, depth);
 	}
 #endif
 

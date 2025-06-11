@@ -112,11 +112,15 @@ namespace gE::Editor
 
         _loading.Mutex.lock();
         if(_loading.Mode == LoadAssetMode::ImportTexture)
+        {
             for(const Path& path : _loading.Paths)
                 assetManager.AddFile(PVR::ReadAsFile(&GetWindow(), path));
+            _loading.Paths.clear();
+        }
         else if(_loading.Mode == LoadAssetMode::ImportMesh)
             ImGui::OpenPopup("GLTF Import Settings");
         else if(_loading.Mode == LoadAssetMode::LoadFile)
+        {
             for(const Path& path : _loading.Paths)
             {
                 const Path extension = path.extension();
@@ -125,6 +129,8 @@ namespace gE::Editor
                 else if(const Type<gE::Window*>* type = TypeSystem<gE::Window*>::GetTypeInfoFromExtension(extension))
                     assetManager.AddFile(File(&GetWindow(), path, type))->Load();
             }
+            _loading.Paths.clear();
+        }
         _loading.Mode = LoadAssetMode::None;
         _loading.Mutex.unlock();
     }
@@ -214,19 +220,25 @@ namespace gE::Editor
         {
             _gltfImportSettings.OnEditorGUI(0);
 
+
             if(ImGui::Button("OK"))
             {
+                _loading.Mutex.lock();
+
                 Array<File> files;
                 for(const Path& path : _loading.Paths)
                 {
                     Model::ReadGLTFAsFile(&GetWindow(), path, _gltfImportSettings, files);
                     for(File& file : files)
                         assetManager.AddFile(std::move(file));
+
                 }
                 ImGui::CloseCurrentPopup();
+
+                _loading.Mutex.unlock();
+                _loading.Paths.clear();
             }
             ImGui::EndPopup();
         }
-
     }
 }

@@ -96,13 +96,14 @@ namespace gE::Editor
         ImGui::DockSpaceOverViewport(0, nullptr);
 
         ImGui::SetNextWindowSizeConstraints(ImVec2(256, 256), ImVec2(FLT_MAX, FLT_MAX));
-        ImGui::Begin("TopBar", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar);
+        ImGui::Begin("Viewport", nullptr);
 
         if(ImGui::Button(_isRunning ? "Pause" : "Play"))
             _isRunning = !_isRunning;
 
-        const Size2D size = (Size2D) ImGui::GetContentRegionAvail();
-        _window->SetViewport(Viewport(size));
+        _viewport = Viewport((Size2D) ImGui::GetContentRegionAvail(), (Size2D) ImGui::GetWindowPos());
+
+        _window->SetViewport(Viewport(_viewport.Size));
 
         ImGui::Image((ImTextureID) _viewportTexture, ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
         ImGui::End();

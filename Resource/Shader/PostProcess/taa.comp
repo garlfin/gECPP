@@ -103,6 +103,11 @@ void main()
     imageStore(ColorOut, texel, vec4(color, currentColor.a));
 #else
     vec4 color = clamp(texture(ColorIn, uv), vec4(0.0), vec4(vec3(TAA_CLAMP_MAX), 1.0));
+
+#ifdef NAN_KILLER
+    color = FixNan(color);
+#endif
+
     imageStore(ColorOut, texel, color);
 #endif
 }
