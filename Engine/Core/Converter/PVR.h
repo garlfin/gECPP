@@ -26,7 +26,8 @@ namespace gE::PVR
         RGB8 = 2260630272894834,
         RGBA8 = 7267626108080808,
         RGB32F = 9042521072232306,
-        RGB16F = 4521260539340658
+        RGB16F = 4521260539340658,
+        RGBU8 = 2260630272894834
     };
 
     enum class ColorSpace : u32
@@ -47,8 +48,7 @@ namespace gE::PVR
         Flags Flags;
         PixelFormat Format;
         ColorSpace ColorSpace;
-        u32vec2 Size;
-        uint32_t Depth;
+        u32vec3 Size;
         uint32_t Surfaces;
         uint32_t Faces;
         uint32_t MipCount;

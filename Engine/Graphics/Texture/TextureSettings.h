@@ -63,7 +63,7 @@ namespace GPU
 	public:
 		TextureData(GLenum, GLenum, CompressionScheme, u8, Array<u8>&&);
 
-		GLenum PixelFormat = GL_RGB;
+		GLenum PixelFormat = GL_RGB_INTEGER;
 		GLenum PixelType = GL_UNSIGNED_BYTE;
 		CompressionScheme Scheme = { 1, 1 };
 		u8 MipCount = 0;

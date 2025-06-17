@@ -52,6 +52,9 @@ namespace gE::PostProcess
 
         // Manual
         float Exposure = 0.6f;
+
+    	// LUT
+    	Reference<API::Texture3D> LUT;
     };
 
 	inline float PhysicalCameraSettings::EV100(float aperture, float shutter, float ISO)
@@ -94,5 +97,7 @@ namespace gE::PostProcess
 		}
 
 		DrawField<const float>(ScalarField<float>{ "Exposure" }, Exposure, depth);
+
+		DrawField(AssetDragDropField<API::Texture3D>{ "LUT" }, LUT, depth);
 	});
 };

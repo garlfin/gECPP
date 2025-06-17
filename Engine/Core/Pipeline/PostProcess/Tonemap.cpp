@@ -10,7 +10,6 @@ namespace gE::PostProcess
 {
 	bool AutoExposure::RenderPass(GL::Texture2D& in, GL::Texture2D& out)
 	{
-
 		return false;
 	}
 
@@ -27,6 +26,10 @@ namespace gE::PostProcess
 
 		in.Bind(0, GL_READ_ONLY);
 		out.Bind(1, GL_WRITE_ONLY);
+
+		shader.SetUniform(1, (bool) GetSettings().LUT);
+		if(GetSettings().LUT)
+			shader.SetUniform(2, GetSettings().LUT, 0);
 
 		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 		GetWindow().GetTonemapShader().Dispatch(DIV_CEIL_T(in.GetSize(), TONEMAP_GROUP_SIZE, Size2D));

@@ -6,6 +6,8 @@
 
 // IO
 layout(location = 0) uniform float Exposure;
+layout(location = 1) uniform bool HasLUT;
+layout(location = 2) uniform sampler3D LUT;
 
 layout(binding = 0, PIPELINE_COLOR_FORMAT) restrict readonly uniform image2D ColorIn;
 layout(binding = 1, PIPELINE_COLOR_FORMAT) restrict writeonly uniform image2D ColorOut;
@@ -30,6 +32,12 @@ void main()
 #ifdef VR
     color.rgb = pow(color.rgb, vec3(2.2));
 #endif
+
+    color.rgb = saturate(color.rgb);
+    if(HasLUT)
+    {
+        color.rgb = texture(LUT, color.rbg).rgb;
+    }
 
     imageStore(ColorOut, texel, color);
 }

@@ -33,6 +33,11 @@ namespace gE
         );
 
         void Play() const;
+        void Stop() const;
+
+        void SetUniform(std::string_view, float) const;
+        void SetUniform(std::string_view, i32) const;
+        void SetUniform(std::string_view, std::string_view) const;
 
         ~Sound();
 

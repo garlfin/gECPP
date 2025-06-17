@@ -34,7 +34,8 @@ namespace gE
         void OnInit() override
         {
             GetWindow().GetMouse().SetIsEnabled(false);
-            _testSound = GetWindow().GetSounds().GetSound("S1E1 Title");
+            _testSound = GetWindow().GetSounds().GetSound("event:/S1E1 Title");
+            _testSound.Play();
         }
 
         void OnUpdate(float delta) override
@@ -53,6 +54,11 @@ namespace gE
             {
                 mouse.SetIsEnabled(!cursorEnabled);
                 mouse.SetPosition(GetWindow().GetSize() / 2u);
+            }
+
+            if(keyboard.GetKey(Key::L) == KeyState::Pressed)
+            {
+                _testSound.SetUniform("parameter:/FinishLoad", 1);
             }
 
             if(GetWindow().GetVREnabled())

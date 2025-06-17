@@ -23,6 +23,26 @@ namespace gE
         FMOD_Studio_EventInstance_Start(_instance);
     }
 
+    void Sound::Stop() const
+    {
+        FMOD_Studio_EventInstance_Stop(_instance, FMOD_STUDIO_STOP_ALLOWFADEOUT);
+    }
+
+    void Sound::SetUniform(std::string_view name, float value) const
+    {
+        FMOD_Studio_EventInstance_SetParameterByName(_instance, name.cbegin(), value, false);
+    }
+
+    void Sound::SetUniform(std::string_view name, i32 value) const
+    {
+        FMOD_Studio_EventInstance_SetParameterByName(_instance, name.cbegin(), value, false);
+    }
+
+    void Sound::SetUniform(std::string_view name, std::string_view value) const
+    {
+        FMOD_Studio_EventInstance_SetParameterByNameWithLabel(_instance, name.cbegin(), value.cbegin(), false);
+    }
+
     Sound::~Sound()
     {
         FMOD_Studio_EventInstance_Release(_instance);
@@ -54,6 +74,12 @@ namespace gE
     void SoundManager::LoadBank(const Path& path)
     {
         FMOD_STUDIO_BANK* _loadedBank;
+
+        Path strBankPath = path;
+        strBankPath.replace_extension(".strings.bank");
+        if(FMOD_Studio_System_LoadBankFile(_system, strBankPath.string().c_str(), FMOD_STUDIO_LOAD_BANK_NORMAL, &_loadedBank) != FMOD_OK)
+            Log::WriteLine("Failed to strings bank \"{}\"", strBankPath.string());
+
         if(FMOD_Studio_System_LoadBankFile(_system, path.string().c_str(), FMOD_STUDIO_LOAD_BANK_NORMAL, &_loadedBank) != FMOD_OK)
             Log::WriteLine("Failed to load bank \"{}\"", path.string());
 
