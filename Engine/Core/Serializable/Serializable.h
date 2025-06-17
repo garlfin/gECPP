@@ -74,7 +74,7 @@ public:
 	char magic[5] {}; \
 	Read<char>(in, 4, magic); \
 	if(!strcmpb(magic, SType.Magic.c_str(), 4))\
-		gE::Log::Write(std::format("Expected {}, got {} while loading {}!\n", SType.Magic.substr(0, 4), magic, SType.Name)); \
+		gE::Log::Write("Expected {}, got {} while loading {}!\n", SType.Magic.substr(0, 4), magic, SType.Name); \
 	_version = Read<u8>(in);
 
 #define SERIALIZABLE_PROTO_ABSTRACT(TYPE, SUPER_T, ...) \

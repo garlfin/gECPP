@@ -329,6 +329,8 @@ void Window::OnRender(float delta)
 	Transforms.OnUpdate(delta); // Updates Model Matrices
 	Transforms.OnRender(delta, nullptr); // Resets flag
 
+	Sounds.OnUpdate(delta);
+
 	if(!Editor || Editor->OnRender())
 		Cameras.OnRender(delta, nullptr);
 

@@ -108,4 +108,6 @@ void DemoWindow::OnInit()
 
 	Cubemaps->LoadSkybox(("Resource/Texture/sky.pvr"));
 	InitVoxelReflections();
+
+	Sounds.LoadBank("Resource/Sound/Master.bank");
 }

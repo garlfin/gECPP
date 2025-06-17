@@ -34,6 +34,7 @@ namespace gE
         void OnInit() override
         {
             GetWindow().GetMouse().SetIsEnabled(false);
+            _testSound = GetWindow().GetSounds().GetSound("S1E1 Title");
         }
 
         void OnUpdate(float delta) override
@@ -111,6 +112,7 @@ namespace gE
         }
 
     private:
+        Sound _testSound;
         vec3 _rot = DEFAULT;
         RelativePointer<CharacterController> _controller;
         Entity* _camera = DEFAULT;
