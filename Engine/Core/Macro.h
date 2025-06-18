@@ -24,9 +24,6 @@ using namespace std::string_view_literals;
 	#define TRAP __builtin_trap
 	#define FORCE_IMPL __attribute__((used))
 	#define NO_IMPL __attribute__((unused))
-#endif
-
-#if defined(__WIN64__) || defined(__WIN32__)
 	#define DEBUGBREAK __debugbreak
 #endif
 
@@ -37,6 +34,9 @@ using namespace std::string_view_literals;
 #ifdef GE_COMPILER_MSVC
 	#define PRETTY_FUNCTION __FUNCSIG__
 	#define TRAP __debugbreak
+	#define FORCE_IMPL
+	#define NO_IMPL
+	#define DEBUGBREAK __debugbreak
 #endif
 
 #define COPY(x) std::remove_cvref_t<decltype(x)>(x)
@@ -116,13 +116,13 @@ T& PlacementNew(T& to, ARGS&&... args)
 #define BIT_SIZE(X) (sizeof(decltype(X)) * 8)
 #define BIT_FIELD_ALIGN u8 : 0
 
-#ifndef MIN
+/*#ifndef MIN
 	#define MIN(X, Y) ((X) < (Y) ? (X) : (Y))
 #endif
 
 #ifndef MAX
 	#define MAX(X, Y) ((X) > (Y) ? (X) : (Y))
-#endif
+#endif*/
 
 #ifndef GLOBAL
 	#define GLOBAL inline const
@@ -240,7 +240,7 @@ T& PlacementNew(T& to, ARGS&&... args)
 		return (TYPE) ~std::underlying_type_t<TYPE>(a); \
 	} \
 
-#pragma GCC diagnostic ignored "-Winvalid-offsetof"
+// #pragma GCC diagnostic ignored "-Winvalid-offsetof"
 #define offsetbetween(TYPE, FIELDFROM, FIELDTO) (offsetof(TYPE, FIELDTO) - offsetof(TYPE, FIELDFROM))
 #define sizebetween(TYPE, FIELDFROM, FIELDTO) (offsetof(TYPE, FIELDTO) + sizeof(TYPE::FIELDTO) - offsetof(TYPE, FIELDFROM))
 #define offsetof_memptr(TYPE, PTR) ((size_t) &((TYPE*) nullptr->*PTR))

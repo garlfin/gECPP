@@ -33,7 +33,8 @@ namespace gE
 	template<Dimension DIMENSION>
 	AABB<DIMENSION> AABB<DIMENSION>::operator*(const MAT_T& mat) const
 	{
-		POS_T min(FLT_MAX), max(-FLT_MAX);
+ 		POS_T boundsMin(FLT_MAX),
+			  boundsMax(-FLT_MAX);
 
 		const POS_T center = Center(),
 					extent = Extent();
@@ -45,11 +46,11 @@ namespace gE
 
 			temp = mat * temp;
 
-			min = glm::min(min, POS_T(temp));
-			max = glm::max(max, POS_T(temp));
+			boundsMin = min(boundsMin, POS_T(temp));
+			boundsMax = max(boundsMax, POS_T(temp));
 		}
 
-		return { min, max };
+		return { boundsMin, boundsMax };
 	}
 
 	template<Dimension DIMENSION>

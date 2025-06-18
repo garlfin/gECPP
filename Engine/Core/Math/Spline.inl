@@ -109,38 +109,6 @@ typename Spline<DIMENSION>::Iterator Spline<DIMENSION>::GetPoint(size_t index)
 }
 
 template <Dimension DIMENSION>
-template <class INTERPOLATOR> requires interpolator<Position<DIMENSION>, INTERPOLATOR>
-typename Spline<DIMENSION>::Result Spline<DIMENSION>::Evaluate(DistanceMode mode, float distance, INTERPOLATOR interpolator) const
-{
-    distance = AdjustDistance(mode, distance);
-    if(mode == DistanceMode::Absolute)
-        distance /= GetLength();
-
-    if(_points.empty()) return DEFAULT;
-    if(!GetSegmentCount() || GetSegmentCount() % 2 == 1) return DEFAULT;
-
-    const float delta = GetSegmentCount() / 2.f;
-    float fac = distance * delta;
-    size_t basePoint = fac;
-    fac -= basePoint;
-    basePoint *= 2;
-
-    if(_points.size() - basePoint == 0)
-            return DEFAULT;
-
-    const SplinePoint<DIMENSION>& a = _points[basePoint];
-    const SplinePoint<DIMENSION>& b = _points[basePoint + 1];
-    const SplinePoint<DIMENSION>& c = _points[basePoint + 2];
-
-    return
-    {
-        interpolator.Interpolate(fac, a.Position, b.Position, c.Position),
-        normalize(interpolator.Interpolate(fac, a.Normal, b.Normal, c.Normal)),
-        normalize(interpolator.InterpolateDerivative(fac, a.Position, b.Position, c.Position))
-    };
-}
-
-template <Dimension DIMENSION>
 float Spline<DIMENSION>::AdjustDistance(DistanceMode mode, float distance) const
 {
     const float denominator = (mode == DistanceMode::Absolute ? GetLength() : 1.f) + FLT_EPSILON;
@@ -226,13 +194,6 @@ void SplineData<T, DIMENSION>::SetPoint(size_t index, const Point& point)
     auto begin = _points.cbegin();
     for(size_t i = 0; i < index; i++) ++begin; // cannot add to set iterator
     *begin = point;
-}
-
-template <class T, Dimension DIMENSION>
-template <class INTERPOLATOR> requires interpolator<SplineDataPoint<T>, INTERPOLATOR>
-T SplineData<T, DIMENSION>::Evaluate(DistanceMode mode, float distance, INTERPOLATOR interpolator) const
-{
-    return DEFAULT;
 }
 
 template <class T, Dimension DIMENSION>

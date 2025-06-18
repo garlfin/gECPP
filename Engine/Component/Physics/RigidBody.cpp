@@ -91,7 +91,7 @@ namespace gE
 
         if(!_isTrigger) return;
 
-        std::ranges::remove_if(_collisions, [](const Collision& collision){ return collision.State == CollisionState::Exiting; });
+        std::erase_if(_collisions, [](const Collision& collision){ return collision.State == CollisionState::Exiting; });
 
         for(Collision& collision : _collisions)
         {

@@ -107,7 +107,7 @@ namespace GL
 		API_UNDERLYING_IMPL();
 
 	public:
-		NODISCARD ALWAYS_INLINE Size1D GetSize(u8 mip = 0) const { return MAX(Size >> mip, 1); }
+		NODISCARD ALWAYS_INLINE Size1D GetSize(u8 mip = 0) const { return max(Size >> mip, 1u); }
 
 		void CopyFrom(const GL::Texture&) override;
 	};

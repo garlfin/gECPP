@@ -7,6 +7,7 @@
 #include "Field.h"
 #include "Editor/Settings.h"
 
+#include <span>
 #include <Core/Serializable/Asset.h>
 #include <Vendor/IMGUI/imgui.h>
 #include <Vendor/IMGUI/imgui_stdlib.h>

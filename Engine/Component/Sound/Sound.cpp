@@ -5,6 +5,8 @@
 #include "Sound.h"
 
 #include <FMOD/fmod_studio.h>
+#include <SteamAudio/steamaudio_fmod.h>
+#include <SteamAudio/phonon.h>
 
 #include <Entity/Entity.h>
 #include <Window.h>
@@ -69,17 +71,17 @@ namespace gE
 
     void Sound::SetUniform(std::string_view name, float value) const
     {
-        FMOD_Studio_EventInstance_SetParameterByName(_instance, name.cbegin(), value, false);
+        FMOD_Studio_EventInstance_SetParameterByName(_instance, name.data(), value, false);
     }
 
     void Sound::SetUniform(std::string_view name, i32 value) const
     {
-        FMOD_Studio_EventInstance_SetParameterByName(_instance, name.cbegin(), value, false);
+        FMOD_Studio_EventInstance_SetParameterByName(_instance, name.data(), value, false);
     }
 
     void Sound::SetUniform(std::string_view name, std::string_view value) const
     {
-        FMOD_Studio_EventInstance_SetParameterByNameWithLabel(_instance, name.cbegin(), value.cbegin(), false);
+        FMOD_Studio_EventInstance_SetParameterByNameWithLabel(_instance, name.data(), value.data(), false);
     }
 
     void Sound::SetPosition(const TransformData& transform)
@@ -108,6 +110,21 @@ namespace gE
         );
         if(result != FMOD_OK)
             Log::FatalError("Failed to initialize FMOD Studio System.");
+
+        FMOD_SYSTEM* coreSystem;
+        FMOD_Studio_System_GetCoreSystem(_system, &coreSystem);
+
+        result = FMOD_System_LoadPlugin(coreSystem, "Vendor/SteamAudio/bin/phonon_fmod.dll", nullptr, FMOD_PLUGINTYPE_DSP);
+        if(result != FMOD_OK)
+            Log::FatalError("Failed to initialize Steam Audio.");
+
+        /*IPLContextSettings steamAudioSettings
+        {
+            STEAMAUDIO_VERSION
+        };
+
+        if(const IPLerror err = iplContextCreate(&steamAudioSettings, &_steamAudioContext); err != IPL_STATUS_SUCCESS)
+            Log::FatalError(std::format("Failed to initialize Steam Audio: {}", (u32) err));*/
     }
 
     void SoundManager::OnUpdate(float delta)
@@ -165,7 +182,7 @@ namespace gE
     Sound SoundManager::GetSound(std::string_view name)
     {
         FMOD_STUDIO_EVENTDESCRIPTION* eventDescription;
-        if(FMOD_Studio_System_GetEvent(_system, name.cbegin(), &eventDescription) != FMOD_OK)
+        if(FMOD_Studio_System_GetEvent(_system, name.data(), &eventDescription) != FMOD_OK)
             Log::WriteLine("Could not load sound \"{}\"", name);
 
         FMOD_STUDIO_EVENTINSTANCE* instance;

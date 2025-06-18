@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <array>
 #include <Prototype.h>
 #include <set>
 #include <Core/Macro.h>

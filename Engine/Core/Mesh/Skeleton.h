@@ -9,8 +9,8 @@
 #include <Core/Math/Transform.h>
 #include <Core/Serializable/Asset.h>
 #include <Core/Serializable/Serializable.h>
-
-#include "Core/RelativePointer.h"
+#include <variant>
+#include <Core/RelativePointer.h>
 
 #define GE_MAX_BONES (UINT16_MAX - 1)
 

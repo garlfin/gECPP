@@ -52,7 +52,7 @@ namespace GPU
 		REFLECTABLE_NAME_PROTO();
 
 	public:
-		constexpr VertexField(const char name[4], ElementType elementType, bool normalized, u8 bufferIndex, u8 index, u8 elementCount, u8 offset);
+		VertexField(const char name[4], ElementType elementType, bool normalized, u8 bufferIndex, u8 index, u8 elementCount, u8 offset);
 
 		alignas(4) char Name[4] = DEFAULT;
 		ElementType ElementType = DEFAULT;
@@ -63,7 +63,7 @@ namespace GPU
 		u8 Offset = DEFAULT;
 	};
 
-	constexpr VertexField::VertexField(const char name[4], enum ElementType elementType, bool normalized, u8 bufferIndex, u8 index, u8 elementCount, u8 offset) :
+	 inline VertexField::VertexField(const char name[4], enum ElementType elementType, bool normalized, u8 bufferIndex, u8 index, u8 elementCount, u8 offset) :
 		ElementType(elementType),
 		Normalized(normalized),
 		BufferIndex(bufferIndex),

@@ -19,6 +19,7 @@ namespace GPU
 		default:
 			assert(false);
 		}
+		return GL_NONE;
 	}
 
 	void VAO::IDeserialize(istream& in, SETTINGS_T s)

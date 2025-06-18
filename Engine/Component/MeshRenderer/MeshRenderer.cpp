@@ -81,7 +81,7 @@ namespace gE
 	REFLECTABLE_ONGUI_IMPL(MeshRenderer,
 		const size_t materialCount = _mesh->VAO->GetSettings().Counts.MaterialCount;
 
-		DrawField(AssetDragDropField<Mesh>{ "Mesh", "", GE_EDITOR_ASSET_PAYLOAD, GetDragDropAcceptor() }, *this, depth, GetMesh, SetMesh);
+		DrawField(AssetDragDropField<Mesh>{ "Mesh", "", GE_EDITOR_ASSET_PAYLOAD, GetDragDropAcceptor() }, *this, depth, &MeshRenderer::GetMesh, &MeshRenderer::SetMesh);
 		const size_t changed = DrawField(ArrayField<AssetDragDropField<Material>>{ "Materials" }, _materials.Data(), materialCount, depth);
 
 		if(changed != materialCount)

@@ -106,7 +106,7 @@ namespace gE
     REFLECTABLE_ONGUI_IMPL(Camera2D,
     {
         DrawField<const float>(ScalarField<float>{"Aspect"}, GetAspect(), depth);
-        DrawField(ScalarField{ "Resolution", "", 1u }, *this, depth, GetSize, Resize);
+        DrawField(ScalarField{ "Resolution", "", 1u }, *this, depth, &Camera2D::GetSize, &Camera2D::Resize);
     });
 
     void Camera2D::GetGPUCamera(GPU::Camera& camera)

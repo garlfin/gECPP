@@ -12,6 +12,7 @@ struct FMOD_STUDIO_BANK;
 struct FMOD_STUDIO_SYSTEM;
 struct FMOD_STUDIO_EVENTINSTANCE;
 struct FMOD_STUDIO_EVENTDESCRIPTION;
+struct _IPLContext_t;
 
 namespace gE
 {
@@ -86,6 +87,8 @@ namespace gE
         void UnloadBank(const SoundBank& bank);
 
         FMOD_STUDIO_SYSTEM* _system;
+        _IPLContext_t* _steamAudioContext;
+
         std::vector<SoundBank> _banks;
     };
 }

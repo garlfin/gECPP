@@ -92,7 +92,35 @@ public:
     Iterator GetPoint(size_t index);
 
     template<class INTERPOLATOR = CubicInterpolation<::Position<DIMENSION>>> requires interpolator<::Position<DIMENSION>, INTERPOLATOR>
-    Result Evaluate(DistanceMode mode, float distance, INTERPOLATOR interpolator = DEFAULT) const;
+    Result Evaluate(DistanceMode mode, float distance, INTERPOLATOR interpolator = DEFAULT) const
+    {
+        distance = AdjustDistance(mode, distance);
+        if(mode == DistanceMode::Absolute)
+            distance /= GetLength();
+
+        if(_points.empty()) return DEFAULT;
+        if(!GetSegmentCount() || GetSegmentCount() % 2 == 1) return DEFAULT;
+
+        const float delta = GetSegmentCount() / 2.f;
+        float fac = distance * delta;
+        size_t basePoint = fac;
+        fac -= basePoint;
+        basePoint *= 2;
+
+        if(_points.size() - basePoint == 0)
+            return DEFAULT;
+
+        const SplinePoint<DIMENSION>& a = _points[basePoint];
+        const SplinePoint<DIMENSION>& b = _points[basePoint + 1];
+        const SplinePoint<DIMENSION>& c = _points[basePoint + 2];
+
+        return
+        {
+            interpolator.Interpolate(fac, a.Position, b.Position, c.Position),
+            normalize(interpolator.Interpolate(fac, a.Normal, b.Normal, c.Normal)),
+            normalize(interpolator.InterpolateDerivative(fac, a.Position, b.Position, c.Position))
+        };
+    }
 
 private:
     float AdjustDistance(DistanceMode mode, float distance) const;
@@ -125,7 +153,10 @@ public:
     void SetPoint(size_t index, const Point& point);
 
     template<class INTERPOLATOR = CubicInterpolation<T>> requires interpolator<Point, INTERPOLATOR>
-    T Evaluate(DistanceMode mode, float distance, INTERPOLATOR interpolator = DEFAULT) const;
+    T Evaluate(DistanceMode mode, float distance, INTERPOLATOR interpolator = DEFAULT) const
+    {
+        return DEFAULT;
+    }
 
 private:
     float AdjustDistance(DistanceMode mode, float distance) const;
