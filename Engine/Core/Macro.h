@@ -151,8 +151,8 @@ T& PlacementNew(T& to, ARGS&&... args)
 	TYPE& operator=(TYPE&&) noexcept;
 
 #define OPERATOR_COPY_PROTO(TYPE) \
-	TYPE(const TYPE&) noexcept; \
-	TYPE& operator=(const TYPE& ACCESSOR) noexcept;
+	TYPE(const TYPE&); \
+	TYPE& operator=(const TYPE& ACCESSOR);
 
 #define OPERATOR_MOVE_IMPL(NAMESPACE, TYPE, DESTRUCTOR, CODE) \
     NAMESPACE TYPE(TYPE&& o) noexcept \

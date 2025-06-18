@@ -11,21 +11,60 @@
 
 namespace gE
 {
-    SoundComponent::SoundComponent(Entity* owner) : Component(owner, &owner->GetWindow().GetSounds()) {}
+    FMOD_VECTOR ToFMOD(const vec3& vec) { return FMOD_VECTOR(vec.x, vec.y, vec.z); }
+    FMOD_3D_ATTRIBUTES ToFMOD(const TransformData& transform)
+    {
+        return FMOD_3D_ATTRIBUTES(
+            ToFMOD(transform.Position),
+            ToFMOD(vec3(0.f)),
+            ToFMOD(transform.Forward()),
+            ToFMOD(transform.Up())
+        );
+    }
 
-    Sound::Sound(FMOD_STUDIO_EVENTINSTANCE* instance) : _instance(instance)
+    Speaker::Speaker(Entity* owner) : Component(owner, &owner->GetWindow().GetSounds())
     {
 
     }
+
+    void Speaker::OnUpdate(float delta)
+    {
+        _sound.SetPosition(GetOwner().GetTransform().GetGlobalTransform());
+    }
+
+    void Speaker::SetSound(std::string_view name)
+    {
+        _sound = GetWindow().GetSounds().GetSound(name);
+    }
+
+    Sound::Sound(FMOD_STUDIO_EVENTINSTANCE* instance) : _instance(instance)
+    {
+    }
+
+    OPERATOR_COPY_IMPL(Sound::, Sound, this->~Sound(),
+        FMOD_STUDIO_EVENTDESCRIPTION* description;
+        FMOD_Studio_EventInstance_GetDescription(_instance, &description);
+        FMOD_Studio_EventDescription_CreateInstance(description, &_instance);
+    );
 
     void Sound::Play() const
     {
         FMOD_Studio_EventInstance_Start(_instance);
     }
 
+    void Sound::Pause() const
+    {
+        FMOD_Studio_EventInstance_SetPaused(_instance, true);
+    }
+
     void Sound::Stop() const
     {
         FMOD_Studio_EventInstance_Stop(_instance, FMOD_STUDIO_STOP_ALLOWFADEOUT);
+    }
+
+    void Sound::SetTime(float time) const
+    {
+        FMOD_Studio_EventInstance_SetTimelinePosition(_instance, time);
     }
 
     void Sound::SetUniform(std::string_view name, float value) const
@@ -43,6 +82,12 @@ namespace gE
         FMOD_Studio_EventInstance_SetParameterByNameWithLabel(_instance, name.cbegin(), value.cbegin(), false);
     }
 
+    void Sound::SetPosition(const TransformData& transform)
+    {
+        FMOD_3D_ATTRIBUTES attributes = ToFMOD(transform);
+        FMOD_Studio_EventInstance_Set3DAttributes(_instance, &attributes);
+    }
+
     Sound::~Sound()
     {
         FMOD_Studio_EventInstance_Release(_instance);
@@ -58,7 +103,7 @@ namespace gE
             _system,
             GE_FMOD_MAX_CHANNELS,
             FMOD_STUDIO_INIT_NORMAL,
-            FMOD_INIT_NORMAL,
+            FMOD_INIT_3D_RIGHTHANDED,
             nullptr
         );
         if(result != FMOD_OK)
@@ -68,7 +113,13 @@ namespace gE
     void SoundManager::OnUpdate(float delta)
     {
         ComponentManager::OnUpdate(delta);
-        FMOD_Studio_System_Update(_system);
+
+        const Transform& cameraTransform = GetWindow()->GetCameras().GetCurrentCamera()->GetCamera().GetOwner().GetTransform();
+        const FMOD_3D_ATTRIBUTES listenerAttributes = ToFMOD(cameraTransform.GetGlobalTransform());
+
+        FMOD_Studio_System_SetListenerAttributes(_system, 0, &listenerAttributes, nullptr);
+        if(const FMOD_RESULT err = FMOD_Studio_System_Update(_system); err != FMOD_OK)
+            Log::WriteLine("FMOD Update Error: {}",  (u32) err);
     }
 
     void SoundManager::LoadBank(const Path& path)

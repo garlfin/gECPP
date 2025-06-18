@@ -20,18 +20,21 @@ namespace gE
             Entity(window, nullptr, LayerMask::All, flags),
             _renderer(this, mesh),
             _rigidBody(this, RigidBodySettings(), _collider),
-            _collider(this, GetShapeSettings(size))
+            _collider(this, GetShapeSettings(size)),
+            _speaker(this)
         {
         }
 
         GET(MeshRenderer&, Renderer, _renderer);
         GET(RigidBody&, RigidBody, _rigidBody);
         GET(BoxCollider&, Collider, _collider);
+        GET(Speaker&, Speaker, _speaker);
 
     private:
         MeshRenderer _renderer;
         RigidBody _rigidBody;
         BoxCollider _collider;
+        Speaker _speaker;
     };
 
     REFLECTABLE_FACTORY_NO_IMPL(PhysicsCubeEntity, inline);

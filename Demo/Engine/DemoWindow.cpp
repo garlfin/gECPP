@@ -20,6 +20,8 @@ void DemoWindow::OnInit()
 {
 	Window::OnInit();
 
+	Sounds.LoadBank("Resource/Sound/Master.bank");
+
 	if(VR::IsVRHeadsetPresent())
 		VRManager = ptr_create<VR>(this);
 
@@ -98,16 +100,16 @@ void DemoWindow::OnInit()
 	physicsCube->SetName("Cube 2");
 	physicsCube->GetTransform().SetLocation(vec3(0.f, 5.f, 0.f));
 	physicsCube->GetTransform().SetScale(vec3(0.25));
+	physicsCube->GetSpeaker().SetSound("event:/Explosion");
+	physicsCube->GetSpeaker()->Play();
 
-	auto* floor = new EmptyColliderEntity(this, vec3(5.f, 0.1f, 5.f), EntityFlags(true));
+	auto* floor = new EmptyColliderEntity(this, vec3(5.f, 0.1f, 5.f), EntityFlags::Static);
 	floor->SetName("Floor Collider");
 	floor->GetTransform().SetLocation(vec3(0.f, -0.1, 0.f));
 
 	auto* animatedCube = new AnimatedMeshEntity(this, cubeMesh);
 	animatedCube->SetName("Animated Cube");
 
-	Cubemaps->LoadSkybox(("Resource/Texture/sky.pvr"));
+	Cubemaps->LoadSkybox("Resource/Texture/sky.pvr");
 	InitVoxelReflections();
-
-	Sounds.LoadBank("Resource/Sound/Master.bank");
 }

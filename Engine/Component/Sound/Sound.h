@@ -15,12 +15,6 @@ struct FMOD_STUDIO_EVENTDESCRIPTION;
 
 namespace gE
 {
-    class SoundComponent : public Component
-    {
-    public:
-        explicit SoundComponent(Entity* owner);
-    };
-
     class Sound
     {
     public:
@@ -32,12 +26,18 @@ namespace gE
             o._instance = nullptr;
         );
 
+        OPERATOR_COPY_PROTO(Sound);
+
         void Play() const;
+        void Pause() const;
         void Stop() const;
+        void SetTime(float) const;
 
         void SetUniform(std::string_view, float) const;
         void SetUniform(std::string_view, i32) const;
         void SetUniform(std::string_view, std::string_view) const;
+
+        void SetPosition(const TransformData& transform);
 
         ~Sound();
 
@@ -53,7 +53,22 @@ namespace gE
         bool operator==(const ::Path& path) const { return Path == path; }
     };
 
-    class SoundManager final : public ComponentManager<SoundComponent>
+    class Speaker : public Component
+    {
+    public:
+        explicit Speaker(Entity* owner);
+
+        void OnInit() override {};
+        void OnUpdate(float delta) override;
+        void SetSound(std::string_view name);
+
+        const Sound* operator->() const { return &_sound; }
+
+    private:
+        Sound _sound = DEFAULT;
+    };
+
+    class SoundManager final : public ComponentManager<Speaker>
     {
     public:
         explicit SoundManager(Window* window);
