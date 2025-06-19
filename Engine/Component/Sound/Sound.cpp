@@ -4,12 +4,11 @@
 
 #include "Sound.h"
 
-#include <FMOD/fmod_studio.h>
-#include <SteamAudio/steamaudio_fmod.h>
-#include <SteamAudio/phonon.h>
-
-#include <Entity/Entity.h>
 #include <Window.h>
+#include <Entity/Entity.h>
+#include <FMOD/fmod_studio.h>
+#include <SteamAudio/phonon.h>
+#include <SteamAudio/steamaudio_fmod.h>
 
 namespace gE
 {
@@ -116,15 +115,59 @@ namespace gE
 
         result = FMOD_System_LoadPlugin(coreSystem, "Vendor/SteamAudio/bin/phonon_fmod.dll", nullptr, FMOD_PLUGINTYPE_DSP);
         if(result != FMOD_OK)
-            Log::FatalError("Failed to initialize Steam Audio.");
+            Log::FatalError("Failed to initialize Steam Audio for FMOD.");
 
-        /*IPLContextSettings steamAudioSettings
+        IPLContextSettings steamAudioSettings
         {
             STEAMAUDIO_VERSION
         };
 
         if(const IPLerror err = iplContextCreate(&steamAudioSettings, &_steamAudioContext); err != IPL_STATUS_SUCCESS)
-            Log::FatalError(std::format("Failed to initialize Steam Audio: {}", (u32) err));*/
+            Log::FatalError(std::format("Failed to initialize Steam Audio: {}", (u32) err));
+
+        iplFMODInitialize(_steamAudioContext);
+
+        IPLHRTFSettings hrtfSettings
+        {
+            IPL_HRTFTYPE_DEFAULT,
+            nullptr,
+            nullptr,
+            0,
+            1.f
+        };
+
+        IPLAudioSettings audioSettings
+        {
+            44100,
+            1024
+        };
+
+        if(const IPLerror err = iplHRTFCreate(_steamAudioContext, &audioSettings, &hrtfSettings, &_steamAudioHRTF); err != IPL_STATUS_SUCCESS)
+            Log::FatalError(std::format("Failed to create HRTF: {}", (u32) err));
+
+        iplFMODSetHRTF(_steamAudioHRTF);
+
+        IPLSimulationSettings simulationSettings
+        {
+            IPL_SIMULATIONFLAGS_DIRECT,
+            IPL_SCENETYPE_EMBREE,
+            IPL_REFLECTIONEFFECTTYPE_PARAMETRIC,
+            3,
+            3,
+            3,
+            0.1f,
+            1,
+            10,
+            4,
+            0,
+            4,
+            44100,
+            1024,
+            nullptr,
+            nullptr,
+            nullptr
+        };
+        iplFMODSetSimulationSettings(simulationSettings);
     }
 
     void SoundManager::OnUpdate(float delta)
@@ -199,6 +242,9 @@ namespace gE
     {
         for(SoundBank& bank : _banks)
             UnloadBank(bank);
+
+        iplHRTFRelease(&_steamAudioHRTF);
+        iplContextRelease(&_steamAudioContext);
 
         FMOD_Studio_System_Release(_system);
     }

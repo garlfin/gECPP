@@ -13,6 +13,8 @@ struct FMOD_STUDIO_SYSTEM;
 struct FMOD_STUDIO_EVENTINSTANCE;
 struct FMOD_STUDIO_EVENTDESCRIPTION;
 struct _IPLContext_t;
+struct _IPLHRTF_t;
+struct _IPLBinauralEffect_t;
 
 namespace gE
 {
@@ -88,6 +90,7 @@ namespace gE
 
         FMOD_STUDIO_SYSTEM* _system;
         _IPLContext_t* _steamAudioContext;
+        _IPLHRTF_t* _steamAudioHRTF;
 
         std::vector<SoundBank> _banks;
     };

@@ -30,10 +30,13 @@ namespace gE
         float CrouchingHeight = 0.875;
         float JumpHeight = 1.f;
         float Sensitivity = 0.1f;
+        Sound SlideSound;
 
         void OnInit() override
         {
             GetWindow().GetMouse().SetIsEnabled(false);
+            SlideSound = GetWindow().GetSounds().GetSound("event:/FNX45/Slide");
+            SlideSound.SetPosition(DEFAULT);
         }
 
         void OnUpdate(float delta) override
@@ -53,6 +56,9 @@ namespace gE
                 mouse.SetIsEnabled(!cursorEnabled);
                 mouse.SetPosition(GetWindow().GetSize() / 2u);
             }
+
+            if(keyboard.GetKey(Key::L) == KeyState::Pressed)
+                SlideSound.Play();
 
             if(GetWindow().GetVREnabled())
                 cameraTransform.SetPosition(cameraTransform->Position - StandingHeight / 2.f * vec3(0, 1, 0));

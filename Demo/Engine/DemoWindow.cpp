@@ -100,8 +100,6 @@ void DemoWindow::OnInit()
 	physicsCube->SetName("Cube 2");
 	physicsCube->GetTransform().SetLocation(vec3(0.f, 5.f, 0.f));
 	physicsCube->GetTransform().SetScale(vec3(0.25));
-	physicsCube->GetSpeaker().SetSound("event:/Explosion");
-	physicsCube->GetSpeaker()->Play();
 
 	auto* floor = new EmptyColliderEntity(this, vec3(5.f, 0.1f, 5.f), EntityFlags::Static);
 	floor->SetName("Floor Collider");
