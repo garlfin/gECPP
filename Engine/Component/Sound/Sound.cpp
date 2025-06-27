@@ -94,6 +94,11 @@ namespace gE
         FMOD_Studio_EventInstance_Release(_instance);
     }
 
+    void SteamAudioLogFunction(IPLLogLevel level, const char* message)
+    {
+        Log::Write("SteamAudio Message: Level {}\n{}\n", (u32) level, message);
+    }
+
     SoundManager::SoundManager(Window* window) : ComponentManager(window)
     {
         FMOD_RESULT result = FMOD_Studio_System_Create(&_system, FMOD_VERSION);
@@ -103,7 +108,11 @@ namespace gE
         result = FMOD_Studio_System_Initialize(
             _system,
             GE_FMOD_MAX_CHANNELS,
+#ifdef DEBUG
+            FMOD_STUDIO_INIT_LIVEUPDATE,
+#elif
             FMOD_STUDIO_INIT_NORMAL,
+#endif
             FMOD_INIT_3D_RIGHTHANDED,
             nullptr
         );
@@ -119,7 +128,12 @@ namespace gE
 
         IPLContextSettings steamAudioSettings
         {
-            STEAMAUDIO_VERSION
+            STEAMAUDIO_VERSION,
+            SteamAudioLogFunction,
+            nullptr,
+            nullptr,
+            IPL_SIMDLEVEL_SSE2,
+            IPL_CONTEXTFLAGS_VALIDATION
         };
 
         if(const IPLerror err = iplContextCreate(&steamAudioSettings, &_steamAudioContext); err != IPL_STATUS_SUCCESS)
@@ -152,20 +166,6 @@ namespace gE
             IPL_SIMULATIONFLAGS_DIRECT,
             IPL_SCENETYPE_EMBREE,
             IPL_REFLECTIONEFFECTTYPE_PARAMETRIC,
-            3,
-            3,
-            3,
-            0.1f,
-            1,
-            10,
-            4,
-            0,
-            4,
-            44100,
-            1024,
-            nullptr,
-            nullptr,
-            nullptr
         };
         iplFMODSetSimulationSettings(simulationSettings);
     }
@@ -245,6 +245,7 @@ namespace gE
 
         iplHRTFRelease(&_steamAudioHRTF);
         iplContextRelease(&_steamAudioContext);
+        iplFMODTerminate();
 
         FMOD_Studio_System_Release(_system);
     }
