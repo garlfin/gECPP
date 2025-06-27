@@ -45,8 +45,7 @@ namespace gE::VoxelPipeline
 	{
 		Window& window = GetWindow();
 
-		window.GetLights().UseNearestLights(vec3(0.0f));
-
+		window.GetLights().UseSun();
 		window.RenderState = RenderState::Voxel;
 
 		glDepthMask(0);

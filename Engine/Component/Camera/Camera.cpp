@@ -40,7 +40,7 @@ namespace gE
     {
     }
 
-    void Camera::GetGPUCamera(GPU::Camera& cam)
+    void Camera::GetGPUCamera(GPU::Camera& cam) const
     {
         const Transform& transform = GetOwner().GetTransform();
 
@@ -109,7 +109,7 @@ namespace gE
         DrawField(ScalarField{ "Resolution", "", 1u }, *this, depth, &Camera2D::GetSize, &Camera2D::Resize);
     });
 
-    void Camera2D::GetGPUCamera(GPU::Camera& camera)
+    void Camera2D::GetGPUCamera(GPU::Camera& camera) const
     {
         Camera::GetGPUCamera(camera);
 
@@ -137,7 +137,7 @@ namespace gE
         flags.LayerMode = LayerMode::Viewport;
     }
 
-    void PerspectiveCamera::GetGPUCamera(GPU::Camera& camera)
+    void PerspectiveCamera::GetGPUCamera(GPU::Camera& camera) const
     {
         Camera2D::GetGPUCamera(camera);
 
@@ -242,7 +242,7 @@ namespace gE
 
     REFLECTABLE_FACTORY_NO_IMPL(Camera3D);
 
-    void Camera3D::GetGPUCamera(GPU::Camera& cam)
+    void Camera3D::GetGPUCamera(GPU::Camera& cam) const
     {
         Camera::GetGPUCamera(cam);
 
@@ -271,7 +271,7 @@ namespace gE
         Projection = perspectiveFov(radians(90.f), 1.f, 1.f, GetClipPlanes().x, GetClipPlanes().y);
     }
 
-    void CameraCube::GetGPUCamera(GPU::Camera& cam)
+    void CameraCube::GetGPUCamera(GPU::Camera& cam) const
     {
         Camera::GetGPUCamera(cam);
 

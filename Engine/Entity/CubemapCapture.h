@@ -44,7 +44,7 @@ namespace gE
 		GET(API::TextureCube&, Color, _target.GetColor());
 		GET(CameraCube&, Camera, _camera);
 
-		void GetGPUCubemap(GPU::Cubemap&);
+		void GetGPUCubemap(GPU::Cubemap&) const;
 
 	 private:
 		Managed<CubemapCapture> _cubemapManaged;
@@ -61,7 +61,6 @@ namespace gE
 
 		void DrawSkybox() const;
 		void OnRender(float delta, Camera*);
-		void UseNearestCubemaps(const vec3& point) const;
 
 		void LoadSkybox(const Path& path);
 		void CreateHarmonic() const;

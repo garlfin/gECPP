@@ -22,9 +22,9 @@ namespace gE
 		_sceneBuffer(window, 1, nullptr, GPU::BufferUsageHint::Dynamic, true),
 		_lightBuffer(window, 1, nullptr, GPU::BufferUsageHint::Dynamic, true)
 	{
-		_sceneBuffer.Bind(API::BufferBaseTarget::Uniform, 0);
-		_cameraBuffer.Bind(API::BufferBaseTarget::Uniform, 1);
-		_lightBuffer.Bind(API::BufferBaseTarget::Uniform, 2);
+		_sceneBuffer.Bind(API::BufferBaseTarget::ShaderStorage, 0);
+		_cameraBuffer.Bind(API::BufferBaseTarget::ShaderStorage, 1);
+		_lightBuffer.Bind(API::BufferBaseTarget::ShaderStorage, 2);
 	}
 
 	void DefaultPipeline::Target2D::RenderPass(float delta, Camera*)
@@ -69,8 +69,7 @@ namespace gE
 
 		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
-		window.GetLights().UseNearestLights(vec3(0.0f));
-		window.GetCubemaps().UseNearestCubemaps(vec3(0.0f));
+		window.GetLights().UseSun();
 
 		// COLOR
 		window.RenderState = RenderState::PreZForward;

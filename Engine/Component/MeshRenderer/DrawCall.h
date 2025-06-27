@@ -33,15 +33,13 @@ namespace gE
 
 		GET(auto, Iterator, _it);
 
-		GET_CONST(const Transform&, Transform, *_transform);
+		GET_CONST(const MeshRenderer&, Renderer, *_renderer);
 		GET_CONST(const Material*, Material, _material);
 
 		GET_CONST(API::IVAO&, VAO, *_vao);
 		GET_CONST(const Shader*, Shader, _material ? &_material->GetShader() : nullptr);
 		GET_CONST(u8, SubmeshIndex, _submeshIndex);
 		GET_CONST(u8, LOD, _lod);
-
-		GET_SET(GPU::ObjectFlags, Flags, _flags);
 
 		bool operator<(const DrawCall& b) const;
 
@@ -50,14 +48,12 @@ namespace gE
 	private:
 		std::set<const DrawCall*, DrawCallCompare>::iterator _it = DEFAULT;
 
-		const Transform* _transform = nullptr;
+		const MeshRenderer* _renderer = nullptr;
 		const Material* _material = nullptr;
 
 		u8 _submeshIndex = 0;
 		u8 _lod = 0;
 		API::IVAO* _vao = nullptr;
-
-		GPU::ObjectFlags _flags = DEFAULT;
 	};
 
 	class DrawCallManager final

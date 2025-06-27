@@ -38,6 +38,7 @@ namespace GPU
 
     enum class LightType : u32
     {
+        None,
         Directional,
         Point,
         Spot,
@@ -57,10 +58,10 @@ namespace GPU
 
     enum class CubemapType : u32
     {
-        Infinite,
+        None,
         AABB,
         Sphere,
-        None = Infinite
+        Infinite,
     };
 
     struct Cubemap
@@ -92,15 +93,21 @@ namespace GPU
         ObjectInfo Objects[API_MAX_INSTANCE];
     };
 
-    struct Lighting
+    struct GPU_ALIGN ObjectLighting
     {
-        u32 LightCount = 1;
-        u32 CubemapCount = 1;
-
-        handle Skybox;
-        ColorHarmonic SkyboxIrradiance;
+        u32 LightCount = 0;
+        u32 CubemapCount = 0;
 
         GPU_ALIGN Light Lights[API_MAX_LIGHT];
         GPU_ALIGN Cubemap Cubemaps[API_MAX_CUBEMAP];
+    };
+
+    struct Lighting
+    {
+        handle Skybox;
+        GPU_ALIGN ColorHarmonic SkyboxIrradiance;
+
+        GPU_ALIGN Light Sun;
+        GPU_ALIGN ObjectLighting Objects[API_MAX_INSTANCE];
     };
 }

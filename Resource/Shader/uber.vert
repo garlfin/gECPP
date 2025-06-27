@@ -15,6 +15,7 @@ struct VertexOut
     vec2 UV;
     vec4 CurrentNDC;
 	vec4 PreviousNDC;
+    vec4 FragPosSunSpace;
     vec4 FragPosLightSpace[MAX_LIGHTS];
     mat3 TBN;
 };
@@ -35,7 +36,7 @@ void main()
     gl_Position = viewProjection * vec4(VertexIn.FragPos, 1);
     VertexIn.CurrentNDC = gl_Position;
 
-    if(Scene_EnableJitter)
+    if(Scene_EnablePostProcess)
     {
         vec2 jitter = Jitter(Camera.Frame, Camera.Size);
         gl_Position.xy += jitter * gl_Position.w;
@@ -55,6 +56,7 @@ void main()
 
     VertexIn.TBN = mat3(tan, bitan, nor);
 
-    for(uint i = 0; i < Lighting.LightCount; i++)
-        VertexIn.FragPosLightSpace[i] = Lighting.Lights[i].ViewProjection * vec4(VertexIn.FragPos, 1);
+    VertexIn.FragPosSunSpace = Lighting.Sun.ViewProjection * vec4(VertexIn.FragPos, 1);
+    for(uint i = 0; i < OBJECT_LIGHTING.LightCount; i++)
+        VertexIn.FragPosLightSpace[i] = OBJECT_LIGHTING.Lights[i].ViewProjection * vec4(VertexIn.FragPos, 1);
 }

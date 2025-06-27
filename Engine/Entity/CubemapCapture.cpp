@@ -28,9 +28,9 @@ namespace gE
 	{
 	}
 
-	void CubemapCapture::GetGPUCubemap(GPU::Cubemap& cubemap)
+	void CubemapCapture::GetGPUCubemap(GPU::Cubemap& cubemap) const
 	{
-		Transform& transform = GetTransform();
+		const Transform& transform = GetTransform();
 
 		cubemap.Position = transform.GetGlobalTransform().Position;
 		cubemap.Scale = transform.GetGlobalTransform().Scale;
@@ -47,26 +47,10 @@ namespace gE
 		GE_ASSERTM((bool) Skybox, "ERROR: NO SKYBOX TEXTURE");
 
 		lighting.Skybox = Skybox->GetHandle();
-
 		buffers.GetLights().UpdateData<std::byte>(sizebetween(GPU::Lighting, Skybox, SkyboxIrradiance), offsetof(GPU::Lighting, Skybox));
 
 		for(ITER_T* i = List.GetFirst(); i; i = i->GetNext())
 			(**i)->GetCamera().OnRender(delta, camera);
-	}
-
-	void CubemapManager::UseNearestCubemaps(const vec3& point) const
-	{
-		DefaultPipeline::Buffers& buffers = _window->GetPipelineBuffers();
-		GPU::Lighting& lighting = **buffers.GetLights().GetData();
-
-		lighting.CubemapCount = std::min<u32>(List.Size(), API_MAX_CUBEMAP);
-
-		auto it = List.GetFirst();
-		for(u32 i = 0; i < lighting.CubemapCount; i++, it++)
-			(**it)->GetGPUCubemap(lighting.Cubemaps[i]);
-
-		buffers.GetLights().UpdateData<u32>(1, offsetof(GPU::Lighting, CubemapCount));
-		buffers.GetLights().UpdateData<GPU::Cubemap>(1, offsetof(GPU::Lighting, Cubemaps));
 	}
 
 	void CubemapManager::LoadSkybox(const Path& path)
@@ -78,9 +62,6 @@ namespace gE
 
 	void CubemapManager::CreateHarmonic() const
 	{
-		DefaultPipeline::Buffers& buffers = _window->GetPipelineBuffers();
-		GPU::Lighting& lighting = **buffers.GetLights().GetData();
-
 		GPU::ComputeShader shaderSettings("Resource/Shader/Compute/sh.comp");
 		API::ComputeShader shader(_window, move(shaderSettings));
 		shader.Free();
@@ -132,8 +113,6 @@ namespace gE
 	{
 		CameraCube& camera = GetCamera();
 		Window& window = camera.GetWindow();
-
-		window.GetLights().UseNearestLights(vec3(0.0f));
 
 		window.RenderState = RenderState::Cubemap;
 		camera.GetFlagOverrides(window.RenderState);

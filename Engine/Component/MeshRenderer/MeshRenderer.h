@@ -14,6 +14,9 @@
 
 namespace gE
 {
+    class Light;
+    class CubemapCapture;
+
     class MeshRenderer : public Component
     {
         REFLECTABLE_PROTO(MeshRenderer, Component);
@@ -22,7 +25,7 @@ namespace gE
         MeshRenderer(Entity* o, const Reference<Mesh>& mesh);
 
         void OnInit() override {};
-        void OnUpdate(float delta) override {};
+        void OnUpdate(float delta) override;
 
         GET_CONST(size_t, MaterialCount, _materials.Size());
         GET_CONST(const Reference<Mesh>&, Mesh, _mesh);
@@ -37,6 +40,9 @@ namespace gE
         virtual API::IVAO* GetVAO() const { return _mesh ? _mesh->VAO.GetPointer() : nullptr; }
         virtual GPU::ObjectFlags GetFlags() const { return DEFAULT; }
 
+        void GetGPUObject(GPU::ObjectInfo&) const;
+        void GetGPULighting(GPU::ObjectLighting&) const;
+
         friend class RendererManager;
 
     protected:
@@ -48,6 +54,9 @@ namespace gE
         Reference<Mesh> _mesh;
         Array<DrawCall> _drawCalls;
         Array<Reference<Material>> _materials;
+
+        SmallVector<const Light*, 4> _nearestLights;
+        SmallVector<const CubemapCapture*, 4> _nearestCubemaps;
     };
 
     class IAnimator : public Reflectable<Window*>

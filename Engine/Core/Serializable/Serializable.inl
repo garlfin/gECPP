@@ -79,7 +79,7 @@ void ReadArray(std::istream& in, Array<T>& array)
 
 	UINT_T length = Read<UINT_T>(in);
 	array = Array<T>(length);
-	in.read((char*) array.Data(), length * sizeof(typename Array<T>::I));
+	in.read((char*) array.Data(), length * sizeof(T));
 }
 
 template<typename UINT_T, class T>

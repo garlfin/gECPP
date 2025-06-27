@@ -22,7 +22,7 @@ namespace gE
 	{
 	}
 
-	void Light::GetGPULight(GPU::Light& light)
+	void Light::GetGPULight(GPU::Light& light) const
 	{
 		const Transform& transform = GetTransform();
 		const Camera& camera = GetCamera();
@@ -46,21 +46,13 @@ namespace gE
 			(**i)->GetCamera().OnRender(delta, camera);
 	}
 
-	void LightManager::UseNearestLights(const vec3& point) const
+	void LightManager::UseSun() const
 	{
 		DefaultPipeline::Buffers& buffers = _window->GetPipelineBuffers();
 		GPU::Lighting& lighting = **buffers.GetLights().GetData();
 
-		lighting.LightCount = List.Size();
-
-		GE_ASSERTM(lighting.LightCount <= 4, "TOO MANY LIGHTS!");
-
-		int i = 0;
-		for(ITER_T* light = List.GetFirst(); light; light = light->GetNext(), i++)
-			(**light)->GetGPULight(lighting.Lights[i]);
-
-		buffers.GetLights().UpdateData<u32>(1);
-		buffers.GetLights().UpdateData<GPU::Light>(lighting.LightCount, offsetof(GPU::Lighting, Lights));
+		Sun->GetGPULight(lighting.Sun);
+		buffers.GetLights().UpdateData<GPU::Light>(1, offsetof(GPU::Lighting, Sun));
 	}
 
 	DirectionalLight::DirectionalLight(Window* w, u16 size, float scale, const quat& rot) :
@@ -120,7 +112,7 @@ namespace gE
 		return true;
 	}
 
-	void DirectionalLight::GetGPULight(GPU::Light& light)
+	void DirectionalLight::GetGPULight(GPU::Light& light) const
 	{
 		Light::GetGPULight(light);
 
@@ -168,7 +160,7 @@ namespace gE
 		Depth = &_target.GetDepth();
     }
 
-	void PointLight::GetGPULight(GPU::Light& light)
+	void PointLight::GetGPULight(GPU::Light& light) const
 	{
 		Light::GetGPULight(light);
 

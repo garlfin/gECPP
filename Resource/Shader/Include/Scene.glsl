@@ -13,14 +13,16 @@
 #define MAX_CUBEMAPS 4
 #define MAX_MULTI_DRAW 8
 
-#define LIGHT_DIRECTIONAL 0
-#define LIGHT_POINT 1
-#define LIGHT_SPOT 2
-#define LIGHT_AREA 3
+#define LIGHT_NONE 0
+#define LIGHT_DIRECTIONAL 1
+#define LIGHT_POINT 2
+#define LIGHT_SPOT 3
+#define LIGHT_AREA 4
 
 #define CUBEMAP_NONE 0
 #define CUBEMAP_AABB 1
 #define CUBEMAP_SPHERE 2
+#define CUBEMAP_INFINITE 3
 
 struct Light
 {
@@ -57,23 +59,29 @@ struct SceneData
     ObjectInfo Objects[MAX_OBJECTS];
 };
 
-struct LightingData
+struct ObjectLighting
 {
     uint LightCount;
     uint CubemapCount;
 
+    Light Lights[MAX_LIGHTS];
+    Cubemap Cubemaps[MAX_CUBEMAPS];
+};
+
+struct LightingData
+{
     BINDLESS_TEXTURE(samplerCube, Skybox);
     ColorHarmonic SkyboxIrradiance;
 
-    Light Lights[MAX_LIGHTS];
-    Cubemap Cubemaps[MAX_CUBEMAPS];
+    Light Sun;
+    ObjectLighting Objects[MAX_OBJECTS];
 };
 
 #ifndef SCENE_UNIFORM_LOCATION
     #define SCENE_UNIFORM_LOCATION 0
 #endif
 
-layout(std140, binding = SCENE_UNIFORM_LOCATION) uniform SceneUniform
+layout(std140, binding = SCENE_UNIFORM_LOCATION) buffer SceneUniform
 {
     SceneData Scene;
 };
@@ -86,15 +94,10 @@ layout(std140, binding = SCENE_UNIFORM_LOCATION) uniform SceneUniform
     #define LIGHT_UNIFORM_LAYOUT std140
 #endif
 
-layout(LIGHT_UNIFORM_LAYOUT, binding = LIGHT_UNIFORM_LOCATION) uniform LightingUniform
+layout(LIGHT_UNIFORM_LAYOUT, binding = LIGHT_UNIFORM_LOCATION) buffer LightingUniform
 {
     LightingData Lighting;
 };
-
-#if defined(FRAGMENT_SHADER) && !defined(GL_ARB_bindless_texture)
-    uniform sampler2D Lights[MAX_LIGHTS];
-    uniform samplerCube Cubemaps[MAX_CUBEMAPS];
-#endif
 
 #ifdef VERTEX_SHADER
     uint InstanceCount = Scene.InstanceCount[gl_DrawID / 4][gl_DrawID % 4];
@@ -127,8 +130,6 @@ layout(LIGHT_UNIFORM_LAYOUT, binding = LIGHT_UNIFORM_LOCATION) uniform LightingU
 #define RASTER_MODE_NORMAL 0
 #define RASTER_MODE_CONSERVATIVE 1
 
-#define OBJECT_FLAG_DYNAMIC 1 == 1
-
 const uint Scene_RenderMode = Scene.State & 2;
 const uint Scene_WriteMode = Scene.State >> 2 & 2;
 const uint Scene_DepthMode = Scene.State >> 4 & 1;
@@ -136,7 +137,7 @@ const uint Scene_VoxelWriteMode = Scene.State >> 5 & 1;
 const uint Scene_RasterMode = Scene.State >> 6 & 1;
 const uint Scene_InstanceMultiplier = Scene.State >> 8 & 7;
 const bool Scene_UseLayer = bool(Scene.State >> 11 & 1);
-const bool Scene_EnableJitter = bool(Scene.State >> 12 & 1);
+const bool Scene_EnablePostProcess = bool(Scene.State >> 12 & 1);
 const bool Scene_EnableFaceCull = bool(Scene.State >> 13 & 1);
 const bool Scene_EnableDepthTest = bool(Scene.State >> 14 & 1);
 const bool Scene_EnableSpecular = bool(Scene.State >> 15 & 1);
@@ -153,3 +154,6 @@ const bool Scene_EnableSpecular = bool(Scene.State >> 15 & 1);
         ViewIndexIn = ViewIndex;
     }
 #endif
+
+#define OBJECT_LIGHTING Lighting.Objects[ObjectIndexIn]
+#define OBJECT_INFO Scene.Objects[ObjectIndexIn];

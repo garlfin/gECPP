@@ -32,7 +32,7 @@ namespace gE
 	public:
 		PointLight(Window*, u16 resolution);
 
-		void GetGPULight(GPU::Light&) override;
+		void GetGPULight(GPU::Light&) const override;
 
 		GET(CameraCube&, Camera, _camera);
 		GET(PointLightTarget&, Target, _target);

@@ -30,7 +30,7 @@ namespace gE
         void OnRender(float delta, Camera* callingCamera) override;
 
         virtual void GetFlagOverrides(RenderFlags& flags) {};
-        virtual void GetGPUCamera(GPU::Camera&);
+        virtual void GetGPUCamera(GPU::Camera&) const;
         virtual Size2D GetViewportSize() const = 0;
 
         GET(IRenderTarget&, Target, *_target);
@@ -65,7 +65,7 @@ namespace gE
         GET_CONST(SIZE_T, Size, _size);
         GET_CONST(float, Aspect, (float) GetSize().x / GetSize().y);
 
-        void GetGPUCamera(GPU::Camera& camera) override;
+        void GetGPUCamera(GPU::Camera& camera) const override;
         void Resize(Size2D);
         Size2D GetViewportSize() const override { return _size; }
 
@@ -98,7 +98,7 @@ namespace gE
         }
 
         void GetFlagOverrides(RenderFlags& flags) override;
-        void GetGPUCamera(GPU::Camera& camera) override;
+        void GetGPUCamera(GPU::Camera& camera) const override;
         void OnRender(float delta, Camera* callingCamera) override;
         void SetViewport() const override;
 
@@ -143,7 +143,7 @@ namespace gE
         GET_CONST(SIZE_T, Size, _size);
         GET_CONST(float, Scale, GetOwner().GetTransform()->Scale.x);
 
-        void GetGPUCamera(GPU::Camera&) override;
+        void GetGPUCamera(GPU::Camera&) const override;
         void Resize(Size3D);
         Size2D GetViewportSize() const override { return _size; }
 
@@ -168,7 +168,7 @@ namespace gE
         GET(TARGET_T&, Target, (TARGET_T&) Camera::GetTarget());
         GET_CONST(SIZE_T, Size, _size);
 
-        void GetGPUCamera(GPU::Camera& camera) override;
+        void GetGPUCamera(GPU::Camera& camera) const override;
         void Resize(Size1D);
         Size2D GetViewportSize() const override { return Size2D(_size); }
 

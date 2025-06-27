@@ -22,7 +22,7 @@ namespace GL
 
 	template<typename T>
 	Buffer<T>::Buffer(gE::Window* window, size_t count, const T* data, GPU::BufferUsageHint hint, bool createBacking) :
-		Buffer(window, SUPER(count, data, sizeof(typename Array<T>::I), hint, createBacking))
+		Buffer(window, SUPER(count, data, sizeof(T), hint, createBacking))
 	{
 	}
 

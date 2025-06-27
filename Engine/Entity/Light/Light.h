@@ -28,7 +28,7 @@ namespace gE
 	public:
 		Light(Window*, Camera&, IDepthTarget&);
 
-		virtual void GetGPULight(GPU::Light& light);
+		virtual void GetGPULight(GPU::Light& light) const;
 
 		GET(Camera&, Camera, _camera);
 		GET(GL::Texture&, Depth, *Depth);
@@ -51,8 +51,7 @@ namespace gE
 		DirectionalLight* Sun = DEFAULT;
 
 		void OnRender(float delta, Camera*);
-
-		void UseNearestLights(const vec3& point) const;
+		void UseSun() const;
 
 	 private:
 		Window* _window = DEFAULT;

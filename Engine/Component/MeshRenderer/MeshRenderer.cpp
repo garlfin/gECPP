@@ -6,7 +6,8 @@
 
 #include <Window.h>
 
-#include "Core/Converter/MeshUtility.h"
+#include <Core/Converter/MeshUtility.h>
+#include <Entity/Light/DirectionalLight.h>
 
 #define DRAWCALL_SUBITER_SAFE(VAR, ITER, FUNC) (VAR->ITER ? FUNC(VAR->ITER) : nullptr)
 #define DRAWCALL_SIMILAR_SAFE(VAR, ITER) (VAR ? &VAR->ITER : nullptr)
@@ -26,6 +27,45 @@ namespace gE
 			_materials[i] = DEFAULT;
 			PlacementNew(_drawCalls[i], *this, i);
 		}
+	}
+
+	template<class T, u64 SORT_COUNT> requires std::is_base_of_v<Entity, T>
+	SmallVector<const T*, SORT_COUNT> SortClosest(const LinkedList<Managed<T>>& list,  const vec3& position, bool(*predicate)(const T& t) = nullptr)
+	{
+		using pair = std::pair<const T*, float>;
+		using vec = SmallVector<pair, SORT_COUNT>;
+
+		vec sorted {};
+		for(const auto& managed : list)
+		{
+			const T& component = **managed;
+			const TransformData& globalTransform = component.GetTransform().GetGlobalTransform();
+
+			if(predicate && !predicate(component))
+				continue;
+
+			float distance = distance2(globalTransform.Position, position);
+
+			typename vec::iterator foundIt = std::find_if(sorted.begin(), sorted.end(), [&](const pair& a){ return a.second > distance; });
+			sorted.Insert(foundIt, pair(&component, distance));
+		}
+
+		SmallVector<const T*, SORT_COUNT> result{};
+		for(const pair& p : sorted)
+			result.PushBack(p.first);
+		return result;
+	}
+
+	void MeshRenderer::OnUpdate(float delta)
+	{
+		const Transform& transform = GetOwner().GetTransform();
+		if(!(bool)(transform.GetFlags() & TransformFlags::RenderInvalidated))
+			return;
+
+		const TransformData& globalTransform = transform.GetGlobalTransform();
+
+		_nearestCubemaps = SortClosest<CubemapCapture, 4>(GetWindow().GetCubemaps().GetList(), globalTransform.Position);
+		_nearestLights = SortClosest<Light, 4>(GetWindow().GetLights().GetList(), globalTransform.Position, [](const Light& light){ return light.GetType() != &DirectionalLight::SType; });
 	}
 
 	void MeshRenderer::SetMesh(const Reference<Mesh>& mesh)
@@ -60,6 +100,27 @@ namespace gE
 
 		_materials[i] = DEFAULT;
 		PlacementNew(_drawCalls[i], *this, i);
+	}
+
+	void MeshRenderer::GetGPUObject(GPU::ObjectInfo& object) const
+	{
+		Transform& transform = GetOwner().GetTransform();
+
+		object.Model = transform.Model();
+		object.PreviousModel = transform.PreviousRenderModel();
+		object.Normal = transpose(inverse(transform.Model()));
+		object.Flags = GetFlags();
+	}
+
+	void MeshRenderer::GetGPULighting(GPU::ObjectLighting& lighting) const
+	{
+		lighting.LightCount = _nearestLights.Size();
+		for(u64 i = 0; i < _nearestLights.Size(); i++)
+			_nearestLights[i]->GetGPULight(lighting.Lights[i]);
+
+		lighting.CubemapCount = _nearestCubemaps.Size();
+		for(u64 i = 0; i < _nearestCubemaps.Size(); i++)
+			_nearestCubemaps[i]->GetGPUCubemap(lighting.Cubemaps[i]);
 	}
 
 	void MeshRenderer::UpdateDrawCall(size_t i)
@@ -185,6 +246,8 @@ namespace gE
 
 	void AnimatedMeshRenderer::OnUpdate(float delta)
 	{
+		MeshRenderer::OnUpdate(delta);
+
 		if(!GetMesh()->Skeleton) return;
 
 		const RendererManager& manager = GetWindow().GetRenderers();
@@ -287,6 +350,7 @@ namespace gE
 		_boneDebugShader(window, GPU::Shader("Resource/Shader/bone.vert", "Resource/Shader/wireframe.frag")),
 		_wireframeShader(window, GPU::Shader("Resource/Shader/wireframe.vert", "Resource/Shader/wireframe.frag"))
 	{
+
 		_bonesBuffer.Bind(API::BufferBaseTarget::ShaderStorage, 11);
 	}
 
@@ -297,12 +361,11 @@ namespace gE
 	}
 
 	DrawCall::DrawCall(const MeshRenderer& renderer, u8 i) :
-		_transform(&renderer.GetOwner().GetTransform()),
+		_renderer(&renderer),
 		_material(renderer.GetMaterial(i)),
 		_submeshIndex(i),
 		_lod(0),
-		_vao(renderer.GetVAO()),
-		_flags(renderer.GetFlags())
+		_vao(renderer.GetVAO())
 	{
 		if(!_vao) return;
 		if(i >= renderer.GetMesh()->VAO->GetSettings().Counts.MaterialCount) return;
@@ -312,7 +375,7 @@ namespace gE
 	DrawCall::~DrawCall()
 	{
 		if(_vao)
-			_transform->GetWindow().GetRenderers().GetDrawCallManager().Remove(this);
+			_renderer->GetWindow().GetRenderers().GetDrawCallManager().Remove(this);
 	}
 
 	void DrawCallManager::OnRender(float delta, const Camera* camera)
@@ -322,17 +385,19 @@ namespace gE
 		Window& window = camera->GetWindow();
 		DefaultPipeline::Buffers& buffers = window.GetPipelineBuffers();
 		GPU::Scene& scene = **buffers.GetScene().GetData();
+		GPU::Lighting& lighting = **buffers.GetLights().GetData();
 
 		scene.State = window.RenderState;
 
 		size_t instanceCount = 0, batchInstanceCount = 0, batchCount = 0;
 		for(ITER_T iter = _draws.begin(), nextIter; iter != _draws.end(); iter = nextIter)
 		{
-			GPU::ObjectInfo& object = scene.Objects[instanceCount];
 			const DrawCall* draw = *iter;
 			bool flush = true;
 			bool flushBatch = true;
 
+			const MeshRenderer& renderer = draw->GetRenderer();
+			const Transform& transform = renderer.GetOwner().GetTransform();
 			const Material* material = draw->GetMaterial() ? draw->GetMaterial() : &window.GetDefaultMaterial();
 			const Shader* shader = draw->GetShader();
 
@@ -345,10 +410,8 @@ namespace gE
 				flushBatch = draw->GetSubmeshIndex() != nextDraw->GetSubmeshIndex() || draw->GetLOD() != nextDraw->GetSubmeshIndex();
 			}
 
-			object.Model = draw->GetTransform().Model();
-			object.PreviousModel = draw->GetTransform().PreviousRenderModel();
-			object.Normal = transpose(inverse(draw->GetTransform().Model()));
-			object.Flags = draw->GetFlags();
+			renderer.GetGPUObject(scene.Objects[instanceCount]);
+			renderer.GetGPULighting(lighting.Objects[instanceCount]);
 
 			if(material)
 				material->GetGPUMaterialData(instanceCount);
@@ -369,9 +432,10 @@ namespace gE
 
 			if(!flush) continue;
 
-			const size_t updateTo = offsetof(GPU::Scene, Objects) + sizeof(GPU::ObjectInfo) * instanceCount;
+			const size_t sceneUpdateSize = offsetof(GPU::Scene, Objects) + sizeof(GPU::ObjectInfo) * instanceCount;
 
-			buffers.GetScene().UpdateData<std::byte>(updateTo);
+			buffers.GetScene().UpdateData<std::byte>(sceneUpdateSize);
+			buffers.GetLights().UpdateData<GPU::ObjectLighting>(instanceCount, offsetof(GPU::Lighting, Objects));
 
 			if(material)
 			{

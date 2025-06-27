@@ -1,7 +1,7 @@
 #define ENABLE_SMRT
 #define ENABLE_POM
 #ifndef VR
-    #define ENABLE_VOXEL_TRACE
+    //#define ENABLE_VOXEL_TRACE
     #define ENABLE_SS_TRACE
     #define ENABLE_SMRT_CONTACT_SHADOW
     #define ENABLE_SSAO
@@ -54,6 +54,7 @@ struct VertexOut
     vec2 UV;
     vec4 CurrentNDC;
     vec4 PreviousNDC;
+    vec4 FragPosSunSpace;
     vec4 FragPosLightSpace[MAX_LIGHTS];
     mat3 TBN;
 };
@@ -118,21 +119,22 @@ void main()
     PBRSample pbrSample = ImportanceSample(vert, frag);
     AOSettings aoSettings = AOSettings(8, 0.2, 0.5, 0.5);
 
-#if defined(EXT_BINDLESS) && defined(ENABLE_SSAO)
-    float ao = SS_AO(aoSettings, vert) * SS_GetAOStrength(armd.r, material.AOStrength);
-#else
     float ao = SS_GetAOStrength(armd.r, material.AOStrength);
+#if defined(EXT_BINDLESS) && defined(ENABLE_SSAO)
+    if(Scene_EnablePostProcess)
+        ao *= SS_AO(aoSettings, vert);
 #endif
 
-    vec3 ambient = SH_SampleProbe(Lighting.SkyboxIrradiance, frag.Normal).rgb / PI;
+    vec3 ambient = SH_SampleProbe(Lighting.SkyboxIrradiance, frag.Normal).rgb / (2.0 * PI);
 #ifdef ENABLE_GI
     ambient = SampleLighting(vert, pbrSample.Diffuse, true);
 #endif
 
     FragColor.rgb = albedo * ambient * ao;
 
-    for(int i = 0; i < Lighting.LightCount; i++)
-        FragColor.rgb += GetLighting(vert, frag, Lighting.Lights[i], VertexIn.FragPosLightSpace[i]);
+    FragColor.rgb += GetLighting(vert, frag, Lighting.Sun, VertexIn.FragPosSunSpace);
+    for(int i = 0; i < OBJECT_LIGHTING.LightCount; i++)
+        FragColor.rgb += GetLighting(vert, frag, OBJECT_LIGHTING.Lights[i], VertexIn.FragPosLightSpace[i]);
 
     if(Scene_EnableSpecular)
     {
@@ -161,12 +163,12 @@ vec3 SampleLighting(Vertex vert, vec3 sampleDirection, bool rough)
 
     vec3 cubemapColor;
     float cubemapWeight, maxCubemapWeight;
-    for(uint i = 0; i < Lighting.CubemapCount; i++)
+    for(uint i = 0; i < OBJECT_LIGHTING.CubemapCount; i++)
     {
         float weight = 1.0;
-        vec3 cubemapDir = CubemapParallax(vert.Position, sampleDirection, Lighting.Cubemaps[i], weight);
+        vec3 cubemapDir = CubemapParallax(vert.Position, sampleDirection, OBJECT_LIGHTING.Cubemaps[i], weight);
 
-        cubemapColor += textureLod(Lighting.Cubemaps[i].Color, cubemapDir, 0.f).rgb;
+        cubemapColor += textureLod(OBJECT_LIGHTING.Cubemaps[i].Color, cubemapDir, 0.f).rgb;
         cubemapWeight += weight;
         maxCubemapWeight = max(maxCubemapWeight, weight);
     }

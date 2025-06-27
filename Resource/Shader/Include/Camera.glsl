@@ -30,7 +30,7 @@ struct CameraData
     #define CAMERA_UNIFORM_LOCATION 1
 #endif
 
-layout(std140, binding = CAMERA_UNIFORM_LOCATION) uniform CameraUniform
+layout(std140, binding = CAMERA_UNIFORM_LOCATION) buffer CameraUniform
 {
     CameraData Camera;
 };

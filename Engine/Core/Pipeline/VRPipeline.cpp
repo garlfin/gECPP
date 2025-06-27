@@ -35,8 +35,7 @@ namespace gE::VRPipeline
 
 		window.GetRenderers().OnRender(0.f, &camera);
 
-		window.GetLights().UseNearestLights(vec3(0.0f));
-		window.GetCubemaps().UseNearestCubemaps(vec3(0.0f));
+		window.GetLights().UseSun();
 
 		// COLOR
 		window.RenderState = RenderState::PreZForward;

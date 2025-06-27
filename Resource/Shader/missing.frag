@@ -11,6 +11,7 @@ struct VertexOut
    vec2 UV;
    vec4 CurrentNDC;
    vec4 PreviousNDC;
+   vec4 FragPosSunSpace;
    vec4 FragPosLightSpace[MAX_LIGHTS];
    mat3 TBN;
 };

@@ -32,7 +32,7 @@ namespace gE
 	public:
 		DirectionalLight(Window*, u16 size, float scale, const quat& = identity<quat>());
 
-		void GetGPULight(GPU::Light&) override;
+		void GetGPULight(GPU::Light&) const override;
 
 		GET(OrthographicCamera&, Camera, _camera);
 		GET(DirectionalLightTarget&, Target, _target);
