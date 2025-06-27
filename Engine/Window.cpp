@@ -320,16 +320,18 @@ void Window::OnRender(float delta)
 {
 	Behaviors.OnRender(delta, nullptr);
 
-	Lights->OnRender(delta, nullptr);
-	Cubemaps->OnRender(delta, nullptr);
-	Renderers->OnUpdate(delta); // Will tick animated mesh entities
-
 	if(VRManager) VRManager->OnUpdate();
 
-	Transforms.OnUpdate(delta); // Updates Model Matrices
-	Transforms.OnRender(delta, nullptr); // Resets flag
+	glMemoryBarrier(GL_ALL_BARRIER_BITS);
 
+	Transforms.OnUpdate(delta); // Updates Model Matrices
+
+	Lights->OnRender(delta, nullptr);
+	Renderers->OnUpdate(delta); // Will tick animated mesh entities
+	Cubemaps->OnRender(delta, nullptr);
 	Sounds.OnUpdate(delta);
+
+	Transforms.OnRender(delta, nullptr); // Resets flag
 
 	if(!Editor || Editor->OnRender())
 		Cameras.OnRender(delta, nullptr);

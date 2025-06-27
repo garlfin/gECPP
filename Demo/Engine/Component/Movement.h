@@ -35,8 +35,8 @@ namespace gE
         void OnInit() override
         {
             GetWindow().GetMouse().SetIsEnabled(false);
-            SlideSound = GetWindow().GetSounds().GetSound("event:/FNX45/Slide");
-            SlideSound.SetPosition(DEFAULT);
+            SlideSound = GetWindow().GetSounds().GetSound("event:/S1E1 Title");
+            SlideSound.Play();
         }
 
         void OnUpdate(float delta) override
@@ -58,7 +58,7 @@ namespace gE
             }
 
             if(keyboard.GetKey(Key::L) == KeyState::Pressed)
-                SlideSound.Play();
+                SlideSound.SetUniform("FinishLoad", true);
 
             if(GetWindow().GetVREnabled())
                 cameraTransform.SetPosition(cameraTransform->Position - StandingHeight / 2.f * vec3(0, 1, 0));

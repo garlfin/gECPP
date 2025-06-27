@@ -87,7 +87,7 @@ void DemoWindow::OnInit()
 	auto* cubemapCap = new CubemapCapture(this, 512);
 	cubemapCap->SetName("Cubemap Capture");
 	cubemapCap->GetTransform().SetPosition(vec3(0.0, 2.1, 0.0));
-	cubemapCap->GetTransform().SetScale(vec3(2.1f));
+	cubemapCap->GetTransform().SetScale(vec3(2.14f));
 
 	auto* physicsCube = new PhysicsCubeEntity(this, cubeMesh, vec3(0.5f));
 	physicsCube->SetName("Cube 1");

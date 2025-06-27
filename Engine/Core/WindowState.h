@@ -66,7 +66,7 @@ namespace gE
 		BIT_FIELD_ALIGN;
 		u8 InstanceMultiplier : 3 = 1; // 8
 		LayerMode LayerMode : 1 = LayerMode::Layer; // 9
-		bool EnableJitter : 1 = true; // 12
+		bool UsePostProcess : 1 = true; // 12
 		bool EnableFaceCull : 1 = true; // 13
 		bool EnableDepthTest : 1 = true; // 14
 		bool EnableSpecular : 1 = true; // 15

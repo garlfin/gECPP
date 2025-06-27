@@ -136,6 +136,7 @@ namespace gE
 		window.GetLights().UseNearestLights(vec3(0.0f));
 
 		window.RenderState = RenderState::Cubemap;
+		camera.GetFlagOverrides(window.RenderState);
 
 		glDepthMask(1);
 		glColorMask(1, 1, 1, 1);

@@ -24,7 +24,7 @@ namespace gE::VRPipeline
 
 		// PRE-Z
 		window.RenderState = RenderState::PreZ;
-		window.RenderState.EnableJitter = false;
+		window.RenderState.UsePostProcess = false;
 		camera.GetFlagOverrides(window.RenderState);
 
 		glDepthMask(1);
@@ -40,7 +40,7 @@ namespace gE::VRPipeline
 
 		// COLOR
 		window.RenderState = RenderState::PreZForward;
-		window.RenderState.EnableJitter = false;
+		window.RenderState.UsePostProcess = false;
 		camera.GetFlagOverrides(window.RenderState);
 
 		glDepthMask(0);
