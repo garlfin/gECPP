@@ -4,7 +4,6 @@
 
 #include "Texture.h"
 #include "TextureSlotManager.h"
-#include <Core/GUI/Field.h>
 
 #define GPU_TEXTURE_DEFINITION(TYPE, DIMENSION) \
 	void TYPE::IDeserialize(istream& in, SETTINGS_T s) { Read(in, Size); if(!MipCount) MipCount = GetMipCount<DIMENSION>(Size); } \
@@ -70,41 +69,41 @@ namespace GPU
 	}
 
 	REFLECTABLE_ONGUI_IMPL(Texture,
-		gE::DrawField<const GLenum>(gE::ScalarField<GLenum>{ "Format" }, Format, depth);
+		/*gE::DrawField<const GLenum>(gE::ScalarField<GLenum>{ "Format" }, Format, depth);
 		gE::DrawField<const u8>(gE::ScalarField<u8>{ "Mip Count" }, MipCount, depth);
 
 		gE::DrawField(gE::EnumField{ "Wrap Mode", "", EWrapMode }, WrapMode, depth);
-		gE::DrawField(gE::EnumField{ "Filter", "", EFilterMode }, Filter, depth);
+		gE::DrawField(gE::EnumField{ "Filter", "", EFilterMode }, Filter, depth);*/
 	);
 	REFLECTABLE_FACTORY_NO_IMPL(Texture);
 
 	GPU_TEXTURE_DEFINITION(Texture1D, Dimension::D1D);
 	REFLECTABLE_ONGUI_IMPL(Texture1D,
-		gE::DrawField(gE::ScalarField<u32>{ "Size" }, (const Size1D&) Size, depth);
+		//gE::DrawField(gE::ScalarField<u32>{ "Size" }, (const Size1D&) Size, depth);
 	);
 	API_REFLECTABLE_FACTORY_IMPL(Texture1D, API::Texture1D);
 
 	GPU_TEXTURE_DEFINITION(Texture2D, Dimension::D2D);
 	REFLECTABLE_ONGUI_IMPL(Texture2D,
-		gE::DrawField(gE::ScalarField<u32>{ "Size" }, (const Size2D&) Size, depth);
+		//gE::DrawField(gE::ScalarField<u32>{ "Size" }, (const Size2D&) Size, depth);
 	)
 	API_REFLECTABLE_FACTORY_IMPL(Texture2D, API::Texture2D);
 
 	GPU_TEXTURE_DEFINITION(Texture2DArray, Dimension::D3D);
 	REFLECTABLE_ONGUI_IMPL(Texture2DArray,
-		gE::DrawField(gE::ScalarField<u32>{ "Size" }, (const Size3D&) Size, depth);
+		//gE::DrawField(gE::ScalarField<u32>{ "Size" }, (const Size3D&) Size, depth);
 	);
 	API_REFLECTABLE_FACTORY_IMPL(Texture2DArray, API::Texture2DArray);
 
 	GPU_TEXTURE_DEFINITION(Texture3D, Dimension::D3D);
 	REFLECTABLE_ONGUI_IMPL(Texture3D,
-		gE::DrawField(gE::ScalarField<u32>{ "Size" }, (const Size3D&) Size, depth);
+		//gE::DrawField(gE::ScalarField<u32>{ "Size" }, (const Size3D&) Size, depth);
 	);
 	API_REFLECTABLE_FACTORY_IMPL(Texture3D, API::Texture3D);
 
 	GPU_TEXTURE_DEFINITION(TextureCube, Dimension::D1D);
 	REFLECTABLE_ONGUI_IMPL(TextureCube,
-		gE::DrawField(gE::ScalarField<u32>{ "Size" }, (const Size1D&) Size, depth);
+		//gE::DrawField(gE::ScalarField<u32>{ "Size" }, (const Size1D&) Size, depth);
 	);
 	API_REFLECTABLE_FACTORY_IMPL(TextureCube, API::TextureCube);
 

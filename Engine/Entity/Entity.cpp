@@ -46,7 +46,7 @@ namespace gE
 		Read(in, _name);
 		Read(in, _flags);
 		Read(in, _layers);
-		ReadSerializable(in, _transform, this);
+		ReadSerializable(in, _transform, ComponentCreationSettings{ s, this });
 	}
 
 	void Entity::ISerialize(ostream& out) const
@@ -59,9 +59,9 @@ namespace gE
 
 	REFLECTABLE_ONGUI_IMPL(Entity,
 	{
-		DrawField(Field{ "Name" }, _name, depth);
+		/*DrawField(Field{ "Name" }, _name, depth);
 		DrawField(Field{ "Parent" }, _parent, depth);
-		DrawField(Field{ "Transform" }, _transform, depth);
+		DrawField(Field{ "Transform" }, _transform, depth);*/
 	});
 	REFLECTABLE_NAME_IMPL(Entity, return _name);
 	REFLECTABLE_FACTORY_NO_IMPL(Entity);
@@ -114,7 +114,7 @@ namespace gE
 
 	void Component::IDeserialize(istream& in, SETTINGS_T s)
 	{
-		_owner = s;
+		_owner = s.Parent;
 		_window = &_owner->GetWindow();
 
 		SetThis(this);

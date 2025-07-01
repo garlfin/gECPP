@@ -6,11 +6,11 @@
 
 #include <Core/Material/Material.h>
 #include <Core/Mesh/Mesh.h>
+#include <Core/Pipeline/Buffers.h>
 #include <Entity/Entity.h>
 #include <Graphics/Buffer/VAO.h>
 
 #include "DrawCall.h"
-#include "Core/Pipeline/Buffers.h"
 
 namespace gE
 {
@@ -48,7 +48,7 @@ namespace gE
     protected:
         void UpdateDrawCall(size_t i);
         void UpdateDrawCalls();
-        virtual DragDropCompareFunc<Asset> GetDragDropAcceptor();
+        virtual Editor::DragDropCompareFunc<Asset> GetDragDropAcceptor();
 
     private:
         Reference<Mesh> _mesh;
@@ -116,8 +116,8 @@ namespace gE
     #endif
 
     protected:
-        static bool DragDropAcceptor(const Reference<Asset>& asset, NoUserData);
-        DragDropCompareFunc<Asset> GetDragDropAcceptor() override { return DragDropAcceptor; }
+        static bool DragDropAcceptor(const Reference<Asset>& asset, Editor::NoUserData);
+        Editor::DragDropCompareFunc<Asset> GetDragDropAcceptor() override { return DragDropAcceptor; }
         static void AddPreviousPositionField(GPU::VAO& vao, size_t vertexCount);
 
     private:

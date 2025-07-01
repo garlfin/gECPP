@@ -82,6 +82,8 @@ namespace gE
         Bank* Bank;
         Path Path;
         AssetLoadMode LoadMode;
+
+        operator class Window*() const { return Window;}
     };
 
     struct BankLoadArgs
@@ -90,6 +92,8 @@ namespace gE
         Reference<std::istream> Stream;
         Window* Window;
         AssetLoadMode Mode;
+
+        operator class Window*() const { return Window;}
     };
 
     struct SerializableCompare
@@ -104,11 +108,30 @@ namespace gE
         NODISCARD ALWAYS_INLINE bool operator()(const FileInfo& a, const UUID& b) const;
         NODISCARD ALWAYS_INLINE bool operator()(const UUID& a, const FileInfo& b) const;
     };
-
 }
 
-template struct TypeSystem<const gE::FileLoadArgs&>;
-template struct TypeSystem<const gE::BankLoadArgs&>;
+namespace gE::Editor
+{
+    template<class T>
+    bool AssetDragDropAcceptor(const Reference<Asset>& asset, NoUserData)
+    {
+        return asset->IsCastable<T>();
+    }
+
+    template<class T, class SETTINGS_T> requires IsDragDroppable<Asset, T>
+    struct DragDropField<Asset, T, SETTINGS_T> : public Field
+    {
+        std::string Type = GE_EDITOR_ASSET_PAYLOAD;
+        DragDropCompareFunc<Asset, SETTINGS_T> Acceptor = AssetDragDropAcceptor<T>;
+        SETTINGS_T* UserData = DEFAULT;
+    };
+
+    template<class T, class SETTINGS_T = std::nullptr_t>
+    using AssetDragDropField = DragDropField<Asset, T, SETTINGS_T>;
+}
+
+template class TypeSystem<const gE::FileLoadArgs&>;
+template class TypeSystem<const gE::BankLoadArgs&>;
 
 namespace gE
 {

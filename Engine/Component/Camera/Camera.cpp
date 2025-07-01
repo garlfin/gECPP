@@ -85,10 +85,10 @@ namespace gE
 
     REFLECTABLE_ONGUI_IMPL(Camera,
     {
-        DrawField(ScalarField{"Clip Planes", "", 0.01f, 1000.f, 0.1f}, _settings.ClipPlanes, depth);
+        /*DrawField(ScalarField{"Clip Planes", "", 0.01f, 1000.f, 0.1f}, _settings.ClipPlanes, depth);
         DrawField(ScalarField<u8>{"Tick Offset", "First frame that renders."}, _settings.Timing.TickOffset, depth);
         DrawField(ScalarField<u8>{"Tick Skip", "ie. 0 = every frame, 1 = every other"}, _settings.Timing.TickSkip, depth);
-        DrawField<const u32>(ScalarField<u32>{"Frame"}, Frame, depth);
+        DrawField<const u32>(ScalarField<u32>{"Frame"}, Frame, depth);*/
     });
 
     Camera2D::Camera2D(Entity* p, TARGET_T& t, const CameraSettings2D& s, ComponentManager<Camera>* m) :
@@ -105,8 +105,8 @@ namespace gE
 
     REFLECTABLE_ONGUI_IMPL(Camera2D,
     {
-        DrawField<const float>(ScalarField<float>{"Aspect"}, GetAspect(), depth);
-        DrawField(ScalarField{ "Resolution", "", 1u }, *this, depth, &Camera2D::GetSize, &Camera2D::Resize);
+        /*DrawField<const float>(ScalarField<float>{"Aspect"}, GetAspect(), depth);
+        DrawField(ScalarField{ "Resolution", "", 1u }, *this, depth, &Camera2D::GetSize, &Camera2D::Resize);*/
     });
 
     void Camera2D::GetGPUCamera(GPU::Camera& camera) const
@@ -185,9 +185,9 @@ namespace gE
 
     REFLECTABLE_ONGUI_IMPL(PerspectiveCamera,
     {
-        float fovDeg = GetFOV();
+        /*float fovDeg = GetFOV();
         if (DrawField(ScalarField{"FOV", "Vertical FOV in Degrees", 1.f, 120.f, 1.f}, fovDeg, depth))
-            SetFOV(fovDeg);
+            SetFOV(fovDeg);*/
     });
 
     REFLECTABLE_FACTORY_NO_IMPL(PerspectiveCamera);
@@ -206,7 +206,7 @@ namespace gE
 
     REFLECTABLE_ONGUI_IMPL(OrthographicCamera,
     {
-        DrawField(ScalarField{"Orthographic Scale", "", 0.01f}, _orthographicScale, depth);
+        //DrawField(ScalarField{"Orthographic Scale", "", 0.01f}, _orthographicScale, depth);
     });
 
     REFLECTABLE_FACTORY_NO_IMPL(OrthographicCamera);
@@ -237,7 +237,7 @@ namespace gE
 
     REFLECTABLE_ONGUI_IMPL(Camera3D,
     {
-        DrawField(ScalarField{ "Resolution", "", 1u }, *this, depth, &Camera3D::GetSize, &Camera3D::Resize);
+        //DrawField(ScalarField{ "Resolution", "", 1u }, *this, depth, &Camera3D::GetSize, &Camera3D::Resize);
     });
 
     REFLECTABLE_FACTORY_NO_IMPL(Camera3D);
@@ -261,7 +261,7 @@ namespace gE
 
     REFLECTABLE_ONGUI_IMPL(CameraCube,
     {
-        DrawField(ScalarField{ "Resolution", "", 1u }, *this, depth, &CameraCube::GetSize, &CameraCube::Resize);
+        //DrawField(ScalarField{ "Resolution", "", 1u }, *this, depth, &CameraCube::GetSize, &CameraCube::Resize);
     });
 
     REFLECTABLE_FACTORY_NO_IMPL(CameraCube);

@@ -86,9 +86,9 @@ namespace gE
 #ifdef GE_ENABLE_IMGUI
 	void TransformData::OnEditorGUI(u8 depth)
 	{
-		DrawField(ScalarField<float>{ "Position" }, Position, depth);
+		/*DrawField(ScalarField<float>{ "Position" }, Position, depth);
 		DrawField(ScalarField<float>{ "Rotation" }, Rotation, depth);
-		DrawField(ScalarField{ "Scale", "", FLT_EPSILON }, Scale, depth);
+		DrawField(ScalarField{ "Scale", "", FLT_EPSILON }, Scale, depth);*/
 	}
 #endif
 
@@ -119,9 +119,9 @@ namespace gE
 
 	REFLECTABLE_ONGUI_IMPL(Transform,
 	{
-		DrawField(ScalarField<float>{ "Position" }, *this, depth, &Transform::GetPosition_, &Transform::SetPosition_);
+		/*DrawField(ScalarField<float>{ "Position" }, *this, depth, &Transform::GetPosition_, &Transform::SetPosition_);
 		DrawField(ScalarField<float>{ "Rotation" }, *this, depth, &Transform::GetRotation_, &Transform::SetRotation_);
-		DrawField(ScalarField{ "Scale", "", FLT_EPSILON }, *this, depth, &Transform::GetScale_, &Transform::SetScale_);
+		DrawField(ScalarField{ "Scale", "", FLT_EPSILON }, *this, depth, &Transform::GetScale_, &Transform::SetScale_);*/
 	});
 	REFLECTABLE_FACTORY_IMPL(Transform);
 

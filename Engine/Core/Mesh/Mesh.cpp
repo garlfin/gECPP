@@ -78,13 +78,13 @@ namespace gE
 
     REFLECTABLE_ONGUI_IMPL(Mesh,
     {
-        DrawField(Field{ "Name" }, Name, depth);
+        /*DrawField(Field{ "Name" }, Name, depth);
         DrawField(Field{ "VAO" }, VAO->GetSettings(), depth);
 
         if(Shape)
             DrawField(Field{ "Shape" }, Shape->GetSettings(), depth);
 
-        DrawField(AssetDragDropField<struct Skeleton>{ "Skeleton" }, Skeleton, depth);
+        DrawField(AssetDragDropField<struct Skeleton>{ "Skeleton" }, Skeleton, depth);*/
     });
     REFLECTABLE_NAME_IMPL(Mesh, return Name);
     REFLECTABLE_FACTORY_IMPL(Mesh);

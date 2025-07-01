@@ -22,6 +22,10 @@ namespace GPU
 		return GL_NONE;
 	}
 
+	REFLECTABLE_CLASS(VAO, {
+		REFLECT_MEMBER(ScalarField<u32>, Test, FieldFlags::Default, "Tip")
+	}, 1);
+
 	void VAO::IDeserialize(istream& in, SETTINGS_T s)
 	{
 		Counts = Read<VAOFieldCounts>(in);
@@ -77,16 +81,16 @@ namespace GPU
 
 	REFLECTABLE_ONGUI_IMPL(MaterialSlot,
 	{
-		DrawField(gE::Field{ "Name" }, Name, depth);
+		/*DrawField(gE::Field{ "Name" }, Name, depth);
 		DrawField(gE::ScalarField<u32>{ "Offset", "Tri offset" }, Offset, depth);
-		DrawField(gE::ScalarField{ "Count", "Number of tris", 1u }, Count, depth);
+		DrawField(gE::ScalarField{ "Count", "Number of tris", 1u }, Count, depth);*/
 	});
 	REFLECTABLE_NAME_IMPL(MaterialSlot, return Name);
 	REFLECTABLE_FACTORY_IMPL(MaterialSlot);
 
 	REFLECTABLE_ONGUI_IMPL(VAO,
 	{
-		u8 matCount = Counts.MaterialCount;
+		/*u8 matCount = Counts.MaterialCount;
 		u8 bufCount = Counts.BufferCount;
 		u8 fieldCount = Counts.FieldCount;
 
@@ -100,19 +104,19 @@ namespace GPU
 
 		DrawField(gE::ArrayField<gE::Field>{ "Materials" }, Materials, Counts.MaterialCount, depth);
 		DrawField(gE::ArrayField<gE::Field>{ "Buffers" }, Buffers, Counts.BufferCount, depth);
-		DrawField(gE::ArrayField<gE::Field>{ "Fields" }, Fields, Counts.FieldCount, depth);
+		DrawField(gE::ArrayField<gE::Field>{ "Fields" }, Fields, Counts.FieldCount, depth);*/
 	});
 	API_REFLECTABLE_FACTORY_IMPL(VAO, API::VAO);
 
 	REFLECTABLE_ONGUI_IMPL(IndexedVAO,
 	{
-		DrawField(gE::Field{ "Triangles" }, IndicesBuffer, depth);
+		//DrawField(gE::Field{ "Triangles" }, IndicesBuffer, depth);
 	});
 	API_REFLECTABLE_FACTORY_IMPL(IndexedVAO, API::IndexedVAO);
 
 	REFLECTABLE_ONGUI_IMPL(VertexField,
 	{
-		DrawField<const std::span<char>>(gE::Field{ "Name" }, std::span(Name, Name + 4), depth);
+		/*DrawField<const std::span<char>>(gE::Field{ "Name" }, std::span(Name, Name + 4), depth);
 		DrawField(gE::EnumField{ "Element Type", "", EElementType}, ElementType, depth);
 
 		bool normalized = Normalized;
@@ -125,7 +129,7 @@ namespace GPU
 
 		DrawField(gE::ScalarField<u8>{ "Index", "", 0, GE_MAX_VAO_FIELD}, Index, depth);
 		DrawField(gE::ScalarField<u8>{ "Element Count", "", 1, 4}, ElementCount, depth);
-		DrawField(gE::ScalarField<u8>{ "Offset" }, Offset, depth);
+		DrawField(gE::ScalarField<u8>{ "Offset" }, Offset, depth);*/
 	});
 	REFLECTABLE_NAME_IMPL(VertexField, return std::string(Name, 4));
 	REFLECTABLE_FACTORY_IMPL(VertexField);

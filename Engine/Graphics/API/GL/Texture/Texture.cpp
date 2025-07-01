@@ -72,7 +72,7 @@ namespace GL
 	}
 
 	REFLECTABLE_ONGUI_IMPL(Texture2D,
-		OnEditorIcon(ImGui::GetContentRegionAvail().x);
+		//OnEditorIcon(ImGui::GetContentRegionAvail().x);
 	);
 
 	REFLECTABLE_ICON_IMPL(Texture2D,

@@ -27,6 +27,6 @@ namespace gE
     REFLECTABLE_FACTORY_NO_IMPL(StaticMeshEntity, inline);
     inline REFLECTABLE_ONGUI_IMPL(StaticMeshEntity,
     {
-        DrawField(Field{ "Renderer"sv }, _renderer, depth);
+        //DrawField(Field{ "Renderer"sv }, _renderer, depth);
     });
 }

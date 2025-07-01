@@ -20,6 +20,8 @@ namespace gE
 	{
 		Window* Window;
 		Entity* Parent;
+
+		operator class Window*() const { return Window; }
 	};
 }
 

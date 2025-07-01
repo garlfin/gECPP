@@ -48,6 +48,8 @@ layout(std140, binding = 4) uniform PBRMaterialUniform
     PBRMaterialData Materials[MAX_OBJECTS];
 };
 
+#define OBJECT_MATERIAL Materials[ObjectIndexIn]
+
 struct VertexOut
 {
     vec3 FragPos;
@@ -71,39 +73,37 @@ void main()
 {
     if(!bool(Scene_WriteMode & WRITE_MODE_COLOR)) return;
 
-    PBRMaterialData material = Materials[ObjectIndexIn];
-
     Vertex vert = Vertex
     (
         VertexIn.FragPos,
         normalize(VertexIn.TBN[2]),
         VertexIn.TBN,
-        (VertexIn.UV + material.Offset) * material.Scale
+        (VertexIn.UV + OBJECT_MATERIAL.Offset) * OBJECT_MATERIAL.Scale
     );
 
-	ParallaxEffectSettings parallaxSettings = ParallaxEffectSettings(material.ParallaxDepth, POM_MIN_LAYER, POM_MAX_LAYER, 0.0, 0.5);
+	ParallaxEffectSettings parallaxSettings = ParallaxEffectSettings(OBJECT_MATERIAL.ParallaxDepth, POM_MIN_LAYER, POM_MAX_LAYER, 0.0, 0.5);
 
     vec3 viewDir = normalize(Camera.Position[ViewIndex] - VertexIn.FragPos);
 
 #if defined(EXT_BINDLESS) && defined(EXT_BINDLESS)
-    if(material.ParallaxDepth > 0.0)
-        vert.UV = ParallaxMapping(viewDir, material.ARMD, vert, parallaxSettings);
+    if(OBJECT_MATERIAL.ParallaxDepth > 0.0)
+        vert.UV = ParallaxMapping(viewDir, OBJECT_MATERIAL.ARMD, vert, parallaxSettings);
 #endif
 
 #ifdef EXT_BINDLESS
-    vec3 albedo = texture(material.Albedo, vert.UV).rgb;
-    vec3 armd = texture(material.ARMD, vert.UV).rgb;
-    if((material.sRGB & 1) == 1) armd = pow(armd, vec3(1.0 / 2.2));
-    vec3 normal = texture(material.Normal, vert.UV).rgb;
-    if((material.sRGB >> 8) == 1) armd = pow(armd, vec3(1.0 / 2.2));
+    vec3 albedo = texture(OBJECT_MATERIAL.Albedo, vert.UV).rgb;
+    vec3 armd = texture(OBJECT_MATERIAL.ARMD, vert.UV).rgb;
+    if((OBJECT_MATERIAL.sRGB & 1) == 1) armd = pow(armd, vec3(1.0 / 2.2));
+    vec3 normal = texture(OBJECT_MATERIAL.Normal, vert.UV).rgb;
+    if((OBJECT_MATERIAL.sRGB >> 8) == 1) armd = pow(armd, vec3(1.0 / 2.2));
 #else
-    vec3 albedo = vec3(1.f);
-    vec3 armd = vec3(1.f);
-    vec3 normal = vec3(1.f);
+    vec3 albedo = vec3(1.0);
+    vec3 armd = vec3(1.0, 1.0, 0.0);
+    vec3 normal = vec3(0.5);
 #endif
 	normal = normal * 2.0 - 1.0;
     normal = normalize(VertexIn.TBN * normal);
-    normal = mix(VertexIn.TBN[2], normal, material.NormalStrength);
+    normal = mix(VertexIn.TBN[2], normal, OBJECT_MATERIAL.NormalStrength);
     normal = normalize(normal);
 
     PBRFragment frag = PBRFragment
@@ -119,7 +119,7 @@ void main()
     PBRSample pbrSample = ImportanceSample(vert, frag);
     AOSettings aoSettings = AOSettings(8, 0.2, 0.5, 0.5);
 
-    float ao = SS_GetAOStrength(armd.r, material.AOStrength);
+    float ao = SS_GetAOStrength(armd.r, OBJECT_MATERIAL.AOStrength);
 #if defined(EXT_BINDLESS) && defined(ENABLE_SSAO)
     if(Scene_EnablePostProcess)
         ao *= SS_AO(aoSettings, vert);
@@ -130,7 +130,11 @@ void main()
     ambient = SampleLighting(vert, pbrSample.Diffuse, true);
 #endif
 
+#ifdef APPLY_AO_LAST
+    FragColor.rgb = albedo * ambient;
+#else
     FragColor.rgb = albedo * ambient * ao;
+#endif
 
     FragColor.rgb += GetLighting(vert, frag, Lighting.Sun, VertexIn.FragPosSunSpace);
     for(int i = 0; i < OBJECT_LIGHTING.LightCount; i++)
@@ -141,6 +145,10 @@ void main()
         vec3 specular = SampleLighting(vert, pbrSample.Specular);
         FragColor.rgb += FilterSpecular(vert, frag, pbrSample, specular);
     }
+
+#ifdef APPLY_AO_LAST
+    FragColor.rgb *= ao;
+#endif
 
     FragColor.a = 1.0;
     FragColor = FixNan(FragColor);
@@ -184,7 +192,7 @@ vec3 SampleLighting(Vertex vert, vec3 sampleDirection, bool rough)
 #ifdef ENABLE_SS_TRACE
     if(Scene_VoxelWriteMode != VOXEL_MODE_WRITE && !rough)
     {
-        SSRaySettings raySettings = SSRaySettings(HIZ_MAX_ITER, EPSILON, 0.2, vert.Normal);
+        SSRaySettings raySettings = SSRaySettings(HIZ_MAX_ITER, EPSILON, 0.05, vert.Normal);
 
         if(rough)
         {

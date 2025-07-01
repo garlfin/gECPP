@@ -13,7 +13,7 @@ namespace gE
 {
 	class Material : public Asset
 	{
-		REFLECTABLE_PROTO(Material, Asset, );
+		REFLECTABLE_PROTO(Material, Asset);
 
 	public:
 		Material(Window* window, const Reference<Shader>& shader);

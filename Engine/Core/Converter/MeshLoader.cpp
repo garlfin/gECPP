@@ -32,8 +32,8 @@ namespace gE::Model
 #ifdef GE_ENABLE_IMGUI
     void GLTFImportSettings::OnEditorGUI(u8 depth)
     {
-        DrawField(ScalarField{ "Bone Scale", "", FLT_EPSILON }, BoneScale, depth);
-        DrawField(Field{ "Flip Tangent", "" }, FlipTangents, depth);
+        //DrawField(ScalarField{ "Bone Scale", "", FLT_EPSILON }, BoneScale, depth);
+        //DrawField(Field{ "Flip Tangent", "" }, FlipTangents, depth);
     }
 #endif
 

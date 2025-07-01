@@ -325,7 +325,7 @@ namespace gE
         }
 
         if(_asset)
-            _type->UFactory(in, _window, *_asset);
+            _asset->Deserialize(in, _window);
         else
             _asset = ref_cast((Asset*) _type->Factory(in, _window));
 

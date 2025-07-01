@@ -5,10 +5,10 @@
 #pragma once
 
 #include <Prototype.h>
+#include <Core/Input.h>
 #include <Core/Macro.h>
 
 #include "Settings.h"
-#include "Core/Input.h"
 
 namespace gE::Editor
 {

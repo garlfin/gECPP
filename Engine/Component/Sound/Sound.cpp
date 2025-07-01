@@ -133,7 +133,11 @@ namespace gE
             nullptr,
             nullptr,
             IPL_SIMDLEVEL_SSE2,
-            IPL_CONTEXTFLAGS_VALIDATION
+#ifdef DEBUG
+            IPL_CONTEXTFLAGS_VALIDATION,
+#else
+           DEFAULT,
+#endif
         };
 
         if(const IPLerror err = iplContextCreate(&steamAudioSettings, &_steamAudioContext); err != IPL_STATUS_SUCCESS)

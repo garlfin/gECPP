@@ -29,7 +29,7 @@ namespace gE
     REFLECTABLE_FACTORY_NO_IMPL(AnimatedMeshEntity, inline);
     inline REFLECTABLE_ONGUI_IMPL(AnimatedMeshEntity,
     {
-        DrawField(Field{ "Renderer"sv }, _renderer, depth);
-        DrawField(Field{ "Animator"sv }, _animator, depth);
+        /*DrawField(Field{ "Renderer"sv }, _renderer, depth);
+        DrawField(Field{ "Animator"sv }, _animator, depth);*/
     });
 }

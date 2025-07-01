@@ -14,6 +14,7 @@
 #include <Core/UUID.h>
 #include <Core/Math/Math.h>
 
+#include "IO.h"
 #include "Reflectable.h"
 
 struct Underlying
@@ -77,8 +78,8 @@ public:
 		gE::Log::Write("Expected {}, got {} while loading {}!\n", SType.Magic.substr(0, 4), magic, SType.Name); \
 	_version = Read<u8>(in);
 
-#define SERIALIZABLE_PROTO_ABSTRACT(TYPE, SUPER_T, ...) \
-	REFLECTABLE_PROTO(TYPE, SUPER_T, __VA_ARGS__); \
+#define SERIALIZABLE_PROTO_ABSTRACT(TYPE, SUPER_T) \
+	REFLECTABLE_PROTO(TYPE, SUPER_T); \
 	public: \
 		typedef SUPER_T SUPER; \
 		typedef SUPER::SETTINGS_T SETTINGS_T;\
@@ -91,13 +92,13 @@ public:
 		void ISerialize(ostream& out) const; \
 		u8 _version = SType.Version;
 
-#define SERIALIZABLE_PROTO(TYPE, SUPER_T, ...) \
-	SERIALIZABLE_PROTO_ABSTRACT(TYPE, SUPER_T, __VA_ARGS__); \
+#define SERIALIZABLE_PROTO(TYPE, SUPER_T) \
+	SERIALIZABLE_PROTO_ABSTRACT(TYPE, SUPER_T); \
 	public: \
 		inline void Deserialize(istream& in, SETTINGS_T s) override { PlacementNew(*this, in, s); } \
 	DEFAULT_OPERATOR_CM(TYPE)
 
-#define SERIALIZABLE_PROTO_NOHEADER(TYPE, SUPER_T, ...) \
+#define SERIALIZABLE_PROTO_NOHEADER(TYPE, SUPER_T) \
 	public: \
 		typedef SUPER_T SUPER; \
 		typedef SUPER::SETTINGS_T SETTINGS_T;\
@@ -111,41 +112,13 @@ public:
 		void IDeserialize(istream& in, SETTINGS_T s); \
 		void ISerialize(ostream& out) const; \
 		u8 _version = 0; \
-		REFLECTABLE_PROTO(TYPE, SUPER_T, __VA_ARGS__)
-
-template<class T, class S>
-concept is_serializable_in = requires(T t, S s, std::istream& i)
-{
-	t.Deserialize(i, s);
-};
-
-template<class T>
-concept is_serializable_out = requires(T t, std::ostream& o)
-{
-	t.Serialize(o);
-};
-
-template<class T, class S>
-concept is_serializable = is_serializable_in<S, T> and is_serializable_out<T>;
+		REFLECTABLE_PROTO(TYPE, SUPER_T)
 
 template<class T> struct Serializable;
 
 template<is_serializable_in<gE::Window*> T> void ReadSerializableFromFile(gE::Window*, const Path&, T&);
 template<is_serializable_in<gE::Window*> T> T* ReadSerializableFromFile(gE::Window*, const Path&);
 template<is_serializable_out T> void WriteSerializableToFile(const Path&, const T&);
-
-template<class T> void Read(std::istream& in, u32 count, T* t);
-template<class T> void Read(std::istream& in, T& t) { Read(in, 1, &t); }
-template<class T> T Read(std::istream& in) { T t; Read(in, t); return t; }
-
-template<class T> void Write(std::ostream& out, u32 count, const T* t);
-template<class T> void Write(std::ostream& out, const T& t) { Write(out, 1, &t); }
-
-template<typename UINT_T, class T> void Read(std::istream& in, u32 count, Array<T>* t);
-template<typename UINT_T, class T> void Read(std::istream& in, Array<T>& t) { Read<UINT_T>(in, 1, &t); }
-
-template<typename UINT_T, class T> void WriteArray(std::ostream& out, u32 count, const Array<T>* t);
-template<typename UINT_T, class T> void WriteArray(std::ostream& out, const Array<T>& t) { WriteArray<UINT_T>(out, 1, &t); }
 
 template<typename UINT_T, class T> void ReadArraySerializable(std::istream& in, u32 count, Array<T>* t, typename T::SETTINGS_T s);
 template<typename UINT_T, class T> void ReadArraySerializable(std::istream& in, Array<T>& t, typename T::SETTINGS_T s) { ReadArraySerializable<UINT_T>(in, 1, &t, s); }
@@ -165,10 +138,5 @@ void WriteType(std::ostream& out, const Type<T>& type)
 {
 	Write(out, type.Name);
 }
-
-template<> void Read(std::istream& in, u32 count, std::string* t);
-template<> void Write(std::ostream& out, u32 count, const std::string* t);
-
-template<> void Write(std::ostream& out, u32 count, const std::string_view* t);
 
 #include "Serializable.inl"

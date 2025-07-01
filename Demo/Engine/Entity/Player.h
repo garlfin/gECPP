@@ -43,8 +43,8 @@ namespace gE
 	REFLECTABLE_FACTORY_NO_IMPL(Player, inline);
 	inline REFLECTABLE_ONGUI_IMPL(Player,
 	{
-		DrawField(Field{ "Movement"sv }, _movement, depth);
-		DrawField(Field{ "Character Controller"sv }, _controller, depth);
+		/*DrawField(Field{ "Movement"sv }, _movement, depth);
+		DrawField(Field{ "Character Controller"sv }, _controller, depth);*/
 	});
 
 	class PlayerCamera final : public Entity
@@ -89,7 +89,7 @@ namespace gE
 	REFLECTABLE_FACTORY_NO_IMPL(PlayerCamera, inline);
 	inline REFLECTABLE_ONGUI_IMPL(PlayerCamera,
 	{
-		DrawField(Field{ "Camera"sv, ""}, _camera, depth);
-		DrawField(Field{ "PhysicalCamera"sv, ""}, _physicalCamera, depth);
+		/*DrawField(Field{ "Camera"sv, ""}, _camera, depth);
+		DrawField(Field{ "PhysicalCamera"sv, ""}, _physicalCamera, depth);*/
 	});
 }

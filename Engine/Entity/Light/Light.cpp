@@ -36,8 +36,8 @@ namespace gE
 
 	REFLECTABLE_ONGUI_IMPL(Light,
 	{
-		DrawField(Field{ "Camera" }, *_camera, depth);
-		DrawField(ScalarField{ "Color", "", 0.01f, FLT_MAX, FLT_EPSILON, ScalarViewMode::ColorPicker }, _color, depth);
+		/*DrawField(Field{ "Camera" }, *_camera, depth);
+		DrawField(ScalarField{ "Color", "", 0.01f, FLT_MAX, FLT_EPSILON, ScalarViewMode::ColorPicker }, _color, depth);*/
 	});
 
 	void LightManager::OnRender(float delta, Camera* camera)
@@ -170,7 +170,7 @@ namespace gE
 
 	REFLECTABLE_ONGUI_IMPL(PointLight,
 	{
-		DrawField(ScalarField{ "Radius", "", 0.01f }, _radius, depth);
+		//DrawField(ScalarField{ "Radius", "", 0.01f }, _radius, depth);
 	});
 
 	REFLECTABLE_FACTORY_NO_IMPL(PointLight);

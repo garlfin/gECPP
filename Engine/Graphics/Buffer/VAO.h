@@ -9,6 +9,8 @@
 #include "Buffer.h"
 #include "VAOSettings.h"
 
+#include <Core/Serializable/Field.h>
+
 namespace GL
 {
 	class VAO;
@@ -42,9 +44,10 @@ namespace GPU
 
 	class VAO : public gE::Asset
 	{
-		SERIALIZABLE_PROTO(VAO, Asset, 1);
+		SERIALIZABLE_PROTO(VAO, Asset);
 
 	public:
+		u32 Test;
 		VAOFieldCounts Counts{};
 		MaterialSlot Materials[GE_MAX_VAO_MATERIAL];
 		VertexField Fields[GE_MAX_VAO_FIELD];
@@ -69,7 +72,7 @@ namespace GPU
 
 	class IndexedVAO : public VAO
 	{
-		SERIALIZABLE_PROTO(IndexedVAO, VAO, 0, &GPU::VAO::SType);
+		SERIALIZABLE_PROTO(IndexedVAO, VAO);
 
 	public:
 		ALWAYS_INLINE void Free() override { VAO::Free(); IndicesBuffer.Free(); }

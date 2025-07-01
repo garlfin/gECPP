@@ -79,7 +79,7 @@ namespace gE::PostProcess
 
 	inline REFLECTABLE_ONGUI_IMPL(PhysicalCameraSettings,
 	{
-		DrawField(EnumField{ "Exposure Mode", "", EExposureMode }, ExposureMode, depth);
+		/*DrawField(EnumField{ "Exposure Mode", "", EExposureMode }, ExposureMode, depth);
 
 		if(ExposureMode == ExposureMode::Manual)
 		{
@@ -98,6 +98,6 @@ namespace gE::PostProcess
 
 		DrawField<const float>(ScalarField<float>{ "Exposure" }, Exposure, depth);
 
-		DrawField(AssetDragDropField<API::Texture3D>{ "LUT" }, LUT, depth);
+		DrawField(AssetDragDropField<API::Texture3D>{ "LUT" }, LUT, depth);*/
 	});
 };

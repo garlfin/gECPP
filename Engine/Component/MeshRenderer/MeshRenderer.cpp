@@ -134,19 +134,19 @@ namespace gE
 			PlacementNew(_drawCalls[i], *this, i);
 	}
 
-	DragDropCompareFunc<Asset> MeshRenderer::GetDragDropAcceptor()
+	Editor::DragDropCompareFunc<Asset> MeshRenderer::GetDragDropAcceptor()
 	{
-		return AssetDragDropAcceptor<Mesh>;
+		return Editor::AssetDragDropAcceptor<Mesh>;
 	}
 
 	REFLECTABLE_ONGUI_IMPL(MeshRenderer,
-		const size_t materialCount = _mesh->VAO->GetSettings().Counts.MaterialCount;
+		/*const size_t materialCount = _mesh->VAO->GetSettings().Counts.MaterialCount;
 
 		DrawField(AssetDragDropField<Mesh>{ "Mesh", "", GE_EDITOR_ASSET_PAYLOAD, GetDragDropAcceptor() }, *this, depth, &MeshRenderer::GetMesh, &MeshRenderer::SetMesh);
 		const size_t changed = DrawField(ArrayField<AssetDragDropField<Material>>{ "Materials" }, _materials.Data(), materialCount, depth);
 
 		if(changed != materialCount)
-			UpdateDrawCall(changed);
+			UpdateDrawCall(changed);*/
 	)
 	REFLECTABLE_FACTORY_NO_IMPL(MeshRenderer);
 
@@ -190,11 +190,11 @@ namespace gE
 
 	bool IAnimator::DragDropAcceptor(const Reference<Asset>& asset, const IAnimator* animator)
 	{
-		return AssetDragDropAcceptor<Animation>(asset, nullptr) && ((Animation*) asset.GetPointer())->GetSkeleton();
+		return Editor::AssetDragDropAcceptor<Animation>(asset, nullptr) && ((Animation*) asset.GetPointer())->GetSkeleton();
 	}
 
 	REFLECTABLE_ONGUI_IMPL(IAnimator,
-		DrawField(AssetDragDropField<Skeleton>{ "Skeleton", "", GE_EDITOR_ASSET_PAYLOAD }, *this, depth, &IAnimator::GetSkeleton, &IAnimator::SetSkeleton);
+		//DrawField(AssetDragDropField<Skeleton>{ "Skeleton", "", GE_EDITOR_ASSET_PAYLOAD }, *this, depth, &IAnimator::GetSkeleton, &IAnimator::SetSkeleton);
 	);
 	REFLECTABLE_FACTORY_NO_IMPL(IAnimator);
 
@@ -207,9 +207,9 @@ namespace gE
 	}
 
 	REFLECTABLE_ONGUI_IMPL(SimpleAnimator,
-		if(DrawField(AssetDragDropField<Animation, IAnimator>{ "Animation", "", GE_EDITOR_ASSET_PAYLOAD, DragDropAcceptor, this }, _animation, depth))
+		/*if(DrawField(AssetDragDropField<Animation, IAnimator>{ "Animation", "", GE_EDITOR_ASSET_PAYLOAD, DragDropAcceptor, this }, _animation, depth))
 			SetSkeleton(_animation->GetSkeleton());
-		DrawField(ScalarField{ "Time", "", 0.f }, _time, depth);
+		DrawField(ScalarField{ "Time", "", 0.f }, _time, depth);*/
 	);
 	REFLECTABLE_FACTORY_NO_IMPL(SimpleAnimator);
 
@@ -324,9 +324,9 @@ namespace gE
 		MeshRenderer::SetMesh(mesh);
 	}
 
-	bool AnimatedMeshRenderer::DragDropAcceptor(const Reference<Asset>& asset, NoUserData userData)
+	bool AnimatedMeshRenderer::DragDropAcceptor(const Reference<Asset>& asset, Editor::NoUserData userData)
 	{
-		return AssetDragDropAcceptor<Mesh>(asset, userData);// && ((Mesh*) asset.GetPointer())->Skeleton;
+		return Editor::AssetDragDropAcceptor<Mesh>(asset, userData);// && ((Mesh*) asset.GetPointer())->Skeleton;
 	}
 
 	void AnimatedMeshRenderer::AddPreviousPositionField(GPU::VAO& vao, size_t vertexCount)
@@ -338,7 +338,7 @@ namespace gE
 	}
 
 	REFLECTABLE_ONGUI_IMPL(AnimatedMeshRenderer,
-	    DrawField(Field{ "Enable Debug Skeleton" }, _enableDebugView, depth);
+	    //DrawField(Field{ "Enable Debug Skeleton" }, _enableDebugView, depth);
 	);
 	REFLECTABLE_FACTORY_NO_IMPL(AnimatedMeshRenderer);
 

@@ -10,11 +10,22 @@
 
 #include "Prototype.h"
 
-template struct TypeSystem<gE::Entity*>;
+namespace gE
+{
+	struct ComponentCreationSettings
+	{
+		Window* Window;
+		Entity* Parent;
+
+		operator class Window*() const { return Window; }
+	};
+}
+
+template class TypeSystem<const gE::ComponentCreationSettings&>;
 
 namespace gE
 {
-	class Component : public Serializable<Entity*>, public Managed<Component>
+	class Component : public Serializable<const ComponentCreationSettings&>, public Managed<Component>
 	{
 		SERIALIZABLE_PROTO_ABSTRACT(Component, Serializable);
 

@@ -74,7 +74,7 @@ namespace gE
 	private:
 		TransformData _transform, _globalTransform;
 		mat4 _model, _previousModel = mat4(1.0);
-		TransformFlags _flags = DEFAULT;
+		TransformFlags _flags = TransformFlags::All;
 	};
 
 	class TransformManager final : public ComponentManager<Transform>

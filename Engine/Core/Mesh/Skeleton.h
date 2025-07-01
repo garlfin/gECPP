@@ -22,9 +22,24 @@ namespace gE
     struct Bone;
 }
 
-template struct TypeSystem<gE::Skeleton&>;
-template struct TypeSystem<gE::Skeleton*>;
-template struct TypeSystem<const gE::AnimationChannel&>;
+struct SkeletonLoadArgs
+{
+    gE::Window* Window;
+    gE::Skeleton* Skeleton;
+
+    operator gE::Window*() const { return Window; }
+};
+
+struct ChannelLoadArgs
+{
+    gE::Window* Window;
+    const gE::AnimationChannel* Channel;
+
+    operator gE::Window*() const { return Window; }
+};
+
+template class TypeSystem<const SkeletonLoadArgs&>;
+template class TypeSystem<const ChannelLoadArgs&>;
 
 namespace gE
 {
@@ -71,7 +86,7 @@ namespace gE
         REFLECT_ENUM(TransformMixMode, Add)
     );
 
-    struct Frame : public Serializable<const AnimationChannel&>
+    struct Frame : public Serializable<const ChannelLoadArgs&>
     {
         SERIALIZABLE_PROTO_NOHEADER(Frame, Serializable);
         REFLECTABLE_NAME_PROTO();
@@ -85,7 +100,7 @@ namespace gE
 #endif
     };
 
-    struct BoneReference : public Serializable<Skeleton*>
+    struct BoneReference : public Serializable<const SkeletonLoadArgs&>
     {
         SERIALIZABLE_PROTO(BoneReference, Serializable);
         REFLECTABLE_NAME_PROTO();
@@ -104,7 +119,7 @@ namespace gE
         std::string Name = DEFAULT;
     };
 
-    struct Bone : public Serializable<Skeleton&>
+    struct Bone : public Serializable<const SkeletonLoadArgs&>
     {
         SERIALIZABLE_PROTO(Bone, Serializable);
         REFLECTABLE_NAME_PROTO();
@@ -136,7 +151,7 @@ namespace gE
         Array<Bone> Bones = DEFAULT;
     };
 
-    struct AnimationChannel final : public Serializable<Skeleton*>
+    struct AnimationChannel final : public Serializable<const SkeletonLoadArgs&>
     {
         SERIALIZABLE_PROTO(AnimationChannel, Serializable);
         REFLECTABLE_NAME_PROTO();

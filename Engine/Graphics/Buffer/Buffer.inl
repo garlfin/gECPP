@@ -5,7 +5,6 @@
 #pragma once
 
 #include "Buffer.h"
-#include <Core/GUI/Field.h>
 
 namespace GPU
 {
@@ -50,11 +49,5 @@ namespace GPU
 	Buffer<T>* Buffer<T>::Factory(std::istream& in, SETTINGS_T t)
 	{
 		return new Buffer(in, t);
-	};
-
-	template<class T>
-	void Buffer<T>::UFactory(std::istream& in, SETTINGS_T t, Buffer& result)
-	{
-		PlacementNew(result, in, t);
 	};
 }

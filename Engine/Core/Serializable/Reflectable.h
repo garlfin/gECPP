@@ -4,13 +4,17 @@
 
 #pragma once
 
+#include "Field.h"
+
 #include <array>
 #include <Prototype.h>
 #include <set>
 #include <Core/Macro.h>
 #include <Core/Math/Math.h>
 
-template<class T>
+class IField;
+
+template<class T> requires std::is_convertible_v<std::remove_cvref_t<T>, gE::Window*>
 struct Type;
 
 template<class T>
@@ -18,30 +22,6 @@ using FactoryFunction = Serializable<gE::Window*>*(*)(std::istream&, T);
 
 template<class T>
 using UFactoryFunction = void(*)(std::istream&, T, Serializable<gE::Window*>&);
-
-template<class SERIALIZABLE_T>
-concept ReflConstructible = requires
-{
-	SERIALIZABLE_T::SType;
-};
-
-template<class T>
-concept HasType = requires(std::add_const_t<T>& t)
-{
-	t.GetType();
-};
-
-template<class T>
-concept HasOnGUI = requires(T& t, u8 depth)
-{
-	t.OnEditorGUI(depth);
-};
-
-template<class T>
-concept HasEditorName = requires(std::add_const_t<T>& t)
-{
-	{ t.GetEditorName() } -> std::convertible_to<std::string>;
-};
 
 template<class T>
 struct TypeCompare
@@ -56,8 +36,9 @@ struct TypeCompare
 };
 
 template<class T>
-struct TypeSystem
+class TypeSystem
 {
+public:
 	TypeSystem() = delete;
 
 	using SET_T = std::set<Type<T>*, TypeCompare<T>>;
@@ -90,17 +71,21 @@ private:
 	static inline SET_T _types = DEFAULT;
 };
 
-template<class T>
+template<class T> requires std::is_convertible_v<std::remove_cvref_t<T>, gE::Window*>
 struct Type
 {
+private:
+	using VEC_T = std::vector<IField*>;
+
+public:
 	Type() = delete;
 
-	explicit Type(const std::string& name, const std::string& extension, FactoryFunction<T> factory, UFactoryFunction<T> uFactory, u8 version = 0, const Type* baseType = nullptr) :
+	explicit Type(const std::string& name, const std::string& extension, FactoryFunction<T> factory, VEC_T&& fields, u8 version = 0, const Type* baseType = nullptr) :
 		Name(name),
 		Magic(extension),
 		Factory(factory),
-		UFactory(uFactory),
 		Version(version),
+		Fields(std::move(fields)),
 		BaseType(baseType)
 	{
 		Extension.replace_extension(extension);
@@ -108,9 +93,9 @@ struct Type
 	}
 
 	template<class I, typename... ARGS>
-	static Type MakeType(ARGS&&... args)
+	static Type MakeType(const std::string& extension, FactoryFunction<T> factory, VEC_T&& fields, ARGS&&... args)
 	{
-		return Type(demangle(typeid(I).name()), std::forward<ARGS>(args)...);
+		return Type(demangle(typeid(I).name()), extension, factory, std::move(fields), std::forward<ARGS>(args)...);
 	}
 
 	NODISCARD const Type* GetBaseType() const { return BaseType ? BaseType : this; }
@@ -119,9 +104,11 @@ struct Type
 	std::string Magic;
 	Path Extension;
 	FactoryFunction<T> Factory;
-	UFactoryFunction<T> UFactory;
 	u8 Version;
+	VEC_T Fields;
 	const Type* BaseType;
+
+	~Type() { for(IField* field : Fields) delete field; }
 };
 
 struct IReflectable
@@ -179,13 +166,18 @@ struct EnumData
 	NODISCARD typename ARR_T::const_iterator At(T t) const;
 };
 
-#define REFLECTABLE_TYPE_PROTO(TYPE, ...) \
+#define REFLECTABLE_TYPE_PROTO(TYPE) \
 	public: \
 		using THIS_T = TYPE; \
 		static TYPE* Factory(std::istream& in, SETTINGS_T t); \
-		static void UFactory(std::istream& in, SETTINGS_T t, TYPE& result); \
 		const TYPE_T* GetType() const override { return &SType; }; \
-		FORCE_IMPL static inline const TYPE_T SType = TYPE_T::MakeType<TYPE>(#TYPE, (FactoryFunction<SETTINGS_T>) Factory, (UFactoryFunction<SETTINGS_T>) UFactory __VA_OPT__(,) __VA_ARGS__); \
+		static const TYPE_T SType;
+
+#define REFLECTABLE_CLASS(TYPE, ...) \
+	const TYPE::TYPE_T TYPE::SType = TYPE_T::MakeType<TYPE>(#TYPE, (FactoryFunction<SETTINGS_T>) Factory __VA_OPT__(,) __VA_ARGS__);
+
+#define REFLECT_MEMBER(SETTINGS_TYPE, MEMBER, FLAGS, TOOLTIP, ...) \
+	new SETTINGS_TYPE(&THIS_T::MEMBER, gE::Editor::SETTINGS_TYPE{ #MEMBER, TOOLTIP __VA_OPT__(,) __VA_ARGS__}, FLAGS)
 
 #ifdef GE_ENABLE_IMGUI
 	#define REFLECTABLE_ONGUI_PROTO(SUPER) \
@@ -214,8 +206,8 @@ struct EnumData
 	#define REFLECTABLE_NAME_IMPL(TYPE, ...)
 #endif
 
-#define REFLECTABLE_PROTO(TYPE, SUPER, ...) \
-	REFLECTABLE_TYPE_PROTO(TYPE, __VA_ARGS__); \
+#define REFLECTABLE_PROTO(TYPE, SUPER) \
+	REFLECTABLE_TYPE_PROTO(TYPE); \
 	REFLECTABLE_ONGUI_PROTO(SUPER)
 
 #define REFLECTABLE_NOIMPL(SUPER) \
@@ -223,12 +215,10 @@ struct EnumData
 		void OnEditorGUI(u8 depth) override { SUPER::OnEditorGUI(depth); }
 
 #define REFLECTABLE_FACTORY_IMPL(TYPE, ...) \
-	__VA_ARGS__ TYPE* TYPE::Factory(std::istream& in, TYPE::SETTINGS_T t) { return (TYPE*) new TYPE(in, t); } \
-	__VA_ARGS__ void TYPE::UFactory(std::istream& in, TYPE::SETTINGS_T t, TYPE& result) { PlacementNew((TYPE&) result, in, t); }
+	__VA_ARGS__ TYPE* TYPE::Factory(std::istream& in, TYPE::SETTINGS_T t) { return (TYPE*) new TYPE(in, t); }
 
 #define REFLECTABLE_FACTORY_NO_IMPL(TYPE, ...) \
-	__VA_ARGS__ TYPE* TYPE::Factory(std::istream&, TYPE::SETTINGS_T) { return nullptr; } \
-	__VA_ARGS__ void TYPE::UFactory(std::istream&, TYPE::SETTINGS_T, TYPE&) { }
+	__VA_ARGS__ TYPE* TYPE::Factory(std::istream&, TYPE::SETTINGS_T) { return nullptr; }
 
 #define REFLECTABLE_ONEDITOR_NO_IMPL(TYPE, SUPER) \
 	void TYPE::OnEditorGUI(u8 depth) { SUPER::OnEditorGUI(depth); }
@@ -256,8 +246,8 @@ struct EnumData
 #define ENUM_PAIR(E_VAL, E_NAME) std::make_pair(E_VAL, E_NAME##sv)
 
 // Typesystem must be explicitly instantiated.
-template struct TypeSystem<gE::Window*>;
-template struct TypeSystem<std::nullptr_t>;
+template class TypeSystem<gE::Window*>;
+template class TypeSystem<std::nullptr_t>;
 
 template <class T>
 bool TypeCompare<T>::operator()(const TYPE_T& a, const TYPE_T& b) const

@@ -25,7 +25,7 @@ namespace gE
 
 	REFLECTABLE_ONGUI_IMPL(Material,
 	{
-		DrawField(AssetDragDropField<Shader>{ "Shader" }, _shader, depth);
+		//DrawField(AssetDragDropField<Shader>{ "Shader" }, _shader, depth);
 	})
 	REFLECTABLE_FACTORY_NO_IMPL(Material);
 
@@ -68,7 +68,7 @@ namespace gE
 #ifdef GE_ENABLE_IMGUI
 	void PBRMaterialSettings::OnEditorGUI(u8 depth)
 	{
-		DrawField(ScalarField<float>{ "Scale" }, Scale, depth);
+		/*DrawField(ScalarField<float>{ "Scale" }, Scale, depth);
 		DrawField(ScalarField<float>{ "Offset" }, Offset, depth);
 		DrawField(ScalarField{ "Parllax Depth", "", 0.f, 1.f, FLT_EPSILON, ScalarViewMode::Slider }, ParallaxDepth, depth);
 		DrawField(ScalarField{ "Normal Map Strength", "", 0.f, 1.f, FLT_EPSILON, ScalarViewMode::Slider }, NormalStrength, depth);
@@ -78,13 +78,13 @@ namespace gE
 		DrawField(Field{"Normal sRGB Color Space"}, NormalsRGB, depth);
 		DrawField(AssetDragDropField<API::Texture2D>{ "Normal" }, Normal, depth);
 		DrawField(Field{"ARMD sRGB Color Space"}, ARMDsRGB, depth);
-		DrawField(AssetDragDropField<API::Texture2D>{ "ARMD" }, ARMD, depth);
+		DrawField(AssetDragDropField<API::Texture2D>{ "ARMD" }, ARMD, depth);*/
 	}
 #endif
 
 	REFLECTABLE_ONGUI_IMPL(PBRMaterial,
 	{
-		DrawField(Field{ "Settings" }, _settings, depth);
+		// DrawField(Field{ "Settings" }, _settings, depth);
 	});
 	REFLECTABLE_FACTORY_NO_IMPL(PBRMaterial);
 
@@ -180,9 +180,9 @@ namespace gE
 
 	REFLECTABLE_FACTORY_NO_IMPL(Shader);
 	REFLECTABLE_ONGUI_IMPL(Shader,
-		DrawField(EnumField{ "Depth Function", "", EDepthFunction }, _depthFunc, depth);
+		/*DrawField(EnumField{ "Depth Function", "", EDepthFunction }, _depthFunc, depth);
 		DrawField(EnumField{ "Cull Mode", "", ECullMode }, _cullMode, depth);
-		DrawField(EnumField{ "Blend Mode", "", EBlendMode }, _blendMode, depth);
+		DrawField(EnumField{ "Blend Mode", "", EBlendMode }, _blendMode, depth);*/
 	)
 
 	void Shader::Bind() const

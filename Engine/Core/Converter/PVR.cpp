@@ -12,7 +12,7 @@ namespace gE::PVR
 		std::ifstream src;
 		src.open(path, std::ios::in | std::ios::binary);
 
-		if(!src.is_open()) Log::Write("ERROR: COULD NOT OPEN FILE {}", path.string());
+		if(!src.is_open()) Log::Error("ERROR: COULD NOT OPEN FILE {}", path.string());
 
 		src.seekg(0, std::ios::end);
 		size_t copySize = src.tellg();

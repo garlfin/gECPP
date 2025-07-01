@@ -37,8 +37,8 @@ namespace gE
     REFLECTABLE_FACTORY_NO_IMPL(PhysicsCubeEntity, inline);
     inline REFLECTABLE_ONGUI_IMPL(PhysicsCubeEntity,
     {
-        DrawField(Field{ "Mesh Renderer"sv }, _renderer, depth);
+        /*DrawField(Field{ "Mesh Renderer"sv }, _renderer, depth);
         DrawField(Field{ "Rigid Body"sv }, _rigidBody, depth);
-        DrawField(Field{ "Box Collider"sv }, _collider, depth);
+        DrawField(Field{ "Box Collider"sv }, _collider, depth);*/
     });
 }

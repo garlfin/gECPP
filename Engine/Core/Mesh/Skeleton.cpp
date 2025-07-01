@@ -4,21 +4,20 @@
 
 #include "Skeleton.h"
 
-#include "Core/GUI/Field.h"
 #include "Core/GUI/Editor/Editor.h"
 
 namespace gE
 {
-    void Frame::IDeserialize(istream& in, const AnimationChannel& channel)
+    void Frame::IDeserialize(istream& in, const ChannelLoadArgs& args)
     {
 #ifdef GE_ENABLE_IMGUI
-        Channel = channel;
+        Channel = args.Channel;
 #endif
 
         Read(in, Time);
-        if(channel.Type == ChannelType::Location || channel.Type == ChannelType::Scale)
+        if(args.Channel->Type == ChannelType::Location || args.Channel->Type == ChannelType::Scale)
             Value = Read<vec3>(in);
-        else if(channel.Type == ChannelType::Rotation)
+        else if(args.Channel->Type == ChannelType::Rotation)
             Value = Read<quat>(in);
         else
             assert(false);
@@ -34,7 +33,7 @@ namespace gE
     }
 
     REFLECTABLE_ONGUI_IMPL(Frame,
-        if(!Channel) return;
+        /*if(!Channel) return;
 
         size_t index = this - &Channel->Frames[0];
 
@@ -48,16 +47,16 @@ namespace gE
         else if(Channel->Type == ChannelType::Rotation)
             DrawField(ScalarField<float>{ "Rotation" }, std::get<quat>(Value), depth);
         else if(Channel->Type == ChannelType::Scale)
-            DrawField(ScalarField{ "Scale", "", FLT_EPSILON }, std::get<vec3>(Value), depth);
+            DrawField(ScalarField{ "Scale", "", FLT_EPSILON }, std::get<vec3>(Value), depth);*/
     );
     REFLECTABLE_NAME_IMPL(Frame, return std::to_string(Time));
     REFLECTABLE_FACTORY_IMPL(Frame);
 
-    inline void BoneReference::IDeserialize(istream& in, Skeleton* skeleton)
+    inline void BoneReference::IDeserialize(istream& in, const SkeletonLoadArgs& args)
     {
         Location = Read<u16>(in);
         Name = Read<std::string>(in);
-        Resolve(skeleton);
+        Resolve(args.Skeleton);
     }
 
     inline void BoneReference::ISerialize(ostream& out) const
@@ -67,10 +66,10 @@ namespace gE
     }
 
     REFLECTABLE_ONGUI_IMPL(BoneReference,
-        if(Pointer)
+        /*if(Pointer)
             DrawField(Field{ "Target (Pointer)" }, Pointer.GetPointer(), depth);
         else
-            DrawField<const std::string>(Field{ "Target (Name)" }, Name, depth);
+            DrawField<const std::string>(Field{ "Target (Name)" }, Name, depth);*/
     );
     REFLECTABLE_NAME_IMPL(BoneReference, return Name);
     REFLECTABLE_FACTORY_IMPL(BoneReference);
@@ -78,7 +77,7 @@ namespace gE
     void Bone::IDeserialize(istream& in, SETTINGS_T s)
     {
         Read(in, Name);
-        ReadSerializable(in, Parent, &s);
+        ReadSerializable(in, Parent, s);
         Read(in, Transform);
         Read(in, InverseBindMatrix);
     }
@@ -92,9 +91,9 @@ namespace gE
     }
 
     REFLECTABLE_ONGUI_IMPL(Bone,
-        DrawField(Field{ "Name" }, Name, depth);
+        /*DrawField(Field{ "Name" }, Name, depth);
         DrawField(Field{ "Parent" }, Parent.Pointer.GetPointer(), depth);
-        DrawField(ScalarField<float>{ "Transform" }, Transform, depth);
+        DrawField(ScalarField<float>{ "Transform" }, Transform, depth);*/
     );
     REFLECTABLE_NAME_IMPL(Bone, return Name);
     REFLECTABLE_FACTORY_IMPL(Bone);
@@ -102,7 +101,7 @@ namespace gE
     void Skeleton::IDeserialize(istream& in, SETTINGS_T s)
     {
         Read(in, Name);
-        ReadArraySerializable<u8>(in, Bones, *this);
+        ReadArraySerializable<u8>(in, Bones, SkeletonLoadArgs{ s, this });
     }
 
     void Skeleton::ISerialize(ostream& out) const
@@ -122,8 +121,8 @@ namespace gE
     }
 
     REFLECTABLE_ONGUI_IMPL(Skeleton,
-        DrawField(Field{ "Name" }, Name, depth);
-        DrawField(ArrayField<Field>{ "Bones", "", ArrayViewMode::Elements }, Bones, depth);
+        /*DrawField(Field{ "Name" }, Name, depth);
+        DrawField(ArrayField<Field>{ "Bones", "", ArrayViewMode::Elements }, Bones, depth);*/
     )
     REFLECTABLE_NAME_IMPL(Skeleton, return Name);
     REFLECTABLE_FACTORY_IMPL(Skeleton);
@@ -173,7 +172,7 @@ namespace gE
     {
         ReadSerializable(in, Target, s);
         Read(in, Type);
-        ReadArraySerializable<u16>(in, Frames, *this);
+        ReadArraySerializable<u16>(in, Frames, ChannelLoadArgs{ s, this });
     }
 
     void AnimationChannel::ISerialize(ostream& out) const
@@ -184,8 +183,8 @@ namespace gE
     }
 
     REFLECTABLE_ONGUI_IMPL(AnimationChannel,
-        DrawField(Field{ "Target" }, Target, depth);
-        DrawField(ArrayField<Field>{ "Frames" }, Frames, depth);
+        /*DrawField(Field{ "Target" }, Target, depth);
+        DrawField(ArrayField<Field>{ "Frames" }, Frames, depth);*/
     );
     REFLECTABLE_NAME_IMPL(AnimationChannel,
         return std::format("{}::{}", Target.Name, EChannelType.At(Type)->second)
@@ -206,7 +205,7 @@ namespace gE
     {
         Read(in, Name);
         Read(in, Length);
-        ReadArraySerializable<u16>(in, Channels, nullptr);
+        ReadArraySerializable<u16>(in, Channels, SkeletonLoadArgs{ s, nullptr });
     }
 
     void Animation::ISerialize(ostream& out) const
@@ -252,10 +251,10 @@ namespace gE
     }
 
     REFLECTABLE_ONGUI_IMPL(Animation,
-       DrawField(Field{ "Name" }, Name, depth);
+       /*DrawField(Field{ "Name" }, Name, depth);
        DrawField(AssetDragDropField<Skeleton>{ "Skeleton" }, *this, depth, &Animation::GetSkeleton, &Animation::SetSkeleton);
        DrawField<const float>(ScalarField<float>{ "Length" }, Length, depth);
-       DrawField(ArrayField<Field>{ "Channels" }, Channels, depth);
+       DrawField(ArrayField<Field>{ "Channels" }, Channels, depth);*/
     );
     REFLECTABLE_NAME_IMPL(Animation, return Name);
     REFLECTABLE_FACTORY_IMPL(Animation);
